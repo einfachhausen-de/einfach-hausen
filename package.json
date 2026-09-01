@@ -38,7 +38,8 @@
     "test:responsive": "node scripts/responsive-matrix.mjs",
     "test:a11y:apps": "node scripts/a11y-apps.mjs",
     "test:a11y:matrix": "node scripts/a11y-matrix.mjs",
-    "test:i18n": "node scripts/i18n-regression.mjs"
+    "test:i18n": "node scripts/i18n-regression.mjs",
+    "test:premium-redesign": "node scripts/premium-redesign-contract.mjs"
   },
   "dependencies": {
     "@capacitor/keyboard": "^8.0.5",
