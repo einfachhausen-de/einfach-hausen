@@ -13,6 +13,24 @@ const requiredFiles = [
   "src/components/marketing/premium/types.ts",
 ];
 
+const requiredAssets = [
+  "public/brand/premium/homeowner-hero.webp",
+  "public/brand/premium/category-heating.webp",
+  "public/brand/premium/category-energy.webp",
+  "public/brand/premium/category-roof.webp",
+  "public/brand/premium/category-bath.webp",
+  "public/brand/premium/category-renovation.webp",
+  "public/brand/premium/category-garden.webp",
+  "public/brand/premium/category-care.webp",
+  "public/brand/premium/category-more.webp",
+  "public/brand/premium/story-describe.webp",
+  "public/brand/premium/story-professional.webp",
+  "public/brand/premium/story-complete.webp",
+  "public/brand/premium/house-record.webp",
+  "public/brand/premium/partner-professional.webp",
+  "public/brand/premium/security-home.webp",
+];
+
 const requiredHomepageRoles = [
   "ConsumerHero",
   "VisualCategoryGrid",
@@ -25,7 +43,7 @@ const requiredHomepageRoles = [
 
 const errors = [];
 
-for (const path of requiredFiles) {
+for (const path of [...requiredFiles, ...requiredAssets]) {
   if (!fs.existsSync(path)) {
     errors.push(`missing ${path}`);
   }
