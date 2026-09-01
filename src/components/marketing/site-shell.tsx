@@ -1,11 +1,10 @@
-import { ArrowRight, Menu, X } from 'lucide-react';
+import { ArrowRight, Database, Handshake, Menu, ShieldCheck, X } from 'lucide-react';
 import Image from 'next/image';
 import localFont from 'next/font/local';
 import { ScrollShadow, SmoothScroll } from './motion';
 import styles from './marketing.module.css';
 // Static imports: content-hashed URLs, immune to optimizer cache staleness.
 import logoMark from './assets/logo-mark.png';
-import logoFull from './assets/logo-full.png';
 
 // Self-hosted Inter Variable: the public website shares the crisp, neutral
 // grotesque look of the app surfaces (DESIGN.md: "System-/Inter-nahe Sans").
@@ -112,12 +111,26 @@ export function MarketingShell({ children }: { children: React.ReactNode }) {
       </ScrollShadow>
       <main id="main-content">{children}</main>
       <footer className={styles.footer}>
+        <div className={styles.footerLead}>
+          <div>
+            <span>Einfach anfangen</span>
+            <h2>Ein Haus. Ein Gedächtnis. Ein verlässlicher nächster Schritt.</h2>
+          </div>
+          <a href="/register?role=homeowner">Hauskonto erstellen <ArrowRight size={17} aria-hidden="true" /></a>
+        </div>
         <div className={styles.footerInner}>
           <div className={styles.footerBrand}>
             {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
-            <a href="/" aria-label="einfachhausen Startseite"><Image src={logoFull} alt="einfachhausen" width={158} height={110} className={styles.logoImg} /></a>
+            <a className={styles.footerLogo} href="/" aria-label="einfachhausen Startseite">
+              <Image src={logoMark} alt="" width={43} height={32} className={styles.logoImg} />
+              <span><b>einfach</b>hausen</span>
+            </a>
             <p>Eine Anlaufstelle für alles rund ums Eigenheim: Anliegen einordnen, passende Menschen finden, Aufträge organisieren und Hauswissen behalten.</p>
-            <span>© 2026 Einfach Hausen</span>
+            <div className={styles.footerPrinciples}>
+              <span><ShieldCheck size={17} aria-hidden="true" /> Du entscheidest</span>
+              <span><Handshake size={17} aria-hidden="true" /> Geprüfte Partner</span>
+              <span><Database size={17} aria-hidden="true" /> Hauswissen behalten</span>
+            </div>
           </div>
           <div className={styles.footerGrid}>
             {footerGroups.map((group) => (
@@ -131,13 +144,13 @@ export function MarketingShell({ children }: { children: React.ReactNode }) {
           </div>
         </div>
         <div className={styles.trustBadges} aria-label="Vertrauensmerkmale">
-          <span className={styles.trustBadge}><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg> Geprüfte Vertragspartner</span>
-          <span className={styles.trustBadge}><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/></svg> DSGVO: Hosting in der EU</span>
-          <span className={styles.trustBadge}><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M16 2v2"/><path d="M21 2v2"/><path d="M3 2v2"/><path d="M8 2v2"/><path d="M17 6h3a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h3"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg> Kein Lead-Handel</span>
-          <span className={styles.trustBadge}><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg> Kein Auftrag ohne deine Entscheidung</span>
+          <span className={styles.trustBadge}><ShieldCheck size={15} aria-hidden="true" /> Geprüfte Vertragspartner</span>
+          <span className={styles.trustBadge}><Database size={15} aria-hidden="true" /> DSGVO: Hosting in der EU</span>
+          <span className={styles.trustBadge}><Handshake size={15} aria-hidden="true" /> Kein Lead-Handel</span>
+          <span className={styles.trustBadge}><ShieldCheck size={15} aria-hidden="true" /> Kein Auftrag ohne deine Entscheidung</span>
         </div>
         <div className={styles.footerBottom}>
-          <p>Einfach Hausen organisiert digital. Ausgeführt wird durch eigenständige, geprüfte Partnerbetriebe.</p>
+          <p>© 2026 Einfach Hausen · Digital organisiert, durch eigenständige Partnerbetriebe ausgeführt.</p>
           <a href="/kontakt">Kontakt</a>
         </div>
       </footer>

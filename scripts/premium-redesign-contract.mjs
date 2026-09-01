@@ -31,6 +31,25 @@ const requiredAssets = [
   "public/brand/premium/security-home.webp",
 ];
 
+const requiredNavHrefs = [
+  "/so-funktionierts",
+  "/leistungen",
+  "/hausakte",
+  "/partner",
+  "/preise",
+  "/eigenheimbesitzer",
+  "/ueber-uns",
+  "/hilfe",
+  "/kontakt",
+  "/sicherheit",
+  "/login",
+  "/register?role=homeowner",
+  "/impressum",
+  "/datenschutz",
+  "/agb",
+  "/barrierefreiheit",
+];
+
 const requiredHomepageRoles = [
   "ConsumerHero",
   "VisualCategoryGrid",
@@ -46,6 +65,13 @@ const errors = [];
 for (const path of [...requiredFiles, ...requiredAssets]) {
   if (!fs.existsSync(path)) {
     errors.push(`missing ${path}`);
+  }
+}
+
+const shell = fs.readFileSync("src/components/marketing/site-shell.tsx", "utf8");
+for (const href of requiredNavHrefs) {
+  if (!shell.includes(`"${href}"`) && !shell.includes(`'${href}'`)) {
+    errors.push(`site shell missing navigation href ${href}`);
   }
 }
 
