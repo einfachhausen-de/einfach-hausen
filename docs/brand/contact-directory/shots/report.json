@@ -1,0 +1,104 @@
+{
+  "ok": true,
+  "shots": [
+    {
+      "name": "dir-categories",
+      "viewport": "1536x960",
+      "url": "http://127.0.0.1:41619/app/messages",
+      "file": "dir-categories-1536x960.png",
+      "bytes": 79377,
+      "h1": 1,
+      "overflow": false
+    },
+    {
+      "name": "dir-subcategories",
+      "viewport": "1536x960",
+      "url": "http://127.0.0.1:41619/app/messages?main=garten",
+      "file": "dir-subcategories-1536x960.png",
+      "bytes": 59915,
+      "h1": 1,
+      "overflow": false
+    },
+    {
+      "name": "dir-detail",
+      "viewport": "1536x960",
+      "url": "http://127.0.0.1:41619/app/messages?entry=1&saved=1&main=garten&sub=garten-gaertner-gartenpflege",
+      "file": "dir-detail-1536x960.png",
+      "bytes": 84866,
+      "h1": 1,
+      "overflow": false
+    },
+    {
+      "name": "dir-contacts",
+      "viewport": "1536x960",
+      "url": "http://127.0.0.1:41619/app/messages?main=garten&sub=garten-gaertner-gartenpflege",
+      "file": "dir-contacts-1536x960.png",
+      "bytes": 79675,
+      "h1": 1,
+      "overflow": false
+    },
+    {
+      "name": "dir-manage",
+      "viewport": "1536x960",
+      "url": "http://127.0.0.1:41619/app/messages?mode=manage",
+      "file": "dir-manage-1536x960.png",
+      "bytes": 67984,
+      "h1": 1,
+      "overflow": false
+    },
+    {
+      "name": "dir-assign",
+      "viewport": "1536x960",
+      "url": "http://127.0.0.1:41619/app/messages?entry=1&main=garten&mode=assign",
+      "file": "dir-assign-1536x960.png",
+      "bytes": 87836,
+      "h1": 1,
+      "overflow": false
+    },
+    {
+      "name": "dir-error",
+      "viewport": "1536x960",
+      "url": "http://127.0.0.1:41619/app/messages?main=nosuch",
+      "file": "dir-error-1536x960.png",
+      "bytes": 71609,
+      "h1": 1,
+      "overflow": false
+    },
+    {
+      "name": "dir-categories",
+      "viewport": "390x844",
+      "url": "http://127.0.0.1:41619/app/messages",
+      "file": "dir-categories-390x844.png",
+      "bytes": 41998,
+      "h1": 1,
+      "overflow": false
+    },
+    {
+      "name": "dir-detail",
+      "viewport": "390x844",
+      "url": "http://127.0.0.1:41619/app/messages?entry=1",
+      "file": "dir-detail-390x844.png",
+      "bytes": 46647,
+      "h1": 1,
+      "overflow": false
+    },
+    {
+      "name": "dir-categories",
+      "viewport": "736x1024",
+      "url": "http://127.0.0.1:41619/app/messages",
+      "file": "dir-categories-736x1024.png",
+      "bytes": 55009,
+      "h1": 1,
+      "overflow": false
+    },
+    {
+      "name": "dir-detail",
+      "viewport": "736x1024",
+      "url": "http://127.0.0.1:41619/app/messages?entry=1",
+      "file": "dir-detail-736x1024.png",
+      "bytes": 57795,
+      "h1": 1,
+      "overflow": false
+    }
+  ]
+}

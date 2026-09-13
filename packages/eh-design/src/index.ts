@@ -20,3 +20,4 @@ export * from "./assistant";
 export * from "./property-overview";
 
 export * from "./workspace-owner";
+export * from "./workspace-contact-directory";

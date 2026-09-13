@@ -52,12 +52,18 @@ export async function GET() {
     provider_teams_owned: all(`SELECT pm.user_id AS member_user_id,pm.job_title,pm.can_manage_jobs,pm.active,pm.created_at
       FROM provider_members pm WHERE pm.provider_id=?`),
     house_transfers_received: all(`SELECT property_id,status,created_at,accepted_at FROM house_transfers WHERE accepted_by_user_id=?`),
+    contact_directory_entries: all("SELECT id,contact_user_id,display_name,company,phone,email,legacy_category,revision,created_at,updated_at FROM homeowner_contact_entries WHERE homeowner_id=?"),
+    contact_directory_assignments: all(`SELECT links.entry_id,links.subcategory_id,subs.title AS subcategory_label,mains.slug AS main_category_id,mains.title AS main_category_label,links.created_at
+      FROM homeowner_contact_subcategories links
+      JOIN contact_directory_subcategories subs ON subs.slug=links.subcategory_id
+      JOIN contact_directory_mains mains ON mains.slug=subs.main_slug
+      WHERE links.homeowner_id=?`),
   };
   // T-0127: private-file manifest lists media the user owns (job media, house
   // history documents) so the export is self-describing; the archive is a
   // single JSON document (reproducible: same DB state -> same bytes modulo the
   // exported_at timestamp), bounded by the rate limit above.
-  const privateFiles = all(
+  const privateFiles = allBoth(
     `SELECT jp.id, jp.path, jp.created_at, 'job_media' AS kind FROM job_photos jp
        JOIN jobs j ON j.id = jp.job_id WHERE j.homeowner_id = ?
      UNION ALL
