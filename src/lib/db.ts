@@ -1,6 +1,7 @@
 import Database from 'better-sqlite3';
 import fs from 'node:fs';
 import path from 'node:path';
+import { initializeContactDirectory } from './contact-directory-schema';
 
 const dbPath = process.env.DATABASE_PATH ? path.resolve(process.env.DATABASE_PATH) : path.join(process.cwd(), 'data', 'einfach-hausen.db');
 fs.mkdirSync(path.dirname(dbPath), { recursive: true });
@@ -292,3 +293,6 @@ addColumnIfMissing('user_settings','ai_byok_key_enc','ai_byok_key_enc TEXT');
 addColumnIfMissing('user_settings','ai_byok_base_url',"ai_byok_base_url TEXT NOT NULL DEFAULT ''");
 addColumnIfMissing('user_settings','ai_byok_model',"ai_byok_model TEXT NOT NULL DEFAULT ''");
 addColumnIfMissing('user_settings','automation_prefs',"automation_prefs TEXT NOT NULL DEFAULT '{}'");
+
+// Non-destructive address-book registry and legacy contact mirror.
+execWithRetry(() => initializeContactDirectory(db));

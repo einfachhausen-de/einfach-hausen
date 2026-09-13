@@ -1,7 +1,7 @@
 {
   "_meta": {
     "version": 1,
-    "updated": "2026-09-07",
+    "updated": "2026-09-13",
     "lawful_base": "Art. 6 Abs. 1 lit. b DSGVO (Vertragserfuellung) / lit. f (berechtigtes Interesse, soweit genannt)",
     "retention_legend": {
       "account": "bis Accountloeschung (T-0144 Workflow: Anonymisierung + Endloeschung nach RETENTION_YEARS)",
@@ -374,6 +374,29 @@
       "personal": true,
       "purpose": "Stripe-/Externe-Webhook-Verarbeitung (Ids, Status)",
       "retention": "short"
+    },
+    "homeowner_contact_entries": {
+      "personal": true,
+      "purpose": "Persönliches Adressbuch: manuelle und verknüpfte Partnerkontakte",
+      "retention": "account"
+    },
+    "homeowner_contact_subcategories": {
+      "personal": true,
+      "purpose": "Vom Nutzer gewählte Leistungszuordnungen seiner Adressbuchkontakte",
+      "retention": "account"
+    },
+    "contact_directory_receipts": {
+      "personal": true,
+      "purpose": "Idempotenzbelege eigener Speicheranfragen ohne Kontaktinhalte",
+      "retention": "account"
+    },
+    "contact_directory_mains": {
+      "personal": false,
+      "purpose": "Globale Hauptkategorien der Ansprechpartner-Navigation"
+    },
+    "contact_directory_subcategories": {
+      "personal": false,
+      "purpose": "Globale Unterkategorien der Ansprechpartner-Navigation"
     }
   }
 }

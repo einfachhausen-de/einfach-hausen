@@ -83,6 +83,10 @@ export async function deleteAccountData(userId: number): Promise<{ authSubject: 
     db.prepare('DELETE FROM messages WHERE sender_id=? OR recipient_id=?').run(userId, userId);
     db.prepare('DELETE FROM contact_messages WHERE homeowner_id=? OR provider_id=? OR contact_user_id=? OR sender_id=?').run(userId, userId, userId, userId);
     db.prepare('DELETE FROM homeowner_contacts WHERE homeowner_id=? OR provider_id=? OR contact_user_id=?').run(userId, userId, userId);
+    db.prepare('DELETE FROM homeowner_contact_subcategories WHERE homeowner_id=?').run(userId);
+    db.prepare('DELETE FROM contact_directory_receipts WHERE homeowner_id=?').run(userId);
+    db.prepare('DELETE FROM homeowner_contact_entries WHERE homeowner_id=?').run(userId);
+    db.prepare('UPDATE homeowner_contact_entries SET contact_user_id=NULL WHERE contact_user_id=?').run(userId);
     db.prepare('DELETE FROM provider_invites WHERE homeowner_id=?').run(userId);
     db.prepare('UPDATE provider_invites SET linked_provider_id=NULL WHERE linked_provider_id=?').run(userId);
     db.prepare('DELETE FROM house_transfers WHERE homeowner_id=? OR accepted_by_user_id=?').run(userId, userId);
