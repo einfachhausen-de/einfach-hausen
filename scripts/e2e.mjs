@@ -306,7 +306,7 @@ try{await Promise.all([manager.waitForURL('**/pro'),manager.getByRole('button',{
 await nav(manager, base+'/pro/profile')
 await manager.waitForLoadState('networkidle').catch(()=>{});
 await waitForDomStable(manager,'input[name="document"]',1);
-const preVerifyConsultationToggle=manager.getByLabel('Beratung / fachliche Fragen',{exact:true}); if(!(await preVerifyConsultationToggle.isChecked()))await preVerifyConsultationToggle.check();
+const preVerifyConsultationToggle=manager.getByLabel('Beratung / fachliche Fragen',{exact:true}); if(!(await preVerifyConsultationToggle.isChecked()))await preVerifyConsultationToggle.check(); const preVerifyShortNoticeToggle=manager.getByLabel('Kurzfristige Aufträge',{exact:true}); if(!(await preVerifyShortNoticeToggle.isChecked()))await preVerifyShortNoticeToggle.check();
 const preVerifyEmergencyToggle=manager.getByLabel('Notfälle',{exact:true}); if(!(await preVerifyEmergencyToggle.isChecked()))await preVerifyEmergencyToggle.check();
 try{await manager.locator('select[name="emergencyMode"]').waitFor({timeout:30000});await manager.locator('select[name="emergencyMode"]').selectOption('24_7');}catch(modeError){console.error('E2EDIAG emergencymode count=',await manager.locator('select[name="emergencyMode"]').count());console.error('E2EDIAG emergencymode body=',(await manager.locator('body').innerText()).slice(0,400).replace(/\n+/g,' | '));throw modeError;}
 try{await clickAndWaitUrl(manager,manager.getByRole('button',{name:'Profil speichern'}),/profile=(?:review|saved)/);}catch(saveError){console.error('E2EDIAG profilesave url=',manager.url());console.error('E2EDIAG profilesave body=',(await manager.locator('body').innerText()).slice(0,400).replace(/\n+/g,' | '));throw saveError;}
