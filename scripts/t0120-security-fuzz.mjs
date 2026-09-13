@@ -28,6 +28,8 @@ function check(name, condition, detail = '') {
 // ---------------------------------------------------------------------------
 const SOURCES = [
   'src/lib/db.ts',
+  'src/lib/contact-directory-schema.ts',
+  'src/lib/contact-directory-taxonomy.ts',
   'src/lib/auth.ts',
   'src/lib/demo-accounts.ts',
   'src/lib/security/audit.ts',
