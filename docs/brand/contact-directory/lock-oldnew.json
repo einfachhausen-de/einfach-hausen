@@ -1,0 +1,14 @@
+{
+  "old": {
+    "DESIGN.md": "daaf5ae747961ab54759d65856c3ebb1637133f62edc2af872bc9a644df26d4f",
+    "packages/eh-design/src/index.ts": "64d99457189819ce273ef2abd184592becac9fa79bb7964ec2f4bab13f2652ff",
+    "packages/eh-design/src/styles.module.css": "85219abe43c5aa12588c3fef34ad3b9dba742e1d259ae06c777831c0a43daf7e",
+    "packages/eh-design/src/workspace-contact-directory.tsx": null
+  },
+  "new": {
+    "DESIGN.md": "084e9ce355971a9ee9bb32ad41a9eca5d8f75a414d278a16878d25a52e643b2c",
+    "packages/eh-design/src/index.ts": "19e8a41583a28c39e5c6d3fa1056d629bac1f9eb9df3e28141165a24ff3c5613",
+    "packages/eh-design/src/styles.module.css": "8e9cf19c3bed85a7faf7b14b30d18567d8fc144cbf6dd3f831474e70715cd07c",
+    "packages/eh-design/src/workspace-contact-directory.tsx": "ece42aec49c79cc8c0f5e79bd0ea7a079750be08d985c68695c275568fe69612"
+  }
+}
