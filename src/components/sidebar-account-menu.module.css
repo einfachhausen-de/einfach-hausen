@@ -6,7 +6,7 @@
 .accountText { min-width: 0; display: block; }
 .accountText strong { display: block; font-size: var(--eh-font-label); font-weight: 650; overflow-wrap: anywhere; }
 .accountText small { display: block; color: var(--eh-color-secondary); font-size: var(--eh-font-meta); }
-.accountPopover { position: absolute; bottom: calc(100% + 10px); left: 0; z-index: 50; width: 264px; max-width: calc(100vw - 48px); padding: 8px; border: 1px solid var(--eh-color-line); border-radius: var(--eh-shape-panel); background: var(--eh-color-white); box-shadow: 0 12px 32px rgba(16, 34, 42, 0.14); }
+.accountPopover { position: absolute; bottom: calc(100% + 10px); left: 0; z-index: 50; width: 264px; max-width: calc(100vw - 48px); padding: 8px; border: 1px solid var(--eh-color-line); border-radius: var(--eh-shape-panel); background: var(--eh-color-white); box-shadow: none; }
 .accountPopover > a, .accountPopover > form > button { width: 100%; display: flex; align-items: center; gap: 12px; padding: 11px 12px; border: 0; border-radius: var(--eh-shape-control); background: transparent; color: var(--eh-color-ink); font-size: var(--eh-font-label); font-weight: 550; text-decoration: none; cursor: pointer; }
 .accountPopover > a:hover, .accountPopover > form > button:hover { background: var(--eh-color-paper); }
 .accountPopover > a > span:last-child, .accountPopover > form > button > span:last-child { margin-left: auto; color: var(--eh-color-petrol); font-size: 1.25rem; }

@@ -1,31 +1,39 @@
 import { AppShell } from '@/components/shell';
-import { EHAppHeader, EHWorkSection, EHScheduleList, EHList, EHEmptyState, EHButton } from '@/design-system';
+import { EHOwnerPageHeader, EHOwnerFilters, EHOwnerSection, EHOwnerRecords, EHEmptyState, EHButton, type EHOwnerRecord } from '@/design-system';
 import { requireUser } from '@/lib/auth';
 import { db } from '@/lib/db';
-import { dateLabel,statusLabel } from '@/lib/format';
+import { statusLabel } from '@/lib/format';
+import { ownerDate, ownerInstant } from '@/lib/owner-format';
 
-const monthFmt=new Intl.DateTimeFormat('de-DE',{month:'long',year:'numeric',timeZone:'Europe/Berlin'});
-const weekdayFmt=new Intl.DateTimeFormat('de-DE',{weekday:'long',timeZone:'Europe/Berlin'});
-
-export default async function Calendar(){
-  const u=await requireUser('homeowner');
-  const rows=db.prepare(`SELECT a.*,j.title,p.business_name FROM appointments a JOIN jobs j ON j.id=a.job_id JOIN provider_profiles p ON p.user_id=a.provider_id WHERE a.homeowner_id=? AND a.start_at>=datetime('now','-1 day') ORDER BY a.start_at`).all(u.id) as any[];
-  const groups=new Map<string,any[]>();
-  for(const r of rows){const key=monthFmt.format(new Date(r.start_at));const list=groups.get(key);if(list)list.push(r);else groups.set(key,[r]);}
-  return <AppShell role="homeowner" active="/app/calendar" title="Kalender" subtitle="Termine rund um dein Zuhause">
-    <EHAppHeader eyebrow="Übersicht" title="Deine Termine" text="Deine Verabredungen, Ansprechpartner und der aktuelle Terminstatus." />
-    {rows.length===0&&<EHEmptyState title="Noch keine Termine" text="Wenn du etwas klären oder organisieren möchtest, startest du am schnellsten beim Hausmeister." action={<EHButton href="/app/hausmeister" arrow>Anliegen beschreiben</EHButton>} />}
-    {[...groups.entries()].map(([month,list])=><EHWorkSection key={month} title={month}>
-      <EHScheduleList label={month} items={list.map((r:any)=>({id:String(r.id),day:new Intl.DateTimeFormat('de-DE',{day:'2-digit',timeZone:'Europe/Berlin'}).format(new Date(r.start_at)),month:new Intl.DateTimeFormat('de-DE',{month:'short',timeZone:'Europe/Berlin'}).format(new Date(r.start_at)),dateLabel:dateLabel(r.start_at),title:r.title,detail:`${weekdayFmt.format(new Date(r.start_at))} · ${r.business_name}`,status:statusLabel(r.status)}))}/>
-    </EHWorkSection>)}
-    <PastAppointments userId={u.id}/>
+type Appointment = {id:number;job_id:number;title:string;start_at:string;status:string;business_name:string|null};
+const monthFmt = new Intl.DateTimeFormat('de-DE',{month:'long',year:'numeric',timeZone:'Europe/Berlin'});
+export default async function Calendar({searchParams}:{searchParams:Promise<Record<string,string|string[]|undefined>>}) {
+  const user = await requireUser('homeowner');
+  const params = await searchParams;
+  const past = params.view === 'past';
+  const count = past ? (db.prepare("SELECT COUNT(*) c FROM appointments a JOIN jobs j ON j.id=a.job_id WHERE a.homeowner_id=? AND datetime(a.start_at)<datetime('now')").get(user.id) as {c:number}).c : 0;
+  const pages = Math.max(1, Math.ceil(count / 50));
+  const requestedPage = Number(params.page);
+  const page = past && Number.isSafeInteger(requestedPage) && requestedPage > 0 ? Math.min(requestedPage, pages) : 1;
+  const rows = db.prepare(`SELECT a.id,a.job_id,a.start_at,a.status,j.title,p.business_name FROM appointments a JOIN jobs j ON j.id=a.job_id LEFT JOIN provider_profiles p ON p.user_id=a.provider_id WHERE a.homeowner_id=? AND datetime(a.start_at) ${past ? '<' : '>='} datetime('now') ORDER BY datetime(a.start_at) ${past ? 'DESC' : 'ASC'},a.id ${past ? 'LIMIT 50 OFFSET ?' : ''}`).all(...(past ? [user.id, (page - 1) * 50] : [user.id])) as Appointment[];
+  const groups = new Map<string,EHOwnerRecord[]>();
+  for (const row of rows) {
+    const instant = ownerInstant(row.start_at);
+    const month = instant ? monthFmt.format(instant) : 'Datum prüfen';
+    const list = groups.get(month) || [];
+    list.push({id:String(row.id),href:`/app/jobs/${row.job_id}`,title:row.title,detail:ownerDate(row.start_at),meta:row.business_name || 'Betrieb im Auftrag ansehen',status:statusLabel(row.status),tone:row.status==='cancelled' ? 'neutral' : row.status==='confirmed' ? 'success' : 'info',action:'Auftrag öffnen'});
+    groups.set(month,list);
+  }
+  return <AppShell role="homeowner" active="/app/calendar" title="Termine">
+    <EHOwnerPageHeader title="Deine Termine" text="Deine Terminübersicht. Absprachen und Änderungen klärst du im jeweiligen Auftrag." />
+    <EHOwnerFilters label="Zeitraum" items={[{href:'/app/calendar',label:'Anstehend',active:!past},{href:'/app/calendar?view=past',label:'Vergangen',active:past}]} />
+    <EHOwnerSection title={past ? 'Vergangene Termine' : 'Anstehende Termine'} text={past ? `Seite ${page} von ${pages}. Ein vergangener Termin bedeutet nicht, dass der Auftrag abgeschlossen ist.` : 'Alle Termine ab jetzt, einschließlich noch unbestätigter oder stornierter Einträge mit ihrem jeweiligen Status.'}>
+      {rows.length===0 && <EHEmptyState title={past ? 'Keine vergangenen Termine' : 'Keine anstehenden Termine'} text={past ? 'Vergangene Besuche erscheinen später hier.' : 'Neue Anliegen kannst du beschreiben. Bestehende Absprachen findest du in deinen Aufträgen.'} action={<EHButton href="/app/jobs" variant="secondary">Aufträge ansehen</EHButton>} />}
+    </EHOwnerSection>
+    {[...groups].map(([month,items]) => <EHOwnerSection key={month} title={month}><EHOwnerRecords label={month} items={items} /></EHOwnerSection>)}
+    {past && pages > 1 && <EHOwnerFilters label="Seiten der Terminhistorie" items={[
+      ...(page > 1 ? [{href:`/app/calendar?view=past&page=${page-1}`,label:'Neuere Termine',active:false}] : []),
+      ...(page < pages ? [{href:`/app/calendar?view=past&page=${page+1}`,label:'Ältere Termine',active:false}] : []),
+    ]} />}
   </AppShell>;
-}
-
-function PastAppointments({userId}:{userId:number}){
-  const past=db.prepare(`SELECT a.*,j.title,p.business_name FROM appointments a JOIN jobs j ON j.id=a.job_id JOIN provider_profiles p ON p.user_id=a.provider_id WHERE a.homeowner_id=? AND a.start_at<datetime('now','-1 day') ORDER BY a.start_at DESC LIMIT 8`).all(userId) as any[];
-  if(past.length===0)return null;
-  return <EHWorkSection title="Vergangene Termine">
-    <EHList label="Vergangene Termine" items={past.map((r:any)=>({ id: 'past-' + r.id, title: r.title, text: `${dateLabel(r.start_at)} · ${r.business_name}` }))} />
-  </EHWorkSection>;
 }

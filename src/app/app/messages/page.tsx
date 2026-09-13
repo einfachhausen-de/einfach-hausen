@@ -1,5 +1,4 @@
-import { Cpu, DoorOpen, Hammer, HardHat, Home, Leaf, Lock, Sparkles, Wrench, Zap } from 'lucide-react';
-import { EHContactDirectory, EHContactGroup, EHConversation, EHWorkflowForm, EHSubmitButton, EHFormFeedback, EHAppHeader, EHEmptyState, EHErrorState, EHCallout, EHButton, EHField, EHSelect, EHInput } from '@/design-system';
+import { EHOwnerPageHeader, EHOwnerSearch, EHOwnerContacts, EHOwnerLinks, EHConversation, EHWorkflowForm, EHSubmitButton, EHFormFeedback, EHEmptyState, EHErrorState, EHCallout, EHButton, EHField, EHSelect, EHInput } from '@/design-system';
 import { AppShell } from '@/components/shell';
 import { requireUser } from '@/lib/auth';
 import { db } from '@/lib/db';
@@ -35,15 +34,13 @@ export default async function Messages({ searchParams }: { searchParams: Promise
     JOIN provider_profiles p ON p.user_id=hc.provider_id
     LEFT JOIN jobs j ON j.id=hc.last_job_id
     WHERE hc.homeowner_id=? ORDER BY hc.updated_at DESC`).all(u.id) as any[];
-  const grouped = groupContactsByCategory(contacts);
   const requestedId = Number(sp.contact);
   const hasRequestedContact = Boolean(sp.contact);
   const selected = hasRequestedContact
     ? contacts.find((contact) => Number.isSafeInteger(requestedId) && contact.contact_user_id === requestedId)
     : contacts[0];
-  const selectedId = hasRequestedContact ? selected?.contact_user_id : undefined;
   const selectedCategory = selected ? normalizeContactCategory(selected.category || '') : '';
-  const messages = selected
+  const messages = hasRequestedContact && selected
     ? db.prepare(`SELECT 'direct' source,cm.id,cm.sender_id,cm.body,cm.read_at,cm.created_at,NULL context_title,NULL job_id
         FROM contact_messages cm
         WHERE cm.homeowner_id=? AND cm.provider_id=? AND cm.contact_user_id=?
@@ -70,6 +67,15 @@ export default async function Messages({ searchParams }: { searchParams: Promise
   const rawQuery = typeof sp.q === 'string' ? sp.q : '';
   const query = rawQuery.trim().toLowerCase();
   const activeArea = typeof sp.bereich === 'string' ? sp.bereich : '';
+  const returnParams = new URLSearchParams();
+  if (rawQuery) returnParams.set('q', rawQuery);
+  if (activeArea) returnParams.set('bereich', activeArea);
+  const directoryHref = `/app/messages${returnParams.size ? `?${returnParams}` : ''}`;
+  const contactHref = (id: number) => {
+    const params = new URLSearchParams(returnParams);
+    params.set('contact', String(id));
+    return `/app/messages?${params}`;
+  };
   const directoryContacts = contacts.filter((contact: any) => {
     const area = normalizeContactCategory(contact.category || '');
     if (activeArea && area !== activeArea) return false;
@@ -78,52 +84,22 @@ export default async function Messages({ searchParams }: { searchParams: Promise
     return haystack.includes(query);
   });
   const directoryGrouped = groupContactsByCategory(directoryContacts);
-  const areaMeta: Record<string, { hint: string; icon: React.ReactNode }> = {
-    'Haus & Allgemein': { hint: 'z. B. Hausmeister & allgemeine Fragen', icon: <Home aria-hidden="true" /> },
-    'Garten & Außen': { hint: 'z. B. Rasen mähen oder Hecke schneiden', icon: <Leaf aria-hidden="true" /> },
-    'Dach & Fassade': { hint: 'z. B. Dach undicht oder Fassade beschädigt', icon: <HardHat aria-hidden="true" /> },
-    'Elektro': { hint: 'z. B. Stromausfall oder Steckdose defekt', icon: <Zap aria-hidden="true" /> },
-    'Sanitär & Heizung': { hint: 'z. B. Wasserhahn undicht oder Heizung ohne Wärme', icon: <Wrench aria-hidden="true" /> },
-    'Fenster & Türen': { hint: 'z. B. Fenster klemmt oder Tür schließt nicht', icon: <DoorOpen aria-hidden="true" /> },
-    'Reinigung & Pflege': { hint: 'z. B. Fensterreinigung oder Grundreinigung', icon: <Sparkles aria-hidden="true" /> },
-    'Technik & Energie': { hint: 'z. B. PV-Anlage oder Wallbox', icon: <Cpu aria-hidden="true" /> },
-    'Sicherheit & Schloss': { hint: 'z. B. Schloss klemmt oder Einbruchschutz', icon: <Lock aria-hidden="true" /> },
-    'Renovierung & Innenausbau': { hint: 'z. B. Möbelaufbau oder kleine Reparaturen', icon: <Hammer aria-hidden="true" /> },
-  };
-  const areaCounts = new Map<string, number>();
-  for (const contact of contacts as any[]) {
-    const area = normalizeContactCategory((contact as any).category || '');
-    areaCounts.set(area, (areaCounts.get(area) || 0) + 1);
-  }
-  const directoryCategories = (Object.keys(areaMeta) as string[]).map((area) => ({
-    id: area,
-    title: area,
-    count: areaCounts.get(area) || 0,
-    hint: areaMeta[area].hint,
-    href: activeArea === area ? '/app/messages' : `/app/messages?bereich=${encodeURIComponent(area)}`,
-    active: activeArea === area,
-    icon: areaMeta[area].icon,
-  }));
+  const areas = [...new Set(contacts.map((contact: any) => normalizeContactCategory(contact.category || '')))].sort((a,b) => a.localeCompare(b,'de'));
 
   return <AppShell role="homeowner" active="/app/messages" title="Ansprechpartner" subtitle="Dein persönliches Netzwerk fürs Haus">
-    <EHAppHeader eyebrow="Netzwerk" title="Meine Ansprechpartner" text="Nach Bereichen sortiert, damit du sofort weißt, wen du für Garten, Dach, Elektro oder andere Themen ansprechen kannst." />
-    {contacts.length === 0 ? <EHEmptyState title="Noch keine Ansprechpartner" text="Wenn du zuerst nur mit einem passenden Menschen sprechen möchtest, startest du beim Hausmeister und wählst bewusst „Ansprechpartner finden“." action={<EHButton href="/app/hausmeister" arrow>Ansprechpartner finden</EHButton>} /> : <>
+    <EHOwnerPageHeader title="Deine Ansprechpartner" text="Deine bestehenden Kontakte. Direkt schreiben, anrufen und Absprachen wiederfinden." action={{href:"/app/hausmeister",label:"Ansprechpartner finden"}} />
+    {contacts.length === 0 ? <EHEmptyState title="Noch keine Ansprechpartner" text="Beschreibe im Hausmanager, wen du suchst, und wähle „Ansprechpartner finden“. Nach der Vermittlung bleibt der Kontakt hier erhalten." action={<EHButton href="/app/hausmeister" arrow>Ansprechpartner finden</EHButton>} /> : <>
       {!(hasRequestedContact && selected) && (
-      <EHContactDirectory
-        totalHref="/app/messages"
-        totalLabel={`Alle Ansprechpartner · ${contacts.length} in deinem Netzwerk`}
-        search={{ action: '/app/messages', name: 'q', defaultValue: rawQuery, placeholder: 'Suche nach Dienstleister oder Kategorie …' }}
-        categories={directoryCategories}
-        finder={{ title: 'Ansprechpartner finden', text: 'Noch kein passender Kontakt? Starte beim Hausmeister – wir vermitteln den passenden Betrieb.', href: '/app/hausmeister', label: 'Anliegen beschreiben' }}
-        listTitle="Meine Ansprechpartner"
-        listAllHref="/app/messages"
-        list={<>{directoryGrouped.length === 0 ? <EHEmptyState title="Keine Treffer" text="Für diese Suche gibt es in deinen Ansprechpartnern keinen Treffer." /> : directoryGrouped.map(([category, rows]) => <EHContactGroup key={category} title={category} contacts={(rows as any[]).map((contact: any) => ({ id: String(contact.contact_user_id), href: `/app/messages?contact=${contact.contact_user_id}`, name: `${contact.first_name} ${contact.last_name}`, detail: `${contact.job_title || 'Ansprechpartner'} · ${contact.business_name}${contact.last_job_title ? ` · ${contact.last_job_title}` : ''}`, active: contact.contact_user_id === selectedId, unread: Number(contact.unread_count || 0) }))} />)}</>}
-      />
+      <>
+        <EHOwnerSearch action="/app/messages" query={rawQuery} placeholder="Name, Betrieb oder Auftrag" areas={areas} area={activeArea} />
+        {directoryGrouped.length === 0 ? <EHEmptyState title="Keine passenden Ansprechpartner" text="Ändere den Suchbegriff oder wähle einen anderen Bereich." action={<EHButton href="/app/messages" variant="secondary">Filter zurücksetzen</EHButton>} /> : <EHOwnerContacts groups={directoryGrouped.map(([category,rows]) => ({title:category,contacts:(rows as any[]).map((contact:any)=>({id:String(contact.contact_user_id),name:`${contact.first_name} ${contact.last_name}`,company:contact.business_name,role:contact.job_title || undefined,context:contact.last_job_title || undefined,href:contactHref(contact.contact_user_id),phone:contact.phone || undefined,unread:Number(contact.unread_count || 0)}))}))} />}
+        <EHOwnerLinks items={[{href:'/app/hausmeister',title:'Ein weiterer Kontakt fehlt?',text:'Beschreibe dein Anliegen im Hausmanager und suche einen passenden Betrieb.'}]} />
+      </>
       )}
       {hasRequestedContact && !selected && <EHErrorState text="Dieser Ansprechpartner ist nicht mehr verfügbar. Wähle einen Kontakt aus deiner Liste." />}
       {hasRequestedContact && selected ? (
       <>
-      <p style={{ margin: '0 0 4px' }}><a href="/app/messages">← Zurück zu allen Ansprechpartnern</a></p>
+      <EHButton href={directoryHref} variant="quiet">Zurück zu deinen Ansprechpartnern</EHButton>
         {selected&&<EHConversation role="owner" name={`${selected.first_name} ${selected.last_name}`} detail={`${selected.job_title||'Ansprechpartner'} · ${selected.business_name} · ${selectedCategory}`} phone={selected.phone}
           messages={messages.map(message=>({id:`${message.source}-${message.id}`,mine:message.sender_id===u.id,author:`${message.sender_id===u.id?'Du':selected.first_name}${message.source==='job'&&message.context_title?` · Auftrag: ${message.context_title}`:''}`,body:message.body}))}
           composer={<OwnerMessageComposer contactUserId={selected.contact_user_id} peerName={selected.first_name} unreadCount={unreadCount}/>}

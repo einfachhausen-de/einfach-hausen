@@ -1,0 +1,184 @@
+{
+  "shots": [
+    "final-app-390x844.png",
+    "final-app-390x844-full.png",
+    "final-app-390x844-after-action.png",
+    "final-app-736x1024.png",
+    "final-app-1536x960.png",
+    "final-jobs-390x844.png",
+    "final-jobs-390x844-search.png",
+    "final-jobs-390x844-completed.png",
+    "final-jobs-736x1024.png",
+    "final-jobs-1536x960.png",
+    "final-calendar-390x844.png",
+    "final-calendar-736x1024.png",
+    "final-calendar-1536x960.png",
+    "final-calendar-390x844-past.png",
+    "final-messages-390x844.png",
+    "final-messages-736x1024.png",
+    "final-messages-1536x960.png",
+    "final-messages-390x844-thread.png",
+    "final-messages-390x844-thread-sent.png",
+    "final-messages-390x844-filter.png",
+    "final-account-390x844.png",
+    "final-pro-390x844.png",
+    "final-pro-1536x960.png"
+  ],
+  "checks": [
+    {
+      "label": "app-mobile",
+      "h1": 1,
+      "overflow": false,
+      "toolbarNotif": 1,
+      "hausmanager": 1
+    },
+    {
+      "label": "app-composer-present",
+      "ok": true
+    },
+    {
+      "label": "app-mobile-last-action 44px",
+      "height": 130
+    },
+    {
+      "label": "app-mobile-after-last-action",
+      "h1": 1,
+      "overflow": false
+    },
+    {
+      "label": "app-736x1024",
+      "h1": 1,
+      "overflow": false
+    },
+    {
+      "label": "app-1536x960",
+      "h1": 1,
+      "overflow": false
+    },
+    {
+      "label": "jobs-mobile",
+      "h1": 1,
+      "overflow": false,
+      "toolbarNotif": 1
+    },
+    {
+      "label": "jobs-search-Notfall",
+      "found": 2
+    },
+    {
+      "label": "jobs-mobile-completed",
+      "h1": 1,
+      "overflow": false
+    },
+    {
+      "label": "jobs-completed-view",
+      "found": 1
+    },
+    {
+      "label": "jobs-query-preserved",
+      "qval": "Notfall"
+    },
+    {
+      "label": "jobs-736x1024",
+      "h1": 1,
+      "overflow": false,
+      "hausmanager": 1
+    },
+    {
+      "label": "jobs-1536x960",
+      "h1": 1,
+      "overflow": false,
+      "hausmanager": 1
+    },
+    {
+      "label": "calendar-390x844",
+      "h1": 1,
+      "overflow": false,
+      "toolbarNotif": 2,
+      "hausmanager": 1
+    },
+    {
+      "label": "calendar-736x1024",
+      "h1": 1,
+      "overflow": false,
+      "toolbarNotif": 2,
+      "hausmanager": 1
+    },
+    {
+      "label": "calendar-1536x960",
+      "h1": 1,
+      "overflow": false,
+      "toolbarNotif": 1,
+      "hausmanager": 1
+    },
+    {
+      "label": "calendar-mobile-past",
+      "h1": 1,
+      "overflow": false
+    },
+    {
+      "label": "messages-390x844",
+      "h1": 1,
+      "overflow": false,
+      "toolbarNotif": 2,
+      "hausmanager": 1
+    },
+    {
+      "label": "messages-736x1024",
+      "h1": 1,
+      "overflow": false,
+      "toolbarNotif": 2,
+      "hausmanager": 1
+    },
+    {
+      "label": "messages-1536x960",
+      "h1": 1,
+      "overflow": false,
+      "toolbarNotif": 1,
+      "hausmanager": 1
+    },
+    {
+      "label": "messages-thread",
+      "h1": 1,
+      "overflow": false
+    },
+    {
+      "label": "messages-send 44px",
+      "height": 48
+    },
+    {
+      "label": "messages-thread-send",
+      "sentVisible": 2
+    },
+    {
+      "label": "messages-filter",
+      "h1": 1,
+      "overflow": false
+    },
+    {
+      "label": "messages-search-filter",
+      "foundContact": 1
+    },
+    {
+      "label": "account-mobile",
+      "h1": 1,
+      "overflow": false
+    },
+    {
+      "label": "pro-390x844",
+      "h1": 1,
+      "overflow": false
+    },
+    {
+      "label": "pro-1536x960",
+      "h1": 1,
+      "overflow": false
+    }
+  ],
+  "errors": [],
+  "source": "kept green E2E run MfAQpE (real UI flows); prod server; real Supabase login; 3 documented fixture rows in temp DB",
+  "cleanup": [
+    "maria-shots-mtzi1bkp@example.test: identities removed",
+    "gartenbau-shots-mtzi1bkp@example.test: identities removed"
+  ]
+}
