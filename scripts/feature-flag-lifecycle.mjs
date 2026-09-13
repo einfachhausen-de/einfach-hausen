@@ -22,7 +22,7 @@ const failures = [];
 // deterministic regressions (no build step needed). The full transitive local
 // graph must be copied (learning from the dispatcher hotfix, PR #55).
 fs.symlinkSync(path.join(root, 'node_modules'), path.join(dbDir, 'node_modules'), 'dir');
-for (const rel of ['src/lib/db.ts', 'src/lib/observability.ts', 'src/lib/security/audit.ts', 'src/lib/security/rate-limit.ts', 'src/lib/feature-flags.ts']) {
+for (const rel of ['src/lib/db.ts', 'src/lib/observability.ts', 'src/lib/security/audit.ts', 'src/lib/security/rate-limit.ts', 'src/lib/feature-flags.ts', 'src/lib/contact-directory-schema.ts', 'src/lib/contact-directory-taxonomy.ts']) {
   const fileSrc = fs.readFileSync(path.join(root, rel), 'utf8');
   const stripped = stripTypeScriptTypes(fileSrc)
     .replace(/(from\s*['"])(\.\.?\/[^'"]+)(['"])/g, (_m, a, s, b) => `${a}${s}.mjs${b}`)

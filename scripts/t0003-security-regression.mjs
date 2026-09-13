@@ -12,7 +12,7 @@ process.env.DATABASE_PATH=path.join(dbDir,'regression.db');
 process.chdir(dbDir);
 fs.symlinkSync(path.join(root,'node_modules'),path.join(scratch,'node_modules'),'dir');
 
-const sources=['src/lib/db.ts','src/lib/security/webhooks.ts','src/lib/security/private-files.ts'];
+const sources=['src/lib/db.ts','src/lib/contact-directory-schema.ts','src/lib/contact-directory-taxonomy.ts','src/lib/security/webhooks.ts','src/lib/security/private-files.ts'];
 for(const rel of sources){
   const src=fs.readFileSync(path.join(root,rel),'utf8');
   const stripped=stripTypeScriptTypes(src).replace(/(from\s*['"])(\.\.?\/[^'"]+)(['"])/g,(_m,a,s,b)=>`${a}${s}.mjs${b}`);
