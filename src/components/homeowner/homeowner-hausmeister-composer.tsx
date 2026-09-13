@@ -148,7 +148,7 @@ export function HomeownerHausmeisterComposer({
           }}>Vorschlag verwerfen</EHButton>
         </EHActions>
       </EHPanel>}
-      <label className="owner-visually-hidden" htmlFor={descriptionId}>Anliegen an den Hausmeister</label>
+      <label className="owner-visually-hidden" htmlFor={descriptionId}>Anliegen an den Hausmanager</label>
       <textarea
         id={descriptionId}
         name="description"
@@ -162,7 +162,7 @@ export function HomeownerHausmeisterComposer({
       <div className="agent-actions">
         <label className="icon-action" htmlFor={fileId} title="Foto, Video oder Sprachnachricht hinzufügen">
           <Camera size={19} aria-hidden="true" />
-          <span>Foto</span>
+          <span>Medien</span>
           <input
             id={fileId}
             name="photo"
@@ -179,11 +179,11 @@ export function HomeownerHausmeisterComposer({
           aria-label={listening ? 'Spracheingabe beenden' : speechSupported ? 'Spracheingabe starten' : 'Spracheingabe nicht verfügbar; Alternativen anzeigen'}
         >
           {listening ? <Square size={18} aria-hidden="true" /> : <Mic size={19} aria-hidden="true" />}
-          <span>{listening ? 'Stopp' : speechSupported ? 'Sprache' : 'Nur Text'}</span>
+          <span>{listening ? 'Stopp' : speechSupported ? 'Diktieren' : 'Sprache nicht verfügbar'}</span>
         </button>
         <button className="send-action" type="submit" disabled={offline || submitting || text.trim().length < 4} aria-busy={submitting}>
           <Send size={18} aria-hidden="true" />
-          <span>{submitting ? 'Wird gesendet…' : continuingIntent ? 'Weiter' : 'Senden'}</span>
+          <span>{submitting ? 'Wird gesendet…' : continuingIntent ? 'Weiter' : 'Anliegen senden'}</span>
         </button>
         {submitError && (
           <p className="owner-composer-status" role="alert" data-tone="error">{submitError}</p>

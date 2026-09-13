@@ -1,330 +1,43 @@
-import {
-  CalendarDays,
-  CheckCircle2,
-  FileText,
-  MessageCircle,
-  ShieldCheck,
-} from 'lucide-react';
-
 import { HomeownerHausmeisterComposer } from '@/components/homeowner/homeowner-hausmeister-composer';
-import {
-  EHCallout,
-  EHOwnerDashboardComposer,
-  EHOwnerDashboardHeader,
-  EHOwnerDashboardOverview,
-  EHOwnerDashboardStatus,
-  EHOwnerDashboardTopGrid,
-  EHOwnerDashboardUtilityGrid,
-  EHTextLink,
-} from '@/design-system';
 import { AppShell } from '@/components/shell';
-
+import { EHButton, EHCallout, EHEmptyState, EHOwnerPageHeader, EHOwnerOverview, EHOwnerWelcome, EHOwnerSection, EHOwnerRecords, EHOwnerComposer, EHOwnerLinks, type EHOwnerRecord } from '@/design-system';
 import { requireUser } from '@/lib/auth';
 import { db } from '@/lib/db';
-import { dateLabel } from '@/lib/format';
 import { primaryProperty } from '@/lib/properties';
+import { ownerDate, ownerMaintenanceState } from '@/lib/owner-format';
 
 export default async function Dashboard() {
   const user = await requireUser('homeowner');
-
-  const profile = db
-    .prepare(
-      'SELECT address,postcode,onboarding_step FROM homeowner_profiles WHERE user_id=?',
-    )
-    .get(user.id) as any;
-
-  const onboardingPending =
-    profile?.onboarding_step && profile.onboarding_step !== 'done';
-
+  const profile = db.prepare('SELECT address,postcode,onboarding_step FROM homeowner_profiles WHERE user_id=?').get(user.id) as { address?: string; postcode?: string; onboarding_step?: string } | undefined;
   const property = primaryProperty(user.id);
-
-  const houseAddress = property?.address || profile?.address || '';
-  const housePostcode = property?.postcode || profile?.postcode || '';
-
-  const houseContext = [houseAddress, housePostcode]
-    .filter(Boolean)
-    .join(', ');
-
-  const nextAppointment = db
-    .prepare(
-      `SELECT
-        a.*,
-        j.title,
-        p.business_name
-      FROM appointments a
-      JOIN jobs j ON j.id=a.job_id
-      JOIN provider_profiles p ON p.user_id=a.provider_id
-      WHERE a.homeowner_id=?
-        AND a.status='confirmed'
-        AND datetime(a.start_at) >= datetime('now')
-      ORDER BY datetime(a.start_at) ASC
-      LIMIT 1`,
-    )
-    .get(user.id) as any;
-
-  const openDecision = db
-    .prepare(
-      `SELECT *
-      FROM jobs
-      WHERE homeowner_id=?
-        AND status='quoted'
-      ORDER BY updated_at DESC
-      LIMIT 1`,
-    )
-    .get(user.id) as any;
-
-  const openDecisionQuotes = openDecision
-    ? (
-        db
-          .prepare(
-            `SELECT COUNT(*) c
-            FROM quotes
-            WHERE job_id=?
-              AND status='pending'`,
-          )
-          .get(openDecision.id) as { c: number }
-      ).c
-    : 0;
-
-  const dueMaintenance = property
-    ? (db
-        .prepare(
-          `SELECT *
-          FROM maintenance_tasks
-          WHERE property_id=?
-            AND status='open'
-          ORDER BY date(due_date) ASC
-          LIMIT 1`,
-        )
-        .get(property.id) as any)
-    : null;
-
-  const decisionMeta = openDecision
-    ? openDecisionQuotes > 0
-      ? `${openDecisionQuotes} ${
-          openDecisionQuotes === 1 ? 'Angebot' : 'Angebote'
-        } zur Prüfung`
-      : 'Aktuellen Stand prüfen'
-    : 'Aktuell keine Entscheidung offen';
-
-  const scheduleTitle = dueMaintenance
-    ? dueMaintenance.title
-    : nextAppointment
-      ? nextAppointment.title
-      : 'Keine Wartung fällig';
-
-  const scheduleMeta = dueMaintenance
-    ? dateLabel(dueMaintenance.due_date)
-    : nextAppointment
-      ? `${nextAppointment.business_name} · ${dateLabel(
-          nextAppointment.start_at,
-        )}`
-      : 'Aktuell nichts fällig';
-
-  const statusItems = [
-    {
-      id: 'decision',
-      label: 'Offenes Angebot',
-      title: openDecision?.title || 'Keine offene Entscheidung',
-      meta: decisionMeta,
-      href: openDecision ? `/app/jobs/${openDecision.id}` : '/app/jobs',
-      icon: <FileText aria-hidden="true" />,
-    },
-    {
-      id: 'maintenance',
-      label: dueMaintenance ? 'Nächste Wartung' : 'Nächster Termin',
-      title: scheduleTitle,
-      meta: scheduleMeta,
-      href: dueMaintenance
-        ? '/app/year'
-        : nextAppointment
-          ? `/app/jobs/${nextAppointment.job_id}`
-          : '/app/calendar',
-      icon: <CalendarDays aria-hidden="true" />,
-    },
-    {
-      id: 'general',
-      label: 'Allgemeiner Status',
-      title:
-        openDecision || dueMaintenance
-          ? 'Keine weiteren akuten Anliegen'
-          : 'Keine akuten Anliegen',
-      meta: 'Dein Zuhause bleibt übersichtlich organisiert.',
-      href: '/app/home',
-      icon: <CheckCircle2 aria-hidden="true" />,
-    },
+  const address = property?.address || profile?.address || '';
+  const postcode = property?.postcode || profile?.postcode || '';
+  const context = [address, postcode ? `PLZ ${postcode}` : ''].filter(Boolean).join(' · ');
+  const decisions = db.prepare(`SELECT j.id,j.title,COUNT(q.id) quote_count FROM jobs j LEFT JOIN quotes q ON q.job_id=j.id AND q.status='pending' WHERE j.homeowner_id=? AND j.status='quoted' AND j.request_kind='service' GROUP BY j.id ORDER BY j.updated_at DESC`).all(user.id) as {id:number;title:string;quote_count:number}[];
+  const maintenance = property ? db.prepare(`SELECT id,title,due_date FROM maintenance_tasks WHERE property_id=? AND status='open' ORDER BY CASE WHEN due_date IS NULL OR due_date='' THEN 1 ELSE 0 END,date(due_date),id LIMIT 3`).all(property.id) as {id:number;title:string;due_date:string|null}[] : [];
+  const next = db.prepare(`SELECT a.job_id,a.start_at,j.title,p.business_name FROM appointments a JOIN jobs j ON j.id=a.job_id LEFT JOIN provider_profiles p ON p.user_id=a.provider_id WHERE a.homeowner_id=? AND a.status='confirmed' AND datetime(a.start_at)>=datetime('now') ORDER BY datetime(a.start_at) LIMIT 1`).get(user.id) as {job_id:number;start_at:string;title:string;business_name:string|null}|undefined;
+  const items: EHOwnerRecord[] = [
+    ...decisions.map(item => ({id:`offer-${item.id}`,title:item.title,href:`/app/jobs/${item.id}`,detail:item.quote_count > 0 ? `${item.quote_count} ${item.quote_count === 1 ? 'Angebot wartet' : 'Angebote warten'} auf deine Prüfung.` : 'Der Angebotsstatus braucht eine Prüfung.',status:'Entscheidung offen',tone:'warning' as const,action:item.quote_count > 0 ? 'Angebot prüfen' : 'Stand prüfen'})),
+    ...maintenance.filter(item => ownerMaintenanceState(item.due_date) !== 'Wartung geplant').slice(0, 2).map(item => ({id:`maintenance-${item.id}`,title:item.title,href:'/app/year',detail:ownerDate(item.due_date),status:ownerMaintenanceState(item.due_date),tone:ownerMaintenanceState(item.due_date).includes('überfällig') ? 'warning' as const : 'neutral' as const,action:'Wartung ansehen'})),
   ];
-
-  const overviewItems = [
-    ...(openDecision
-      ? [
-          {
-            id: `overview-decision-${openDecision.id}`,
-            label: 'Offenes Angebot',
-            title: openDecision.title,
-            meta:
-              openDecisionQuotes > 0
-                ? `${openDecisionQuotes} ${
-                    openDecisionQuotes === 1 ? 'Angebot' : 'Angebote'
-                  } prüfen`
-                : 'Vorgang öffnen',
-            href: `/app/jobs/${openDecision.id}`,
-            icon: <FileText aria-hidden="true" />,
-          },
-        ]
-      : []),
-    ...(dueMaintenance
-      ? [
-          {
-            id: `overview-maintenance-${dueMaintenance.id ?? 'next'}`,
-            label: 'Fällige Wartung',
-            title: dueMaintenance.title,
-            meta: dateLabel(dueMaintenance.due_date),
-            href: '/app/year',
-            icon: <CalendarDays aria-hidden="true" />,
-          },
-        ]
-      : nextAppointment
-        ? [
-            {
-              id: `overview-appointment-${nextAppointment.job_id}`,
-              label: 'Nächster Termin',
-              title: nextAppointment.title,
-              meta: dateLabel(nextAppointment.start_at),
-              href: `/app/jobs/${nextAppointment.job_id}`,
-              icon: <CalendarDays aria-hidden="true" />,
-            },
-          ]
-        : []),
-  ];
-
-  return (
-    <AppShell
-      role="homeowner"
-      active="/app"
-      title="Mein Zuhause"
-      subtitle="Dein persönlicher Hausmanager"
-    >
-      <>
-        <EHOwnerDashboardHeader
-          eyebrow="Übersicht"
-          title={`Hallo ${user.first_name}.`}
-          text={houseContext || 'Dein Zuhause im Überblick.'}
-          imageSrc="/images/marketing/owner-facade-reference.png"
-          imageAlt=""
-        />
-
-        {onboardingPending && (
-          <EHCallout title="Einrichtung unvollständig">
-            <p>Du hast die Ersteinrichtung noch nicht abgeschlossen.</p>
-            <EHTextLink href="/app/onboarding">
-              Jetzt weiter einrichten
-            </EHTextLink>
-          </EHCallout>
-        )}
-
-        <EHOwnerDashboardTopGrid
-          main={
-            <EHOwnerDashboardStatus
-              eyebrow="Aktuell wichtig"
-              title="Hausstatus"
-              text="Alles auf einen Blick – so steht es um dein Zuhause."
-              items={statusItems}
-              primaryAction={{
-                href: openDecision
-                  ? `/app/jobs/${openDecision.id}`
-                  : '/app/jobs',
-                label: openDecision ? 'Angebot prüfen' : 'Aufträge ansehen',
-              }}
-            />
-          }
-          aside={
-            <EHOwnerDashboardOverview
-              title="Dein nächster Überblick"
-              items={overviewItems}
-              emptyText="Aktuell gibt es hier nichts Dringendes."
-              footerLink={{
-                href: '/app/calendar',
-                label: 'Alle Termine anzeigen',
-              }}
-            />
-          }
-        />
-
-        <EHOwnerDashboardComposer
-          title="Was steht bei deinem Haus an?"
-          text="Beschreibe dein Anliegen. Wir helfen dir, den nächsten Schritt zu organisieren."
-          composer={
-            <HomeownerHausmeisterComposer starterHint="Was gibt es an deinem Haus zu tun?" />
-          }
-          examples={[
-            {
-              label: 'Heizung macht ungewöhnliche Geräusche',
-              href: '/app/hausmeister',
-            },
-            {
-              label: 'Wasserhahn tropft',
-              href: '/app/hausmeister',
-            },
-            {
-              label: 'Frage zu einer Rechnung',
-              href: '/app/hausmeister',
-            },
-            {
-              label: 'Termin für Wartung vereinbaren',
-              href: '/app/hausmeister',
-            },
-          ]}
-        />
-
-        <EHOwnerDashboardUtilityGrid
-          groups={[
-            {
-              title: 'Für dein Zuhause',
-              items: [
-                {
-                  href: '/app/consultation',
-                  title: 'Beratung',
-                  text: 'Vorhaben besprechen und Möglichkeiten klären.',
-                  icon: <MessageCircle aria-hidden="true" />,
-                },
-                {
-                  href: '/app/emergency',
-                  title: 'Notfall',
-                  text: 'Hinweise und Unterstützung für dringende Anliegen.',
-                  icon: <ShieldCheck aria-hidden="true" />,
-                },
-              ],
-            },
-            {
-              title: 'Deine Hausakte',
-              items: [
-                {
-                  href: '/app/documents',
-                  title: 'Dokumente',
-                  text: 'Pläne, Rechnungen und Nachweise wiederfinden.',
-                  icon: <FileText aria-hidden="true" />,
-                },
-              ],
-            },
-            {
-              title: 'Mein Jahr',
-              items: [
-                {
-                  href: '/app/calendar',
-                  title: 'Anstehende Termine',
-                  text: 'Alle Wartungen und wichtigen Termine im Blick.',
-                  icon: <CalendarDays aria-hidden="true" />,
-                },
-              ],
-              footerLink: {
-                href: '/app/calendar',
-                label: 'Zum Kalender',
-              },
-            },
-          ]}
-        />
-      </>
-    </AppShell>
-  );
+  return <AppShell role="homeowner" active="/app" title="Zuhause">
+    <EHOwnerWelcome imageSrc="/images/marketing/owner-facade-reference.png" caption="Wohnbeispiel · nicht dein hinterlegtes Hausfoto">
+      <EHOwnerPageHeader title="Dein Zuhause" context={context || undefined} text="Offene Entscheidungen, nächste Termine und alles, was dein Haus braucht." />
+    </EHOwnerWelcome>
+    {profile?.onboarding_step && profile.onboarding_step !== 'done' && <EHCallout title="Einrichtung unvollständig"><p>Ergänze die Angaben zu deinem Zuhause.</p><EHButton href="/app/onboarding" variant="secondary">Einrichtung fortsetzen</EHButton></EHCallout>}
+    <EHOwnerOverview main={
+    <EHOwnerSection title="Als Nächstes" action={{href:'/app/jobs',label:'Aufträge ansehen'}}>
+      {items.length ? <EHOwnerRecords label="Offene Entscheidungen und Wartungen" items={items} /> : <EHEmptyState title="Keine offenen Angebote oder Wartungen" text="Neue Angebote und gespeicherte Wartungen erscheinen hier. Deine laufenden Aufträge findest du unter Aufträge." />}
+    </EHOwnerSection>
+    } aside={next ? <EHOwnerSection title="Nächster bestätigter Termin"><EHOwnerRecords label="Nächster bestätigter Termin" items={[{id:String(next.job_id),title:next.title,href:`/app/jobs/${next.job_id}`,detail:ownerDate(next.start_at),meta:next.business_name || 'Betrieb im Auftrag ansehen',status:'Bestätigt',tone:'success',action:'Termin ansehen'}]} /></EHOwnerSection> : undefined} />
+    <EHOwnerComposer><HomeownerHausmeisterComposer starterHint="Zum Beispiel: Die Heizung macht ungewöhnliche Geräusche." /></EHOwnerComposer>
+    <EHOwnerLinks items={[
+      {href:'/app/home',title:'Hausakte',text:'Hausdaten und Geschichte deines Zuhauses.'},
+      {href:'/app/documents',title:'Dokumente',text:'Pläne, Rechnungen und Nachweise.'},
+      {href:'/app/year',title:'Jahresplan',text:'Wartungen und wiederkehrende Aufgaben.'},
+      {href:'/app/calendar',title:'Termine',text:'Vereinbarte Termine und vergangene Besuche.'},
+      {href:'/app/consultation',title:'Beratung',text:'Vorhaben besprechen und Entscheidungen vorbereiten.'},
+      {href:'/app/emergency',title:'Hilfe im Notfall',text:'Sicherheitshinweise und Kontaktwege für dringende Situationen.'},
+    ]} />
+  </AppShell>;
 }

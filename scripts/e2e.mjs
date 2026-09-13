@@ -416,8 +416,8 @@ await fillRegisterField(owner,'firstName','Maria'); await fillRegisterField(owne
 await Promise.all([owner.waitForURL('**/app/onboarding'),owner.getByRole('button',{name:'Kostenlos registrieren'}).last().click()]);
 await waitText(owner,'Damit Partner in deiner Region arbeiten können');
 // Resume works: leaving mid-onboarding and returning keeps the saved step.
-await nav(owner, base+'/app'); await waitText(owner,'Jetzt weiter einrichten');
-await clickAndWaitUrl(owner,owner.getByRole('link',{name:'Jetzt weiter einrichten'}),/\/app\/onboarding$/);
+await nav(owner, base+'/app'); await waitText(owner,'Einrichtung unvollständig');
+await clickAndWaitUrl(owner,owner.getByRole('link',{name:'Einrichtung fortsetzen'}),/\/app\/onboarding$/);
 await waitText(owner,'Damit Partner in deiner Region arbeiten können');
 await strictRetry(owner,()=>owner.getByLabel('Straße und Hausnummer').fill('Gartenweg 12'));
 await clickServerAction(owner,owner.getByRole('button',{name:'Weiter'})); await waitText(owner,'Worum geht es bei deinem Haus?');
@@ -425,9 +425,9 @@ await clickServerAction(owner,owner.getByRole('button',{name:'Weiter'})); await 
 await strictRetry(owner,()=>owner.getByRole('button',{name:'Überspringen'}).click()); await waitText(owner,'Wie dürfen wir dich erreichen?');
 await strictRetry(owner,()=>owner.getByRole('button',{name:'Überspringen'}).click());
 await Promise.all([owner.waitForURL('**/app?onboarding=done'),owner.waitForLoadState('load')]);
-if(await owner.locator('.owner-onboarding-banner').count())throw new Error('Onboarding banner shown after completion');
+if(await owner.getByText('Einrichtung unvollständig').count())throw new Error('Onboarding banner shown after completion');
 await assertNoOverflow(owner,'Mobile customer app');
-await nav(owner, base+'/app'); await waitText(owner,'Was steht bei deinem Haus an?'); await waitText(owner,'Dein nächster Überblick');
+await nav(owner, base+'/app'); await waitText(owner,'Was möchtest du für dein Zuhause klären?'); await waitText(owner,'Als Nächstes');
 // Owner mobile navigation is the Notion drawer; the bottom tab bar is gone on owner mobile.
 const ownerDrawer=owner.locator('.mobile-menu');
 await owner.evaluate(()=>window.scrollTo(0,0));
@@ -469,7 +469,7 @@ await nav(manager, manager.url()); await waitText(manager,'Du bist mit dem Eigen
 await nav(owner, base+`/app/jobs/${contactJobId}`); await waitText(owner,'Thomas Weber'); await waitText(owner,'noch kein Auftrag'); await assertNoOverflow(owner,'Mobile contact detail');
 
 // Direkter Kontakt funktioniert schon ohne Auftrag.
-await owner.getByRole('link',{name:'Nachricht',exact:true}).click(); await waitText(owner,'Meine Ansprechpartner'); await assertNoOverflow(owner,'Mobile contacts');
+await owner.getByRole('link',{name:'Nachricht',exact:true}).click(); await waitText(owner,'Zurück zu deinen Ansprechpartnern'); await assertNoOverflow(owner,'Mobile contacts');
 await owner.getByPlaceholder(/Nachricht an Thomas/).fill('Thomas, kannst du kurz sagen, ob du dir das ansehen würdest?'); await clickServerAction(owner,owner.getByRole('button',{name:'Nachricht senden'}));
 const techCtx=await newE2EContext({viewport:{width:390,height:844}}); const tech=await techCtx.newPage(); trackPage(tech,'provider-contact');
 tech.on('framenavigated',f=>{ if(f===tech.mainFrame()) console.error('E2E-NAV:',JSON.stringify(tech.url())); });
@@ -531,7 +531,7 @@ await nav(owner, owner.url()); await waitText(owner,'Thomas Weber'); await waitT
 await owner.screenshot({path:path.join(artifactsDir,'owner-personal-contact.png'),fullPage:true});
 
 // 6) Derselbe Ansprechpartner bleibt auch nach der späteren Buchung erreichbar.
-await owner.getByRole('link',{name:'Nachricht',exact:true}).click(); await waitText(owner,'Meine Ansprechpartner');
+await owner.getByRole('link',{name:'Nachricht',exact:true}).click(); await waitText(owner,'Zurück zu deinen Ansprechpartnern');
 await owner.getByPlaceholder(/Nachricht an Thomas/).fill('Thomas, bitte kurz Bescheid sagen, bevor du losfährst.'); await clickServerAction(owner,owner.getByRole('button',{name:'Nachricht senden'}));
 await nav(tech, base+'/pro/messages'); await waitText(tech,'Thomas, bitte kurz Bescheid');
 await tech.getByPlaceholder(/Nachricht an Maria/).fill('Gerne, ich melde mich etwa 30 Minuten vorher.'); await clickServerAction(tech,tech.getByRole('button',{name:'Nachricht senden'}));
@@ -548,7 +548,7 @@ for(let attempt=0;attempt<2;attempt++){ await nav(owner, base+invoiceHref,{timeo
 await waitText(owner,'Rechnungsbetrag'); await waitText(owner,'Gartenbau Müller'); await assertNoOverflow(owner,'Mobile invoice');
 await clickAndWaitUrl(owner,owner.getByRole('button',{name:'Rechnung bezahlen'}),/error=/); await waitText(owner,'Onlinezahlung ist gerade nicht verfügbar'); if(!(await owner.getByRole('button',{name:'Rechnung bezahlen'}).isVisible()))throw new Error('Unavailable payment path mutated invoice state');
 await nav(tech, base+`/pro/jobs/${jobId}`); const documentSection=tech.locator('form').filter({has:tech.getByLabel('Datei')}).first(); await documentSection.waitFor(); await documentSection.getByLabel('Titel').fill('Leistungsnachweis Heckenschnitt'); await documentSection.getByLabel('Dokumenttyp').selectOption('report'); await documentSection.getByLabel('Datei').setInputFiles({name:'nachweis.pdf',mimeType:'application/pdf',buffer:Buffer.from('%PDF-1.4\n% Einfach Hausen Test\n')}); await clickServerAction(tech,documentSection.getByRole('button',{name:'Dokument hochladen'}));
-await nav(owner, base+'/app/messages'); await waitText(owner,'Thomas Weber'); await waitText(owner,'Bestehende Kundenbeziehung');
+await nav(owner, base+'/app/messages'); await waitText(owner,'Thomas Weber'); const docRow=owner.locator('a[href*="/app/messages?contact="]').filter({hasText:'Thomas Weber'}).first(); await docRow.click(); await waitText(owner,'Bestehende Kundenbeziehung');
 await nav(owner, base+'/app/documents'); await waitText(owner,'Leistungsnachweis Heckenschnitt');
 
 // 7a) Notification Center: server-side read-state sync, per-item toggles, pagination chrome.
@@ -573,19 +573,19 @@ await assertNoOverflow(manager,'Mobile notification center');
 await nav(owner, base+'/app/home'); await waitText(owner,'Mein Haus'); await owner.locator('#hausprofil > summary').click(); await assertNoOverflow(owner,'Mobile house file'); await owner.getByLabel('Haustyp').selectOption('Einfamilienhaus'); await owner.getByLabel('Baujahr').fill('2004'); await owner.getByLabel('Wohnfläche (m²)').fill('145'); await owner.getByLabel('Grundstück (m²)').fill('620'); await clickServerAction(owner,owner.getByRole('button',{name:'Hausprofil speichern'}));
 await owner.locator('#technik-anlegen > summary').click(); const assetForm=owner.locator('form').filter({has:owner.locator('select[name="kind"]')}).first(); await assetForm.getByLabel('Bereich').selectOption('pv'); await assetForm.locator('input[name="name"]').fill('PV-Anlage 10 kWp'); await clickServerAction(owner,assetForm.getByRole('button',{name:'Zur Hausakte hinzufügen'})); await waitText(owner,'PV-Anlage und Ertrag prüfen');
 await nav(owner, base+'/app/home/history'); await owner.getByLabel('Bereich').selectOption({label:'Dach & Fassade'}); await owner.getByLabel('Datum').fill('2025-06-12'); await owner.getByLabel('Was wurde gemacht?').fill('Dachsanierung 2025'); await owner.getByLabel('Firma').fill('Gartenbau Müller'); await owner.getByLabel('E-Mail Handwerker').fill(providerEmail); await owner.getByLabel('Kosten €').fill('18500'); await clickServerAction(owner,owner.getByRole('button',{name:'In Hausakte speichern'})); await waitText(owner,'Dachsanierung 2025'); await waitText(owner,'Partner verbunden'); await assertNoOverflow(owner,'Mobile house history');
-await nav(owner, base+'/app/messages'); await waitText(owner,'Dach'); await waitText(owner,'Garten'); const thomasRow=owner.locator('a[href*="/app/messages?contact="]').filter({hasText:'Thomas Weber'}).first(); await thomasRow.click(); await owner.locator('details').filter({has:owner.getByText('Bereich ändern')}).first().locator('summary').click(); await owner.getByLabel('Eigener Bereich (optional)').fill('Hecke & Bäume'); await clickAndWaitUrl(owner,owner.getByRole('button',{name:'Bereich speichern'}),/category=saved/); await waitText(owner,'Hecke & Bäume');
+await nav(owner, base+'/app/messages'); await waitText(owner,'Garten & Außen'); const thomasRow=owner.locator('a[href*="/app/messages?contact="]').filter({hasText:'Thomas Weber'}).first(); await thomasRow.click(); await owner.locator('details').filter({has:owner.getByText('Bereich ändern')}).first().locator('summary').click(); await owner.getByLabel('Eigener Bereich (optional)').fill('Hecke & Bäume'); await clickAndWaitUrl(owner,owner.getByRole('button',{name:'Bereich speichern'}),/category=saved/); await waitText(owner,'Hecke & Bäume');
 await nav(owner, base+`/app/year?year=${new Date().getFullYear()+2}`); await waitText(owner,'Mein Jahr'); await waitText(owner,'PV-Anlage und Ertrag prüfen'); await assertNoOverflow(owner,'Mobile year plan');
 await nav(owner, base+'/app/plans'); await waitText(owner,'Monatliche Mitgliedschaften'); await waitText(owner,'Haus Jahrespflege'); await waitText(owner,'Energie & Technik Check'); await assertNoOverflow(owner,'Mobile plans');
 await nav(owner, base+'/app/jobs?view=completed');
 if(!owner.url().includes('view=completed'))throw new Error('completed view param lost');
 {
   const completedBody=await owner.locator('body').innerText();
-  if(completedBody.includes('Noch keine abgeschlossenen Aufträge')){await waitText(owner,'Abgeschlossene Aufträge erscheinen hier');}
+  if(completedBody.includes('Keine Aufträge in dieser Ansicht')){await waitText(owner,'Abgeschlossene Aufträge');}
   else{
-    const completedList=owner.locator('section[aria-labelledby="owner-orders-current-heading"]');
-    await waitForDomStable(owner,'section[aria-labelledby="owner-orders-current-heading"]');
+    const completedList=owner.locator('ul[aria-label="Abgeschlossene Aufträge"]');
+    await waitForDomStable(owner,'ul[aria-label="Abgeschlossene Aufträge"]');
     const listText=await completedList.innerText();
-    if(/Angebot liegt vor|Angebote liegen vor/.test(listText))throw new Error('Active quoted job leaked into completed view');
+    if(/Angebot liegt vor|Angebote liegen vor|Angebotsstatus prüfen/.test(listText))throw new Error('Active quoted job leaked into completed view');
     await completedList.getByText('Erledigt').first().waitFor();
   }
 }
@@ -616,12 +616,12 @@ await clickAndWaitUrl(buyer,buyer.getByRole('button',{name:'Weiter'}),/\/app\/on
 await waitText(buyer,'Wie dürfen wir dich erreichen?');
 await buyer.getByRole('button',{name:'Überspringen'}).click();
 await Promise.all([buyer.waitForURL('**/app?onboarding=done'),buyer.waitForLoadState('load')]);
-await waitText(buyer,'Was steht bei deinem Haus an?');
-if(await buyer.locator('.owner-onboarding-banner').count())throw new Error('Onboarding banner still shown after completion');
-await nav(buyer, buyer.url()); if(await buyer.locator('.owner-onboarding-banner').count())throw new Error('Onboarding state did not persist after reload');
+await waitText(buyer,'Was möchtest du für dein Zuhause klären?');
+if(await buyer.getByText('Einrichtung unvollständig').count())throw new Error('Onboarding banner still shown after completion');
+await nav(buyer, buyer.url()); if(await buyer.getByText('Einrichtung unvollständig').count())throw new Error('Onboarding state did not persist after reload');
 // 12) Hausakte kann kontrolliert übergeben werden, private Vorgänge bleiben beim bisherigen Eigentümer.
 await nav(owner, base+'/app/home/history'); await owner.getByLabel('E-Mail des Käufers').fill(buyerEmail); await clickAndWaitUrl(owner,owner.getByRole('button',{name:'Übergabe vorbereiten'}),/transfer=/); const transferToken=new URL(owner.url()).searchParams.get('transfer'); if(!transferToken)throw new Error('House transfer token missing');
-await nav(buyer, base+'/app'); await waitText(buyer,'Was steht bei deinem Haus an?'); console.error('E2EDIAG buyer still authed before transfer accept');
+await nav(buyer, base+'/app'); await waitText(buyer,'Was möchtest du für dein Zuhause klären?'); console.error('E2EDIAG buyer still authed before transfer accept');
 await waitForDomStable(buyer,'#owner-main-content',1);
 const buyerCookies=await buyerCtx.cookies(base+'/'); console.error('E2EDIAG buyer cookies:',JSON.stringify(buyerCookies.map(c=>c.name)));
 await nav(buyer, base+`/transfer/${transferToken}`); await waitText(buyer,'Hausakte übernehmen');

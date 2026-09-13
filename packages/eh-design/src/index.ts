@@ -18,3 +18,5 @@ export * from "./documents";
 export * from "./assistant";
 
 export * from "./property-overview";
+
+export * from "./workspace-owner";

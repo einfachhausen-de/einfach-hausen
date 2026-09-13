@@ -54,7 +54,8 @@
     "test:deletion-regression": "node scripts/t0144-deletion-regression.mjs",
     "typecheck": "next typegen && tsc --noEmit",
     "test:flags": "node scripts/feature-flag-lifecycle.mjs",
-    "test:inventory": "node scripts/data-inventory-check.mjs"
+    "test:inventory": "node scripts/data-inventory-check.mjs",
+    "test:owner-coherence": "node --experimental-strip-types scripts/eh-owner-coherence.test.mjs"
   },
   "dependencies": {
     "@capacitor/keyboard": "^8.0.5",

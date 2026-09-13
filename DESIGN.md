@@ -223,3 +223,14 @@ Ihre Styles liegen ausschließlich in `packages/eh-design/src/styles.module.css`
 Die bestehende globale Owner-Shell bleibt unabhängig davon kanonisch. Das Aufträge-Referenzbild darf nicht benutzt werden, um pro Route unterschiedliche Sidebars oder Topbars zu erfinden.
 
 Desktop priorisiert die horizontale, ruhige Listenstruktur. Tablet und Mobile dürfen die Informationen stapeln, ohne Inhalte oder Aktionen zu entfernen. Horizontaler Seiten-Overflow ist nicht zulässig.
+
+
+## Owner-Kohärenz 2026-09-13 — Operator-Korrektur, Abnahme und Deploy ausstehend
+
+Der Operator hat am 13.09.2026 eine Korrektur der vier Eigentümer-Routen `/app`, `/app/jobs`, `/app/calendar` und `/app/messages` angeordnet. Sie ersetzt die Kompositionen aus „Owner-Dashboard-Komposition 2026-09-11“ und „Owner-Aufträge 2026-09-11“ ausschließlich für diese vier Routen; alle übrigen Flächen behalten ihre bisherigen Freigaben. Weder eine visuelle Abnahme noch ein Deploy sind bisher erfolgt; Screenshots und Review stehen aus.
+
+Leitlinien der Korrektur: gemeinsamer linker Blattrand, maximal 1320 px Inhaltsbreite, ein geteilter Owner-Kopf (44 px Desktop- / 32 px Mobile-H1, kurze Beschreibung, Aktion rechts), ein Profileintrag in der Sidebar, Benachrichtigungen plus Hausmanager in der Toolbar aller vier Routen. Inhalte stammen aus echten `jobs`, `quotes`, `appointments`, `provider_profiles`, `job_photos`, `homeowner_contacts` und Nachrichten; keine Mockdaten im Produkt.
+
+Kanonische Bausteine in `packages/eh-design/src/workspace-owner.tsx` (neue Datei, bestehende Primitive unverändert): `EHOwnerPageHeader`, `EHOwnerSection`, `EHOwnerRecords` (+ Typ `EHOwnerRecord`), `EHOwnerFilters`, `EHOwnerSearch`, `EHOwnerLinks`, `EHOwnerWelcome`, `EHOwnerComposer`, `EHOwnerContacts`. Export über `packages/eh-design/src/index.ts` (`export * from "./workspace-owner"`), Styles als einmaliger `owner*`-Anhang in `packages/eh-design/src/styles.module.css`. Datums- und Wartungsdarstellung in `src/lib/owner-format.ts` (`ownerInstant` liest SQLite-Zeitstempel als UTC, `ownerDate` formatiert nach Europe/Berlin, `ownerMaintenanceState` vergleicht Kalendertage).
+
+Diese Korrektur erlaubt die Aktualisierung des versiegelten Designkerns ausschließlich für die hier dokumentierten Owner-Bausteine. Design-Guard, Debt-Baseline, übrige Lock-Einträge und Prüfskripte bleiben unverändert; die notwendige Lock-Aktualisierung (drei Einträge) wird der Designautorität als Vorschlag vorgelegt, nicht selbst versiegelt.
