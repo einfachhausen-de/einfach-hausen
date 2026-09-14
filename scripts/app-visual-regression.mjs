@@ -28,6 +28,7 @@ import pixelmatch from 'pixelmatch';
 import { createClient } from '@supabase/supabase-js';
 import { createServerClient } from '@supabase/ssr';
 import { importTs } from './lib/import-ts.mjs';
+import { createIdentity as createTestIdentity, deleteIdentity as deleteTestIdentity } from './lib/identity.mjs';
 
 const root = process.cwd();
 const update = process.argv.includes('--update-baselines');
@@ -77,14 +78,10 @@ async function waitForServer(url, timeoutMs = 90000) {
   throw new Error(`Server not ready: ${url}`);
 }
 
+const identityCfg = { supabaseUrl, serviceKey };
+
 async function createIdentity(email, password) {
-  const response = await fetch(`${supabaseUrl}/auth/v1/admin/users`, {
-    method: 'POST',
-    headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, password, email_confirm: true, user_metadata: { app_visual: true } }),
-  });
-  const data = await response.json();
-  if (!data.id) throw new Error(`identity create failed: ${JSON.stringify(data).slice(0, 200)}`);
+  const id = await createTestIdentity(identityCfg, email, password, { app_visual: true });
   const client = createClient(supabaseUrl, anonKey, { auth: { persistSession: false, autoRefreshToken: false } });
   const signed = await client.auth.signInWithPassword({ email, password });
   if (signed.error || !signed.data.session) throw new Error(`identity sign-in failed: ${signed.error?.message || email}`);
@@ -98,14 +95,10 @@ async function createIdentity(email, password) {
   const session = signed.data.session;
   const set = await serverClient.auth.setSession({ access_token: session.access_token, refresh_token: session.refresh_token });
   if (set.error || !cookies.length) throw new Error(`SSR cookie session failed: ${set.error?.message || email}`);
-  return { id: data.id, email, cookies };
+  return { id, email, cookies };
 }
 
-async function deleteIdentity(identity) {
-  await fetch(`${supabaseUrl}/auth/v1/admin/users/${encodeURIComponent(identity.id)}`, {
-    method: 'DELETE', headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` },
-  });
-}
+const deleteIdentity = (identity) => deleteTestIdentity(identityCfg, identity.id);
 
 if (!fs.existsSync(path.join(root, '.next', 'BUILD_ID'))) {
   console.error('No production build — run npm run build (release-gate builds it).');

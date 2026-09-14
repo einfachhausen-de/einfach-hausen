@@ -10,6 +10,7 @@ import path from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { spawn } from 'node:child_process';
 import { importTs } from './lib/import-ts.mjs';
+import { createIdentity as createTestIdentity } from './lib/identity.mjs';
 
 const root = process.cwd();
 const supabaseUrl = process.env.SUPABASE_URL || 'https://supabase.delqhi.com';
@@ -59,15 +60,10 @@ const ownerRow = db.prepare('SELECT id,email FROM users WHERE id=?').get(fixture
 const providerRow = db.prepare('SELECT id,email FROM users WHERE id=?').get(fixture.providerId);
 
 const password = `A11yM!${randomUUID().replaceAll('-', '').slice(0, 14)}`;
+// Shared helper: an identity left behind by a cancelled run would otherwise
+// break every later run with "email_exists".
 async function createIdentity(email) {
-  const response = await fetch(`${supabaseUrl}/auth/v1/admin/users`, {
-    method: 'POST',
-    headers: { apikey: svc, Authorization: `Bearer ${svc}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, password, email_confirm: true, user_metadata: { a11y_matrix: true } }),
-  });
-  const data = await response.json();
-  if (!data.id) throw new Error(`identity create failed: ${JSON.stringify(data).slice(0, 160)}`);
-  return data.id;
+  return createTestIdentity({ supabaseUrl, serviceKey: svc }, email, password, { a11y_matrix: true });
 }
 const ownerId = await createIdentity(ownerRow.email);
 const providerId = await createIdentity(providerRow.email);
