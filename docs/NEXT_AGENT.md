@@ -1,3 +1,5 @@
+> **COUNTS+ICONS 2026-09-14 LIVE (136fbf1, PR #107):** Alle 17 Bereiche mit Lucide-Icon + echter Anzahl. Gate 15/15, Smoke 18/18. Branch geraeumt.
+
 > **CMD-PALETTE 2026-09-14 LIVE (55a1861, PR #106):** Suche ist Command-Menue (Cmd+K/Cmd+S, Pfeile+Enter, Esc). Gate 15/15, Smoke 18/18. Branch geraeumt.
 
 > **TAGESABSCHLUSS 2026-09-14 ALLES LIVE:** PRs #103/#104/#105 gemergt+deployed, GitHub nur main, 4 Hosts je 1 Worktree, Reste als archive-Tags, Tests 20/20. Offen: Gina-Abnahmen, Issues #10/#11/#12/#33, Runner.
