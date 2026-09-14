@@ -7,7 +7,7 @@ import { db } from '@/lib/db';
 import { CONTACT_DIRECTORY_CATEGORIES, contactDirectoryCategory, contactDirectorySubcategory } from '@/lib/contact-directory-taxonomy';
 import { createContactDirectoryStore } from '@/lib/contact-directory-store';
 import { OwnerMessageComposer } from './thread-client';
-import { submitDirectoryAction } from './directory-actions';
+import { submitDirectoryAction, submitDirectoryShortcut } from './directory-actions';
 
 type ActiveContact = { contact_user_id: number; provider_id: number; first_name: string; last_name: string; business_name: string; job_title: string; phone: string | null; email: string; unread_count: number };
 type ThreadMessage = { source: 'direct' | 'job'; id: number; sender_id: number; body: string; read_at: string | null; created_at: string; context_title: string | null; job_id: number | null };
@@ -96,6 +96,6 @@ export default async function Messages({ searchParams }: { searchParams: Promise
     composer={<OwnerMessageComposer contactUserId={active.contact_user_id} peerName={active.first_name} unreadCount={Number(active.unread_count || 0)} />} />
     : entry?.platformUserId ? <EHCallout title="Aktuell keine aktive Nachrichtenverbindung"><p>Der gespeicherte Kontakt und seine Zuordnungen bleiben erhalten. Ein App-Chat ist nur bei einer aktiven Partnerverbindung verfügbar.</p></EHCallout> : undefined;
   return <AppShell role="homeowner" active="/app/messages" title="Ansprechpartner" subtitle="Dein persönliches Netzwerk fürs Haus">
-    <EHContactWorkspace categories={CONTACT_DIRECTORY_CATEGORIES} contacts={contacts} mode={mode} mainId={main?.id} subcategoryId={sub?.id} entryId={entryId} query={text('q').slice(0, 200)} requestId={randomUUID()} notice={text('saved') === '1' ? 'Gespeichert. Dein Kontakt und alle Zuordnungen sind aktuell.' : undefined} action={submitDirectoryAction} conversation={mode === 'detail' ? conversation : undefined} />
+    <EHContactWorkspace categories={CONTACT_DIRECTORY_CATEGORIES} contacts={contacts} mode={mode} mainId={main?.id} subcategoryId={sub?.id} entryId={entryId} query={text('q').slice(0, 200)} requestId={randomUUID()} notice={text('saved') === '1' ? 'Gespeichert. Dein Kontakt und alle Zuordnungen sind aktuell.' : undefined} action={submitDirectoryAction} shortcutAction={submitDirectoryShortcut} conversation={mode === 'detail' ? conversation : undefined} />
   </AppShell>;
 }

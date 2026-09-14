@@ -296,3 +296,5 @@ addColumnIfMissing('user_settings','automation_prefs',"automation_prefs TEXT NOT
 
 // Non-destructive address-book registry and legacy contact mirror.
 execWithRetry(() => initializeContactDirectory(db));
+addColumnIfMissing('homeowner_contact_entries','is_pinned','is_pinned INTEGER NOT NULL DEFAULT 0');
+addColumnIfMissing('homeowner_contact_entries','is_emergency','is_emergency INTEGER NOT NULL DEFAULT 0');

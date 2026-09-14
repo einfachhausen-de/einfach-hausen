@@ -53,3 +53,25 @@ export async function submitDirectoryAction(_previous: EHDirectoryFormState, dat
   // NEXT_REDIRECT must escape the action, not enter its database-error catch.
   redirect(`/app/messages?${params}`);
 }
+export async function submitDirectoryShortcut(data: FormData): Promise<void> {
+  const user = await requireUser('homeowner');
+  const value = (key: string) => typeof data.get(key) === 'string' ? String(data.get(key)) : '';
+  const raw = value('entryId');
+  const entryId = /^\d+$/.test(raw) && Number.isSafeInteger(Number(raw)) ? Number(raw) : -1;
+  const intent = value('intent');
+  const from = value('from');
+  const back = from.startsWith('/app/messages') ? from : '/app/messages';
+  const store = createContactDirectoryStore(db);
+  if (entryId > 0 && ['pin', 'unpin', 'emergency-on', 'emergency-off'].includes(intent)) {
+    try {
+      if (intent === 'pin') store.setFlags({ ownerId: user.id, entryId, pinned: true });
+      else if (intent === 'unpin') store.setFlags({ ownerId: user.id, entryId, pinned: false });
+      else if (intent === 'emergency-on') store.setFlags({ ownerId: user.id, entryId, emergency: true });
+      else store.setFlags({ ownerId: user.id, entryId, emergency: false });
+    } catch (error) {
+      console.error('Contact directory shortcut failed:', error instanceof Error ? error.name : 'UnknownError');
+    }
+  }
+  revalidatePath('/app/messages');
+  redirect(back);
+}

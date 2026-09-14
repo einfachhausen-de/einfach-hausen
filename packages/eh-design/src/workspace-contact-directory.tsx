@@ -4,9 +4,10 @@ import { useActionState, useEffect, useRef, useState, type ReactNode } from "rea
 import s from "./styles.module.css";
 
 export type EHDirectoryCategory = { readonly id: string; readonly label: string; readonly subcategories: readonly { readonly id: string; readonly label: string }[] };
-export type EHDirectoryContact = { id: number; platformUserId: number | null; name: string; company: string; phone: string; email: string; legacyCategory: string; revision: number; subcategoryIds: string[]; unreadCount?: number };
+export type EHDirectoryContact = { id: number; platformUserId: number | null; name: string; company: string; phone: string; email: string; legacyCategory: string; revision: number; subcategoryIds: string[]; unreadCount?: number; isPinned?: boolean; isEmergency?: boolean };
 export type EHDirectoryFormState = { error?: string; fieldErrors?: Record<string, string>; duplicates?: EHDirectoryContact[] };
 export type EHDirectoryAction = (state: EHDirectoryFormState, data: FormData) => Promise<EHDirectoryFormState>;
+export type EHDirectoryShortcutAction = (data: FormData) => Promise<void>;
 export type EHDirectoryMode = "categories" | "subcategories" | "contacts" | "manage" | "detail" | "new" | "assign" | "edit";
 
 function directoryHref(values: { main?: string; sub?: string; entry?: number; mode?: string; q?: string }) {
@@ -26,10 +27,64 @@ function dialHref(phone: string) {
   return dial && /\d/.test(dial) ? `tel:${dial}` : undefined;
 }
 
-export function EHContactWorkspace({ categories, contacts, mode, mainId, subcategoryId, entryId, query = "", requestId, notice, action, conversation }: {
+function ShortcutRow({ contact }: { contact: EHDirectoryContact }) {
+  const phoneHref = dialHref(contact.phone);
+  return <li key={contact.id} data-shortcut-entry={contact.id}>
+    <a className={s.directoryContactLink} href={directoryHref({ entry: contact.id })}>
+      <div><strong>{contact.name}</strong>{contact.company && contact.company !== contact.name && <p>{contact.company}</p>}
+        {!phoneHref && <p className={s.directoryServices}>Keine Telefonnummer hinterlegt</p>}
+      </div><DirectoryArrow />
+    </a>
+    {phoneHref && <a className={s.directoryInlineAction} href={phoneHref} aria-label={`${contact.name} anrufen`}>Anrufen</a>}
+  </li>;
+}
+
+export function EHDirectoryShortcuts({ contacts }: { contacts: readonly EHDirectoryContact[] }) {
+  const pinned = contacts.filter(contact => contact.isPinned);
+  const emergency = contacts.filter(contact => contact.isEmergency);
+  return <>
+    <section className={s.ownerSection} aria-labelledby="directory-pinned-title">
+      <header><h2 id="directory-pinned-title">Angeheftete Kontakte</h2><a href="/app/messages?mode=manage">Kontakte verwalten</a></header>
+      {pinned.length ? <ul className={s.directoryContacts} aria-label="Angeheftete Kontakte">{pinned.map(contact => <ShortcutRow key={contact.id} contact={contact} />)}</ul>
+        : <p className={s.directoryHelp}>Noch keine Kontakte angeheftet. Öffne einen gespeicherten Kontakt und wähle „Anheften“.</p>}
+    </section>
+    <section className={s.ownerSection} aria-labelledby="directory-emergency-title">
+      <header><h2 id="directory-emergency-title">Für den Notfall</h2><a href="/app/emergency">Notfall-Bereich öffnen</a></header>
+      {emergency.length ? <ul className={s.directoryContacts} aria-label="Notfall-Kontakte">{emergency.map(contact => <ShortcutRow key={contact.id} contact={contact} />)}</ul>
+        : <p className={s.directoryHelp}>Noch keine Notfall-Kontakte markiert. Bei unmittelbarer Gefahr: 112.</p>}
+    </section>
+  </>;
+}
+
+export function EHDirectoryCommandSearch({ categories, contacts }: { categories: readonly EHDirectoryCategory[]; contacts: readonly EHDirectoryContact[] }) {
+  const [value, setValue] = useState("");
+  const terms = value.trim().toLocaleLowerCase("de").split(/\s+/).filter(Boolean);
+  const hit = (text: string) => terms.every(term => text.toLocaleLowerCase("de").includes(term));
+  const matchingMains = categories.filter(category => terms.length > 0 && hit(category.label));
+  const matchingSubs = categories.flatMap(category => category.subcategories.map(sub => ({ main: category, sub }))).filter(item => terms.length > 0 && (hit(item.sub.label) || hit(item.main.label))).slice(0, 6);
+  const matchingContacts = terms.length > 0 ? contacts.filter(contact => hit(`${contact.name} ${contact.company} ${contact.email}`)).slice(0, 6) : [];
+  const commands = terms.length > 0 ? [
+    { id: "manage", label: "Kontakte verwalten", href: "/app/messages?mode=manage", text: "kontakte verwalten bearbeiten" },
+    { id: "emergency", label: "Notfallkontakte öffnen", href: "/app/emergency", text: "notfall notdienst notfallkontakte öffnen" },
+  ].filter(command => hit(command.text)) : [];
+  const empty = terms.length > 0 && !matchingMains.length && !matchingSubs.length && !matchingContacts.length && !commands.length;
+  return <div className={s.directorySearch} role="search">
+    <label htmlFor="directory-command-search">Kontakte und Bereiche suchen</label>
+    <div><input id="directory-command-search" name="q" type="search" value={value} onChange={event => setValue(event.target.value)} placeholder="Name, Betrieb oder Befehl" autoComplete="off" /></div>
+    {terms.length > 0 && <ul className={s.directoryContacts} aria-label="Suchergebnisse">
+      {commands.map(command => <li key={command.id}><a className={s.directoryContactLink} href={command.href}><div><strong>{command.label}</strong></div><DirectoryArrow /></a></li>)}
+      {matchingMains.map(category => <li key={category.id}><a className={s.directoryContactLink} href={directoryHref({ main: category.id })}><div><strong>{category.label}</strong></div><DirectoryArrow /></a></li>)}
+      {matchingSubs.map(item => <li key={`${item.main.id}:${item.sub.id}`}><a className={s.directoryContactLink} href={directoryHref({ main: item.main.id, sub: item.sub.id })}><div><strong>{item.sub.label}</strong><p>{item.main.label}</p></div><DirectoryArrow /></a></li>)}
+      {matchingContacts.map(contact => <ShortcutRow key={contact.id} contact={contact} />)}
+      {empty && <li><p className={s.directoryHelp}>Keine Treffer. Versuche einen anderen Begriff.</p></li>}
+    </ul>}
+  </div>;
+}
+
+export function EHContactWorkspace({ categories, contacts, mode, mainId, subcategoryId, entryId, query = "", requestId, notice, action, shortcutAction, conversation }: {
   categories: readonly EHDirectoryCategory[]; contacts: EHDirectoryContact[]; mode: EHDirectoryMode;
   mainId?: string; subcategoryId?: string; entryId?: number; query?: string; requestId: string;
-  notice?: string; action: EHDirectoryAction; conversation?: ReactNode;
+  notice?: string; action: EHDirectoryAction; shortcutAction: EHDirectoryShortcutAction; conversation?: ReactNode;
 }) {
   const main = categories.find(item => item.id === mainId);
   const sub = main?.subcategories.find(item => item.id === subcategoryId);
@@ -54,6 +109,8 @@ export function EHContactWorkspace({ categories, contacts, mode, mainId, subcate
       {mode === "detail" && entry && entry.platformUserId === null && <a className={s.directorySecondary} href={directoryHref({ entry: entry.id, main: main?.id, sub: sub?.id, mode: "edit", q: query })}>Kontakt bearbeiten</a>}
     </header>
     {notice && <p className={s.directoryNotice} role="status">{notice}</p>}
+    {mode === "categories" && <EHDirectoryCommandSearch categories={categories} contacts={contacts} />}
+    {mode === "categories" && <EHDirectoryShortcuts contacts={contacts} />}
     {mode === "categories" && <nav aria-label="Hauptkategorien"><ul className={s.directoryCategories}>
       {categories.map(category => <li key={category.id}><a href={directoryHref({ main: category.id })} data-main-category={category.id}><span>{category.label}</span><DirectoryArrow /></a></li>)}
     </ul></nav>}
@@ -86,6 +143,20 @@ export function EHContactWorkspace({ categories, contacts, mode, mainId, subcate
     </>}
     {mode === "detail" && entry && <>
       <a className={s.directoryBack} href={sub ? directoryHref({ main: main?.id, sub: sub.id, q: query }) : directoryHref({ mode: "manage", q: query })}>Zurück zur Kontaktliste</a>
+    {mode === "detail" && entry && <div>
+      <form action={shortcutAction}>
+        <input type="hidden" name="intent" value={entry.isPinned ? "unpin" : "pin"} />
+        <input type="hidden" name="entryId" value={String(entry.id)} />
+        <input type="hidden" name="from" value={directoryHref({ entry: entry.id, main: main?.id, sub: sub?.id, q: query })} />
+        <button className={s.directorySecondary} type="submit">{entry.isPinned ? "Entheften" : "Anheften"}</button>
+      </form>
+      <form action={shortcutAction}>
+        <input type="hidden" name="intent" value={entry.isEmergency ? "emergency-off" : "emergency-on"} />
+        <input type="hidden" name="entryId" value={String(entry.id)} />
+        <input type="hidden" name="from" value={directoryHref({ entry: entry.id, main: main?.id, sub: sub?.id, q: query })} />
+        <button className={s.directorySecondary} type="submit">{entry.isEmergency ? "Kein Notfall-Kontakt" : "Als Notfall-Kontakt"}</button>
+      </form>
+    </div>}
       <div className={s.directoryDetail}>
         <section aria-labelledby="contact-reachability"><h2 id="contact-reachability">Kontaktdaten</h2><dl className={s.directoryData}>
           <div><dt>Telefon</dt><dd>{dialHref(entry.phone) ? <a href={dialHref(entry.phone)}>{entry.phone}</a> : "Nicht hinterlegt"}</dd></div>
