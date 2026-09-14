@@ -145,10 +145,19 @@ try {
         }
         // Cleanup ephemeral identity (best effort; response gives the id on create —
         // we resolve by email via admin list to stay independent of form internals).
+        // GoTrue's admin list-users reads only filter/page/per_page, so `?email=` is
+        // ignored; page through and match the exact address client-side, otherwise a
+        // user beyond the first page would never be cleaned up.
         try {
-          const listResponse = await fetch(`${supabaseUrl}/auth/v1/admin/users?email=${encodeURIComponent(email)}`, { headers: { apikey: svc, Authorization: `Bearer ${svc}` } });
-          const listData = await listResponse.json();
-          identityId = listData?.users?.find((u) => u.email === email)?.id || '';
+          const wanted = String(email).toLowerCase();
+          for (let page = 1; page <= 20 && !identityId; page += 1) {
+            const listResponse = await fetch(`${supabaseUrl}/auth/v1/admin/users?page=${page}&per_page=1000`, { headers: { apikey: svc, Authorization: `Bearer ${svc}` } });
+            if (!listResponse.ok) break;
+            const listData = await listResponse.json().catch(() => ({}));
+            const users = Array.isArray(listData?.users) ? listData.users : [];
+            identityId = users.find((u) => String(u.email || '').toLowerCase() === wanted)?.id || '';
+            if (users.length < 1000) break;
+          }
           if (identityId) await fetch(`${supabaseUrl}/auth/v1/admin/users/${identityId}`, { method: 'DELETE', headers: { apikey: svc, Authorization: `Bearer ${svc}` } });
         } catch {}
       }

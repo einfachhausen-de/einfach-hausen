@@ -164,8 +164,23 @@ for (const vp of [{ w: 390, h: 844 }, { w: 736, h: 1024 }]) {
 }
 // cleanup supabase identity
 try {
-  const list = await (await fetch(`${supabaseUrl}/auth/v1/admin/users?email=${encodeURIComponent(ownerEmail)}`, { headers: { apikey: supabaseServiceKey, Authorization: `Bearer ${supabaseServiceKey}` } })).json();
-  for (const u of (list.users || [])) await fetch(`${supabaseUrl}/auth/v1/admin/users/${encodeURIComponent(u.id)}`, { method: 'DELETE', headers: { apikey: supabaseServiceKey, Authorization: `Bearer ${supabaseServiceKey}` } });
+  // GoTrue's admin list-users endpoint reads only filter/page/per_page - there
+  // is no `email` query parameter, so `?email=` is ignored and returns the first
+  // page of ALL users. Deleting that page would remove unrelated identities
+  // (including the shared demo accounts). Page through and match the exact
+  // address client-side instead.
+  const wanted = String(ownerEmail).toLowerCase();
+  for (let page = 1; page <= 20; page += 1) {
+    const res = await fetch(`${supabaseUrl}/auth/v1/admin/users?page=${page}&per_page=1000`, { headers: { apikey: supabaseServiceKey, Authorization: `Bearer ${supabaseServiceKey}` } });
+    if (!res.ok) break;
+    const payload = await res.json().catch(() => ({}));
+    const users = Array.isArray(payload.users) ? payload.users : [];
+    for (const u of users) {
+      if (String(u.email || '').toLowerCase() !== wanted) continue;
+      await fetch(`${supabaseUrl}/auth/v1/admin/users/${encodeURIComponent(u.id)}`, { method: 'DELETE', headers: { apikey: supabaseServiceKey, Authorization: `Bearer ${supabaseServiceKey}` } });
+    }
+    if (users.length < 1000) break;
+  }
 } catch {}
 await browser.close();
 server.kill('SIGKILL');

@@ -33,17 +33,43 @@ const buyerEmail=`buyer-${stamp}@example.test`;
 let server;
 let browser;
 const e2eIdentityEmails=[providerEmail,techEmail,ownerEmail,buyerEmail];
-async function deleteE2eIdentities(){
-  for(const email of e2eIdentityEmails){
-    try{
-      const list=await fetch(`${supabaseUrl}/auth/v1/admin/users?email=${encodeURIComponent(email)}`,{headers:{apikey:supabaseServiceKey,Authorization:`Bearer ${supabaseServiceKey}`}});
-      if(!list.ok)continue;
-      const payload=await list.json().catch(()=>({}));
-      for(const user of (payload.users||[])){
-        await fetch(`${supabaseUrl}/auth/v1/admin/users/${encodeURIComponent(user.id)}`,{method:'DELETE',headers:{apikey:supabaseServiceKey,Authorization:`Bearer ${supabaseServiceKey}`}});
-      }
-    }catch{}
+// GoTrue's admin list-users endpoint reads ONLY filter/page/per_page - there is
+// no `email` query parameter (see supabase/auth internal/api/admin.go,
+// adminUsers). A `?email=` filter is therefore silently ignored and the call
+// returns the first page of ALL users. Deleting that page wiped every identity
+// in the shared Supabase project, including those of the parallel
+// browser-matrix jobs: chromium finished first, its cleanup removed the users
+// firefox/webkit were still using, and both then failed mid-onboarding with
+// "User from sub claim in JWT does not exist".
+// Page through and match the exact address client-side instead - the same
+// pattern scripts/seed-demo-users.mjs already uses for findUser().
+async function listSupabaseUsers(){
+  const out=[];
+  for(let page=1;page<=20;page+=1){
+    const res=await fetch(`${supabaseUrl}/auth/v1/admin/users?page=${page}&per_page=1000`,{headers:{apikey:supabaseServiceKey,Authorization:`Bearer ${supabaseServiceKey}`}});
+    if(!res.ok)return out;
+    const payload=await res.json().catch(()=>({}));
+    const users=Array.isArray(payload.users)?payload.users:[];
+    out.push(...users);
+    if(users.length<1000)return out;
   }
+  return out;
+}
+async function findSupabaseUserByEmail(email){
+  const wanted=String(email||'').toLowerCase();
+  const users=await listSupabaseUsers();
+  return users.find((user)=>String(user.email||'').toLowerCase()===wanted)||null;
+}
+async function deleteE2eIdentities(){
+  // Only ever delete the four identities this run created, matched by exact
+  // address. Never delete a user we did not create.
+  const wanted=new Set(e2eIdentityEmails.map((email)=>email.toLowerCase()));
+  try{
+    for(const user of await listSupabaseUsers()){
+      if(!wanted.has(String(user.email||'').toLowerCase()))continue;
+      await fetch(`${supabaseUrl}/auth/v1/admin/users/${encodeURIComponent(user.id)}`,{method:'DELETE',headers:{apikey:supabaseServiceKey,Authorization:`Bearer ${supabaseServiceKey}`}});
+    }
+  }catch{}
 }
 const serverLog=[];
 process.on('exit',()=>{try{if(server&&!server.killed)server.kill('SIGKILL');}catch{}try{if(!process.env.E2E_KEEP_TEMP)fs.rmSync(tempRoot,{recursive:true,force:true});else console.error('E2E-KEPT ' + tempRoot);}catch{}});
@@ -483,7 +509,9 @@ let supabaseTechUserId=null;
 {
   const mk=await fetch(`${supabaseAdminBase}/auth/v1/admin/users`,{method:'POST',headers:{apikey:supabaseServiceKey,Authorization:`Bearer ${supabaseServiceKey}`,'Content-Type':'application/json'},body:JSON.stringify({email:techEmail,password,email_confirm:true,user_metadata:{role:'provider',e2e:true}})});
   if(mk.ok){const u=await mk.json();supabaseTechUserId=u.id;}
-  else if(mk.status===422){const list=await (await fetch(`${supabaseAdminBase}/auth/v1/admin/users?email=${encodeURIComponent(techEmail)}`,{headers:{apikey:supabaseServiceKey,Authorization:`Bearer ${supabaseServiceKey}`}})).json();supabaseTechUserId=list.users?.[0]?.id||null;}
+  // 422 = already exists. Resolve the id by exact address; `?email=` would be
+  // ignored by GoTrue and `users[0]` would be an arbitrary other user.
+  else if(mk.status===422){const existing=await findSupabaseUserByEmail(techEmail);supabaseTechUserId=existing?.id||null;}
   else throw new Error(`Supabase identity creation failed: HTTP ${mk.status}`);
 }
 await nav(tech, base+'/login'); await tech.getByRole('heading',{name:/Willkommen zurück/}).waitFor(); const loginButton=tech.locator('#btn-submit-login:visible'); const loginBox=await loginButton.boundingBox(); if(!loginBox || loginBox.height < 44)throw new Error('Login primary action must be at least 44px high');
