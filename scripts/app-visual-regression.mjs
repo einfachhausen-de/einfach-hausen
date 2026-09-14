@@ -27,50 +27,7 @@ import { PNG } from 'pngjs';
 import pixelmatch from 'pixelmatch';
 import { createClient } from '@supabase/supabase-js';
 import { createServerClient } from '@supabase/ssr';
-
-// src/lib/*.ts is written for a bundler: relative imports carry no extension
-// ("moduleResolution": "bundler" in tsconfig.json). Plain Node resolves
-// specifiers literally, so `./contact-directory-schema` inside db.ts is simply
-// not found and this script died at startup with ERR_MODULE_NOT_FOUND.
-// Rewrite the relative specifiers to `.ts` for the duration of the import and
-// put the file back afterwards - the trick admin-auth.ts already needed here.
-// The rewrite stays in the script on purpose: touching db.ts would mean
-// allowImportingTsExtensions plus a Turbopack resolution change.
-const RELATIVE_SPECIFIER = /(?:from|import)\s*['"](\.\.?\/[^'"]+)['"]/g;
-const rewrittenSources = new Map();
-// The closure matters, not just the entry file: db.ts pulls in
-// contact-directory-schema.ts, which itself imports contact-directory-taxonomy
-// without an extension. Rewrite the whole reachable set before importing.
-function rewriteRelativeImports(filePath) {
-  if (rewrittenSources.has(filePath) || !fs.existsSync(filePath)) return;
-  const source = fs.readFileSync(filePath, 'utf8');
-  rewrittenSources.set(filePath, source);
-  const rewritten = source.replace(
-    /(from\s*['"])(\.\.?\/[^'"]+)(['"])/g,
-    (_m, open, specifier, close) => `${open}${specifier.endsWith('.ts') ? specifier : `${specifier}.ts`}${close}`,
-  );
-  if (rewritten === source) return;
-  fs.writeFileSync(filePath, rewritten);
-  const directory = path.dirname(filePath);
-  for (const match of source.matchAll(RELATIVE_SPECIFIER)) {
-    const specifier = match[1];
-    rewriteRelativeImports(path.resolve(directory, specifier.endsWith('.ts') ? specifier : `${specifier}.ts`));
-  }
-}
-function restoreRewrittenImports() {
-  for (const [filePath, source] of rewrittenSources) fs.writeFileSync(filePath, source);
-  rewrittenSources.clear();
-}
-async function importTs(relativePath) {
-  rewriteRelativeImports(new URL(relativePath, import.meta.url).pathname);
-  // Safe to restore immediately: Node caches the module by resolved URL, so
-  // admin-auth.ts later resolving './db.ts' hits that instance, not the disk.
-  try {
-    return await import(relativePath);
-  } finally {
-    restoreRewrittenImports();
-  }
-}
+import { importTs } from './lib/import-ts.mjs';
 
 const root = process.cwd();
 const update = process.argv.includes('--update-baselines');
@@ -161,7 +118,7 @@ for (const suffix of ['', '-wal', '-shm']) fs.rmSync(dbPath + suffix, { force: t
 const savedDatabasePath = process.env.DATABASE_PATH;
 process.env.DATABASE_PATH = dbPath;
 const { createE2EFixture } = await import('./e2e-fixtures.mjs');
-const { db } = await importTs('../src/lib/db.ts');
+const { db } = await importTs('../src/lib/db.ts', import.meta.url);
 const fixture = createE2EFixture(db, { namespace: 'appvisual' });
 const owner = db.prepare('SELECT id,email FROM users WHERE id=?').get(fixture.homeownerId);
 const provider = db.prepare('SELECT id,email FROM users WHERE id=?').get(fixture.providerId);
@@ -245,7 +202,7 @@ try {
   // admin-auth.ts uses an extensionless './db' import - same rewrite as db.ts.
   // db.ts is already in the module cache from the import above, so admin-auth
   // resolves to that instance even though the file on disk is restored by then.
-  const adminAuth = await importTs('../src/lib/admin-auth.ts');
+  const adminAuth = await importTs('../src/lib/admin-auth.ts', import.meta.url);
   const adminToken = adminAuth.issueAdminSessionToken();
   // admin-auth appends an _admin suffix to the SESSION_COOKIE_NAME override.
   const adminCookieName = `${process.env.SESSION_COOKIE_NAME}_admin`;

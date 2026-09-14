@@ -10,6 +10,7 @@ import net from 'node:net';
 import path from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { spawn, execFileSync } from 'node:child_process';
+import { importTs } from './lib/import-ts.mjs';
 
 const root = process.cwd();
 const supabaseUrl = process.env.SUPABASE_URL || 'https://supabase.delqhi.com';
@@ -61,7 +62,9 @@ const dbPath = '/tmp/eh-matrix.db';
 for (const suffix of ['', '-wal', '-shm']) { try { fs.rmSync(dbPath + suffix, { force: true }); } catch {} }
 process.env.DATABASE_PATH = dbPath;
 const { createE2EFixture } = await import('./e2e-fixtures.mjs');
-const { db } = await import('../src/lib/db.ts');
+// Plain Node cannot resolve db.ts's extensionless relative imports; the helper
+// rewrites them for the duration of the import and restores them afterwards.
+const { db } = await importTs('../src/lib/db.ts', import.meta.url);
 const fixture = createE2EFixture(db, { namespace: 'matrix' });
 const ownerRow = db.prepare('SELECT id,email FROM users WHERE id=?').get(fixture.homeownerId);
 const providerRow = db.prepare('SELECT id,email FROM users WHERE id=?').get(fixture.providerId);

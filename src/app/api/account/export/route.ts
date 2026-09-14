@@ -30,6 +30,7 @@ export async function GET() {
     house_assets: all("SELECT * FROM house_assets WHERE homeowner_id=?"),
     maintenance_tasks: all("SELECT * FROM maintenance_tasks WHERE homeowner_id=?"),
     house_history_entries: all("SELECT * FROM house_history_entries WHERE homeowner_id=?"),
+    house_contracts: all("SELECT id,kind,provider,tariff,contract_number,cost_amount,cost_interval,started_at,term_months,renewal_months,cancellation_days,cancellation_deadline,notice,document_title,status,created_at,updated_at FROM house_contracts WHERE homeowner_id=?"),
     jobs_as_homeowner: all("SELECT id,title,description,category,status,created_at FROM jobs WHERE homeowner_id=?"),
     quotes_as_provider: all("SELECT job_id,amount,status,message,created_at FROM quotes WHERE provider_id=?"),
     subscriptions: all("SELECT plan_slug,status,current_period_end,created_at FROM subscriptions WHERE homeowner_id=?"),
@@ -63,13 +64,18 @@ export async function GET() {
   // history documents) so the export is self-describing; the archive is a
   // single JSON document (reproducible: same DB state -> same bytes modulo the
   // exported_at timestamp), bounded by the rate limit above.
-  const privateFiles = allBoth(
-    `SELECT jp.id, jp.path, jp.created_at, 'job_media' AS kind FROM job_photos jp
-       JOIN jobs j ON j.id = jp.job_id WHERE j.homeowner_id = ?
-     UNION ALL
-     SELECT hhd.id, hhd.path, hhd.created_at, 'house_history_document' AS kind FROM house_history_documents hhd
-       JOIN house_history_entries hhe ON hhe.id = hhd.entry_id WHERE hhe.homeowner_id = ?`,
-  ) as Array<{ id: number; path: string; created_at: string; kind: string }>;
+  const privateFiles = db
+    .prepare(
+      `SELECT jp.id, jp.path, jp.created_at, 'job_media' AS kind FROM job_photos jp
+         JOIN jobs j ON j.id = jp.job_id WHERE j.homeowner_id = ?
+       UNION ALL
+       SELECT hhd.id, hhd.path, hhd.created_at, 'house_history_document' AS kind FROM house_history_documents hhd
+         JOIN house_history_entries hhe ON hhe.id = hhd.entry_id WHERE hhe.homeowner_id = ?
+       UNION ALL
+       SELECT hc.id, hc.document_path, hc.created_at, 'house_contract_document' AS kind FROM house_contracts hc
+         WHERE hc.homeowner_id = ? AND hc.document_path IS NOT NULL`,
+    )
+    .all(id, id, id) as Array<{ id: number; path: string; created_at: string; kind: string }>;
 
   const exportPayload = {
     ...payload,

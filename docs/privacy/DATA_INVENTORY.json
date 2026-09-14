@@ -140,6 +140,11 @@
       "purpose": "Technische Anlagen/Geraete im Haus (Hausakte)",
       "retention": "account"
     },
+    "house_contracts": {
+      "personal": true,
+      "purpose": "Hausakte: laufende Vertraege (Anbieter, Tarif, Kosten, Laufzeit, Kuendigungsfrist, Vertragsdokument)",
+      "retention": "account"
+    },
     "house_history_documents": {
       "personal": true,
       "purpose": "Dokumente zur Hausakte (Pfad)",

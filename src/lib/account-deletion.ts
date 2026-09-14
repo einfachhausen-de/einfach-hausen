@@ -39,6 +39,7 @@ function storedPaths(userId: number): string[] {
   for (const row of all(
     'SELECT d.path AS p FROM house_history_documents d JOIN house_history_entries e ON e.id=d.entry_id WHERE e.homeowner_id=?', userId,
   )) push(row.p);
+  for (const row of all('SELECT document_path AS p FROM house_contracts WHERE homeowner_id=?', userId)) push(row.p);
   return paths;
 }
 
@@ -105,6 +106,7 @@ export async function deleteAccountData(userId: number): Promise<{ authSubject: 
     db.prepare('DELETE FROM house_assets WHERE homeowner_id=?').run(userId);
     db.prepare('DELETE FROM maintenance_tasks WHERE homeowner_id=?').run(userId);
     db.prepare('DELETE FROM house_history_entries WHERE homeowner_id=?').run(userId);
+    db.prepare('DELETE FROM house_contracts WHERE homeowner_id=?').run(userId);
     const propertyIds = (db.prepare('SELECT property_id FROM property_ownerships WHERE homeowner_id=?').all(userId) as Row[])
       .map((row) => Number(row.property_id));
     db.prepare('DELETE FROM property_ownerships WHERE homeowner_id=?').run(userId);

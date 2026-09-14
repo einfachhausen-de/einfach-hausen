@@ -23,6 +23,9 @@
 
 # next.js
 /.next/
+# moved-aside build directories (a local build cannot delete .next under some
+# sandboxes, so it gets renamed instead of removed)
+/.next-*/
 /out/
 
 # production
