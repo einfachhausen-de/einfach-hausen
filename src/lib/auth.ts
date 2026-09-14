@@ -278,6 +278,23 @@ export async function establishSupabaseSession(email: string, password: string):
       setAll: (items) => { for (const item of items) { try { store.set(item.name, item.value, item.options); } catch {} } },
     },
   });
-  const { error } = await client.auth.signInWithPassword({ email, password });
-  return !error;
+  // GoTrue's /token endpoint can answer transiently - cold start, short-lived
+  // rate limiting, a dropped keep-alive socket. A single failure used to make
+  // registerAction() redirect a brand new account to
+  // /login?notice=Konto%20erstellt, which the browser matrix reported as
+  // "registration never reached /pro" (scripts/e2e.mjs:331). The account is
+  // already created at this point, so retry briefly before giving up, and log
+  // the real reason instead of collapsing it into a bare boolean.
+  const attempts = 3;
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    if (attempt > 1) await new Promise((resolve) => setTimeout(resolve, 200 * attempt));
+    try {
+      const { error } = await client.auth.signInWithPassword({ email, password });
+      if (!error) return true;
+      if (attempt === attempts) console.error('[auth] establishSupabaseSession failed:', error.message);
+    } catch (error) {
+      if (attempt === attempts) console.error('[auth] establishSupabaseSession threw:', error instanceof Error ? error.message : String(error));
+    }
+  }
+  return false;
 }
