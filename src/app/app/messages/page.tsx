@@ -66,6 +66,15 @@ export default async function Messages({ searchParams }: { searchParams: Promise
     const profile = contact.platformUserId ? activeById.get(contact.platformUserId) : undefined;
     return profile ? { ...contact, name: `${profile.first_name} ${profile.last_name}`.trim(), company: profile.business_name || '', phone: profile.phone || '', email: profile.email || '', unreadCount: Number(profile.unread_count || 0) } : contact;
   });
+  const subcategoryToMain = new Map(CONTACT_DIRECTORY_CATEGORIES.flatMap(main => main.subcategories.map(sub => [sub.id, main.id] as const)));
+  const countsByMain: Record<string, number> = Object.fromEntries(CONTACT_DIRECTORY_CATEGORIES.map(main => [main.id, 0]));
+  for (const contact of contacts) {
+    const seenMains = new Set<string>();
+    for (const subcategoryId of contact.subcategoryIds) {
+      const mainId = subcategoryToMain.get(subcategoryId);
+      if (mainId && !seenMains.has(mainId)) { seenMains.add(mainId); countsByMain[mainId] += 1; }
+    }
+  }
   const active = entry?.platformUserId ? activeById.get(entry.platformUserId) : undefined;
   const messages = mode === 'detail' && active
     ? db.prepare(`SELECT 'direct' source,cm.id,cm.sender_id,cm.body,cm.read_at,cm.created_at,NULL context_title,NULL job_id
@@ -96,6 +105,6 @@ export default async function Messages({ searchParams }: { searchParams: Promise
     composer={<OwnerMessageComposer contactUserId={active.contact_user_id} peerName={active.first_name} unreadCount={Number(active.unread_count || 0)} />} />
     : entry?.platformUserId ? <EHCallout title="Aktuell keine aktive Nachrichtenverbindung"><p>Der gespeicherte Kontakt und seine Zuordnungen bleiben erhalten. Ein App-Chat ist nur bei einer aktiven Partnerverbindung verfügbar.</p></EHCallout> : undefined;
   return <AppShell role="homeowner" active="/app/messages" title="Ansprechpartner" subtitle="Dein persönliches Netzwerk fürs Haus">
-    <EHContactWorkspace categories={CONTACT_DIRECTORY_CATEGORIES} contacts={contacts} mode={mode} mainId={main?.id} subcategoryId={sub?.id} entryId={entryId} query={text('q').slice(0, 200)} requestId={randomUUID()} notice={text('saved') === '1' ? 'Gespeichert. Dein Kontakt und alle Zuordnungen sind aktuell.' : undefined} action={submitDirectoryAction} shortcutAction={submitDirectoryShortcut} conversation={mode === 'detail' ? conversation : undefined} />
+    <EHContactWorkspace categories={CONTACT_DIRECTORY_CATEGORIES} contacts={contacts} mode={mode} mainId={main?.id} subcategoryId={sub?.id} entryId={entryId} query={text('q').slice(0, 200)} requestId={randomUUID()} notice={text('saved') === '1' ? 'Gespeichert. Dein Kontakt und alle Zuordnungen sind aktuell.' : undefined} action={submitDirectoryAction} shortcutAction={submitDirectoryShortcut} counts={countsByMain} conversation={mode === 'detail' ? conversation : undefined} />
   </AppShell>;
 }
