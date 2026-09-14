@@ -26,12 +26,12 @@ export default async function Calendar({searchParams}:{searchParams:Promise<Reco
   }
   const total = past ? count : rows.length;
   return <AppShell role="homeowner" active="/app/calendar" title="Termine">
-    <EHOwnerPageHeader title="Deine Termine" context={`${total} ${total === 1 ? 'Termin' : 'Termine'}`} text="Deine Terminübersicht. Absprachen und Änderungen klärst du im jeweiligen Auftrag." />
+    <EHOwnerPageHeader title="Deine Termine" context={`${total} ${total === 1 ? 'Termin' : 'Termine'}`} text="Alle Termine mit Status. Details stehen im jeweiligen Auftrag." />
     <EHOwnerFilters label="Zeitraum" items={[{href:'/app/calendar',label:'Anstehend',active:!past},{href:'/app/calendar?view=past',label:'Vergangen',active:past}]} />
     {rows.length===0 ? (
       <EHEmptyState title={past ? 'Keine vergangenen Termine' : 'Keine anstehenden Termine'} text={past ? 'Vergangene Besuche erscheinen später hier.' : 'Neue Anliegen kannst du beschreiben. Bestehende Absprachen findest du in deinen Aufträgen.'} action={<EHButton href="/app/jobs" variant="secondary">Aufträge ansehen</EHButton>} />
     ) : (
-      <EHOwnerSection title={past ? 'Vergangene Termine' : 'Anstehende Termine'} text={past ? `Seite ${page} von ${pages}. Ein vergangener Termin bedeutet nicht, dass der Auftrag abgeschlossen ist.` : 'Alle Termine ab jetzt, einschließlich noch unbestätigter oder stornierter Einträge mit ihrem jeweiligen Status.'}>
+      <EHOwnerSection title={past ? 'Vergangene Termine' : 'Anstehende Termine'} text={past ? `Seite ${page} von ${pages}.` : undefined}>
         {null}
       </EHOwnerSection>
     )}
