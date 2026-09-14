@@ -80,7 +80,7 @@ const anonKey = process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABAS
 const serviceKey = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 if (!serviceKey || !anonKey) { console.error('Supabase service and anon keys are required.'); process.exit(2); }
 
-const ownerRoutes = ['/app', '/app/home', '/app/jobs', '/app/messages', '/app/documents', '/app/partners', '/app/profile'];
+const ownerRoutes = ['/app', '/app/home', '/app/contracts', '/app/jobs', '/app/messages', '/app/documents', '/app/partners', '/app/profile'];
 // /pro/jobs is intentionally absent: it is a detail-only route (/pro/jobs/[id])
 // with no list page and no nav entry; the provider nav links /pro/orders.
 // Capturing /pro/jobs bare races the prod middleware login redirect vs the 404

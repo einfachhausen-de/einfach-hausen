@@ -1,24 +1,31 @@
-import { FileText,House,MessageCircle,ShieldCheck,Sparkles,UserRound,WalletCards,Wrench } from 'lucide-react';
+import { Bell, CircleHelp, MessageCircle, Sparkles, UserRound, WalletCards } from 'lucide-react';
 import { AppShell } from '@/components/shell';
+import { ownerAccountItems, ownerAreas } from '@/components/nav-config';
 import { requireUser } from '@/lib/auth';
 import { EHAppHeader, EHServiceDirectory, EHCallout } from '@/design-system';
 
-const links=[
-  ['/app/hausmeister',MessageCircle,'Hausmeisterservice','Fragen klären und den nächsten Schritt organisieren'],
-  ['/app/hausmanager',Sparkles,'KI-Hausmanager','Alte Gespräche, Aufgaben & Automatisierungen'],
-  ['/app/home',House,'Mein Haus','Hausakte, Technik und Historie'],
-  ['/app/year',Wrench,'Wartungen & Mein Jahr','Was demnächst ansteht'],
-  ['/app/documents',FileText,'Dokumente & Rechnungen','Rechnungen, Nachweise und Belege'],
-  ['/app/plans',WalletCards,'Mitgliedschaft & Pakete','Free, Plus, Premium und Jahrespakete'],
-  ['/notifications',ShieldCheck,'Benachrichtigungen','Alle wichtigen Updates'],
-  ['/app/profile',UserRound,'Profil & Einstellungen','Persönliche Daten, WhatsApp und App'],
+// "Mehr" is no longer a main-navigation entry: every area has its own place
+// now. The page survives as a flat directory so old links and bookmarks keep
+// working.
+const AREA_TEXT: Record<string, string> = {
+  '/app': 'Was heute ansteht: offene Aufträge, Termine und nächste Schritte.',
+  '/app/home': 'Hausdaten, Technik, Historie, Dokumente und Wartung – deine digitale Hausakte.',
+  '/app/contracts': 'Laufende Verträge mit Kosten, Laufzeit und Kündigungsfrist, plus Spar-Check.',
+  '/app/jobs': 'Beauftragte Arbeiten, abgeschlossene Aufträge und Termine.',
+  '/app/messages': 'Dein persönliches Netzwerk fürs Haus.',
+};
+
+const ACTIONS = [
+  { href: '/app/hausmeister', title: 'Hausmeisterservice', text: 'Fragen klären und den nächsten Schritt organisieren', icon: <MessageCircle /> },
+  { href: '/app/hausmanager', title: 'KI-Hausmanager', text: 'Alte Gespräche, Aufgaben & Automatisierungen', icon: <Sparkles /> },
 ] as const;
 
-export default async function More(){await requireUser('homeowner');return <AppShell role="homeowner" active="/app/more" title="Mehr" subtitle="Alles Weitere rund um dein Zuhause">
-    <EHAppHeader eyebrow="Navigation" title="Mehr" text="Alles Weitere rund um dein Zuhause." />
+export default async function More(){await requireUser('homeowner');return <AppShell role="homeowner" active="/app/more" title="Mehr" subtitle="Alle Bereiche auf einen Blick" breadcrumbs={[{ href: '/app', label: 'Start' }, { label: 'Alle Bereiche' }]}>
+    <EHAppHeader eyebrow="Navigation" title="Alle Bereiche" text="Jeder Bereich ist über die Hauptnavigation erreichbar. Diese Seite ist nur die flache Übersicht." />
     <EHServiceDirectory groups={[
-      {title:"Dein Haus organisieren",items:links.slice(0,5).map(([href,Icon,title,text])=>({href,title,text,icon:<Icon/>}))},
-      {title:"Dein Konto",items:links.slice(5).map(([href,Icon,title,text])=>({href,title,text,icon:<Icon/>}))},
+      {title:"Bereiche",items:ownerAreas.map(area=>{const Icon=area.icon;return {href:area.href,title:area.label,text:AREA_TEXT[area.href]||'',icon:<Icon/>};})},
+      {title:"Direkt starten",items:ACTIONS.map(a=>({href:a.href,title:a.title,text:a.text,icon:a.icon}))},
+      {title:"Dein Konto",items:ownerAccountItems.map((item,index)=>{const Icon=[UserRound,Bell,WalletCards,CircleHelp][index]??UserRound;return {href:item.href,title:item.label,text:'',icon:<Icon/>};})},
     ]}/>
     <EHCallout title="Hilfe & Support"><p>Wenn ein Vorgang festhängt, kannst du ihn direkt im Auftrag als Servicefall melden.</p></EHCallout>
   </AppShell>}

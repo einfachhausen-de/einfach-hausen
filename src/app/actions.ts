@@ -20,6 +20,7 @@ import { savePrivateMediaUpload } from '@/lib/intake-media';
 import { completeMaintenanceAndScheduleNext, ensureAssetMaintenance, ensureCompletedWorkMaintenance, ensureMaintenanceTask } from '@/lib/maintenance';
 import { createPropertyForOwner, primaryProperty, propertyOwnedBy, syncPropertyFromLegacyProfile } from '@/lib/properties';
 import { createBrokerMatches } from '@/lib/broker-matching';
+import { isContractKind, isCostInterval } from '@/lib/contracts';
 import { headers } from 'next/headers';
 import { checkRateLimit, consumeRateLimitAttempt, applyRateLimitLockout, rateLimitBlockedEvent, recordRateLimitFailure, recordRateLimitSuccess } from '@/lib/security/rate-limit';
 import { logAdminAudit, logSecurityEvent } from '@/lib/security/audit';
@@ -1088,4 +1089,58 @@ export async function purchasePackageAction(packageSlug:string){
   const pkgName=`Einfach Hausen · ${pkg.title}${pilotPkg?' · Pilot-Vorteil −15%':''}`;
   const session=await stripe.checkout.sessions.create({mode:'payment',customer_email:user.email,line_items:[{price_data:{currency:'eur',product_data:{name:pkgName},unit_amount:pkgPrice},quantity:1}],success_url:`${origin}/api/packages/success?session_id={CHECKOUT_SESSION_ID}`,cancel_url:`${origin}/app/plans?checkout=cancelled`,metadata:{kind:'package',homeownerId:String(user.id),packageSlug:pkg.slug,packageOrderId:String(orderId)}});
   db.prepare('UPDATE package_orders SET stripe_session_id=? WHERE id=?').run(session.id,orderId); redirect(session.url!);
+}
+
+// --- Verträge & Tarife ------------------------------------------------------
+
+function ownHouseContract(id:number, homeownerId:number) {
+  return db.prepare('SELECT * FROM house_contracts WHERE id=? AND homeowner_id=?').get(id, homeownerId) as any | undefined;
+}
+
+// "1.234,56" and "1234.56" both mean the same to a German homeowner.
+function centsFromEurosInput(value:string): number | null {
+  const raw = value.replace(/\s/g, '').replace(/\./g, '').replace(',', '.');
+  if (!raw) return null;
+  const n = Number(raw);
+  if (!Number.isFinite(n) || n < 0) return null;
+  return Math.round(n * 100);
+}
+
+export async function addHouseContractAction(fd:FormData){
+  const user=await requireUser('homeowner'); const property=primaryProperty(user.id);
+  const provider=text(fd,'provider'); if(!provider)return;
+  const kindRaw=text(fd,'kind'); const kind=isContractKind(kindRaw)?kindRaw:'sonstiges';
+  const intervalRaw=text(fd,'costInterval'); const costInterval=isCostInterval(intervalRaw)?intervalRaw:'month';
+  const document=fd.get('document');
+  const stored=document instanceof File&&document.size?await savePrivateFile(document,'house-contracts'):null;
+  db.prepare(`INSERT INTO house_contracts(homeowner_id,property_id,kind,provider,tariff,contract_number,cost_amount,cost_interval,started_at,term_months,renewal_months,cancellation_days,cancellation_deadline,notice,document_title,document_path) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`)
+    .run(user.id,property?.id??null,kind,provider,text(fd,'tariff'),text(fd,'contractNumber'),
+      centsFromEurosInput(text(fd,'cost')),costInterval,text(fd,'startedAt')||null,
+      int(fd,'termMonths'),int(fd,'renewalMonths')??12,int(fd,'cancellationDays')??30,
+      text(fd,'cancellationDeadline')||null,text(fd,'notice').slice(0,2000),
+      text(fd,'documentTitle')||(document instanceof File?document.name:''),stored);
+  revalidatePath('/app/contracts'); redirect('/app/contracts?saved=1');
+}
+
+export async function updateHouseContractAction(fd:FormData){
+  const user=await requireUser('homeowner'); const id=int(fd,'id'); if(!id)return;
+  if(!ownHouseContract(id,user.id))return;
+  const kindRaw=text(fd,'kind'); const kind=isContractKind(kindRaw)?kindRaw:'sonstiges';
+  const intervalRaw=text(fd,'costInterval'); const costInterval=isCostInterval(intervalRaw)?intervalRaw:'month';
+  db.prepare(`UPDATE house_contracts SET kind=?,provider=?,tariff=?,contract_number=?,cost_amount=?,cost_interval=?,started_at=?,term_months=?,renewal_months=?,cancellation_days=?,cancellation_deadline=?,notice=?,updated_at=CURRENT_TIMESTAMP WHERE id=? AND homeowner_id=?`)
+    .run(kind,text(fd,'provider')||'Unbekannt',text(fd,'tariff'),text(fd,'contractNumber'),
+      centsFromEurosInput(text(fd,'cost')),costInterval,text(fd,'startedAt')||null,
+      int(fd,'termMonths'),int(fd,'renewalMonths')??12,int(fd,'cancellationDays')??30,
+      text(fd,'cancellationDeadline')||null,text(fd,'notice').slice(0,2000),id,user.id);
+  revalidatePath('/app/contracts'); redirect('/app/contracts?saved=1');
+}
+
+// Switching ends a contract; it never deletes it. The house file keeps what was
+// in place before - that history is the point of the Hausakte.
+export async function setHouseContractStatusAction(id:number, status:string){
+  const user=await requireUser('homeowner');
+  if(!['active','cancelled','expired'].includes(status))return;
+  if(!ownHouseContract(id,user.id))return;
+  db.prepare(`UPDATE house_contracts SET status=?,updated_at=CURRENT_TIMESTAMP WHERE id=? AND homeowner_id=?`).run(status,id,user.id);
+  revalidatePath('/app/contracts'); redirect('/app/contracts?saved=1');
 }

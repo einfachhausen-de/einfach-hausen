@@ -4,108 +4,27 @@ import { EHLogo } from "@/design-system";
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import {
-  Bell as BellIco,
-  BookOpen as BookIco,
-  CircleCheck as CheckIco,
-  CircleHelp as HelpIco,
-  Clock as ClockIco,
-  Ellipsis as DotsIco,
-  FileText as FileIco,
-  Hammer as HammerIco,
-  Plus as PlusIco,
-  Info as InfoIco,
-  Users as UsersIco,
-} from "lucide-react";
-import {
-  BookThinIcon,
-  CalendarCheckThinIcon,
-  CatDachIcon,
-  CatElektroIcon,
-  CatFensterIcon,
-  CatInnenIcon,
-  CatReinigungIcon,
-  CatSanitaerIcon,
-  CloseIcon,
-  CrownIcon,
-  GearMenuIcon,
-  HomeMenuIcon,
-  HamburgerIcon,
-  LeafIcon,
-  LogoutIcon,
-  ShieldIcon,
-  ArrowRightThin,
-  PersonSmallIcon,
-} from "@/components/icons";
+import { Bell, CircleHelp, LogOut, UserRound, WalletCards } from "lucide-react";
+import { CloseIcon, CrownIcon, HamburgerIcon, ArrowRightThin } from "@/components/icons";
 import { logoutAction } from "@/app/actions";
+import { matchesArea, ownerAccountItems, ownerAreas } from "./nav-config";
 
-type SubItem = { label: string; href?: string; icon: React.ReactNode; logout?: boolean };
-type Section = { n: string; label: string; icon: React.ReactNode; href: string; open: boolean; subs: SubItem[] };
+const ACCOUNT_ICONS = [UserRound, Bell, WalletCards, CircleHelp] as const;
 
-const cat = (icon: React.ReactNode, label: string): SubItem => ({ label, href: "/app/messages", icon });
-const hist = (label: string, icon: React.ReactNode): SubItem => ({ label, href: "/app/home/history", icon });
-const ico = (El: React.ComponentType<{ size?: number; strokeWidth?: number }>, size = 15) => <El size={size} strokeWidth={1.7} />;
-
-const SECTIONS: Section[] = [
-  {
-    n: "1.", label: "Mein Haus", icon: <HomeMenuIcon />, href: "/app", open: false,
-    subs: [
-      { label: "Übersicht", href: "/app", icon: <HomeMenuIcon /> },
-      { label: "Hausdaten", href: "/app/home/passport", icon: ico(FileIco, 16) },
-      { label: "Weiteres", href: "/app/more", icon: ico(DotsIco, 16) },
-    ],
-  },
-  {
-    n: "2.", label: "Aufträge", icon: <CalendarCheckThinIcon />, href: "/app/jobs", open: false,
-    subs: [
-      { label: "Aktive Aufträge", href: "/app/jobs", icon: ico(ClockIco, 16) },
-      { label: "Abgeschlossene Aufträge", href: "/app/jobs?tab=completed", icon: ico(CheckIco, 16) },
-    ],
-  },
-  {
-    n: "3.", label: "Ansprechpartner", icon: ico(UsersIco, 24), href: "/app/partners", open: true,
-    subs: [
-      { label: "Alle Ansprechpartner", href: "/app/messages", icon: ico(UsersIco, 16) },
-      cat(<LeafIcon />, "Garten & Außen"),
-      cat(<CatDachIcon />, "Dach & Fassade"),
-      cat(<CatElektroIcon />, "Elektro"),
-      cat(<CatFensterIcon />, "Fenster & Türen"),
-      cat(<CatSanitaerIcon />, "Sanitär & Heizung"),
-      cat(<CatReinigungIcon />, "Reinigung & Pflege"),
-      cat(<CatInnenIcon />, "Renovierung & Innenausbau"),
-      { label: "Ansprechpartner hinzufügen", href: "/app/messages", icon: ico(PlusIco, 16) },
-    ],
-  },
-  {
-    n: "4.", label: "Haus-Historie", icon: <BookThinIcon />, href: "/app/home/history", open: true,
-    subs: [
-      hist("Alle Ereignisse", ico(BookIco, 16)),
-      hist("Renovierungen & Reparaturen", ico(HammerIco, 16)),
-      hist("Neuinstallation oder Anbau", ico(HomeMenuIcon)),
-      hist("Wartungen", ico(GearMenuIcon)),
-      { label: "Ereignis hinzufügen", href: "/app/home/history", icon: ico(PlusIco, 16) },
-    ],
-  },
-  {
-    n: "5.", label: "Einstellungen", icon: <GearMenuIcon />, href: "/app/profile", open: true,
-    subs: [
-      { label: "Mein Profil", href: "/app/profile", icon: <PersonSmallIcon /> },
-      { label: "Benachrichtigungen", href: "/notifications", icon: ico(BellIco, 16) },
-      { label: "Datenschutz", href: "/datenschutz", icon: <ShieldIcon /> },
-      { label: "Hilfe & Kontakt", href: "/app/hilfe", icon: ico(HelpIco, 16) },
-      { label: "Über einfachhausen", href: "/ueber-uns", icon: ico(InfoIco, 16) },
-      { label: "Abmelden", logout: true, icon: <LogoutIcon /> },
-    ],
-  },
-];
+function childActive(active: string, href: string): boolean {
+  // Children that only differ by query string are marked by the page's own
+  // tab bar, not here.
+  if (href.includes("?")) return false;
+  return active === href;
+}
 
 export function OwnerMobileMenu({ active }: { active: string }) {
   const [open, setOpen] = useState(false);
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
   const router = useRouter();
 
-  function toggleSection(key: string) {
-    setOpenSections((current) => ({ ...current, [key]: !(current[key] ?? SECTIONS.find((s) => s.n === key)?.open) }));
+  function toggleSection(href: string) {
+    setOpenSections((current) => ({ ...current, [href]: !(current[href] ?? true) }));
   }
 
   function go(href: string) {
@@ -149,28 +68,76 @@ export function OwnerMobileMenu({ active }: { active: string }) {
         </div>
 
         <nav className="sm-nav ehn-acc">
-          {SECTIONS.map((s) => (
-            <div key={s.n} className={`ehn-acc-sec${(openSections[s.n] ?? s.open) ? " ehn-acc-open" : ""}`}>
-              <button type="button" className="sm-item ehn-acc-head" aria-expanded={openSections[s.n] ?? s.open} onClick={() => toggleSection(s.n)}>
-                <span className="sm-icon">{s.icon}</span>
-                <span className="sm-label">{s.n} {s.label}</span>
-                <span className="ehn-acc-chevron" aria-hidden="true"><ArrowRightThin /></span>
-              </button>
-              {Boolean(openSections[s.n] ?? s.open) && <div className="ehn-acc-body">
-                {s.subs.map((sub) =>
-                  sub.logout ? (
-                    <form key={sub.label} action={logoutAction} className="ehn-acc-row">
-                      <button type="submit" className="ehn-acc-link" data-testid="owner-logout-menu" aria-label="Abmelden"><span className="ehn-acc-ico">{sub.icon}</span><span>{sub.label}</span></button>
-                    </form>
-                  ) : (
-                    <button key={sub.label} type="button" className={`ehn-acc-link${active === sub.href ? " ehn-acc-active" : ""}`} onClick={() => go(sub.href!)}>
-                      <span className="ehn-acc-ico">{sub.icon}</span><span>{sub.label}</span>
+          {ownerAreas.map((area) => {
+            const Icon = area.icon;
+            const areaActive = matchesArea(active, area);
+            const expanded = openSections[area.href] ?? areaActive;
+            if (area.children.length === 0) {
+              return (
+                <div key={area.href} className="ehn-acc-sec">
+                  <Link
+                    href={area.href}
+                    className={`sm-item ehn-acc-head${areaActive ? " ehn-acc-active" : ""}`}
+                    aria-current={areaActive ? "page" : undefined}
+                    onClick={() => setOpen(false)}
+                  >
+                    <span className="sm-icon"><Icon size={18} /></span>
+                    <span className="sm-label">{area.label}</span>
+                  </Link>
+                </div>
+              );
+            }
+            return (
+              <div key={area.href} className={`ehn-acc-sec${expanded ? " ehn-acc-open" : ""}`}>
+                <button type="button" className={`sm-item ehn-acc-head${areaActive ? " ehn-acc-active" : ""}`} aria-expanded={expanded} onClick={() => toggleSection(area.href)}>
+                  <span className="sm-icon"><Icon size={18} /></span>
+                  <span className="sm-label">{area.label}</span>
+                  <span className="ehn-acc-chevron" aria-hidden="true"><ArrowRightThin /></span>
+                </button>
+                {expanded && <div className="ehn-acc-body">
+                  {area.children.map((sub) => (
+                    <button
+                      key={sub.href}
+                      type="button"
+                      className={`ehn-acc-link${childActive(active, sub.href) ? " ehn-acc-active" : ""}`}
+                      aria-current={childActive(active, sub.href) ? "page" : undefined}
+                      onClick={() => go(sub.href)}
+                    >
+                      <span>{sub.label}</span>
                     </button>
-                  ),
-                )}
-              </div>}
-            </div>
-          ))}
+                  ))}
+                </div>}
+              </div>
+            );
+          })}
+        </nav>
+
+        <div className="sm-divider" />
+        <nav className="sm-nav ehn-acc" aria-label="Konto">
+          {ownerAccountItems.map((item, index) => {
+            const AccountIcon = ACCOUNT_ICONS[index] ?? UserRound;
+            return (
+              <div key={item.href} className="ehn-acc-sec">
+                <Link
+                  href={item.href}
+                  className={`sm-item ehn-acc-head${active === item.href ? " ehn-acc-active" : ""}`}
+                  aria-current={active === item.href ? "page" : undefined}
+                  onClick={() => setOpen(false)}
+                >
+                  <span className="sm-icon"><AccountIcon size={18} /></span>
+                  <span className="sm-label">{item.label}</span>
+                </Link>
+              </div>
+            );
+          })}
+          <div className="ehn-acc-sec">
+            <form action={logoutAction} className="ehn-acc-row">
+              <button type="submit" className="sm-item ehn-acc-head" data-testid="owner-logout-menu" aria-label="Abmelden">
+                <span className="sm-icon"><LogOut size={18} /></span>
+                <span className="sm-label">Abmelden</span>
+              </button>
+            </form>
+          </div>
         </nav>
 
         <div className="sm-divider" />
@@ -180,9 +147,9 @@ export function OwnerMobileMenu({ active }: { active: string }) {
           <ArrowRightThin />
         </button>
         <form action={logoutAction}>
-          <button type="submit" className="sm-logout" data-testid="owner-logout-drawer" aria-label="Abmelden"> <LogoutIcon /> Abmelden</button>
+          <button type="submit" className="sm-logout" data-testid="owner-logout-drawer" aria-label="Abmelden"> <LogOut size={18} /> Abmelden</button>
         </form>
-        <div className="sm-footer">Version 1.0.0 &nbsp;•&nbsp; <Link href="/datenschutz">Datenschutz</Link> &nbsp;•&nbsp; <Link href="/impressum">Impressum</Link></div>
+        <div className="sm-footer">Version 1.0.0 &nbsp;•&nbsp; <Link href="/app/more">Alle Bereiche</Link> &nbsp;•&nbsp; <Link href="/datenschutz">Datenschutz</Link> &nbsp;•&nbsp; <Link href="/impressum">Impressum</Link></div>
       </aside>
     </details>
   );

@@ -1,4 +1,4 @@
-import { CalendarDays, FileText, History, House, NotebookPen, TrendingUp, Wrench } from 'lucide-react';
+import { CalendarDays, FileText, History, House, NotebookPen, Receipt, TrendingUp, Wrench } from 'lucide-react';
 import { AppShell } from '@/components/shell';
 import {
   EHAppHeader, EHList, EHEmptyState, EHButton, EHText, EHPropertyOverview, EHDetailDisclosure,
@@ -65,8 +65,10 @@ export default async function MyHome() {
       <EHWorkSection title="Deine Hausakte weiterführen">
           <EHServiceDirectory groups={[{ title: 'Wissen & Unterlagen', items: [
             { href: '/app/home/history', title: 'Hausgeschichte', text: 'Frühere Arbeiten, Kosten und Ansprechpartner dokumentieren.', icon: <History /> },
-            { href: '/app/documents', title: 'Dokumente & Rechnungen', text: 'Nachweise und Unterlagen wiederfinden.', icon: <FileText /> },
             { href: '/app/home/passport', title: 'Hauspass', text: 'Deine Hausdaten als druckbare Übersicht ansehen.', icon: <House /> },
+          ] }, { title: 'Kosten & Verträge', items: [
+            { href: '/app/contracts', title: 'Verträge & Tarife', text: 'Laufende Verträge, Kündigungsfristen und Spar-Check.', icon: <Receipt /> },
+            { href: '/app/documents', title: 'Dokumente & Rechnungen', text: 'Nachweise und Unterlagen wiederfinden.', icon: <FileText /> },
           ] }, { title: 'Planen & Vorbereiten', items: [
             { href: '/app/year', title: 'Mein Jahr', text: 'Anstehende Arbeiten und Wartungen im Blick behalten.', icon: <CalendarDays /> },
             { href: '#technik', title: 'Technik & Geräte', text: 'Ausstattung und Modellangaben nachschlagen.', icon: <Wrench /> },
