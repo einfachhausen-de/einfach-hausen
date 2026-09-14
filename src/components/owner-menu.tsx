@@ -23,8 +23,10 @@ export function OwnerMobileMenu({ active }: { active: string }) {
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
   const router = useRouter();
 
-  function toggleSection(href: string) {
-    setOpenSections((current) => ({ ...current, [href]: !(current[href] ?? true) }));
+  // The rendered state falls back to the area's own active state, so the toggle
+  // has to flip what is on screen - not a second, different default.
+  function toggleSection(href: string, currentlyExpanded: boolean) {
+    setOpenSections((current) => ({ ...current, [href]: !currentlyExpanded }));
   }
 
   function go(href: string) {
@@ -89,7 +91,7 @@ export function OwnerMobileMenu({ active }: { active: string }) {
             }
             return (
               <div key={area.href} className={`ehn-acc-sec${expanded ? " ehn-acc-open" : ""}`}>
-                <button type="button" className={`sm-item ehn-acc-head${areaActive ? " ehn-acc-active" : ""}`} aria-expanded={expanded} onClick={() => toggleSection(area.href)}>
+                <button type="button" className={`sm-item ehn-acc-head${areaActive ? " ehn-acc-active" : ""}`} aria-expanded={expanded} onClick={() => toggleSection(area.href, expanded)}>
                   <span className="sm-icon"><Icon size={18} /></span>
                   <span className="sm-label">{area.label}</span>
                   <span className="ehn-acc-chevron" aria-hidden="true"><ArrowRightThin /></span>
