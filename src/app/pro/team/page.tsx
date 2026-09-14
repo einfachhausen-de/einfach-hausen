@@ -3,6 +3,7 @@ import { requireUser } from '@/lib/auth';
 import { EHAppHeader, EHWorkspaceGrid, EHWorkSection, EHStatus, EHButton, EHField, EHInput, EHCheckbox, EHWorkflowStack, EHWorkflowForm, EHFormSection, EHFormFeedback, EHSubmitButton, EHText, EHEmptyState } from '@/design-system';
 import { addProviderMemberAction, updateProviderMemberAction } from '@/app/actions';
 import { getProviderContext, getProviderMembers } from '@/lib/provider';
+import styles from './team.module.css';
 
 export default async function Team({ searchParams }: { searchParams: Promise<Record<string, string>> }) {
   const u = await requireUser('provider');
@@ -22,7 +23,9 @@ export default async function Team({ searchParams }: { searchParams: Promise<Rec
         return <EHWorkflowForm key={member.user_id} action={updateProviderMemberAction.bind(null, member.user_id)}>
           <EHFormSection title={`${member.first_name} ${member.last_name}${firmAccount ? ' · Firmenkonto' : ''}`}>
             <EHStatus tone={member.active ? 'success' : 'neutral'}>{member.active ? 'Zugang aktiv' : 'Zugang deaktiviert'}</EHStatus>
-            <EHText>{member.email}</EHText>
+            {/* Wrapped: an e-mail address is an unbreakable token and would
+                otherwise set this column's min-content width (see team.module.css). */}
+            <EHText><span className={styles.memberContact}>{member.email}</span></EHText>
             {member.phone && <EHText>{member.phone}</EHText>}
             <EHField id={'member-title-' + member.user_id} label="Bezeichnung">
               <EHInput id={'member-title-' + member.user_id} name="jobTitle" defaultValue={member.job_title || ''} placeholder="z. B. Kundendienst, Techniker, Disposition" disabled={!ctx.canManageJobs} />
