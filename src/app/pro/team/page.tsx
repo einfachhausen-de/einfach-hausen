@@ -1,3 +1,4 @@
+import { Fragment } from 'react';
 import { AppShell } from '@/components/shell';
 import { requireUser } from '@/lib/auth';
 import { EHAppHeader, EHWorkspaceGrid, EHWorkSection, EHStatus, EHButton, EHField, EHInput, EHCheckbox, EHWorkflowStack, EHWorkflowForm, EHFormSection, EHFormFeedback, EHSubmitButton, EHText, EHEmptyState } from '@/design-system';
@@ -22,7 +23,13 @@ export default async function Team({ searchParams }: { searchParams: Promise<Rec
         return <EHWorkflowForm key={member.user_id} action={updateProviderMemberAction.bind(null, member.user_id)}>
           <EHFormSection title={`${member.first_name} ${member.last_name}${firmAccount ? ' · Firmenkonto' : ''}`}>
             <EHStatus tone={member.active ? 'success' : 'neutral'}>{member.active ? 'Zugang aktiv' : 'Zugang deaktiviert'}</EHStatus>
-            <EHText>{member.email}</EHText>
+            {/* An e-mail address is one unbreakable token: at 390px a long one
+                set this column's min-content width to ~410px and pushed the
+                whole page into horizontal overflow (Firefox measured 449 vs
+                390). <wbr> marks the natural break opportunities of an address.
+                Markup rather than styling on purpose - the design guard forbids
+                both new page stylesheets and inline styles. */}
+            <EHText>{String(member.email).split(/([-@])/).map((part, index) => <Fragment key={index}>{part}{/^[-@]$/.test(part) ? <wbr /> : null}</Fragment>)}</EHText>
             {member.phone && <EHText>{member.phone}</EHText>}
             <EHField id={'member-title-' + member.user_id} label="Bezeichnung">
               <EHInput id={'member-title-' + member.user_id} name="jobTitle" defaultValue={member.job_title || ''} placeholder="z. B. Kundendienst, Techniker, Disposition" disabled={!ctx.canManageJobs} />

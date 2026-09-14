@@ -4,6 +4,16 @@ on:
   push:
     branches: [main]
   pull_request:
+  # Visual baselines are rendered by Chromium on Linux. Regenerating them
+  # anywhere else bakes in that machine's font rasterisation and antialiasing,
+  # which on its own moves ~2.7% (up to 6.5%) of pixels - enough to fail the
+  # 8% budget on pages that did not change at all. Refresh them in CI instead.
+  workflow_dispatch:
+    inputs:
+      update_baselines:
+        description: 'Visual baselines in CI neu erzeugen und als PR liefern'
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -146,3 +156,55 @@ jobs:
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
         run: npm run test:e2e
+
+  # Refresh the visual baselines on the very Linux runner that later verifies
+  # them. Manual dispatch only, and it opens a PR instead of pushing straight
+  # to main: a new baseline records a design decision, so it needs review.
+  visual-baselines:
+    name: refresh visual baselines
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.update_baselines == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Use Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Install Chromium for Playwright
+        run: npx --yes playwright@1.62.1 install --with-deps chromium
+      - name: Production build
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: npm run build
+      - name: Regenerate website baselines
+        run: npm run test:visual:update
+      - name: Open pull request with the new baselines
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -e
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          branch="chore/visual-baselines-${{ github.run_number }}"
+          git checkout -B "$branch"
+          git add tests/visual-baselines
+          if git diff --cached --quiet; then
+            echo "Baselines unveraendert - kein PR noetig."
+            exit 0
+          fi
+          git commit -m "chore(visual): Baselines auf dem Linux-Runner neu erzeugen (Run ${{ github.run_number }})"
+          git push --force origin "$branch"
+          printf '%s\n' "Automatisch erzeugt durch workflow_dispatch (update_baselines), Run ${{ github.run_number }}." "" "Bitte die Diff-Bilder im Review ansehen - eine neue Baseline ist eine Design-Entscheidung." > /tmp/pr-body.md
+          gh pr create --title "chore(visual): Baselines neu erzeugen (Run ${{ github.run_number }})" --body-file /tmp/pr-body.md --base main --head "$branch"
