@@ -6,6 +6,17 @@ import { addHouseHistoryAction,createHouseTransferAction } from '@/app/actions';
 import { euroExact } from '@/lib/format';
 import { HOUSE_TRANSFER_TTL_DAYS,houseTransferExpiresAt,houseTransferLifecycleStatus,primaryProperty } from '@/lib/properties';
 
+// An e-mail address is one unbreakable token: at 390px a long one sets the
+// column's min-content width and pushes the whole page into horizontal
+// overflow (Firefox measured 413 against 390 here, 449 on /pro/team). A
+// zero-width space marks the natural break opportunities of an address without
+// changing what is read out or copied. It has to be plain text, not markup:
+// EHList types title and text as strings, and the design guard forbids both a
+// new page stylesheet and inline styles.
+function breakableEmail(email: string): string {
+  return String(email).replace(/([-@])/g, '$1\u200B');
+}
+
 export default async function HouseHistory({searchParams}:{searchParams:Promise<Record<string,string>>}){
   const user=await requireUser('homeowner'); const sp=await searchParams; const property=primaryProperty(user.id);
   if (!property) return <AppShell role="homeowner" active="/app/home" title="Haus-Historie">
@@ -53,7 +64,7 @@ export default async function HouseHistory({searchParams}:{searchParams:Promise<
       <EHSubmitButton pendingLabel="Arbeit wird gespeichert …">In Hausakte speichern</EHSubmitButton>
       </EHFormSection></EHWorkflowForm></section>
 
-    {invites.length>0&&<EHWorkSection title="Vorgemerkte Betriebe"><EHList label="Vorgemerkte Betriebe" items={invites.map(i=>({ id: String(i.id), title: i.company_name||i.email, text: `${i.email} · wird automatisch verbunden, sobald sich der Betrieb registriert.`, href: `/partner-invite/${i.token}` }))} /></EHWorkSection>}
+    {invites.length>0&&<EHWorkSection title="Vorgemerkte Betriebe"><EHList label="Vorgemerkte Betriebe" items={invites.map(i=>({ id: String(i.id), title: i.company_name||breakableEmail(i.email), text: `${breakableEmail(i.email)} · wird automatisch verbunden, sobald sich der Betrieb registriert.`, href: `/partner-invite/${i.token}` }))} /></EHWorkSection>}
 
     <EHWorkSection title="Eigentümerhistorie"><EHList label="Eigentümerhistorie" items={ownerships.map(o=>({ id: String(o.id), title: `${o.first_name} ${o.last_name}`, text: `${new Date(o.started_at).toLocaleDateString('de-DE')} – ${o.active?'heute':o.ended_at?new Date(o.ended_at).toLocaleDateString('de-DE'):'beendet'}`, meta: o.active?<EHStatus tone="success">Aktuell</EHStatus>:null }))} /></EHWorkSection>
 
@@ -67,7 +78,7 @@ export default async function HouseHistory({searchParams}:{searchParams:Promise<
         <EHSubmitButton pendingLabel="Übergabe wird vorbereitet …">Übergabe vorbereiten</EHSubmitButton>
       </EHFormSection>
     </EHWorkflowForm>} />
-    {transfers.length>0&&<EHList label="Übergabe-Verlauf" items={transfers.map(t=>{const lifecycle=houseTransferLifecycleStatus(t);const expiresAt=houseTransferExpiresAt(t.created_at);const label=lifecycle==='accepted'?'Übergeben':lifecycle==='expired'?'Abgelaufen':lifecycle==='revoked'?'Widerrufen':'Bereit';return { id: String(t.id), title: t.target_email, text: lifecycle==='active'&&expiresAt?`gültig bis ${expiresAt.toLocaleDateString('de-DE')}`:label, meta: <EHStatus tone={lifecycle==='accepted'?'success':lifecycle==='active'?'info':'neutral'}>{label}</EHStatus> };})} />}
+    {transfers.length>0&&<EHList label="Übergabe-Verlauf" items={transfers.map(t=>{const lifecycle=houseTransferLifecycleStatus(t);const expiresAt=houseTransferExpiresAt(t.created_at);const label=lifecycle==='accepted'?'Übergeben':lifecycle==='expired'?'Abgelaufen':lifecycle==='revoked'?'Widerrufen':'Bereit';return { id: String(t.id), title: breakableEmail(t.target_email), text: lifecycle==='active'&&expiresAt?`gültig bis ${expiresAt.toLocaleDateString('de-DE')}`:label, meta: <EHStatus tone={lifecycle==='accepted'?'success':lifecycle==='active'?'info':'neutral'}>{label}</EHStatus> };})} />}
     </EHWorkflowStack>
   </AppShell>;
 }
