@@ -24,12 +24,17 @@ export default async function Calendar({searchParams}:{searchParams:Promise<Reco
     list.push({id:String(row.id),href:`/app/jobs/${row.job_id}`,title:row.title,detail:ownerDate(row.start_at),meta:row.business_name || 'Betrieb im Auftrag ansehen',status:statusLabel(row.status),tone:row.status==='cancelled' ? 'neutral' : row.status==='confirmed' ? 'success' : 'info',action:'Auftrag öffnen'});
     groups.set(month,list);
   }
+  const total = past ? count : rows.length;
   return <AppShell role="homeowner" active="/app/calendar" title="Termine">
-    <EHOwnerPageHeader title="Deine Termine" text="Deine Terminübersicht. Absprachen und Änderungen klärst du im jeweiligen Auftrag." />
+    <EHOwnerPageHeader title="Deine Termine" context={`${total} ${total === 1 ? 'Termin' : 'Termine'}`} text="Deine Terminübersicht. Absprachen und Änderungen klärst du im jeweiligen Auftrag." />
     <EHOwnerFilters label="Zeitraum" items={[{href:'/app/calendar',label:'Anstehend',active:!past},{href:'/app/calendar?view=past',label:'Vergangen',active:past}]} />
-    <EHOwnerSection title={past ? 'Vergangene Termine' : 'Anstehende Termine'} text={past ? `Seite ${page} von ${pages}. Ein vergangener Termin bedeutet nicht, dass der Auftrag abgeschlossen ist.` : 'Alle Termine ab jetzt, einschließlich noch unbestätigter oder stornierter Einträge mit ihrem jeweiligen Status.'}>
-      {rows.length===0 && <EHEmptyState title={past ? 'Keine vergangenen Termine' : 'Keine anstehenden Termine'} text={past ? 'Vergangene Besuche erscheinen später hier.' : 'Neue Anliegen kannst du beschreiben. Bestehende Absprachen findest du in deinen Aufträgen.'} action={<EHButton href="/app/jobs" variant="secondary">Aufträge ansehen</EHButton>} />}
-    </EHOwnerSection>
+    {rows.length===0 ? (
+      <EHEmptyState title={past ? 'Keine vergangenen Termine' : 'Keine anstehenden Termine'} text={past ? 'Vergangene Besuche erscheinen später hier.' : 'Neue Anliegen kannst du beschreiben. Bestehende Absprachen findest du in deinen Aufträgen.'} action={<EHButton href="/app/jobs" variant="secondary">Aufträge ansehen</EHButton>} />
+    ) : (
+      <EHOwnerSection title={past ? 'Vergangene Termine' : 'Anstehende Termine'} text={past ? `Seite ${page} von ${pages}. Ein vergangener Termin bedeutet nicht, dass der Auftrag abgeschlossen ist.` : 'Alle Termine ab jetzt, einschließlich noch unbestätigter oder stornierter Einträge mit ihrem jeweiligen Status.'}>
+        {null}
+      </EHOwnerSection>
+    )}
     {[...groups].map(([month,items]) => <EHOwnerSection key={month} title={month}><EHOwnerRecords label={month} items={items} /></EHOwnerSection>)}
     {past && pages > 1 && <EHOwnerFilters label="Seiten der Terminhistorie" items={[
       ...(page > 1 ? [{href:`/app/calendar?view=past&page=${page-1}`,label:'Neuere Termine',active:false}] : []),
