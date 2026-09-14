@@ -149,6 +149,11 @@ async function strictRetry(page,fn,attempts=8){let lastError;for(let attempt=0;a
 // ones whose own content does not fit (scrollWidth > clientWidth) - that is
 // the actual culprit, its ancestors are only being pushed wide by it.
 async function assertNoOverflow(page,label){
+  // Metrics taken before the webfont swaps in are measured with the fallback
+  // face, which is wider: the page "overflows" for a moment and no real user
+  // ever sees it. Firefox lost its font swap race on /pro/team and failed a
+  // run that was green before and after. Settle the fonts first.
+  await page.evaluate(()=>document.fonts?.ready).catch(()=>{});
   const report=await page.evaluate(()=>{
     const doc=document.documentElement;
     if(doc.scrollWidth<=doc.clientWidth+0.5)return null;
@@ -199,10 +204,18 @@ function isToleratedFirefoxPageError(message){
 }
 function isToleratedFirefoxConsole(text,source){
   return browserName==='firefox' && (
-    /^Failed to fetch RSC payload .* Falling back to browser navigation/.test(text)
-    || text==='JSHandle@object'
+    text==='JSHandle@object'
     || /A ServiceWorker intercepted the request and encountered an unexpected error/.test(text)
     || (text==='Error' && /_next\/static\/chunks\//.test(source||'')));
+}
+// Next.js logs a failed RSC fetch itself and then falls back to a full browser
+// navigation - the framework recovers and the user gets the page, so the
+// navigation is not broken. Deliberately NOT scoped to one engine: Firefox and
+// WebKit both emit it when a prefetch is cancelled by the navigation it was
+// warming up. Under load either engine may or may not win that race, which is
+// why the same commit was green once and red the next time.
+function isToleratedRscFallback(text){
+  return /Failed to fetch RSC payload .* Falling back to browser navigation/.test(text);
 }
 // WebKit: Next.js `Link` prefetches are cancelled the moment the pointer
 // leaves a link or the page navigates on. WebKit reports every cancellation
@@ -226,6 +239,7 @@ function isToleratedConsoleError(text,source){
   // Offline probe and the 404 not-found probe are deliberately provoked.
   if(/ERR_INTERNET_DISCONNECTED|Failed to load resource.*503/i.test(text))return true;
   if(/__e2e-unknown-route__/.test(source||'') && /404/.test(text))return true;
+  if(isToleratedRscFallback(text))return true;
   return isToleratedFirefoxConsole(text,source)||isToleratedWebKitConsole(text,source);
 }
 function trackPage(page,label){
