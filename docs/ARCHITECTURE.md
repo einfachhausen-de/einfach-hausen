@@ -958,3 +958,38 @@ Die Markenstudie liegt unter design/brand-study/ und ist unabhängig von Next-Ap
 
 Der Nutzer hat die drei Stilproben aus PR #40 ausdrücklich verworfen. Deren technische 27/27-Prüfung ist keine visuelle Freigabe. Root Codex gestaltet und implementiert die neue Richtung persönlich; keinen weiteren Prime/bai-Dispatch aus alten Abschnitten ableiten. Neuer Arbeitsstand: `design/einfachhausen-brand-atelier-20260906`, Workspace `/home/ubuntu/orca/workspaces/einfach-hausen-brand-atelier-20260906`. Konzept, vollständige Nutzerkorrektur und Plan: `docs/brand/ATELIER_02.md`; aktuelle Übergabe: `docs/brand/HANDOFF.md`; vollständige Quellen: `docs/brand/ATELIER_02_SOURCE.md`; bedienbare Vollansicht: `design/brand-atelier/preview.html`. EH-BRAND-03 bleibt in Arbeit, die neue Richtung wurde noch nicht vom Nutzer bewertet. Genau nächste Markenaktion: diese neue Vollansicht besprechen und tatsächliches Nutzerfeedback dokumentieren. EH-BRAND-04..06 folgen erst der Richtungsentscheidung; kein Merge/Deploy. Ältere Empfehlungen/Dispatch-Anweisungen sind für diese Markenwelle historisch. Andere laufende Arbeitswellen bleiben erhalten.
 >>>>>>> origin/main
+
+<!-- SIN-GPT-WEB-HANDOVER
+task: DOCS-01
+updated: 2026-09-08T06:23:19+00:00
+actor: local-agent
+evidence-sha256: 02422d9cea1ac470342ae2bebe52c003e7a9e35672373bbd6aa7497a7503833e
+-->
+
+<!-- SIN-GPT-WEB-HANDOVER
+task: DOCS-02
+updated: 2026-09-08T06:23:20+00:00
+actor: local-agent
+evidence-sha256: 02422d9cea1ac470342ae2bebe52c003e7a9e35672373bbd6aa7497a7503833e
+-->
+
+<!-- SIN-GPT-WEB-HANDOVER
+task: DOCS-03
+updated: 2026-09-08T06:23:21+00:00
+actor: local-agent
+evidence-sha256: 02422d9cea1ac470342ae2bebe52c003e7a9e35672373bbd6aa7497a7503833e
+-->
+
+<!-- SIN-GPT-WEB-HANDOVER
+task: EH-BRAND-07-WORKSPACE
+updated: 2026-09-10T08:16:13+00:00
+actor: local-agent
+evidence-sha256: 33de7bf2a603bb0ec77dc854170363bd7ca513213ea229a19b541ae04cc2baa1
+-->
+
+<!-- SIN-GPT-WEB-HANDOVER
+task: EH-BRAND-08-ASSISTANT
+updated: 2026-09-10T08:16:26+00:00
+actor: local-agent
+evidence-sha256: 015d0d2ceaa4d632f31ebbea1137fa73741c36e2bf71d15e38f5dd4d4c398489
+-->

@@ -1,5 +1,7 @@
 # Einfach Hausen — visuelle Produktlinie
 
+> **Historisch seit 2026-09-11 (EH-DOC-CONVERGENCE):** Die einzige verbindliche visuelle Quelle ist [`DESIGN.md`](../DESIGN.md) zusammen mit `packages/eh-design/`. Diese Datei beschreibt die frühere Visionslinie der Kunden-App und bleibt als Hintergrund erhalten. Änderungen am Design erfolgen ausschließlich über `DESIGN.md` und die Designautorität.
+
 Diese Datei beschreibt die verbindliche visuelle Richtung der Kunden-App. Referenz ist das von der Familie gelieferte Mobile-App-Board vom 21.08.2026.
 
 ## Leitidee

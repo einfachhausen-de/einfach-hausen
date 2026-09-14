@@ -901,3 +901,38 @@ Der Nutzer hat die drei Stilproben aus PR #40 ausdrücklich verworfen. Deren tec
 ## App-Vorlagen: verbindliche Ergänzung 2026-09-07
 Für Shell, Provider-Onboarding und Team zuerst docs/brand/app-foundation/NEXT_AGENT.md lesen. Bestehende Vorlagen wiederverwenden; fehlende Workflows nicht selbst gestalten. Edition 2 bedeutet nicht vollständige App-Abdeckung.
 >>>>>>> origin/main
+
+<!-- SIN-GPT-WEB-HANDOVER
+task: DOCS-01
+updated: 2026-09-08T06:23:19+00:00
+actor: local-agent
+evidence-sha256: 02422d9cea1ac470342ae2bebe52c003e7a9e35672373bbd6aa7497a7503833e
+-->
+
+<!-- SIN-GPT-WEB-HANDOVER
+task: DOCS-02
+updated: 2026-09-08T06:23:20+00:00
+actor: local-agent
+evidence-sha256: 02422d9cea1ac470342ae2bebe52c003e7a9e35672373bbd6aa7497a7503833e
+-->
+
+<!-- SIN-GPT-WEB-HANDOVER
+task: DOCS-03
+updated: 2026-09-08T06:23:21+00:00
+actor: local-agent
+evidence-sha256: 02422d9cea1ac470342ae2bebe52c003e7a9e35672373bbd6aa7497a7503833e
+-->
+
+<!-- SIN-GPT-WEB-HANDOVER
+task: EH-BRAND-07-WORKSPACE
+updated: 2026-09-10T08:16:13+00:00
+actor: local-agent
+evidence-sha256: 33de7bf2a603bb0ec77dc854170363bd7ca513213ea229a19b541ae04cc2baa1
+-->
+
+<!-- SIN-GPT-WEB-HANDOVER
+task: EH-BRAND-08-ASSISTANT
+updated: 2026-09-10T08:16:26+00:00
+actor: local-agent
+evidence-sha256: 015d0d2ceaa4d632f31ebbea1137fa73741c36e2bf71d15e38f5dd4d4c398489
+-->

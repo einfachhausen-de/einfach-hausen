@@ -1,0 +1,15 @@
+timestamp=2026-08-26T18:32:15.779Z level=INFO run=abf4617b message="creating instance" directory=/home/ubuntu/dev/einfach-hausen
+timestamp=2026-08-26T18:32:15.784Z level=INFO run=abf4617b message=fromDirectory directory=/home/ubuntu/dev/einfach-hausen
+timestamp=2026-08-26T18:32:15.811Z level=ERROR run=abf4617b message="Failed to fetch models.dev" cause="Cause([Die(Error: EACCES: permission denied, mkdir '/home/ubuntu/.local/state/opencode/locks/19c80674cdbc0429c37952fd39af9b8237ffa59d.lock')])"
+timestamp=2026-08-26T18:32:15.892Z level=INFO run=abf4617b message=bootstrapping directory=/home/ubuntu/dev/einfach-hausen
+timestamp=2026-08-26T18:32:15.906Z level=INFO run=abf4617b message=loading path=/home/ubuntu/dev/einfach-hausen/.opencode-config/opencode/config.json
+timestamp=2026-08-26T18:32:15.915Z level=INFO run=abf4617b message=loading path=/home/ubuntu/dev/einfach-hausen/.opencode-config/opencode/opencode.json
+timestamp=2026-08-26T18:32:15.916Z level=INFO run=abf4617b message=loading path=/home/ubuntu/dev/einfach-hausen/.opencode-config/opencode/opencode.jsonc
+timestamp=2026-08-26T18:32:15.989Z level=WARN run=abf4617b message="background dependency install failed" dir=/home/ubuntu/dev/einfach-hausen/.opencode-config/opencode error="Cause([Die(PlatformError: PermissionDenied: FileSystem.makeDirectory (/home/ubuntu/.local/state/opencode/locks/4c7d36502a088aef2d59f95a76494481e3528bed.lock) (cause: Error: EACCES: permission denied, mkdir '/home/ubuntu/.local/state/opencode/locks/4c7d36502a088aef2d59f95a76494481e3528bed.lock'))])"
+timestamp=2026-08-26T18:32:16.031Z level=INFO run=abf4617b message=loading path=/home/ubuntu/.opencode/opencode.json
+timestamp=2026-08-26T18:32:16.033Z level=INFO run=abf4617b message=loading path=/home/ubuntu/.opencode/opencode.jsonc
+timestamp=2026-08-26T18:32:16.046Z level=INFO run=abf4617b message=loading path=/home/ubuntu/.config/orca/opencode-hooks/shared/opencode.json
+timestamp=2026-08-26T18:32:16.065Z level=INFO run=abf4617b message=loading path=/home/ubuntu/.config/orca/opencode-hooks/shared/opencode.jsonc
+timestamp=2026-08-26T18:32:16.379Z level=INFO run=abf4617b message="all LSPs are disabled"
+timestamp=2026-08-26T18:32:16.381Z level=INFO run=abf4617b message="all formatters are disabled"
+timestamp=2026-08-26T18:32:16.381Z level=INFO run=abf4617b message=init
