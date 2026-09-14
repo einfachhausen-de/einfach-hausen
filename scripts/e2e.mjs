@@ -144,7 +144,41 @@ async function nav(page,url,options){let response;try{response=await page.goto(u
 // Structural reads/writes can still race the hydration swap; retry until the
 // transient S:<n> tree is gone instead of failing the whole flow.
 async function strictRetry(page,fn,attempts=8){let lastError;for(let attempt=0;attempt<attempts;attempt++){try{return await fn();}catch(error){if(!String(error).includes('strict mode violation'))throw error;lastError=error;await page.waitForTimeout(600);}}throw lastError;}
-async function assertNoOverflow(page,label){const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>document.documentElement.clientWidth);if(overflow)throw new Error(`${label} has horizontal overflow`);}
+// A bare "has horizontal overflow" is impossible to act on: it does not say
+// which element is too wide. Report the boxes that stick out, and flag the
+// ones whose own content does not fit (scrollWidth > clientWidth) - that is
+// the actual culprit, its ancestors are only being pushed wide by it.
+async function assertNoOverflow(page,label){
+  const report=await page.evaluate(()=>{
+    const doc=document.documentElement;
+    if(doc.scrollWidth<=doc.clientWidth+0.5)return null;
+    const limit=doc.clientWidth;
+    const offenders=[];
+    for(const el of document.querySelectorAll('*')){
+      const rect=el.getBoundingClientRect();
+      if(rect.width<1||rect.height<1)continue;
+      if(rect.right<=limit+0.5)continue;
+      const style=getComputedStyle(el);
+      offenders.push({
+        tag:el.tagName.toLowerCase(),
+        cls:String(el.className||'').trim().split(/\s+/).slice(0,3).join('.'),
+        id:el.id||'',
+        right:Math.round(rect.right),
+        width:Math.round(rect.width),
+        selfOverflow:el.scrollWidth>el.clientWidth+0.5,
+        overflowX:style.overflowX,
+        text:String(el.textContent||'').trim().slice(0,50),
+      });
+    }
+    return {scrollWidth:doc.scrollWidth,clientWidth:limit,offenders};
+  });
+  if(!report)return;
+  // Prefer the boxes that genuinely cannot fit their content; they explain the
+  // rest. Fall back to the widest boxes if nothing reports its own overflow.
+  const ranked=report.offenders.filter(o=>o.selfOverflow).concat(report.offenders.filter(o=>!o.selfOverflow));
+  const detail=ranked.slice(0,6).map(o=>`${o.tag}${o.id?'#'+o.id:''}${o.cls?'.'+o.cls:''} right=${o.right} w=${o.width} overflowX=${o.overflowX}${o.selfOverflow?' [content overflows]':''} text="${o.text}"`).join('\n    ');
+  throw new Error(`${label} has horizontal overflow (scrollWidth=${report.scrollWidth} clientWidth=${report.clientWidth}):\n    ${detail}`);
+}
 const runtimeErrors=[];
 const trackedPages=[];
 // ---------------------------------------------------------------------------
