@@ -58,20 +58,49 @@ export function EHDirectoryShortcuts({ contacts }: { contacts: readonly EHDirect
 
 export function EHDirectoryCommandSearch({ categories, contacts }: { categories: readonly EHDirectoryCategory[]; contacts: readonly EHDirectoryContact[] }) {
   const [value, setValue] = useState("");
+  const [focused, setFocused] = useState(false);
+  const boxRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const terms = value.trim().toLocaleLowerCase("de").split(/\s+/).filter(Boolean);
   const hit = (text: string) => terms.every(term => text.toLocaleLowerCase("de").includes(term));
+  const commands = [
+    { id: "manage", label: "Kontakte verwalten", href: "/app/messages?mode=manage", text: "kontakte verwalten bearbeiten" },
+    { id: "emergency", label: "Notfallkontakte öffnen", href: "/app/emergency", text: "notfall notdienst notfallkontakte öffnen" },
+  ].filter(command => terms.length === 0 || hit(command.text));
   const matchingMains = categories.filter(category => terms.length > 0 && hit(category.label));
   const matchingSubs = categories.flatMap(category => category.subcategories.map(sub => ({ main: category, sub }))).filter(item => terms.length > 0 && (hit(item.sub.label) || hit(item.main.label))).slice(0, 6);
   const matchingContacts = terms.length > 0 ? contacts.filter(contact => hit(`${contact.name} ${contact.company} ${contact.email}`)).slice(0, 6) : [];
-  const commands = terms.length > 0 ? [
-    { id: "manage", label: "Kontakte verwalten", href: "/app/messages?mode=manage", text: "kontakte verwalten bearbeiten" },
-    { id: "emergency", label: "Notfallkontakte öffnen", href: "/app/emergency", text: "notfall notdienst notfallkontakte öffnen" },
-  ].filter(command => hit(command.text)) : [];
   const empty = terms.length > 0 && !matchingMains.length && !matchingSubs.length && !matchingContacts.length && !commands.length;
-  return <div className={s.directorySearch} role="search">
-    <label htmlFor="directory-command-search">Kontakte und Bereiche suchen</label>
-    <div><input id="directory-command-search" name="q" type="search" value={value} onChange={event => setValue(event.target.value)} placeholder="Name, Betrieb oder Befehl" autoComplete="off" /></div>
-    {terms.length > 0 && <ul className={s.directoryContacts} aria-label="Suchergebnisse">
+  const open = focused || terms.length > 0;
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && (event.key === "k" || event.key === "s")) {
+        event.preventDefault();
+        inputRef.current?.focus();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+  const moveFocus = (direction: 1 | -1) => {
+    const root = boxRef.current;
+    if (!root) return;
+    const items = Array.from(root.querySelectorAll("input, a[href]")) as HTMLElement[];
+    const at = items.indexOf(document.activeElement as HTMLElement);
+    const next = items[(at + direction + items.length) % items.length];
+    next?.focus();
+  };
+  return <div className={s.directorySearch} role="search" ref={boxRef}
+    onFocus={() => setFocused(true)}
+    onBlur={event => { if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setFocused(false); }}
+    onKeyDown={event => {
+      if (event.key === "ArrowDown") { event.preventDefault(); moveFocus(1); }
+      else if (event.key === "ArrowUp") { event.preventDefault(); moveFocus(-1); }
+      else if (event.key === "Escape") { setValue(""); inputRef.current?.blur(); }
+    }}>
+    <label htmlFor="directory-command-search">Kontakte und Bereiche suchen <span aria-hidden="true">⌘K</span></label>
+    <div><input ref={inputRef} id="directory-command-search" name="q" type="search" value={value} onChange={event => setValue(event.target.value)} placeholder="Name, Betrieb oder Befehl" autoComplete="off" /></div>
+    {open && <ul className={s.directoryContacts} aria-label="Suchergebnisse">
       {commands.map(command => <li key={command.id}><a className={s.directoryContactLink} href={command.href}><div><strong>{command.label}</strong></div><DirectoryArrow /></a></li>)}
       {matchingMains.map(category => <li key={category.id}><a className={s.directoryContactLink} href={directoryHref({ main: category.id })}><div><strong>{category.label}</strong></div><DirectoryArrow /></a></li>)}
       {matchingSubs.map(item => <li key={`${item.main.id}:${item.sub.id}`}><a className={s.directoryContactLink} href={directoryHref({ main: item.main.id, sub: item.sub.id })}><div><strong>{item.sub.label}</strong><p>{item.main.label}</p></div><DirectoryArrow /></a></li>)}
@@ -80,6 +109,7 @@ export function EHDirectoryCommandSearch({ categories, contacts }: { categories:
     </ul>}
   </div>;
 }
+
 
 export function EHContactWorkspace({ categories, contacts, mode, mainId, subcategoryId, entryId, query = "", requestId, notice, action, shortcutAction, conversation }: {
   categories: readonly EHDirectoryCategory[]; contacts: EHDirectoryContact[]; mode: EHDirectoryMode;
