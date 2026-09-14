@@ -2,6 +2,47 @@
 
 import { useActionState, useEffect, useRef, useState, type ReactNode } from "react";
 import s from "./styles.module.css";
+import {
+  AirVent,
+  Building,
+  ClipboardCheck,
+  DoorOpen,
+  Droplets,
+  Flame,
+  HardHat,
+  House,
+  Paintbrush,
+  ShieldCheck,
+  Sparkles,
+  TreePine,
+  Trees,
+  Truck,
+  Waves,
+  Wrench,
+  Zap,
+  type LucideIcon,
+} from "lucide-react";
+
+const DIRECTORY_MAIN_ICONS: Record<string, LucideIcon> = {
+  garten: TreePine,
+  elektro: Zap,
+  heizung: Flame,
+  "wasser-sanitaer": Droplets,
+  dach: House,
+  "fenster-tueren": DoorOpen,
+  renovieren: Paintbrush,
+  "bauen-sanieren": HardHat,
+  reinigung: Sparkles,
+  "reparaturen-montage": Wrench,
+  "klima-lueftung": AirVent,
+  sicherheit: ShieldCheck,
+  "entruempeln-umzug": Truck,
+  aussenanlagen: Trees,
+  "pool-garten": Waves,
+  "gutachter-planung": ClipboardCheck,
+  immobilien: Building,
+};
+
 
 export type EHDirectoryCategory = { readonly id: string; readonly label: string; readonly subcategories: readonly { readonly id: string; readonly label: string }[] };
 export type EHDirectoryContact = { id: number; platformUserId: number | null; name: string; company: string; phone: string; email: string; legacyCategory: string; revision: number; subcategoryIds: string[]; unreadCount?: number; isPinned?: boolean; isEmergency?: boolean };
@@ -98,8 +139,8 @@ export function EHDirectoryCommandSearch({ categories, contacts }: { categories:
       else if (event.key === "ArrowUp") { event.preventDefault(); moveFocus(-1); }
       else if (event.key === "Escape") { setValue(""); inputRef.current?.blur(); }
     }}>
-    <label htmlFor="directory-command-search">Kontakte und Bereiche suchen <span aria-hidden="true">⌘K</span></label>
-    <div><input ref={inputRef} id="directory-command-search" name="q" type="search" value={value} onChange={event => setValue(event.target.value)} placeholder="Name, Betrieb oder Befehl" autoComplete="off" /></div>
+    <label htmlFor="directory-command-search">Kontakte und Bereiche suchen</label>
+    <div><input ref={inputRef} id="directory-command-search" name="q" type="search" value={value} onChange={event => setValue(event.target.value)} placeholder="Name, Betrieb oder Befehl (⌘K)" autoComplete="off" /></div>
     {open && <ul className={s.directoryContacts} aria-label="Suchergebnisse">
       {commands.map(command => <li key={command.id}><a className={s.directoryContactLink} href={command.href}><div><strong>{command.label}</strong></div><DirectoryArrow /></a></li>)}
       {matchingMains.map(category => <li key={category.id}><a className={s.directoryContactLink} href={directoryHref({ main: category.id })}><div><strong>{category.label}</strong></div><DirectoryArrow /></a></li>)}
@@ -111,10 +152,10 @@ export function EHDirectoryCommandSearch({ categories, contacts }: { categories:
 }
 
 
-export function EHContactWorkspace({ categories, contacts, mode, mainId, subcategoryId, entryId, query = "", requestId, notice, action, shortcutAction, conversation }: {
+export function EHContactWorkspace({ categories, contacts, mode, mainId, subcategoryId, entryId, query = "", requestId, notice, action, shortcutAction, counts, conversation }: {
   categories: readonly EHDirectoryCategory[]; contacts: EHDirectoryContact[]; mode: EHDirectoryMode;
   mainId?: string; subcategoryId?: string; entryId?: number; query?: string; requestId: string;
-  notice?: string; action: EHDirectoryAction; shortcutAction: EHDirectoryShortcutAction; conversation?: ReactNode;
+  notice?: string; action: EHDirectoryAction; shortcutAction: EHDirectoryShortcutAction; counts?: Record<string, number>; conversation?: ReactNode;
 }) {
   const main = categories.find(item => item.id === mainId);
   const sub = main?.subcategories.find(item => item.id === subcategoryId);
@@ -142,7 +183,11 @@ export function EHContactWorkspace({ categories, contacts, mode, mainId, subcate
     {mode === "categories" && <EHDirectoryCommandSearch categories={categories} contacts={contacts} />}
     {mode === "categories" && <EHDirectoryShortcuts contacts={contacts} />}
     {mode === "categories" && <nav aria-label="Hauptkategorien"><ul className={s.directoryCategories}>
-      {categories.map(category => <li key={category.id}><a href={directoryHref({ main: category.id })} data-main-category={category.id}><span>{category.label}</span><DirectoryArrow /></a></li>)}
+      {categories.map(category => {
+        const Icon = DIRECTORY_MAIN_ICONS[category.id] ?? Wrench;
+        const count = counts?.[category.id] ?? 0;
+        return <li key={category.id}><a href={directoryHref({ main: category.id })} data-main-category={category.id} aria-label={`${category.label}, ${count} ${count === 1 ? "Kontakt" : "Kontakte"}`}><span style={{ display: "inline-flex", alignItems: "center", gap: "8px" }}><Icon width={18} height={18} aria-hidden="true" /> {category.label} · {count}</span><DirectoryArrow /></a></li>;
+      })}
     </ul></nav>}
     {mode === "subcategories" && main && <nav aria-label={`Leistungen in ${main.label}`}><ul className={s.directorySubcategories}>
       {main.subcategories.map(item => <li key={item.id}><a href={directoryHref({ main: main.id, sub: item.id })} data-subcategory={item.id}><span>{item.label}</span><DirectoryArrow /></a></li>)}
