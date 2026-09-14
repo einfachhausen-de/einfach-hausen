@@ -190,6 +190,12 @@ jobs:
         run: npm run build
       - name: Regenerate website baselines
         run: npm run test:visual:update
+      - name: Regenerate app baselines
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: npm run test:visual:apps:update
       - name: Open pull request with the new baselines
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
