@@ -1,4 +1,5 @@
 import { AppShell } from '@/components/shell';
+import { crumbs } from '@/components/nav-config';
 import { requireUser } from '@/lib/auth';
 import {
   EHAppHeader,
@@ -14,7 +15,7 @@ export default async function HilfePage() {
   await requireUser('homeowner');
 
   return (
-    <AppShell role="homeowner" active="/app/more" title="Hilfe" subtitle="Orientierung und persönliche Unterstützung">
+    <AppShell role="homeowner" active="/app/more" title="Hilfe" subtitle="Orientierung und persönliche Unterstützung" breadcrumbs={crumbs(null,'Hilfe & Kontakt')}>
       <EHAppHeader
         eyebrow="Hilfe & Orientierung"
         title="Was möchtest du klären?"

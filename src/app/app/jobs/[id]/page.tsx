@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { AlertTriangle,CalendarDays,CheckCircle2,MapPin,MessageSquare,Phone,ShieldCheck,Sparkles,Star,UserRound } from 'lucide-react';
 import { AppShell,SectionTitle } from '@/components/shell';
+import { crumbs } from '@/components/nav-config';
 import { JobMedia } from '@/components/job-media';
 import { mediaKindFromPath } from '@/lib/intake-media';
 import { requireUser } from '@/lib/auth';
@@ -37,7 +38,7 @@ export default async function JobDetail({params,searchParams}:{params:Promise<{i
     const contact=db.prepare(`SELECT a.provider_id,a.contact_user_id,u.first_name,u.last_name,u.phone,u.email,m.job_title,p.business_name FROM job_assignments a JOIN users u ON u.id=a.contact_user_id JOIN provider_members m ON m.user_id=a.contact_user_id JOIN provider_profiles p ON p.user_id=a.provider_id WHERE a.job_id=?`).get(job.id) as any;
     const messages=contact?db.prepare('SELECT * FROM contact_messages WHERE homeowner_id=? AND contact_user_id=? ORDER BY created_at').all(u.id,contact.contact_user_id) as any[]:[];
     const dispatches=db.prepare(`SELECT COUNT(*) total FROM job_dispatches WHERE job_id=?`).get(job.id) as any;
-    return <AppShell role="homeowner" active="/app/jobs" title="Ansprechpartner" subtitle={job.category}>
+    return <AppShell role="homeowner" active="/app/jobs" title="Ansprechpartner" subtitle={job.category} breadcrumbs={crumbs('/app/jobs','Ansprechpartner')}>
       <EHWorkspaceGrid main={<>       <EHAppHeader eyebrow={job.category} title={job.title.replace(/^Ansprechpartner:\s*/,'')} text={job.description} actions={<EHStatus tone={contact?"success":"neutral"}>{contact?'Verbunden':'Ansprechpartner gesucht'}</EHStatus>} /> </>} aside={<EHWorkSection title="Dein Anliegen"><div className="meta-line"><span><MapPin/>{job.postcode}</span></div>{job.photo_id&&<JobMedia src={`/api/job-media/${job.photo_id}`} alt="Foto, Video oder Sprachnachricht zum Thema" kind={mediaKindFromPath(job.photo_path)}/>}
 </EHWorkSection>} />
       <div className="ai-summary"><Sparkles/><div><strong>Du hast nur einen Ansprechpartner gewählt</strong><p>Es wurde noch kein Auftrag vergeben und kein Preis vereinbart. Der Hausmeisterservice bleibt dabei und verbindet dich nur mit einem passenden Menschen.</p></div></div>
@@ -60,7 +61,7 @@ export default async function JobDetail({params,searchParams}:{params:Promise<{i
   const cheapest=quotes.length?Math.min(...quotes.map(q=>q.amount)):null;
   const available=quotes.filter(q=>q.available_at).sort((a,b)=>new Date(a.available_at).getTime()-new Date(b.available_at).getTime()); const fastest=available[0]?.id;
 
-  return <AppShell role="homeowner" active="/app/jobs">
+  return <AppShell role="homeowner" active="/app/jobs" breadcrumbs={crumbs('/app/jobs','Auftrag')}>
     <EHWorkspaceGrid main={<>     <EHAppHeader eyebrow={job.category} title={job.title} text={job.description} actions={<><EHStatus tone="neutral">{statusLabel(job.status)}</EHStatus>{job.urgency==='emergency'&&<EHStatus tone="error">NOTFALL</EHStatus>}</>} /> </>} aside={<EHWorkSection title="Dein Auftrag"><div className="meta-line"><span><MapPin/>{job.postcode}</span><span><CalendarDays/>{dateLabel(job.preferred_date)}</span></div>{job.photo_id&&<JobMedia src={`/api/job-media/${job.photo_id}`} alt="Foto, Video oder Sprachnachricht zum Auftrag" kind={mediaKindFromPath(job.photo_path)}/> }
 </EHWorkSection>} />
     {sp.error&&<EHErrorState text={sp.error} />}{sp.cancelled==='1'&&<EHFormFeedback kind="success">Auftrag wurde storniert.</EHFormFeedback>}{sp.payment==='processing'&&<EHFormFeedback kind="success">Zahlung eingegangen. Der endgültige Status wird sicher über Stripe bestätigt.</EHFormFeedback>}{sp.payment==='unavailable'&&<EHErrorState text="Onlinezahlung ist derzeit nicht vollständig konfiguriert. Es wurde kein Zahlungsstatus geändert. Stimme die Zahlung direkt mit deinem Ansprechpartner ab oder versuche es später erneut." />}{sp.payment==='cancelled'&&<EHErrorState text="Zahlung wurde abgebrochen. Es wurde nichts belastet." />}

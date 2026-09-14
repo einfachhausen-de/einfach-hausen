@@ -206,7 +206,13 @@ function isToleratedFirefoxConsole(text,source){
   return browserName==='firefox' && (
     text==='JSHandle@object'
     || /A ServiceWorker intercepted the request and encountered an unexpected error/.test(text)
-    || (text==='Error' && /_next\/static\/chunks\//.test(source||'')));
+    || (text==='Error' && /_next\/static\/chunks\//.test(source||''))
+    // Firefox reports an image whose request the next navigation cancelled as
+    // "Image corrupt or truncated". The bytes are fine - every PNG chunk CRC
+    // of /brand/logo-full.png verifies and the IDAT stream decompresses - the
+    // response was aborted mid-flight. Scoped to image URLs so a genuinely
+    // broken asset still fails the run.
+    || (/Image corrupt or truncated/.test(text) && /\.(?:png|jpe?g|webp|avif|gif|svg)(?:\?|$)/i.test(source||'')));
 }
 // Next.js logs a failed RSC fetch itself and then falls back to a full browser
 // navigation - the framework recovers and the user gets the page, so the

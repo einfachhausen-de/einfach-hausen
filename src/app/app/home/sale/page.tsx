@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { Building2, CheckCircle2, ChevronRight, LockKeyhole, MessageCircle, RefreshCw, ShieldCheck, UserRound } from 'lucide-react';
 import { AppShell, SectionTitle } from '@/components/shell';
+import { crumbs } from '@/components/nav-config';
 import { EHAppHeader, EHPanel, EHList, EHEmptyState, EHField, EHSelect, EHTextarea, EHInput, EHStatus, EHSubmitButton } from '@/design-system';
 import { requireUser } from '@/lib/auth';
 import { db } from '@/lib/db';
@@ -47,7 +48,7 @@ export default async function Sale() {
   const user = await requireUser('homeowner');
   const property = primaryProperty(user.id);
   if (!property) {
-    return <AppShell role="homeowner" active="/app/home"><div className="empty owner-empty-action"><Building2 aria-hidden="true" /><strong>Hausprofil fehlt</strong><p>Lege zuerst dein Zuhause an. Danach kannst du Bewertung und Verkauf vorbereitet organisieren.</p><Link className="btn primary" href="/app/home">Mein Haus einrichten</Link></div></AppShell>;
+    return <AppShell role="homeowner" active="/app/home" breadcrumbs={crumbs('/app/home','Verkauf & Bewertung')}><div className="empty owner-empty-action"><Building2 aria-hidden="true" /><strong>Hausprofil fehlt</strong><p>Lege zuerst dein Zuhause an. Danach kannst du Bewertung und Verkauf vorbereitet organisieren.</p><Link className="btn primary" href="/app/home">Mein Haus einrichten</Link></div></AppShell>;
   }
 
   const valuations = db.prepare(`SELECT * FROM property_valuations WHERE property_id=? AND homeowner_id=? ORDER BY created_at DESC LIMIT 10`).all(property.id, user.id) as any[];
@@ -69,7 +70,7 @@ export default async function Sale() {
 
   const currentStage = lead ? Math.max(0, saleStages.findIndex(([status]) => status === lead.status)) : -1;
 
-  return <AppShell role="homeowner" active="/app/home" title="Verkauf & Bewertung" subtitle="Du entscheidest, was geteilt wird">
+  return <AppShell role="homeowner" active="/app/home" title="Verkauf & Bewertung" subtitle="Du entscheidest, was geteilt wird" breadcrumbs={crumbs('/app/home','Verkauf & Bewertung')}>
     <EHAppHeader eyebrow="Dein Haus bleibt dein Datensatz" title="Bewerten, verkaufen, passende Makler finden." text="Hausdaten werden übernommen. Private Rechnungen, Dokumente, Zahlungen und Nachrichten bleiben außerhalb des Verkaufsprozesses." />
 
     <section className="property-sale-summary"><div><small>Immobilie</small><strong>{property.address || property.postcode || 'Mein Zuhause'}</strong><span>{property.property_type || 'Eigenheim'}{property.living_area ? ` · ${property.living_area} m²` : ''}</span></div><div><small>Orientierungswert</small><strong>{property.estimated_value_min != null && property.estimated_value_max != null ? `${euro(property.estimated_value_min)} – ${euro(property.estimated_value_max)}` : 'Noch nicht hinterlegt'}</strong></div></section>

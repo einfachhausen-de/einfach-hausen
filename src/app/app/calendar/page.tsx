@@ -1,4 +1,5 @@
 import { AppShell } from '@/components/shell';
+import { crumbs } from '@/components/nav-config';
 import { EHOwnerPageHeader, EHOwnerFilters, EHOwnerSection, EHOwnerRecords, EHEmptyState, EHButton, type EHOwnerRecord } from '@/design-system';
 import { requireUser } from '@/lib/auth';
 import { db } from '@/lib/db';
@@ -25,7 +26,7 @@ export default async function Calendar({searchParams}:{searchParams:Promise<Reco
     groups.set(month,list);
   }
   const total = past ? count : rows.length;
-  return <AppShell role="homeowner" active="/app/calendar" title="Termine">
+  return <AppShell role="homeowner" active="/app/calendar" title="Termine" breadcrumbs={crumbs('/app/jobs','Termine')}>
     <EHOwnerPageHeader title="Deine Termine" context={`${total} ${total === 1 ? 'Termin' : 'Termine'}`} text="Alle Termine mit Status. Details stehen im jeweiligen Auftrag." />
     <EHOwnerFilters label="Zeitraum" items={[{href:'/app/calendar',label:'Anstehend',active:!past},{href:'/app/calendar?view=past',label:'Vergangen',active:past}]} />
     {rows.length===0 ? (

@@ -82,6 +82,21 @@ export const ownerAccountItems: readonly NavChild[] = [
   { href: '/app/hilfe', label: 'Hilfe & Kontakt' },
 ];
 
+export type CrumbTrail = readonly { href?: string; label: string }[];
+
+/**
+ * One shape for every page below the first level: "Start › Bereich › Seite".
+ * Pages pass only the area they belong to and their own name, so a trail can
+ * never invent a hierarchy the navigation does not have.
+ */
+export function crumbs(areaHref: string | null, leaf: string): CrumbTrail {
+  const trail: { href?: string; label: string }[] = [{ href: '/app', label: 'Start' }];
+  const area = areaHref ? ownerAreas.find((candidate) => candidate.href === areaHref) : undefined;
+  if (area && area.href !== '/app') trail.push({ href: area.href, label: area.label });
+  trail.push({ label: leaf });
+  return trail;
+}
+
 export function matchesArea(active: string, area: NavArea): boolean {
   if (active === area.href) return true;
   if (area.owns.includes(active)) return true;

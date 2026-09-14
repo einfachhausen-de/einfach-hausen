@@ -3,6 +3,7 @@ import { BadgeCheck, ChevronRight } from 'lucide-react';
 import { EHAppHeader, EHPanel, EHList, EHEmptyState, EHErrorState, EHButton, EHField, EHInput, EHFormFeedback, EHSubmitButton } from '@/design-system';
 import { notFound } from 'next/navigation';
 import { AppShell } from '@/components/shell';
+import { crumbs } from '@/components/nav-config';
 import { requireUser } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { reportReviewAction } from '@/app/actions';
@@ -13,7 +14,7 @@ export default async function PartnerProfile({params,searchParams}:{params:Promi
   const reviews=db.prepare(`SELECT r.id,r.rating,r.comment,r.created_at,u.first_name FROM reviews r JOIN users u ON u.id=r.homeowner_id WHERE r.provider_id=? AND r.hidden=0 ORDER BY r.created_at DESC LIMIT 5`).all(providerId) as any[];
   const trades=String(provider.trades||'').split(',').map((x:string)=>x.trim()).filter(Boolean).slice(0,6);
   const returnHref=sp.job?`/app/jobs/${Number(sp.job)}`:'/app/jobs';
-  return <AppShell role="homeowner" active="/app/jobs" title="Partnerprofil" subtitle="Geprüfter Einfach-Hausen-Partner">
+  return <AppShell role="homeowner" active="/app/jobs" title="Partnerprofil" subtitle="Geprüfter Einfach-Hausen-Partner" breadcrumbs={crumbs('/app/jobs','Partnerprofil')}>
     {sp.message&&<EHFormFeedback kind="success">{String(sp.message)}</EHFormFeedback>}
     {sp.error&&<EHErrorState text={String(sp.error)} />}
     <EHButton href={returnHref} variant="secondary">Zurück</EHButton>

@@ -1,4 +1,5 @@
 import { AppShell } from '@/components/shell';
+import { crumbs } from '@/components/nav-config';
 import { EHAppHeader, EHDossierList, EHWorkSection, EHEmptyState, EHButton, EHStatus } from '@/design-system';
 import { requireUser } from '@/lib/auth';
 import { db } from '@/lib/db';
@@ -17,7 +18,7 @@ export default async function Documents(){
   const openInvoices = invoices.filter(i=>i.status==='sent');
   const openTotal = openInvoices.reduce((s:number,i:any)=>s+(typeof i.total_gross==='number'?i.total_gross:0),0);
   const headerText = empty ? 'Rechnungen deiner Partnerbetriebe, Leistungsnachweise und Zahlungsbelege an einem Ort.' : `${invoices.length} ${invoices.length===1?'Rechnung':'Rechnungen'} · ${uploaded.length} ${uploaded.length===1?'Nachweis':'Nachweise'} · ${payments.length} ${payments.length===1?'Zahlungsbeleg':'Zahlungsbelege'}`;
-  return <AppShell role="homeowner" active="/app/documents">
+  return <AppShell role="homeowner" active="/app/documents" breadcrumbs={crumbs('/app/home','Dokumente')}>
     <EHAppHeader eyebrow="Übersicht" title="Dokumente & Rechnungen" text={headerText} />
     {invoices.length>0 && <EHWorkSection title={`Rechnungen · ${invoices.length}`}>{openInvoices.length>0 && <p><EHStatus tone="warning">Offen: {euroExact(openTotal)}</EHStatus></p>}<EHDossierList label="Rechnungen" items={invoices.map(i=>({id:`i-${i.id}`,kind:'Rechnung',title:`Rechnung ${i.invoice_number}`,detail:`${i.business_name} · ${i.title} · ${ownerDate(i.issue_date||i.created_at)}`,amount:euroExact(i.total_gross),href:`/app/invoices/${i.id}`,status:<EHStatus tone={invoiceTone(i.status)}>{invoiceStatusLabel(i.status)}</EHStatus>}))}/></EHWorkSection>}
     {uploaded.length>0 && <EHWorkSection title={`Nachweise & Unterlagen · ${uploaded.length}`}><EHDossierList label="Hochgeladene Dokumente" items={uploaded.map(d=>({id:`d-${d.id}`,kind:d.kind,title:d.document_title,detail:`${d.business_name||'Einfach Hausen'} · ${d.job_title} · ${ownerDate(d.created_at)}`,href:`/api/documents/${d.id}`}))}/></EHWorkSection>}

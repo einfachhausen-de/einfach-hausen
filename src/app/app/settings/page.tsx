@@ -1,5 +1,6 @@
 import { BellOff, ShieldCheck } from 'lucide-react';
 import { AppShell } from '@/components/shell';
+import { crumbs } from '@/components/nav-config';
 import { EHAppHeader, EHPanel, EHList, EHButton } from '@/design-system';
 import { InstallAppCard } from '@/components/install-app-card';
 import { requireUser } from '@/lib/auth';
@@ -12,7 +13,7 @@ export default async function AppSettingsPage() {
   await requireUser('homeowner');
 
   return (
-    <AppShell role="homeowner" active="/app/profile" title="App-Einstellungen" subtitle="Installation, Offline-Modus und Benachrichtigungen">
+    <AppShell role="homeowner" active="/app/profile" title="App-Einstellungen" subtitle="Installation, Offline-Modus und Benachrichtigungen" breadcrumbs={crumbs(null,'App-Einstellungen')}>
       <EHAppHeader eyebrow="Konfiguration" title="App-Einstellungen" text="Hier siehst du, was dein Browser wirklich unterstützt und welche Funktionen noch nicht aktiv sind." actions={<EHButton href="/app/profile" variant="secondary">Profil</EHButton>} />
 
       <EHPanel title="Installation & Offline">
