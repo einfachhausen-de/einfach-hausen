@@ -24,6 +24,8 @@ export type ContactView = {
   email: string;
   legacyCategory: string;
   revision: number;
+  isPinned: boolean;
+  isEmergency: boolean;
   subcategoryIds: string[];
 };
 
@@ -116,6 +118,8 @@ type EntryRow = {
   email: string;
   legacy_category: string;
   revision: number;
+  is_pinned: number | null;
+  is_emergency: number | null;
 };
 
 export type CreateManualInput = {
@@ -177,6 +181,8 @@ export function createContactDirectoryStore(
       email: row.email,
       legacyCategory: row.legacy_category,
       revision: row.revision,
+      isPinned: Number(row.is_pinned ?? 0) === 1,
+      isEmergency: Number(row.is_emergency ?? 0) === 1,
       subcategoryIds: links.map((link) => link.subcategory_id),
     };
   }
@@ -200,6 +206,22 @@ export function createContactDirectoryStore(
     const row = loadEntry(ownerId, entryId);
     if (!row) return fail('not-found');
     return { ok: true, value: toView(row) };
+  }
+
+  function setFlags(input: { ownerId: number; entryId: number; pinned?: boolean; emergency?: boolean }): StoreResult<ContactView> {
+    if (!validOwnerId(input.ownerId)) return fail('not-found');
+    const row = loadEntry(input.ownerId, input.entryId);
+    if (!row) return fail('not-found');
+    const updates: string[] = [];
+    const params: number[] = [];
+    if (input.pinned !== undefined) { updates.push('is_pinned=?'); params.push(input.pinned ? 1 : 0); }
+    if (input.emergency !== undefined) { updates.push('is_emergency=?'); params.push(input.emergency ? 1 : 0); }
+    if (!updates.length) return { ok: true, value: toView(row) };
+    updates.push('updated_at=CURRENT_TIMESTAMP');
+    database.prepare(`UPDATE homeowner_contact_entries SET ${updates.join(', ')} WHERE homeowner_id=? AND id=?`).run(...params, input.ownerId, input.entryId);
+    const next = loadEntry(input.ownerId, input.entryId);
+    if (!next) return fail('not-found');
+    return { ok: true, value: toView(next) };
   }
 
   function findByPlatformUserId(ownerId: number, userId: number): StoreResult<ContactView> {
@@ -461,6 +483,7 @@ export function createContactDirectoryStore(
   // Inner transactions use better-sqlite3 savepoints. No decision can race another writer.
   return {
     list, get, findByPlatformUserId,
+    setFlags: (input: { ownerId: number; entryId: number; pinned?: boolean; emergency?: boolean }) => database.transaction(setFlags).immediate(input),
     createManual: (input: CreateManualInput) => database.transaction(createManual).immediate(input),
     updateManual: (input: UpdateManualInput) => database.transaction(updateManual).immediate(input),
     replaceAssignments: (input: ReplaceAssignmentsInput) => database.transaction(replaceAssignments).immediate(input),
