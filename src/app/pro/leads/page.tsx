@@ -12,12 +12,26 @@ import { updateBrokerLeadStatusAction } from '@/app/actions';
 export default async function ProLeads() {
   const user = await requireUser('provider');
   const ctx = getProviderContext(user.id);
-  if (!ctx) return null;
+
+  if (!ctx) {
+    return (
+      <AppShell role="provider" active="/pro/leads" title="Immobilien-Leads" subtitle="Zugang prüfen">
+        <ProviderState
+          icon={<Building2 size={21} />}
+          title="Keinem Unternehmen zugeordnet"
+          description="Dein Zugang ist aktuell keinem aktiven Partnerunternehmen zugeordnet. Freigegebene Immobilienkontakte können deshalb nicht angezeigt werden."
+          action={{ href: '/pro/hilfe', label: 'Hilfe & Kontakt' }}
+          tone="unavailable"
+        />
+      </AppShell>
+    );
+  }
+
   const broker = providerHasCategory(ctx.providerId, 'makler');
 
   if (!broker) {
     return (
-      <AppShell role="provider" active="/pro" title="Immobilien-Leads" subtitle="Nur für passende Anbieter">
+      <AppShell role="provider" active="/pro/leads" title="Immobilien-Leads" subtitle="Nur für passende Anbieter">
         <ProviderPageIntro eyebrow="Immobilien" title="Freigegebene Kontakte" description="Immobilienkontakte werden nur angezeigt, wenn die passende Tätigkeit aktiv ist und der Eigentümer ausdrücklich freigegeben hat." />
         <ProviderState
           icon={<Building2 size={21} />}

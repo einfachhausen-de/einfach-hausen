@@ -9,7 +9,11 @@ import { startPartnerPlanCheckoutAction } from '@/app/actions';
 import { getProviderContext } from '@/lib/provider';
 
 export default async function PartnerPlans({searchParams}:{searchParams:Promise<Record<string,string>>}){
-  const u=await requireUser('provider'); const ctx=getProviderContext(u.id); if(!ctx)return null; const sp=await searchParams;
+  const u=await requireUser('provider'); const ctx=getProviderContext(u.id);
+  if(!ctx)return <AppShell role="provider" active="/pro/plans" title="Partner-Tarife" subtitle="Zugang prüfen">
+    <ProviderState icon={<BadgeCheck size={21}/>} title="Keinem Unternehmen zugeordnet" description="Dein Zugang ist aktuell keinem aktiven Partnerunternehmen zugeordnet. Tarife und Abrechnung können deshalb nicht angezeigt werden." action={{href:'/pro/hilfe',label:'Hilfe & Kontakt'}} tone="unavailable"/>
+  </AppShell>;
+  const sp=await searchParams;
   const plans=db.prepare('SELECT * FROM partner_plans WHERE active=1 ORDER BY monthly_amount').all() as any[];
   const current=db.prepare(`SELECT s.*,p.title FROM partner_subscriptions s JOIN partner_plans p ON p.slug=s.plan_slug WHERE s.provider_id=?`).get(ctx.providerId) as any;
   return <AppShell role="provider" active="/pro/plans" title="Partner-Tarife" subtitle="0 % Provision · keine Gebühr pro Auftrag">

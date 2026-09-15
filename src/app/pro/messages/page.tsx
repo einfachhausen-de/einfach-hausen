@@ -23,7 +23,21 @@ type ThreadMessage = {
 export default async function Messages({ searchParams }: { searchParams: Promise<Record<string, string>> }) {
   const u = await requireUser('provider');
   const ctx = getProviderContext(u.id);
-  if (!ctx) return null;
+
+  if (!ctx) {
+    return (
+      <AppShell role="provider" active="/pro/messages" title="Nachrichten" subtitle="Zugang prüfen">
+        <ProviderState
+          icon={<MessageSquare size={21} />}
+          title="Keinem Unternehmen zugeordnet"
+          description="Dein Zugang ist aktuell keinem aktiven Partnerunternehmen zugeordnet. Nachrichten an Kunden können deshalb nicht angezeigt werden."
+          action={{ href: '/pro/hilfe', label: 'Hilfe & Kontakt' }}
+          tone="unavailable"
+        />
+      </AppShell>
+    );
+  }
+
   const sp = await searchParams;
 
   const customers = db.prepare(`SELECT hc.*,hu.first_name,hu.last_name,hu.phone,hu.email,h.address,h.postcode,j.title last_job_title,

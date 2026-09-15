@@ -99,12 +99,27 @@ export const ownerAccountTabs: readonly NavChild[] = [
 // The partner navigation follows the same rules as the owner navigation: one
 // list, "owns" for routes that live elsewhere, children for its own pages.
 export const providerAreas: readonly NavArea[] = [
-  { href: '/pro', label: 'Anfragen', icon: Home, owns: ['/pro/onboarding', '/pro/leads'], children: [] },
+  {
+    href: '/pro',
+    label: 'Anfragen',
+    icon: Home,
+    // /pro/leads is a destination of this area, so it needs a link and not only
+    // an active state - it is a child here. /pro/onboarding stays in "owns"
+    // alone: it is a one-time setup flow that the profile already links to, not
+    // a page anyone switches between.
+    owns: ['/pro/onboarding', '/pro/leads'],
+    children: [
+      { href: '/pro', label: 'Anfragen' },
+      { href: '/pro/leads', label: 'Immobilien-Leads' },
+    ],
+  },
   {
     href: '/pro/orders',
     label: 'Aufträge',
     icon: ClipboardList,
-    owns: ['/pro/jobs', '/pro/invoices'],
+    // /pro/jobs is a redirect stub onto /pro/orders. /pro/invoices is not here:
+    // only /pro/invoices/[id] exists, the bare path has no page.
+    owns: ['/pro/jobs'],
     children: [
       { href: '/pro/orders', label: 'Aufträge' },
       { href: '/pro/calendar', label: 'Termine' },

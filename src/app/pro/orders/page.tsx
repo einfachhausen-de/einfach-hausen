@@ -12,7 +12,20 @@ const DONE_STATUSES = new Set(['completed', 'cancelled', 'closed']);
 export default async function Orders() {
   const u = await requireUser('provider');
   const ctx = getProviderContext(u.id);
-  if (!ctx) return null;
+
+  if (!ctx) {
+    return (
+      <AppShell role="provider" active="/pro/orders" title="Aufträge" subtitle="Zugang prüfen">
+        <ProviderState
+          icon={<ClipboardList size={21} />}
+          title="Keinem Unternehmen zugeordnet"
+          description="Dein Zugang ist aktuell keinem aktiven Partnerunternehmen zugeordnet. Aufträge und Kontakte können deshalb nicht angezeigt werden."
+          action={{ href: '/pro/hilfe', label: 'Hilfe & Kontakt' }}
+          tone="unavailable"
+        />
+      </AppShell>
+    );
+  }
 
   const rows = ctx.canManageJobs
     ? db.prepare(`SELECT j.*,q.amount,q.status quote_status,a.contact_user_id,cu.first_name contact_first,cu.last_name contact_last

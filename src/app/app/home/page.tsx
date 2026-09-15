@@ -1,4 +1,4 @@
-import { CalendarDays, FileText, History, House, NotebookPen, Receipt, TrendingUp, Wrench } from 'lucide-react';
+import { CalendarDays, FileText, History, House, Receipt, TrendingUp, Wrench } from 'lucide-react';
 import { AppShell } from '@/components/shell';
 import {
   EHAppHeader, EHList, EHEmptyState, EHButton, EHText, EHPropertyOverview, EHDetailDisclosure,
@@ -74,7 +74,6 @@ export default async function MyHome() {
             { href: '#technik', title: 'Technik & Geräte', text: 'Ausstattung und Modellangaben nachschlagen.', icon: <Wrench /> },
             { href: '/app/home/sale', title: 'Verkauf & Bewertung', text: 'Hauswert festhalten und einen möglichen Verkauf vorbereiten.', icon: <TrendingUp /> },
           ] }]} />
-          <EHText muted><NotebookPen aria-hidden="true" size={18} /> Notizen: noch nicht verfügbar. Hinweise zu Geräten kannst du bereits bei der Technik hinterlegen.</EHText>
         </EHWorkSection>
     </EHWorkflowStack>
   </AppShell>;
