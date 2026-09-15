@@ -113,6 +113,12 @@ jobs:
           npm run test:matching:t0107
           npm run test:matching:benchmark
           npm run test:review
+          # T-0122/T-0132 ran in no workflow at all until now - which is why the
+          # error-tracking suite could rot to ERR_MODULE_NOT_FOUND unnoticed, and
+          # why two error boundaries reported nothing for weeks. test:error-tracking
+          # also guards that every boundary under src/app wires useErrorReport.
+          npm run test:observability
+          npm run test:error-tracking
       - name: CRM acceptance
         run: npm run test:crm
       - name: Architecture acceptance
