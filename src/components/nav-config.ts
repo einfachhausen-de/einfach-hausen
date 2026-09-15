@@ -6,6 +6,14 @@ export type NavChild = { href: string; label: string };
 export type NavArea = {
   href: string;
   label: string;
+  /**
+   * Short form for the mobile bottom navigation. Five entries share 390px, so a
+   * label like "Verträge & Tarife" has to wrap onto two lines and pushes its
+   * icon 8px above the icons of the single-line entries. The sidebar and the
+   * breadcrumbs keep `label` - they have the room. The link carries the full
+   * `label` as its accessible name, so nothing is lost for screen readers.
+   */
+  shortLabel?: string;
   icon: LucideIcon;
   /**
    * Routes that belong to this area although they do not sit below its own
@@ -44,6 +52,7 @@ export const ownerAreas: readonly NavArea[] = [
   {
     href: '/app/contracts',
     label: 'Verträge & Tarife',
+    shortLabel: 'Verträge',
     icon: FileSignature,
     owns: [],
     children: [
@@ -54,6 +63,7 @@ export const ownerAreas: readonly NavArea[] = [
   {
     href: '/app/jobs',
     label: 'Aufträge & Termine',
+    shortLabel: 'Aufträge',
     icon: ClipboardList,
     owns: ['/app/calendar'],
     // The status views of the job list (offen, in Arbeit, abgeschlossen) are
@@ -67,6 +77,7 @@ export const ownerAreas: readonly NavArea[] = [
   {
     href: '/app/messages',
     label: 'Ansprechpartner',
+    shortLabel: 'Kontakte',
     icon: UsersRound,
     owns: ['/app/partners'],
     // /app/partners redirects to /app/messages: one surface, one destination.

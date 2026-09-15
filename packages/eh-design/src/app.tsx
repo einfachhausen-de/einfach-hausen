@@ -33,7 +33,7 @@ export function EHDialog({open, onClose, title, children, actions}: {open: boole
   return <dialog ref={ref} className={s.dialog} aria-labelledby={uid} onCancel={event=>{event.preventDefault();onClose();}} onClose={onClose}><div className={s.dialogHead}><h2 id={uid}>{title}</h2><button type="button" aria-label="Dialog schließen" onClick={onClose}>×</button></div><div className={s.dialogBody}>{children}</div>{actions && <EHActions>{actions}</EHActions>}</dialog>;
 }
 export function EHEmptyState({title, text, action}: {title: string; text: string; action?: ReactNode}) {
-  return <div className={s.emptyState}><EHEyebrow number="—">Hier ist Platz</EHEyebrow><EHHeading as="h2" scale="item">{title}</EHHeading><EHText>{text}</EHText>{action && <EHActions>{action}</EHActions>}</div>;
+  return <div className={s.emptyState}><EHHeading as="h2" scale="item">{title}</EHHeading><EHText>{text}</EHText>{action && <EHActions>{action}</EHActions>}</div>;
 }
 export function EHLoadingState({label = "Wird geladen …"}: {label?: string}) {return <div className={s.loading} role="status"><span aria-hidden="true"/>{label}</div>;}
 export function EHErrorState({title = "Das hat noch nicht geklappt.", text, onRetry}: {title?: string; text: string; onRetry?: ()=>void}) {

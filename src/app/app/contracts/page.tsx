@@ -77,7 +77,7 @@ export default async function Contracts({ searchParams }: { searchParams: Promis
   return <AppShell role="homeowner" active="/app/contracts" title="Verträge & Tarife" subtitle="Laufende Verträge, Fristen und Sparpotenzial" breadcrumbs={trail} tabs={tabs}>
     <EHWorkflowStack>
       <EHAppHeader
-        eyebrow="Hausakte"
+        eyebrow="Fristen & Kosten"
         title="Verträge & Tarife"
         text="Strom, DSL, Versicherungen und alles, was regelmäßig Geld kostet – mit den Fristen, die sonst im Briefkasten untergehen."
         actions={<EHButton href="/app/documents" variant="secondary">Alle Dokumente</EHButton>}

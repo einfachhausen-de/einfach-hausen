@@ -78,7 +78,7 @@
 .eh-status[data-status="error"] { color: var(--eh-color-error); }
 .eh-divider { border: 0; border-top: 1px solid var(--eh-rule); margin-block: 32px; }
 .eh-hero { display: grid; gap: clamp(36px,6vw,96px); align-items: center; }
-.eh-hero[data-has-media="true"] { grid-template-columns: minmax(0,1.08fr) minmax(0,1fr); }
+.eh-hero[data-has-media="true"] { grid-template-columns: minmax(0,1.2fr) minmax(0,1fr); }
 .eh-heroCopy { display: flex; flex-direction: column; gap: 28px; align-items: flex-start; min-width: 0; }
 .eh-heroCopy .eh-text { overflow-wrap: anywhere; }
 /* No `hyphens: auto` here. Hyphenation depends on the machine: it needs a
@@ -89,8 +89,8 @@
    failed the visual gate on every deploy. `overflow-wrap: anywhere` already
    guarantees no horizontal overflow, without making the layout depend on
    the reader's dictionaries. */
-.eh-heroCopy .eh-heading { max-width: 16ch; overflow-wrap: anywhere; }
-.eh-heroCopy .eh-heading[data-scale="display"] { max-width: 10ch; }
+.eh-heroCopy .eh-heading { max-width: 22ch; overflow-wrap: anywhere; }
+.eh-heroCopy .eh-heading[data-scale="display"] { max-width: 14ch; }
 .eh-heroCopy .eh-actions { margin-top: 8px; }
 .eh-heroMedia { min-width: 0; }
 .eh-promiseRow { display: grid; grid-template-columns: repeat(auto-fit,minmax(min(100%,220px),1fr)); padding: 0; list-style: none; border-top: 1px solid var(--eh-rule); }
@@ -213,8 +213,8 @@
 .eh-documentList { display: grid; gap: 20px; }
 @media (max-width: 850px) {
   .eh-hero[data-has-media="true"], .eh-split { grid-template-columns: 1fr; gap: 36px; }
-  .eh-heroCopy .eh-heading { max-width: 19ch; }
-  .eh-heroCopy .eh-heading[data-scale="display"] { max-width: 11ch; }
+  .eh-heroCopy .eh-heading { max-width: 26ch; }
+  .eh-heroCopy .eh-heading[data-scale="display"] { max-width: 15ch; }
   .eh-heroMedia { max-width: 640px; }
   .eh-heroMedia .eh-imageCut { aspect-ratio: 1.45; }
   .eh-split[data-reverse] .eh-storyCopy { order: initial; }

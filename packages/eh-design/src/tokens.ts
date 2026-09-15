@@ -24,7 +24,7 @@ export const EHTokens = {
     "eyebrow": "0.75rem",
     "input": "1rem",
     "display": "clamp(3.5rem, 7.8vw, 7rem)",
-    "page": "clamp(2.75rem, 5vw, 4.25rem)",
+    "page": "clamp(2rem, 5vw, 4.25rem)",
     "section": "clamp(2rem, 3.6vw, 3.25rem)",
     "appTitle": "clamp(2rem, 3vw, 2.75rem)"
   },
