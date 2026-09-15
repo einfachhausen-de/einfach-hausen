@@ -1,5 +1,6 @@
 import { EHAppHeader, EHList, EHCallout, EHField, EHInput, EHWorkspaceGrid, EHIdentitySummary, EHWorkflowForm, EHFormSection, EHFieldGrid, EHSubmitButton, EHWorkSection } from '@/design-system';
 import { AppShell } from '@/components/shell';
+import { ownerAccountTabs } from '@/components/nav-config';
 import { InstallAppCard } from '@/components/install-app-card';
 import { requireUser } from '@/lib/auth';
 import { db } from '@/lib/db';
@@ -8,7 +9,9 @@ import { logoutAction,saveProfileAction } from '@/app/actions';
 export default async function Profile(){
   const u=await requireUser('homeowner'); const p=db.prepare('SELECT * FROM homeowner_profiles WHERE user_id=?').get(u.id) as any;
   const initials=`${u.first_name?.[0]||''}${u.last_name?.[0]||''}`.toUpperCase();
-  return <AppShell role="homeowner" active="/app/profile" title="Profil" subtitle="Konto und Einstellungen">
+  return <AppShell role="homeowner" active="/app/profile" title="Profil & Einstellungen" subtitle="Konto und Einstellungen"
+    breadcrumbs={[{ href: '/app', label: 'Start' }, { label: 'Profil & Einstellungen' }]}
+    tabs={ownerAccountTabs.map(tab=>({href:tab.href,label:tab.label,active:tab.href==='/app/profile'}))}>
     <EHAppHeader eyebrow="Dein Konto" title="Profil & Einstellungen" text="Deine persönlichen Daten und der Zugang zu deinem Zuhause." />
     <EHWorkspaceGrid main={<EHWorkflowForm action={saveProfileAction}>
       <EHFormSection title="Persönliche Daten" description="So erreichen dich deine Ansprechpartner.">
@@ -26,9 +29,7 @@ export default async function Profile(){
     <EHList label="Profilbereiche" items={[
       { id: 'plans', title: 'Zahlungen & Mitgliedschaft', href: '/app/plans' },
       { id: 'notifications', title: 'Benachrichtigungen', href: '/notifications' },
-      { id: 'security', title: 'Sicherheit', text: 'Geschützte Sitzung', href: '/app/settings' },
       { id: 'help', title: 'Hilfe & Support', text: 'Direkte Unterstützung', href: '/app/hilfe' },
-      { id: 'settings', title: 'App-Einstellungen', text: 'Installation & Gerät', href: '/app/settings' },
     ]} />
 
     </EHWorkSection>

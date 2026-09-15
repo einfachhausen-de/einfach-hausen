@@ -51,7 +51,7 @@ export default async function YearPage({ searchParams }: {
     ) : undefined,
   }));
 
-  return <AppShell role="homeowner" active="/app/home" title="Mein Jahr" subtitle="Wartung, Termine und Hausaufgaben" breadcrumbs={crumbs('/app/home','Mein Jahr')}>
+  return <AppShell role="homeowner" active="/app/year" title="Mein Jahr" subtitle="Wartung, Termine und Hausaufgaben" breadcrumbs={crumbs('/app/home','Mein Jahr')}>
     <EHAppHeader eyebrow={String(year)} title="Mein Jahr" text="Wartungen und Aufträge für dein Zuhause. Wähle ein Jahr und behalte offene Aufgaben im Blick." actions={<EHButton href="/app/hausmeister" arrow>Neue Aufgabe planen</EHButton>} />
     <nav aria-label="Jahr auswählen">
       <EHActions>

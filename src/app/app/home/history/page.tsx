@@ -20,7 +20,7 @@ function breakableEmail(email: string): string {
 
 export default async function HouseHistory({searchParams}:{searchParams:Promise<Record<string,string>>}){
   const user=await requireUser('homeowner'); const sp=await searchParams; const property=primaryProperty(user.id);
-  if (!property) return <AppShell role="homeowner" active="/app/home" title="Haus-Historie" breadcrumbs={crumbs('/app/home','Historie')}>
+  if (!property) return <AppShell role="homeowner" active="/app/home/history" title="Haus-Historie" breadcrumbs={crumbs('/app/home','Historie')}>
     <EHAppHeader title="Haus-Historie" text="Die Geschichte deines Zuhauses." />
     <EHEmptyState title="Keine aktive Hausakte" text="Lege zuerst dein Zuhause an. Danach kannst du frühere Arbeiten, Wartungen und Dokumente hier sammeln." action={<EHButton href="/app/home">Mein Haus einrichten</EHButton>} />
   </AppShell>;
@@ -28,7 +28,7 @@ export default async function HouseHistory({searchParams}:{searchParams:Promise<
   const invites=db.prepare(`SELECT * FROM provider_invites WHERE property_id=? AND status='pending' ORDER BY created_at DESC`).all(property.id) as any[];
   const transfers=db.prepare(`SELECT * FROM house_transfers WHERE property_id=? ORDER BY created_at DESC LIMIT 5`).all(property.id) as any[];
   const ownerships=db.prepare(`SELECT o.*,u.first_name,u.last_name FROM property_ownerships o JOIN users u ON u.id=o.homeowner_id WHERE o.property_id=? ORDER BY o.started_at DESC,o.id DESC`).all(property.id) as any[];
-  return <AppShell role="homeowner" active="/app/home" title="Haus-Historie" subtitle="Die Geschichte deines Hauses" breadcrumbs={crumbs('/app/home','Historie')}>
+  return <AppShell role="homeowner" active="/app/home/history" title="Haus-Historie" subtitle="Die Geschichte deines Hauses" breadcrumbs={crumbs('/app/home','Historie')}>
     <EHWorkflowStack>
     <EHAppHeader eyebrow="Lebenslange Hausakte" title="Was wurde wann am Haus gemacht?" text="Auch Arbeiten aus der Zeit vor Einfach Hausen gehören hier hinein – mit Kosten, Garantie, Dokumenten und Ansprechpartnern." actions={<EHButton href="#historie-anlegen" arrow>Arbeit dokumentieren</EHButton>} />
     {sp.transfer&&<EHFormFeedback kind="success">Übergabelink erstellt. Nur die angegebene Käufer-E-Mail kann ihn innerhalb von {HOUSE_TRANSFER_TTL_DAYS} Tagen annehmen.</EHFormFeedback>}

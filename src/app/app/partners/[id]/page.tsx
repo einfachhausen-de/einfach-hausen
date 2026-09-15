@@ -14,7 +14,7 @@ export default async function PartnerProfile({params,searchParams}:{params:Promi
   const reviews=db.prepare(`SELECT r.id,r.rating,r.comment,r.created_at,u.first_name FROM reviews r JOIN users u ON u.id=r.homeowner_id WHERE r.provider_id=? AND r.hidden=0 ORDER BY r.created_at DESC LIMIT 5`).all(providerId) as any[];
   const trades=String(provider.trades||'').split(',').map((x:string)=>x.trim()).filter(Boolean).slice(0,6);
   const returnHref=sp.job?`/app/jobs/${Number(sp.job)}`:'/app/jobs';
-  return <AppShell role="homeowner" active="/app/jobs" title="Partnerprofil" subtitle="Geprüfter Einfach-Hausen-Partner" breadcrumbs={crumbs('/app/jobs','Partnerprofil')}>
+  return <AppShell role="homeowner" active="/app/partners" title="Partnerprofil" subtitle="Geprüfter Einfach-Hausen-Partner" breadcrumbs={crumbs('/app/messages','Partnerprofil')}>
     {sp.message&&<EHFormFeedback kind="success">{String(sp.message)}</EHFormFeedback>}
     {sp.error&&<EHErrorState text={String(sp.error)} />}
     <EHButton href={returnHref} variant="secondary">Zurück</EHButton>

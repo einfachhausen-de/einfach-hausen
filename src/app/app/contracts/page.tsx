@@ -1,7 +1,7 @@
 import { AppShell } from '@/components/shell';
 import {
   EHAppHeader, EHButton, EHCallout, EHEmptyState, EHFacts, EHField, EHFieldGrid, EHFormFeedback,
-  EHFormSection, EHInput, EHList, EHRouteTabs, EHSelect, EHStatus, EHSubmitButton, EHText,
+  EHFormSection, EHInput, EHList, EHSelect, EHStatus, EHSubmitButton, EHText,
   EHTextarea, EHWorkSection, EHWorkflowForm, EHWorkflowStack, EHDetailDisclosure,
 } from '@/design-system';
 import { requireUser } from '@/lib/auth';
@@ -67,7 +67,14 @@ export default async function Contracts({ searchParams }: { searchParams: Promis
     ? [{ href: '/app', label: 'Start' }, { href: '/app/contracts', label: 'Verträge & Tarife' }, { label: 'Spar-Check' }]
     : [{ href: '/app', label: 'Start' }, { label: 'Verträge & Tarife' }];
 
-  return <AppShell role="homeowner" active="/app/contracts" title="Verträge & Tarife" subtitle="Laufende Verträge, Fristen und Sparpotenzial" breadcrumbs={trail}>
+  // Both views live on the same route, so only the page knows which one is
+  // active - it passes its own tabs instead of letting the shell derive them.
+  const tabs = [
+    { href: '/app/contracts?tab=vertraege', label: 'Laufende Verträge', active: tab === 'vertraege' },
+    { href: '/app/contracts?tab=sparcheck', label: 'Spar-Check', active: tab === 'sparcheck' },
+  ];
+
+  return <AppShell role="homeowner" active="/app/contracts" title="Verträge & Tarife" subtitle="Laufende Verträge, Fristen und Sparpotenzial" breadcrumbs={trail} tabs={tabs}>
     <EHWorkflowStack>
       <EHAppHeader
         eyebrow="Hausakte"
@@ -75,10 +82,6 @@ export default async function Contracts({ searchParams }: { searchParams: Promis
         text="Strom, DSL, Versicherungen und alles, was regelmäßig Geld kostet – mit den Fristen, die sonst im Briefkasten untergehen."
         actions={<EHButton href="/app/documents" variant="secondary">Alle Dokumente</EHButton>}
       />
-      <EHRouteTabs label="Verträge & Tarife" items={[
-        { href: '/app/contracts?tab=vertraege', label: 'Laufende Verträge', active: tab === 'vertraege' },
-        { href: '/app/contracts?tab=sparcheck', label: 'Spar-Check', active: tab === 'sparcheck' },
-      ]} />
       {saved && <EHFormFeedback kind="success">Gespeichert. Deine Hausakte ist aktuell.</EHFormFeedback>}
 
       {tab === 'vertraege' ? (
