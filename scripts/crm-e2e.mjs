@@ -180,7 +180,7 @@ async function clickResearchSync(page){
   if(current.pathname!=='/admin/crm'||current.search){current.pathname='/admin/crm';current.search='';await page.goto(current.toString());}
   await Promise.all([
     page.waitForURL(url=>url.pathname==='/admin/crm'&&url.searchParams.has('sync'),{timeout:120000}),
-    page.getByRole('button',{name:/Alle Research-Daten synchronisieren/}).click(),
+    page.getByRole('button',{name:/Research-Daten synchronisieren/}).click(),
   ]);
 }
 
@@ -201,12 +201,19 @@ try{
   appDb.pragma('busy_timeout = 5000');
   browser=await chromium.launch({headless:true,executablePath:browserExecutable()});
   const page=await browser.newPage({viewport:{width:1440,height:1000}});
+  // Dev server compiles pages on demand; /admin/crm is query-heavy and the first
+  // visit can exceed the 30s default.
+  page.setDefaultTimeout(120000);
+  page.setDefaultNavigationTimeout(120000);
 
   await page.goto(`${base}/admin/login`);
   await page.getByLabel('Admin-Passwort').fill(adminPassword);
   await Promise.all([page.waitForURL('**/admin'),page.getByRole('button',{name:'Admin anmelden'}).click()]);
   await page.getByRole('link',{name:'Leads & CRM'}).click();
-  await page.getByRole('heading',{name:'Leads & CRM'}).waitFor();
+  // The page title has been reworded by design more than once ("Leads & CRM" ->
+  // "Leads & Outreach CRM"), so the wording is not a contract. The h1 is the
+  // stable render barrier; the route assertion below is the real check.
+  await page.getByRole('heading',{level:1,name:/Leads/}).waitFor();
   check(new URL(page.url()).pathname==='/admin/crm','admin CRM browser route opens');
 
   await clickResearchSync(page);
