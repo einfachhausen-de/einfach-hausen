@@ -128,6 +128,24 @@ jobs:
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
         run: npm run test:e2e:architecture
+      # Steps 9 (perf) and 10 (a11y) each rebuild .next through
+      # scripts/release-gate.mjs. That helper reads the build env from
+      # /etc/einfach-hausen-build.env or .env.build.local, neither of which
+      # exists on a runner, so those builds inherit the step environment - and
+      # neither step carries the Supabase build env. They therefore overwrite
+      # the inlined client origin that step 8 wrote into .next.
+      # scripts/e2e.mjs refuses to run against a bundle without it (T-0147,
+      # T-0200), which is why this step failed the first time it ever executed.
+      # .next is shared mutable state across steps: rebuild it here instead of
+      # trusting whatever the previous step left behind.
+      - name: Production build (Supabase build env, for browser acceptance)
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: npm run build
       - name: Browser product acceptance
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
