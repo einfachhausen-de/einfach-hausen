@@ -103,15 +103,14 @@ export const providerAreas: readonly NavArea[] = [
     href: '/pro',
     label: 'Anfragen',
     icon: Home,
-    // /pro/leads is a destination of this area, so it needs a link and not only
-    // an active state - it is a child here. /pro/onboarding stays in "owns"
-    // alone: it is a one-time setup flow that the profile already links to, not
-    // a page anyone switches between.
+    // /pro/leads and /pro/onboarding belong to this area, so "owns" gives them
+    // the active state. They are deliberately NOT children: a second child
+    // would make contextTabs() render a tab bar and change the chrome of /pro,
+    // which the app visual baselines record as a design decision. The page is
+    // reachable from /pro/hilfe, from the empty state on /pro/orders and from
+    // every notification about a released contact.
     owns: ['/pro/onboarding', '/pro/leads'],
-    children: [
-      { href: '/pro', label: 'Anfragen' },
-      { href: '/pro/leads', label: 'Immobilien-Leads' },
-    ],
+    children: [],
   },
   {
     href: '/pro/orders',
