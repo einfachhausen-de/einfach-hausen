@@ -70,9 +70,11 @@ Inter Variable wird selbst gehostet. Originaldatei: `src/fonts/InterVariable.wof
 | Kurze, nicht entscheidende Großbuchstabenregister | 12 px |
 | Input, Select, Textarea | 16 px, auch mobil |
 | Startseiten-Display | 56–112 px, responsive |
-| Unterseiten-H1 | 44–68 px |
+| Unterseiten-H1 | 32–68 px, responsiv: `clamp(2rem, 5vw, 4.25rem)` |
 | App-H1 | 32–44 px |
 | Präsentation bei 1920×1080 | Bild-/Fußtexte mindestens 24 px, Inhalt 32–36 px, Titel 56–88 px |
+
+Die Untergrenze der Unterseiten-H1 liegt seit 15.09.2026 bei 32 px statt 44 px. Grund: Die Titel mehrerer Leistungsseiten sind 60 Zeichen und länger; auf 390 px brachen sie dadurch auf sechs Zeilen um, und der Hero nahm die gesamte Bildschirmhöhe ein, bevor der erste Inhalt sichtbar wurde. Die Obergrenze von 68 px bleibt unverändert, die Skala wächst weiterhin mit 5 vw und erreicht 44 px ab etwa 880 px Breite. Jerry hat diese Senkung ausdrücklich freigegeben. Die Ursache bleibt zusätzlich der zu lange Titel — er wird inhaltlich gekürzt, die Schriftgröße ist nur die zweite Hälfte der Antwort.
 
 Eine überladene Folie wird inhaltlich aufgeteilt. Text wird nicht bis zur Unlesbarkeit verkleinert oder abgeschnitten. Numerische Schritte bleiben ungebrochen. Absätze haben kurze, sinnvolle Leselängen; lange Fachtexte kommen in `EHProse`.
 
