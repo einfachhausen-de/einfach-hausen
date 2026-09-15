@@ -565,7 +565,7 @@ const drawerKonto=await ownerDrawer.locator('nav[aria-label="Konto"]').locator('
 if(drawerKonto<4)throw new Error(`Mobile homeowner drawer must expose an account block, got ${drawerKonto}`);
 if(await ownerDrawer.getByRole('button',{name:'Abmelden'}).count()<2)throw new Error('Drawer logout actions missing');
 const jobsSection=ownerDrawer.locator('.ehn-acc-sec').filter({hasText:'Aufträge'}); await jobsSection.locator('button.ehn-acc-head').click();
-await clickAndWaitUrl(owner,jobsSection.getByRole('button',{name:'Aktiv'}),/\/app\/jobs/);
+await clickAndWaitUrl(owner,jobsSection.getByRole('button',{name:'Aufträge',exact:true}),/\/app\/jobs/);
 if(await drawerPanel.isVisible())throw new Error('Mobile owner menu did not close after navigation');
 await nav(owner, base+'/app/profile'); await waitText(owner,'Einfach Hausen aufs Handy'); await assertNoOverflow(owner,'Mobile customer profile');
 await nav(owner, base+'/app/hausmeister'); await assertNoOverflow(owner,'Mobile housemaster');
