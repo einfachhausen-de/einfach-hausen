@@ -447,7 +447,7 @@ details.faq[open] .faqBody { grid-template-rows: 1fr; }
 }
 @media (max-width: 540px) {
   .chipRow { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-  .intake .chip, .chip { justify-content: flex-start; text-align: left; padding: 8px 12px; font-size: 12px; white-space: normal; line-height: 1.3; hyphens: auto; -webkit-hyphens: auto; overflow-wrap: break-word; }
+  .intake .chip, .chip { justify-content: flex-start; text-align: left; padding: 8px 12px; font-size: 12px; white-space: normal; line-height: 1.3; overflow-wrap: break-word; }
   .floatCardA { right: 8px; top: -16px; }
   .floatCardB { left: 8px; bottom: 46px; }
   .floatCard { padding: 10px 12px; }
