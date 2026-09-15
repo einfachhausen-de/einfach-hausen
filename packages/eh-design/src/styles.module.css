@@ -81,7 +81,15 @@
 .hero[data-has-media="true"] { grid-template-columns: minmax(0,1.08fr) minmax(0,1fr); }
 .heroCopy { display: flex; flex-direction: column; gap: 28px; align-items: flex-start; min-width: 0; }
 .heroCopy .text { overflow-wrap: anywhere; }
-.heroCopy .heading { max-width: 16ch; overflow-wrap: anywhere; hyphens: auto; }
+/* No `hyphens: auto` here. Hyphenation depends on the machine: it needs a
+   hyphenation dictionary the browser may or may not have. Chromium on the
+   deploy host has none and does not break the word at all, while the CI
+   runner does - so the same heading wrapped to 4 lines in the pixel
+   baselines and 5 lines on the server, which shifted the whole page and
+   failed the visual gate on every deploy. `overflow-wrap: anywhere` already
+   guarantees no horizontal overflow, without making the layout depend on
+   the reader's dictionaries. */
+.heroCopy .heading { max-width: 16ch; overflow-wrap: anywhere; }
 .heroCopy .heading[data-scale="display"] { max-width: 10ch; }
 .heroCopy .actions { margin-top: 8px; }
 .heroMedia { min-width: 0; }
