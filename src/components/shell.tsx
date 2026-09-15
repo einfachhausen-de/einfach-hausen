@@ -39,7 +39,7 @@ export async function AppShell({ role, active, children, title, subtitle, breadc
     account={<SidebarAccountMenu name={user?`${user.first_name} ${user.last_name}`:'Profil'} initials={initials} accountLabel={pro?'Partnerkonto':'Eigenheim-Konto'} profileHref={profileHref} settingsHref={pro?'/pro/profile':'/app/settings'} helpHref={pro?'/pro/hilfe':'/app/hilfe'} />}
     mobileMenu={mobileMenu}
     notifications={<>{!pro && <HouseAssistant placement="toolbar" />}<Link href="/notifications" aria-label={unread?`${unread} ungelesene Benachrichtigungen`:'Benachrichtigungen'}><Bell size={22}/>{unread>0&&<span>{unread>99?'99+':unread}</span>}</Link>{pro && <Link href={profileHref} aria-label="Profil">{initials}</Link>}</>}
-    bottomNav={<BottomNav role={role} active={active}/>}>{breadcrumbs&&breadcrumbs.length>0&&<Breadcrumbs trail={breadcrumbs}/>}{contextTabs&&contextTabs.length>0&&<EHRouteTabs label="Bereich wechseln" items={contextTabs}/>}{children}</EHWorkspaceFrame></EHScope>;
+    bottomNav={<BottomNav role={role} active={active}/>}>{breadcrumbs&&breadcrumbs.length>0&&<Breadcrumbs trail={breadcrumbs}/>}{contextTabs&&contextTabs.length>0&&<EHRouteTabs label="Bereichsseiten" items={contextTabs}/>}{children}</EHWorkspaceFrame></EHScope>;
 }
 
 export function SectionTitle({ children, href }: {children:React.ReactNode; href?:string}) {
