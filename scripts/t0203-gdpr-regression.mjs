@@ -5,6 +5,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { stripTypeScriptTypes } from 'node:module';
+import { tsClosure } from './lib/ts-scratch.mjs';
 import Database from 'better-sqlite3';
 
 // T-0203: GDPR account deletion + export. Phase A proves the deletion core
@@ -83,7 +84,7 @@ async function phaseA() {
   fs.writeFileSync(path.join(mediaDir, 'proof.txt'), 'x');
   fs.writeFileSync(path.join(scratch, 'data', 'private', 'verify.txt'), 'x');
   // Private roots resolve against process.cwd() -> run the lib from the scratch dir.
-  const files = ['src/lib/db.ts', 'src/lib/mailer.ts', 'src/lib/notifications.ts', 'src/lib/security/audit.ts', 'src/lib/security/rate-limit.ts', 'src/lib/security/private-files.ts', 'src/lib/auth.ts', 'src/lib/account-deletion.ts'];
+  const files = tsClosure(root, ['src/lib/db.ts', 'src/lib/mailer.ts', 'src/lib/notifications.ts', 'src/lib/security/audit.ts', 'src/lib/security/rate-limit.ts', 'src/lib/security/private-files.ts', 'src/lib/auth.ts', 'src/lib/account-deletion.ts']);
   for (const rel of files) {
     const src = fs.readFileSync(path.join(root, rel), 'utf8');
     const stripped = stripTypeScriptTypes(src).replace(/(from\s*['"])(\.\.?\/[^'"]+)(['"])/g, (_m, a, s, b) => `${a}${s}.mjs${b}`);

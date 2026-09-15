@@ -6,6 +6,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { stripTypeScriptTypes } from 'node:module';
+import { tsClosure } from './lib/ts-scratch.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const dbDir = fs.mkdtempSync(path.join(os.tmpdir(), 'eh-t0143-'));
@@ -13,7 +14,7 @@ process.env.DATABASE_PATH = path.join(dbDir, 'regression.db');
 process.chdir(dbDir);
 fs.symlinkSync(path.join(root, 'node_modules'), path.join(dbDir, 'node_modules'), 'dir');
 
-for (const rel of ['src/lib/db.ts', 'src/lib/observability.ts', 'src/lib/security/audit.ts', 'src/lib/security/rate-limit.ts']) {
+for (const rel of tsClosure(root, ['src/lib/db.ts', 'src/lib/observability.ts', 'src/lib/security/audit.ts', 'src/lib/security/rate-limit.ts'])) {
   const src = fs.readFileSync(path.join(root, rel), 'utf8');
   const stripped = stripTypeScriptTypes(src).replace(/(from\s*['"])(\.\.?\/[^'"]+)(['"])/g, (_m, a, s, b) => `${a}${s}.mjs${b}`);
   const dest = path.join(dbDir, rel.replace(/\.ts$/, '.mjs'));

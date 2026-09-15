@@ -3,6 +3,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { stripTypeScriptTypes } from 'node:module';
+import { tsClosure } from './lib/ts-scratch.mjs';
 
 // Einfach Hausen notification outbox dispatcher (EH T-0201).
 // Runs as a systemd oneshot every few minutes: delivers every due pending
@@ -13,7 +14,7 @@ import { stripTypeScriptTypes } from 'node:module';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const scratch = fs.mkdtempSync(path.join(os.tmpdir(), 'eh-dispatch-src-'));
 fs.symlinkSync(path.join(root, 'node_modules'), path.join(scratch, 'node_modules'), 'dir');
-for (const rel of ['src/lib/db.ts', 'src/lib/mailer.ts', 'src/lib/notifications.ts', 'src/lib/observability.ts', 'src/lib/security/redact.ts', 'src/lib/retention.ts']) {
+for (const rel of tsClosure(root, ['src/lib/db.ts', 'src/lib/mailer.ts', 'src/lib/notifications.ts', 'src/lib/observability.ts', 'src/lib/security/redact.ts', 'src/lib/retention.ts'])) {
   const src = fs.readFileSync(path.join(root, rel), 'utf8');
   const stripped = stripTypeScriptTypes(src)
     .replace(/(from\s*['"])(\.\.?\/[^'"]+)(['"])/g, (_m, a, s, b) => `${a}${s}.mjs${b}`)

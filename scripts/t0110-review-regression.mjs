@@ -3,6 +3,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { stripTypeScriptTypes } from 'node:module';
+import { tsClosure } from './lib/ts-scratch.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const scratch = fs.mkdtempSync(path.join(os.tmpdir(), 'eh-t0110-src-'));
@@ -10,7 +11,7 @@ const dbDir = fs.mkdtempSync(path.join(os.tmpdir(), 'eh-t0110-db-'));
 process.env.DATABASE_PATH = path.join(dbDir, 'regression.db');
 process.chdir(dbDir);
 fs.symlinkSync(path.join(root, 'node_modules'), path.join(scratch, 'node_modules'), 'dir');
-for (const rel of ['src/lib/db.ts', 'src/lib/review-eligibility.ts']) {
+for (const rel of tsClosure(root, ['src/lib/db.ts', 'src/lib/review-eligibility.ts'])) {
   const src = fs.readFileSync(path.join(root, rel), 'utf8');
   const stripped = stripTypeScriptTypes(src).replace(/(from\s*['"])(\.\.?\/[^'"]+)(['"])/g, (_m, a, s, b) => `${a}${s}.mjs${b}`);
   const dest = path.join(scratch, rel.replace(/\.ts$/, '.mjs'));
