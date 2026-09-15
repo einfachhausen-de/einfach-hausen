@@ -91,7 +91,10 @@ try {
       const page = await context.newPage();
       if (login) {
         await page.goto(`${base}/login`, { waitUntil: 'networkidle' });
-        await page.fill('input[type="email"]', login.email);
+        // The auth-v2 login screen types the identifier as text (id
+        // login-identifier); only the register form uses type="email". Both
+        // carry name="email", so the name is the only selector that matches.
+        await page.fill('input[name="email"]', login.email);
         await page.fill('input[type="password"]', password);
         await Promise.all([page.waitForURL(new RegExp(login.landing), { timeout: 60000 }).catch(() => {}), page.click('button[type="submit"]')]);
         await page.waitForTimeout(3000);
