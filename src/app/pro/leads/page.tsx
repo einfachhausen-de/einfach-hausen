@@ -43,7 +43,13 @@ export default async function ProLeads() {
       <ProviderSectionHeader title="Anfragen" description={`${matches.length} ${matches.length === 1 ? 'freigegebener Kontakt' : 'freigegebene Kontakte'}`} />
       {matches.map((match: any) => (
         <EHPanel key={match.id} title={`${match.property_type || 'Immobilie'} in ${match.postcode} — Passung ${Math.round(match.match_score)} % · Status ${match.status}`}>
-          <p>{match.address || match.postcode} · {match.first_name} {match.last_name}{match.phone ? ` · ${match.phone}` : ''} · {match.living_area ? `${match.living_area} m² Wohnfläche` : 'Fläche offen'} · {match.estimated_value_min != null && match.estimated_value_max != null ? `${euro(match.estimated_value_min)} – ${euro(match.estimated_value_max)}` : 'Noch nicht bewertet'}</p>
+          {/* The email is the contact detail the owner releases ("Ich gebe
+              {Betrieb} meine Kontaktdaten und die Objektzusammenfassung ...").
+              The move onto design-system blocks in db6acb0 dropped it from the
+              render while the query kept selecting u.email - so a released lead
+              carried no contact channel at all whenever the owner had no phone.
+              Keep it next to the name, as it was before. */}
+          <p>{match.address || match.postcode} · {match.first_name} {match.last_name}{match.email ? ` · ${match.email}` : ''}{match.phone ? ` · ${match.phone}` : ''} · {match.living_area ? `${match.living_area} m² Wohnfläche` : 'Fläche offen'} · {match.estimated_value_min != null && match.estimated_value_max != null ? `${euro(match.estimated_value_min)} – ${euro(match.estimated_value_max)}` : 'Noch nicht bewertet'}</p>
           <form action={updateBrokerLeadStatusAction.bind(null, match.id)}>
             <EHField id={`lead-status-${match.id}`} label="Nächster Schritt"><EHSelect id={`lead-status-${match.id}`} name="status" defaultValue={match.status === 'contact_released' ? 'interested' : match.status}>
               <option value="interested">Interesse bestätigt</option>
