@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { canonical } from '@/lib/seo';
+import { canonical, ogImages } from '@/lib/seo';
 import { ServiceDetailPage } from '@/components/marketing/service-detail-page';
 import { SERVICE_CATEGORIES, getServiceCategory } from '@/components/marketing/service-catalog';
 
@@ -16,7 +16,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     title: service.seo.title,
     description: service.seo.description,
     alternates: { canonical: canonical(`/leistungen/${service.slug}`) },
-    openGraph: { type: 'website', title: service.seo.title, description: service.seo.description, url: `/leistungen/${service.slug}` },
+    openGraph: { type: 'website', title: service.seo.title, description: service.seo.description, url: `/leistungen/${service.slug}`, images: ogImages('leistungen') },
   };
 }
 

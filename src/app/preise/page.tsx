@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { canonical } from '@/lib/seo';
+import { canonical, ogBlock } from '@/lib/seo';
 import { db } from '@/lib/db';
 import { euroExact } from '@/lib/format';
 import { MarketingShell } from '@/components/marketing/site-shell';
@@ -10,6 +10,7 @@ export const metadata: Metadata = {
   title: 'Preise – dein Hauskonto und optionale Betreuung',
   description: 'Kostenloses Hauskonto, optionale Mitgliedschaften und transparente Betriebstarife. Handwerkerleistungen werden separat vereinbart.',
   alternates: { canonical: canonical('/preise') },
+  openGraph: ogBlock({ url: '/preise', title: 'Preise · Einfach Hausen', description: 'Kostenloses Hauskonto, optionale Mitgliedschaften und transparente Betriebstarife.', motiv: 'preise' }),
 };
 
 type Plan = { slug: string; title: string; monthly_amount: number };

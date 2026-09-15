@@ -1,12 +1,12 @@
 import type { Metadata } from 'next';
-import { canonical } from '@/lib/seo';
+import { canonical, ogBlock } from '@/lib/seo';
 import { BadgeCheck, BriefcaseBusiness, Building2, Handshake, ReceiptText, UsersRound } from 'lucide-react';
 import { MarketingShell } from '@/components/marketing/site-shell';
 import { Steps } from '@/components/marketing/ui';
 import { EHScope, EHSection, EHPageHero, EHFeatureRows, EHPanel, EHList, EHClosing, EHButton, EHActions, EHEyebrow, EHHeading, EHText, EHProse } from '@/design-system';
 import { HeroEditorialPhoto } from '@/components/marketing/hero-visuals';
 
-export const metadata: Metadata = { title: 'Für Betriebe', description: 'Partnernetzwerk für regionale Betriebe: passende Anfragen, direkter Kundenkontakt und 0 % Auftragsprovision.' , alternates: { canonical: canonical('/partner') } };
+export const metadata: Metadata = { title: 'Für Betriebe', description: 'Partnernetzwerk für regionale Betriebe: passende Anfragen, direkter Kundenkontakt und 0 % Auftragsprovision.' , alternates: { canonical: canonical('/partner') }, openGraph: ogBlock({ url: '/partner', title: 'Für Betriebe · Einfach Hausen', description: 'Regionales Qualitätsnetzwerk: passende Anfragen, direkter Kundenkontakt und 0 % Auftragsprovision.', motiv: 'partner' }) };
 export default function Page(){return <MarketingShell>
   <EHScope>
   <EHPageHero eyebrow="Für Betriebe" title="Passende Anfragen. Persönlicher Kundenkontakt. 0 % Provision." text="Einfach Hausen ist kein offener Lead-Marktplatz. Geprüfte und vertraglich gebundene Unternehmen arbeiten in einem regionalen Qualitätsnetzwerk mit planbaren Monatstarifen." actions={<><EHButton href="/register?role=provider" arrow>Als Partner starten</EHButton><EHButton href="/preise" variant="secondary">Partnerpreise</EHButton></>} media={<HeroEditorialPhoto src="/images/premium/story-ansprechpartner.jpg" label="0 % Auftragsprovision" detail="Der ausführende Betrieb bleibt Rechnungssteller." />} />

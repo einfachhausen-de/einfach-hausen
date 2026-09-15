@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { breadcrumbJsonLd, canonical, SITE_URL } from '@/lib/seo';
+import { breadcrumbJsonLd, canonical, ogImages, SITE_URL } from '@/lib/seo';
 import { LEXIKON_EINTRAEGE, LEXIKON_KATEGORIEN, alleBuchstaben, eintraegeInKategorie } from '@/lib/lexikon';
 import { MarketingShell } from '@/components/marketing/site-shell';
 import { Steps } from '@/components/marketing/ui';
@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   description:
     'Wärmepumpe, Energieausweis, Rückstauklappe, Schimmelklasse: Definition, Kostenrahmen, Ablauf und Prüfpunkte für Eigentümer — sachlich und mit klarem nächsten Schritt.',
   alternates: { canonical: canonical('/lexikon') },
-  openGraph: { type: 'website', title: 'Lexikon · Einfach Hausen', description: 'Fachbegriffe rund ums Haus, verständlich erklärt.', url: '/lexikon' },
+  openGraph: { type: 'website', title: 'Lexikon · Einfach Hausen', description: 'Fachbegriffe rund ums Haus, verständlich erklärt.', url: '/lexikon', images: ogImages('lexikon') },
 };
 
 // Feste, bewusst gemischte Auswahl für den Hero-Stapel: Pflicht, Empfehlung, Grundwissen.

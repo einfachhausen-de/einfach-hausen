@@ -12,6 +12,49 @@ export function canonical(path: string): string {
   return path === '/' ? `${SITE_URL}/` : `${SITE_URL}${path}`;
 }
 
+/**
+ * Social-Preview-Bild (1200x630). Motive liegen als PNG unter public/og/ und werden
+ * von scripts/eh-og-image.mjs aus tokens.json erzeugt — dieselbe Farbquelle wie
+ * tokens.css, damit die Vorschau nicht von der Marke abdriftet.
+ *
+ * Wichtig: Next merged Metadata nur FLACH. Eine Seite mit eigenem `openGraph`-Block
+ * ersetzt den des Layouts komplett — inklusive `images`. Deshalb muss jede Seite, die
+ * `openGraph` setzt, hier `images: ogImages('<motiv>')` mitgeben, sonst hat sie wieder
+ * keine Vorschau. Twitter faellt automatisch auf `openGraph.images` zurueck.
+ */
+export type OgMotiv = 'default' | 'leistungen' | 'lexikon' | 'blog' | 'partner' | 'hilfe' | 'preise';
+
+const OG_ALT: Record<OgMotiv, string> = {
+  default: 'Einfach Hausen — alles rund ums Eigenheim',
+  leistungen: 'Leistungen bei Einfach Hausen: alles, was ein Haus braucht',
+  lexikon: 'Einfach Hausen Lexikon: Fachbegriffe rund ums Haus',
+  blog: 'Einfach Hausen Ratgeber rund ums Eigenheim',
+  partner: 'Einfach Hausen für Handwerksbetriebe',
+  hilfe: 'Einfach Hausen Hilfe und FAQ',
+  preise: 'Einfach Hausen Preise und Hauskonto',
+};
+
+export function ogImages(motiv: OgMotiv = 'default'): Array<{ url: string; width: number; height: number; alt: string }> {
+  return [{ url: `/og/${motiv}.png`, width: 1200, height: 630, alt: OG_ALT[motiv] }];
+}
+
+/**
+ * Vollstaendiger openGraph-Block fuer Seiten, die bisher keinen hatten.
+ * Alle Felder an einer Stelle, weil eine Seiten-eigene `openGraph`-Angabe die des
+ * Layouts komplett ersetzt: locale und siteName wuerden sonst stillschweigend fehlen.
+ */
+export function ogBlock(o: { url: string; title: string; description: string; motiv?: OgMotiv; type?: 'website' | 'article' }) {
+  return {
+    type: o.type ?? 'website',
+    locale: 'de_DE',
+    siteName: 'Einfach Hausen',
+    title: o.title,
+    description: o.description,
+    url: o.url,
+    images: ogImages(o.motiv),
+  };
+}
+
 /** Globaler Graph: Organization + WebSite (ohne sameAs — keine Social-Profile im Code belegt). */
 export function orgWebsiteJsonLd(): Record<string, unknown> {
   return {

@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ArrowLeft, ArrowRight, CalendarDays, ChevronRight, Clock } from 'lucide-react';
-import { breadcrumbJsonLd, canonical, SITE_URL } from '@/lib/seo';
+import { breadcrumbJsonLd, canonical, ogImages, SITE_URL } from '@/lib/seo';
 import { CLUSTER_DATE_MODIFIED, CLUSTER_DATE_PUBLISHED } from '@/lib/seo-cluster';
 import {
   LEXIKON_EINTRAEGE,
@@ -37,7 +37,7 @@ export async function generateMetadata({ params }: { params: Promise<{ begriff: 
     title: term.title,
     description: term.description,
     alternates: { canonical: canonical(`/lexikon/${term.slug}`) },
-    openGraph: { type: 'article', title: term.title, description: term.description, url: `/lexikon/${term.slug}` },
+    openGraph: { type: 'article', title: term.title, description: term.description, url: `/lexikon/${term.slug}`, images: ogImages('lexikon') },
   };
 }
 

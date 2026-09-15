@@ -1,10 +1,10 @@
 import type { Metadata } from 'next';
-import { breadcrumbJsonLd, canonical, leistungenServiceJsonLd } from '@/lib/seo';
+import { breadcrumbJsonLd, canonical, leistungenServiceJsonLd, ogBlock } from '@/lib/seo';
 import { MarketingShell } from '@/components/marketing/site-shell';
 import { EHScope, EHSection, EHPageHero, EHServiceIndex, EHProductExcerpt, EHSectionHeading, EHProcess, EHFAQ, EHClosing, EHButton } from '@/design-system';
 import { SERVICE_CATEGORIES } from '@/components/marketing/service-catalog';
 
-export const metadata: Metadata = { title: 'Leistungen', description: 'Alles rund ums Eigenheim: Reparatur, Heizung, Dach, Garten, Sanierung, Wartung. Du beschreibst, wir ordnen zu.' , alternates: { canonical: canonical('/leistungen') } };
+export const metadata: Metadata = { title: 'Leistungen', description: 'Alles rund ums Eigenheim: Reparatur, Heizung, Dach, Garten, Sanierung, Wartung. Du beschreibst, wir ordnen zu.' , alternates: { canonical: canonical('/leistungen') }, openGraph: ogBlock({ url: '/leistungen', title: 'Leistungen · Einfach Hausen', description: 'Alles rund ums Eigenheim: Reparatur, Heizung, Dach, Garten, Sanierung, Wartung. Du beschreibst, wir ordnen zu.', motiv: 'leistungen' }) };
 
 const EXAMPLES = [
   'Die Heizung macht seit gestern klackernde Geräusche.',

@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ChevronRight } from 'lucide-react';
-import { breadcrumbJsonLd, canonical, SITE_URL } from '@/lib/seo';
+import { breadcrumbJsonLd, canonical, ogImages, SITE_URL } from '@/lib/seo';
 import { LEXIKON_KATEGORIEN, eintraegeInKategorie, getKategorie, type LexikonKategorieSlug } from '@/lib/lexikon';
 import { MarketingShell } from '@/components/marketing/site-shell';
 import { CtaBand, LinkButton, Section } from '@/components/marketing/ui';
@@ -26,7 +26,7 @@ export async function generateMetadata({ params }: { params: Promise<{ kategorie
     title: `${kat.name}: ${n} Begriffe erklärt`,
     description: kat.beschreibung,
     alternates: { canonical: canonical(`/lexikon/kategorie/${kat.slug}`) },
-    openGraph: { type: 'website', title: `${kat.name} · Lexikon`, description: kat.beschreibung, url: `/lexikon/kategorie/${kat.slug}` },
+    openGraph: { type: 'website', title: `${kat.name} · Lexikon`, description: kat.beschreibung, url: `/lexikon/kategorie/${kat.slug}`, images: ogImages('lexikon') },
   };
 }
 

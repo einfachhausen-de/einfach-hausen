@@ -9,7 +9,7 @@ import { PwaRegister } from '@/components/pwa-register';
 import { AuthProvider } from '@/components/AuthContext';
 import NativeInit from '@/components/NativeInit';
 import { CwvTelemetry } from '@/components/telemetry/cwv-telemetry';
-import { SITE_URL, orgWebsiteJsonLd } from '@/lib/seo';
+import { SITE_URL, ogImages, orgWebsiteJsonLd } from '@/lib/seo';
 
 // Brand typography: self-hosted Inter Variable for ALL surfaces (site, funnel, app).
 const interVariable = localFont({
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
   applicationName:'Einfach Hausen',
   title:{default:'Einfach Hausen · Alles rund ums Eigenheim',template:'%s · Einfach Hausen'},
   description:'Ein Ansprechpartner für alles rund ums Eigenheim. Fragen klären, passende Menschen finden, Aufträge organisieren und Hauswissen an einem Ort behalten.',
-  openGraph:{type:'website',locale:'de_DE',siteName:'Einfach Hausen',url:'/'},
+  openGraph:{type:'website',locale:'de_DE',siteName:'Einfach Hausen',url:'/',images:ogImages()},
   twitter:{card:'summary_large_image'},
   manifest:'/manifest.webmanifest',
   appleWebApp:{capable:true,statusBarStyle:'black-translucent',title:'Einfach Hausen'},

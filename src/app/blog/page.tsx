@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { breadcrumbJsonLd, canonical } from '@/lib/seo';
+import { breadcrumbJsonLd, canonical, ogBlock } from '@/lib/seo';
 import { BLOG_POSTS } from '@/lib/seo-cluster';
 import { MarketingShell } from '@/components/marketing/site-shell';
 import { EHScope, EHSection, EHPageHero, EHServiceIndex, EHClosing, EHButton, EHEyebrow, EHHeading } from '@/design-system';
@@ -8,6 +8,7 @@ export const metadata: Metadata = {
   title: 'Ratgeber rund ums Eigenheim',
   description: 'Praxisnahe Ratgeber: Heizungswartung, Bad-Sanierung, Schimmel. Problem, Optionen, Kostenrahmen, Entscheidung.',
   alternates: { canonical: canonical('/blog') },
+  openGraph: ogBlock({ url: '/blog', title: 'Ratgeber rund ums Eigenheim', description: 'Praxisnahe Ratgeber: Heizungswartung, Bad-Sanierung, Schimmel. Problem, Optionen, Kostenrahmen, Entscheidung.', motiv: 'blog' }),
 };
 
 export default function Page() {

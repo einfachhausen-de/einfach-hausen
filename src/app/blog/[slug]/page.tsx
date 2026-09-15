@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { breadcrumbJsonLd, canonical, SITE_URL } from '@/lib/seo';
+import { breadcrumbJsonLd, canonical, ogImages, SITE_URL } from '@/lib/seo';
 import { BLOG_POSTS, CLUSTER_DATE_MODIFIED, CLUSTER_DATE_PUBLISHED } from '@/lib/seo-cluster';
 import { MarketingShell } from '@/components/marketing/site-shell';
 import { Steps } from '@/components/marketing/ui';
@@ -18,7 +18,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     title: post.title,
     description: post.description,
     alternates: { canonical: canonical(`/blog/${post.slug}`) },
-    openGraph: { type: 'article', title: post.title, description: post.description, url: `/blog/${post.slug}` },
+    openGraph: { type: 'article', title: post.title, description: post.description, url: `/blog/${post.slug}`, images: ogImages('blog') },
   };
 }
 

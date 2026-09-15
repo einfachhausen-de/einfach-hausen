@@ -1,0 +1,34 @@
+{
+  "width": 1200,
+  "height": 630,
+  "images": [
+    {
+      "slug": "default",
+      "bytes": 40555
+    },
+    {
+      "slug": "leistungen",
+      "bytes": 43192
+    },
+    {
+      "slug": "lexikon",
+      "bytes": 50474
+    },
+    {
+      "slug": "blog",
+      "bytes": 42889
+    },
+    {
+      "slug": "partner",
+      "bytes": 51462
+    },
+    {
+      "slug": "hilfe",
+      "bytes": 37583
+    },
+    {
+      "slug": "preise",
+      "bytes": 40059
+    }
+  ]
+}

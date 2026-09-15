@@ -1,11 +1,11 @@
 import type { Metadata } from 'next';
-import { canonical } from '@/lib/seo';
+import { canonical, ogBlock } from '@/lib/seo';
 import { MarketingShell } from '@/components/marketing/site-shell';
 import { EHScope, EHSection, EHPageHero, EHServiceIndex, EHProse, EHClosing, EHButton, EHEyebrow, EHHeading, EHText } from '@/design-system';
 import { MiniContact } from '@/components/marketing/app-frames';
 import { FaqExplorer } from './faq-explorer';
 
-export const metadata: Metadata = { title: 'Hilfe & FAQ', description: 'Antworten zu Ablauf, Kosten, Ansprechpartnern, Hausakte und Partnern. Ehrlich und ohne Kleingedrucktes.' , alternates: { canonical: canonical('/hilfe') } };
+export const metadata: Metadata = { title: 'Hilfe & FAQ', description: 'Antworten zu Ablauf, Kosten, Ansprechpartnern, Hausakte und Partnern. Ehrlich und ohne Kleingedrucktes.' , alternates: { canonical: canonical('/hilfe') }, openGraph: ogBlock({ url: '/hilfe', title: 'Hilfe & FAQ · Einfach Hausen', description: 'Antworten zu Ablauf, Kosten, Ansprechpartnern, Hausakte und Partnern.', motiv: 'hilfe' }) };
 
 const faq = [
   { q: 'Löst eine normale Frage automatisch einen Auftrag aus?', a: 'Nein. Eine Frage bleibt eine Frage. Du entscheidest separat, ob du einen Ansprechpartner sprechen oder einen Auftrag organisieren lassen willst.', cat: 'Ablauf' },

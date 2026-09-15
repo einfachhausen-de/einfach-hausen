@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { canonical } from '@/lib/seo';
+import { canonical, ogImages } from '@/lib/seo';
 import { ServiceDetailPage } from '@/components/marketing/service-detail-page';
 import { getServiceCategory } from '@/components/marketing/service-catalog';
 
@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   title: service.seo.title,
   description: service.seo.description,
   alternates: { canonical: canonical('/leistungen/heizung') },
-  openGraph: { type: 'website', title: service.seo.title, description: service.seo.description, url: '/leistungen/heizung' },
+  openGraph: { type: 'website', title: service.seo.title, description: service.seo.description, url: '/leistungen/heizung', images: ogImages('leistungen') },
 };
 
 export default function Page() {
