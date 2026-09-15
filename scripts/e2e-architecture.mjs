@@ -45,7 +45,9 @@ function browserExecutable(){
 
 function createProjectCopy(){
   fs.mkdirSync(projectRoot,{recursive:true});
-  for(const directory of ['src','public'])fs.cpSync(path.join(repo,directory),path.join(projectRoot,directory),{recursive:true});
+  // "packages" carries the design system: src/design-system/index.ts re-exports
+  // ../../packages/eh-design/src, so a copy without it cannot compile a page.
+  for(const directory of ['src','public','packages'])fs.cpSync(path.join(repo,directory),path.join(projectRoot,directory),{recursive:true});
   for(const file of ['package.json','tsconfig.json','next.config.ts','postcss.config.mjs','next-env.d.ts']){
     const source=path.join(repo,file);
     if(fs.existsSync(source))fs.copyFileSync(source,path.join(projectRoot,file));

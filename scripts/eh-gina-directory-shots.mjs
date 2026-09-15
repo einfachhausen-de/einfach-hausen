@@ -53,7 +53,9 @@ async function shot(page, name, vp, checks = {}) {
 }
 const results = [];
 // project copy
-for (const d of ['src', 'public']) fs.cpSync(path.join(repo, d), path.join(projectRoot, d), { recursive: true });
+// "packages" carries the design system: src/design-system/index.ts re-exports
+// ../../packages/eh-design/src, so a copy without it cannot compile a page.
+for (const d of ['src', 'public', 'packages']) fs.cpSync(path.join(repo, d), path.join(projectRoot, d), { recursive: true });
 for (const f of ['package.json', 'tsconfig.json', 'next.config.ts', 'postcss.config.mjs', 'next-env.d.ts']) { const s = path.join(repo, f); if (fs.existsSync(s)) fs.copyFileSync(s, path.join(projectRoot, f)); }
 fs.symlinkSync(path.join(repo, 'node_modules'), path.join(projectRoot, 'node_modules'), 'dir');
 fs.cpSync(path.join(repo, '.next'), path.join(projectRoot, '.next'), { recursive: true, filter: (s) => !s.includes(`${path.sep}.next${path.sep}cache`) });

@@ -56,14 +56,27 @@ async function freePort(){
   });
 }
 
+// A failing route floods the log with identical "GET ... 500" lines and pushes
+// the actual compile error out of the tail. Collapse the repetitions so the
+// cause survives.
+function serverLogTail(limit=60){
+  const seen=new Set(); const out=[];
+  for(let i=serverLog.length-1;i>=0&&out.length<limit;i-=1){
+    const key=serverLog[i].trim();
+    if(seen.has(key))continue;
+    seen.add(key); out.unshift(serverLog[i]);
+  }
+  return out.join('');
+}
+
 async function waitForServer(url,timeoutMs=90000){
   const started=Date.now();
   while(Date.now()-started<timeoutMs){
-    if(server?.exitCode!==null&&server?.exitCode!==undefined)throw new Error(`Next server exited early (${server.exitCode})\n${serverLog.slice(-40).join('')}`);
+    if(server?.exitCode!==null&&server?.exitCode!==undefined)throw new Error(`Next server exited early (${server.exitCode})\n${serverLogTail()}`);
     try{const response=await fetch(url,{redirect:'manual'});if(response.status<500)return;}catch{}
     await new Promise(resolve=>setTimeout(resolve,250));
   }
-  throw new Error(`Next server did not become ready\n${serverLog.slice(-40).join('')}`);
+  throw new Error(`Next server did not become ready\n${serverLogTail()}`);
 }
 
 async function waitForDb(query,args=[],predicate=value=>Boolean(value),timeoutMs=30000){
@@ -79,7 +92,11 @@ async function waitForDb(query,args=[],predicate=value=>Boolean(value),timeoutMs
 
 function createProjectCopy(){
   fs.mkdirSync(projectRoot,{recursive:true});
-  for(const directory of ['src','public'])fs.cpSync(path.join(repo,directory),path.join(projectRoot,directory),{recursive:true});
+  // "packages" carries the design system: src/design-system/index.ts re-exports
+  // ../../packages/eh-design/src. Scripts that run the precompiled build do not
+  // notice its absence, scripts that compile in the copy (next dev) 500 on
+  // every page because the canonical UI cannot be resolved.
+  for(const directory of ['src','public','packages'])fs.cpSync(path.join(repo,directory),path.join(projectRoot,directory),{recursive:true});
   for(const file of ['package.json','tsconfig.json','next.config.ts','postcss.config.mjs','next-env.d.ts']){
     const source=path.join(repo,file);if(fs.existsSync(source))fs.copyFileSync(source,path.join(projectRoot,file));
   }
@@ -178,7 +195,7 @@ try{
     env:{...process.env,DATABASE_PATH:databasePath,BUSINESS_RESEARCH_DB_PATH:researchPath,ADMIN_PASSWORD:adminPassword,NEXT_PUBLIC_APP_URL:base},
     stdio:['ignore','pipe','pipe'],
   });
-  for(const stream of [server.stdout,server.stderr])stream.on('data',chunk=>{serverLog.push(chunk.toString());if(serverLog.length>250)serverLog.shift();});
+  for(const stream of [server.stdout,server.stderr])stream.on('data',chunk=>{serverLog.push(chunk.toString());if(serverLog.length>600)serverLog.shift();});
   await waitForServer(`${base}/admin/login`);
   appDb=new Database(databasePath);
   appDb.pragma('busy_timeout = 5000');

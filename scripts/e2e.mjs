@@ -95,7 +95,11 @@ function newE2EContext(options){return browser.newContext({serviceWorkers:E2E_SW
 
 function createProjectCopy(){
   fs.mkdirSync(projectRoot,{recursive:true});
-  for(const directory of ['src','public'])fs.cpSync(path.join(repo,directory),path.join(projectRoot,directory),{recursive:true});
+  // "packages" carries the design system: src/design-system/index.ts re-exports
+  // ../../packages/eh-design/src. This script runs the precompiled production
+  // build, so it never noticed the gap - scripts that compile inside the copy
+  // fail with a 500 on every page.
+  for(const directory of ['src','public','packages'])fs.cpSync(path.join(repo,directory),path.join(projectRoot,directory),{recursive:true});
   for(const file of ['package.json','tsconfig.json','next.config.ts','postcss.config.mjs','next-env.d.ts']){
     const source=path.join(repo,file);if(fs.existsSync(source))fs.copyFileSync(source,path.join(projectRoot,file));
   }
