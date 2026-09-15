@@ -26,7 +26,15 @@ jobs:
   quality:
     name: lint, build, security and browser acceptance
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    # This job carries the whole chain: build, four browser-driven suites
+    # (website + apps visual regression, responsive matrix, three a11y passes)
+    # and every domain suite. Steps 1-11 alone take ~6.5 minutes, and the two
+    # suites that boot their own dev server (CRM, architecture) plus the full
+    # browser acceptance add roughly 15 more. At 20 minutes the job was killed
+    # around step 21, which is why "architecture acceptance" and "production
+    # smoke contract" had never run at all. The budget has to cover the chain
+    # it actually contains, otherwise the last steps are decorative.
+    timeout-minutes: 45
     steps:
       - name: Checkout
         uses: actions/checkout@v4
