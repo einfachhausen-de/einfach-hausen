@@ -59,6 +59,36 @@ try{
   const mediaRoute=fs.readFileSync(path.join(root,'src/app/api/job-media/[id]/route.ts'),'utf8');
   check('private media route returns audio MIME types',mediaRoute.includes("ext==='.ogg'?'audio/ogg'")&&mediaRoute.includes("ext==='.mp3'?'audio/mpeg'"));
 
+  // The sentence a visitor types on a public intake form is a GET parameter onto
+  // /register (?role=…&request=…). Server side has always been complete:
+  // registerAction reads `initialRequest`, answers it as a Hausmeister question
+  // and lands on /app/hausmeister?answered=1. What was missing was the client
+  // chain — the page read only `role`, so the text was dropped on arrival, and
+  // the same gap silently discarded every ?notice=/?error= redirect message.
+  // A dropped prop is invisible in typecheck and in a build, so guard the chain.
+  console.log('\n[Entry funnel wiring]');
+  const read=(rel)=>fs.readFileSync(path.join(root,rel),'utf8');
+  const has=(src,re)=>re.test(src);
+  const registerPage=read('src/app/register/page.tsx');
+  check('register page forwards the intake text',has(registerPage,/initialRequest=\{sp\.request\}/));
+  check('register page forwards the notice message',has(registerPage,/notice=\{sp\.notice\}/));
+  check('register page forwards the error message',has(registerPage,/error=\{sp\.error\}/));
+  const loginPage=read('src/app/login/page.tsx');
+  check('login page forwards the notice message',has(loginPage,/notice=\{sp\.notice\}/));
+  check('login page forwards the error message',has(loginPage,/error=\{sp\.error\}/));
+  const shell=read('src/components/auth-v2/AuthShell.tsx');
+  check('AuthShell declares the intake text',has(shell,/initialRequest\?:\s*string/));
+  check('AuthShell declares notice and error',has(shell,/notice\?:\s*string/)&&has(shell,/error\?:\s*string/));
+  check('AuthShell passes the intake text to LoginForm',has(shell,/initialRequest=\{initialRequest\}/));
+  check('AuthShell passes notice and error to LoginForm',has(shell,/notice=\{notice\}/)&&has(shell,/error=\{error\}/));
+  const form=read('src/components/auth-v2/LoginForm.tsx');
+  check('LoginForm declares the intake text',has(form,/initialRequest\?:\s*string/));
+  check('LoginForm sends the intake text with the registration',has(form,/data\.set\(\s*["']initialRequest["']/));
+  check('LoginForm renders the notice as a status line',has(form,/arena-notice/)&&has(form,/role=["']status["']/));
+  const actionSrc=read('src/app/actions.ts');
+  check('registerAction reads the intake text',has(actionSrc,/text\(fd,\s*['"]initialRequest['"]\)/));
+  check('registerAction answers the intake text and marks it answered',has(actionSrc,/['"]\/app\/hausmeister\?answered=1['"]/));
+
   console.log(`\n${passed} passed, ${failures.length} failed`);
   if(failures.length){console.error(failures.map(f=>` - ${f}`).join('\n'));process.exitCode=1;}
 }finally{try{fs.rmSync(scratch,{recursive:true,force:true});}catch{}try{fs.rmSync(dbDir,{recursive:true,force:true});}catch{}}
