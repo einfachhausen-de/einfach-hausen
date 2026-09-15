@@ -185,7 +185,16 @@ try{
   const shareForm=owner.locator('form').filter({has:owner.getByRole('button',{name:'Freigabe erteilen'})}).first();
   await shareForm.getByRole('checkbox').check();
   await shareForm.getByRole('button',{name:'Freigabe erteilen'}).click();
-  await owner.waitForTimeout(200); await broker.reload(); await waitText(broker,'Olivia Eigentümer'); await waitText(broker,ownerEmail); await assertNoOverflow(broker,'Mobile broker lead');
+  // Wait for the share to actually EXIST before looking at the broker. Once
+  // grantBrokerContactAction has written property_shares and revalidated
+  // /app/home/sale (src/app/actions.ts:752-757), the owner's card flips from
+  // "Freigabe erteilen" to "Freigabe widerrufen" - that is the observable proof.
+  // A fixed 200 ms sleep raced the server action: on a loaded runner the broker
+  // reloaded before the share existed, saw the empty state, and waitText then
+  // polled that stale DOM for 15 s. The step failed intermittently on main
+  // (runs 35024685547 vs. the green 35011906962) with no product change behind it.
+  await owner.getByRole('button',{name:'Freigabe widerrufen'}).first().waitFor({timeout:20000});
+  await broker.reload(); await waitText(broker,'Olivia Eigentümer'); await waitText(broker,ownerEmail); await assertNoOverflow(broker,'Mobile broker lead');
 
   // D) The same property and its history can be transferred to a new owner. An
   // active sale share is deliberately left in place so the transfer itself must
