@@ -119,8 +119,17 @@ function secretScan() {
     ['private connection string', /postgres(ql)?:\/\/[^:\s]+:[^@\s]+@/],
   ];
 
+  // Files that carry secret-shaped strings on purpose. The redaction
+  // regression test needs synthetic live keys to prove that redactDetail()
+  // strips them - they are fixtures, not credentials. Keep this list short
+  // and specific; never add a whole directory.
+  const SECRET_SCAN_EXCEPTIONS = new Set([
+    'scripts/t0132-error-tracking-regression.mjs',
+  ]);
+
   let findings = 0;
   for (const file of files) {
+    if (SECRET_SCAN_EXCEPTIONS.has(file)) continue;
     const content = fs.readFileSync(path.join(root, file), 'utf8');
     for (const [label, re] of patterns) {
       const m = content.match(re);
