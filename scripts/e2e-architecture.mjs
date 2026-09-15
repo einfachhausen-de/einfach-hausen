@@ -151,10 +151,19 @@ try{
   // sich ändern, der Slug ist die Datenidentität.
   const categoryBox=slug=>broker.locator(`input[name="providerCategory"][value="${slug}"]`);
   for(const slug of ['handwerk','makler'])await categoryBox(slug).check();
-  await Promise.all([broker.waitForURL(/profile=saved/),broker.getByRole('button',{name:'Profil speichern'}).click()]);
+  // Saving changed company or service data does not confirm with "saved": the
+  // action sends the profile back into review whenever business name, trades,
+  // categories or services differ (src/app/pro/profile/actions.ts:76-104). That
+  // is the contract even for a provider that was never verified - the audit
+  // entry records was_verified precisely because the branch fires regardless.
+  // This first save adds both categories, so it lands on ?profile=review.
+  await Promise.all([broker.waitForURL(/profile=review/),broker.getByRole('button',{name:'Profil speichern'}).click()]);
+  await waitText(broker,'Die Partnerfreigabe ist pausiert');
   await broker.goto(base+'/pro/profile'); await waitText(broker,'Ein Konto, beliebig erweiterbar');
   if(!(await categoryBox('handwerk').isChecked())||!(await categoryBox('makler').isChecked()))throw new Error('Professional account must support multiple provider categories');
   await broker.getByLabel('Regionen / PLZ').fill('463, Borken'); await broker.getByLabel('Immobilientypen').fill('Einfamilienhaus, Doppelhaushälfte'); await broker.getByLabel('Kaufpreis ab €').fill('250000'); await broker.getByLabel('Kaufpreis bis €').fill('1200000'); await broker.getByLabel('Wohnfläche ab m²').fill('80'); await broker.getByLabel('Wohnfläche bis m²').fill('300'); await broker.getByLabel('Spezialisierungen').fill('Eigenheime, modernisierte Bestandsimmobilien');
+  // Only the broker search fields change here, none of the fields the lifecycle
+  // comparison tracks - so this is the save that confirms with ?profile=saved.
   await Promise.all([broker.waitForURL(/profile=saved/),broker.getByRole('button',{name:'Profil speichern'}).click()]);
   await broker.getByLabel('Nachweis').setInputFiles({name:'makler-nachweis.pdf',mimeType:'application/pdf',buffer:Buffer.from('%PDF-1.4\n% Test\n')}); await broker.getByLabel('Hinweis').fill('Makler-Gewerbe und Berufshaftpflicht liegen vor.'); await Promise.all([broker.waitForURL(/verification=submitted/),broker.getByRole('button',{name:'Zur Prüfung einreichen'}).click()]);
 
