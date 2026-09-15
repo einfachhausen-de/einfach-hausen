@@ -53,6 +53,14 @@ function createProjectCopy(){
     if(fs.existsSync(source))fs.copyFileSync(source,path.join(projectRoot,file));
   }
   fs.symlinkSync(path.join(repo,'node_modules'),path.join(projectRoot,'node_modules'),'dir');
+  // Production server needs the compiled app; the cache is not portable.
+  if(fs.existsSync(path.join(repo,'.next','BUILD_ID'))){
+    fs.cpSync(path.join(repo,'.next'),path.join(projectRoot,'.next'),{recursive:true,filter:(source)=>!source.includes(`${path.sep}.next${path.sep}cache`)});
+  }
+  // Persistent-storage bootstrap mirrors deploy/update-on-oci.sh so the
+  // storage gate passes in the test environment.
+  fs.mkdirSync(path.join(projectRoot,'data','private'),{recursive:true});
+  fs.mkdirSync(path.join(projectRoot,'public','uploads'),{recursive:true});
 }
 
 async function freePort(){
@@ -87,15 +95,43 @@ try{
   const port=await freePort();
   const base=`http://127.0.0.1:${port}`;
   const nextBin=path.join(repo,'node_modules','next','dist','bin','next');
-  server=spawn(process.execPath,[nextBin,'dev','--webpack','-H','127.0.0.1','-p',String(port)],{
+  // Registration is fail-closed on the Supabase identity authority: without a
+  // service-role key, registerAction redirects to
+  // "/register?error=Registrierung aktuell nicht verfuegbar"
+  // (src/app/actions.ts:120-123). AUTH_MODE:'local' does not change that - it
+  // only switches session verification - so a suite that registers real
+  // accounts has to talk to the same identity authority as the browser suite.
+  // This is exactly why this suite failed the first time it ever executed in
+  // CI: it spawned a local-auth server with no credentials and every
+  // registration was refused before a page could even render.
+  const sanitizedEnv={...process.env};
+  for(const key of Object.keys(sanitizedEnv)){
+    if(/(?:STRIPE|WHATSAPP|META_|OPENAI|OPENROUTER|SILICONFLOW|OMNIROUTE|API_KEY|ACCESS_TOKEN|AUTH_TOKEN|WEBHOOK_SECRET)/i.test(key))delete sanitizedEnv[key];
+  }
+  const supabaseUrl=process.env.SUPABASE_URL||'https://supabase.delqhi.com';
+  const supabaseAnonKey=process.env.SUPABASE_ANON_KEY;
+  const supabaseServiceKey=process.env.SUPABASE_SERVICE_KEY||process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if(!supabaseAnonKey||!supabaseServiceKey)throw new Error('SUPABASE_ANON_KEY/SUPABASE_SERVICE_KEY missing from the architecture e2e env');
+  // Dev mode (StrictMode/Fast-Refresh double-mounting) races the Supabase SSR
+  // cookie and drops sessions mid-flow - the same reason scripts/e2e.mjs runs
+  // the precompiled production server. Use that path here too.
+  if(!fs.existsSync(path.join(projectRoot,'.next','BUILD_ID')))throw new Error('No production build found - run `npm run build` (with the Supabase build env) before npm run test:e2e:architecture.');
+  server=spawn(process.execPath,[nextBin,'start','-H','127.0.0.1','-p',String(port)],{
     cwd:projectRoot,
     env:{
-      ...process.env,
+      ...sanitizedEnv,
       DATABASE_PATH:databasePath,
       ADMIN_PASSWORD:adminPassword,
+      SESSION_COOKIE_NAME:'e2e_session',
       NEXT_PUBLIC_APP_URL:base,
-      NODE_ENV:'development',
-      AUTH_MODE:'local',
+      AUTH_MODE:'supabase',
+      E2E_INSECURE_COOKIES:'1',
+      SUPABASE_URL:supabaseUrl,
+      SUPABASE_ANON_KEY:supabaseAnonKey,
+      SUPABASE_SERVICE_ROLE_KEY:supabaseServiceKey,
+      SUPABASE_SERVICE_KEY:supabaseServiceKey,
+      NEXT_PUBLIC_SUPABASE_URL:supabaseUrl,
+      NEXT_PUBLIC_SUPABASE_ANON_KEY:supabaseAnonKey,
     },
     stdio:['ignore','pipe','pipe'],
   });

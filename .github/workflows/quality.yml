@@ -116,6 +116,17 @@ jobs:
       - name: CRM acceptance
         run: npm run test:crm
       - name: Architecture acceptance
+        # The suite registers real accounts, and registration is fail-closed on
+        # the Supabase identity authority (src/app/actions.ts:120-123): without a
+        # service-role key it redirects to "Registrierung aktuell nicht
+        # verfuegbar" and the suite dies on its first navigation. This step used
+        # to run without credentials, which is why it failed the first time it
+        # ever got to execute. It also relies on the production build from the
+        # step above, which carries the inlined Supabase origin.
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
         run: npm run test:e2e:architecture
       - name: Browser product acceptance
         env:
