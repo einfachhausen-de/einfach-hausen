@@ -28,10 +28,19 @@ export function AuthShell({
   initialAuthMode = "login",
   initialRole = "kunde",
   nextPath,
+  initialRequest,
+  notice,
+  error,
 }: {
   initialAuthMode?: AuthMode;
   initialRole?: Role;
   nextPath?: string;
+  /** Anliegen text a visitor typed into a public intake form, carried to the registration. */
+  initialRequest?: string;
+  /** Server message from a redirect (?notice=…), shown as a status line. */
+  notice?: string;
+  /** Server message from a redirect (?error=…), shown as an alert. */
+  error?: string;
 }) {
   const [role, setRole] = useState<Role>(initialRole);
   const [activeLegalModal, setActiveLegalModal] = useState<LegalType | null>(null);
@@ -101,6 +110,9 @@ export function AuthShell({
               role={role}
               initialAuthMode={initialAuthMode}
               nextPath={nextPath}
+              initialRequest={initialRequest}
+              notice={notice}
+              error={error}
               onRoleChange={setRole}
             />
           </div>

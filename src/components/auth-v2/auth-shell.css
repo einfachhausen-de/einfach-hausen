@@ -213,6 +213,10 @@
   margin-top: 16px; padding: 12px 14px; border-radius: 8px;
   background: color-mix(in srgb, var(--eh-color-error) 12%, var(--eh-color-white)); color: var(--eh-color-error); font-size: 0.9rem; font-weight: 600;
 }
+.arena-notice {
+  margin-top: 16px; padding: 12px 14px; border-radius: 8px;
+  background: color-mix(in srgb, var(--eh-color-success) 12%, var(--eh-color-white)); color: var(--eh-color-deep); font-size: 0.9rem; font-weight: 600;
+}
 
 #role-toggle-partner, #role-toggle-kunde { display: inline-flex; align-items: center; gap: 6px; }
 #role-toggle-partner svg, #role-toggle-kunde svg { display: inline; }

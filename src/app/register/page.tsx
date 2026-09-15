@@ -12,5 +12,13 @@ export default async function RegisterPage({ searchParams }: { searchParams: Pro
   return <AuthShell
     initialAuthMode="register"
     initialRole={sp.role === "provider" ? "handwerker" : "kunde"}
+    // The public intake forms (home hero, footer band, /leistungen) are GET forms
+    // onto this page: `?role=…&request=…`. This page used to read only `role`,
+    // so the sentence a visitor typed was dropped on arrival. registerAction
+    // already knows the field (`initialRequest`) and answers it as a
+    // Hausmeister question, so the value is forwarded unchanged.
+    initialRequest={sp.request}
+    notice={sp.notice}
+    error={sp.error}
   />;
 }

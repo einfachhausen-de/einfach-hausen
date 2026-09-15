@@ -18,6 +18,12 @@ interface LoginFormProps {
   initialRole?: Role;
   initialAuthMode?: AuthMode;
   nextPath?: string;
+  /** Anliegen text from a public intake form, carried into the registration. */
+  initialRequest?: string;
+  /** Server message from a redirect (?notice=…). */
+  notice?: string;
+  /** Server message from a redirect (?error=…). */
+  error?: string;
   onRoleChange?: (role: Role) => void;
 }
 
@@ -28,6 +34,9 @@ export function LoginForm({
   initialRole = "kunde",
   initialAuthMode = "login",
   nextPath,
+  initialRequest,
+  notice,
+  error,
   onRoleChange,
 }: LoginFormProps = {}) {
   const router = useRouter();
@@ -45,7 +54,9 @@ export function LoginForm({
   const [showPassword, setShowPassword] = useState(false);
   const [remember, setRemember] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  // A server redirect (?error=…) arrives as a prop; it seeds the same slot the
+  // client-side validation writes to, so the user sees exactly one message.
+  const [errorMessage, setErrorMessage] = useState<string | null>(error ?? null);
   const [isForgotModalOpen, setIsForgotModalOpen] = useState(false);
   const [legalModalType, setLegalModalType] = useState<LegalType | null>(null);
 
@@ -143,6 +154,10 @@ export function LoginForm({
       data.set("firstName", firstName.trim());
       data.set("lastName", lastName.trim());
       data.set("postcode", postcode.trim());
+      // The sentence a visitor typed into the public intake form travels with
+      // the registration. registerAction answers it as a Hausmeister question
+      // once the account exists and then lands on /app/hausmeister?answered=1.
+      if (initialRequest) data.set("initialRequest", initialRequest.slice(0, 700));
       if (role === "handwerker") {
         data.set("businessName", businessName.trim());
         data.set("trades", trades.trim());
@@ -177,6 +192,7 @@ export function LoginForm({
       <EHWorkflowHeading title={formTitle} description={formText} />
 
       {errorMessage && <div className="arena-error" role="alert">{errorMessage}</div>}
+      {notice && <div className="arena-notice" role="status">{notice}</div>}
 
       {authMode === "login" ? (
         <form onSubmit={handleLoginSubmit} aria-busy={isLoading}>
