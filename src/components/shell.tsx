@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { HouseAssistant } from './house-assistant';
 import { Bell, Menu } from 'lucide-react';
 import { BottomNav } from './bottom-nav';
-import { matchesArea, ownerAreas, providerAreas, ownerContextTabs, providerContextTabs, type ContextTab } from './nav-config';
+import { matchesArea, ownerAreas, providerAreas, ownerContextTabs, providerContextTabs, activeArea, activeProviderArea, type ContextTab } from './nav-config';
 import { OwnerMobileMenu } from './owner-menu';
 import { SidebarAccountMenu } from './sidebar-account-menu';
 import { Breadcrumbs, type Crumb } from './breadcrumbs';
@@ -31,8 +31,17 @@ export async function AppShell({ role, active, children, title, subtitle, breadc
     <OwnerMobileMenu active={active} />
   );
 
+  // The top bar names the AREA, not the page. It used to receive `title`, which
+  // put the same words into the top bar, the breadcrumb and the page heading at
+  // once - and on detail pages it named the wrong thing outright: /app/jobs/[id]
+  // showed "Ansprechpartner" above an order, and /app/documents fell back to
+  // "Dein Zuhause" because it passes no title at all. activeArea() is the same
+  // source the sidebar and the bottom navigation read, so they cannot disagree.
+  const area = pro ? activeProviderArea(active) : activeArea(active);
+  const context = area?.label ?? title ?? (pro ? 'Partnerbereich' : 'Dein Zuhause');
+
   return <EHScope app><EHWorkspaceFrame homeHref={pro?"/pro":"/app"}
-    context={pro ? "Partnerbereich" : title || "Dein Zuhause"}
+    context={context}
     navigation={pro
       ? providerAreas.map(area=>{const Icon=area.icon;return <EHWorkspaceNavItem key={area.href} href={area.href} active={matchesArea(active,area)} icon={<Icon size={22}/>}>{area.label}</EHWorkspaceNavItem>;})
       : ownerAreas.map(area=>{const Icon=area.icon;return <EHWorkspaceNavItem key={area.href} href={area.href} active={matchesArea(active,area)} icon={<Icon size={22}/>}>{area.label}</EHWorkspaceNavItem>;})}
