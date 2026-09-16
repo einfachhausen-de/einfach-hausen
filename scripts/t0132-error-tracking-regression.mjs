@@ -15,6 +15,8 @@ fs.symlinkSync(path.join(root, 'node_modules'), path.join(dbDir, 'node_modules')
 
 const SOURCES = [
   'src/lib/db.ts',
+  'src/lib/contact-directory-schema.ts',
+  'src/lib/contact-directory-taxonomy.ts',
   'src/lib/observability.ts',
   'src/lib/security/audit.ts',
   'src/lib/security/redact.ts',
@@ -109,6 +111,25 @@ t('digest and correlation id shapes validated', () => {
   const invalidDigest = /^[\w-]{6,64}$/.test('x');
   const validCorr = /^[\w-]{6,64}$/.test(newCorrelationId());
   assert.ok(validDigest && !invalidDigest && validCorr);
+});
+
+// 7) every error boundary reports. A nested boundary that renders its own
+// fallback without the shared hook SHADOWS the root boundary, so the error is
+// never recorded at all — that was the state of /app and /pro until this check.
+t('every error boundary wires the shared reporter', () => {
+  const boundaries = [];
+  (function walk(dir) {
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      const full = path.join(dir, entry.name);
+      if (entry.isDirectory()) walk(full);
+      else if (entry.name === 'error.tsx' || entry.name === 'global-error.tsx') boundaries.push(full);
+    }
+  })(path.join(root, 'src/app'));
+  assert.ok(boundaries.length >= 3, `expected at least 3 boundaries, found ${boundaries.length}`);
+  for (const file of boundaries) {
+    const src = fs.readFileSync(file, 'utf8');
+    assert.match(src, /useErrorReport\(/, `${path.relative(root, file)} must report via useErrorReport`);
+  }
 });
 
 console.log(JSON.stringify({ ok: true, checks }));
