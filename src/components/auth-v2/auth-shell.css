@@ -1,3 +1,4 @@
+@layer eh-legacy {
 /* Login shell: cream form column + deep-petrol hero panel.
    Canonical EH palette only (paper/petrol/deep/sand/terra/line).
    No arena greens, no radii above the design system (inputs/buttons <=8,
@@ -237,3 +238,4 @@
 .arena-role-toggle svg{vertical-align:-2px}
 .arena-mt{margin-top:18px}
 .arena-hint{font-size:13px;color:var(--eh-color-secondary);margin:6px 0 0}
+}

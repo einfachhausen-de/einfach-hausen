@@ -1,3 +1,4 @@
+@layer eh-legacy {
 /* Einfach Hausen — minimal production system v3
    Editorial, calm, high-signal. One accent, very little chrome. */
 :root{
@@ -1182,3 +1183,4 @@ main.app-page.ehn-owner .ehn-composer .agent-composer .icon-action span{display:
 /* ki-chat header: replaces inline centering/spacer styles (DESIGN.md §2). */
 .ki-page .ki-robot-centered{margin:0 auto}
 .ki-head-spacer{width:20px}
+}
