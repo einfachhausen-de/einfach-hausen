@@ -1,4 +1,4 @@
-@layer eh-tokens, eh-reset, eh-base, eh-legacy, theme, base, components, utilities, eh-blocks, eh-pages;
+@layer eh-tokens, eh-reset, eh-base, theme, base, eh-legacy, components, utilities, eh-blocks, eh-pages;
 @import 'tailwindcss';
 @import "tw-animate-css";
 

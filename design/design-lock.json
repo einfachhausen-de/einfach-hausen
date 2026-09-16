@@ -47,7 +47,7 @@
     "scripts/eh-design-sync.mjs": "b33e7f99b92b7a717dd6a8794a78ac7d4d2e962553888783c9e416daa1674629",
     "src/app/app/homeowner.module.css": "a483bea8f8ae24cd74dddf79da6fd556217559aa659e532961d972c695877d80",
     "src/app/design-system.css": "828a20111453cad12e6c7f1ac39d39fe7fe1b1e89bf92f8a4b10e7137dc65509",
-    "src/app/globals.css": "a3c3ede74b0df616a89447835825570892e994384dc5823704fc22afa53e417d",
+    "src/app/globals.css": "b0a73e761a700719290959c43e5774ec7c8f04ee7a30a27472ab6a2a4d11eb1e",
     "src/app/pro/provider-workspace.module.css": "7b718c05d6a19d7dcb8bdb5b773267538ca0ca0a34645f8228587329adfb706d",
     "src/components/marketing/home-hero.tsx": "8fef8ff8fa9624a178635222a5ff21864ee5685d6bf0ea961735f16fa4ed6532",
     "src/components/marketing/mkt.module.css": "3521a38b2af3d796b9ecc3ee428767f7dfcab7ae2c0aca51d7197d6c89de1856",
