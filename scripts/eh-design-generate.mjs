@@ -12,7 +12,7 @@ const data = JSON.parse(raw);
 // Grenzen: hoechstens MAX_FONT_SIZES Schriftgroessen, und keine neue Gruppe.
 // "family" ist keine Groesse und zaehlt nicht mit.
 export const MAX_FONT_SIZES = 8;
-export const TOKEN_GROUPS = ["color","font","weight","leading","track","space","radius","shape","shadow","motion","slide"];
+export const TOKEN_GROUPS = ["color","font","app","weight","leading","track","space","radius","shape","shadow","motion","slide"];
 export function vocabularyErrors(data) {
   const errors = [];
   const sizes = Object.keys(data.font ?? {}).filter(key => key !== "family");

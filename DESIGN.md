@@ -193,7 +193,7 @@ CRM verwendet denselben Vertrag ohne React-Umbau: packages/eh-design/src/html.mj
 Die gesamte Kaskadenreihenfolge der Anwendung steht in **einer Zeile** — Zeile 1 von `src/app/globals.css`, vor allen `@import`:
 
 ```css
-@layer eh-tokens, eh-reset, eh-base, eh-legacy, theme, base, components, utilities, eh-blocks, eh-pages;
+@layer eh-tokens, eh-reset, eh-base, theme, base, eh-legacy, components, utilities, eh-blocks, eh-pages;
 @import 'tailwindcss';
 ```
 
@@ -204,12 +204,14 @@ Die Schichtreihenfolge wird durch das erste Vorkommen festgelegt. Tailwinds eige
 | `eh-tokens` | `packages/eh-design/src/tokens.css`, `src/components/marketing/tokens.css` |
 | `eh-reset` | `box-sizing`, Margin-Reset |
 | `eh-base` | Element-Defaults: `a`, `button`, `input`, `h1`–`h6` |
-| `eh-legacy` | der komplette Altbestand von `src/app/globals.css` und `src/app/design-system.css` |
-| `theme`, `base`, `components`, `utilities` | Tailwind, an dieser Stelle fixiert |
+| `theme` | Tailwind — Custom Properties aus `@theme inline` |
+| `base` | Tailwind Preflight (`h1{font-size:inherit}`, Button-/Input-Resets) |
+| `eh-legacy` | Altbestand aus `src/app/globals.css`, `src/app/design-system.css`, `src/components/auth-v2/auth-shell.css` |
+| `components`, `utilities` | Tailwind |
 | `eh-blocks` | `packages/eh-design/src/styles.module.css`, `html.css`, alle Komponentenmodule |
 | `eh-pages` | Seitenmodule `src/app/**/*.module.css` |
 
-Der entscheidende Zug ist `eh-legacy`: der Altbestand liegt in der **niedrigsten** eigenen Schicht. **Damit gewinnt jeder neue Baustein gegen den Altbestand, ohne dass eine alte Zeile angefasst wird.** Vorher lag der Altbestand ungeschichtet und schlug alles — unabhängig von der Importreihenfolge in `src/app/layout.tsx`. Das ist der Grund für die 112 `!important`.
+Der entscheidende Zug ist die Position von `eh-legacy`: **zwischen** `base` und `components`. Damit gewinnen neue Bausteine und Utilities gegen den Altbestand — gleichzeitig verlieren Preflight-Resets nicht mehr gegen den Altbestand, weil `base` davor liegt. Eine Schichtposition vor `base` (frühere Fassung) ließ Preflight die Klassenregeln `.wl-title`, `.arena-*` und Co. trotz höherer Spezifität überschreiben — Login und Welcome brachen visuell. Vor der Schichtung überhaupt lag der Altbestand ungeschichtet und schlug alles — unabhängig von der Importreihenfolge in `src/app/layout.tsx`. Das ist der Grund für die 112 `!important`.
 
 Eine neue Regel in einer der vier globalen Dateien (`src/app/globals.css`, `src/app/design-system.css`, `src/components/marketing/tokens.css`, `src/components/auth-v2/auth-shell.css`) gehört in eine `eh-*`-Schicht. Ausnahmen: `@font-face`, `@keyframes`, `@media`-Hüllen. Wer eine Überschreibung braucht, korrigiert die Schicht — nicht das Ausrufezeichen.
 

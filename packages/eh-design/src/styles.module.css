@@ -37,7 +37,7 @@
 .heading[data-scale="display"] { font-size: var(--eh-font-display); line-height: .99; letter-spacing: -.052em; }
 .heading[data-scale="page"] { font-size: var(--eh-font-page); }
 .heading[data-scale="section"] { font-size: var(--eh-font-section); }
-.heading[data-scale="app"] { font-size: var(--eh-font-section); }
+.heading[data-scale="app"] { font-size: var(--eh-app-title); }
 .heading[data-scale="item"] { font-size: clamp(1.25rem, 1.6vw, 1.5rem); line-height: var(--eh-leading-tight); letter-spacing: -.025em; }
 .text { font-size: var(--eh-font-body); line-height: 1.65; max-width: 66ch; color: inherit; }
 .text[data-size="lead"] { font-size: clamp(1.0625rem, 1.45vw, 1.25rem); line-height: 1.65; max-width: 51ch; }

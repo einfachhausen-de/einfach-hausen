@@ -26,6 +26,10 @@ export const EHTokens = {
     "eyebrow": "0.75rem",
     "input": "1rem"
   },
+  "app": {
+    "title": "1.75rem",
+    "large": "1.25rem"
+  },
   "weight": {
     "regular": "400",
     "medium": "500",
