@@ -1,0 +1,89 @@
+name: Einfachhausen design report
+on:
+  schedule:
+    # Monatlich am 1. um 06:00 UTC.
+    - cron: "0 6 1 * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: eh-design-report-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  report:
+    name: monthly design metrics
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # newGlobalCssFiles wertet `git log --since="1 month ago"` aus; mit
+          # einem flachen Clone waere die Kennzahl nicht belegt.
+          fetch-depth: 0
+      - name: Use Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install dependencies
+        # Nur fuer postcss (node_modules/postcss/lib/postcss.mjs).
+        run: npm ci
+      # Der Vergleich laeuft gegen den Report, der im Branch liegt - also bevor
+      # der neue geschrieben wird. continue-on-error haelt den Lauf gruen:
+      # Alarmkanal ist das Issue, nicht der Job-Status, damit der PR mit den
+      # neuen Zahlen trotzdem entsteht.
+      - name: Compare with the stored report
+        id: compare
+        continue-on-error: true
+        run: node scripts/eh-design-report.mjs --check
+      - name: Write report
+        run: node scripts/eh-design-report.mjs
+      - name: Job summary
+        run: node scripts/eh-design-report.mjs --markdown >> "$GITHUB_STEP_SUMMARY"
+      - name: Open issue on regression
+        if: steps.compare.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -e
+          node scripts/eh-design-report.mjs --markdown > /tmp/eh-report.md
+          {
+            printf '%s\n' "Der monatliche Design-Report meldet einen Rueckschritt (Run ${{ github.run_number }}, $(date -u +%F))." ""
+            cat /tmp/eh-report.md
+            printf '%s\n' "" "Verglichen wird die gespeicherte design/design-report.json mit einer frischen Messung (node scripts/eh-design-report.mjs --check)." "Zwei Kennzahlen sind im Report absichtlich null: deadCssRatio und cssBytesPerRoute (nicht belegt ohne Browser)."
+          } > /tmp/eh-issue.md
+          title="Design-Report: Rueckschritt (Run ${{ github.run_number }})"
+          # Ein Rueckschritt bleibt meist mehrere Monate sichtbar. Ohne diese
+          # Pruefung legt der Cron jeden Monat ein weiteres Issue an.
+          open=$(gh issue list --state open --search "$title in:title" --json number --jq 'length')
+          if [ "$open" -eq 0 ]; then
+            gh issue create --title "$title" --body-file /tmp/eh-issue.md
+          else
+            echo "Issue zu Run ${{ github.run_number }} ist bereits offen - kein neues."
+          fi
+      - name: Open pull request with the new report
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -e
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          branch="chore/design-report-${{ github.run_number }}"
+          git checkout -B "$branch"
+          git add design/design-report.json
+          if git diff --cached --quiet; then
+            echo "Report unveraendert - kein PR noetig."
+            exit 0
+          fi
+          git commit -m "chore(design): Monatsreport $(date -u +%F) (Run ${{ github.run_number }})"
+          git push --force origin "$branch"
+          printf '%s\n' "Automatisch erzeugt durch den monatlichen Design-Report, Run ${{ github.run_number }}." "" "Bitte die Kennzahlen im Review ansehen - ein Rueckschritt ist eine Design-Entscheidung." > /tmp/pr-body.md
+          gh pr create --title "chore(design): Monatsreport $(date -u +%F) (Run ${{ github.run_number }})" --body-file /tmp/pr-body.md --base main --head "$branch"

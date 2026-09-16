@@ -1,0 +1,104 @@
+{
+  "generated": "2026-09-16",
+  "metrics": {
+    "debtPoints": {
+      "value": 3585,
+      "target": 0,
+      "alarm": "steigt",
+      "source": "design/design-debt.json"
+    },
+    "debtFiles": {
+      "value": 67,
+      "target": 0,
+      "alarm": "steigt",
+      "source": "design/design-debt.json"
+    },
+    "fontSizes": {
+      "value": 174,
+      "alarm": "steigt",
+      "source": "postcss ueber src/**/*.css und packages/**/*.css"
+    },
+    "fontWeights": {
+      "value": 32,
+      "alarm": "steigt",
+      "source": "postcss ueber src/**/*.css und packages/**/*.css"
+    },
+    "importantDeclarations": {
+      "value": 112,
+      "target": 0,
+      "alarm": "steigt",
+      "source": "postcss ueber src/**/*.css"
+    },
+    "duplicateTopLevelSelectors": {
+      "value": 45,
+      "target": 0,
+      "alarm": "steigt",
+      "source": "postcss ueber 4 globale CSS-Dateien",
+      "byFile": {
+        "src/app/globals.css": 985,
+        "src/app/design-system.css": 1529,
+        "src/components/marketing/tokens.css": 4,
+        "src/components/auth-v2/auth-shell.css": 70
+      }
+    },
+    "unreferencedClassNames": {
+      "value": 633,
+      "target": 0,
+      "alarm": "steigt",
+      "source": "design/design-deadcss.json",
+      "byFile": {
+        "src/app/globals.css": 242,
+        "src/app/design-system.css": 390,
+        "src/components/auth-v2/auth-shell.css": 1
+      }
+    },
+    "layerlessRules": {
+      "value": 3006,
+      "target": 0,
+      "alarm": "steigt",
+      "source": "postcss ueber die vier globalen CSS-Dateien",
+      "byFile": {
+        "src/app/globals.css": 1112,
+        "src/app/design-system.css": 1815,
+        "src/components/marketing/tokens.css": 5,
+        "src/components/auth-v2/auth-shell.css": 74
+      }
+    },
+    "newGlobalCssFiles": {
+      "value": 8,
+      "target": 0,
+      "alarm": "steigt",
+      "source": "git log --since=\"1 month ago\" --diff-filter=A --name-only",
+      "files": [
+        "packages/eh-design/src/html.css",
+        "packages/eh-design/src/tokens.css",
+        "design/brand-atelier/atelier.css",
+        "design/brand-study/study.css",
+        "src/components/auth-v2/auth-shell.css",
+        "src/app/design-system.css",
+        "src/app/globals.css",
+        "src/components/marketing/tokens.css"
+      ]
+    },
+    "deadCssRatio": {
+      "value": null,
+      "note": "nicht belegt",
+      "reason": "braucht eine Messung im Browser (document.styleSheets gegen das gerenderte DOM)",
+      "target": 0,
+      "source": "nicht messbar ohne Browser"
+    },
+    "cssBytesPerRoute": {
+      "value": null,
+      "note": "nicht belegt",
+      "reason": "braucht einen Produktions-Build und einen Browser, der die Route laedt",
+      "alarm": "steigt",
+      "source": "nicht messbar ohne Build und Browser"
+    }
+  },
+  "notMeasured": [
+    "deadCssRatio",
+    "cssBytesPerRoute"
+  ],
+  "scannedCssFiles": 37,
+  "parseErrors": []
+}

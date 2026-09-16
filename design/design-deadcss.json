@@ -1,0 +1,3191 @@
+{
+  "version": 1,
+  "generated": "2026-09-16",
+  "corpus": {
+    "dirs": [
+      "src",
+      "packages"
+    ],
+    "extensions": [
+      ".ts",
+      ".tsx",
+      ".js",
+      ".jsx",
+      ".mjs"
+    ]
+  },
+  "files": {
+    "src/app/globals.css": [
+      {
+        "class": "brand-icon",
+        "line": 13,
+        "count": 2
+      },
+      {
+        "class": "feature-grid",
+        "line": 13,
+        "count": 6
+      },
+      {
+        "class": "landing-actions",
+        "line": 13,
+        "count": 1
+      },
+      {
+        "class": "landing-copy",
+        "line": 13,
+        "count": 2
+      },
+      {
+        "class": "login-link",
+        "line": 13,
+        "count": 1
+      },
+      {
+        "class": "phone-shell",
+        "line": 13,
+        "count": 7
+      },
+      {
+        "class": "top-actions",
+        "line": 13,
+        "count": 1
+      },
+      {
+        "class": "dark-empty",
+        "line": 19,
+        "count": 2
+      },
+      {
+        "class": "detail-head",
+        "line": 19,
+        "count": 2
+      },
+      {
+        "class": "file-label",
+        "line": 19,
+        "count": 2
+      },
+      {
+        "class": "hello",
+        "line": 19,
+        "count": 2
+      },
+      {
+        "class": "job-card",
+        "line": 19,
+        "count": 4
+      },
+      {
+        "class": "job-card-side",
+        "line": 19,
+        "count": 1
+      },
+      {
+        "class": "job-row",
+        "line": 19,
+        "count": 7
+      },
+      {
+        "class": "page-title",
+        "line": 19,
+        "count": 1
+      },
+      {
+        "class": "pro-appointment",
+        "line": 19,
+        "count": 3
+      },
+      {
+        "class": "pro-conversation",
+        "line": 19,
+        "count": 3
+      },
+      {
+        "class": "pro-detail",
+        "line": 19,
+        "count": 2
+      },
+      {
+        "class": "pro-form",
+        "line": 19,
+        "count": 3
+      },
+      {
+        "class": "pro-request",
+        "line": 19,
+        "count": 11
+      },
+      {
+        "class": "profile-form",
+        "line": 19,
+        "count": 1
+      },
+      {
+        "class": "quote-form",
+        "line": 19,
+        "count": 2
+      },
+      {
+        "class": "quote-top",
+        "line": 19,
+        "count": 4
+      },
+      {
+        "class": "quoted-badge",
+        "line": 19,
+        "count": 1
+      },
+      {
+        "class": "request-bubble",
+        "line": 19,
+        "count": 4
+      },
+      {
+        "class": "request-card",
+        "line": 19,
+        "count": 2
+      },
+      {
+        "class": "request-grid",
+        "line": 19,
+        "count": 3
+      },
+      {
+        "class": "request-main",
+        "line": 19,
+        "count": 3
+      },
+      {
+        "class": "secure-card",
+        "line": 19,
+        "count": 6
+      },
+      {
+        "class": "thumb-placeholder",
+        "line": 19,
+        "count": 2
+      },
+      {
+        "class": "document-row",
+        "line": 21,
+        "count": 6
+      },
+      {
+        "class": "home-stats",
+        "line": 21,
+        "count": 5
+      },
+      {
+        "class": "house-job",
+        "line": 21,
+        "count": 4
+      },
+      {
+        "class": "page-subtitle",
+        "line": 21,
+        "count": 1
+      },
+      {
+        "class": "pro-doc-list",
+        "line": 21,
+        "count": 3
+      },
+      {
+        "class": "admin-header",
+        "line": 23,
+        "count": 4
+      },
+      {
+        "class": "verification-card",
+        "line": 23,
+        "count": 9
+      },
+      {
+        "class": "verification-gate",
+        "line": 23,
+        "count": 4
+      },
+      {
+        "class": "notification-link",
+        "line": 25,
+        "count": 2
+      },
+      {
+        "class": "notification-row",
+        "line": 25,
+        "count": 10
+      },
+      {
+        "class": "notifications-head",
+        "line": 25,
+        "count": 2
+      },
+      {
+        "class": "agent-avatar",
+        "line": 28,
+        "count": 2
+      },
+      {
+        "class": "agent-hero",
+        "line": 28,
+        "count": 3
+      },
+      {
+        "class": "agent-job",
+        "line": 28,
+        "count": 1
+      },
+      {
+        "class": "agent-online",
+        "line": 28,
+        "count": 1
+      },
+      {
+        "class": "asset-form",
+        "line": 28,
+        "count": 3
+      },
+      {
+        "class": "asset-grid",
+        "line": 28,
+        "count": 7
+      },
+      {
+        "class": "contract-checks",
+        "line": 28,
+        "count": 3
+      },
+      {
+        "class": "documents-cta",
+        "line": 28,
+        "count": 4
+      },
+      {
+        "class": "home-insights",
+        "line": 28,
+        "count": 7
+      },
+      {
+        "class": "house-profile-form",
+        "line": 28,
+        "count": 1
+      },
+      {
+        "class": "icon-check",
+        "line": 28,
+        "count": 1
+      },
+      {
+        "class": "maintenance-date",
+        "line": 28,
+        "count": 4
+      },
+      {
+        "class": "maintenance-row",
+        "line": 28,
+        "count": 3
+      },
+      {
+        "class": "package-buy",
+        "line": 28,
+        "count": 4
+      },
+      {
+        "class": "package-card",
+        "line": 28,
+        "count": 4
+      },
+      {
+        "class": "package-grid",
+        "line": 28,
+        "count": 1
+      },
+      {
+        "class": "package-icon",
+        "line": 28,
+        "count": 1
+      },
+      {
+        "class": "package-order",
+        "line": 28,
+        "count": 1
+      },
+      {
+        "class": "package-services",
+        "line": 28,
+        "count": 2
+      },
+      {
+        "class": "partner-standard-banner",
+        "line": 28,
+        "count": 5
+      },
+      {
+        "class": "plan-card",
+        "line": 28,
+        "count": 7
+      },
+      {
+        "class": "plan-grid",
+        "line": 28,
+        "count": 4
+      },
+      {
+        "class": "plan-icon",
+        "line": 28,
+        "count": 1
+      },
+      {
+        "class": "plan-popular",
+        "line": 28,
+        "count": 1
+      },
+      {
+        "class": "plan-price",
+        "line": 28,
+        "count": 4
+      },
+      {
+        "class": "plans-hero",
+        "line": 28,
+        "count": 4
+      },
+      {
+        "class": "profile-links",
+        "line": 28,
+        "count": 3
+      },
+      {
+        "class": "three",
+        "line": 28,
+        "count": 2
+      },
+      {
+        "class": "whatsapp-card",
+        "line": 28,
+        "count": 4
+      },
+      {
+        "class": "contact-avatar",
+        "line": 33,
+        "count": 2
+      },
+      {
+        "class": "contact-card",
+        "line": 33,
+        "count": 6
+      },
+      {
+        "class": "contact-chat",
+        "line": 33,
+        "count": 1
+      },
+      {
+        "class": "contact-list",
+        "line": 33,
+        "count": 1
+      },
+      {
+        "class": "contact-row",
+        "line": 33,
+        "count": 8
+      },
+      {
+        "class": "icon-contact",
+        "line": 33,
+        "count": 2
+      },
+      {
+        "class": "member-card",
+        "line": 33,
+        "count": 2
+      },
+      {
+        "class": "member-explain",
+        "line": 33,
+        "count": 1
+      },
+      {
+        "class": "member-head",
+        "line": 33,
+        "count": 3
+      },
+      {
+        "class": "member-switches",
+        "line": 33,
+        "count": 4
+      },
+      {
+        "class": "partner-plan-card",
+        "line": 33,
+        "count": 9
+      },
+      {
+        "class": "partner-plan-grid",
+        "line": 33,
+        "count": 4
+      },
+      {
+        "class": "partner-plan-hero",
+        "line": 33,
+        "count": 5
+      },
+      {
+        "class": "personal-contact-card",
+        "line": 33,
+        "count": 6
+      },
+      {
+        "class": "pro-contact-card",
+        "line": 33,
+        "count": 2
+      },
+      {
+        "class": "pro-contact-list",
+        "line": 33,
+        "count": 3
+      },
+      {
+        "class": "relationship-note",
+        "line": 33,
+        "count": 4
+      },
+      {
+        "class": "simple-role-principle",
+        "line": 33,
+        "count": 5
+      },
+      {
+        "class": "team-add-form",
+        "line": 33,
+        "count": 2
+      },
+      {
+        "class": "team-manage-toggle",
+        "line": 33,
+        "count": 2
+      },
+      {
+        "class": "logo-wrap",
+        "line": 59,
+        "count": 1
+      },
+      {
+        "class": "tagline",
+        "line": 63,
+        "count": 1
+      },
+      {
+        "class": "hero-text",
+        "line": 66,
+        "count": 3
+      },
+      {
+        "class": "hero-image",
+        "line": 69,
+        "count": 2
+      },
+      {
+        "class": "support-card",
+        "line": 95,
+        "count": 3
+      },
+      {
+        "class": "role-page",
+        "line": 108,
+        "count": 1
+      },
+      {
+        "class": "role-headline",
+        "line": 109,
+        "count": 3
+      },
+      {
+        "class": "owner-card",
+        "line": 112,
+        "count": 1
+      },
+      {
+        "class": "owner-image",
+        "line": 119,
+        "count": 2
+      },
+      {
+        "class": "owner-overlay",
+        "line": 121,
+        "count": 1
+      },
+      {
+        "class": "owner-content",
+        "line": 125,
+        "count": 3
+      },
+      {
+        "class": "owner-line",
+        "line": 127,
+        "count": 1
+      },
+      {
+        "class": "owner-cta",
+        "line": 129,
+        "count": 2
+      },
+      {
+        "class": "owner-cta-icon",
+        "line": 144,
+        "count": 1
+      },
+      {
+        "class": "owner-features",
+        "line": 149,
+        "count": 1
+      },
+      {
+        "class": "ofeat",
+        "line": 150,
+        "count": 3
+      },
+      {
+        "class": "ofeat-icon",
+        "line": 155,
+        "count": 1
+      },
+      {
+        "class": "pro-card",
+        "line": 163,
+        "count": 2
+      },
+      {
+        "class": "pro-icon",
+        "line": 175,
+        "count": 1
+      },
+      {
+        "class": "pro-text",
+        "line": 181,
+        "count": 3
+      },
+      {
+        "class": "trust-row",
+        "line": 184,
+        "count": 3
+      },
+      {
+        "class": "trust-icon",
+        "line": 190,
+        "count": 1
+      },
+      {
+        "class": "pro-page",
+        "line": 201,
+        "count": 1
+      },
+      {
+        "class": "pro-hero",
+        "line": 202,
+        "count": 1
+      },
+      {
+        "class": "pro-hero-bg",
+        "line": 203,
+        "count": 2
+      },
+      {
+        "class": "pro-hero-fade",
+        "line": 205,
+        "count": 1
+      },
+      {
+        "class": "back-btn-float",
+        "line": 206,
+        "count": 1
+      },
+      {
+        "class": "pro-logo",
+        "line": 207,
+        "count": 1
+      },
+      {
+        "class": "pro-tagline",
+        "line": 208,
+        "count": 1
+      },
+      {
+        "class": "pro-headline",
+        "line": 209,
+        "count": 3
+      },
+      {
+        "class": "benefit-card",
+        "line": 212,
+        "count": 1
+      },
+      {
+        "class": "benefit-divider",
+        "line": 214,
+        "count": 1
+      },
+      {
+        "class": "pro-form-section",
+        "line": 217,
+        "count": 2
+      },
+      {
+        "class": "pro-form-sub",
+        "line": 219,
+        "count": 1
+      },
+      {
+        "class": "divider-or",
+        "line": 224,
+        "count": 3
+      },
+      {
+        "class": "btn-social",
+        "line": 227,
+        "count": 1
+      },
+      {
+        "class": "trust-grid",
+        "line": 231,
+        "count": 1
+      },
+      {
+        "class": "trust-item",
+        "line": 232,
+        "count": 3
+      },
+      {
+        "class": "mail-circle",
+        "line": 322,
+        "count": 1
+      },
+      {
+        "class": "dash-page",
+        "line": 325,
+        "count": 3
+      },
+      {
+        "class": "dash-top",
+        "line": 326,
+        "count": 2
+      },
+      {
+        "class": "top-btn",
+        "line": 327,
+        "count": 2
+      },
+      {
+        "class": "bell-dot",
+        "line": 328,
+        "count": 1
+      },
+      {
+        "class": "dash-logo",
+        "line": 329,
+        "count": 1
+      },
+      {
+        "class": "top-line",
+        "line": 330,
+        "count": 1
+      },
+      {
+        "class": "greet",
+        "line": 331,
+        "count": 2
+      },
+      {
+        "class": "greet-name",
+        "line": 333,
+        "count": 1
+      },
+      {
+        "class": "greet-firma",
+        "line": 334,
+        "count": 1
+      },
+      {
+        "class": "greet-gebiet",
+        "line": 335,
+        "count": 1
+      },
+      {
+        "class": "avatar-wrap",
+        "line": 336,
+        "count": 1
+      },
+      {
+        "class": "online-dot",
+        "line": 338,
+        "count": 1
+      },
+      {
+        "class": "stat-divider",
+        "line": 340,
+        "count": 1
+      },
+      {
+        "class": "stat-icon",
+        "line": 341,
+        "count": 1
+      },
+      {
+        "class": "stat-card",
+        "line": 344,
+        "count": 2
+      },
+      {
+        "class": "term-card",
+        "line": 344,
+        "count": 2
+      },
+      {
+        "class": "section-head",
+        "line": 346,
+        "count": 2
+      },
+      {
+        "class": "see-all",
+        "line": 348,
+        "count": 1
+      },
+      {
+        "class": "badge-red",
+        "line": 356,
+        "count": 1
+      },
+      {
+        "class": "req-time",
+        "line": 362,
+        "count": 1
+      },
+      {
+        "class": "req-all",
+        "line": 365,
+        "count": 1
+      },
+      {
+        "class": "quote-card",
+        "line": 366,
+        "count": 3
+      },
+      {
+        "class": "quote-icon",
+        "line": 367,
+        "count": 2
+      },
+      {
+        "class": "quote-text",
+        "line": 368,
+        "count": 6
+      },
+      {
+        "class": "term-date",
+        "line": 373,
+        "count": 3
+      },
+      {
+        "class": "term-body",
+        "line": 376,
+        "count": 4
+      },
+      {
+        "class": "term-addr",
+        "line": 379,
+        "count": 1
+      },
+      {
+        "class": "term-right",
+        "line": 380,
+        "count": 1
+      },
+      {
+        "class": "term-today",
+        "line": 381,
+        "count": 1
+      },
+      {
+        "class": "term-time",
+        "line": 382,
+        "count": 1
+      },
+      {
+        "class": "tabbar",
+        "line": 383,
+        "count": 3
+      },
+      {
+        "class": "tab-count",
+        "line": 386,
+        "count": 2
+      },
+      {
+        "class": "owner-reg-page",
+        "line": 387,
+        "count": 2
+      },
+      {
+        "class": "oreg-hero",
+        "line": 388,
+        "count": 1
+      },
+      {
+        "class": "oreg-logo",
+        "line": 389,
+        "count": 2
+      },
+      {
+        "class": "oreg-tagline",
+        "line": 390,
+        "count": 1
+      },
+      {
+        "class": "oreg-house",
+        "line": 391,
+        "count": 2
+      },
+      {
+        "class": "oreg-headline",
+        "line": 393,
+        "count": 4
+      },
+      {
+        "class": "oreg-benefits",
+        "line": 396,
+        "count": 3
+      },
+      {
+        "class": "oreg-benefit",
+        "line": 397,
+        "count": 3
+      },
+      {
+        "class": "oreg-benefit-icon",
+        "line": 398,
+        "count": 1
+      },
+      {
+        "class": "oreg-form-section",
+        "line": 401,
+        "count": 3
+      },
+      {
+        "class": "oreg-form-sub",
+        "line": 403,
+        "count": 1
+      },
+      {
+        "class": "oreg-form",
+        "line": 404,
+        "count": 1
+      },
+      {
+        "class": "form-error",
+        "line": 405,
+        "count": 1
+      },
+      {
+        "class": "auth-footer",
+        "line": 406,
+        "count": 1
+      },
+      {
+        "class": "link-strong",
+        "line": 407,
+        "count": 1
+      },
+      {
+        "class": "oreg-trust",
+        "line": 408,
+        "count": 3
+      },
+      {
+        "class": "oreg-trust-row",
+        "line": 409,
+        "count": 1
+      },
+      {
+        "class": "oreg-trust-item",
+        "line": 410,
+        "count": 3
+      },
+      {
+        "class": "oreg-trust-icon",
+        "line": 411,
+        "count": 1
+      },
+      {
+        "class": "oreg-made",
+        "line": 414,
+        "count": 3
+      },
+      {
+        "class": "oreg-made-icon",
+        "line": 415,
+        "count": 1
+      },
+      {
+        "class": "login-page",
+        "line": 418,
+        "count": 2
+      },
+      {
+        "class": "login-logo",
+        "line": 419,
+        "count": 1
+      },
+      {
+        "class": "login-tagline",
+        "line": 420,
+        "count": 1
+      },
+      {
+        "class": "login-head",
+        "line": 421,
+        "count": 4
+      },
+      {
+        "class": "login-form",
+        "line": 424,
+        "count": 2
+      },
+      {
+        "class": "login-row",
+        "line": 425,
+        "count": 1
+      },
+      {
+        "class": "forgot-link",
+        "line": 426,
+        "count": 1
+      },
+      {
+        "class": "own-dash",
+        "line": 428,
+        "count": 1
+      },
+      {
+        "class": "own-top",
+        "line": 429,
+        "count": 2
+      },
+      {
+        "class": "own-burger",
+        "line": 430,
+        "count": 2
+      },
+      {
+        "class": "own-bell",
+        "line": 431,
+        "count": 2
+      },
+      {
+        "class": "own-logo",
+        "line": 432,
+        "count": 2
+      },
+      {
+        "class": "own-logo-svg",
+        "line": 433,
+        "count": 2
+      },
+      {
+        "class": "own-logo-text",
+        "line": 434,
+        "count": 1
+      },
+      {
+        "class": "own-logo-line1",
+        "line": 435,
+        "count": 2
+      },
+      {
+        "class": "own-logo-line2",
+        "line": 436,
+        "count": 2
+      },
+      {
+        "class": "qa-row",
+        "line": 437,
+        "count": 3
+      },
+      {
+        "class": "qa-card",
+        "line": 438,
+        "count": 10
+      },
+      {
+        "class": "qa-icon",
+        "line": 439,
+        "count": 3
+      },
+      {
+        "class": "qa-dark",
+        "line": 440,
+        "count": 1
+      },
+      {
+        "class": "qa-arrow",
+        "line": 443,
+        "count": 1
+      },
+      {
+        "class": "ki-robot",
+        "line": 446,
+        "count": 1
+      },
+      {
+        "class": "ki-title-row",
+        "line": 447,
+        "count": 2
+      },
+      {
+        "class": "ki-text",
+        "line": 450,
+        "count": 1
+      },
+      {
+        "class": "overview-grid",
+        "line": 456,
+        "count": 3
+      },
+      {
+        "class": "ov-card",
+        "line": 457,
+        "count": 3
+      },
+      {
+        "class": "ov-icon",
+        "line": 458,
+        "count": 1
+      },
+      {
+        "class": "ov-icon-lg",
+        "line": 459,
+        "count": 1
+      },
+      {
+        "class": "ov-text",
+        "line": 460,
+        "count": 3
+      },
+      {
+        "class": "ov-wide",
+        "line": 463,
+        "count": 3
+      },
+      {
+        "class": "sm-logo",
+        "line": 470,
+        "count": 1
+      },
+      {
+        "class": "sheet-item",
+        "line": 492,
+        "count": 4
+      },
+      {
+        "class": "sheet-icon",
+        "line": 493,
+        "count": 3
+      },
+      {
+        "class": "badge-gray",
+        "line": 516,
+        "count": 2
+      },
+      {
+        "class": "tl-item",
+        "line": 519,
+        "count": 1
+      },
+      {
+        "class": "tl-dot",
+        "line": 520,
+        "count": 3
+      },
+      {
+        "class": "tl-body",
+        "line": 521,
+        "count": 3
+      },
+      {
+        "class": "tl-date",
+        "line": 522,
+        "count": 1
+      },
+      {
+        "class": "notfall-page",
+        "line": 525,
+        "count": 1
+      },
+      {
+        "class": "nf-hero",
+        "line": 526,
+        "count": 3
+      },
+      {
+        "class": "nf-icon",
+        "line": 527,
+        "count": 1
+      },
+      {
+        "class": "step-dot",
+        "line": 608,
+        "count": 2
+      },
+      {
+        "class": "error-box",
+        "line": 642,
+        "count": 1
+      },
+      {
+        "class": "spinner",
+        "line": 643,
+        "count": 1
+      },
+      {
+        "class": "ob-visual",
+        "line": 645,
+        "count": 2
+      },
+      {
+        "class": "welcome-logo",
+        "line": 651,
+        "count": 1
+      },
+      {
+        "class": "welcome-logo-text",
+        "line": 652,
+        "count": 1
+      },
+      {
+        "class": "welcome-tag",
+        "line": 655,
+        "count": 1
+      },
+      {
+        "class": "role-hero",
+        "line": 656,
+        "count": 2
+      },
+      {
+        "class": "role-cards",
+        "line": 657,
+        "count": 2
+      },
+      {
+        "class": "role-card",
+        "line": 658,
+        "count": 5
+      },
+      {
+        "class": "role-icon",
+        "line": 660,
+        "count": 3
+      },
+      {
+        "class": "role-text",
+        "line": 661,
+        "count": 3
+      },
+      {
+        "class": "auth-head",
+        "line": 664,
+        "count": 4
+      },
+      {
+        "class": "auth-links",
+        "line": 667,
+        "count": 2
+      },
+      {
+        "class": "history-head",
+        "line": 747,
+        "count": 1
+      },
+      {
+        "class": "history-title-icon",
+        "line": 748,
+        "count": 1
+      },
+      {
+        "class": "nf-mark",
+        "line": 788,
+        "count": 1
+      },
+      {
+        "class": "ehn-reg-submit",
+        "line": 816,
+        "count": 2
+      },
+      {
+        "class": "workflow-demo-inner",
+        "line": 852,
+        "count": 1
+      }
+    ],
+    "src/app/design-system.css": [
+      {
+        "class": "marketing-v3",
+        "line": 23,
+        "count": 1
+      },
+      {
+        "class": "marketing-v3-header",
+        "line": 24,
+        "count": 8
+      },
+      {
+        "class": "marketing-v3-actions",
+        "line": 25,
+        "count": 3
+      },
+      {
+        "class": "marketing-v3-login",
+        "line": 25,
+        "count": 3
+      },
+      {
+        "class": "hero-v3",
+        "line": 27,
+        "count": 7
+      },
+      {
+        "class": "hero-v3-actions",
+        "line": 28,
+        "count": 5
+      },
+      {
+        "class": "hero-v3-copy",
+        "line": 28,
+        "count": 3
+      },
+      {
+        "class": "hero-v3-kicker",
+        "line": 28,
+        "count": 1
+      },
+      {
+        "class": "hero-v3-lead",
+        "line": 28,
+        "count": 6
+      },
+      {
+        "class": "text-link",
+        "line": 28,
+        "count": 2
+      },
+      {
+        "class": "prompt-card",
+        "line": 30,
+        "count": 2
+      },
+      {
+        "class": "prompt-stage",
+        "line": 30,
+        "count": 2
+      },
+      {
+        "class": "prompt-ai",
+        "line": 31,
+        "count": 1
+      },
+      {
+        "class": "prompt-answer",
+        "line": 31,
+        "count": 4
+      },
+      {
+        "class": "prompt-copy",
+        "line": 31,
+        "count": 2
+      },
+      {
+        "class": "prompt-label",
+        "line": 31,
+        "count": 1
+      },
+      {
+        "class": "prompt-meta",
+        "line": 31,
+        "count": 2
+      },
+      {
+        "class": "prompt-row",
+        "line": 31,
+        "count": 1
+      },
+      {
+        "class": "prompt-send",
+        "line": 31,
+        "count": 1
+      },
+      {
+        "class": "prompt-tool",
+        "line": 31,
+        "count": 3
+      },
+      {
+        "class": "prompt-tools",
+        "line": 31,
+        "count": 2
+      },
+      {
+        "class": "statement-strip",
+        "line": 33,
+        "count": 2
+      },
+      {
+        "class": "statement-strip-inner",
+        "line": 33,
+        "count": 4
+      },
+      {
+        "class": "editorial-eyebrow",
+        "line": 35,
+        "count": 3
+      },
+      {
+        "class": "editorial-intro",
+        "line": 35,
+        "count": 2
+      },
+      {
+        "class": "editorial-section",
+        "line": 35,
+        "count": 4
+      },
+      {
+        "class": "process-index",
+        "line": 36,
+        "count": 1
+      },
+      {
+        "class": "process-list",
+        "line": 36,
+        "count": 3
+      },
+      {
+        "class": "process-row",
+        "line": 36,
+        "count": 11
+      },
+      {
+        "class": "house-record",
+        "line": 38,
+        "count": 1
+      },
+      {
+        "class": "house-v3",
+        "line": 38,
+        "count": 2
+      },
+      {
+        "class": "house-v3-copy",
+        "line": 38,
+        "count": 4
+      },
+      {
+        "class": "record-row",
+        "line": 38,
+        "count": 10
+      },
+      {
+        "class": "record-status",
+        "line": 38,
+        "count": 1
+      },
+      {
+        "class": "partner-fact",
+        "line": 40,
+        "count": 4
+      },
+      {
+        "class": "partner-facts",
+        "line": 40,
+        "count": 2
+      },
+      {
+        "class": "partner-v3",
+        "line": 40,
+        "count": 20
+      },
+      {
+        "class": "partner-v3-wrap",
+        "line": 40,
+        "count": 2
+      },
+      {
+        "class": "final-v3",
+        "line": 42,
+        "count": 6
+      },
+      {
+        "class": "marketing-v3-footer",
+        "line": 42,
+        "count": 7
+      },
+      {
+        "class": "desktop-sidebar",
+        "line": 45,
+        "count": 5
+      },
+      {
+        "class": "sidebar-brand",
+        "line": 45,
+        "count": 4
+      },
+      {
+        "class": "sidebar-chevron",
+        "line": 45,
+        "count": 1
+      },
+      {
+        "class": "sidebar-footer",
+        "line": 45,
+        "count": 4
+      },
+      {
+        "class": "sidebar-help",
+        "line": 45,
+        "count": 1
+      },
+      {
+        "class": "sidebar-icon",
+        "line": 45,
+        "count": 2
+      },
+      {
+        "class": "sidebar-nav",
+        "line": 45,
+        "count": 13
+      },
+      {
+        "class": "sidebar-user",
+        "line": 45,
+        "count": 5
+      },
+      {
+        "class": "top-user-avatar",
+        "line": 45,
+        "count": 5
+      },
+      {
+        "class": "user-avatar",
+        "line": 45,
+        "count": 1
+      },
+      {
+        "class": "page-context",
+        "line": 46,
+        "count": 5
+      },
+      {
+        "class": "top-actions",
+        "line": 46,
+        "count": 11
+      },
+      {
+        "class": "topbar-v3",
+        "line": 46,
+        "count": 14
+      },
+      {
+        "class": "agent-avatar",
+        "line": 49,
+        "count": 1
+      },
+      {
+        "class": "agent-hero",
+        "line": 49,
+        "count": 10
+      },
+      {
+        "class": "agent-online",
+        "line": 49,
+        "count": 2
+      },
+      {
+        "class": "home-insights",
+        "line": 49,
+        "count": 8
+      },
+      {
+        "class": "job-row",
+        "line": 49,
+        "count": 5
+      },
+      {
+        "class": "thumb-placeholder",
+        "line": 49,
+        "count": 1
+      },
+      {
+        "class": "asset-grid",
+        "line": 52,
+        "count": 1
+      },
+      {
+        "class": "contact-card",
+        "line": 52,
+        "count": 1
+      },
+      {
+        "class": "document-row",
+        "line": 52,
+        "count": 1
+      },
+      {
+        "class": "house-profile-form",
+        "line": 52,
+        "count": 1
+      },
+      {
+        "class": "job-card",
+        "line": 52,
+        "count": 1
+      },
+      {
+        "class": "maintenance-row",
+        "line": 52,
+        "count": 1
+      },
+      {
+        "class": "member-card",
+        "line": 52,
+        "count": 3
+      },
+      {
+        "class": "package-card",
+        "line": 52,
+        "count": 3
+      },
+      {
+        "class": "page-subtitle",
+        "line": 52,
+        "count": 2
+      },
+      {
+        "class": "page-title",
+        "line": 52,
+        "count": 2
+      },
+      {
+        "class": "plan-card",
+        "line": 52,
+        "count": 3
+      },
+      {
+        "class": "secure-card",
+        "line": 52,
+        "count": 1
+      },
+      {
+        "class": "partner-standard-banner",
+        "line": 55,
+        "count": 1
+      },
+      {
+        "class": "pro-form",
+        "line": 55,
+        "count": 2
+      },
+      {
+        "class": "pro-request",
+        "line": 55,
+        "count": 7
+      },
+      {
+        "class": "quote-form",
+        "line": 55,
+        "count": 2
+      },
+      {
+        "class": "mobile-brand",
+        "line": 63,
+        "count": 12
+      },
+      {
+        "class": "prompt-options",
+        "line": 68,
+        "count": 6
+      },
+      {
+        "class": "resolution-choice",
+        "line": 69,
+        "count": 2
+      },
+      {
+        "class": "contact-request-note",
+        "line": 71,
+        "count": 7
+      },
+      {
+        "class": "customer-hero",
+        "line": 79,
+        "count": 7
+      },
+      {
+        "class": "benefit-preview",
+        "line": 83,
+        "count": 3
+      },
+      {
+        "class": "benefit-preview-head",
+        "line": 84,
+        "count": 4
+      },
+      {
+        "class": "benefit-preview-foot",
+        "line": 85,
+        "count": 1
+      },
+      {
+        "class": "benefit-preview-path",
+        "line": 85,
+        "count": 6
+      },
+      {
+        "class": "customer-outcome",
+        "line": 86,
+        "count": 5
+      },
+      {
+        "class": "outcome-list",
+        "line": 86,
+        "count": 9
+      },
+      {
+        "class": "soft-kicker",
+        "line": 112,
+        "count": 1
+      },
+      {
+        "class": "round-add",
+        "line": 113,
+        "count": 3
+      },
+      {
+        "class": "dashboard-facts",
+        "line": 116,
+        "count": 7
+      },
+      {
+        "class": "home-memory-strip",
+        "line": 116,
+        "count": 6
+      },
+      {
+        "class": "mobile-home-head",
+        "line": 116,
+        "count": 4
+      },
+      {
+        "class": "next-card",
+        "line": 116,
+        "count": 6
+      },
+      {
+        "class": "next-card-icon",
+        "line": 116,
+        "count": 1
+      },
+      {
+        "class": "offer-summary-card",
+        "line": 116,
+        "count": 7
+      },
+      {
+        "class": "offer-summary-price",
+        "line": 116,
+        "count": 4
+      },
+      {
+        "class": "quick-action-grid",
+        "line": 116,
+        "count": 6
+      },
+      {
+        "class": "quick-section-head",
+        "line": 116,
+        "count": 3
+      },
+      {
+        "class": "service-entry-action",
+        "line": 116,
+        "count": 1
+      },
+      {
+        "class": "service-entry-card",
+        "line": 116,
+        "count": 10
+      },
+      {
+        "class": "housemaster-hero",
+        "line": 119,
+        "count": 1
+      },
+      {
+        "class": "house-cover-art",
+        "line": 122,
+        "count": 2
+      },
+      {
+        "class": "house-cover-card",
+        "line": 122,
+        "count": 3
+      },
+      {
+        "class": "house-cover-copy",
+        "line": 122,
+        "count": 5
+      },
+      {
+        "class": "house-inline-form",
+        "line": 122,
+        "count": 1
+      },
+      {
+        "class": "house-menu",
+        "line": 122,
+        "count": 12
+      },
+      {
+        "class": "house-menu-disabled",
+        "line": 122,
+        "count": 2
+      },
+      {
+        "class": "house-menu-icon",
+        "line": 122,
+        "count": 2
+      },
+      {
+        "class": "house-roof-line",
+        "line": 122,
+        "count": 1
+      },
+      {
+        "class": "house-screen-head",
+        "line": 122,
+        "count": 4
+      },
+      {
+        "class": "jobs-head",
+        "line": 122,
+        "count": 4
+      },
+      {
+        "class": "soon-pill",
+        "line": 122,
+        "count": 1
+      },
+      {
+        "class": "year-head",
+        "line": 122,
+        "count": 4
+      },
+      {
+        "class": "year-preview-card",
+        "line": 122,
+        "count": 7
+      },
+      {
+        "class": "segmented-tabs",
+        "line": 125,
+        "count": 5
+      },
+      {
+        "class": "timeline-dot",
+        "line": 125,
+        "count": 5
+      },
+      {
+        "class": "year-cta",
+        "line": 125,
+        "count": 1
+      },
+      {
+        "class": "year-item",
+        "line": 125,
+        "count": 5
+      },
+      {
+        "class": "year-month",
+        "line": 125,
+        "count": 1
+      },
+      {
+        "class": "year-row",
+        "line": 125,
+        "count": 3
+      },
+      {
+        "class": "year-timeline",
+        "line": 125,
+        "count": 1
+      },
+      {
+        "class": "job-tabs",
+        "line": 128,
+        "count": 1
+      },
+      {
+        "class": "job-type-icon",
+        "line": 128,
+        "count": 3
+      },
+      {
+        "class": "mobile-job-card",
+        "line": 128,
+        "count": 3
+      },
+      {
+        "class": "mobile-job-foot",
+        "line": 128,
+        "count": 5
+      },
+      {
+        "class": "mobile-job-list",
+        "line": 128,
+        "count": 1
+      },
+      {
+        "class": "mobile-job-meta",
+        "line": 128,
+        "count": 3
+      },
+      {
+        "class": "mobile-job-top",
+        "line": 128,
+        "count": 1
+      },
+      {
+        "class": "inline-back",
+        "line": 131,
+        "count": 2
+      },
+      {
+        "class": "partner-profile-main",
+        "line": 131,
+        "count": 3
+      },
+      {
+        "class": "partner-quality-list",
+        "line": 131,
+        "count": 3
+      },
+      {
+        "class": "partner-rating",
+        "line": 131,
+        "count": 3
+      },
+      {
+        "class": "profile-facts",
+        "line": 131,
+        "count": 9
+      },
+      {
+        "class": "quote-partner-link",
+        "line": 131,
+        "count": 2
+      },
+      {
+        "class": "quote-top",
+        "line": 131,
+        "count": 1
+      },
+      {
+        "class": "review-list",
+        "line": 131,
+        "count": 4
+      },
+      {
+        "class": "verified-partner",
+        "line": 131,
+        "count": 2
+      },
+      {
+        "class": "profile-avatar-large",
+        "line": 135,
+        "count": 1
+      },
+      {
+        "class": "profile-identity",
+        "line": 135,
+        "count": 3
+      },
+      {
+        "class": "profile-trust",
+        "line": 135,
+        "count": 5
+      },
+      {
+        "class": "settings-form",
+        "line": 135,
+        "count": 1
+      },
+      {
+        "class": "settings-list",
+        "line": 135,
+        "count": 10
+      },
+      {
+        "class": "plan-grid",
+        "line": 138,
+        "count": 2
+      },
+      {
+        "class": "plan-price",
+        "line": 138,
+        "count": 3
+      },
+      {
+        "class": "plans-hero",
+        "line": 138,
+        "count": 5
+      },
+      {
+        "class": "package-buy",
+        "line": 148,
+        "count": 1
+      },
+      {
+        "class": "premium-marketing",
+        "line": 152,
+        "count": 12
+      },
+      {
+        "class": "premium-header",
+        "line": 162,
+        "count": 10
+      },
+      {
+        "class": "premium-primary",
+        "line": 166,
+        "count": 4
+      },
+      {
+        "class": "premium-hero",
+        "line": 168,
+        "count": 16
+      },
+      {
+        "class": "hero-badge",
+        "line": 169,
+        "count": 2
+      },
+      {
+        "class": "secondary-cta",
+        "line": 175,
+        "count": 2
+      },
+      {
+        "class": "hero-trust",
+        "line": 176,
+        "count": 6
+      },
+      {
+        "class": "service-demo",
+        "line": 177,
+        "count": 4
+      },
+      {
+        "class": "service-demo-top",
+        "line": 179,
+        "count": 6
+      },
+      {
+        "class": "demo-house-icon",
+        "line": 180,
+        "count": 1
+      },
+      {
+        "class": "demo-status",
+        "line": 180,
+        "count": 2
+      },
+      {
+        "class": "demo-question",
+        "line": 181,
+        "count": 4
+      },
+      {
+        "class": "demo-note",
+        "line": 182,
+        "count": 2
+      },
+      {
+        "class": "demo-route",
+        "line": 182,
+        "count": 1
+      },
+      {
+        "class": "demo-route-item",
+        "line": 182,
+        "count": 6
+      },
+      {
+        "class": "demo-route-line",
+        "line": 182,
+        "count": 1
+      },
+      {
+        "class": "section-heading-row",
+        "line": 183,
+        "count": 7
+      },
+      {
+        "class": "service-ways",
+        "line": 183,
+        "count": 2
+      },
+      {
+        "class": "service-ways-wrap",
+        "line": 183,
+        "count": 1
+      },
+      {
+        "class": "service-way-card",
+        "line": 184,
+        "count": 10
+      },
+      {
+        "class": "service-way-grid",
+        "line": 184,
+        "count": 3
+      },
+      {
+        "class": "service-way-icon",
+        "line": 184,
+        "count": 1
+      },
+      {
+        "class": "process-section",
+        "line": 185,
+        "count": 11
+      },
+      {
+        "class": "house-benefits",
+        "line": 186,
+        "count": 3
+      },
+      {
+        "class": "premium-house",
+        "line": 186,
+        "count": 8
+      },
+      {
+        "class": "premium-record",
+        "line": 187,
+        "count": 8
+      },
+      {
+        "class": "record-title",
+        "line": 187,
+        "count": 7
+      },
+      {
+        "class": "premium-outcome",
+        "line": 188,
+        "count": 9
+      },
+      {
+        "class": "premium-final",
+        "line": 190,
+        "count": 8
+      },
+      {
+        "class": "home-overview",
+        "line": 215,
+        "count": 5
+      },
+      {
+        "class": "home-state",
+        "line": 215,
+        "count": 7
+      },
+      {
+        "class": "consultation-home-button",
+        "line": 216,
+        "count": 1
+      },
+      {
+        "class": "contact-avatar",
+        "line": 216,
+        "count": 3
+      },
+      {
+        "class": "emergency-home-button",
+        "line": 216,
+        "count": 1
+      },
+      {
+        "class": "empty-contact-home",
+        "line": 216,
+        "count": 1
+      },
+      {
+        "class": "home-contact-categories",
+        "line": 216,
+        "count": 9
+      },
+      {
+        "class": "home-contact-category",
+        "line": 216,
+        "count": 1
+      },
+      {
+        "class": "home-primary-actions",
+        "line": 216,
+        "count": 9
+      },
+      {
+        "class": "consultation-form",
+        "line": 218,
+        "count": 1
+      },
+      {
+        "class": "consultation-hero",
+        "line": 218,
+        "count": 8
+      },
+      {
+        "class": "emergency-button",
+        "line": 218,
+        "count": 1
+      },
+      {
+        "class": "emergency-disclaimer",
+        "line": 218,
+        "count": 1
+      },
+      {
+        "class": "emergency-form",
+        "line": 218,
+        "count": 1
+      },
+      {
+        "class": "emergency-hero",
+        "line": 218,
+        "count": 8
+      },
+      {
+        "class": "emergency-inline-badge",
+        "line": 218,
+        "count": 1
+      },
+      {
+        "class": "emergency-location",
+        "line": 218,
+        "count": 4
+      },
+      {
+        "class": "history-form",
+        "line": 218,
+        "count": 3
+      },
+      {
+        "class": "history-hero",
+        "line": 218,
+        "count": 9
+      },
+      {
+        "class": "more-icon",
+        "line": 224,
+        "count": 2
+      },
+      {
+        "class": "more-menu",
+        "line": 224,
+        "count": 7
+      },
+      {
+        "class": "more-support",
+        "line": 224,
+        "count": 4
+      },
+      {
+        "class": "contact-category-editor",
+        "line": 226,
+        "count": 6
+      },
+      {
+        "class": "contact-category-group",
+        "line": 226,
+        "count": 3
+      },
+      {
+        "class": "contact-category-groups",
+        "line": 226,
+        "count": 1
+      },
+      {
+        "class": "contact-category-title",
+        "line": 226,
+        "count": 3
+      },
+      {
+        "class": "contact-list",
+        "line": 226,
+        "count": 1
+      },
+      {
+        "class": "contact-row",
+        "line": 226,
+        "count": 5
+      },
+      {
+        "class": "history-documents",
+        "line": 228,
+        "count": 2
+      },
+      {
+        "class": "history-invite",
+        "line": 228,
+        "count": 5
+      },
+      {
+        "class": "history-linked",
+        "line": 228,
+        "count": 3
+      },
+      {
+        "class": "history-meta",
+        "line": 228,
+        "count": 2
+      },
+      {
+        "class": "history-notes",
+        "line": 228,
+        "count": 1
+      },
+      {
+        "class": "history-pending",
+        "line": 228,
+        "count": 3
+      },
+      {
+        "class": "history-photos",
+        "line": 228,
+        "count": 4
+      },
+      {
+        "class": "history-year",
+        "line": 228,
+        "count": 2
+      },
+      {
+        "class": "house-history-list",
+        "line": 228,
+        "count": 7
+      },
+      {
+        "class": "house-transfer-card",
+        "line": 228,
+        "count": 7
+      },
+      {
+        "class": "invite-actions",
+        "line": 228,
+        "count": 2
+      },
+      {
+        "class": "transfer-history",
+        "line": 228,
+        "count": 3
+      },
+      {
+        "class": "invoice-form-head",
+        "line": 230,
+        "count": 3
+      },
+      {
+        "class": "invoice-items-head",
+        "line": 230,
+        "count": 4
+      },
+      {
+        "class": "invoice-line",
+        "line": 230,
+        "count": 3
+      },
+      {
+        "class": "invoice-preview-total",
+        "line": 230,
+        "count": 6
+      },
+      {
+        "class": "invoice-wordmark",
+        "line": 230,
+        "count": 1
+      },
+      {
+        "class": "emergency-day-picker",
+        "line": 232,
+        "count": 8
+      },
+      {
+        "class": "emergency-settings",
+        "line": 232,
+        "count": 6
+      },
+      {
+        "class": "register-options",
+        "line": 232,
+        "count": 5
+      },
+      {
+        "class": "service-preferences",
+        "line": 232,
+        "count": 4
+      },
+      {
+        "class": "three",
+        "line": 235,
+        "count": 1
+      },
+      {
+        "class": "conversion-site",
+        "line": 245,
+        "count": 1
+      },
+      {
+        "class": "conversion-header",
+        "line": 258,
+        "count": 9
+      },
+      {
+        "class": "conversion-header-cta",
+        "line": 262,
+        "count": 2
+      },
+      {
+        "class": "conversion-hero",
+        "line": 264,
+        "count": 9
+      },
+      {
+        "class": "conversion-hero-copy",
+        "line": 265,
+        "count": 4
+      },
+      {
+        "class": "conversion-kicker",
+        "line": 266,
+        "count": 2
+      },
+      {
+        "class": "public-intake",
+        "line": 270,
+        "count": 3
+      },
+      {
+        "class": "public-intake-row",
+        "line": 272,
+        "count": 7
+      },
+      {
+        "class": "public-intake-meta",
+        "line": 276,
+        "count": 4
+      },
+      {
+        "class": "example-prompts",
+        "line": 279,
+        "count": 6
+      },
+      {
+        "class": "conversion-hero-product",
+        "line": 284,
+        "count": 5
+      },
+      {
+        "class": "product-window-head",
+        "line": 286,
+        "count": 7
+      },
+      {
+        "class": "product-home-mark",
+        "line": 287,
+        "count": 1
+      },
+      {
+        "class": "product-question",
+        "line": 289,
+        "count": 2
+      },
+      {
+        "class": "product-response",
+        "line": 290,
+        "count": 1
+      },
+      {
+        "class": "product-choice",
+        "line": 291,
+        "count": 8
+      },
+      {
+        "class": "product-assurance",
+        "line": 293,
+        "count": 1
+      },
+      {
+        "class": "credibility-strip",
+        "line": 295,
+        "count": 13
+      },
+      {
+        "class": "conversion-section",
+        "line": 298,
+        "count": 2
+      },
+      {
+        "class": "conversion-final",
+        "line": 299,
+        "count": 9
+      },
+      {
+        "class": "conversion-section-head",
+        "line": 299,
+        "count": 9
+      },
+      {
+        "class": "free-section",
+        "line": 299,
+        "count": 11
+      },
+      {
+        "class": "house-story-copy",
+        "line": 299,
+        "count": 9
+      },
+      {
+        "class": "outcome-grid",
+        "line": 302,
+        "count": 10
+      },
+      {
+        "class": "conversion-process-wrap",
+        "line": 304,
+        "count": 1
+      },
+      {
+        "class": "conversion-process",
+        "line": 305,
+        "count": 1
+      },
+      {
+        "class": "conversion-step-list",
+        "line": 305,
+        "count": 10
+      },
+      {
+        "class": "conversion-paths",
+        "line": 306,
+        "count": 10
+      },
+      {
+        "class": "house-story",
+        "line": 308,
+        "count": 4
+      },
+      {
+        "class": "strong-link",
+        "line": 308,
+        "count": 1
+      },
+      {
+        "class": "house-story-card",
+        "line": 309,
+        "count": 3
+      },
+      {
+        "class": "house-story-footer",
+        "line": 309,
+        "count": 5
+      },
+      {
+        "class": "house-story-timeline",
+        "line": 309,
+        "count": 8
+      },
+      {
+        "class": "house-story-title",
+        "line": 309,
+        "count": 6
+      },
+      {
+        "class": "light-head",
+        "line": 311,
+        "count": 3
+      },
+      {
+        "class": "trust-check-grid",
+        "line": 311,
+        "count": 7
+      },
+      {
+        "class": "trust-inner",
+        "line": 311,
+        "count": 4
+      },
+      {
+        "class": "big-cta",
+        "line": 313,
+        "count": 3
+      },
+      {
+        "class": "conversion-footer",
+        "line": 315,
+        "count": 2
+      },
+      {
+        "class": "conversion-partner",
+        "line": 315,
+        "count": 6
+      },
+      {
+        "class": "register-intent-preview",
+        "line": 337,
+        "count": 5
+      },
+      {
+        "class": "app-menu",
+        "line": 363,
+        "count": 18
+      },
+      {
+        "class": "app-menu-mark",
+        "line": 368,
+        "count": 1
+      },
+      {
+        "class": "app-menu-summary-label",
+        "line": 369,
+        "count": 2
+      },
+      {
+        "class": "app-menu-content",
+        "line": 370,
+        "count": 2
+      },
+      {
+        "class": "app-menu-summary",
+        "line": 372,
+        "count": 1
+      },
+      {
+        "class": "ehn-owner",
+        "line": 447,
+        "count": 55
+      },
+      {
+        "class": "ehn-center-logo",
+        "line": 449,
+        "count": 17
+      },
+      {
+        "class": "ehn-dash-screen",
+        "line": 459,
+        "count": 3
+      },
+      {
+        "class": "ehn-center-logo-text",
+        "line": 460,
+        "count": 4
+      },
+      {
+        "class": "own-logo-line1",
+        "line": 461,
+        "count": 5
+      },
+      {
+        "class": "own-logo-line2",
+        "line": 462,
+        "count": 5
+      },
+      {
+        "class": "ehn-owner-top",
+        "line": 463,
+        "count": 7
+      },
+      {
+        "class": "notification-link",
+        "line": 464,
+        "count": 4
+      },
+      {
+        "class": "ehn-bell-dot",
+        "line": 466,
+        "count": 1
+      },
+      {
+        "class": "ehn-center-logo-house",
+        "line": 481,
+        "count": 4
+      },
+      {
+        "class": "ehn-acc-ico",
+        "line": 508,
+        "count": 2
+      },
+      {
+        "class": "ehn-dash",
+        "line": 512,
+        "count": 1
+      },
+      {
+        "class": "ehn-onboard-banner",
+        "line": 513,
+        "count": 4
+      },
+      {
+        "class": "ov-card",
+        "line": 516,
+        "count": 9
+      },
+      {
+        "class": "qa-card",
+        "line": 516,
+        "count": 7
+      },
+      {
+        "class": "ehn-composer",
+        "line": 518,
+        "count": 23
+      },
+      {
+        "class": "ki-more",
+        "line": 535,
+        "count": 4
+      },
+      {
+        "class": "ehn-reg-head",
+        "line": 595,
+        "count": 1
+      },
+      {
+        "class": "ehn-reg-back",
+        "line": 596,
+        "count": 1
+      },
+      {
+        "class": "ehn-reg-hero",
+        "line": 597,
+        "count": 3
+      },
+      {
+        "class": "ehn-reg-form-section",
+        "line": 601,
+        "count": 2
+      },
+      {
+        "class": "ehn-reg-form",
+        "line": 603,
+        "count": 4
+      },
+      {
+        "class": "ehn-two",
+        "line": 604,
+        "count": 1
+      },
+      {
+        "class": "ehn-field-area",
+        "line": 609,
+        "count": 2
+      },
+      {
+        "class": "ehn-field-file",
+        "line": 612,
+        "count": 1
+      },
+      {
+        "class": "ehn-file-label",
+        "line": 613,
+        "count": 1
+      },
+      {
+        "class": "auth-footer",
+        "line": 617,
+        "count": 1
+      },
+      {
+        "class": "qa-row",
+        "line": 656,
+        "count": 4
+      },
+      {
+        "class": "qa-icon",
+        "line": 658,
+        "count": 2
+      },
+      {
+        "class": "qa-dark",
+        "line": 659,
+        "count": 1
+      },
+      {
+        "class": "qa-arrow",
+        "line": 662,
+        "count": 2
+      },
+      {
+        "class": "ki-robot",
+        "line": 665,
+        "count": 2
+      },
+      {
+        "class": "ki-title-row",
+        "line": 666,
+        "count": 1
+      },
+      {
+        "class": "ki-text",
+        "line": 668,
+        "count": 2
+      },
+      {
+        "class": "overview-grid",
+        "line": 679,
+        "count": 3
+      },
+      {
+        "class": "ov-icon",
+        "line": 681,
+        "count": 4
+      },
+      {
+        "class": "ov-icon-lg",
+        "line": 683,
+        "count": 2
+      },
+      {
+        "class": "ov-text",
+        "line": 684,
+        "count": 7
+      },
+      {
+        "class": "ov-wide",
+        "line": 686,
+        "count": 2
+      },
+      {
+        "class": "sm-logo",
+        "line": 696,
+        "count": 2
+      },
+      {
+        "class": "own-logo-text",
+        "line": 777,
+        "count": 1
+      },
+      {
+        "class": "pdx-hero",
+        "line": 867,
+        "count": 3
+      },
+      {
+        "class": "pdx-person",
+        "line": 869,
+        "count": 2
+      },
+      {
+        "class": "pdx-region",
+        "line": 871,
+        "count": 1
+      },
+      {
+        "class": "pdx-avatar",
+        "line": 872,
+        "count": 1
+      },
+      {
+        "class": "pdx-avatar-circle",
+        "line": 873,
+        "count": 1
+      },
+      {
+        "class": "pdx-avatar-dot",
+        "line": 874,
+        "count": 1
+      },
+      {
+        "class": "pdx-stats",
+        "line": 875,
+        "count": 2
+      },
+      {
+        "class": "pdx-stat",
+        "line": 876,
+        "count": 8
+      },
+      {
+        "class": "pdx-stat-icon",
+        "line": 878,
+        "count": 2
+      },
+      {
+        "class": "pdx-section-head",
+        "line": 881,
+        "count": 3
+      },
+      {
+        "class": "pdx-section-head-tight",
+        "line": 884,
+        "count": 1
+      },
+      {
+        "class": "pdx-requests",
+        "line": 885,
+        "count": 2
+      },
+      {
+        "class": "pdx-request",
+        "line": 886,
+        "count": 4
+      },
+      {
+        "class": "pdx-request-icon",
+        "line": 887,
+        "count": 3
+      },
+      {
+        "class": "pdx-request-title",
+        "line": 890,
+        "count": 3
+      },
+      {
+        "class": "pdx-request-meta",
+        "line": 898,
+        "count": 2
+      },
+      {
+        "class": "pdx-price-chip",
+        "line": 900,
+        "count": 1
+      },
+      {
+        "class": "pdx-chevron",
+        "line": 901,
+        "count": 1
+      },
+      {
+        "class": "pdx-show-all",
+        "line": 902,
+        "count": 1
+      },
+      {
+        "class": "pdx-quote-cta",
+        "line": 903,
+        "count": 5
+      },
+      {
+        "class": "pdx-quote-icon",
+        "line": 904,
+        "count": 1
+      },
+      {
+        "class": "pdx-quote-button",
+        "line": 907,
+        "count": 2
+      },
+      {
+        "class": "pdx-appointments",
+        "line": 908,
+        "count": 2
+      },
+      {
+        "class": "pdx-appointment",
+        "line": 909,
+        "count": 6
+      },
+      {
+        "class": "pdx-date-tile",
+        "line": 910,
+        "count": 3
+      },
+      {
+        "class": "pdx-appointment-time",
+        "line": 916,
+        "count": 4
+      },
+      {
+        "class": "pdx-empty-line",
+        "line": 919,
+        "count": 1
+      },
+      {
+        "class": "wz-wrap",
+        "line": 924,
+        "count": 2
+      },
+      {
+        "class": "wz-stepper",
+        "line": 925,
+        "count": 1
+      },
+      {
+        "class": "wz-step",
+        "line": 926,
+        "count": 7
+      },
+      {
+        "class": "wz-step-dot",
+        "line": 929,
+        "count": 3
+      },
+      {
+        "class": "wz-title",
+        "line": 934,
+        "count": 1
+      },
+      {
+        "class": "wz-lead",
+        "line": 935,
+        "count": 1
+      },
+      {
+        "class": "wz-form",
+        "line": 936,
+        "count": 1
+      },
+      {
+        "class": "wz-field",
+        "line": 937,
+        "count": 9
+      },
+      {
+        "class": "wz-plain",
+        "line": 941,
+        "count": 2
+      },
+      {
+        "class": "wz-area",
+        "line": 943,
+        "count": 1
+      },
+      {
+        "class": "wz-two",
+        "line": 945,
+        "count": 1
+      },
+      {
+        "class": "wz-invisible",
+        "line": 946,
+        "count": 1
+      },
+      {
+        "class": "wz-char",
+        "line": 947,
+        "count": 1
+      },
+      {
+        "class": "wz-toggle",
+        "line": 948,
+        "count": 4
+      },
+      {
+        "class": "wz-toggle-track",
+        "line": 950,
+        "count": 4
+      },
+      {
+        "class": "wz-toggle-copy",
+        "line": 954,
+        "count": 3
+      },
+      {
+        "class": "wz-submit",
+        "line": 957,
+        "count": 2
+      },
+      {
+        "class": "wz-save-later",
+        "line": 958,
+        "count": 1
+      },
+      {
+        "class": "wz-group-label",
+        "line": 959,
+        "count": 1
+      },
+      {
+        "class": "wz-categories",
+        "line": 960,
+        "count": 2
+      },
+      {
+        "class": "wz-category",
+        "line": 961,
+        "count": 6
+      },
+      {
+        "class": "wz-category-active",
+        "line": 965,
+        "count": 3
+      },
+      {
+        "class": "wz-cat-check",
+        "line": 966,
+        "count": 3
+      },
+      {
+        "class": "wz-services",
+        "line": 969,
+        "count": 1
+      },
+      {
+        "class": "wz-service",
+        "line": 970,
+        "count": 4
+      },
+      {
+        "class": "wz-service-check",
+        "line": 972,
+        "count": 2
+      },
+      {
+        "class": "wz-service-active",
+        "line": 973,
+        "count": 2
+      },
+      {
+        "class": "wz-summary",
+        "line": 975,
+        "count": 4
+      },
+      {
+        "class": "provider-leads-card",
+        "line": 1008,
+        "count": 1
+      },
+      {
+        "class": "verification-card",
+        "line": 1008,
+        "count": 6
+      },
+      {
+        "class": "eh-toast-success",
+        "line": 1033,
+        "count": 1
+      },
+      {
+        "class": "eh-toast-error",
+        "line": 1034,
+        "count": 1
+      },
+      {
+        "class": "review-report",
+        "line": 1070,
+        "count": 5
+      },
+      {
+        "class": "pro-appointment",
+        "line": 1086,
+        "count": 3
+      },
+      {
+        "class": "pro-conversation",
+        "line": 1086,
+        "count": 3
+      },
+      {
+        "class": "member-head",
+        "line": 1090,
+        "count": 1
+      },
+      {
+        "class": "team-add-form",
+        "line": 1091,
+        "count": 2
+      },
+      {
+        "class": "member-switches",
+        "line": 1092,
+        "count": 1
+      },
+      {
+        "class": "team-manage-toggle",
+        "line": 1092,
+        "count": 1
+      },
+      {
+        "class": "member-explain",
+        "line": 1093,
+        "count": 1
+      },
+      {
+        "class": "verification-gate",
+        "line": 1099,
+        "count": 2
+      },
+      {
+        "class": "partner-plan-hero",
+        "line": 1101,
+        "count": 3
+      },
+      {
+        "class": "partner-plan-card",
+        "line": 1104,
+        "count": 7
+      },
+      {
+        "class": "notification-row",
+        "line": 1125,
+        "count": 3
+      },
+      {
+        "class": "pro-contact-card",
+        "line": 1128,
+        "count": 2
+      },
+      {
+        "class": "pro-contact-list",
+        "line": 1128,
+        "count": 3
+      },
+      {
+        "class": "simple-role-principle",
+        "line": 1132,
+        "count": 3
+      },
+      {
+        "class": "contract-checks",
+        "line": 1137,
+        "count": 2
+      },
+      {
+        "class": "pro-detail",
+        "line": 1141,
+        "count": 2
+      },
+      {
+        "class": "dark-empty",
+        "line": 1143,
+        "count": 2
+      },
+      {
+        "class": "ki-robot-centered",
+        "line": 1183,
+        "count": 1
+      },
+      {
+        "class": "ki-head-spacer",
+        "line": 1184,
+        "count": 1
+      }
+    ],
+    "src/components/marketing/tokens.css": [],
+    "src/components/auth-v2/auth-shell.css": [
+      {
+        "class": "arena-rule",
+        "line": 133,
+        "count": 1
+      }
+    ]
+  }
+}
