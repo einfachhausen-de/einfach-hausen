@@ -1,13 +1,13 @@
-import { Bell, CalendarDays, FileText, MessageSquare } from 'lucide-react';
+import { CalendarDays, FileText, MessageSquare } from 'lucide-react';
 import { AppShell } from '@/components/shell';
 import {
   EHFormFeedback,
   EHManagerAttention,
   EHManagerAutomations,
   EHMetricsBar,
-  EHOwnerSection,
   EHPageHeader,
   EHRecordList,
+  EHWorkSection,
   type EHRecordEntry,
 } from '@/design-system';
 import { requireUser } from '@/lib/auth';
@@ -91,7 +91,6 @@ export default async function Hausmanager({
       role="homeowner"
       active="/app/hausmanager"
       title="Hausmanager"
-      subtitle="Dein Zuhause im Blick"
     >
       <EHPageHeader title="Hausmanager" context={houseLabel || undefined} />
 
@@ -107,13 +106,13 @@ export default async function Hausmanager({
         {id:'angebote',label:'Angebote zu prüfen',value:quotedJobs.length},
       ]} />
 
-      <EHOwnerSection title="Anstehende Aufgaben">
+      <EHWorkSection title="Anstehende Aufgaben">
         <EHRecordList label="Anstehende Aufgaben" items={taskItems} empty="Aktuell nichts fällig. Neue Aufgaben erscheinen hier automatisch." />
-      </EHOwnerSection>
+      </EHWorkSection>
 
-      <EHOwnerSection title="Letzte Gespräche">
+      <EHWorkSection title="Letzte Gespräche">
         <EHRecordList label="Letzte Gespräche" items={threadItems} empty="Noch keine Gespräche. Starte unten beim Hausmeister." />
-      </EHOwnerSection>
+      </EHWorkSection>
 
       <EHManagerAutomations
         items={AUTOMATION_STARTERS.map((starter) => ({
@@ -127,11 +126,6 @@ export default async function Hausmanager({
         action={updateAutomationPrefsAction}
         saved={false}
       />
-
-      <p>
-        <Bell aria-hidden="true" /> Neue Gespräche starten jederzeit beim{' '}
-        <a href="/app/hausmeister">Hausmeister</a>.
-      </p>
     </AppShell>
   );
 }

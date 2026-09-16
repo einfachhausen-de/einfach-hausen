@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Building2, CheckCircle2, ChevronRight, LockKeyhole, MessageCircle, RefreshCw, UserRound } from 'lucide-react';
+import { Building2, MessageCircle, RefreshCw, UserRound } from 'lucide-react';
 import { AppShell } from '@/components/shell';
 import { crumbs } from '@/components/nav-config';
 import { EHEmptyState, EHField, EHSelect, EHTextarea, EHInput, EHStatus, EHSubmitButton, EHPanel, EHMetricsBar, EHPageHeader, EHRecordViews, EHWorkSection } from '@/design-system';
@@ -80,7 +80,6 @@ export default async function Sale() {
 
     <EHWorkSection title="Immobilienbewertung">
     <EHPanel title="Neue Bewertung">
-      <p>Lege einen offenen Bewertungsvorgang an. Dabei wird kein vorhandener Wert behauptet oder gespeichert.</p>
       <form action={requestPropertyValuationAction}>
         <EHField id="sale-type" label="Gewünschte Art"><EHSelect id="sale-type" name="valuationType" defaultValue="orientation"><option value="orientation">Orientierungswert</option><option value="expert">Sachverständigenbewertung</option><option value="market">Makler-Marktwert</option></EHSelect></EHField>
         <EHField id="sale-notes" label="Hinweis"><EHTextarea id="sale-notes" name="notes" rows={3} placeholder="Optional: Besonderheiten oder Modernisierungen" /></EHField>
@@ -88,8 +87,6 @@ export default async function Sale() {
       </form>
     </EHPanel>
     <EHPanel title="Vorhandene Einschätzung">
-      <p>Nutze diesen Weg nur, wenn dir bereits eine konkrete Wertspanne vorliegt.</p>
-
       <form action={storeExistingValuationAction}>
         <EHField id="sale-min" label="Von €"><EHInput id="sale-min" name="estimatedMin" type="number" min="0" step="1000" required /></EHField>
         <EHField id="sale-max" label="Bis €"><EHInput id="sale-max" name="estimatedMax" type="number" min="0" step="1000" required /></EHField>
@@ -122,8 +119,6 @@ export default async function Sale() {
         <ol>{saleStages.map(([status, label], index) => <li key={status} data-state={index < currentStage ? 'done' : index === currentStage ? 'current' : 'next'}><span>{index + 1}</span><div><strong>{label}</strong>{index === currentStage && <small>Aktueller Schritt</small>}</div></li>)}</ol>
       </section>
 
-      <div className="privacy-banner"><LockKeyhole aria-hidden="true" /><div><strong>Du entscheidest über jede Freigabe</strong><p>Makler werden zunächst nur dir vorgeschlagen. Eine Freigabe gilt ausschließlich für die Verkaufsanbahnung und kann jederzeit widerrufen werden.</p></div></div>
-
       {matches.length > 0 && <EHRecordViews label="Vorgeschlagene Makler" storageKey="verkauf-makler" items={matches.map((match: any) => {
         const activeShare = match.share_status === 'active';
         const permissions = permissionLabels(match.permissions_json);
@@ -147,7 +142,5 @@ export default async function Sale() {
       {matches.length === 0 && <div className="empty owner-empty-action"><UserRound aria-hidden="true" /><strong>Noch kein passender Makler im Netzwerk</strong><p>Deine Verkaufsabsicht bleibt gespeichert. Ohne passenden aktiven und geprüften Suchprofil-Treffer werden keine Kontaktdaten freigegeben.</p><Link className="btn ghost" href="/app/hausmeister"><MessageCircle size={16} aria-hidden="true" /> Frage zum Verkauf klären</Link></div>}
     </>}
     </EHWorkSection>
-
-    <div className="privacy-rules"><CheckCircle2 aria-hidden="true" /><div><strong>Klare Grenze der Verkaufsfreigabe</strong><p>Freigegeben werden nur Objektzusammenfassung und Kontaktdaten für den Zweck „Verkaufsanbahnung“. Private Nachrichten, Zahlungen, Rechnungen, Versicherungen und vollständige Dokumente bleiben außerhalb des Verkaufshandoffs.</p></div><ChevronRight aria-hidden="true" /></div>
   </AppShell>;
 }
