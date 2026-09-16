@@ -1,5 +1,14 @@
 {
   "version": "1.0.0",
+  "debtCap": [
+    {"until": "2026-10-31", "max": 8314},
+    {"until": "2026-11-30", "max": 6500},
+    {"until": "2026-12-31", "max": 4500},
+    {"until": "2027-01-31", "max": 2800},
+    {"until": "2027-02-28", "max": 1500},
+    {"until": "2027-03-31", "max": 600},
+    {"until": "2027-04-30", "max": 0}
+  ],
   "protected": [
     "packages/eh-design/",
     "design/design-policy.json",
