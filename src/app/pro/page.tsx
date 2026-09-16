@@ -1,5 +1,5 @@
-import { BadgeCheck, ClipboardList, Flame, Leaf, MapPin, Sprout } from 'lucide-react';
-import { EHAppHeader, EHList, EHWorkSection, EHWorkspaceGrid, EHWorkMetrics, EHPriorityAction, EHRequestList } from '@/design-system';
+import { BadgeCheck, CalendarClock, Flame, Leaf, Sprout } from 'lucide-react';
+import { EHAppHeader, EHMetricsBar, EHPriorityAction, EHRecordList, EHRecordViews, EHStatus, EHWorkspaceGrid, EHWorkSection, type EHRecordEntry } from '@/design-system';
 import { AppShell } from '@/components/shell';
 import { ProviderAccessBoundary, ProviderState } from '@/components/provider/workspace';
 import { requireUser } from '@/lib/auth';
@@ -8,9 +8,9 @@ import { dateLabel, euro } from '@/lib/format';
 import { getProviderContext } from '@/lib/provider';
 
 const TYPE_BADGES = [
-  { kind: 'emergency', label: 'Notfallservice', icon: Flame, className: 'pdx-badge emergency' },
-  { kind: 'consultation', label: 'Beratung', icon: Leaf, className: 'pdx-badge consultation' },
-  { kind: 'service', label: 'Auftrag', icon: Sprout, className: 'pdx-badge order' },
+  { kind: 'emergency', label: 'Notfallservice', icon: Flame },
+  { kind: 'consultation', label: 'Beratung', icon: Leaf },
+  { kind: 'service', label: 'Auftrag', icon: Sprout },
 ] as const;
 
 function requestBadge(job: any) {
@@ -69,68 +69,82 @@ export default async function Pro() {
   }
 
   const requests = db.prepare(`SELECT d.id dispatch_id,d.status dispatch_status,d.match_score,d.distance_km,d.sent_at,j.*,(SELECT amount FROM quotes q WHERE q.job_id=j.id AND q.provider_id=?) my_quote FROM job_dispatches d JOIN jobs j ON j.id=d.job_id WHERE d.provider_id=? AND d.status IN ('sent','viewed','quoted') AND j.status IN ('open','quoted') ORDER BY d.sent_at DESC LIMIT 30`).all(ctx.providerId, ctx.providerId) as any[];
-  const companyOpen = ctx.canManageJobs
-    ? (db.prepare(`SELECT COUNT(*) c FROM job_dispatches d JOIN jobs j ON j.id=d.job_id WHERE d.provider_id=? AND d.status='accepted' AND j.status!='completed'`).get(ctx.providerId) as any).c
-    : 0;
+  // "Laufende Aufträge" ist der Betriebsbestand: Aufträge in Bearbeitung, die dem
+  // Unternehmen zugeordnet sind. Ohne Auftragsverwaltung zählt stattdessen die
+  // eigene zugewiesene Arbeit - sonst stünde dort für Team-Mitglieder eine Null,
+  // obwohl sie laufende Vorgänge bearbeiten.
+  const runningJobs = ctx.canManageJobs
+    ? (db.prepare(`SELECT COUNT(*) c FROM jobs j JOIN job_dispatches d ON d.job_id=j.id AND d.provider_id=? WHERE j.status IN ('accepted','in_progress')`).get(ctx.providerId) as any).c
+    : (db.prepare(`SELECT COUNT(*) c FROM jobs j JOIN job_assignments a ON a.job_id=j.id AND a.provider_id=? AND a.contact_user_id=? WHERE j.status IN ('accepted','in_progress')`).get(ctx.providerId, u.id) as any).c;
   const messages = (db.prepare(`SELECT COUNT(*) c FROM messages WHERE recipient_id=? AND read_at IS NULL`).get(u.id) as any).c
     + (db.prepare(`SELECT COUNT(*) c FROM contact_messages WHERE provider_id=? AND sender_id!=? AND read_at IS NULL`).get(ctx.providerId, u.id) as any).c;
   const upcoming = db.prepare(`SELECT a.start_at,j.title,j.postcode,j.id FROM appointments a JOIN jobs j ON j.id=a.job_id WHERE a.contact_user_id=? AND a.status='confirmed' AND datetime(a.start_at)>=datetime('now','localtime') ORDER BY a.start_at ASC LIMIT 2`).all(u.id) as any[];
   const quoteCandidates = requests.filter((job) => !job.my_quote && job.request_kind !== 'contact').length;
   const newRequestsCount = requests.filter((job) => job.dispatch_status === 'sent').length;
+  // Standort ist die Grundlage der Auftragszuweisung: PLZ des Betriebs und der
+  // Radius, in dem er Aufträge annimmt. Beides darf hier nicht verschwinden.
+  const location = `${ctx.jobTitle || 'Ansprechpartner'} · ${p?.radius_km || 25} km um ${p?.postcode || 'deine Region'}`;
+
+  const requestItems: EHRecordEntry[] = requests.slice(0, 5).map((job) => {
+    const badge = requestBadge(job);
+    const Icon = badge.icon;
+    const price = job.my_quote ? euro(job.my_quote) : job.budget_min && job.budget_max ? `ca. ${euro((job.budget_min + job.budget_max) / 2)}` : job.budget_max ? `ca. ${euro(job.budget_max)}` : null;
+    return {
+      id: String(job.dispatch_id),
+      title: job.title.replace(/^Ansprechpartner:\s*/, ''),
+      detail: job.description,
+      value: price ?? undefined,
+      dateLabel: timeAgo(job.sent_at),
+      status: <EHStatus tone={job.emergency_type ? 'warning' : 'neutral'}>{badge.label}</EHStatus>,
+      icon: <Icon size={20} />,
+      href: `/pro/jobs/${job.id}`,
+    };
+  });
+
+  const appointmentItems: EHRecordEntry[] = upcoming.map((appointment) => {
+    const start = new Date(appointment.start_at + 'Z');
+    const sameDay = start.toDateString() === new Date().toDateString();
+    return {
+      id: `${appointment.id}-${appointment.start_at}`,
+      title: appointment.title.replace(/^Ansprechpartner:\s*/, ''),
+      detail: `${sameDay ? 'Heute' : dateLabel(appointment.start_at.slice(0, 10))}, ${start.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })} Uhr · ${appointment.postcode || 'Terminort'}`,
+      icon: <CalendarClock size={20} />,
+      href: `/pro/jobs/${appointment.id}`,
+    };
+  });
 
   return (
     <AppShell role="provider" active="/pro" title="Arbeitsbereich" subtitle={`${ctx.businessName} · ${ctx.jobTitle || 'Ansprechpartner'}`}>
       <ProviderAccessBoundary canManageJobs={ctx.canManageJobs} />
 
-      <EHAppHeader eyebrow={ctx.businessName} title={`${greeting()}, ${u.first_name}.`} text={ctx.canManageJobs ? "Anfragen prüfen. Arbeit planen. Den nächsten Auftrag voranbringen." : "Deine zugewiesene Arbeit und die nächsten Termine im Überblick."}/>
-      <p>{ctx.jobTitle || 'Ansprechpartner'} · {p?.radius_km || 25} km um {p?.postcode || 'deine Region'}</p>
-      <EHWorkMetrics items={[
-        ...(ctx.canManageJobs ? [{label:"Neue Anfragen",value:newRequestsCount,href:"/pro/orders",hint:"In den zuletzt geladenen Anfragen"},{label:"Laufende Aufträge",value:companyOpen,href:"/pro/orders"}] : []),
-        {label:"Nächste Termine",value:upcoming.length,href:"/pro/calendar",hint:"Vorschau der nächsten zwei Termine"},
-        {label:"Ungelesene Nachrichten",value:messages,href:"/pro/messages"},
-      ]}/>
-      {/* Nächster Arbeitsschritt: Prominent hervorgehoben */}
+      <EHAppHeader
+        eyebrow={ctx.businessName}
+        title={`${greeting()}, ${u.first_name}.`}
+        text={ctx.canManageJobs ? 'Anfragen prüfen. Arbeit planen. Den nächsten Auftrag voranbringen.' : 'Deine zugewiesene Arbeit und die nächsten Termine im Überblick.'}
+      />
+
+      <p>{location}</p>
+
+      <EHMetricsBar label="Stand deines Betriebs" items={[
+        { id: 'anfragen', label: 'Neue Anfragen', value: newRequestsCount, hint: 'In den zuletzt geladenen Anfragen' },
+        { id: 'laufend', label: 'Laufende Aufträge', value: runningJobs },
+        { id: 'termine', label: 'Nächste Termine', value: upcoming.length, hint: 'Vorschau der nächsten zwei Termine' },
+        { id: 'nachrichten', label: 'Ungelesene Nachrichten', value: messages },
+      ]} />
+
       {ctx.canManageJobs && quoteCandidates > 0 && (
-        <EHPriorityAction eyebrow="Als Nächstes" title="Dein nächstes Angebot" text={`${quoteCandidates} Anfragen ohne eigenes Angebot warten auf deine Prüfung.`} href={`/pro/jobs/${requests.find((job) => !job.my_quote && job.request_kind !== 'contact')?.id}`} label="Anfrage prüfen"/>
+        <EHPriorityAction eyebrow="Als Nächstes" title="Dein nächstes Angebot" text={`${quoteCandidates} Anfragen ohne eigenes Angebot warten auf deine Prüfung.`} href={`/pro/jobs/${requests.find((job) => !job.my_quote && job.request_kind !== 'contact')?.id}`} label="Anfrage prüfen" />
       )}
-      <EHWorkspaceGrid main={<>
-      {/* Arbeitsliste: Klare Auftragszeilen */}
-      <EHWorkSection title="Passende Kundenanfragen" link={{href:"/pro/orders",label:"Alle ansehen"}}>
-        <EHRequestList items={requests.slice(0, 5).map((job) => {
-          const badge = requestBadge(job);
-          const price = job.my_quote ? euro(job.my_quote) : job.budget_min && job.budget_max ? `ca. ${euro((job.budget_min + job.budget_max) / 2)}` : job.budget_max ? `ca. ${euro(job.budget_max)}` : null;
-          return {
-            id: String(job.dispatch_id),
-            kind: badge.label,
-            title: job.title.replace(/^Ansprechpartner:\s*/, ''),
-            description: job.description,
-            location: `${job.postcode || 'Region'}${job.distance_km ? ` · ${Math.round(job.distance_km)} km` : ''}`,
-            price,
-            time: timeAgo(job.sent_at),
-            href: `/pro/jobs/${job.id}`,
-          };
-        })} />
-        {requests.length === 0 && (
-          <ProviderState
-            icon={<ClipboardList size={21} />}
-            title="Keine neuen Anfragen im Umkreis"
-            description="Neue Anfragen erscheinen hier automatisch, sobald passende Vorhaben in deinem PLZ-Bereich freigegeben werden."
-          />
-        )}
-      </EHWorkSection>
-      </>} aside={<EHWorkSection title="Deine nächsten Termine" link={{href:"/pro/calendar",label:"Kalender"}}>
-        <EHList label="Kommende Vor-Ort-Termine" items={upcoming.map((appointment) => {
-          const start = new Date(appointment.start_at + 'Z');
-          const sameDay = start.toDateString() === new Date().toDateString();
-          return {
-            id: `${appointment.id}-${appointment.start_at}`,
-            title: appointment.title.replace(/^Ansprechpartner:\s*/, ''),
-            text: `${sameDay ? 'Heute' : dateLabel(appointment.start_at.slice(0, 10))}, ${start.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })} Uhr · ${appointment.postcode || 'Terminort'}`,
-            href: `/pro/jobs/${appointment.id}`,
-          };
-        })} />
-        {upcoming.length === 0 && <p>Keine anstehenden Termine.</p>}
-      </EHWorkSection>}/>
+
+      <EHWorkspaceGrid main={
+        <EHWorkSection title="Passende Kundenanfragen" link={{ href: '/pro/orders', label: 'Alle ansehen' }}>
+          <EHRecordViews label="Passende Kundenanfragen" items={requestItems} empty="Keine neuen Anfragen." storageKey="pro-start" switcherLabel="Anfragen: Ansicht wechseln" />
+        </EHWorkSection>
+      } aside={
+        <EHWorkSection title="Deine nächsten Termine" link={{ href: '/pro/calendar', label: 'Kalender' }}>
+          <EHRecordList label="Kommende Vor-Ort-Termine" items={appointmentItems} empty="Keine anstehenden Termine." />
+        </EHWorkSection>
+      } />
     </AppShell>
   );
 }
