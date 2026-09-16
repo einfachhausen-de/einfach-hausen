@@ -1,11 +1,8 @@
 'use client';
 
 import { AlertCircle } from 'lucide-react';
-import { useErrorReport } from '@/components/error-reporting';
 
-export default function ProError({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
-  useErrorReport(error);
-
+export default function ProError({ reset }: { error: Error & { digest?: string }; reset: () => void }) {
   return (
     <div className="provider-error-page" role="alert">
       <div className="provider-state provider-state-error">

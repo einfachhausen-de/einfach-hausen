@@ -2,11 +2,9 @@
 
 import { useEffect, useRef } from 'react';
 import { AlertCircle, RotateCcw } from 'lucide-react';
-import { useErrorReport } from '@/components/error-reporting';
 
-export default function HomeownerError({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
+export default function HomeownerError({ reset }: { error: Error & { digest?: string }; reset: () => void }) {
   const stateRef = useRef<HTMLElement>(null);
-  useErrorReport(error);
 
   useEffect(() => {
     stateRef.current?.focus();
