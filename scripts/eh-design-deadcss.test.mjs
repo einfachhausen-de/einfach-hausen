@@ -26,25 +26,26 @@ async function fixture(fn, sites = []) {
   }
 }
 
-// Altbestand ist eingefroren und darf nur schrumpfen - genau wie in den vier
-// globalen Dateien. Neuzugang dagegen beisst sofort.
-test("a frozen dead module class passes, a new one in the same file fails", () => fixture(async ({ root, put }) => {
+// Modulklassen sind hart geprueft (Zukunftssicherung §3A): der Build erzeugt
+// den Hash selbst, also ist "greift diese Klasse je?" entscheidbar - ohne
+// Altbestand und ohne --sync.
+test("a dead module class fails, deleting it makes the gate green", () => fixture(async ({ root, put }) => {
   put("src/a.module.css", ".used{color:red}\n.dead{color:blue}\n");
   put("src/a.tsx", 'import styles from "./a.module.css";\nexport const A=()=><div className={styles.used}/>;\n');
   await sync(root, { postcss });
-  assert.deepEqual(await check(root, { postcss }), []);
-  put("src/a.module.css", ".used{color:red}\n.dead{color:blue}\n.fresh{color:green}\n");
   const errors = await check(root, { postcss });
-  assert.ok(errors.some((e) => e.includes("src/a.module.css") && e.includes('neue tote Modul-Klasse "fresh"')), JSON.stringify(errors));
-  assert.ok(!errors.some((e) => e.includes('"dead"')), JSON.stringify(errors));
+  assert.ok(errors.some((e) => e.includes('Klasse "dead" ist tot')), JSON.stringify(errors));
   assert.ok(!errors.some((e) => e.includes('"used"')), JSON.stringify(errors));
+  put("src/a.module.css", ".used{color:red}\n");
+  assert.deepEqual(await check(root, { postcss }), []);
 }));
 
-test("deleting a frozen dead module class passes", () => fixture(async ({ root, put }) => {
-  put("src/a.module.css", ".used{color:red}\n.dead{color:blue}\n");
-  put("src/a.tsx", 'import styles from "./a.module.css";\nexport const A=()=><div className={styles.used}/>;\n');
+// :global(.x) bleibt ungehascht - das ist ein globaler Selektor und keine
+// Modulklasse. Solche Regeln darf der Waechter nicht als tot melden.
+test("a class inside :global() is not judged", () => fixture(async ({ root, put }) => {
+  put("src/g.module.css", ".scope{color:red}\n.scope :global(.legacy-nav){color:blue}\n");
+  put("src/g.tsx", 'import styles from "./g.module.css";\nexport const G=()=><div className={styles.scope}/>;\n');
   await sync(root, { postcss });
-  put("src/a.module.css", ".used{color:red}\n");
   assert.deepEqual(await check(root, { postcss }), []);
 }));
 
@@ -119,13 +120,14 @@ test("a registered dynamic site exempts its value set", () => fixture(async ({ r
   put("src/dyn.module.css", ".sm{width:1px}\n.md{width:2px}\n.lg{width:3px}\n");
   put("src/dyn.tsx", 'import styles from "./dyn.module.css";\nexport const D=({size})=> <div className={styles[size]}/>;\n');
   await sync(root, { postcss });
-  // sm und md sind eingetragen, lg wandert als Altbestand in die Liste.
-  assert.deepEqual(await check(root, { postcss }), []);
-  // xl ist neu und tot: das beisst.
-  put("src/dyn.module.css", ".sm{width:1px}\n.md{width:2px}\n.lg{width:3px}\n.xl{width:4px}\n");
+  // sm und md sind eingetragen und damit frei; lg ist tot und beisst hart.
   const errors = await check(root, { postcss });
-  assert.ok(errors.some((e) => e.includes('neue tote Modul-Klasse "xl"')), JSON.stringify(errors));
-  assert.ok(!errors.some((e) => e.includes('"lg"') || e.includes('"sm"') || e.includes('"md"')), JSON.stringify(errors));
+  assert.ok(errors.some((e) => e.includes('Klasse "lg" ist tot')), JSON.stringify(errors));
+  assert.ok(!errors.some((e) => e.includes('"sm"') || e.includes('"md"')), JSON.stringify(errors));
+  put("src/dyn.module.css", ".sm{width:1px}\n.md{width:2px}\n.xl{width:4px}\n");
+  const more = await check(root, { postcss });
+  assert.ok(more.some((e) => e.includes('Klasse "xl" ist tot')), JSON.stringify(more));
+  assert.ok(!more.some((e) => e.includes('"sm"') || e.includes('"md"')), JSON.stringify(more));
 }, [{ file: "src/dyn.tsx", line: 2, expression: "styles[size]", applies: "module", module: "src/dyn.module.css", values: ["sm", "md"] }]));
 
 // Verschwindet die Stelle aus dem Quelltext, ist die geschuetzte Liste veraltet.

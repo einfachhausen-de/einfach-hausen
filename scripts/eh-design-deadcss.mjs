@@ -14,14 +14,11 @@
  * Rohtext-Suche hatte schon einmal eine erzeugt) ist damit ausgeschlossen.
  *
  * Vier Pruefungen:
- *   1. Keine neue tote Klasse in CSS Modules. Der Hash entsteht zur Buildzeit,
- *      deshalb ist die Frage "greift diese Klasse je?" statisch entscheidbar:
- *      sie greift genau dann, wenn der Quelltext sie ueber den Importnamen
- *      anspricht. Der Altbestand (757 Namen) steht eingefroren unter
- *      "modules" in design-deadcss.json und darf nur schrumpfen; eine neue
- *      tote Klasse ist ein harter Fehler. Nicht hart ab null, weil ZUKUNFTS-
- *      SICHERUNG.md §3 das Loeschen alter Klassen ausdruecklich hinter den
- *      Seitenumbau legt - bis dahin waere ein rotes Gate nur doppelte Arbeit.
+ *   1. Keine tote Klasse in CSS Modules - hart, ohne Altbestand. Der Hash
+ *      entsteht zur Buildzeit, deshalb ist die Frage "greift diese Klasse je?"
+ *      statisch entscheidbar: sie greift genau dann, wenn der Quelltext sie
+ *      ueber den Importnamen anspricht (Zukunftssicherung §3A). Namen aus
+ *      :global(.x) bleiben ungehascht und werden nicht bewertet.
  *   2. Die sechs bekannten dynamischen Stellen (design-dynamic-classes.json).
  *      Dort steht der Klassenname nicht als Wort im Quelltext. Eine siebte
  *      Stelle anzulegen heisst, diese geschuetzte Datei zu aendern.
@@ -126,6 +123,37 @@ function collectClasses(cssRoot) {
     }
   });
   return map;
+}
+
+/**
+ * Namen, die in der Datei innerhalb von :global(...) oder :global { } stehen.
+ * Die bleiben beim Build ungehascht - es sind globale Selektoren, keine
+ * Modulklassen. Sie sind ueber den Importnamen nie erreichbar und werden
+ * deshalb hier nicht bewertet (sonst stuenden lebende Regeln wie
+ * `.ownerScope :global(.app-shell-v3 .sidebar-nav)` als "tot" im Befund).
+ */
+export function globalEscapedNames(text) {
+  const out = new Set();
+  let i = 0;
+  while ((i = text.indexOf(":global", i)) !== -1) {
+    let j = i + ":global".length;
+    while (j < text.length && /\s/.test(text[j])) j += 1;
+    const open = text[j];
+    if (open !== "(" && open !== "{") {
+      i = j;
+      continue;
+    }
+    const close = open === "(" ? ")" : "}";
+    let depth = 0;
+    let k = j;
+    for (; k < text.length; k += 1) {
+      if (text[k] === open) depth += 1;
+      else if (text[k] === close && (depth -= 1) === 0) break;
+    }
+    for (const match of text.slice(j + 1, k).matchAll(CLASS_RE)) out.add(match[1]);
+    i = k + 1;
+  }
+  return out;
 }
 
 // `composes: basis` bzw. `composes: basis from './other.module.css'` - wer
@@ -290,6 +318,7 @@ export async function measure(root, { postcss: injected } = {}) {
     const cssRoot = parse(root, postcss, file, parseErrors);
     if (!cssRoot) continue;
     const classes = collectClasses(cssRoot);
+    for (const name of globalEscapedNames(readFileSync(abs(root, file), "utf8"))) classes.delete(name);
     const composes = collectComposes(cssRoot, file);
     classesByFile.set(file, classes);
     composesByFile.set(file, composes);
@@ -397,20 +426,20 @@ export async function check(root, options = {}) {
   const report = await measure(root, options);
   const errors = [...report.parseErrors, ...report.dynamic.errors];
 
+  /* 1. CSS Modules: hart, ohne Liste (Zukunftssicherung §3A). */
+  for (const { file, class: name, line } of report.moduleDead) {
+    errors.push(`${file}:${line}: Klasse "${name}" ist tot - im Quelltext keine Referenz ueber den Modul-Import; loeschen oder verwenden`);
+  }
+
+  /* 3. Globale Dateien: nur Altbestand darf tot sein. */
   const frozen = readJson(root, DEADCSS_FILE);
-  if (!frozen?.files && !frozen?.modules) errors.push(`${DEADCSS_FILE} fehlt oder ist unlesbar - einmalig --sync ausfuehren`);
+  if (!frozen?.files) errors.push(`${DEADCSS_FILE} fehlt oder ist unlesbar - einmalig --sync ausfuehren`);
   else {
     for (const [file, list] of Object.entries(report.globalDead)) {
       const known = new Set((frozen.files?.[file] ?? []).map((entry) => entry.class));
       for (const entry of list) {
         if (!known.has(entry.class)) errors.push(`${file}:${entry.line}: neue tote Klasse "${entry.class}" - Altbestand darf nur schrumpfen`);
       }
-    }
-    // Dieselbe Regel fuer CSS Modules: Altbestand eingefroren, Neuzugang hart.
-    for (const entry of report.moduleDead) {
-      const known = new Set((frozen.modules?.[entry.file] ?? []).map((item) => item.class));
-      if (known.has(entry.class)) continue;
-      errors.push(`${entry.file}:${entry.line}: neue tote Modul-Klasse "${entry.class}" - im Quelltext keine Referenz ueber den Modul-Import; Altbestand darf nur schrumpfen`);
     }
   }
 
@@ -422,18 +451,14 @@ export async function check(root, options = {}) {
 export async function sync(root, options = {}) {
   const report = await measure(root, options);
   const generated = today();
-  const modules = {};
-  for (const entry of report.moduleDead) {
-    (modules[entry.file] ??= []).push({ class: entry.class, line: entry.line, count: entry.count });
-  }
   const dead = {
     version: 1,
     generated,
     corpus: { dirs: CORPUS_DIRS, extensions: CORPUS_EXT },
-    // Eine Liste, zwei Schluessel: "files" sind die vier globalen Dateien,
-    // "modules" die CSS Modules. Beide duerfen nur schrumpfen.
+    // Nur die vier globalen Dateien stehen hier. Modulklassen sind seit §3A
+    // hart geprueft und brauchen keine Liste - sie stehen hier absichtlich
+    // nicht mehr, damit niemand den Altbestand wieder auffuellen kann.
     files: report.globalDead,
-    modules,
   };
   const budgets = { version: 1, generated, counters: report.counters };
   const { data } = dynamicSites(root);
@@ -460,7 +485,7 @@ export function reportText(report) {
   ];
   const width = Math.max(...rows.map(([key]) => key.length));
   const lines = rows.map(([key, value]) => `  ${key.padEnd(width)}  ${value}`);
-  lines.push(`  tote Modul-Klassen          ${report.moduleDead.length} (eingefroren)`);
+  lines.push(`  tote Modul-Klassen          ${report.moduleDead.length} (hart)`);
   return lines.join("\n");
 }
 

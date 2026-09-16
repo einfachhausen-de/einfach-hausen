@@ -163,28 +163,6 @@
 
 /* --- Fußnote unter der Tabelle ----------------------------------------- */
 
-.foot {
-  margin-top: var(--eh-space-5);
-}
-
-.note {
-  margin: 0;
-  font-size: var(--eh-small);
-  line-height: 1.55;
-  color: var(--eh-ink-mute);
-}
-
-.note strong {
-  color: var(--eh-ink-soft);
-  font-weight: 650;
-}
-
-.note a {
-  color: var(--eh-teal-700);
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
 .wrapper {
   min-width: 0;
   max-width: 100%;

@@ -212,7 +212,6 @@
 .dHeroCopy { display: flex; flex-direction: column; gap: 20px; max-width: 700px; }
 .dHeroTags { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 .dHeroCopy h1 { font-size: var(--eh-h1); line-height: 1.02; letter-spacing: -0.04em; font-weight: 800; color: var(--eh-teal-900); }
-.dHeroCopy .lead { font-size: var(--eh-lead); line-height: 1.55; color: var(--eh-ink-soft); }
 .synonyms { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 13.5px; color: var(--eh-ink-mute); }
 .synonyms span { padding: 4px 10px; border-radius: 8px; background: var(--eh-surface); border: 1px solid var(--eh-line); color: var(--eh-ink-soft); font-weight: 600; font-size: 12.5px; }
 .dHeroActions { display: flex; flex-wrap: wrap; gap: 12px; }
@@ -354,7 +353,6 @@
 .naviCard span { font-size: 14px; color: var(--eh-ink-soft); }
 
 /* Category page hero list / not-found */
-.catHeroList { display: flex; flex-wrap: wrap; gap: 8px; }
 .notFound { composes: container from '../mkt.module.css'; padding: clamp(64px, 10vw, 140px) var(--eh-gutter); display: flex; flex-direction: column; gap: 24px; max-width: 760px; }
 .notFound h1 { font-size: var(--eh-h1); line-height: 1.04; letter-spacing: -0.035em; font-weight: 800; color: var(--eh-teal-900); }
 .notFound p { font-size: var(--eh-lead); color: var(--eh-ink-soft); }

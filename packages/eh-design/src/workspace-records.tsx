@@ -484,6 +484,12 @@ export type EHRecordEntry = {
   status?: ReactNode;
   /** 20px-Symbol, zum Beispiel <FileText size={20}/>. */
   icon?: ReactNode;
+  /**
+   * Bedienelement am Zeilenende, meist ein <form> mit Server-Aktion. Nur fuer
+   * Eintraege ohne href: eine Form haette in einem Link zwei Tippziele und
+   * waere ungueltiges HTML.
+   */
+  action?: ReactNode;
   href?: string;
 };
 
@@ -503,6 +509,7 @@ function RecordRow({item}: {item: EHRecordEntry}) {
         {item.status}
       </span>
     )}
+    {item.action}
   </>;
 
   return item.href
@@ -545,6 +552,7 @@ export function EHRecordCards({label, items, empty}: {label: string; items: read
               {item.dateLabel && <span className={s.recordDate}>{item.dateLabel}</span>}
             </span>
           )}
+          {item.action}
         </>;
 
         return (
@@ -580,6 +588,7 @@ export function EHRecordTimeline({label, items, empty}: {label: string; items: r
 
           {item.detail && <span className={s.recordDetail}>{item.detail}</span>}
           {item.note && <span className={s.recordNote}>{item.note}</span>}
+          {item.action}
         </>;
 
         return (

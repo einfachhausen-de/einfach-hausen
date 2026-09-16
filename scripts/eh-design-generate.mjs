@@ -5,6 +5,27 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const dir = resolve(root, "packages/eh-design/src");
 const raw = readFileSync(resolve(dir, "tokens.json"), "utf8");
 const data = JSON.parse(raw);
+
+// --- Wortschatz-Obergrenze (Zukunftssicherung 1.4) -----------------------
+// Der Generaator pruefte bisher nur, ob die Generaate zu tokens.json passen.
+// Damit entsteht ein elfter Wert als Token und niemand diskutiert ihn. Zwei
+// Grenzen: hoechstens MAX_FONT_SIZES Schriftgroessen, und keine neue Gruppe.
+// "family" ist keine Groesse und zaehlt nicht mit.
+export const MAX_FONT_SIZES = 8;
+export const TOKEN_GROUPS = ["color","font","weight","leading","track","space","radius","shape","shadow","motion","slide"];
+export function vocabularyErrors(data) {
+  const errors = [];
+  const sizes = Object.keys(data.font ?? {}).filter(key => key !== "family");
+  if (sizes.length > MAX_FONT_SIZES)
+    errors.push("tokens.font: " + sizes.length + " Schriftgroessen > " + MAX_FONT_SIZES + " erlaubt (" + sizes.join(", ") + ")");
+  for (const group of Object.keys(data).filter(key => typeof data[key] === "object"))
+    if (!TOKEN_GROUPS.includes(group))
+      errors.push("neue Token-Gruppe \"" + group + "\" nicht freigegeben (erlaubt: " + TOKEN_GROUPS.join(", ") + ")");
+  return errors;
+}
+const vocabulary = vocabularyErrors(data);
+if (vocabulary.length) throw new Error("Token-Wortschatz verletzt: " + vocabulary.join("; "));
+
 const css = "/* Generated from tokens.json. Run node scripts/eh-design-generate.mjs. */\n:root {\n" +
  Object.entries(data).filter(([,v]) => typeof v === "object").flatMap(([group, values]) =>
  Object.entries(values).filter(([,value])=>typeof value==="string").map(([key,value]) =>
