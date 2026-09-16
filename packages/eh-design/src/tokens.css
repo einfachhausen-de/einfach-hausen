@@ -23,6 +23,14 @@
   --eh-font-page: clamp(2rem, 5vw, 4.25rem);
   --eh-font-section: clamp(2rem, 3.6vw, 3.25rem);
   --eh-font-app-title: clamp(2rem, 3vw, 2.75rem);
+  --eh-font-app-large: 1.75rem;
+  --eh-font-app-medium: 1.25rem;
+  --eh-weight-regular: 400;
+  --eh-weight-medium: 550;
+  --eh-weight-strong: 650;
+  --eh-leading-tight: 1.2;
+  --eh-leading-snug: 1.35;
+  --eh-leading-body: 1.55;
   --eh-space-xs: 0.5rem;
   --eh-space-sm: 1rem;
   --eh-space-md: 1.5rem;

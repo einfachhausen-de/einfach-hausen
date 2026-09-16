@@ -12,6 +12,7 @@ export * from "./workspace";
 export * from "./workspace-sidebar";
 export * from "./workspace-hausmanager";
 export * from "./workspace-records";
+export * from "./workspace-views";
 export * from "./workspace-conversation";
 export * from "./workspace-detail";
 export * from "./documents";

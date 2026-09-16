@@ -26,7 +26,19 @@ export const EHTokens = {
     "display": "clamp(3.5rem, 7.8vw, 7rem)",
     "page": "clamp(2rem, 5vw, 4.25rem)",
     "section": "clamp(2rem, 3.6vw, 3.25rem)",
-    "appTitle": "clamp(2rem, 3vw, 2.75rem)"
+    "appTitle": "clamp(2rem, 3vw, 2.75rem)",
+    "appLarge": "1.75rem",
+    "appMedium": "1.25rem"
+  },
+  "weight": {
+    "regular": "400",
+    "medium": "550",
+    "strong": "650"
+  },
+  "leading": {
+    "tight": "1.2",
+    "snug": "1.35",
+    "body": "1.55"
   },
   "space": {
     "xs": "0.5rem",

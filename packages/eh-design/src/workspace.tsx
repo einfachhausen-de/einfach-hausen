@@ -268,6 +268,67 @@ export function EHOwnerDashboardComposer({
   );
 }
 
+/**
+ * Seitenkopf der Werkbank: Titel und hoechstens eine Kontextzeile. Kein
+ * erklaerender Fliessext - was die Seite tut, zeigt sie, sie erzaehlt es nicht.
+ */
+export function EHPageHeader({title, context, actions}: {
+  title: string;
+  context?: string;
+  actions?: ReactNode;
+}) {
+  return (
+    <header className={s.pageHeader}>
+      <div className={s.pageHeaderCopy}>
+        <h1 className={s.pageTitle}>{title}</h1>
+        {context && <p className={s.pageContext}>{context}</p>}
+      </div>
+
+      {actions && <div className={s.pageActions}>{actions}</div>}
+    </header>
+  );
+}
+
+/** Kennzahlen als Daten: Bezeichnung, Wert, hoechstens eine Erlaeuterung. */
+export function EHMetricsBar({label, items}: {
+  label: string;
+  items: readonly {id: string; label: string; value: ReactNode; hint?: string}[];
+}) {
+  return (
+    <dl className={s.metricsBar} aria-label={label}>
+      {items.map((item) => (
+        <div key={item.id}>
+          <dt>{item.label}</dt>
+          <dd>
+            {item.value}
+            {item.hint && <small>{item.hint}</small>}
+          </dd>
+        </div>
+      ))}
+    </dl>
+  );
+}
+
+/** Untere Leiste auf dem Telefon. Der aktive Bereich traegt aria-current="page". */
+export function EHTabBar({label = "Hauptnavigation", items}: {
+  label?: string;
+  items: readonly {id: string; href: string; label: string; shortLabel?: string; icon: ReactNode; count?: number; active?: boolean}[];
+}) {
+  return (
+    <nav className={s.tabBar} aria-label={label}>
+      {items.map((item) => (
+        <a key={item.id} href={item.href} aria-current={item.active ? "page" : undefined} aria-label={item.shortLabel ? item.label : undefined}>
+          <span className={s.tabBarIcon} aria-hidden="true">{item.icon}</span>
+          <span className={s.tabBarLabel}>
+            {item.shortLabel ?? item.label}
+            {item.count ? <span className={s.tabBarCount}>{item.count > 99 ? "99+" : item.count}</span> : null}
+          </span>
+        </a>
+      ))}
+    </nav>
+  );
+}
+
 export function EHOwnerDashboardUtilityGrid({
   groups,
 }: {

@@ -461,6 +461,147 @@ export function EHOwnerOrdersList({
   );
 }
 
+/**
+ * Ein Datensatz, drei Ansichten (Werkbank, Variante A). Derselbe Eintrag wird
+ * als dichte Zeile, als Karte und als Zeitachsen-Ereignis dargestellt - die
+ * Seiten liefern die Daten, der Umschalter waehlt nur die Darstellung.
+ */
+export type EHRecordEntry = {
+  id: string;
+  /** Erste Zeile. In der Liste und auf der Karte der Anker des Eintrags. */
+  title: string;
+  /** Zweite Zeile: Anbieter, Ort, Zusatz. Bleibt kurz, damit die Zeile dicht bleibt. */
+  detail?: string;
+  /** Kennzahl, Betrag oder Termin - rechts in der Liste, unten auf der Karte. */
+  value?: string;
+  /** Zusatzzeile der Chronik. */
+  note?: string;
+  /** ISO-Datum (YYYY-MM-DD). Die Chronik sortiert daran absteigend. */
+  date?: string;
+  /** Anzeige des Datums, zum Beispiel "14.09.". */
+  dateLabel?: string;
+  /** Frei komponierter Zustand, meist <EHStatus/>. */
+  status?: ReactNode;
+  /** 20px-Symbol, zum Beispiel <FileText size={20}/>. */
+  icon?: ReactNode;
+  href?: string;
+};
+
+function RecordRow({item}: {item: EHRecordEntry}) {
+  const body = <>
+    {item.icon && <span className={s.recordIcon} aria-hidden="true">{item.icon}</span>}
+
+    <span className={s.recordMain}>
+      <span className={s.recordTitle}>{item.title}</span>
+      {item.detail && <span className={s.recordDetail}>{item.detail}</span>}
+    </span>
+
+    {(item.value || item.dateLabel || item.status) && (
+      <span className={s.recordTail}>
+        {item.value && <span className={s.recordValue}>{item.value}</span>}
+        {item.dateLabel && <span className={s.recordDate}>{item.dateLabel}</span>}
+        {item.status}
+      </span>
+    )}
+  </>;
+
+  return item.href
+    ? <a className={s.recordRow} href={item.href}>{body}</a>
+    : <div className={s.recordRow}>{body}</div>;
+}
+
+/** Dicht: eine Zeile pro Eintrag. */
+export function EHRecordList({label, items, empty}: {label: string; items: readonly EHRecordEntry[]; empty?: ReactNode}) {
+  if (!items.length) return <p className={s.recordEmpty}>{empty ?? "Keine Einträge."}</p>;
+
+  return (
+    <ul className={s.recordList} aria-label={label}>
+      {items.map((item) => <li key={item.id}><RecordRow item={item}/></li>)}
+    </ul>
+  );
+}
+
+/** Eine Karte pro Eintrag. */
+export function EHRecordCards({label, items, empty}: {label: string; items: readonly EHRecordEntry[]; empty?: ReactNode}) {
+  if (!items.length) return <p className={s.recordEmpty}>{empty ?? "Keine Einträge."}</p>;
+
+  return (
+    <ul className={s.recordCards} aria-label={label}>
+      {items.map((item) => {
+        const body = <>
+          <span className={s.recordCardTop}>
+            {item.icon
+              ? <span className={s.recordIcon} aria-hidden="true">{item.icon}</span>
+              : <span aria-hidden="true"/>}
+            {item.status}
+          </span>
+
+          <span className={s.recordCardTitle}>{item.title}</span>
+          {item.detail && <span className={s.recordDetail}>{item.detail}</span>}
+
+          {(item.value || item.dateLabel) && (
+            <span className={s.recordCardFoot}>
+              {item.value && <span className={s.recordValue}>{item.value}</span>}
+              {item.dateLabel && <span className={s.recordDate}>{item.dateLabel}</span>}
+            </span>
+          )}
+        </>;
+
+        return (
+          <li key={item.id}>
+            {item.href
+              ? <a className={s.recordCard} href={item.href}>{body}</a>
+              : <div className={s.recordCard}>{body}</div>}
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
+function byDateDescending(items: readonly EHRecordEntry[]) {
+  const dated = items.filter((item) => item.date).sort((a, b) => (b.date ?? "").localeCompare(a.date ?? ""));
+  // Ohne Datum bleibt der Eintrag in der Reihenfolge der Seite und steht hinten.
+  return [...dated, ...items.filter((item) => !item.date)];
+}
+
+/** Zeitachse: absteigend nach Datum, das Neueste oben. */
+export function EHRecordTimeline({label, items, empty}: {label: string; items: readonly EHRecordEntry[]; empty?: ReactNode}) {
+  if (!items.length) return <p className={s.recordEmpty}>{empty ?? "Keine Einträge."}</p>;
+
+  return (
+    <ol className={s.recordTimeline} aria-label={label}>
+      {byDateDescending(items).map((item) => {
+        const body = <>
+          <span className={s.recordEventTop}>
+            <span className={s.recordTitle}>{item.title}</span>
+            {item.status}
+          </span>
+
+          {item.detail && <span className={s.recordDetail}>{item.detail}</span>}
+          {item.note && <span className={s.recordNote}>{item.note}</span>}
+        </>;
+
+        return (
+          <li key={item.id} className={s.recordEvent}>
+            {item.date
+              ? <time className={s.recordEventTime} dateTime={item.date}>{item.dateLabel ?? item.date}</time>
+              : <span aria-hidden="true"/>}
+
+            {item.icon
+              ? <span className={s.recordIcon} aria-hidden="true">{item.icon}</span>
+              : <span aria-hidden="true"/>}
+
+            {item.href
+              ? <a className={s.recordEventBody} href={item.href}>{body}</a>
+              : <div className={s.recordEventBody}>{body}</div>}
+          </li>
+        );
+      })}
+    </ol>
+  );
+}
+
 export function EHOwnerOrdersSupport({
   title,
   text,
