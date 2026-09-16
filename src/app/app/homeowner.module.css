@@ -776,14 +776,6 @@
   color: #fff;
 }
 
-.ownerScope :global(.housemaster-panel .trust-strip span) {
-  color: var(--owner-muted);
-}
-
-.ownerScope :global(.housemaster-panel .trust-strip svg) {
-  color: var(--owner-green-700);
-}
-
 /* Flat, readable entity lists across jobs, calendar, contacts and documents */
 .ownerScope :global(.jobs-head h1),
 .ownerScope :global(.house-screen-head h1),
@@ -1287,20 +1279,6 @@
   line-height: var(--eh-leading-loose);
 }
 
-.ownerScope :global(.consultation-points),
-.ownerScope :global(.emergency-trust) {
-  margin: 18px 0 24px;
-  border-top: 1px solid var(--owner-border);
-  border-bottom: 1px solid var(--owner-border);
-}
-
-.ownerScope :global(.consultation-points > span),
-.ownerScope :global(.emergency-trust > span) {
-  min-height: 54px;
-  border: 0;
-  background: transparent;
-}
-
 .ownerScope :global(.emergency-button) {
   min-height: 48px;
   border: 0;
@@ -1603,12 +1581,6 @@
   .ownerScope :global(.asset-form .btn) {
     width: 100%;
     justify-content: center;
-  }
-
-  .ownerScope :global(.consultation-points),
-  .ownerScope :global(.emergency-trust) {
-    display: flex;
-    flex-direction: column;
   }
 
   .ownerScope :global(.plan-grid) {
