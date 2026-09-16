@@ -31,11 +31,21 @@ export function parseArtifactId(value:string){
 }
 
 export function privateRoot(){
-  return path.resolve(process.cwd(),'data','private');
+  // PRIVATE_ROOT hat Vorrang: in Produktion liegt die Ablage ausserhalb des
+  // Projekts (/var/lib/einfach-hausen/private), damit sie Neustarts und
+  // Neuinstallationen ueberlebt und vom Backup erfasst wird.
+  //
+  // Der frueher benutzte Weg ueber einen Symlink <project>/data/private -> /var/lib
+  // ist eine Falle: Turbopack loest den Pfad statisch auf und bricht den Build ab,
+  // sobald dort echte Dateien liegen ("Symlink ... points out of the filesystem
+  // root"). Solange die Ablage leer war, fiel das nie auf - die Dokumentenablage
+  // hat in Produktion deshalb noch nie funktioniert. Ohne den Symlink sieht
+  // Turbopack den Pfad gar nicht erst.
+  return process.env.PRIVATE_ROOT || path.resolve(process.cwd(), 'data', 'private');
 }
 
 export function publicRoot(){
-  return path.resolve(process.cwd(),'public');
+  return path.resolve(process.cwd(), 'public');
 }
 
 export function resolvePrivatePath(storedPath:string|null|undefined){

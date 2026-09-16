@@ -6,6 +6,7 @@ import path from 'node:path';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { saveProfileAction } from '@/app/actions';
+import { privateRoot } from '@/lib/security/private-files';
 import { requireUser } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { closePendingProviderDispatches } from '@/lib/partner-config';
@@ -30,7 +31,7 @@ async function saveVerificationFile(file: File) {
     throw new Error('invalid_verification_file');
   }
   const name = `${Date.now()}-${randomUUID()}.${ext}`;
-  const directory = path.join(process.cwd(), 'data', 'private', 'verification');
+  const directory = path.join(privateRoot(), 'verification');
   await fs.mkdir(directory, { recursive: true });
   await fs.writeFile(path.join(directory, name), Buffer.from(await file.arrayBuffer()), { mode: 0o600 });
   return `verification/${name}`;

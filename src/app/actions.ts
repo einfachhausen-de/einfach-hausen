@@ -17,6 +17,7 @@ import { canAccessProviderJob, getProviderContext, getProviderManagerIds } from 
 import { nextInvoiceNumber } from '@/lib/invoices';
 import { normalizeContactCategory } from '@/lib/contact-categories';
 import { savePrivateMediaUpload } from '@/lib/intake-media';
+import { privateRoot } from '@/lib/security/private-files';
 import { completeMaintenanceAndScheduleNext, ensureAssetMaintenance, ensureCompletedWorkMaintenance, ensureMaintenanceTask } from '@/lib/maintenance';
 import { createPropertyForOwner, primaryProperty, propertyOwnedBy, syncPropertyFromLegacyProfile } from '@/lib/properties';
 import { createBrokerMatches } from '@/lib/broker-matching';
@@ -801,7 +802,7 @@ async function savePrivateFile(file:File,subdir:string){
   const ok=file.type==='application/pdf'||file.type.startsWith('image/');
   if(!ok||file.size===0||file.size>12*1024*1024) throw new Error('Ungültige Datei');
   const ext=(file.name.split('.').pop()||'bin').replace(/[^a-z0-9]/gi,'').slice(0,6)||'bin';
-  const name=`${Date.now()}-${randomUUID()}.${ext}`; const dir=path.join(process.cwd(),'data','private',subdir);
+  const name=`${Date.now()}-${randomUUID()}.${ext}`; const dir=path.join(privateRoot(),subdir);
   await fs.mkdir(dir,{recursive:true}); await fs.writeFile(path.join(dir,name),Buffer.from(await file.arrayBuffer()),{mode:0o600});
   return `${subdir}/${name}`;
 }

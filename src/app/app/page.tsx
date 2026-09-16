@@ -1,5 +1,4 @@
 import fs from 'node:fs';
-import path from 'node:path';
 import Link from 'next/link';
 import { Bell, CalendarClock, ChevronRight, FileText, Search } from 'lucide-react';
 import { AppShell } from '@/components/shell';
@@ -9,6 +8,7 @@ import { db } from '@/lib/db';
 import { dateLabel, euro } from '@/lib/format';
 import { ownerInstant } from '@/lib/owner-format';
 import { primaryProperty } from '@/lib/properties';
+import { resolvePrivatePath } from '@/lib/security/private-files';
 
 /**
  * Werkbank-Kopf und Kennzahlenzeile dieser Seite. Ausschliesslich Design-Tokens,
@@ -50,7 +50,14 @@ function documentFacts(relativePath: string): string {
   const extension = /\.([a-z0-9]+)$/i.exec(relativePath);
   const type = extension ? extension[1].toUpperCase() : '';
   try {
-    const bytes = fs.statSync(path.join(process.cwd(), 'data', 'private', relativePath)).size;
+    // Ueber resolvePrivatePath statt eines eigenen path.join: die Funktion ist
+    // die gepruefte, traversal-sichere Abkuerzung auf die private Ablage. Ein
+    // literales path.join(process.cwd(),'data','private',...) wird von Turbopack
+    // als Verzeichnis-Asset aufgeloest und laesst den Build scheitern, sobald
+    // dort echte Dateien liegen ("Symlink ... points out of the filesystem root").
+    const absolute = resolvePrivatePath(relativePath);
+    if (!absolute) return type;
+    const bytes = fs.statSync(absolute).size;
     const size = bytes >= 1024 * 1024 ? `${(bytes / 1024 / 1024).toFixed(1).replace('.', ',')} MB` : `${Math.max(1, Math.round(bytes / 1024))} KB`;
     return [type, size].filter(Boolean).join(', ');
   } catch {

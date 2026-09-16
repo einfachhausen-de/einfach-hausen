@@ -1,6 +1,7 @@
 import { createHash, randomUUID } from 'node:crypto';
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import { privateRoot } from './security/private-files';
 
 export type IntakeMediaKind = 'image' | 'video' | 'audio';
 type MediaRule = { ext: string; max: number; kind: IntakeMediaKind };
@@ -49,7 +50,10 @@ export async function savePrivateMediaBuffer(data: Uint8Array, contentType: stri
   if (!rule || !data.byteLength || data.byteLength > rule.max) throw new Error('Ungültige Mediendatei');
 
   const name = privateMediaName(rule, stableKey);
-  const dir = path.join(process.cwd(), 'data', 'private', 'job-media');
+  // Ueber privateRoot(), damit die Ablage auch ausserhalb des Projekts liegen
+  // kann (PRIVATE_ROOT). Ein literales 'data','private' bricht den Turbopack-
+  // Build, sobald dort echte Dateien liegen.
+  const dir = path.join(privateRoot(), 'job-media');
   await fs.mkdir(dir, { recursive: true, mode: 0o700 });
   await fs.writeFile(path.join(dir, name), data, { mode: 0o600 });
   return `job-media/${name}`;
