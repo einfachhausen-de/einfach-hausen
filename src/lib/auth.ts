@@ -1,4 +1,5 @@
 import { randomBytes } from 'node:crypto';
+import { cache } from 'react';
 import { db } from './db';
 import { createClient } from '@supabase/supabase-js';
 import { createServerClient } from '@supabase/ssr';
@@ -180,7 +181,7 @@ export async function destroySession() {
   await clearLegacyCookies(name);
 }
 
-export async function getCurrentUser(): Promise<CurrentUser | null> {
+async function loadCurrentUser(): Promise<CurrentUser | null> {
   if (authMode() === 'local') return getLocalUser();
   const store = await jar();
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL || '';
@@ -197,16 +198,26 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
   // The gateway (Kong/tunnel path) intermittently answers 502/503 under burst
   // load. A single transient rejection must never log a user out, so transient
   // failures are retried; hard auth failures stay fail-closed immediately.
+  // Bounded hard: 3 attempts and at most ~0.75s of waiting (250ms + 500ms).
+  // An auth outage must fail fast and visibly instead of stalling a whole
+  // request for a minute (this loader runs on every app page render).
+  const maxAttempts = 3;
+  const maxTotalBackoffMs = 2000;
+  let waitedMs = 0;
   let identity: any = null;
   let lastError: { message?: string; status?: number } | null = null;
-  for (let attempt = 0; attempt < 8; attempt++) {
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
     const { data, error } = await client.auth.getUser();
     if (!error && data.user) { identity = data.user; break; }
     lastError = error as any;
     const status = (error as any)?.status;
     const transient = !status || status === 408 || status === 429 || status >= 500 || /fetch failed|bad gateway|gateway time-?out|network/i.test(String(error?.message ?? ''));
     if (!transient) break;
-    await new Promise((resolve) => setTimeout(resolve, 250 * 2 ** attempt));
+    const remainingMs = maxTotalBackoffMs - waitedMs;
+    if (attempt === maxAttempts - 1 || remainingMs <= 0) break;
+    const delay = Math.min(250 * 2 ** attempt, remainingMs);
+    waitedMs += delay;
+    await new Promise((resolve) => setTimeout(resolve, delay));
   }
   if (!identity) {
     // Quantify WHY an authenticated request was rejected (missing cookie vs
@@ -244,6 +255,15 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
   if (!row) { console.error('[auth-debug] getCurrentUser null: no app row after bind attempt'); return null; }
   return row || null;
 }
+
+// Request-scoped memoization (React `cache`): a page render resolves the
+// identity several times (requireUser() plus AppShell), and every call used to
+// re-run the Supabase getUser() round trip — under a gateway outage that was
+// minutes of retries per request and the page never flushed. `cache()` keys on
+// the request, so the loader body runs exactly once per request; outside a
+// request scope it degrades to a plain call, keeping non-React callers working.
+// Signature is unchanged: () => Promise<CurrentUser | null>.
+export const getCurrentUser = cache(loadCurrentUser);
 
 async function getLocalUser(): Promise<CurrentUser | null> {
   // Must read the same cookie name createSession() writes (respects the
