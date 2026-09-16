@@ -56,8 +56,8 @@ export default async function InsuranceSupport({ searchParams }: { searchParams:
         ),
       }));
 
-  return <AppShell role="homeowner" active="/app" title="Versicherungsunterstützung" subtitle="Schadenfall sauber vorbereiten und weitergeben">
-    <EHPageHeader title="Unterstützung bei einem Schadenfall." context={`${jobs.length} beauftragte ${jobs.length === 1 ? 'Auftrag' : 'Aufträge'}`} />
+  return <AppShell role="homeowner" active="/app" title="Versicherung">
+    <EHPageHeader title="Versicherung" context={`${jobs.length} beauftragte ${jobs.length === 1 ? 'Auftrag' : 'Aufträge'}`} />
     {sp.error && <EHErrorState text={sp.error} />}
     {submitted && <EHFormFeedback kind="success">Servicefall übernommen. Einfach Hausen und der zuständige Partner sehen den Vorgang jetzt im bestehenden Auftragskontext. Deine Versicherung wurde dadurch nicht automatisch kontaktiert.</EHFormFeedback>}
 

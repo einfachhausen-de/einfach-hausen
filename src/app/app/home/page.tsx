@@ -1,9 +1,9 @@
-import { CalendarClock, CalendarDays, FileText, History, House, Receipt, TrendingUp, Wrench } from 'lucide-react';
+import { CalendarClock, CalendarDays, Wrench } from 'lucide-react';
 import { AppShell } from '@/components/shell';
 import {
   EHButton, EHEmptyState, EHText, EHPropertyOverview, EHDetailDisclosure,
   EHWorkspaceGrid, EHWorkSection, EHWorkflowStack,
-  EHSubmitButton, EHMetricsBar, EHPageHeader, EHRecordList, EHRecordViews, EHStatus,
+  EHSubmitButton, EHMetricsBar, EHPageHeader, EHRecordViews, EHStatus,
 } from '@/design-system';
 import { HouseProfileForm, HouseAssetForm, HOUSE_ASSET_KINDS } from '@/components/homeowner/house-profile-forms';
 import { requireUser } from '@/lib/auth';
@@ -22,16 +22,16 @@ export default async function MyHome() {
   const invoiceCount=(db.prepare(`SELECT COUNT(*) c FROM invoices WHERE homeowner_id=?`).get(u.id) as {c:number}).c;
   const historyCount=property?(db.prepare(`SELECT COUNT(*) c FROM house_history_entries WHERE property_id=?`).get(property.id) as {c:number}).c:0;
   const surroundings=[p?.postcode, p?.house_type].filter(Boolean).join(' · ');
-  return <AppShell role="homeowner" active="/app/home" title="Mein Haus">
+  return <AppShell role="homeowner" active="/app/home" title="Hausakte">
     <EHWorkflowStack>
-      <EHPageHeader title="Mein Haus" context={surroundings || undefined}
+      <EHPageHeader title={p?.address || 'Hausdaten ergänzen'} context={surroundings || undefined}
         actions={<EHButton href="/app/year" variant="secondary">Jahresplan öffnen</EHButton>} />
       <EHMetricsBar label="Hausakte" items={[
         { id: 'assets', label: 'Technik & Geräte', value: assets.length },
         { id: 'papers', label: 'Dokumente & Rechnungen', value: docs.c + invoiceCount },
         { id: 'works', label: 'Frühere Arbeiten', value: historyCount },
       ]} />
-      <EHPropertyOverview title={p?.address || 'Hausdaten ergänzen'}
+      <EHPropertyOverview title="Hausdaten"
         facts={[
           { label: 'Baujahr', value: p?.build_year ? String(p.build_year) : 'Nicht erfasst' },
           { label: 'Wohnfläche', value: p?.living_area ? p.living_area + ' m²' : 'Nicht erfasst' },
@@ -72,15 +72,6 @@ export default async function MyHome() {
       <EHDetailDisclosure id="hausprofil" title="Hausdaten bearbeiten" description="Adresse, Gebäude und Flächen">
         <HouseProfileForm action={saveHouseProfileAction} profile={p} />
       </EHDetailDisclosure>
-      <EHRecordList label="Hausakte weiterführen" items={[
-        { id: 'history', title: 'Hausgeschichte', href: '/app/home/history', value: String(historyCount), icon: <History size={20} /> },
-        { id: 'passport', title: 'Hauspass', href: '/app/home/passport', icon: <House size={20} /> },
-        { id: 'contracts', title: 'Verträge & Tarife', href: '/app/contracts', icon: <Receipt size={20} /> },
-        { id: 'documents', title: 'Dokumente & Rechnungen', href: '/app/documents', value: String(docs.c + invoiceCount), icon: <FileText size={20} /> },
-        { id: 'year', title: 'Mein Jahr', href: '/app/year', icon: <CalendarDays size={20} /> },
-        { id: 'technik', title: 'Technik & Geräte', href: '#technik', value: String(assets.length), icon: <Wrench size={20} /> },
-        { id: 'sale', title: 'Verkauf & Bewertung', href: '/app/home/sale', icon: <TrendingUp size={20} /> },
-      ]} />
     </EHWorkflowStack>
   </AppShell>;
 }
