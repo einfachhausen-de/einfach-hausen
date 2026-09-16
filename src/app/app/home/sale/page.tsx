@@ -1,8 +1,8 @@
 import Link from 'next/link';
-import { Building2, CheckCircle2, ChevronRight, LockKeyhole, MessageCircle, RefreshCw, ShieldCheck, UserRound } from 'lucide-react';
-import { AppShell, SectionTitle } from '@/components/shell';
+import { Building2, CheckCircle2, ChevronRight, LockKeyhole, MessageCircle, RefreshCw, UserRound } from 'lucide-react';
+import { AppShell } from '@/components/shell';
 import { crumbs } from '@/components/nav-config';
-import { EHAppHeader, EHPanel, EHList, EHEmptyState, EHField, EHSelect, EHTextarea, EHInput, EHStatus, EHSubmitButton } from '@/design-system';
+import { EHEmptyState, EHField, EHSelect, EHTextarea, EHInput, EHStatus, EHSubmitButton, EHPanel, EHMetricsBar, EHPageHeader, EHRecordViews, EHWorkSection } from '@/design-system';
 import { requireUser } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { primaryProperty } from '@/lib/properties';
@@ -70,12 +70,15 @@ export default async function Sale() {
 
   const currentStage = lead ? Math.max(0, saleStages.findIndex(([status]) => status === lead.status)) : -1;
 
-  return <AppShell role="homeowner" active="/app/home/sale" title="Verkauf & Bewertung" subtitle="Du entscheidest, was geteilt wird" breadcrumbs={crumbs('/app/home','Verkauf & Bewertung')}>
-    <EHAppHeader eyebrow="Dein Haus bleibt dein Datensatz" title="Bewerten, verkaufen, passende Makler finden." text="Hausdaten werden übernommen. Private Rechnungen, Dokumente, Zahlungen und Nachrichten bleiben außerhalb des Verkaufsprozesses." />
+  return <AppShell role="homeowner" active="/app/home/sale" title="Verkauf & Bewertung" breadcrumbs={crumbs('/app/home','Verkauf & Bewertung')}>
+    <EHPageHeader title="Verkauf & Bewertung" context={property.address || property.postcode || undefined} />
 
-    <section className="property-sale-summary"><div><small>Immobilie</small><strong>{property.address || property.postcode || 'Mein Zuhause'}</strong><span>{property.property_type || 'Eigenheim'}{property.living_area ? ` · ${property.living_area} m²` : ''}</span></div><div><small>Orientierungswert</small><strong>{property.estimated_value_min != null && property.estimated_value_max != null ? `${euro(property.estimated_value_min)} – ${euro(property.estimated_value_max)}` : 'Noch nicht hinterlegt'}</strong></div></section>
+    <EHMetricsBar label="Immobilie" items={[
+      { id: 'object', label: 'Immobilie', value: property.property_type || 'Eigenheim', hint: property.living_area ? `${property.living_area} m²` : undefined },
+      { id: 'value', label: 'Orientierungswert', value: property.estimated_value_min != null && property.estimated_value_max != null ? `${euro(property.estimated_value_min)} – ${euro(property.estimated_value_max)}` : 'Noch nicht hinterlegt' },
+    ]} />
 
-    <SectionTitle>Immobilienbewertung</SectionTitle>
+    <EHWorkSection title="Immobilienbewertung">
     <EHPanel title="Neue Bewertung">
       <p>Lege einen offenen Bewertungsvorgang an. Dabei wird kein vorhandener Wert behauptet oder gespeichert.</p>
       <form action={requestPropertyValuationAction}>
@@ -97,15 +100,23 @@ export default async function Sale() {
     </EHPanel>
 
     <EHPanel title={`Bewertungsverlauf · ${valuations.length} ${valuations.length === 1 ? 'Vorgang' : 'Vorgänge'}`}>
-    {valuations.length > 0 && <EHList label="Bewertungsverlauf" items={valuations.map((valuation) => {
+    {valuations.length > 0 && <EHRecordViews label="Bewertungsverlauf" storageKey="verkauf" defaultView="chronik" items={valuations.map((valuation) => {
       const completed = valuation.status === 'completed' && valuation.estimated_min != null && valuation.estimated_max != null;
-      return { id: String(valuation.id), title: completed ? `${euro(valuation.estimated_min)} – ${euro(valuation.estimated_max)}` : valuation.status === 'cancelled' ? 'Bewertung abgebrochen' : 'Bewertung angefragt', text: `${formatDate(valuation.created_at)} · ${valuationTypeLabels[valuation.valuation_type] || valuation.valuation_type}${valuation.notes ? ` · ${valuation.notes}` : ''}`, meta: <EHStatus>{completed ? 'Gespeichert' : valuation.status === 'cancelled' ? 'Abgebrochen' : 'Anfrage offen'}</EHStatus> };
+      return {
+        id: String(valuation.id),
+        title: completed ? `${euro(valuation.estimated_min)} – ${euro(valuation.estimated_max)}` : valuation.status === 'cancelled' ? 'Bewertung abgebrochen' : 'Bewertung angefragt',
+        detail: [valuationTypeLabels[valuation.valuation_type] || valuation.valuation_type, valuation.notes].filter(Boolean).join(' · '),
+        date: String(valuation.created_at).slice(0, 10),
+        dateLabel: formatDate(valuation.created_at),
+        status: <EHStatus tone={completed ? 'success' : valuation.status === 'cancelled' ? 'neutral' : 'info'}>{completed ? 'Gespeichert' : valuation.status === 'cancelled' ? 'Abgebrochen' : 'Anfrage offen'}</EHStatus>,
+      };
     })} />}
     {valuations.length === 0 && <EHEmptyState title="Noch keine Bewertung" text="Eine Anfrage und eine bereits vorhandene Einschätzung werden getrennt im Verlauf dokumentiert." />}
     </EHPanel>
+    </EHWorkSection>
 
-    <SectionTitle>Ich möchte verkaufen</SectionTitle>
-    {!lead ? <div className="sale-start-card"><Building2 aria-hidden="true" /><div className="grow"><strong>Passende Makler für dein Haus finden</strong><p>Wir vergleichen aktive, geprüfte Makler-Suchprofile mit Lage, Immobilientyp, Nutzung, Fläche und – falls vorhanden – Wert. Noch werden keine Kontaktdaten weitergegeben.</p></div><form action={startSaleProcessAction}><button className="btn primary">Makler finden</button></form></div> : <>
+    <EHWorkSection title="Ich möchte verkaufen">
+    {!lead ? <EHEmptyState title="Passende Makler für dein Haus finden" text="Noch werden keine Kontaktdaten weitergegeben." action={<form action={startSaleProcessAction}><button className="btn primary">Makler finden</button></form>} /> : <>
       <section className={styles.lifecycle} aria-labelledby="sale-status-title">
         <div className={styles.lifecycleHead}><div><small id="sale-status-title">Aktueller Verkaufsstatus</small><strong>{saleStatusLabels[lead.status] || lead.status}</strong><span>Aktualisiert am {formatDate(lead.updated_at)}</span></div>{lead.status !== 'sold' && <form action={startSaleProcessAction}><button className="btn ghost"><RefreshCw size={16} aria-hidden="true" /> Maklerabgleich aktualisieren</button></form>}</div>
         <ol>{saleStages.map(([status, label], index) => <li key={status} data-state={index < currentStage ? 'done' : index === currentStage ? 'current' : 'next'}><span>{index + 1}</span><div><strong>{label}</strong>{index === currentStage && <small>Aktueller Schritt</small>}</div></li>)}</ol>
@@ -113,15 +124,29 @@ export default async function Sale() {
 
       <div className="privacy-banner"><LockKeyhole aria-hidden="true" /><div><strong>Du entscheidest über jede Freigabe</strong><p>Makler werden zunächst nur dir vorgeschlagen. Eine Freigabe gilt ausschließlich für die Verkaufsanbahnung und kann jederzeit widerrufen werden.</p></div></div>
 
-      <div className="broker-match-list">{matches.map((match: any) => {
+      {matches.length > 0 && <EHRecordViews label="Vorgeschlagene Makler" storageKey="verkauf-makler" items={matches.map((match: any) => {
         const activeShare = match.share_status === 'active';
         const permissions = permissionLabels(match.permissions_json);
-        return <article key={match.id} className={styles.brokerCard}><div className="broker-score"><span>{Math.round(match.match_score)}%</span><small>Passung</small></div><div className="grow"><strong>{match.business_name}</strong><p><ShieldCheck aria-hidden="true" /> Geprüfter Partner · {match.rating_count ? `${Number(match.rating).toFixed(1)} ★` : 'neu im Netzwerk'}</p><small>Abgleich aus Suchgebiet, Immobilientyp, Nutzung, Flächen und Preisprofil.</small>
-          {activeShare && <div className={styles.shareDetails}><span><b>Zweck:</b> Verkaufsanbahnung</span><span><b>Freigegeben:</b> {permissions.length ? permissions.join(', ') : 'keine Berechtigungen'}</span><span><b>Seit:</b> {formatDate(match.granted_at)}</span><span><b>Nicht enthalten:</b> private Nachrichten, Zahlungen, Rechnungen, Versicherungen und Hausdokumente</span></div>}
-          {activeShare && !match.eligibleNow && <p className={styles.warning}>Dieser Anbieter ist derzeit nicht für neue Makler-Matches freigegeben. Deine bestehende Freigabe bleibt deshalb sichtbar, damit du sie widerrufen kannst.</p>}
-        </div>{activeShare ? <form action={revokeBrokerShareAction.bind(null, match.id)}><button className="btn ghost">Freigabe widerrufen</button></form> : <form action={approveBrokerShareAction.bind(null, match.id)} className={styles.approvalForm}><label><input type="checkbox" name="confirmShare" value="yes" required /><span>Ich gebe {match.business_name} meine Kontaktdaten und die Objektzusammenfassung ausdrücklich für die Verkaufsanbahnung frei.</span></label><button className="btn primary">Freigabe erteilen</button></form>}</article>;
-      })}{matches.length === 0 && <div className="empty owner-empty-action"><UserRound aria-hidden="true" /><strong>Noch kein passender Makler im Netzwerk</strong><p>Deine Verkaufsabsicht bleibt gespeichert. Ohne passenden aktiven und geprüften Suchprofil-Treffer werden keine Kontaktdaten freigegeben.</p><Link className="btn ghost" href="/app/hausmeister"><MessageCircle size={16} aria-hidden="true" /> Frage zum Verkauf klären</Link></div>}</div>
+        const grade = match.rating_count ? `${Number(match.rating).toFixed(1)} ★` : 'neu im Netzwerk';
+        return {
+          id: String(match.id),
+          title: match.business_name,
+          value: `${Math.round(match.match_score)} % Passung`,
+          detail: ['Geprüfter Partner', grade,
+            activeShare ? `Zweck: Verkaufsanbahnung` : '',
+            activeShare ? `freigegeben: ${permissions.length ? permissions.join(', ') : 'keine Berechtigungen'}` : '',
+            activeShare ? `seit ${formatDate(match.granted_at)}` : '',
+            activeShare && !match.eligibleNow ? 'Derzeit nicht für neue Makler-Matches freigegeben. Deine bestehende Freigabe bleibt sichtbar, damit du sie widerrufen kannst.' : '',
+          ].filter(Boolean).join(' · '),
+          status: <EHStatus tone={activeShare ? 'success' : 'neutral'}>{activeShare ? 'Freigabe aktiv' : 'Vorschlag'}</EHStatus>,
+          action: activeShare
+            ? <form action={revokeBrokerShareAction.bind(null, match.id)}><button className="btn ghost">Freigabe widerrufen</button></form>
+            : <form action={approveBrokerShareAction.bind(null, match.id)} className={styles.approvalForm}><label><input type="checkbox" name="confirmShare" value="yes" required /><span>Ich gebe {match.business_name} meine Kontaktdaten und die Objektzusammenfassung ausdrücklich für die Verkaufsanbahnung frei.</span></label><button className="btn primary">Freigabe erteilen</button></form>,
+        };
+      })} />}
+      {matches.length === 0 && <div className="empty owner-empty-action"><UserRound aria-hidden="true" /><strong>Noch kein passender Makler im Netzwerk</strong><p>Deine Verkaufsabsicht bleibt gespeichert. Ohne passenden aktiven und geprüften Suchprofil-Treffer werden keine Kontaktdaten freigegeben.</p><Link className="btn ghost" href="/app/hausmeister"><MessageCircle size={16} aria-hidden="true" /> Frage zum Verkauf klären</Link></div>}
     </>}
+    </EHWorkSection>
 
     <div className="privacy-rules"><CheckCircle2 aria-hidden="true" /><div><strong>Klare Grenze der Verkaufsfreigabe</strong><p>Freigegeben werden nur Objektzusammenfassung und Kontaktdaten für den Zweck „Verkaufsanbahnung“. Private Nachrichten, Zahlungen, Rechnungen, Versicherungen und vollständige Dokumente bleiben außerhalb des Verkaufshandoffs.</p></div><ChevronRight aria-hidden="true" /></div>
   </AppShell>;

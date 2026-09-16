@@ -1,10 +1,9 @@
 import { AppShell } from '@/components/shell';
-import { EHEmptyState, EHOwnerPageHeader, EHOwnerSection, EHOwnerRecords, EHOwnerFilters, EHOwnerSearch } from '@/design-system';
+import { EHEmptyState, EHButton, EHPageHeader, EHOwnerFilters, EHOwnerSearch, EHOwnerSection, EHRecordViews, EHStatus } from '@/design-system';
 import { requireUser } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { statusLabel } from '@/lib/format';
 import { ownerDate, ownerInstant } from '@/lib/owner-format';
-import { mediaKindFromPath } from '@/lib/intake-media';
 
 type SearchParams = Record<string, string | string[] | undefined>;
 
@@ -180,7 +179,7 @@ export default async function Jobs({
     : currentJobs;
 
   return <AppShell role="homeowner" active="/app/jobs" title="Aufträge">
-    <EHOwnerPageHeader title="Deine Aufträge" text="Angebote prüfen, Arbeiten verfolgen und abgeschlossene Aufträge wiederfinden." action={{href:'/app/hausmeister',label:'Anliegen beschreiben'}} />
+    <EHPageHeader title="Deine Aufträge" context={`${jobs.length} ${jobs.length === 1 ? 'Auftrag' : 'Aufträge'}`} actions={<EHButton href="/app/hausmeister" arrow>Anliegen beschreiben</EHButton>} />
     <EHOwnerSearch action="/app/jobs" query={firstParam(params.q)} placeholder="Auftrag, Gewerk oder Betrieb" hidden={currentView === 'current' ? undefined : {name:'view',value:currentView}} />
     <EHOwnerFilters label="Aufträge filtern" items={[
       {href:filterHref('current'),label:'Aktuell',active:currentView==='current'},
@@ -189,11 +188,14 @@ export default async function Jobs({
       {href:filterHref('completed'),label:'Abgeschlossen',count:completedJobs.length,active:currentView==='completed'},
     ]} />
     <EHOwnerSection title={viewTitle} text={`${filteredJobs.length} ${filteredJobs.length === 1 ? 'Auftrag' : 'Aufträge'}${query ? ' für deine Suche' : ''}`}>
-      {filteredJobs.length ? <EHOwnerRecords label={viewTitle} items={filteredJobs.map(job => ({
+      {filteredJobs.length ? <EHRecordViews label={viewTitle} storageKey="auftraege" defaultView="liste" switcherLabel="Aufträge: Ansicht wechseln" items={filteredJobs.map(job => ({
         id:String(job.id),href:`/app/jobs/${job.id}`,title:job.title.replace(/^Ansprechpartner:\s*/,''),
-        detail:[job.category,job.accepted_business].filter(Boolean).join(' · '),meta:jobScheduleCopy(job),
-        status:jobStatusCopy(job),tone:jobStatusTone(job.status),action:job.status==='quoted'?'Angebot prüfen':'Auftrag öffnen',
-        media:job.photo_id && mediaKindFromPath(job.photo_path)==='image' ? {src:`/api/job-media/${job.photo_id}`,alt:`Foto zum Auftrag ${job.title}`} : undefined,
+        detail:[job.category,job.accepted_business].filter(Boolean).join(' · '),
+        date:(job.appointment_start||job.preferred_date||job.updated_at).slice(0,10),
+        dateLabel:ownerDate(job.appointment_start||job.preferred_date||job.updated_at),
+        note:jobScheduleCopy(job),
+        status:<EHStatus tone={jobStatusTone(job.status)}>{jobStatusCopy(job)}</EHStatus>,
+        action:<span>{job.status==='quoted'?'Angebot prüfen':'Auftrag öffnen'}</span>,
       }))} /> : <EHEmptyState title={query ? 'Keine passenden Aufträge' : 'Keine Aufträge in dieser Ansicht'} text={query ? 'Ändere deine Suche oder wähle einen anderen Status.' : 'Neue Anliegen kannst du oben beschreiben. Bereits vorhandene Aufträge findest du über die Statusfilter.'} />}
     </EHOwnerSection>
   </AppShell>;

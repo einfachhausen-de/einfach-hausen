@@ -1,6 +1,6 @@
 import Link from 'next/link';
-import { BadgeCheck, ChevronRight } from 'lucide-react';
-import { EHAppHeader, EHPanel, EHList, EHEmptyState, EHErrorState, EHButton, EHField, EHInput, EHFormFeedback, EHSubmitButton } from '@/design-system';
+import { ChevronRight } from 'lucide-react';
+import { EHEmptyState, EHErrorState, EHButton, EHField, EHFormFeedback, EHInput, EHMetricsBar, EHPageHeader, EHRecordList, EHSubmitButton, EHWorkSection } from '@/design-system';
 import { notFound } from 'next/navigation';
 import { AppShell } from '@/components/shell';
 import { crumbs } from '@/components/nav-config';
@@ -14,27 +14,42 @@ export default async function PartnerProfile({params,searchParams}:{params:Promi
   const reviews=db.prepare(`SELECT r.id,r.rating,r.comment,r.created_at,u.first_name FROM reviews r JOIN users u ON u.id=r.homeowner_id WHERE r.provider_id=? AND r.hidden=0 ORDER BY r.created_at DESC LIMIT 5`).all(providerId) as any[];
   const trades=String(provider.trades||'').split(',').map((x:string)=>x.trim()).filter(Boolean).slice(0,6);
   const returnHref=sp.job?`/app/jobs/${Number(sp.job)}`:'/app/jobs';
+  const rating=Number(provider.rating||0); const ratingCount=Number(provider.rating_count||0);
   return <AppShell role="homeowner" active="/app/partners" title="Partnerprofil" subtitle="Geprüfter Einfach-Hausen-Partner" breadcrumbs={crumbs('/app/messages','Partnerprofil')}>
     {sp.message&&<EHFormFeedback kind="success">{String(sp.message)}</EHFormFeedback>}
     {sp.error&&<EHErrorState text={String(sp.error)} />}
-    <EHButton href={returnHref} variant="secondary">Zurück</EHButton>
-    <EHAppHeader eyebrow="Geprüfter Partner" title={provider.business_name} text={`${Number(provider.rating||0).toFixed(1)} von 5 aus ${provider.rating_count||0} Bewertungen — ${provider.description||'Zuverlässiger regionaler Vertragspartner für Arbeiten rund ums Eigenheim.'}`} />
-    <section className="partner-profile-hero"><div className={provider.logo_path?'partner-profile-cover has-logo':'partner-profile-cover'}>{provider.logo_path?<img src={provider.logo_path} alt={`${provider.business_name} Logo`}/>:<span>{provider.business_name?.slice(0,2).toUpperCase()}</span>}<BadgeCheck/></div><div className="partner-tags">{trades.map((t:string)=><span key={t}>{t}</span>)}</div></section>
-    <EHList label="Profildaten" items={[
-      { id: 'region', title: `${provider.postcode} · bis ${provider.radius_km} km`, text: 'Region' },
-      { id: 'standards', title: 'Vertraglich geprüft', text: 'Standards' },
-      { id: 'leistungen', title: `${trades.length||1} Bereiche`, text: 'Leistungen' },
+    <EHPageHeader title={provider.business_name} context={`Geprüfter Partner · ${rating.toFixed(1)} von 5 aus ${ratingCount} Bewertungen`} actions={<EHButton href={returnHref} variant="secondary">Zurück</EHButton>} />
+    <EHMetricsBar label="Partnerdaten" items={[
+      { id: 'region', label: 'Region', value: `${provider.postcode} · bis ${provider.radius_km} km` },
+      { id: 'bereiche', label: 'Bereiche', value: String(trades.length||1) },
+      { id: 'bewertung', label: 'Bewertung', value: `${rating.toFixed(1)} / 5`, hint: `${ratingCount} Bewertungen` },
     ]} />
-    <EHList label="Prüfstatus" items={[
-      { id: 'vers', title: provider.insurance_verified?'Geprüft':'In Prüfung', text: 'Versicherung' },
-      { id: 'quali', title: provider.qualification_verified?'Geprüft':'In Prüfung', text: 'Qualifikation' },
-      { id: 'vertrag', title: provider.contract_verified?'Aktiv':'In Prüfung', text: 'Partnervertrag' },
-      { id: 'qualitaet', title: provider.quality_standard_verified?'Bestätigt':'In Prüfung', text: 'Qualitätsstandard' },
-    ]} />
-    <EHPanel title={`Bewertungen · ${provider.rating_count||0} insgesamt`}>
-    {reviews.map((r:any,i:number)=><article key={`${r.created_at}-${i}`}><div><strong>{r.first_name||'Kunde'}</strong><span>★ {r.rating}/5</span></div><p>{r.comment||'Zuverlässig ausgeführt.'}</p><details><summary>Melden</summary><form action={reportReviewAction.bind(null,r.id)}><EHField id={`report-${r.id}`} label="Grund der Meldung"><EHInput id={`report-${r.id}`} name="reason" maxLength={500} placeholder="Was stimmt an dieser Bewertung nicht?" aria-label="Grund der Meldung" required/></EHField><EHSubmitButton pendingLabel="Meldung wird gesendet …">Bewertung melden</EHSubmitButton></form></details></article>)}
-    {reviews.length===0&&<EHEmptyState title="Noch keine öffentliche Bewertung" text="Der Betrieb ist geprüft und neu im Netzwerk." />}
-    </EHPanel>
+    <EHWorkSection title="Profildaten">
+      <EHRecordList label="Profildaten" items={[
+        { id: 'leistungen', title: trades.length ? trades.join(' · ') : 'Kein Bereich hinterlegt', detail: 'Leistungen' },
+        { id: 'standards', title: 'Vertraglich geprüft', detail: 'Standards' },
+        { id: 'beschreibung', title: provider.description || 'Zuverlässiger regionaler Vertragspartner für Arbeiten rund ums Eigenheim.', detail: 'Beschreibung' },
+      ]} />
+    </EHWorkSection>
+    <EHWorkSection title="Prüfstatus">
+      <EHRecordList label="Prüfstatus" items={[
+        { id: 'versicherung', title: 'Versicherung', detail: provider.insurance_verified?'Geprüft':'In Prüfung' },
+        { id: 'qualifikation', title: 'Qualifikation', detail: provider.qualification_verified?'Geprüft':'In Prüfung' },
+        { id: 'vertrag', title: 'Partnervertrag', detail: provider.contract_verified?'Aktiv':'In Prüfung' },
+        { id: 'qualitaet', title: 'Qualitätsstandard', detail: provider.quality_standard_verified?'Bestätigt':'In Prüfung' },
+      ]} />
+    </EHWorkSection>
+    <EHWorkSection title={`Bewertungen · ${ratingCount} insgesamt`}>
+    {reviews.length===0
+      ? <EHEmptyState title="Noch keine öffentliche Bewertung" text="Der Betrieb ist geprüft und neu im Netzwerk." />
+      : <EHRecordList label={`Bewertungen · ${ratingCount} insgesamt`} items={reviews.map((r:any,i:number)=>({
+          id: `review-${r.id}-${i}`,
+          title: r.first_name||'Kunde',
+          detail: r.comment||'Zuverlässig ausgeführt.',
+          value: `★ ${r.rating}/5`,
+          action: <details><summary>Melden</summary><form action={reportReviewAction.bind(null,r.id)}><EHField id={`report-${r.id}`} label="Grund der Meldung"><EHInput id={`report-${r.id}`} name="reason" maxLength={500} placeholder="Was stimmt an dieser Bewertung nicht?" aria-label="Grund der Meldung" required/></EHField><EHSubmitButton pendingLabel="Meldung wird gesendet …">Bewertung melden</EHSubmitButton></form></details>,
+        }))} />}
+    </EHWorkSection>
     <Link href={returnHref} className="btn primary wide partner-return">{sp.job?'Zum Angebot zurück':'Aufträge ansehen'} <ChevronRight size={16}/></Link>
   </AppShell>;
 }

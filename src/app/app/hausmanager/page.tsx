@@ -1,14 +1,14 @@
-import { Bell, CalendarDays, FileText } from 'lucide-react';
+import { Bell, CalendarDays, FileText, MessageSquare } from 'lucide-react';
 import { AppShell } from '@/components/shell';
 import {
   EHFormFeedback,
   EHManagerAttention,
-  EHManagerGrid,
   EHManagerAutomations,
-  EHManagerHero,
-  EHManagerTasks,
-  EHManagerWide,
-  EHManagerThreads,
+  EHMetricsBar,
+  EHOwnerSection,
+  EHPageHeader,
+  EHRecordList,
+  type EHRecordEntry,
 } from '@/design-system';
 import { requireUser } from '@/lib/auth';
 import { db } from '@/lib/db';
@@ -62,6 +62,29 @@ export default async function Hausmanager({
     ...dueMaintenance.map((task) => `${task.title} (${dateLabel(task.due_date)})`),
     ...quotedJobs.map((job) => `${job.title}: ${job.quote_count} ${job.quote_count === 1 ? 'Angebot' : 'Angebote'} prüfen`),
   ];
+  const threadItems: EHRecordEntry[] = threads.map((thread) => ({
+    id: String(thread.id),
+    title: `Gespräch vom ${dateLabel(thread.updated_at)}`,
+    detail: `${thread.message_count} ${thread.message_count === 1 ? 'Nachricht' : 'Nachrichten'}`,
+    href: '/app/hausmeister',
+    icon: <MessageSquare aria-hidden="true" size={20} />,
+  }));
+  const taskItems: EHRecordEntry[] = [
+    ...dueMaintenance.map((task) => ({
+      id: `maintenance-${task.id}`,
+      title: task.title,
+      detail: `Fällig ${dateLabel(task.due_date)}`,
+      href: '/app/year',
+      icon: <CalendarDays aria-hidden="true" size={20} />,
+    })),
+    ...quotedJobs.map((job) => ({
+      id: `quote-${job.id}`,
+      title: job.title,
+      detail: `${job.quote_count} ${job.quote_count === 1 ? 'Angebot' : 'Angebote'} prüfen`,
+      href: `/app/jobs/${job.id}`,
+      icon: <FileText aria-hidden="true" size={20} />,
+    })),
+  ];
 
   return (
     <AppShell
@@ -70,11 +93,7 @@ export default async function Hausmanager({
       title="Hausmanager"
       subtitle="Dein Zuhause im Blick"
     >
-      <EHManagerHero
-        eyebrow="KI-Hausmanager"
-        title={`Guten Tag, ${user.first_name}.`}
-        text={houseLabel ? `${houseLabel} im Blick — ich kümmere mich um den Rest.` : 'Dein Zuhause im Blick — ich kümmere mich um den Rest.'}
-      />
+      <EHPageHeader title="Hausmanager" context={houseLabel || undefined} />
 
       <EHManagerAttention items={attention} actionHref="/app/hausmeister" actionLabel="Ansehen" />
 
@@ -82,50 +101,32 @@ export default async function Hausmanager({
         <EHFormFeedback kind="success">Automatisierungen gespeichert.</EHFormFeedback>
       )}
 
-      <EHManagerGrid>
-        <EHManagerThreads
-          items={threads.map((thread) => ({
-            id: String(thread.id),
-            title: `Gespräch vom ${dateLabel(thread.updated_at)}`,
-            meta: `${thread.message_count} ${thread.message_count === 1 ? 'Nachricht' : 'Nachrichten'}`,
-            href: '/app/hausmeister',
-          }))}
-        />
+      <EHMetricsBar label="Hausmanager" items={[
+        {id:'gespraeche',label:'Letzte Gespräche',value:threads.length},
+        {id:'wartung',label:'Wartungen fällig',value:dueMaintenance.length},
+        {id:'angebote',label:'Angebote zu prüfen',value:quotedJobs.length},
+      ]} />
 
-        <EHManagerTasks
-          items={[
-            ...dueMaintenance.map((task) => ({
-              id: `maintenance-${task.id}`,
-              icon: <CalendarDays aria-hidden="true" />,
-              title: task.title,
-              meta: `Fällig ${dateLabel(task.due_date)}`,
-              href: '/app/year',
-            })),
-            ...quotedJobs.map((job) => ({
-              id: `quote-${job.id}`,
-              icon: <FileText aria-hidden="true" />,
-              title: job.title,
-              meta: `${job.quote_count} ${job.quote_count === 1 ? 'Angebot' : 'Angebote'} prüfen`,
-              href: `/app/jobs/${job.id}`,
-            })),
-          ]}
-        />
+      <EHOwnerSection title="Anstehende Aufgaben">
+        <EHRecordList label="Anstehende Aufgaben" items={taskItems} empty="Aktuell nichts fällig. Neue Aufgaben erscheinen hier automatisch." />
+      </EHOwnerSection>
 
-        <EHManagerWide>
-          <EHManagerAutomations
-            items={AUTOMATION_STARTERS.map((starter) => ({
-              slug: starter.slug,
-              title: starter.title,
-              text: starter.text,
-              tier: starter.tier,
-              on: prefs[starter.slug] ?? starter.defaultOn,
-              disabled: starter.tier !== 'free',
-            }))}
-            action={updateAutomationPrefsAction}
-            saved={false}
-          />
-        </EHManagerWide>
-      </EHManagerGrid>
+      <EHOwnerSection title="Letzte Gespräche">
+        <EHRecordList label="Letzte Gespräche" items={threadItems} empty="Noch keine Gespräche. Starte unten beim Hausmeister." />
+      </EHOwnerSection>
+
+      <EHManagerAutomations
+        items={AUTOMATION_STARTERS.map((starter) => ({
+          slug: starter.slug,
+          title: starter.title,
+          text: starter.text,
+          tier: starter.tier,
+          on: prefs[starter.slug] ?? starter.defaultOn,
+          disabled: starter.tier !== 'free',
+        }))}
+        action={updateAutomationPrefsAction}
+        saved={false}
+      />
 
       <p>
         <Bell aria-hidden="true" /> Neue Gespräche starten jederzeit beim{' '}

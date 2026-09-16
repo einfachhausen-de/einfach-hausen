@@ -1,11 +1,11 @@
 import Link from 'next/link';
 import { MessageSquare, Phone, UserRound } from 'lucide-react';
 import { AppShell } from '@/components/shell';
-import { ProviderAccessBoundary, ProviderPageIntro, ProviderSectionHeader, ProviderState } from '@/components/provider/workspace';
+import { ProviderAccessBoundary, ProviderState } from '@/components/provider/workspace';
 import { requireUser } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { getProviderContext } from '@/lib/provider';
-import { EHInbox, EHContactGroup, EHConversation, EHFormFeedback, EHPanel, EHList, EHStatus } from '@/design-system';
+import { EHInbox, EHContactGroup, EHConversation, EHFormFeedback, EHPageHeader } from '@/design-system';
 import { ProviderMessageComposer } from './thread-client';
 import styles from './messages.module.css';
 
@@ -83,14 +83,11 @@ export default async function Messages({ searchParams }: { searchParams: Promise
         ) as ThreadMessage[]
     : [];
   const unreadCount = selected ? Number(selected.unread_count || 0) : 0;
+  const unreadTotal = customers.reduce((total, customer) => total + Number(customer.unread_count || 0), 0);
 
   return (
     <AppShell role="provider" active="/pro/messages" title="Nachrichten" subtitle="Direkter Kundenkontakt">
-      <ProviderPageIntro
-        eyebrow="Kunden"
-        title="Nachrichten"
-        description="Direkte Gespräche mit Kunden, für die du als Ansprechpartner hinterlegt bist. Keine allgemeinen Leads, keine anonyme Inbox."
-      />
+      <EHPageHeader title="Nachrichten" context={`${customers.length} Kunden · ${unreadTotal} ungelesen`} />
 
       <ProviderAccessBoundary canManageJobs={ctx.canManageJobs} />
 

@@ -7,7 +7,6 @@ import { requireUser } from '@/lib/auth';
 import { canAccessProviderJob } from '@/lib/provider';
 import { invoiceWithItems } from '@/lib/invoices';
 import { InvoiceView } from '@/components/invoice-view';
-import { ProviderAccessBoundary } from '@/components/provider/workspace';
 import { cancelInvoiceAction } from '@/app/actions';
 
 export default async function ProviderInvoice({
@@ -37,7 +36,6 @@ export default async function ProviderInvoice({
           </form>
         )}
       </div>
-      <div className="print-hide"><ProviderAccessBoundary canManageJobs={ctx.canManageJobs} /></div>
       {sp.sent && <div className="alert success print-hide" role="status">Rechnung wurde an den Eigentümer gesendet.</div>}
       <InvoiceView invoice={invoice} />
     </main></EHDocumentFrame>

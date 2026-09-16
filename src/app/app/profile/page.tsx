@@ -1,4 +1,4 @@
-import { EHAppHeader, EHList, EHCallout, EHField, EHInput, EHWorkspaceGrid, EHIdentitySummary, EHWorkflowForm, EHFormSection, EHFieldGrid, EHSubmitButton, EHWorkSection } from '@/design-system';
+import { EHPageHeader, EHList, EHCallout, EHField, EHInput, EHWorkspaceGrid, EHIdentitySummary, EHWorkflowForm, EHFormSection, EHFieldGrid, EHSubmitButton, EHWorkSection } from '@/design-system';
 import { AppShell } from '@/components/shell';
 import { ownerAccountTabs } from '@/components/nav-config';
 import { InstallAppCard } from '@/components/install-app-card';
@@ -12,7 +12,7 @@ export default async function Profile(){
   return <AppShell role="homeowner" active="/app/profile" title="Profil & Einstellungen" subtitle="Konto und Einstellungen"
     breadcrumbs={[{ href: '/app', label: 'Start' }, { label: 'Profil & Einstellungen' }]}
     tabs={ownerAccountTabs.map(tab=>({href:tab.href,label:tab.label,active:tab.href==='/app/profile'}))}>
-    <EHAppHeader eyebrow="Dein Konto" title="Profil & Einstellungen" text="Deine persönlichen Daten und der Zugang zu deinem Zuhause." />
+    <EHPageHeader title="Profil & Einstellungen" context={u.email} />
     <EHWorkspaceGrid main={<EHWorkflowForm action={saveProfileAction}>
       <EHFormSection title="Persönliche Daten" description="So erreichen dich deine Ansprechpartner.">
         <EHFieldGrid>
@@ -24,7 +24,7 @@ export default async function Profile(){
         <EHField id="profile-address" label="Adresse"><EHInput id="profile-address" name="address" autoComplete="street-address" defaultValue={p?.address||''}/></EHField>
         <EHSubmitButton>Änderungen speichern</EHSubmitButton>
       </EHFormSection>
-    </EHWorkflowForm>} aside={<EHIdentitySummary initials={initials} name={`${u.first_name} ${u.last_name}`} email={u.email}><p>Dein persönlicher Zugang zu einfachhausen.</p></EHIdentitySummary>}/>
+    </EHWorkflowForm>} aside={<EHIdentitySummary initials={initials} name={`${u.first_name} ${u.last_name}`} email={u.email} />}/>
     <EHWorkSection title="Konto & App">
     <EHList label="Profilbereiche" items={[
       { id: 'plans', title: 'Zahlungen & Mitgliedschaft', href: '/app/plans' },

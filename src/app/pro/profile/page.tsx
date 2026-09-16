@@ -1,6 +1,6 @@
 import { BadgeCheck, CreditCard, FileCheck2, ShieldCheck } from 'lucide-react';
 import { AppShell, SectionTitle } from '@/components/shell';
-import { ProviderAccessBoundary, ProviderPageIntro, ProviderState } from '@/components/provider/workspace';
+import { ProviderAccessBoundary, ProviderState } from '@/components/provider/workspace';
 import { requireUser } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { createStripeOnboardingAction, logoutAction } from '@/app/actions';
@@ -10,7 +10,7 @@ import { getProviderContext } from '@/lib/provider';
 import { getPartnerActivationCheck } from '@/lib/partner-config';
 import { InstallAppCard } from '@/components/install-app-card';
 import {
-  EHPanel, EHList, EHErrorState, EHStatus, EHText, EHActions, EHFormFeedback,
+  EHPanel, EHList, EHErrorState, EHStatus, EHText, EHActions, EHFormFeedback, EHPageHeader,
   EHWorkflowForm, EHFormSection, EHFieldGrid, EHField, EHInput, EHTextarea, EHSelect, EHCheckbox, EHSubmitButton,
 } from '@/design-system';
 
@@ -22,7 +22,7 @@ export default async function ProProfile({ searchParams }: { searchParams: Promi
   const u = await requireUser('provider'); const sp = await searchParams; const ctx = getProviderContext(u.id);
   if (!ctx) {
     return <AppShell role="provider" active="/pro/profile" title="Profil & Vertrauen" subtitle="Zugang prüfen">
-      <ProviderPageIntro eyebrow="Unternehmen" title="Profil & Vertrauen" description="Verifizierung, Vertrag, Auszahlungen und Leistungsprofil an einem Ort." />
+      <EHPageHeader title="Profil & Vertrauen" context="Zugang prüfen" />
       <ProviderState
         icon={<ShieldCheck size={21} />}
         title="Profil derzeit nicht verfügbar"
@@ -45,7 +45,7 @@ export default async function ProProfile({ searchParams }: { searchParams: Promi
   const selectedServices = new Set((db.prepare(`SELECT service_slug FROM provider_service_offerings WHERE provider_id=? AND active=1`).all(ctx.providerId) as Array<{ service_slug: string }>).map(r => r.service_slug));
   const brokerProfile = db.prepare('SELECT * FROM broker_search_profiles WHERE provider_id=?').get(ctx.providerId) as any;
   return <AppShell role="provider" active="/pro/profile" title="Profil & Vertrauen" subtitle={p?.business_name || ctx.businessName}>
-    <ProviderPageIntro eyebrow="Unternehmen" title="Profil & Vertrauen" description="Verifizierung, Vertrag, Auszahlungen und Leistungsprofil an einem Ort. Änderungen an Firma und Einsatzgebiet sind nur für berechtigte Ansprechpartner verfügbar." />
+    <EHPageHeader title="Profil & Vertrauen" context={[p?.business_name || ctx.businessName, ctx.canManageJobs ? 'Änderungen möglich' : 'Nur Ansicht'].join(' · ')} />
     <ProviderAccessBoundary canManageJobs={ctx.canManageJobs} />
     <InstallAppCard />
     {sp.verification === 'submitted' && <EHFormFeedback kind="success">Unternehmensnachweise wurden eingereicht. Bis zur erneuten Freigabe werden keine neuen Anfragen verteilt.</EHFormFeedback>}

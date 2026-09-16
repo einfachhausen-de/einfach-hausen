@@ -11,7 +11,7 @@ import { acceptQuoteAction,cancelJobAction,createCheckoutAction,createClaimActio
 import { dateLabel,euro,statusLabel } from '@/lib/format';
 import { getQuoteRecommendations } from '@/lib/orchestrator';
 import { SubmitButton } from '@/components/ui/submit-button';
-import { EHAppHeader, EHPanel, EHEmptyState, EHErrorState, EHStatus, EHWorkspaceGrid, EHWorkSection, EHFormFeedback } from '@/design-system';
+import { EHPanel, EHEmptyState, EHErrorState, EHStatus, EHPageHeader, EHMetricsBar, EHRecordList, EHWorkSection, EHFormFeedback } from '@/design-system';
 
 function emergencyAvailability(value?:string|null){
   if(!value)return 'Zeit nach Rückmeldung';
@@ -39,9 +39,10 @@ export default async function JobDetail({params,searchParams}:{params:Promise<{i
     const messages=contact?db.prepare('SELECT * FROM contact_messages WHERE homeowner_id=? AND contact_user_id=? ORDER BY created_at').all(u.id,contact.contact_user_id) as any[]:[];
     const dispatches=db.prepare(`SELECT COUNT(*) total FROM job_dispatches WHERE job_id=?`).get(job.id) as any;
     return <AppShell role="homeowner" active="/app/jobs" title="Ansprechpartner" subtitle={job.category} breadcrumbs={crumbs('/app/jobs','Ansprechpartner')}>
-      <EHWorkspaceGrid main={<>       <EHAppHeader eyebrow={job.category} title={job.title.replace(/^Ansprechpartner:\s*/,'')} text={job.description} actions={<EHStatus tone={contact?"success":"neutral"}>{contact?'Verbunden':'Ansprechpartner gesucht'}</EHStatus>} /> </>} aside={<EHWorkSection title="Dein Anliegen"><div className="meta-line"><span><MapPin/>{job.postcode}</span></div>{job.photo_id&&<JobMedia src={`/api/job-media/${job.photo_id}`} alt="Foto, Video oder Sprachnachricht zum Thema" kind={mediaKindFromPath(job.photo_path)}/>}
-</EHWorkSection>} />
-      <div className="ai-summary"><Sparkles/><div><strong>Du hast nur einen Ansprechpartner gewählt</strong><p>Es wurde noch kein Auftrag vergeben und kein Preis vereinbart. Der Hausmeisterservice bleibt dabei und verbindet dich nur mit einem passenden Menschen.</p></div></div>
+      <EHPageHeader title={job.title.replace(/^Ansprechpartner:\s*/,'')} context={[job.category,job.postcode].filter(Boolean).join(' · ')} actions={<EHStatus tone={contact?"success":"neutral"}>{contact?'Verbunden':'Ansprechpartner gesucht'}</EHStatus>} />
+      <EHWorkSection title="Dein Anliegen"><div className="meta-line"><span><MapPin/>{job.postcode}</span></div>{job.description&&<p>{job.description}</p>}{job.photo_id&&<JobMedia src={`/api/job-media/${job.photo_id}`} alt="Foto, Video oder Sprachnachricht zum Thema" kind={mediaKindFromPath(job.photo_path)}/>}
+</EHWorkSection>
+      <div className="ai-summary"><Sparkles/><div><strong>Du hast nur einen Ansprechpartner gewählt</strong><p>Es wurde noch kein Auftrag vergeben und kein Preis vereinbart.</p></div></div>
       {!contact?<EHEmptyState title="Passender Ansprechpartner wird gesucht" text={`${dispatches.total||0} geprüfte regionale Partner wurden angefragt. Sobald ein Betrieb übernimmt, kannst du direkt schreiben oder anrufen.`} />:<>
         <SectionTitle>Dein persönlicher Ansprechpartner</SectionTitle>
         <EHPanel title="Ansprechpartner"><UserRound/><div className="grow"><strong>{contact.first_name} {contact.last_name}</strong><p>{contact.job_title||'Ansprechpartner'} · <Link className="inline-partner-link" href={`/app/partners/${contact.provider_id}?job=${job.id}`}>{contact.business_name}</Link></p><small>Für Fragen direkt erreichbar. Daraus entsteht nicht automatisch ein Auftrag.</small></div></EHPanel>
@@ -62,23 +63,34 @@ export default async function JobDetail({params,searchParams}:{params:Promise<{i
   const available=quotes.filter(q=>q.available_at).sort((a,b)=>new Date(a.available_at).getTime()-new Date(b.available_at).getTime()); const fastest=available[0]?.id;
 
   return <AppShell role="homeowner" active="/app/jobs" breadcrumbs={crumbs('/app/jobs','Auftrag')}>
-    <EHWorkspaceGrid main={<>     <EHAppHeader eyebrow={job.category} title={job.title} text={job.description} actions={<><EHStatus tone="neutral">{statusLabel(job.status)}</EHStatus>{job.urgency==='emergency'&&<EHStatus tone="error">NOTFALL</EHStatus>}</>} /> </>} aside={<EHWorkSection title="Dein Auftrag"><div className="meta-line"><span><MapPin/>{job.postcode}</span><span><CalendarDays/>{dateLabel(job.preferred_date)}</span></div>{job.photo_id&&<JobMedia src={`/api/job-media/${job.photo_id}`} alt="Foto, Video oder Sprachnachricht zum Auftrag" kind={mediaKindFromPath(job.photo_path)}/> }
-</EHWorkSection>} />
+    <EHPageHeader title={job.title} context={[job.category,job.postcode].filter(Boolean).join(' · ')} actions={<><EHStatus tone="neutral">{statusLabel(job.status)}</EHStatus>{job.urgency==='emergency'&&<EHStatus tone="error">NOTFALL</EHStatus>}</>} />
     {sp.error&&<EHErrorState text={sp.error} />}{sp.cancelled==='1'&&<EHFormFeedback kind="success">Auftrag wurde storniert.</EHFormFeedback>}{sp.payment==='processing'&&<EHFormFeedback kind="success">Zahlung eingegangen. Der endgültige Status wird sicher über Stripe bestätigt.</EHFormFeedback>}{sp.payment==='unavailable'&&<EHErrorState text="Onlinezahlung ist derzeit nicht vollständig konfiguriert. Es wurde kein Zahlungsstatus geändert. Stimme die Zahlung direkt mit deinem Ansprechpartner ab oder versuche es später erneut." />}{sp.payment==='cancelled'&&<EHErrorState text="Zahlung wurde abgebrochen. Es wurde nichts belastet." />}
+    <EHMetricsBar label="Stand deines Auftrags" items={[
+      { id: 'angebote', label: 'Angebote', value: quotes.length, hint: cheapest!=null ? `ab ${euro(cheapest)}` : undefined },
+      { id: 'partner', label: 'Angefragte Partner', value: dispatches.total||0 },
+      { id: 'termin', label: 'Wunschtermin', value: dateLabel(job.preferred_date) },
+    ]} />
+    <EHWorkSection title="Dein Auftrag"><div className="meta-line"><span><MapPin/>{job.postcode}</span><span><CalendarDays/>{dateLabel(job.preferred_date)}</span></div>{job.description&&<p>{job.description}</p>}{job.photo_id&&<JobMedia src={`/api/job-media/${job.photo_id}`} alt="Foto, Video oder Sprachnachricht zum Auftrag" kind={mediaKindFromPath(job.photo_path)}/> }
+</EHWorkSection>
 
-    <div className={job.urgency==='emergency'?"ai-summary emergency-summary":"ai-summary"}><Sparkles/><div><strong>{job.urgency==='emergency'?'Wir suchen jetzt verfügbare Hilfe':'Einfach Hausen organisiert'}</strong><p>Richtpreis {job.budget_min&&job.budget_max?`${euro(job.budget_min)}–${euro(job.budget_max)}`:'wird ermittelt'}. {dispatches.total||0} vertragliche Partner wurden angefragt. Qualität und Kundenzufriedenheit haben Vorrang — kein Partner kann sich im Matching nach oben kaufen.</p></div></div>
+    <div className={job.urgency==='emergency'?"ai-summary emergency-summary":"ai-summary"}><Sparkles/><div><strong>{job.urgency==='emergency'?'Wir suchen jetzt verfügbare Hilfe':'Einfach Hausen organisiert'}</strong><p>Richtpreis {job.budget_min&&job.budget_max?`${euro(job.budget_min)}–${euro(job.budget_max)}`:'wird ermittelt'}.</p></div></div>
 
     <SectionTitle>Vergleich</SectionTitle>
-    {quotes.length===0?<EHEmptyState title="Angebote werden eingeholt" text="Einfach Hausen klärt Verfügbarkeit und Angebote mit passenden Partnern." />:<div className="stack">{quotes.map((q,index)=><EHPanel key={q.id} title={q.business_name}>
-      <div className="quote-badges">{index===0&&<span className="recommend">EMPFEHLUNG</span>}{job.urgency==='emergency'&&q.emergency_mode==='24_7'&&<span className="emergency-quote-badge">24/7 NOTDIENST</span>}{job.urgency==='emergency'&&q.emergency_mode!=='24_7'&&<span className="emergency-quote-badge local">LOKAL VERFÜGBAR</span>}{q.amount===cheapest&&<span className="compare-badge">GÜNSTIGST</span>}{q.id===fastest&&<span className="compare-badge fast">SCHNELLSTER TERMIN</span>}</div>
-      <div><Link href={`/app/partners/${q.provider_id}?job=${job.id}`}><strong>{q.business_name}</strong><span>Profil ansehen</span></Link><small>✓ Vertragspartner · {q.rating_count?`⭐ ${q.rating.toFixed(1)} (${q.rating_count})`:'Neu im Netzwerk'}</small><b>{euro(q.amount)}</b></div>
-      <div className="partner-standards"><span>✓ Gewerbe</span><span>{q.insurance_verified?'✓':'○'} Versicherung</span><span>{q.qualification_verified?'✓':'○'} Qualifikation</span><span>{q.contract_verified?'✓':'○'} Vertrag</span></div>
-      <p>{q.message||'Angebot für den beschriebenen Leistungsumfang.'}</p>
-      {job.urgency==='emergency'?<div className="emergency-facts"><span><strong>Hilfe:</strong> {emergencyAvailability(q.available_at)}</span>{Number.isFinite(q.distance_km)&&<span><strong>Entfernung:</strong> {q.distance_km.toFixed(1)} km</span>}<span><strong>Zuschlag:</strong> {q.emergency_markup_bps?`bis ${(q.emergency_markup_bps/100).toFixed(0)} %`:'kein hinterlegter Zuschlag'}</span></div>:<small>{q.available_at?`Verfügbar: ${dateLabel(q.available_at)}`:'Termin nach Abstimmung'}{Number.isFinite(q.distance_km)?` · ${q.distance_km.toFixed(1)} km`:''}</small>}
-      {job.urgency!=='emergency'&&scopeNotes(q.message,job.description).length>0&&<div className="quote-scope-notes" aria-label="Hinweise zum Leistungsumfang">{scopeNotes(q.message,job.description).map(note=><span key={note}>ℹ {note}</span>)}</div>}
-      {index===0&&quotes.length>1&&<div className="recommendation-reason"><Sparkles size={15}/> Bestes Gesamtpaket aus Preis, Qualität, Entfernung, Kapazität, Verfügbarkeit und bestehender Kundenbeziehung.</div>}
-      {q.status==='pending'&&<form action={acceptQuoteAction.bind(null,q.id)}><SubmitButton className="btn primary wide" pendingLabel="Buchung läuft…">Diesen Partner buchen</SubmitButton></form>}{q.status==='accepted'&&<div className="accepted-label"><CheckCircle2/> Gebucht</div>}
-    </EHPanel>)}</div>}
+    {quotes.length===0?<EHEmptyState title="Angebote werden eingeholt" text="Einfach Hausen klärt Verfügbarkeit und Angebote mit passenden Partnern." />:<EHRecordList label="Angebote im Vergleich" items={quotes.map((q,index)=>({
+      id:String(q.id),
+      title:q.business_name,
+      detail:[
+        `✓ Vertragspartner · ${q.rating_count?`⭐ ${q.rating.toFixed(1)} (${q.rating_count})`:'Neu im Netzwerk'}`,
+        q.message||'Angebot für den beschriebenen Leistungsumfang.',
+        ...(job.urgency==='emergency'
+          ? [`Hilfe: ${emergencyAvailability(q.available_at)}`,Number.isFinite(q.distance_km)?`Entfernung: ${q.distance_km.toFixed(1)} km`:'',`Zuschlag: ${q.emergency_markup_bps?`bis ${(q.emergency_markup_bps/100).toFixed(0)} %`:'kein hinterlegter Zuschlag'}`]
+          : [q.available_at?`Verfügbar: ${dateLabel(q.available_at)}`:'Termin nach Abstimmung',Number.isFinite(q.distance_km)?`${q.distance_km.toFixed(1)} km`:'']),
+        ...scopeNotes(q.message,job.description),
+      ].filter(Boolean).join(' · '),
+      value:euro(q.amount),
+      status:<span className="quote-badges">{index===0&&<span className="recommend">EMPFEHLUNG</span>}{job.urgency==='emergency'&&q.emergency_mode==='24_7'&&<span className="emergency-quote-badge">24/7 NOTDIENST</span>}{job.urgency==='emergency'&&q.emergency_mode!=='24_7'&&<span className="emergency-quote-badge local">LOKAL VERFÜGBAR</span>}{q.amount===cheapest&&<span className="compare-badge">GÜNSTIGST</span>}{q.id===fastest&&<span className="compare-badge fast">SCHNELLSTER TERMIN</span>}</span>,
+      action:<><Link className="btn ghost" href={`/app/partners/${q.provider_id}?job=${job.id}`} aria-label={`${q.business_name} — Profil ansehen`}>Profil ansehen</Link>{q.status==='pending'&&<form action={acceptQuoteAction.bind(null,q.id)}><SubmitButton className="btn primary" pendingLabel="Buchung läuft…">Diesen Partner buchen</SubmitButton></form>}{q.status==='accepted'&&<span className="accepted-label"><CheckCircle2/> Gebucht</span>}</>,
+    }))} />}
 
     {accepted&&<>
       <SectionTitle>Dein persönlicher Ansprechpartner</SectionTitle>

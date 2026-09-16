@@ -1,15 +1,16 @@
-import { CalendarDays, FileText, History, House, Receipt, TrendingUp, Wrench } from 'lucide-react';
+import { CalendarClock, CalendarDays, FileText, History, House, Receipt, TrendingUp, Wrench } from 'lucide-react';
 import { AppShell } from '@/components/shell';
 import {
-  EHAppHeader, EHList, EHEmptyState, EHButton, EHText, EHPropertyOverview, EHDetailDisclosure,
-  EHWorkspaceGrid, EHWorkSection, EHWorkMetrics, EHWorkflowStack,
-  EHServiceDirectory, EHSubmitButton,
+  EHButton, EHEmptyState, EHText, EHPropertyOverview, EHDetailDisclosure,
+  EHWorkspaceGrid, EHWorkSection, EHWorkflowStack,
+  EHSubmitButton, EHMetricsBar, EHPageHeader, EHRecordList, EHRecordViews, EHStatus,
 } from '@/design-system';
 import { HouseProfileForm, HouseAssetForm, HOUSE_ASSET_KINDS } from '@/components/homeowner/house-profile-forms';
 import { requireUser } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { addHouseAssetAction, completeMaintenanceTaskAction, saveHouseProfileAction } from '@/app/actions';
 import { dateLabel } from '@/lib/format';
+import { ownerMaintenanceState } from '@/lib/owner-format';
 import { primaryProperty } from '@/lib/properties';
 
 export default async function MyHome() {
@@ -20,39 +21,48 @@ export default async function MyHome() {
   const docs=db.prepare(`SELECT COUNT(*) c FROM documents d JOIN jobs j ON j.id=d.job_id WHERE j.homeowner_id=?`).get(u.id) as any;
   const invoiceCount=(db.prepare(`SELECT COUNT(*) c FROM invoices WHERE homeowner_id=?`).get(u.id) as {c:number}).c;
   const historyCount=property?(db.prepare(`SELECT COUNT(*) c FROM house_history_entries WHERE property_id=?`).get(property.id) as {c:number}).c:0;
-  return <AppShell role="homeowner" active="/app/home" title="Mein Haus" subtitle="Deine digitale Hausakte">
+  const surroundings=[p?.postcode, p?.house_type].filter(Boolean).join(' · ');
+  return <AppShell role="homeowner" active="/app/home" title="Mein Haus">
     <EHWorkflowStack>
-      <EHAppHeader eyebrow="Digitale Hausakte" title="Mein Haus" text="Dein Gebäude, deine Technik und die nächsten Schritte im Überblick."
+      <EHPageHeader title="Mein Haus" context={surroundings || undefined}
         actions={<EHButton href="/app/year" variant="secondary">Jahresplan öffnen</EHButton>} />
-      <EHPropertyOverview title={p?.address || 'Hausdaten ergänzen'} subtitle={[p?.postcode, p?.house_type].filter(Boolean).join(' · ')}
+      <EHMetricsBar label="Hausakte" items={[
+        { id: 'assets', label: 'Technik & Geräte', value: assets.length },
+        { id: 'papers', label: 'Dokumente & Rechnungen', value: docs.c + invoiceCount },
+        { id: 'works', label: 'Frühere Arbeiten', value: historyCount },
+      ]} />
+      <EHPropertyOverview title={p?.address || 'Hausdaten ergänzen'}
         facts={[
           { label: 'Baujahr', value: p?.build_year ? String(p.build_year) : 'Nicht erfasst' },
           { label: 'Wohnfläche', value: p?.living_area ? p.living_area + ' m²' : 'Nicht erfasst' },
           { label: 'Grundstück', value: p?.plot_area ? p.plot_area + ' m²' : 'Nicht erfasst' },
           { label: 'Technik', value: assets.length + ' erfasst' },
         ]} />
-      <EHWorkMetrics items={[
-        { label: 'Technik & Geräte', value: assets.length, href: '#technik' },
-        { label: 'Dokumente & Rechnungen', value: docs.c + invoiceCount, href: '/app/documents' },
-        { label: 'Frühere Arbeiten', value: historyCount, href: '/app/home/history' },
-      ]} />
       <section id="technik" aria-label="Technik und Ausstattung">
-        <EHWorkspaceGrid main={<EHWorkSection title="Technik & Ausstattung">
-          {assets.length > 0 ? <EHList label="Hinterlegte Technik" items={assets.map(a => ({
-            id: String(a.id), title: a.name,
-            text: [HOUSE_ASSET_KINDS[a.kind] || a.kind, a.installed_year ? `Installiert ${a.installed_year}` : null, a.details].filter(Boolean).join(' · '),
-          }))} /> : <EHEmptyState title="Deine Ausstattung ist noch nicht erfasst" text="Beginne zum Beispiel mit deiner Heizung oder PV-Anlage. Hersteller und Modell kannst du direkt ergänzen." />}
-          {tasks.length > 0 && <EHWorkSection title="Nächste Wartungen" link={{ href: '/app/year', label: 'Alle ansehen' }}>
-            <EHList label="Offene Wartungen" items={tasks.slice(0, 4).map(t => ({
-              id: String(t.id), title: t.title, text: `Fällig ${dateLabel(t.due_date)}`,
-              action: <form action={completeMaintenanceTaskAction.bind(null, t.id)} aria-label={`${t.title} abschließen`}>
-                <EHSubmitButton pendingLabel="Wird abgeschlossen …">Erledigt</EHSubmitButton>
-              </form>,
-            }))} />
-          </EHWorkSection>}
-        </EHWorkSection>} aside={<EHWorkSection title="Termine" link={{ href: '/app/year', label: 'Jahresplan' }}>
-          {appointments.length ? <EHList label="Bestätigte Termine" items={appointments.map(a => ({
-            id: String(a.id), title: a.title, text: a.business_name + ' · ' + dateLabel(a.start_at), href: '/app/jobs/' + a.job_id,
+        <EHWorkspaceGrid main={<>
+          <EHWorkSection title="Technik & Ausstattung">
+            {assets.length > 0 ? <EHRecordViews label="Hinterlegte Technik" storageKey="hausakte" items={assets.map(a => ({
+              id: String(a.id), title: a.name,
+              detail: [HOUSE_ASSET_KINDS[a.kind] || a.kind, a.installed_year ? `Installiert ${a.installed_year}` : null, a.details].filter(Boolean).join(' · '),
+              icon: <Wrench size={20} />,
+            }))} /> : <EHEmptyState title="Deine Ausstattung ist noch nicht erfasst" text="Beginne zum Beispiel mit deiner Heizung oder PV-Anlage. Hersteller und Modell kannst du direkt ergänzen." />}
+            {tasks.length > 0 && <EHWorkSection title="Nächste Wartungen" link={{ href: '/app/year', label: 'Alle ansehen' }}>
+              <EHRecordViews label="Offene Wartungen" storageKey="hausakte" items={tasks.slice(0, 4).map(t => {
+                const state = ownerMaintenanceState(t.due_date);
+                return {
+                  id: String(t.id), title: t.title, detail: `Fällig ${dateLabel(t.due_date)}`, date: t.due_date ?? undefined,
+                  status: state.includes('überfällig') ? <EHStatus tone="warning">{state}</EHStatus> : undefined,
+                  icon: <CalendarClock size={20} />,
+                  action: <form action={completeMaintenanceTaskAction.bind(null, t.id)} aria-label={`${t.title} abschließen`}>
+                    <EHSubmitButton pendingLabel="Wird abgeschlossen …">Erledigt</EHSubmitButton>
+                  </form>,
+                };
+              })} />
+            </EHWorkSection>}
+          </EHWorkSection>
+        </>} aside={<EHWorkSection title="Termine" link={{ href: '/app/year', label: 'Jahresplan' }}>
+          {appointments.length ? <EHRecordViews label="Bestätigte Termine" storageKey="hausakte" items={appointments.map(a => ({
+            id: String(a.id), title: a.title, detail: a.business_name, dateLabel: dateLabel(a.start_at), href: '/app/jobs/' + a.job_id, icon: <CalendarDays size={20} />,
           }))} /> : <EHText muted>Keine bestätigten Termine hinterlegt.</EHText>}
           <EHDetailDisclosure id="technik-anlegen" title="Technik hinzufügen" description="Gerät, Anlage oder Ausstattung erfassen">
             <HouseAssetForm action={addHouseAssetAction} />
@@ -62,19 +72,15 @@ export default async function MyHome() {
       <EHDetailDisclosure id="hausprofil" title="Hausdaten bearbeiten" description="Adresse, Gebäude und Flächen">
         <HouseProfileForm action={saveHouseProfileAction} profile={p} />
       </EHDetailDisclosure>
-      <EHWorkSection title="Deine Hausakte weiterführen">
-          <EHServiceDirectory groups={[{ title: 'Wissen & Unterlagen', items: [
-            { href: '/app/home/history', title: 'Hausgeschichte', text: 'Frühere Arbeiten, Kosten und Ansprechpartner dokumentieren.', icon: <History /> },
-            { href: '/app/home/passport', title: 'Hauspass', text: 'Deine Hausdaten als druckbare Übersicht ansehen.', icon: <House /> },
-          ] }, { title: 'Kosten & Verträge', items: [
-            { href: '/app/contracts', title: 'Verträge & Tarife', text: 'Laufende Verträge, Kündigungsfristen und Spar-Check.', icon: <Receipt /> },
-            { href: '/app/documents', title: 'Dokumente & Rechnungen', text: 'Nachweise und Unterlagen wiederfinden.', icon: <FileText /> },
-          ] }, { title: 'Planen & Vorbereiten', items: [
-            { href: '/app/year', title: 'Mein Jahr', text: 'Anstehende Arbeiten und Wartungen im Blick behalten.', icon: <CalendarDays /> },
-            { href: '#technik', title: 'Technik & Geräte', text: 'Ausstattung und Modellangaben nachschlagen.', icon: <Wrench /> },
-            { href: '/app/home/sale', title: 'Verkauf & Bewertung', text: 'Hauswert festhalten und einen möglichen Verkauf vorbereiten.', icon: <TrendingUp /> },
-          ] }]} />
-        </EHWorkSection>
+      <EHRecordList label="Hausakte weiterführen" items={[
+        { id: 'history', title: 'Hausgeschichte', href: '/app/home/history', value: String(historyCount), icon: <History size={20} /> },
+        { id: 'passport', title: 'Hauspass', href: '/app/home/passport', icon: <House size={20} /> },
+        { id: 'contracts', title: 'Verträge & Tarife', href: '/app/contracts', icon: <Receipt size={20} /> },
+        { id: 'documents', title: 'Dokumente & Rechnungen', href: '/app/documents', value: String(docs.c + invoiceCount), icon: <FileText size={20} /> },
+        { id: 'year', title: 'Mein Jahr', href: '/app/year', icon: <CalendarDays size={20} /> },
+        { id: 'technik', title: 'Technik & Geräte', href: '#technik', value: String(assets.length), icon: <Wrench size={20} /> },
+        { id: 'sale', title: 'Verkauf & Bewertung', href: '/app/home/sale', icon: <TrendingUp size={20} /> },
+      ]} />
     </EHWorkflowStack>
   </AppShell>;
 }

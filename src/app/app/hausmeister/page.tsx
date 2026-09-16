@@ -3,7 +3,7 @@ import { AppShell } from '@/components/shell';
 import { HomeownerHausmeisterComposer } from '@/components/homeowner/homeowner-hausmeister-composer';
 import { startHausmeisterRouteAction } from '@/app/actions';
 import { requireUser } from '@/lib/auth';
-import { EHAppHeader, EHPanel, EHErrorState } from '@/design-system';
+import { EHPageHeader, EHPanel, EHErrorState } from '@/design-system';
 import { db } from '@/lib/db';
 import { aiQuotaSnapshot } from '@/lib/ai-engine';
 import { HAUSMEISTER_LIMIT_HINTS } from '@/lib/orchestrator';
@@ -23,7 +23,7 @@ export default async function Hausmeister({searchParams}:{searchParams:Promise<R
   const quota = aiQuotaSnapshot(user.id);
   return <AppShell role="homeowner" active="/app" title="Hausmeister" subtitle="Fragen klären oder etwas organisieren">
     <div className="housemaster-panel">
-      <EHAppHeader eyebrow="Hausmeister · bereit" title={`Hallo ${user.first_name}.`} text="Beschreib einfach, was los ist. Wir klären zuerst die Frage. Erst danach entscheidest du bewusst zwischen weiter fragen, einem persönlichen Ansprechpartner oder einem echten Auftrag." />
+      <EHPageHeader title="Hausmeister" context="Bereit" />
       <p><a href="/app/hausmanager">Zum KI-Hausmanager: alte Gespräche, Aufgaben & Automatisierungen →</a></p>{sp.error&&<EHErrorState text={sp.error} />}
       <EHPanel title="KI-Kontingent & Limits">
         <div data-testid="hausmeister-quota" role="status" aria-live="polite">

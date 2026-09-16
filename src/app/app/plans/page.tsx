@@ -1,5 +1,5 @@
 import { AppShell } from '@/components/shell';
-import { EHAppHeader, EHPanel, EHList, EHErrorState, EHFormFeedback, EHSubmitButton, EHWorkSection, EHWorkspaceGrid, EHText, EHButton, EHStatus, EHEmptyState, EHCheckbox } from '@/design-system';
+import { EHButton, EHCheckbox, EHEmptyState, EHErrorState, EHFormFeedback, EHMetricsBar, EHPageHeader, EHRecordList, EHRecordViews, EHStatus, EHSubmitButton, EHWorkSection } from '@/design-system';
 import { requireUser } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { purchasePackageAction, startMembershipCheckoutAction } from '@/app/actions';
@@ -25,61 +25,83 @@ export default async function Plans({ searchParams }: { searchParams: Promise<Re
     cancelled: 'Deine Mitgliedschaft ist gekündigt. Du kannst dein Hauskonto weiterhin nutzen.',
   };
   const stateLabel: Record<string, string> = { active: 'Aktiv', pending: 'Bestätigung ausstehend', past_due: 'Zahlung offen', cancelled: 'Gekündigt' };
+  const statusHint = current
+    ? stateText[current.status] || 'Bitte lass den Mitgliedschaftsstatus prüfen.'
+    : 'Du brauchst kein kostenpflichtiges Abo, um mit deinem Hauskonto zu beginnen.';
 
   return <AppShell role="homeowner" active="/app/plans" title="Tarif & Pakete" subtitle="Mitgliedschaft und einzelne Leistungen">
-    <EHAppHeader eyebrow="Dein Hauskonto" title="Tarif & Pakete" text="Sieh deinen aktuellen Status, vergleiche Mitgliedschaften und wähle zusätzliche Leistungen bewusst aus." actions={<EHButton href="/preise" variant="secondary">Öffentliche Tarifübersicht</EHButton>} />
+    <EHPageHeader
+      title="Tarif & Pakete"
+      context={current ? `${current.title} · ${stateLabel[current.status] || 'Status prüfen'}` : 'Kostenloses Hauskonto'}
+      actions={<>
+        {current?.status === 'past_due'
+          ? <EHButton href="/kontakt">Zahlungsstatus klären</EHButton>
+          : <EHButton href="/kontakt" variant="secondary">Leistungsumfang klären</EHButton>}
+        <EHButton href="/preise" variant="secondary">Öffentliche Tarifübersicht</EHButton>
+      </>}
+    />
     {sp.error && <EHErrorState text={sp.error} />}
     {(sp.checkout === 'success' || sp.checkout === 'processing') && <EHFormFeedback kind="info">Du bist vom Abschluss zurückgekehrt. Entscheidend ist der bestätigte Status deiner Mitgliedschaft oder Paketbuchung unten; die Rückkehr allein bestätigt keine Zahlung.</EHFormFeedback>}
     {sp.checkout === 'cancelled' && <EHFormFeedback kind="info">Der Bezahlvorgang wurde abgebrochen. Prüfe unten deinen aktuellen Status, bevor du erneut startest.</EHFormFeedback>}
     {sp.checkout === 'unavailable' && <EHErrorState text="Onlinezahlung ist gerade nicht verfügbar. Bitte versuche es später erneut." />}
     {sp.switch === 'done' && <EHFormFeedback kind="success">Deine bezahlte Mitgliedschaft wurde beendet und der Wechsel auf Free bestätigt. Dein Hauskonto bleibt kostenlos nutzbar.</EHFormFeedback>}
 
-    <EHWorkspaceGrid main={<EHPanel title={current ? current.title : 'Dein kostenloses Hauskonto'} label="Aktueller Stand">
-      <EHStatus tone={current?.status === 'past_due' ? 'warning' : current?.status === 'active' ? 'success' : 'neutral'}>{current ? stateLabel[current.status] || 'Status prüfen' : 'Ohne bezahlte Mitgliedschaft'}</EHStatus>
-      <EHText>{current ? stateText[current.status] || 'Bitte lass den Mitgliedschaftsstatus prüfen.' : 'Du brauchst kein kostenpflichtiges Abo, um mit deinem Hauskonto zu beginnen.'}</EHText>
-      {current?.status === 'past_due' && <EHButton href="/kontakt">Zahlungsstatus klären</EHButton>}
-    </EHPanel>} aside={<EHPanel title={pilot ? 'Dein Pilot-Vorteil' : 'Vor deiner Entscheidung'}>
-      <EHText>{pilot ? `Dein hinterlegter Vorteil von ${(pilot.discount_bps / 100).toLocaleString('de-DE')} % ist in den unten angezeigten Preisen bereits berücksichtigt.` : 'Mitgliedschaften werden monatlich abgerechnet. Einzelpakete haben einen eigenen Preis und Leistungsumfang.'}</EHText>
-      <EHText>Arbeit, Material und zusätzliche Handwerkerleistungen sind nicht automatisch enthalten.</EHText>
-      <EHButton href="/kontakt" variant="secondary">Leistungsumfang klären</EHButton>
-    </EHPanel>} />
+    <EHMetricsBar label="Dein Hauskonto" items={[
+      { id: 'status', label: 'Status', value: <EHStatus tone={current?.status === 'past_due' ? 'warning' : current?.status === 'active' ? 'success' : 'neutral'}>{current ? stateLabel[current.status] || 'Status prüfen' : 'Ohne bezahlte Mitgliedschaft'}</EHStatus> },
+      { id: 'mitgliedschaft', label: 'Mitgliedschaft', value: current ? current.title : 'Kostenloses Hauskonto', hint: statusHint },
+      { id: 'pakete', label: 'Gebuchte Pakete', value: String(orders.length) },
+      { id: 'leistung', label: 'Nicht enthalten', value: 'Arbeit & Material', hint: 'Zusätzliche Handwerkerleistungen sind nicht automatisch enthalten.' },
+      ...(pilot ? [{ id: 'vorteil', label: 'Pilot-Vorteil', value: `${(pilot.discount_bps / 100).toLocaleString('de-DE')} %`, hint: 'In den angezeigten Preisen bereits berücksichtigt' }] : []),
+    ]} />
 
     <EHWorkSection title="Monatliche Mitgliedschaften">
-      <EHText>Ein Tarifwechsel ist eine bewusste Entscheidung. Prüfe den Leistungsumfang vor dem Abschluss.</EHText>
       {plans.length === 0 && <EHEmptyState title="Gerade keine Tarife auswählbar" text="Dein aktueller Status bleibt oben sichtbar. Bitte versuche es später erneut." />}
-      {plans.map(plan => {
-        const active = current?.status === 'active' && current.plan_slug === plan.slug;
+      {plans.length > 0 && <EHRecordViews label="Monatliche Mitgliedschaften" storageKey="tarife" defaultView="liste" switcherLabel="Tarife: Ansicht wechseln" items={plans.map(plan => {
+        const isCurrent = current?.status === 'active' && current.plan_slug === plan.slug;
         const downgrading = plan.monthly_amount === 0 && Boolean(current?.stripe_subscription_id);
-        return <EHPanel key={plan.slug} title={plan.title} label={active ? 'Dein aktueller Tarif' : 'Monatliche Mitgliedschaft'}>
-          <EHText size="lead"><strong>{euroExact(price(plan.monthly_amount))} / Monat</strong></EHText>
-          {pilot && plan.monthly_amount > 0 && <EHText size="meta">Regulär {euroExact(plan.monthly_amount)} / Monat · dein Pilot-Vorteil ist enthalten.</EHText>}
-          <EHText>{plan.description}</EHText>
-          {Boolean(plan.annual_house_check) && <EHText>Hauscheck: Durchführung und konkreten Umfang vor Abschluss klären.</EHText>}
-          <form action={startMembershipCheckoutAction.bind(null, plan.slug)}>
-            {downgrading && <EHCheckbox name="confirmFreeSwitch" required label="Ich möchte meine bestehende bezahlte Mitgliedschaft beenden und auf Free wechseln." />}
-            <EHSubmitButton disabled={active} pendingLabel="Wird geöffnet …">{active ? 'Aktueller Tarif' : downgrading ? 'Auf Free wechseln' : plan.monthly_amount === 0 ? 'Free aktivieren' : plan.title + ' · zum Abschluss'}</EHSubmitButton>
-          </form>
-        </EHPanel>;
-      })}
+        return {
+          id: plan.slug,
+          title: plan.title,
+          detail: [
+            plan.description,
+            Boolean(plan.annual_house_check) ? 'Hauscheck: Umfang vor Abschluss klären' : null,
+            pilot && plan.monthly_amount > 0 ? `Regulär ${euroExact(plan.monthly_amount)} / Monat` : null,
+          ].filter(Boolean).join(' · '),
+          value: `${euroExact(price(plan.monthly_amount))} / Monat`,
+          status: isCurrent ? <EHStatus tone="success">Dein aktueller Tarif</EHStatus> : undefined,
+          action: (
+            <form action={startMembershipCheckoutAction.bind(null, plan.slug)}>
+              {downgrading && <EHCheckbox name="confirmFreeSwitch" required label="Ich möchte meine bestehende bezahlte Mitgliedschaft beenden und auf Free wechseln." />}
+              <EHSubmitButton disabled={isCurrent} pendingLabel="Wird geöffnet …">{isCurrent ? 'Aktueller Tarif' : downgrading ? 'Auf Free wechseln' : plan.monthly_amount === 0 ? 'Free aktivieren' : plan.title + ' · zum Abschluss'}</EHSubmitButton>
+            </form>
+          ),
+        };
+      })} />}
     </EHWorkSection>
 
     <EHWorkSection title="Einzelpakete">
-      <EHText>Diese Pakete werden separat gebucht. Der angezeigte Paketpreis ist eine einmalige Zahlung; der Leistungszeitraum richtet sich nach dem Paket.</EHText>
       {packages.length === 0 && <EHEmptyState title="Derzeit keine Einzelpakete" text="Bei einem konkreten Anliegen hilft dir dein Hausmeister weiter." />}
-      {packages.map(pkg => {
+      {packages.length > 0 && <EHRecordViews label="Einzelpakete" storageKey="pakete" defaultView="liste" switcherLabel="Pakete: Ansicht wechseln" items={packages.map(pkg => {
         let services: string[] = [];
         try { const parsed: unknown = JSON.parse(pkg.services_json); if (Array.isArray(parsed)) services = parsed.filter((item): item is string => typeof item === 'string'); } catch {}
-        return <EHPanel key={pkg.slug} title={pkg.title} label="Einmalige Zahlung">
-          <EHText size="lead"><strong>{euroExact(price(pkg.price_amount))} einmalig</strong></EHText>
-          {pilot && pkg.price_amount > 0 && <EHText size="meta">Regulär {euroExact(pkg.price_amount)} · dein Pilot-Vorteil ist enthalten.</EHText>}
-          <EHText>{pkg.description}</EHText>
-          {services.length > 0 && <EHList label={pkg.title + ' – Umfang'} items={services.map((title, index) => ({ id: pkg.slug + '-' + index, title }))} />}
-          <form action={purchasePackageAction.bind(null, pkg.slug)}><EHSubmitButton pendingLabel="Wird geöffnet …">Paket · zum Abschluss</EHSubmitButton></form>
-        </EHPanel>;
-      })}
+        return {
+          id: pkg.slug,
+          title: pkg.title,
+          detail: [
+            pkg.description,
+            services.join(' · '),
+            pilot && pkg.price_amount > 0 ? `Regulär ${euroExact(pkg.price_amount)}` : null,
+          ].filter(Boolean).join(' · '),
+          value: `${euroExact(price(pkg.price_amount))} einmalig`,
+          action: <form action={purchasePackageAction.bind(null, pkg.slug)}><EHSubmitButton pendingLabel="Wird geöffnet …">Paket · zum Abschluss</EHSubmitButton></form>,
+        };
+      })} />}
     </EHWorkSection>
+
     <EHWorkSection title="Deine Paketbuchungen">
-      {orders.length > 0 ? <EHList label="Gebuchte Pakete" items={orders.map(order => ({ id: String(order.id), title: order.title, text: statusLabel(order.status) }))} /> : <EHEmptyState title="Noch keine Pakete gebucht" text="Nach einer Buchung siehst du hier den gespeicherten Status." />}
+      {orders.length > 0
+        ? <EHRecordList label="Gebuchte Pakete" items={orders.map(order => ({ id: String(order.id), title: order.title, status: <EHStatus>{statusLabel(order.status)}</EHStatus> }))} />
+        : <EHEmptyState title="Noch keine Pakete gebucht" text="Nach einer Buchung siehst du hier den gespeicherten Status." />}
     </EHWorkSection>
   </AppShell>;
 }

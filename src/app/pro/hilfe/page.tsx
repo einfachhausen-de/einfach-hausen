@@ -1,6 +1,6 @@
 import { AppShell } from '@/components/shell';
 import { requireUser } from '@/lib/auth';
-import { EHAppHeader, EHPanel, EHText, EHTextLink, EHWorkflowStack } from '@/design-system';
+import { EHMetricsBar, EHPageHeader, EHList, EHTextLink, EHWorkflowStack } from '@/design-system';
 
 const sections = [
   {
@@ -60,24 +60,22 @@ const sections = [
 
 export default async function ProHilfe() {
   await requireUser('provider');
+  const linkCount = sections.reduce((total, section) => total + section.links.length, 0);
   return (
     <AppShell role="provider" active="/pro/hilfe" title="Hilfe" subtitle="Anleitungen für den Partnerbereich">
       <EHWorkflowStack>
-        <EHAppHeader
-          eyebrow="Hilfe"
-          title="Dein Betrieb. Einfach geregelt."
-          text="Kurze Wege zu allen wichtigen Bereichen der Partner-App. Wähle ein Thema, lies in zwei Sätzen, worum es geht, und springe direkt dorthin."
-        />
-        {sections.map((section) => (
-          <EHPanel key={section.title} title={section.title}>
-            <EHText>{section.text}</EHText>
-            {section.links.map((link) => (
-              <p key={link.href}>
-                <EHTextLink href={link.href}>{link.label}</EHTextLink>
-              </p>
-            ))}
-          </EHPanel>
-        ))}
+        <EHPageHeader title="Dein Betrieb. Einfach geregelt." context={`${sections.length} Themen · ${linkCount} Bereiche`} />
+        <EHMetricsBar label="Hilfe" items={[
+          { id: 'themen', label: 'Themen', value: sections.length },
+          { id: 'bereiche', label: 'Verlinkte Bereiche', value: linkCount },
+        ]} />
+        <EHList label="Hilfethemen" items={sections.map((section) => ({
+          id: section.title,
+          title: section.title,
+          text: section.text,
+          href: section.links[0].href,
+          action: <>{section.links.slice(1).map((link) => <EHTextLink key={link.href} href={link.href}>{link.label}</EHTextLink>)}</>,
+        }))} />
       </EHWorkflowStack>
     </AppShell>
   );

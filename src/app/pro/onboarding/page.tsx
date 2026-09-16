@@ -5,7 +5,7 @@ import {getProviderContext} from "@/lib/provider";
 import {saveWizardStepAction} from "./actions";
 import {WIZARD_STEPS, STEP_LABELS} from "./wizard-steps";
 import {
-  EHAppHeader, EHWorkflowStack, EHWorkflowForm, EHWorkflowHeading, EHStepProgress,
+  EHPageHeader, EHWorkflowStack, EHWorkflowForm, EHWorkflowHeading, EHStepProgress,
   EHFormSection, EHFieldGrid, EHField, EHInput, EHSelect, EHTextarea, EHCheckbox,
   EHFormFeedback, EHSubmitButton, EHActions, EHTextLink, EHText, EHPanel, EHEmptyState,
 } from "@/design-system";
@@ -16,7 +16,7 @@ export default async function ProviderOnboardingWizard({searchParams}: {
   const user=await requireUser("provider");
   const ctx=getProviderContext(user.id);
   if(!ctx || !ctx.isOwner) return <AppShell role="provider" active="/pro" title="Einrichtung">
-    <EHAppHeader title="Einrichtung"/>
+    <EHPageHeader title="Einrichtung"/>
     <EHEmptyState title="Für den Firmeninhaber" text="Die Einrichtung kann nur der Firmeninhaber bearbeiten. Ansprechpartner erhalten ihre zugewiesenen Aufgaben im Partnerbereich."/>
     <EHTextLink href="/pro">Zum Partnerbereich</EHTextLink>
   </AppShell>;
@@ -41,8 +41,7 @@ export default async function ProviderOnboardingWizard({searchParams}: {
 
   return <AppShell role="provider" active="/pro" title="Einrichtung" subtitle={ctx.businessName}>
     <EHWorkflowStack>
-      <EHAppHeader eyebrow="Firmenkonto" title="Deinen Betrieb einrichten."
-        text="Vier Schritte zu deinen Betriebsangaben. Jeder Weiter-Schritt speichert den aktuellen Abschnitt."/>
+      <EHPageHeader title="Deinen Betrieb einrichten." context={["Firmenkonto", ctx.businessName].join(" · ")}/>
       <EHStepProgress current={step} steps={WIZARD_STEPS.map(id=>({id,label:STEP_LABELS[id]}))}/>
       {sp.error && <EHFormFeedback kind="error">{sp.error}</EHFormFeedback>}
       <EHWorkflowHeading title={STEP_LABELS[step]}/>

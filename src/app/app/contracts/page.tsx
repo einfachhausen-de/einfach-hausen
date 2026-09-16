@@ -1,7 +1,8 @@
 import { AppShell } from '@/components/shell';
 import {
-  EHAppHeader, EHButton, EHCallout, EHEmptyState, EHFacts, EHField, EHFieldGrid, EHFormFeedback,
-  EHFormSection, EHInput, EHList, EHSelect, EHStatus, EHSubmitButton, EHText,
+  EHButton, EHCallout, EHEmptyState, EHField, EHFieldGrid, EHFormFeedback,
+  EHFormSection, EHInput, EHList, EHMetricsBar, EHPageHeader, EHRecordList, EHRecordViews,
+  EHSelect, EHStatus, EHSubmitButton, EHText,
   EHTextarea, EHWorkSection, EHWorkflowForm, EHWorkflowStack, EHDetailDisclosure,
 } from '@/design-system';
 import { requireUser } from '@/lib/auth';
@@ -76,28 +77,27 @@ export default async function Contracts({ searchParams }: { searchParams: Promis
 
   return <AppShell role="homeowner" active="/app/contracts" title="Verträge & Tarife" subtitle="Laufende Verträge, Fristen und Sparpotenzial" breadcrumbs={trail} tabs={tabs}>
     <EHWorkflowStack>
-      <EHAppHeader
-        eyebrow="Fristen & Kosten"
+      <EHPageHeader
         title="Verträge & Tarife"
-        text="Strom, DSL, Versicherungen und alles, was regelmäßig Geld kostet – mit den Fristen, die sonst im Briefkasten untergehen."
+        context={`${active.length} aktiv · ${euroExact(monthlyTotal)} pro Monat`}
         actions={<EHButton href="/app/documents" variant="secondary">Alle Dokumente</EHButton>}
       />
       {saved && <EHFormFeedback kind="success">Gespeichert. Deine Hausakte ist aktuell.</EHFormFeedback>}
 
       {tab === 'vertraege' ? (
         <>
-          {active.length > 0 && <EHFacts items={[
-            { value: String(active.length), label: 'Aktive Verträge' },
-            { value: euroExact(monthlyTotal), label: 'Kosten pro Monat' },
-            { value: withDeadline.length ? String(withDeadline.length) : '0', label: 'Fristen in den nächsten 90 Tagen' },
+          {active.length > 0 && <EHMetricsBar label="Verträge" items={[
+            { id: 'aktiv', label: 'Aktive Verträge', value: String(active.length) },
+            { id: 'kosten', label: 'Kosten pro Monat', value: euroExact(monthlyTotal), hint: 'nur aktive Verträge' },
+            { id: 'fristen', label: 'Fristen · 90 Tage', value: String(withDeadline.length) },
           ]} />}
 
           {withDeadline.length > 0 && <EHWorkSection title="Jetzt handeln">
-            <EHList label="Fristen in den nächsten 90 Tagen" items={withDeadline.map(({ row, state }) => ({
+            <EHRecordList label="Fristen in den nächsten 90 Tagen" items={withDeadline.map(({ row, state }) => ({
               id: `frist-${row.id}`,
               title: `${contractKindLabel(row.kind)} · ${row.provider}`,
-              text: deadlineLabel(row),
-              meta: <EHStatus tone={DEADLINE_TONE[state]}>{state === 'overdue' ? 'Verpasst' : 'Bald'}</EHStatus>,
+              detail: deadlineLabel(row),
+              status: <EHStatus tone={DEADLINE_TONE[state]}>{state === 'overdue' ? 'Verpasst' : 'Bald'}</EHStatus>,
               href: `/app/contracts?tab=sparcheck&contract=${row.id}`,
             }))} />
           </EHWorkSection>}
@@ -105,23 +105,24 @@ export default async function Contracts({ searchParams }: { searchParams: Promis
           <EHWorkSection title={`Alle Verträge · ${contracts.length}`}>
             {contracts.length === 0
               ? <EHEmptyState title="Noch kein Vertrag erfasst" text="Trag deinen Strom-, DSL- oder Versicherungsvertrag ein. Danach siehst du hier Kosten, Laufzeit und Kündigungsfrist – und im Spar-Check, ob sich ein Wechsel lohnt." />
-              : <EHList label="Erfasste Verträge" items={contracts.map((row) => {
+              : <EHRecordViews label="Erfasste Verträge" storageKey="vertraege" defaultView="liste" switcherLabel="Verträge: Ansicht wechseln" items={contracts.map((row) => {
                   const end = currentTermEnd(row);
-                  const parts = [
-                    row.tariff,
-                    row.cost_amount != null ? `${euroExact(row.cost_amount)} ${costIntervalLabel(row.cost_interval)}` : null,
-                    end ? `Laufzeit bis ${formatDate(end)}` : row.started_at ? `Seit ${formatDate(new Date(`${row.started_at.slice(0, 10)}T12:00:00`))}` : null,
-                    deadlineLabel(row),
-                    row.notice,
-                  ].filter(Boolean).join(' · ');
+                  const started = row.started_at ? formatDate(new Date(`${row.started_at.slice(0, 10)}T12:00:00`)) : '';
                   return {
                     id: String(row.id),
                     title: `${contractKindLabel(row.kind)} · ${row.provider}`,
-                    text: parts,
-                    meta: row.status === 'active'
+                    detail: [
+                      row.tariff,
+                      end ? `Laufzeit bis ${formatDate(end)}` : started ? `Seit ${started}` : null,
+                      row.notice,
+                    ].filter(Boolean).join(' · '),
+                    value: row.cost_amount != null ? `${euroExact(row.cost_amount)} ${costIntervalLabel(row.cost_interval)}` : undefined,
+                    date: row.started_at?.slice(0, 10),
+                    dateLabel: started,
+                    status: row.status === 'active'
                       ? <EHStatus tone={DEADLINE_TONE[deadlineState(cancellationDeadline(row))]}>{deadlineLabel(row)}</EHStatus>
                       : <EHStatus tone="neutral">{row.status === 'cancelled' ? 'Gekündigt' : 'Ausgelaufen'}</EHStatus>,
-                    action: <>{row.document_path && <a href={`/api/house-contracts/${row.id}/document`} target="_blank" rel="noreferrer">{row.document_title || 'Vertragsdokument'}</a>}</>,
+                    action: row.document_path ? <a href={`/api/house-contracts/${row.id}/document`} target="_blank" rel="noreferrer">{row.document_title || 'Vertragsdokument'}</a> : undefined,
                   };
                 })} />}
           </EHWorkSection>
@@ -188,16 +189,16 @@ export default async function Contracts({ searchParams }: { searchParams: Promis
         </>
       ) : (
         <>
-          <EHAppHeader eyebrow="Optimierung" title="Lohnt sich ein Wechsel?" text="Wähle einen Vertrag. Die Einschätzung rechnet mit deinen hinterlegten Kosten und nennt die Annahmen, auf denen sie beruht." />
+          <EHPageHeader title="Lohnt sich ein Wechsel?" context={selected ? `${contractKindLabel(selected.kind)} · ${selected.provider}` : `${contracts.length} Verträge zur Auswahl`} />
           {contracts.length === 0
             ? <EHEmptyState title="Erst einen Vertrag erfassen" text="Der Spar-Check rechnet mit deinen echten Kosten. Trag dafür im Tab „Laufende Verträge“ den Vertrag ein, den du prüfen willst." action={<EHButton href="/app/contracts?tab=vertraege">Vertrag erfassen</EHButton>} />
             : <>
                 <EHWorkSection title="Vertrag auswählen">
-                  <EHList label="Verträge für den Spar-Check" items={contracts.map((row) => ({
+                  <EHRecordList label="Verträge für den Spar-Check" items={contracts.map((row) => ({
                     id: `check-${row.id}`,
                     title: `${contractKindLabel(row.kind)} · ${row.provider}`,
-                    text: row.cost_amount != null ? `${euroExact(row.cost_amount)} ${costIntervalLabel(row.cost_interval)} · ${contractKindLabel(row.kind)}` : 'Keine Kosten hinterlegt',
-                    meta: SAVINGS_KINDS.includes(row.kind as ContractKind) ? <EHStatus tone="info">Spar-Check möglich</EHStatus> : <EHStatus>Kein Vergleich</EHStatus>,
+                    detail: row.cost_amount != null ? `${euroExact(row.cost_amount)} ${costIntervalLabel(row.cost_interval)}` : 'Keine Kosten hinterlegt',
+                    status: SAVINGS_KINDS.includes(row.kind as ContractKind) ? <EHStatus tone="info">Spar-Check möglich</EHStatus> : <EHStatus>Kein Vergleich</EHStatus>,
                     href: `/app/contracts?tab=sparcheck&contract=${row.id}`,
                   }))} />
                 </EHWorkSection>
@@ -206,10 +207,10 @@ export default async function Contracts({ searchParams }: { searchParams: Promis
                   <EHWorkSection title={`Spar-Check · ${contractKindLabel(selected.kind)} · ${selected.provider}`}>
                     {!estimate && <EHFormFeedback kind="info">Für diese Sparte gibt es noch keine Vergleichsstrecke. Ein Spar-Check ist für Strom, Gas, DSL und Versicherungen möglich.</EHFormFeedback>}
                     {estimate && <>
-                      <EHFacts items={[
-                        { value: `${euroExact(estimate.lowCents)} – ${euroExact(estimate.highCents)}`, label: 'Mögliche Ersparnis pro Jahr' },
-                        { value: `${Math.round(estimate.rateBps / 100)} %`, label: 'Ansatz auf die Jahreskosten' },
-                        { value: estimate.confidence, label: 'Belastbarkeit' },
+                      <EHMetricsBar label="Spar-Check" items={[
+                        { id: 'ersparnis', label: 'Ersparnis pro Jahr', value: `${euroExact(estimate.lowCents)} – ${euroExact(estimate.highCents)}` },
+                        { id: 'ansatz', label: 'Ansatz Jahreskosten', value: `${Math.round(estimate.rateBps / 100)} %` },
+                        { id: 'belastbarkeit', label: 'Belastbarkeit', value: estimate.confidence },
                       ]} />
                       <EHText>Diese Spanne beruht auf folgenden Annahmen:</EHText>
                       <EHList label="Annahmen der Einschätzung" items={estimate.reasons.map((reason, index) => ({ id: `grund-${index}`, title: reason }))} />

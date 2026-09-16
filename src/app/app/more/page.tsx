@@ -2,7 +2,7 @@ import { Bell, CircleHelp, MessageCircle, Sparkles, UserRound, WalletCards } fro
 import { AppShell } from '@/components/shell';
 import { ownerAccountItems, ownerAreas } from '@/components/nav-config';
 import { requireUser } from '@/lib/auth';
-import { EHAppHeader, EHServiceDirectory, EHCallout } from '@/design-system';
+import { EHMetricsBar, EHOwnerSection, EHPageHeader, EHRecordList, EHCallout, type EHRecordEntry } from '@/design-system';
 
 // "Mehr" is no longer a main-navigation entry: every area has its own place
 // now. The page survives as a flat directory so old links and bookmarks keep
@@ -20,12 +20,21 @@ const ACTIONS = [
   { href: '/app/hausmanager', title: 'KI-Hausmanager', text: 'Alte Gespräche, Aufgaben & Automatisierungen', icon: <Sparkles /> },
 ] as const;
 
-export default async function More(){await requireUser('homeowner');return <AppShell role="homeowner" active="/app/more" title="Mehr" subtitle="Alle Bereiche auf einen Blick" breadcrumbs={[{ href: '/app', label: 'Start' }, { label: 'Alle Bereiche' }]}>
-    <EHAppHeader eyebrow="Navigation" title="Alle Bereiche" text="Jeder Bereich ist über die Hauptnavigation erreichbar. Diese Seite ist nur die flache Übersicht." />
-    <EHServiceDirectory groups={[
-      {title:"Bereiche",items:ownerAreas.map(area=>{const Icon=area.icon;return {href:area.href,title:area.label,text:AREA_TEXT[area.href]||'',icon:<Icon/>};})},
-      {title:"Direkt starten",items:ACTIONS.map(a=>({href:a.href,title:a.title,text:a.text,icon:a.icon}))},
-      {title:"Dein Konto",items:ownerAccountItems.map((item,index)=>{const Icon=[UserRound,Bell,WalletCards,CircleHelp][index]??UserRound;return {href:item.href,title:item.label,text:'',icon:<Icon/>};})},
-    ]}/>
+export default async function More(){
+  await requireUser('homeowner');
+  const accountIcons = [UserRound,Bell,WalletCards,CircleHelp];
+  const areas: EHRecordEntry[] = ownerAreas.map(area=>{const Icon=area.icon;return {id:area.href,title:area.label,detail:AREA_TEXT[area.href]||undefined,href:area.href,icon:<Icon/>};});
+  const direct: EHRecordEntry[] = ACTIONS.map(action=>({id:action.href,title:action.title,detail:action.text,href:action.href,icon:action.icon}));
+  const account: EHRecordEntry[] = ownerAccountItems.map((item,index)=>{const Icon=accountIcons[index]??UserRound;return {id:item.href,title:item.label,href:item.href,icon:<Icon/>};});
+  return <AppShell role="homeowner" active="/app/more" title="Mehr" subtitle="Alle Bereiche auf einen Blick" breadcrumbs={[{ href: '/app', label: 'Start' }, { label: 'Alle Bereiche' }]}>
+    <EHPageHeader title="Alle Bereiche" context={`${areas.length + direct.length + account.length} Einträge`} />
+    <EHMetricsBar label="Alle Bereiche" items={[
+      {id:'bereiche',label:'Bereiche',value:areas.length},
+      {id:'start',label:'Direkt starten',value:direct.length},
+      {id:'konto',label:'Dein Konto',value:account.length},
+    ]} />
+    <EHOwnerSection title="Bereiche"><EHRecordList label="Bereiche" items={areas} /></EHOwnerSection>
+    <EHOwnerSection title="Direkt starten"><EHRecordList label="Direkt starten" items={direct} /></EHOwnerSection>
+    <EHOwnerSection title="Dein Konto"><EHRecordList label="Dein Konto" items={account} /></EHOwnerSection>
     <EHCallout title="Hilfe & Support"><p>Wenn ein Vorgang festhängt, kannst du ihn direkt im Auftrag als Servicefall melden.</p></EHCallout>
   </AppShell>}

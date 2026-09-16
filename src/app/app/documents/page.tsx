@@ -1,13 +1,23 @@
 import { AppShell } from '@/components/shell';
 import { crumbs } from '@/components/nav-config';
-import { EHAppHeader, EHDossierList, EHWorkSection, EHEmptyState, EHButton, EHStatus } from '@/design-system';
+import { EHButton, EHEmptyState, EHMetricsBar, EHPageHeader, EHRecordViews, EHStatus, type EHRecordEntry } from '@/design-system';
 import { requireUser } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { euroExact } from '@/lib/format';
-import { ownerDate } from '@/lib/owner-format';
 import { invoiceStatusLabel } from '@/lib/invoices';
 
 const invoiceTone = (status: string) => status==='paid' ? 'success' as const : status==='sent' ? 'warning' as const : 'neutral' as const;
+
+/** Kurzes Datum fuer die Zeile; die Chronik sortiert am ISO-Wert. */
+function day(value: string | null | undefined): string {
+  if (!value) return '';
+  const raw = String(value);
+  return new Date(raw.length === 10 ? raw + 'T12:00:00' : raw).toLocaleDateString('de-DE');
+}
+
+function isoDay(value: string | null | undefined): string {
+  return value ? String(value).slice(0, 10) : '';
+}
 
 export default async function Documents(){
   const u=await requireUser('homeowner');
@@ -17,12 +27,45 @@ export default async function Documents(){
   const empty = invoices.length===0&&uploaded.length===0&&payments.length===0;
   const openInvoices = invoices.filter(i=>i.status==='sent');
   const openTotal = openInvoices.reduce((s:number,i:any)=>s+(typeof i.total_gross==='number'?i.total_gross:0),0);
-  const headerText = empty ? 'Rechnungen deiner Partnerbetriebe, Leistungsnachweise und Zahlungsbelege an einem Ort.' : `${invoices.length} ${invoices.length===1?'Rechnung':'Rechnungen'} · ${uploaded.length} ${uploaded.length===1?'Nachweis':'Nachweise'} · ${payments.length} ${payments.length===1?'Zahlungsbeleg':'Zahlungsbelege'}`;
+  const items: EHRecordEntry[] = [
+    ...invoices.map(i=>({
+      id:`i-${i.id}`,
+      title:`Rechnung ${i.invoice_number}`,
+      detail:[i.business_name,i.title].filter(Boolean).join(' · '),
+      value:euroExact(i.total_gross),
+      date:isoDay(i.issue_date||i.created_at),
+      dateLabel:day(i.issue_date||i.created_at),
+      status:<EHStatus tone={invoiceTone(i.status)}>{invoiceStatusLabel(i.status)}</EHStatus>,
+      href:`/app/invoices/${i.id}`,
+    })),
+    ...uploaded.map(d=>({
+      id:`d-${d.id}`,
+      title:d.document_title,
+      detail:[d.kind,d.business_name||'Einfach Hausen',d.job_title].filter(Boolean).join(' · '),
+      date:isoDay(d.created_at),
+      dateLabel:day(d.created_at),
+      href:`/api/documents/${d.id}`,
+    })),
+    ...payments.map(p=>({
+      id:`p-${p.id}`,
+      title:p.title,
+      detail:[p.business_name,'Zahlungsbeleg'].filter(Boolean).join(' · '),
+      value:euroExact(p.amount),
+      date:isoDay(p.paid_at||p.created_at),
+      dateLabel:day(p.paid_at||p.created_at),
+      href:`/app/documents/${p.job_id}/receipt`,
+    })),
+  ].sort((a,b)=>(b.date??'').localeCompare(a.date??''));
   return <AppShell role="homeowner" active="/app/documents" breadcrumbs={crumbs('/app/home','Dokumente')}>
-    <EHAppHeader eyebrow="Übersicht" title="Dokumente & Rechnungen" text={headerText} />
-    {invoices.length>0 && <EHWorkSection title={`Rechnungen · ${invoices.length}`}>{openInvoices.length>0 && <p><EHStatus tone="warning">Offen: {euroExact(openTotal)}</EHStatus></p>}<EHDossierList label="Rechnungen" items={invoices.map(i=>({id:`i-${i.id}`,kind:'Rechnung',title:`Rechnung ${i.invoice_number}`,detail:`${i.business_name} · ${i.title} · ${ownerDate(i.issue_date||i.created_at)}`,amount:euroExact(i.total_gross),href:`/app/invoices/${i.id}`,status:<EHStatus tone={invoiceTone(i.status)}>{invoiceStatusLabel(i.status)}</EHStatus>}))}/></EHWorkSection>}
-    {uploaded.length>0 && <EHWorkSection title={`Nachweise & Unterlagen · ${uploaded.length}`}><EHDossierList label="Hochgeladene Dokumente" items={uploaded.map(d=>({id:`d-${d.id}`,kind:d.kind,title:d.document_title,detail:`${d.business_name||'Einfach Hausen'} · ${d.job_title} · ${ownerDate(d.created_at)}`,href:`/api/documents/${d.id}`}))}/></EHWorkSection>}
-    {payments.length>0 && <EHWorkSection title={`Zahlungsbelege · ${payments.length}`}><EHDossierList label="Zahlungsbelege" items={payments.map(p=>({id:`p-${p.id}`,kind:'Zahlungsbeleg',title:p.title,detail:`${p.business_name} · ${p.title} · ${ownerDate(p.paid_at||p.created_at)}`,amount:euroExact(p.amount),href:`/app/documents/${p.job_id}/receipt`}))}/></EHWorkSection>}
-    {empty && <EHEmptyState title="Noch keine Dokumente" text="Rechnungen, Belege und Leistungsnachweise landen hier nach einer Abwicklung. Für ein neues Anliegen startest du beim Hausmeister." action={<EHButton href="/app/hausmeister" arrow>Anliegen beschreiben</EHButton>} />}
+    <EHPageHeader title="Dokumente & Rechnungen" context={openInvoices.length>0 ? `Offen: ${euroExact(openTotal)}` : undefined} />
+    {!empty && <EHMetricsBar label="Dokumente" items={[
+      {id:'rechnungen',label:'Rechnungen',value:String(invoices.length)},
+      {id:'nachweise',label:'Nachweise',value:String(uploaded.length)},
+      {id:'belege',label:'Zahlungsbelege',value:String(payments.length)},
+      ...(openInvoices.length>0 ? [{id:'offen',label:'Offen',value:euroExact(openTotal),hint:'noch nicht bezahlt'}] : []),
+    ]} />}
+    {empty
+      ? <EHEmptyState title="Noch keine Dokumente" text="Rechnungen, Belege und Leistungsnachweise landen hier nach einer Abwicklung. Für ein neues Anliegen startest du beim Hausmeister." action={<EHButton href="/app/hausmeister" arrow>Anliegen beschreiben</EHButton>} />
+      : <EHRecordViews label="Dokumente & Rechnungen" storageKey="dokumente" defaultView="chronik" switcherLabel="Dokumente: Ansicht wechseln" items={items} />}
   </AppShell>;
 }
