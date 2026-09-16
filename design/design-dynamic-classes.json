@@ -1,0 +1,86 @@
+{
+  "version": 1,
+  "generated": "2026-09-16",
+  "note": "Geschuetzte Liste. Eine neue dynamische Stelle heisst: hier eintragen, sonst wird die Klasse als tot gemeldet.",
+  "sites": [
+    {
+      "file": "src/components/visuals/CardVisual.tsx",
+      "line": 33,
+      "expression": "styles[size]",
+      "applies": "module",
+      "module": "src/components/visuals/CardVisual.module.css",
+      "source": "type CardVisualSize = 'sm' | 'md' | 'lg' | 'xl' (CardVisual.tsx:6)",
+      "values": [
+        "sm",
+        "md",
+        "lg",
+        "xl"
+      ]
+    },
+    {
+      "file": "src/components/ui-toast.tsx",
+      "line": 23,
+      "expression": "eh-toast-${kind}",
+      "applies": "global",
+      "source": "type ToastKind = \"success\" | \"error\" | \"info\" (ui-toast.tsx:6)",
+      "values": [
+        "eh-toast-success",
+        "eh-toast-error",
+        "eh-toast-info"
+      ]
+    },
+    {
+      "file": "src/components/provider/workspace.tsx",
+      "line": 114,
+      "expression": "provider-state-${tone}",
+      "applies": "global",
+      "source": "tone?: 'neutral' | 'error' | 'unavailable' | 'success' (workspace.tsx:109)",
+      "values": [
+        "provider-state-neutral",
+        "provider-state-error",
+        "provider-state-unavailable",
+        "provider-state-success"
+      ]
+    },
+    {
+      "file": "src/components/invoice-view.tsx",
+      "line": 7,
+      "expression": "status ${invoice.status}",
+      "applies": "global",
+      "source": "CHECK(status IN ('draft','sent','paid','cancelled')) in src/lib/db.ts (Tabelle invoices)",
+      "values": [
+        "draft",
+        "sent",
+        "paid",
+        "cancelled"
+      ]
+    },
+    {
+      "file": "src/components/ActionCard.tsx",
+      "line": 17,
+      "expression": "action-card ${variant",
+      "applies": "global",
+      "source": "variant?: \"tint\" | \"bordered\" | \"plain\" (ActionCard.tsx:14); plain erzeugt keine Klasse",
+      "values": [
+        "tint",
+        "bordered"
+      ]
+    },
+    {
+      "file": "src/components/Stepper.tsx",
+      "line": 12,
+      "lines": [
+        12,
+        13
+      ],
+      "expression": "${state}",
+      "applies": "global",
+      "source": "state = n < current ? \"done\" : n === current ? \"active\" : \"todo\" (Stepper.tsx:8)",
+      "values": [
+        "done",
+        "active",
+        "todo"
+      ]
+    }
+  ]
+}

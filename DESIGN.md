@@ -10,6 +10,8 @@ Inhalt, Reihenfolge, Seitenstruktur, echte Bilder, fachliche Daten, erlaubte Kom
 
 Bei widersprüchlichen alten Dokumenten gilt diese angenommene Version. Historische Freigaben, Screenshots und Aufgaben bleiben nachvollziehbar, dürfen aber nicht als heutige Gestaltungsanweisung wiederverwendet werden.
 
+Eine Abnahme einer Komposition ist kein Freibrief für die Technik dahinter. Kaskade, Wortschatz und Ratsche (§9 bis §12) gelten für jede neue Zeile, auch innerhalb einer freigegebenen Komposition.
+
 ## 2. Das Eigene an Einfachhausen
 
 **Zuhause, mit Überblick.** Die Marke verbindet ein persönliches Zuhause mit klarer, nachvollziehbarer Ordnung. Die Gestaltung fühlt sich warm und entschieden an. Sie zeigt echte Inhalte und Beziehungen: Menschen, Unterlagen, Arbeiten, Termine und Hausgeschichte.
@@ -26,7 +28,7 @@ Verboten sind neue Verläufe, Glow, Glassmorphism, schwebende Kugeln, dekorative
 
 | Quelle | Aufgabe |
 | --- | --- |
-| `packages/eh-design/src/tokens.json` | Kanonische, versionierte Werte |
+| `packages/eh-design/src/tokens.json` | Kanonische, versionierte Werte — der einzige Ort, an dem Rohwerte legal sind |
 | `packages/eh-design/src/tokens.css` und `tokens.ts` | Daraus generierte CSS- und TypeScript-Ausgaben |
 | `packages/eh-design/src/styles.module.css` | Einzige neue Komponentenstilquelle |
 | `packages/eh-design/src/primitives.tsx` | Grundlagen |
@@ -38,6 +40,10 @@ Verboten sind neue Verläufe, Glow, Glassmorphism, schwebende Kugeln, dekorative
 | `src/components/marketing/ui.tsx` | Kompatible Adapter für vorhandene Unterseiten |
 | `src/components/marketing/tokens.css` | Alte Namen als Aliase, keine zweite Palette |
 | `design/design-lock.json` | Prüfsummen des geschützten Designkerns |
+| `design/design-policy.json` | Schutzpfade, erlaubte Stildateien, Stufenplan der Schuld |
+| `design/design-debt.json` | Schulden-Baseline |
+| `design/design-deadcss.json` und `design/design-budgets.json` | Eingefrorene Tot-Listen und Zähler |
+| `scripts/eh-design-check.mjs` und `scripts/eh-design-deadcss.mjs` | Die Prüfer |
 
 Andere Repositories erhalten eine identische, versionierte Kopie nach `vendor/eh-design/` und eine Prüfsummenliste unter `design/eh-design-vendor.json`. Diese Kopie wird niemals lokal umgestaltet.
 
@@ -56,6 +62,8 @@ Andere Repositories erhalten eine identische, versionierte Kopie nach `vendor/eh
 | Weiß | #ffffff | Eingaben und funktionale Arbeitsflächen |
 
 Statusfarben `error` und `success` gehören ebenfalls zu den kanonischen Tokens. Status braucht immer Text; Farbe alleine ist keine Information. Dunkle Flächen verwenden Papier als Textfarbe und Sand als Sekundärtext.
+
+Geschrieben wird keine Farbe, sondern `var(--eh-color-*)`.
 
 ### Schrift und Lesbarkeit
 
@@ -76,11 +84,15 @@ Inter Variable wird selbst gehostet. Originaldatei: `src/fonts/InterVariable.wof
 
 Die Untergrenze der Unterseiten-H1 liegt seit 15.09.2026 bei 32 px statt 44 px. Grund: Die Titel mehrerer Leistungsseiten sind 60 Zeichen und länger; auf 390 px brachen sie dadurch auf sechs Zeilen um, und der Hero nahm die gesamte Bildschirmhöhe ein, bevor der erste Inhalt sichtbar wurde. Die Obergrenze von 68 px bleibt unverändert, die Skala wächst weiterhin mit 5 vw und erreicht 44 px ab etwa 880 px Breite. Jerry hat diese Senkung ausdrücklich freigegeben. Die Ursache bleibt zusätzlich der zu lange Titel — er wird inhaltlich gekürzt, die Schriftgröße ist nur die zweite Hälfte der Antwort.
 
+Geschrieben wird keine Schriftgröße, kein Schriftgewicht und keine Zeilenhöhe, sondern `var(--eh-font-*)`, `var(--eh-weight-*)` und `var(--eh-leading-*)`. Zeilenhöhen sind `tight` 1,2 · `snug` 1,35 · `body` 1,55.
+
 Eine überladene Folie wird inhaltlich aufgeteilt. Text wird nicht bis zur Unlesbarkeit verkleinert oder abgeschnitten. Numerische Schritte bleiben ungebrochen. Absätze haben kurze, sinnvolle Leselängen; lange Fachtexte kommen in `EHProse`.
 
 ### Form, Abstand und Bewegung
 
 Eingaben und Schaltflächen: 6 px Radius. Funktionale Panels: 8 px. Fotografien und Aktenumschläge: die kanonische Hauskante. Touch-Ziele mindestens 44×44 px, reguläre Buttons 48 px hoch. Sichtbarer Fokus mit 3-px-Kontur und Abstand, keine Entfernung ohne gleichwertigen Ersatz.
+
+Geschrieben wird kein Radius, sondern `var(--eh-shape-*)`. Eine Pille (`border-radius:999px`) entsteht nicht mehr.
 
 Bewegung unterstützt einen Zustand oder einen Wechsel. Kurze endliche Übergänge; keine Typewriter-Platzhalter, Hintergrunddrifts oder erzwungenen Scroll-Animationen. `prefers-reduced-motion` zeigt den vollständigen Endzustand. Keine Animation darf den Inhalt für Tastatur- oder Screenreader-Nutzer verbergen.
 
@@ -95,6 +107,8 @@ Bewegung unterstützt einen Zustand oder einen Wechsel. Kurze endliche Übergän
 | Arbeitsflächen | EHAppHeader, EHPanel, EHList, EHDataTable, EHDocumentList |
 | Eingaben | EHField, EHInput, EHTextarea, EHSelect, EHCheckbox, EHComposer |
 | Interaktion und Zustände | EHTabs, EHDialog, EHEmptyState, EHLoadingState, EHErrorState |
+
+Der Bestand richtet sich nach den Exporten von `packages/eh-design`; am 16.09.2026 waren es 152 exportierte `EH*`-Symbole (gezählt über `export const|function|class EH…` in `packages/eh-design/src/`). Ein Registereintrag ist kein Nachweis der Verwendung: Wer einen Baustein einsetzt, prüft vorher, ob er im Produktcode tatsächlich ankommt.
 
 Die vollständigen TypeScript-Props sind die API-Referenz; sie stehen mit dem vollständigen Code in der Quellkapsel. Keine zusätzlichen `style`- oder `className`-Schlupflöcher an den neuen öffentlichen Komponenten. Bestehende Adapter behalten ihre bisherigen Schnittstellen, damit Unterseiten nicht brechen.
 
@@ -112,10 +126,22 @@ Die vollständigen TypeScript-Props sind die API-Referenz; sie stehen mit dem vo
 | Preise / Umfang | EHPricingPage | Klarer Leistungsumfang, gültige Preise, Bedingungen |
 | Owner-App | EHOwnerPage | Hausakte, Unterlagen, Menschen, Chronik, Anliegen |
 | Handwerker-App | EHProviderPage | Anfragen, Bearbeitungsstatus, Termine |
+| Auftragsdetail | EHJobDetailPage | Vorgang, Verlauf, Dokumente, nächster Schritt |
+| Termine | EHAppointmentsPage | Zeitraum, Gruppen, primäre Aktion |
+| Nachrichtenverlauf | EHMessageThreadPage | Verlauf, Antwort, Kontext, Rückweg |
+| Rechnungen und Belege | EHBillingPage | Belege mit Vorgang und Dokument verknüpft |
+| Einstellungen | EHSettingsPage | Gruppen, Speichern, Sicherheitsaktion |
+| Zugang | EHAccessPage | Formular, Hilfe, Rechtliches |
+| Lexikon-Eintrag | EHGlossaryEntryPage | Begriff, Definition, Abschnitte, Verwandtes |
+| Sensible Leistung | EHSensitiveServicePage | Hinweis, Umfang, behutsamer nächster Schritt |
+
+Die acht Grundrezepte liegen in `packages/eh-design/src/recipes.tsx`, die acht Fachrezepte in `packages/eh-design/src/domain-recipes.tsx`.
 
 Die Vorlagen nehmen Inhalte und echte Handler als Props entgegen. Datenzugriff, Authentifizierung, Routing, Speicherung und Beauftragung werden aus dem bestehenden Produkt angebunden. Die Browserbibliothek enthält gekennzeichnete Vorschauhandlungen und Beispieldaten; sie sind keine produktiven Endpunkte. Keine Vorschau-Antwort oder Beispieladresse wird in eine echte App übernommen.
 
 Eine neue Seite beginnt mit der passenden vollständigen Vorlage. Fachlich begründete Umstellungen mit vorhandenen Blöcken sind erlaubt. Eine neue Seitenfarbe, Schrift oder lokale Komponentenfamilie ist es nicht.
+
+**Kein neues Seiten-CSS.** Eine neue `*.css` unter `src/` ist verboten; der PR-Check lehnt sie ab (`New page styling forbidden; compose canonical components`). Ausgenommen sind genau die vier Einträge in `ownedStyleFiles` (`design/design-policy.json`): `src/components/marketing/tokens.css`, `src/components/marketing/mkt.module.css`, `src/app/app/homeowner.module.css`, `src/app/pro/provider-workspace.module.css`. Alles andere komponiert aus `packages/eh-design` bzw. `@/design-system`. Eine neue `.tsx` mit UI muss aus der kanonischen Bibliothek importieren; sonst scheitert der Prüfer mit `New UI must consume the canonical library`.
 
 ## 6. Präsentationen
 
@@ -130,12 +156,17 @@ Kanonischer Verbraucher: `einfachhausen-de/einfachhausen-presentation-generator`
 - Diagramme bilden tatsächlich übergebene Zahlen ab. Beispielzahlen sind keine Belege.
 - Remotion bleibt im Generator. Die früher entfernten Website-Präsentationsbereiche werden durch diese Arbeit nicht wieder eingeführt.
 
+(Zahl der Schema-Typen und der Remotion-Geschichten: im externen Repository, hier **nicht belegt**.)
+
 ## 7. Schutz vor unbeabsichtigter Änderung
 
 `node scripts/eh-design-generate.mjs --check` verhindert Abweichungen generierter Tokens.
-`node scripts/eh-design-check.mjs` prüft die versiegelten Kerndateien und neue Verstöße.
+`node scripts/eh-design-check.mjs` (auch `npm run design:check`) prüft die versiegelten Kerndateien und die Schulden-Baseline.
+`node scripts/eh-design-deadcss.mjs` (auch `npm run design:deadcss`) prüft totes CSS und die drei Zähler.
 `node --test scripts/eh-design-check.test.mjs` beweist Positiv- und Negativfälle.
-`node scripts/eh-design-browser.mjs` prüft die echte Bibliothek auf responsives Verhalten, WCAG-Meldungen, Lesbarkeit und Bedienung.
+`node scripts/eh-design-browser.mjs` prüft die echte Bibliothek auf responsives Verhalten, WCAG-Meldungen, Lesbarkeit und Bedienung — von Hand, gegen einen lokal gestarteten Server; es ist in keinem Workflow eingehängt.
+
+`design:check` und `design:deadcss` laufen in `.github/workflows/quality.yml`, unmittelbar nach Lint. `design:debt:sync` führt die Schulden-Baseline nach, `design:report` schreibt `design/design-report.json`; der monatliche Cron-Workflow `eh-design-report.yml` veröffentlicht ihn.
 
 Vorhandene Altlasten stehen präzise pro Datei und Fundtyp in `design/design-debt.json`. Sie dürfen abnehmen, aber nicht durch eine neue Baseline versteckt werden. Neue CSS-Dateien und UI-Dateien ohne kanonischen Import scheitern im PR-Check. Ein Umbruch oder Verschieben von Zeilen schafft kein neues Kontingent für Verstöße.
 
@@ -157,10 +188,137 @@ Die aktuellen vollständigen Quellkapseln und Prüfsummen liegen unter `docs/bra
 
 CRM verwendet denselben Vertrag ohne React-Umbau: packages/eh-design/src/html.mjs, html.css und html-style.mjs. Der Generator erzeugt diese aus den kanonischen CSS-Modulen und Original-Assets. html-style.mjs enthält Schrift und Logo eingebettet. Vollständige datenabhängige CRM-Komposition: docs/brand/system/CRM_RECIPE.mjs. Ausschließlich dokumentierte HTML-Slots dürfen bereits sicher gerendertes HTML enthalten; Daten werden escaped, URLs validiert. Keine zweite Palette oder lokale Komponenten-Kopie.
 
+## 9. Kaskade und Schichtung
+
+Die gesamte Kaskadenreihenfolge der Anwendung steht in **einer Zeile** — Zeile 1 von `src/app/globals.css`, vor allen `@import`:
+
+```css
+@layer eh-tokens, eh-reset, eh-base, eh-legacy, theme, base, components, utilities, eh-blocks, eh-pages;
+@import 'tailwindcss';
+```
+
+Die Schichtreihenfolge wird durch das erste Vorkommen festgelegt. Tailwinds eigene `@layer theme, base, components, utilities;` kann sie deshalb nicht mehr verschieben — unabhängig davon, wer später was in welcher Reihenfolge importiert.
+
+| Schicht | Inhalt |
+| --- | --- |
+| `eh-tokens` | `packages/eh-design/src/tokens.css`, `src/components/marketing/tokens.css` |
+| `eh-reset` | `box-sizing`, Margin-Reset |
+| `eh-base` | Element-Defaults: `a`, `button`, `input`, `h1`–`h6` |
+| `eh-legacy` | der komplette Altbestand von `src/app/globals.css` und `src/app/design-system.css` |
+| `theme`, `base`, `components`, `utilities` | Tailwind, an dieser Stelle fixiert |
+| `eh-blocks` | `packages/eh-design/src/styles.module.css`, `html.css`, alle Komponentenmodule |
+| `eh-pages` | Seitenmodule `src/app/**/*.module.css` |
+
+Der entscheidende Zug ist `eh-legacy`: der Altbestand liegt in der **niedrigsten** eigenen Schicht. **Damit gewinnt jeder neue Baustein gegen den Altbestand, ohne dass eine alte Zeile angefasst wird.** Vorher lag der Altbestand ungeschichtet und schlug alles — unabhängig von der Importreihenfolge in `src/app/layout.tsx`. Das ist der Grund für die 112 `!important`.
+
+Eine neue Regel in einer der vier globalen Dateien (`src/app/globals.css`, `src/app/design-system.css`, `src/components/marketing/tokens.css`, `src/components/auth-v2/auth-shell.css`) gehört in eine `eh-*`-Schicht. Ausnahmen: `@font-face`, `@keyframes`, `@media`-Hüllen. Wer eine Überschreibung braucht, korrigiert die Schicht — nicht das Ausrufezeichen.
+
+## 10. Wortschatz statt Rohwerte
+
+**Ein Ort, an dem Rohwerte legal sind:** `packages/eh-design/src/tokens.json`. Überall sonst in `src/` gilt die Regel `raw-value`.
+
+Für Schriftgröße, Schriftgewicht, Farbe, Hintergrundfarbe, Rahmenfarbe, Radius, Schatten, Laufweite und Zeilenhöhe ist in `.css`, `.tsx` und `.jsx` **nur** erlaubt:
+
+- `var(--eh-…)`
+- `inherit`, `initial`, `unset`, `revert`, `currentColor`, `transparent`, `none`, `0`, `0px`, `0%`, `auto`, `100%`, `normal`, `bold`, `bolder`, `lighter`
+
+Alles andere ist ein Fehler — auch `oklch(0.5 0 0)`, auch `font-size:13px`, auch `font-weight:650`, auch `border-radius:999px`, auch `box-shadow: 0 1px 2px #000`, auch `style={{fontSize:13}}`.
+
+**Whitelist, nicht Blacklist.** Eine Blacklist kann nicht funktionieren, weil die Liste der Rohwerte offen ist. Belegt (Bestandsaufnahme 16.09.2026): `small-type` griff nur bei `px`, nie bei `rem`, `em` oder `%`; `literal-color` sah `oklch(` (62) und `color-mix(` (18) nicht; `decorative-effect` matchte die Klasse `rounded-full` (8), nicht den Wert `border-radius:999px` (153 Vorkommen); `box-shadow` (277 Deklarationen) war vollständig ungeprüft. Die Whitelist schließt alle vier Lücken auf einmal.
+
+**Zielwortschatz:** 8 Schriftgrößen, 4 Schriftgewichte (400/500/600/700), 3 Schatten, 4 Radien, 3 Zeilenhöhen, 2 Laufweiten.
+
+**Heute gelebt:** 174 verschiedene Schriftgrößen und 32 Schriftgewichte (`design/design-report.json`, 16.09.2026, postcss über `src/**/*.css` und `packages/**/*.css`). `tokens.json` enthält heute `weight` 400/550/650, `leading` 3, `shape` 3 — Schatten- und Laufweiten-Tokens fehlen.
+
+Ein neues Schrift-Token entsteht nicht nebenbei: `packages/eh-design/` ist ein geschützter Pfad, und `eh-design-generate.mjs --check` prüft, dass `tokens.css`, `tokens.ts`, `html.css` und `html-style.mjs` exakt zu `tokens.json` passen. **Eine Obergrenze für die Zahl der Schrift-Tokens ist heute nicht eingerichtet** — das ist eine offene Lücke, keine erlaubte Freiheit.
+
+## 11. Die neun Regeln
+
+Erzwungen von `scripts/eh-design-check.mjs` und `scripts/eh-design-deadcss.mjs`, beide in `.github/workflows/quality.yml`. Geprüft wird zeichenweise über `src/` (`.css`, `.ts`, `.tsx`, `.js`, `.jsx`); es wird kein CSS geparst und kein Tailwind-Klassenname aufgelöst.
+
+| Regel | Auslöser |
+| --- | --- |
+| `literal-color` | wörtliche Hex-, `rgb()`-, `hsl()`-Farben |
+| `foreign-font` | Manrope, Poppins, Geist, Roboto, Montserrat, Playfair, DM Sans |
+| `small-type` | `font-size` unter 13 px, `fontSize` unter 13, `text-xs`, `text-[…px]` |
+| `unowned-style` | `style={` im Markup |
+| `decorative-effect` | Gradienten, `backdrop-filter: blur`, `shadow-xl/2xl`, `rounded-full`, `bg-gradient-` |
+| `visual-utility` | Tailwind-Farbklassen `bg-/text-/border-/ring-<palette>-<zahl>` |
+| `raw-value` | §10 — Rohwert, wo ein Token hingehört |
+| `no-important` | `!important` (nur in `.css`) |
+| `state-class` | `active`, `selected`, `is-active`, `current`, `open` in einem `className` (nur in `.tsx`/`.jsx`) |
+
+Bewusst **nicht** geprüft werden: Tippziel-Maße, Kontrast, Abstände, semantische Struktur, Bundle-Größe — und alles außerhalb `src/`. `packages/eh-design/src/`, `presentation/`, `design/`, `scripts/` und `docs/` liegen außerhalb des Prüfradius; eine neue CSS-Datei unter `packages/` oder `presentation/` sieht kein Prüfer. Diese Lücke besteht fort.
+
+## 12. Die Ratsche
+
+**`design/design-debt.json` muss dem Ist-Zustand exakt entsprechen — in beide Richtungen.** Der Prüfer meldet nicht nur neue Verstöße, sondern auch `debt baseline is stale`, wenn eine Datei sauberer ist als eingetragen. Wer aufräumt, muss mit `npm run design:debt:sync` nachziehen, sonst bleibt der Prüfer rot. Wer einen Verstoß auf null bringt, verschwindet aus dem Scan und darf ohne Nachziehen nicht unbemerkt wieder auferstehen — deshalb wird auch jeder verschwundene Schlüssel gemeldet.
+
+**Stufenplan** in `design/design-policy.json`, Schlüssel `debtCap`:
+
+| Bis | Höchstschuld |
+| --- | --- |
+| 31.10.2026 | 8314 |
+| 30.11.2026 | 6500 |
+| 31.12.2026 | 4500 |
+| 31.01.2027 | 2800 |
+| 28.02.2027 | 1500 |
+| 31.03.2027 | 600 |
+| 30.04.2027 | 0 |
+
+Eine verfehlte Stufe ist ein roter Build. Niemand muss sich an ein Datum erinnern.
+
+**Stand 16.09.2026:** der Scan liefert **8314 Punkte in 71 Dateien** — `raw-value` 4991, `literal-color` 2425, `small-type` 627, `no-important` 112, `decorative-effect` 111, `unowned-style` 26, `state-class` 16, `visual-utility` 6. `design/design-debt.json` stand am selben Tag noch bei 3585 Punkten in 67 Dateien; die Nachführung mit `design:debt:sync` steht aus.
+
+**Totes CSS.** 633 tote Klassennamen in den globalen Dateien (`design/design-report.json`) und 757 in CSS Modules (`design/design-deadcss.json`) sind eingefroren. Die Listen dürfen **nur schrumpfen**; eine neue tote Klasse ist ein Baufehler, eine alte zu löschen ist jederzeit erlaubt. Zur Laufzeit gemessen: 5697 geladene Regeln, davon greifen rund 1248.
+
+**Drei Zähler als Ratsche** in `design/design-budgets.json` (16.09.2026): `!important` 112, in mehreren der vier globalen Dateien definierte Top-Level-Selektoren 45, Zustandsklassen 16. Jeder darf nur sinken; wer einen senkt, zieht mit `node scripts/eh-design-deadcss.mjs --sync` nach.
+
+**Sechs dynamische Klassenstellen** stehen in `design/design-dynamic-classes.json` — dort steht der Klassenname nicht als Wort im Quelltext (`styles[size]`, `eh-toast-${kind}` …). Eine siebte Stelle anzulegen heißt, diese geschützte Datei zu ändern.
+
+## 13. Telefon zuerst
+
+Eine Hausakte wird auf dem Handy benutzt. Der Telefonbildschirm ist der Maßstab, nicht der Desktop — und nicht der Geschmack. Für App-Entwürfe gilt verbindlich:
+
+- **vier Schriftgrößen: 28 / 20 / 17 / 15 px**. Nichts unter 15 px.
+- **jedes Tippziel mindestens 44 × 44 px**
+- **vier** Bereiche in der unteren Leiste; eine Beschriftung darf nicht umbrechen
+- **Höhe ist eine Rechnung**, keine Geschmacksfrage: gerechnet wird gegen 844 px. Was unten halb abgeschnitten endet, ist ein Fehler, kein Stil.
+
+**Gemessener Ist-Zustand** (16.09.2026, `/app` bei 390 × 844, laufender Build):
+
+| Messung | `/app` | `/app/home` |
+| --- | --- | --- |
+| Seitenhöhe | 1948 px = 2,3 Bildschirme | 4045 px = 4,8 Bildschirme |
+| Tippziele gesamt | 39 | 59 |
+| davon unter 44 × 44 px | 22 | 31 |
+| verschiedene Schriftgrößen auf einem Schirm | 6 (10–17 px) | 6 |
+
+Tippziel-Maße und die vier Schriftgrößen sind **nicht maschinell geprüft** — kein Prüfer, kein Test und kein Workflow kennt sie. Sie gelten trotzdem verbindlich; die Abnahme erfolgt am Gerät.
+
+## 14. Gattung: die App ist kein Dokument
+
+Die App darf nicht aussehen wie ein Dokument und nicht wie eine Marketingseite. Drei Symptome, jedes für sich ein Rückschritt:
+
+1. ein Marketingkopf mit 44-px-`h1`;
+2. ein erklärender Fließtextblock unter der Überschrift — eine App erklärt sich nicht, sie zeigt Zustand;
+3. alles in Karten, insbesondere eine Wand gleichförmiger, gleichgewichteter Kacheln.
+
+**Richtung A „Werkbank" ist gesetzt:** Aufgaben zuerst, dichte Listen, viel Information pro Bildschirm, wenig Dekoration. Statt einer Kachelwand eine Werkzeugleiste; statt vier großer Kacheln eine Kennzahlenzeile.
+
+Dieselbe Vorgangsliste ist in **drei umschaltbaren Ansichten** darzustellen: **Liste / Karten / Chronik**. Drei Darstellungen eines Bestands, nicht drei Seiten mit je eigener Logik. Die Liste ist der Standard. Eine Karte ist gerechtfertigt, wenn jedes Element ein eigenes, eigenständiges Ziel mit eigenem Bild ist — nicht als Verpackung einer Liste.
+
+## 15. Navigation und Zustand
+
+Zustand reist in ARIA, nicht in eine Klasse. Der aktive Navigationspunkt wird ausschließlich mit `aria-current="page"` markiert. `className` trägt Identität, nicht Zustand.
+
+Echt ist `.workspaceNav a[aria-current="page"]` (`packages/eh-design/src/styles.module.css:344`, `packages/eh-design/src/html.css:344`). Die alte `.sidebar-nav` in `src/app/design-system.css` existiert im DOM **nicht** — kein Treffer in einer `.tsx` unter `src/`. Sie ist Altbestand in `eh-legacy` und wird nicht neu geschrieben.
+
+Wer `className="active"` setzt, erzeugt eine Klasse ohne Wirkung — eine tote Klasse, die `design:deadcss` fängt, und einen Verstoß gegen `state-class`.
 
 ## Fachliche Kompositionen · Edition 2
 
-Acht weitere festgelegte Seitenkompositionen in packages/eh-design/src/domain-recipes.tsx ergänzen die acht Grundrezepte. Verbindliche Auswahl, Daten-/Formularslots, vollständiger Code und lokaler Übernahmeauftrag: docs/brand/system/DOMAIN_RECIPES_HANDOFF.md. Keine neuen Farben, Styles oder Grundkomponenten; 49 Basisbausteine, insgesamt 16 Seitenkompositionen. Neue Rendering-/Verhaltensprüfung und Verteilung sind an lokale Agenten delegiert.
+Acht weitere festgelegte Seitenkompositionen in packages/eh-design/src/domain-recipes.tsx ergänzen die acht Grundrezepte. Verbindliche Auswahl, Daten-/Formularslots, vollständiger Code und lokaler Übernahmeauftrag: docs/brand/system/DOMAIN_RECIPES_HANDOFF.md. Keine neuen Farben, Styles oder Grundkomponenten; der Bausteinbestand richtet sich nach den Exporten von `packages/eh-design`, insgesamt 16 Seitenkompositionen. Neue Rendering-/Verhaltensprüfung und Verteilung sind an lokale Agenten delegiert.
 
 ## Verbindliche Komposition (7. September 2026)
 
@@ -172,76 +330,19 @@ Badge-Text auf Sand nutzt Ink; Terra nur als ergänzender Icon-Akzent. Verbindli
 ## App-Komposition 2026-09-08: bisherige gestalterische Abnahme zurückgewiesen
 Jerry verlangt professionellen Neuaufbau innerhalb Atelier02. Verbindlicher Kandidat und Beweisgrenzen: docs/brand/workspace/NEXT_AGENT.md. Technische Gates und EH-Imports beweisen keine Produktgestaltung; keine neue visuelle Baseline ohne Begutachtung.
 
+## Owner-Kohärenz 2026-09-13 — verbindlich für die vier Eigentümer-Routen
 
-## Owner-Dashboard-Komposition 2026-09-11 — visuell freigegeben
+Der Operator hat am 13.09.2026 die Korrektur der vier Eigentümer-Routen `/app`, `/app/jobs`, `/app/calendar` und `/app/messages` angeordnet. Alle übrigen Flächen behalten ihre bisherigen Freigaben. Der Stand ist live: `/app`, `/app/jobs` und `/app/calendar` sind mit diesen Bausteinen gebaut, und die Telefonmessung vom 16.09.2026 zeigt genau diesen Kopf.
 
-Jerry hat die neue Eigentümer-Startseite anhand des konkreten Desktop-Mockups ausdrücklich mit „Perfekt. Genauso“ freigegeben. Diese Freigabe erweitert Atelier 02 ausschließlich um die Komposition der Owner-Startseite `/app`; sie ist keine allgemeine Erlaubnis für autonome Rebrandings anderer Routen.
+Leitlinien: gemeinsamer linker Blattrand, maximal 1320 px Inhaltsbreite, ein geteilter Owner-Kopf (44 px Desktop- / 32 px Mobile-H1, kurze Beschreibung, Aktion rechts), ein Profileintrag in der Sidebar, Benachrichtigungen plus Hausmanager in der Toolbar aller vier Routen. Inhalte stammen aus echten `jobs`, `quotes`, `appointments`, `provider_profiles`, `job_photos`, `homeowner_contacts` und Nachrichten; keine Mockdaten im Produkt.
 
-Die freigegebene Hierarchie ist verbindlich:
+Kanonische Bausteine in `packages/eh-design/src/workspace-owner.tsx` (bestehende Primitive unverändert): `EHOwnerPageHeader`, `EHOwnerSection`, `EHOwnerRecords` (+ Typ `EHOwnerRecord`), `EHOwnerFilters`, `EHOwnerSearch`, `EHOwnerLinks`, `EHOwnerWelcome`, `EHOwnerComposer`. Export über `packages/eh-design/src/index.ts` (`export * from "./workspace-owner"`), Styles als einmaliger `owner*`-Anhang in `packages/eh-design/src/styles.module.css`. Datums- und Wartungsdarstellung in `src/lib/owner-format.ts` (`ownerInstant` liest SQLite-Zeitstempel als UTC, `ownerDate` formatiert nach Europe/Berlin, `ownerMaintenanceState` vergleicht Kalendertage).
 
-1. ruhiger App-Kopf mit Register `ÜBERSICHT`, persönlicher Begrüßung, realer Objektadresse und einer zurückhaltend beschnittenen vorhandenen Hausfotografie;
-2. erste Arbeitsebene aus großem `Hausstatus` und schmalem `Dein nächster Überblick`;
-3. `Hausstatus` bündelt genau die wesentlichen nächsten Entscheidungen in einer gemeinsamen Fläche statt vieler gleichgewichteter Kacheln;
-4. der bestehende Hausmeister-Composer erhält eine eigene große Arbeitsfläche mit Foto-, Sprach- und Sendeaktion; rechts stehen ruhige Beispiele für Anliegen;
-5. die nachgelagerte Orientierung besteht aus den Bereichen `Für dein Zuhause`, `Deine Hausakte` und `Mein Jahr`;
-6. echte Backenddaten, Rollenlogik, Navigation, Uploads, Sprache, Draft-Persistenz und Serveraktionen bleiben erhalten.
+Diese Korrektur erlaubt die Aktualisierung des versiegelten Designkerns ausschließlich für die hier dokumentierten Owner-Bausteine. Design-Guard, Debt-Baseline, übrige Lock-Einträge und Prüfskripte bleiben unverändert.
 
-Die Gestaltung bleibt innerhalb der kanonischen Tokens: Papier, Weiß, Petrol, tiefes Petrol, Tinte, Sekundärtext und Linie. Keine neue Palette, keine Verläufe, kein Glassmorphism, keine dekorativen Schatten, keine frei erfundenen Radien und keine lokale CSS-Familie im Consumer.
+## Ansprechpartner · Gina-Korrektur 2026-09-13 — neue Referenz
 
-Für diese Komposition sind `EHOwnerDashboardHeader`, `EHOwnerDashboardTopGrid`, `EHOwnerDashboardStatus`, `EHOwnerDashboardOverview`, `EHOwnerDashboardComposer` und `EHOwnerDashboardUtilityGrid` die kanonischen Bausteine in `packages/eh-design/src/workspace.tsx`. Die visuelle Umsetzung liegt ausschließlich in `packages/eh-design/src/styles.module.css`.
-
-Die Desktop-Referenz zeigt eine klare Reihenfolge statt einer Dashboard-Kachelwand. Auf kleineren Viewports darf die Reihenfolge responsiv untereinander fließen; Inhalte, Aktionen und fachliche Priorität dürfen dabei nicht verschwinden. Horizontales Seiten-Scrolling ist nicht zulässig.
-
-Diese Freigabe erlaubt die Aktualisierung des versiegelten Designkerns ausschließlich für die hier dokumentierten Owner-Dashboard-Bausteine. Sie erlaubt nicht, Design-Guard, Debt-Baseline oder andere geschützte Regeln abzuschwächen.
-
-
-## Owner-Aufträge 2026-09-11 — visuell freigegeben
-
-Jerry hat die neue Eigentümer-Auftragsübersicht anhand des konkreten 1536×876-Referenzbildes ausdrücklich zur exakten Umsetzung freigegeben.
-
-Die Freigabe erweitert die Owner-App-Komposition innerhalb Atelier 02. Sie erlaubt keine zweite Palette und keine abweichende AppShell.
-
-Verbindliche Informationshierarchie von `/app/jobs`:
-
-1. ruhiger Auftrags-Hero mit Register `AUFTRÄGE`, zweizeiliger Hauptaussage, kurzer Erklärung, bestehender Hausfotografie und echter Objektadresse;
-2. funktionale Suche nach vorhandenen Aufträgen;
-3. vier gleich hohe Übersichtsflächen für `Offene Aufträge`, `In Bearbeitung`, `Abgeschlossen` und `Neuen Auftrag erstellen`;
-4. aktuelle Aufträge als kompakte horizontale Arbeitsliste, nicht als große Kachelwand;
-5. reale Auftragsmedien dürfen als kleines Thumbnail erscheinen; ohne echtes Bild bleibt die Darstellung neutral;
-6. jede Zeile zeigt Titel, fachliche Kategorie, tatsächlichen Status, vorhandenen Termin oder Wunschtermin und einen eindeutigen `Details`-Zugang;
-7. abschließender Hilfebereich führt zurück zum bestehenden Hausmeister-Intake.
-
-Zahlen werden ausschließlich aus realen `jobs` berechnet. Statische Demo-Zähler, erfundene Termine, erfundene Anbieter oder künstliche Auftragsbilder sind in der Produktansicht verboten.
-
-Die kanonischen Bausteine liegen in `packages/eh-design/src/workspace-records.tsx`:
-
-- `EHOwnerOrdersHero`
-- `EHOwnerOrdersStats`
-- `EHOwnerOrdersList`
-- `EHOwnerOrdersSupport`
-
-Ihre Styles liegen ausschließlich in `packages/eh-design/src/styles.module.css`.
-
-Die bestehende globale Owner-Shell bleibt unabhängig davon kanonisch. Das Aufträge-Referenzbild darf nicht benutzt werden, um pro Route unterschiedliche Sidebars oder Topbars zu erfinden.
-
-Desktop priorisiert die horizontale, ruhige Listenstruktur. Tablet und Mobile dürfen die Informationen stapeln, ohne Inhalte oder Aktionen zu entfernen. Horizontaler Seiten-Overflow ist nicht zulässig.
-
-
-## Owner-Kohärenz 2026-09-13 — Operator-Korrektur, Abnahme und Deploy ausstehend
-
-Der Operator hat am 13.09.2026 eine Korrektur der vier Eigentümer-Routen `/app`, `/app/jobs`, `/app/calendar` und `/app/messages` angeordnet. Sie ersetzt die Kompositionen aus „Owner-Dashboard-Komposition 2026-09-11“ und „Owner-Aufträge 2026-09-11“ ausschließlich für diese vier Routen; alle übrigen Flächen behalten ihre bisherigen Freigaben. Weder eine visuelle Abnahme noch ein Deploy sind bisher erfolgt; Screenshots und Review stehen aus.
-
-Leitlinien der Korrektur: gemeinsamer linker Blattrand, maximal 1320 px Inhaltsbreite, ein geteilter Owner-Kopf (44 px Desktop- / 32 px Mobile-H1, kurze Beschreibung, Aktion rechts), ein Profileintrag in der Sidebar, Benachrichtigungen plus Hausmanager in der Toolbar aller vier Routen. Inhalte stammen aus echten `jobs`, `quotes`, `appointments`, `provider_profiles`, `job_photos`, `homeowner_contacts` und Nachrichten; keine Mockdaten im Produkt.
-
-Kanonische Bausteine in `packages/eh-design/src/workspace-owner.tsx` (neue Datei, bestehende Primitive unverändert): `EHOwnerPageHeader`, `EHOwnerSection`, `EHOwnerRecords` (+ Typ `EHOwnerRecord`), `EHOwnerFilters`, `EHOwnerSearch`, `EHOwnerLinks`, `EHOwnerWelcome`, `EHOwnerComposer`, `EHOwnerContacts`. Export über `packages/eh-design/src/index.ts` (`export * from "./workspace-owner"`), Styles als einmaliger `owner*`-Anhang in `packages/eh-design/src/styles.module.css`. Datums- und Wartungsdarstellung in `src/lib/owner-format.ts` (`ownerInstant` liest SQLite-Zeitstempel als UTC, `ownerDate` formatiert nach Europe/Berlin, `ownerMaintenanceState` vergleicht Kalendertage).
-
-Diese Korrektur erlaubt die Aktualisierung des versiegelten Designkerns ausschließlich für die hier dokumentierten Owner-Bausteine. Design-Guard, Debt-Baseline, übrige Lock-Einträge und Prüfskripte bleiben unverändert; die notwendige Lock-Aktualisierung (drei Einträge) wird der Designautorität als Vorschlag vorgelegt, nicht selbst versiegelt.
-
-
-
-## Ansprechpartner · Gina-Korrektur 2026-09-13 — neue Referenz, visuelle Bewertung offen
-
-Gina Schulze hat über den Operator die bisherige App-Gestaltung als nicht zeitgemäß zurückgewiesen und eine konkrete Ansprechpartner-Hierarchie vorgegeben. Für `/app/messages` ersetzt diese Referenz die zuvor dokumentierte Kontakte-zuerst-Komposition. Historische Freigaben der verworfenen Ansichten sind keine Abnahme dieses Entwurfs. Die frühere Owner-Kohärenz wurde über PR #100 als `59789ff1b570ec0350b3eb24e9b59e140139c44c` veröffentlicht; dieser neue Auftrag ist davon getrennt. Eine Übertragung der neuen Referenz auf alle App-Routen erfolgt nicht stillschweigend.
+Gina Schulze hat über den Operator die bisherige App-Gestaltung als nicht zeitgemäß zurückgewiesen und eine konkrete Ansprechpartner-Hierarchie vorgegeben. Für `/app/messages` ist diese Referenz verbindlich; historische Freigaben verworfener Ansichten sind keine Abnahme dieses Entwurfs. Eine Übertragung der neuen Referenz auf alle App-Routen erfolgt nicht stillschweigend.
 
 Die Bedienung führt ausschließlich über 17 Hauptkategorien → Unterkategorien → Kontakte. Die erste Ebene enthält keine vorgezogenen Kontakte, Unterkategorien, Zählerwand oder Illustration. „Kontakte verwalten“ ist ein separater Verwaltungsweg, damit auch noch nicht zugeordnete Bestandskontakte erreichbar bleiben. Alle 110 Unterkategorien stehen vollständig in `docs/brand/contact-directory/TAXONOMY.md` und `src/lib/contact-directory-taxonomy.ts`. Nur ausdrücklich genannte Vorgaben sind als Gina-Vorgaben gekennzeichnet; Ergänzungen sind keine behauptete Einzelabnahme. Marketing-Katalog und Partner-Matching werden nicht umbenannt.
 
