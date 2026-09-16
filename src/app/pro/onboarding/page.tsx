@@ -35,13 +35,11 @@ export default async function ProviderOnboardingWizard({searchParams}: {
   const catalog=db.prepare("SELECT slug,title,category FROM service_catalog WHERE active=1 ORDER BY category,title")
     .all() as {slug:string;title:string;category:string}[];
   const categories=[...new Set(catalog.map(service=>service.category))];
-  const nextLabel=step==="firmendaten"?"Speichern und Leistungen wählen":
-    step==="leistungen"?"Speichern und Arbeitsgebiet festlegen":
-    step==="arbeitsgebiet"?"Speichern und Angaben ansehen":"Einrichtung abschließen";
+  const nextLabel=step==="abschluss"?"Abschließen":"Weiter";
 
   return <AppShell role="provider" active="/pro" title="Einrichtung" subtitle={ctx.businessName}>
     <EHWorkflowStack>
-      <EHPageHeader title="Deinen Betrieb einrichten." context={["Firmenkonto", ctx.businessName].join(" · ")}/>
+      <EHPageHeader title="Einrichtung" context={["Firmenkonto", ctx.businessName].join(" · ")}/>
       <EHStepProgress current={step} steps={WIZARD_STEPS.map(id=>({id,label:STEP_LABELS[id]}))}/>
       {sp.error && <EHFormFeedback kind="error">{sp.error}</EHFormFeedback>}
       <EHWorkflowHeading title={STEP_LABELS[step]}/>
@@ -65,7 +63,6 @@ export default async function ProviderOnboardingWizard({searchParams}: {
           </EHFormSection>
         </>}
         {step==="leistungen" && <>
-          <EHText>Wähle die konkreten Leistungen, die dein Betrieb anbietet. Die Bereiche gliedern die Auswahl.</EHText>
           {categories.map(category=><EHFormSection key={category} title={category}>
             <EHFieldGrid>{catalog.filter(service=>service.category===category).map(service=>
               <EHCheckbox key={service.slug} name="serviceSlug" value={service.slug} label={service.title} defaultChecked={selected.has(service.slug)}/>
@@ -88,7 +85,6 @@ export default async function ProviderOnboardingWizard({searchParams}: {
             <EHText>{[profile?.legal_form,profile?.founded_year && "Gegründet "+profile.founded_year,profile?.employees && profile.employees+" Mitarbeiter"].filter(Boolean).join(" · ")}</EHText>
             {profile?.street_address && <EHText>{profile.street_address}</EHText>}
             <EHText>{selected.size} Leistungen ausgewählt{profile?.postcode ? " · "+profile.postcode : ""}{profile?.radius_km ? " · "+profile.radius_km+" km Radius" : ""}</EHText>
-            <EHText>Danach kommst du zu deinem Profil. Dort findest du die nächsten Schritte zu Nachweisen und Partnervertrag.</EHText>
           </EHWorkflowStack>
         </EHPanel>}
         <EHActions>

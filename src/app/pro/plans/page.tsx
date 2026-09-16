@@ -2,7 +2,7 @@ import { BadgeCheck,CircleAlert,ShieldCheck } from 'lucide-react';
 import { AppShell } from '@/components/shell';
 import { ProviderState } from '@/components/provider/workspace';
 import { requireUser } from '@/lib/auth';
-import { EHRecordList, EHErrorState, EHCallout, EHPageHeader, EHStatus, EHWorkSection, type EHRecordEntry } from '@/design-system';
+import { EHRecordList, EHErrorState, EHPageHeader, EHStatus, EHWorkSection, type EHRecordEntry } from '@/design-system';
 import { db } from '@/lib/db';
 import { euro } from '@/lib/format';
 import { startPartnerPlanCheckoutAction } from '@/app/actions';
@@ -19,17 +19,16 @@ export default async function PartnerPlans({searchParams}:{searchParams:Promise<
   const isCurrent=(p:any)=>current?.plan_slug===p.slug&&(current.status==='active'||current.status==='trialing');
   const planItems:EHRecordEntry[]=plans.map(p=>({
     id: String(p.slug),
-    title: `${p.title}${p.slug==='pro'?' (beliebt)':''} — ${euro(p.monthly_amount)}/Monat`,
-    detail: [p.description,'0 % Provision','Keine Gebühr pro Auftrag',p.monthly_lead_limit?`Bis zu ${p.monthly_lead_limit} neue Anfragen/Monat`:'Unbegrenztes Anfragevolumen gemäß Qualitäts- und Kapazitätsmatching',p.trial_days?`Erste ${Math.round(p.trial_days/30)} Monate kostenlos`:'Dauerhaft kostenlos'].filter(Boolean).join(' · '),
+    title: `${p.title} — ${euro(p.monthly_amount)}/Monat`,
+    detail: [p.monthly_lead_limit?`Bis zu ${p.monthly_lead_limit} neue Anfragen/Monat`:'Unbegrenzte Anfragen',p.trial_days?`Erste ${Math.round(p.trial_days/30)} Monate kostenlos`:'Dauerhaft kostenlos'].join(' · '),
     status: isCurrent(p)?<EHStatus tone="success">Aktiv</EHStatus>:undefined,
     action: ctx.isOwner
       ? <form action={startPartnerPlanCheckoutAction.bind(null,p.slug)}><button className="btn primary" disabled={isCurrent(p)}>{isCurrent(p)?'Aktiv':`${p.title} wählen`}</button></form>
       : <small>Nur das Firmenkonto kann den Tarif ändern.</small>,
   }));
-  return <AppShell role="provider" active="/pro/plans" title="Partner-Tarife" subtitle="0 % Provision · keine Gebühr pro Auftrag">
-    <EHPageHeader title="Planbar statt Provision" context="0 % Provision · keine Gebühr pro Auftrag"/>
+  return <AppShell role="provider" active="/pro/plans" title="Partner-Tarife">
+    <EHPageHeader title="Partner-Tarife"/>
     {sp.error&&<EHErrorState text={sp.error} />}{sp.checkout==='success'&&<div className="alert success"><BadgeCheck/>Tarif wurde aktiviert.</div>}{sp.checkout==='processing'&&<div className="alert success"><BadgeCheck/>Zahlung eingegangen. Tarifstatus folgt erst nach bestätigtem Stripe-Webhook.</div>}{sp.checkout==='unavailable'&&<ProviderState icon={<CircleAlert size={21}/>} title="Tarifwechsel derzeit nicht verfügbar" description="Die Onlinezahlung ist aktuell nicht vollständig konfiguriert. Es wurde kein Tarifstatus geändert; dein bestehender Zugang bleibt unverändert." tone="unavailable"/>}
-    <EHCallout title="100 % des Auftragswerts bleiben beim Betrieb."><p>Einfach Hausen monetarisiert Partner über planbare Monatsgebühren — nicht über Provision. Bezahlte Tarife kaufen keine bessere Position im Qualitätsmatching.</p></EHCallout>
     {current&&<div className="current-plan pro-current-plan"><ShieldCheck/><div><strong>{current.title} · {current.status}</strong><p>{current.trial_end?`Testphase bis ${new Date(current.trial_end).toLocaleDateString('de-DE')}`:'Aktueller Unternehmenstarif'}</p></div></div>}
     <EHWorkSection title={`Tarife · ${plans.length}`}>
       <EHRecordList label="Partner-Tarife" items={planItems} empty="Keine Tarife verfügbar."/>
