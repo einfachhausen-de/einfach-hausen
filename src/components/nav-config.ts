@@ -213,25 +213,3 @@ export function ownerContextTabs(active: string): readonly ContextTab[] | undefi
 export function providerContextTabs(active: string): readonly ContextTab[] | undefined {
   return contextTabs(active, providerAreas, activeProviderArea);
 }
-
-/**
- * Sub-Items des aktiven Bereichs, mit active-Markierung.
- * "Wartet auf dich" und "Dokumente" (Hausakte) und "Verträge" (Verträge) usw.
- * liefern die gleiche Liste - die Shell setzt sie als navigation in die linke
- * Seitenleiste. So wechselt die Seitenleiste ihren Inhalt mit der Seite.
- */
-type NavSubItem = { href: string; label: string; active: boolean };
-
-export function activeAreaSubNav(active: string, areas: readonly NavArea[], pick: (active: string) => NavArea | undefined): { area: NavArea | undefined; items: NavSubItem[] } {
-  const area = pick(active);
-  if (!area) return { area: undefined, items: [] };
-  const items: NavSubItem[] = area.children.map(c => ({ href: c.href, label: c.label, active: c.href === active }));
-  return { area, items };
-}
-
-export function ownerAreaSubNav(active: string) {
-  return activeAreaSubNav(active, ownerAreas, activeArea);
-}
-export function providerAreaSubNav(active: string) {
-  return activeAreaSubNav(active, providerAreas, activeProviderArea);
-}

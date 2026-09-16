@@ -20,20 +20,6 @@ import { resolvePrivatePath } from '@/lib/security/private-files';
  * eindeutig schlaegt.
  */
 const werkbankLayout = `
-.eh-werkbank-rail-h { font-size:10.5px; letter-spacing:.09em; text-transform:uppercase; color:var(--eh-muted); font-weight:700; margin:0 0 10px; }
-.eh-werkbank-karte { background:var(--eh-color-white); border:1px solid var(--eh-color-line); border-radius:var(--eh-radius-control); padding:13px 14px; margin-bottom:12px; }
-.eh-werkbank-karte h4 { margin:0 0 9px; font-size:13.5px; display:flex; align-items:center; gap:8px; }
-.eh-werkbank-badge { background:var(--eh-color-terra); color:var(--eh-color-white); border-radius:var(--eh-radius-pill); font-size:10px; font-weight:700; padding:1px 7px; }
-.eh-werkbank-item { display:flex; gap:9px; padding:7px 0; border-top:1px solid var(--eh-color-line); font-size:12.5px; align-items:center; }
-.eh-werkbank-item:first-of-type { border-top:0; }
-.eh-werkbank-item b { display:block; font-weight:600; }
-.eh-werkbank-item small { color:var(--eh-muted); font-size:11.5px; }
-.eh-werkbank-ic { width:24px; height:24px; display:grid; place-items:center; color:var(--eh-muted); flex:0 0 auto; font-size:12px; }
-.eh-werkbank-go { display:block; text-align:center; background:var(--eh-color-petrol); color:var(--eh-color-white); border-radius:var(--eh-radius-control); padding:8px; font-weight:600; margin-top:10px; text-decoration:none; font-size:13px; }
-.eh-werkbank-bar { height:7px; border-radius:var(--eh-radius-pill); background:var(--eh-color-paper); overflow:hidden; margin:8px 0 6px; }
-.eh-werkbank-bar i { display:block; height:100%; background:var(--eh-color-petrol); }
-.eh-werkbank-row { display:flex; padding:4px 0; font-size:12.5px; }
-.eh-werkbank-row > :last-child { margin-left:auto; color:var(--eh-muted); }
 .eh-werkbank-kopf { display:flex; align-items:center; gap:12px; padding-bottom:16px; border-bottom:1px solid var(--eh-rule); }
 .eh-werkbank-kopf-copy { flex:1; min-width:0; display:grid; gap:2px; }
 .eh-werkbank-kopf-copy h1 { font-size:var(--eh-font-body); font-weight:var(--eh-weight-semibold); line-height:var(--eh-leading-tight); }
@@ -121,21 +107,7 @@ export default async function Dashboard() {
     href: `/api/documents/${document.id}`,
   }));
 
-  return <AppShell role="homeowner" active="/app" rail={<>
-      <p className="eh-werkbank-rail-h">Kontext dieser Seite</p>
-      <div className="eh-werkbank-karte">
-        <h4>Warten auf dich{waiting.length > 0 && <span className="eh-werkbank-badge">{waiting.length}</span>}</h4>
-        {waiting.slice(0, 2).map(w => <div key={w.id} className="eh-werkbank-item"><span className="eh-werkbank-ic">▤</span><span><b>{w.title}</b><small>{w.detail}</small></span></div>)}
-        <Link href="/app/jobs" className="eh-werkbank-go">Alle ansehen →</Link>
-      </div>
-      <div className="eh-werkbank-karte">
-        <h4>Vollständigkeit</h4>
-        <div className="eh-werkbank-bar"><i style={{ width: '68%' }} /></div>
-        <div className="eh-werkbank-row"><span>Technik</span><span>4 von 6</span></div>
-        <div className="eh-werkbank-row"><span>Verträge</span><span>3 von 5</span></div>
-        <div className="eh-werkbank-row"><span>Nachweise</span><span>2 von 4</span></div>
-      </div>
-    </>}>
+  return <AppShell role="homeowner" active="/app" title="Start">
     <style>{werkbankLayout}</style>
     <header className="eh-werkbank-kopf">
       <div className="eh-werkbank-kopf-copy">
