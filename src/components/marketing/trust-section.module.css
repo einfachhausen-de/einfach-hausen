@@ -30,7 +30,7 @@
   margin: 0;
   font-size: 21px;
   letter-spacing: -0.03em;
-  font-weight: 740;
+  font-weight: var(--eh-weight-bold);
 }
 
 .badgeRow {
@@ -44,7 +44,7 @@
   border-color: var(--eh-teal-300);
   color: var(--eh-teal-700);
   background: var(--eh-teal-100);
-  font-weight: 640;
+  font-weight: var(--eh-weight-semibold);
 }
 
 .separator {

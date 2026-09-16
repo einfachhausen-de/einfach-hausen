@@ -15,7 +15,7 @@
 .overviewIntro h2 {
   margin: 0;
   font-size: 19px;
-  font-weight: 800;
+  font-weight: var(--eh-weight-heavy);
   color: var(--eh-color-ink);
   letter-spacing: -0.02em;
 }
@@ -64,7 +64,7 @@
   color: var(--eh-color-petrol);
   font-size: 28px;
   line-height: 1.1;
-  font-weight: 800;
+  font-weight: var(--eh-weight-heavy);
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.03em;
 }
@@ -99,7 +99,7 @@
   gap: 8px;
   margin: 0 0 16px;
   font-size: 14px;
-  font-weight: 800;
+  font-weight: var(--eh-weight-heavy);
   color: var(--eh-color-ink);
   letter-spacing: -0.01em;
 }
@@ -192,7 +192,7 @@
 .auditHeader h2 { 
   margin: 0; 
   font-size: 18px; 
-  font-weight: 800; 
+  font-weight: var(--eh-weight-heavy); 
   color: var(--eh-color-ink); 
   letter-spacing: -0.02em; 
 }
@@ -206,7 +206,7 @@
 .auditCount { 
   color: var(--eh-color-petrol); 
   font-size: 12px; 
-  font-weight: 800;
+  font-weight: var(--eh-weight-heavy);
   background: #eef5f5;
   padding: 4px 10px;
   border-radius: var(--eh-radius-pill);

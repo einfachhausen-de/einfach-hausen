@@ -66,7 +66,7 @@
 .panelBar strong {
   display: block;
   font-size: 14.5px;
-  font-weight: 620;
+  font-weight: var(--eh-weight-semibold);
   color: var(--eh-ink);
 }
 
@@ -157,7 +157,7 @@
 .railStep strong {
   display: block;
   font-size: 12.5px;
-  font-weight: 620;
+  font-weight: var(--eh-weight-semibold);
   color: var(--eh-ink-soft);
   line-height: var(--eh-leading-tight);
   transition: color var(--eh-dur) var(--eh-ease);
@@ -207,7 +207,7 @@
 
 .sceneLabel {
   font-size: 11px;
-  font-weight: 640;
+  font-weight: var(--eh-weight-semibold);
   letter-spacing: var(--eh-track-wide);
   text-transform: uppercase;
   color: var(--eh-ink-mute);
@@ -312,7 +312,7 @@
 
 .chip strong {
   display: block;
-  font-weight: 620;
+  font-weight: var(--eh-weight-semibold);
   color: var(--eh-ink);
 }
 
@@ -370,7 +370,7 @@
 .partner strong {
   display: block;
   font-size: 13px;
-  font-weight: 620;
+  font-weight: var(--eh-weight-semibold);
 }
 
 .partner small {
@@ -442,7 +442,7 @@
 }
 
 .appointment strong {
-  font-weight: 620;
+  font-weight: var(--eh-weight-semibold);
 }
 
 .appointment svg {
@@ -468,7 +468,7 @@
 }
 
 .akteHead strong {
-  font-weight: 620;
+  font-weight: var(--eh-weight-semibold);
 }
 
 .akteHead span {
@@ -512,7 +512,7 @@
 
 .akteRow strong {
   display: block;
-  font-weight: 620;
+  font-weight: var(--eh-weight-semibold);
 }
 
 .akteRow small {
@@ -556,7 +556,7 @@
 
 .float strong {
   display: block;
-  font-weight: 620;
+  font-weight: var(--eh-weight-semibold);
 }
 
 .float small {

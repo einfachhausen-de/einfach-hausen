@@ -88,9 +88,9 @@
 }
 .megaIntro { display: grid; gap: 4px; max-width: 620px; }
 .megaIntro > span, .megaQuickEyebrow {
-  font-size: var(--eh-font-meta); font-weight: 750; letter-spacing: .09em; text-transform: uppercase; color: var(--eh-teal-700);
+  font-size: var(--eh-font-meta); font-weight: var(--eh-weight-bold); letter-spacing: .09em; text-transform: uppercase; color: var(--eh-teal-700);
 }
-.megaIntro h2 { margin: 0; font-size: 24px; line-height: 1.08; letter-spacing: -.025em; font-weight: 750; color: var(--eh-teal-900); }
+.megaIntro h2 { margin: 0; font-size: 24px; line-height: 1.08; letter-spacing: -.025em; font-weight: var(--eh-weight-bold); color: var(--eh-teal-900); }
 .megaIntro p { margin: 3px 0 0; font-size: 13.5px; line-height: 1.45; color: var(--eh-ink-soft); }
 .desktopNav .megaAllLink {
   display: inline-flex; align-items: center; gap: 8px; flex: none; padding: 9px 12px;
@@ -101,7 +101,7 @@
 .megaServices { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 22px; padding: 22px 24px 24px; }
 .megaGroup { min-width: 0; }
 .megaGroup h3 {
-  margin: 0 0 8px 7px; font-size: var(--eh-font-meta); line-height: var(--eh-leading-tight); font-weight: 750; letter-spacing: .075em;
+  margin: 0 0 8px 7px; font-size: var(--eh-font-meta); line-height: var(--eh-leading-tight); font-weight: var(--eh-weight-bold); letter-spacing: .075em;
   text-transform: uppercase; color: var(--eh-ink-mute);
 }
 .megaGroupList { display: grid; gap: 2px; }
@@ -177,13 +177,13 @@
 .mobileDisclosure + .mobileDisclosure { border-top: 0; }
 .mobileMenu .mobileDisclosure > summary {
   width: 100%; height: auto; min-height: 44px; padding: 10px 14px; border: 0; border-radius: 12px;
-  justify-content: space-between; background: transparent; color: var(--eh-ink); font-weight: 650;
+  justify-content: space-between; background: transparent; color: var(--eh-ink); font-weight: var(--eh-weight-semibold);
 }
 .mobileDisclosure[open] > summary { color: var(--eh-teal-900); background: var(--eh-teal-050); }
 .mobileDisclosure[open] > summary svg { transform: rotate(180deg); }
 .mobileDisclosure > div { display: grid; padding: 4px 0 8px 10px; }
 .mobileMenu .mobileDisclosure > div a { padding: 9px 12px; font-size: 14px; color: var(--eh-ink-soft); }
-.mobileMenu .mobileAllLink { margin: 0 10px 8px; padding: 9px 12px; color: var(--eh-teal-700); font-weight: 650; }
+.mobileMenu .mobileAllLink { margin: 0 10px 8px; padding: 9px 12px; color: var(--eh-teal-700); font-weight: var(--eh-weight-semibold); }
 
 @media (min-width: 960px) {
   .desktopNav, .headerActions { display: flex; }

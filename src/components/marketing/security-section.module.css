@@ -19,7 +19,7 @@
   line-height: var(--eh-leading-normal);
   letter-spacing: -0.02em;
   color: rgba(255, 255, 255, 0.94);
-  font-weight: 460;
+  font-weight: var(--eh-weight-medium);
   max-width: 560px;
 }
 
@@ -53,7 +53,7 @@
 
 .points strong {
   color: var(--eh-on-dark);
-  font-weight: 660;
+  font-weight: var(--eh-weight-bold);
 }
 
 .badgeRow {

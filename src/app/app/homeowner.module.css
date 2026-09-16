@@ -92,7 +92,7 @@
 
 .ownerScope :global(.app-shell-v3 .page-context strong) {
   font-size: 13px;
-  font-weight: 650;
+  font-weight: var(--eh-weight-semibold);
 }
 
 .ownerScope :global(.app-shell-v3 .page-context small) {
@@ -203,7 +203,7 @@
   font-size: clamp(32px, 5vw, 48px);
   line-height: 1.08;
   letter-spacing: -0.04em;
-  font-weight: 560;
+  font-weight: var(--eh-weight-semibold);
 }
 
 .ownerScope :global(.owner-route-state p) {
@@ -217,7 +217,7 @@
 .ownerScope :global(.owner-state-kicker) {
   color: var(--owner-green-700);
   font-size: var(--eh-font-meta);
-  font-weight: 750;
+  font-weight: var(--eh-weight-bold);
   letter-spacing: 0.04em;
 }
 
@@ -324,7 +324,7 @@
   font-size: clamp(38px, 5.4vw, 58px);
   line-height: 1.02;
   letter-spacing: -0.052em;
-  font-weight: 540;
+  font-weight: var(--eh-weight-medium);
 }
 
 .ownerScope :global(.owner-dashboard-intro p) {
@@ -357,7 +357,7 @@
 .ownerScope :global(.owner-section-heading > div > span) {
   color: var(--owner-green-700);
   font-size: var(--eh-font-meta);
-  font-weight: 750;
+  font-weight: var(--eh-weight-bold);
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
@@ -367,7 +367,7 @@
   font-size: clamp(25px, 3.5vw, 34px);
   line-height: 1.12;
   letter-spacing: -0.035em;
-  font-weight: 560;
+  font-weight: var(--eh-weight-semibold);
 }
 
 .ownerScope :global(.owner-copilot-copy p) {
@@ -450,7 +450,7 @@
 .ownerScope :global(.owner-copilot-meta a) {
   min-height: 44px;
   color: #4f5953;
-  font-weight: 650;
+  font-weight: var(--eh-weight-semibold);
 }
 
 .ownerScope :global(.owner-copilot-meta a svg) {
@@ -474,7 +474,7 @@
   font-size: 23px;
   line-height: var(--eh-leading-tight);
   letter-spacing: -0.025em;
-  font-weight: 570;
+  font-weight: var(--eh-weight-semibold);
 }
 
 .ownerScope :global(.owner-section-heading > a) {
@@ -537,7 +537,7 @@
 .ownerScope :global(.owner-next-copy strong) {
   margin-top: 3px;
   font-size: 14px;
-  font-weight: 650;
+  font-weight: var(--eh-weight-semibold);
 }
 
 .ownerScope :global(.owner-next-copy > span) {
@@ -570,7 +570,7 @@
 
 .ownerScope :global(.owner-calm-state strong) {
   font-size: 14px;
-  font-weight: 650;
+  font-weight: var(--eh-weight-semibold);
 }
 
 .ownerScope :global(.owner-calm-state p) {
@@ -792,7 +792,7 @@
 .ownerScope :global(.plans-hero h1) {
   font-size: clamp(30px, 4vw, 40px);
   letter-spacing: -0.038em;
-  font-weight: 560;
+  font-weight: var(--eh-weight-semibold);
 }
 
 .ownerScope :global(.jobs-head p),
@@ -849,7 +849,7 @@
 .ownerScope :global(.mobile-job-card > strong) {
   margin-top: 12px;
   font-size: 15px;
-  font-weight: 650;
+  font-weight: var(--eh-weight-semibold);
 }
 
 .ownerScope :global(.mobile-job-meta span),
@@ -886,7 +886,7 @@
   font-size: clamp(30px, 4vw, 42px);
   line-height: 1.08;
   letter-spacing: -0.04em;
-  font-weight: 560;
+  font-weight: var(--eh-weight-semibold);
 }
 
 .ownerScope :global(.detail-head > p) {
@@ -1217,7 +1217,7 @@
   gap: 7px;
   color: var(--owner-text);
   font-size: var(--eh-font-meta);
-  font-weight: 650;
+  font-weight: var(--eh-weight-semibold);
 }
 
 .ownerScope :global(.asset-form label > span) {
@@ -1274,7 +1274,7 @@
   font-size: clamp(30px, 4vw, 42px);
   line-height: 1.08;
   letter-spacing: -0.04em;
-  font-weight: 560;
+  font-weight: var(--eh-weight-semibold);
 }
 
 .ownerScope :global(.consultation-hero p),
@@ -1431,7 +1431,7 @@
   gap: 7px;
   color: var(--owner-text);
   font-size: 13px;
-  font-weight: 650;
+  font-weight: var(--eh-weight-semibold);
 }
 
 .ownerScope :global(.alert) {
@@ -1788,7 +1788,7 @@
   color: var(--owner-green-700);
 }
 .ownerScope :global(.house-cover-copy) { min-width: 0; display: grid; gap: 4px; }
-.ownerScope :global(.house-cover-copy small) { color: var(--owner-green-700); font-size: var(--eh-font-meta); font-weight: 750; text-transform: uppercase; letter-spacing: .05em; }
+.ownerScope :global(.house-cover-copy small) { color: var(--owner-green-700); font-size: var(--eh-font-meta); font-weight: var(--eh-weight-bold); text-transform: uppercase; letter-spacing: .05em; }
 .ownerScope :global(.house-cover-copy strong) { overflow: hidden; font-size: 16px; text-overflow: ellipsis; white-space: nowrap; }
 .ownerScope :global(.house-menu > a:hover),
 .ownerScope :global(.house-menu > details > summary:hover) { background: var(--owner-green-50); border-radius: var(--eh-shape-panel); }

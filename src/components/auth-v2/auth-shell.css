@@ -50,14 +50,14 @@
   align-items: baseline;
   gap: 12px;
   font-size: 12px;
-  font-weight: 800;
+  font-weight: var(--eh-weight-heavy);
   letter-spacing: 0.18em;
 }
 .arena-eyebrow-num { color: var(--eh-color-terra); font-variant-numeric: tabular-nums; }
 .arena-hero .arena-eyebrow-num { color: var(--eh-color-sand); }
 .arena-hero h1 {
   margin: 0;
-  font-weight: 800;
+  font-weight: var(--eh-weight-heavy);
   letter-spacing: -0.03em;
   line-height: 1.04;
   font-size: clamp(2.1rem, 4.6vw + 1rem, 3.9rem);
@@ -199,7 +199,7 @@
   font-size: 0.88rem;
   color: var(--eh-color-deep);
 }
-.arena-demo-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-weight: 800; letter-spacing: 0.04em; }
+.arena-demo-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-weight: var(--eh-weight-heavy); letter-spacing: 0.04em; }
 .arena-demo-top .arena-mini-link { font-weight: var(--eh-weight-bold); }
 .arena-demo-sub { margin: 8px 0 0; }
 .arena-demo-sub strong { font-weight: var(--eh-weight-bold); }

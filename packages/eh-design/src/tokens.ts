@@ -34,7 +34,8 @@ export const EHTokens = {
     "regular": "400",
     "medium": "500",
     "semibold": "600",
-    "bold": "700"
+    "bold": "700",
+    "heavy": "800"
   },
   "leading": {
     "tight": "1.2",

@@ -42,7 +42,7 @@
   color: var(--eh-ink-soft);
   font: inherit;
   font-size: var(--eh-small);
-  font-weight: 580;
+  font-weight: var(--eh-weight-semibold);
   cursor: pointer;
   transition: background var(--eh-dur) var(--eh-ease), color var(--eh-dur) var(--eh-ease);
 }
@@ -116,7 +116,7 @@
   display: block;
   margin-top: 6px;
   font-size: clamp(23px, 2.4vw, 30px);
-  font-weight: 620;
+  font-weight: var(--eh-weight-semibold);
   letter-spacing: -0.026em;
   color: var(--eh-teal-900);
 }
@@ -134,7 +134,7 @@
   max-width: 24ch;
   margin-top: 7px;
   font-size: var(--eh-micro);
-  font-weight: 450;
+  font-weight: var(--eh-weight-regular);
   line-height: 1.45;
   color: var(--eh-ink-soft);
 }

@@ -163,7 +163,7 @@
   margin-bottom: 8px;
   color: var(--provider-green-700);
   font-size: var(--eh-font-meta);
-  font-weight: 750;
+  font-weight: var(--eh-weight-bold);
   letter-spacing: 0.02em;
 }
 
@@ -173,7 +173,7 @@
   font-size: clamp(30px, 4vw, 44px);
   line-height: 1.04;
   letter-spacing: -0.035em;
-  font-weight: 650;
+  font-weight: var(--eh-weight-semibold);
 }
 
 .providerScope :global(.provider-page-intro p) {
@@ -215,7 +215,7 @@
   font-size: 19px;
   line-height: 1.25;
   letter-spacing: -0.015em;
-  font-weight: 650;
+  font-weight: var(--eh-weight-semibold);
 }
 
 .providerScope :global(.provider-section-head p) {
@@ -356,7 +356,7 @@
   margin-top: 5px;
   color: var(--provider-text);
   font-size: 21px;
-  font-weight: 620;
+  font-weight: var(--eh-weight-semibold);
 }
 
 .providerScope :global(.provider-quick-links) {
@@ -382,7 +382,7 @@
   padding: 0 13px;
   color: #59635d;
   font-size: 13px;
-  font-weight: 650;
+  font-weight: var(--eh-weight-semibold);
 }
 
 .providerScope :global(.provider-quick-links a:hover) {
@@ -405,7 +405,7 @@
 
 .providerScope :global(.partner-standard-banner strong) {
   font-size: 13px;
-  font-weight: 650;
+  font-weight: var(--eh-weight-semibold);
 }
 
 .providerScope :global(.partner-standard-banner small) {
@@ -425,7 +425,7 @@
 .providerScope :global(.section-title strong) {
   color: var(--provider-text);
   font-size: 18px;
-  font-weight: 650;
+  font-weight: var(--eh-weight-semibold);
 }
 
 .providerScope :global(.section-title a) {
@@ -462,7 +462,7 @@
 .providerScope :global(.pro-request strong) {
   color: var(--provider-text);
   font-size: 15px;
-  font-weight: 650;
+  font-weight: var(--eh-weight-semibold);
 }
 
 .providerScope :global(.pro-request small) {
@@ -482,7 +482,7 @@
 .providerScope :global(.pro-request .request-main > b) {
   color: var(--provider-text);
   font-size: 14px;
-  font-weight: 650;
+  font-weight: var(--eh-weight-semibold);
 }
 
 .providerScope :global(.pro-request > svg) {
@@ -523,7 +523,7 @@
   margin-top: 9px;
   color: var(--provider-green-700);
   font-size: var(--eh-font-meta);
-  font-weight: 750;
+  font-weight: var(--eh-weight-bold);
 }
 
 .providerScope :global(.provider-row-meta) {
@@ -643,7 +643,7 @@
   font-size: clamp(28px, 4vw, 42px);
   line-height: 1.08;
   letter-spacing: -0.03em;
-  font-weight: 650;
+  font-weight: var(--eh-weight-semibold);
 }
 
 .providerScope :global(.pro-detail > p) {
@@ -802,7 +802,7 @@
 .providerScope :global(label) {
   color: #3f4842;
   font-size: 13px;
-  font-weight: 650;
+  font-weight: var(--eh-weight-semibold);
 }
 
 .providerScope :global(label small) {
@@ -1372,7 +1372,7 @@
   margin-bottom: 5px;
   color: var(--provider-green-700);
   font-size: var(--eh-font-meta);
-  font-weight: 750;
+  font-weight: var(--eh-weight-bold);
   letter-spacing: 0.02em;
   text-transform: uppercase;
 }
@@ -1383,7 +1383,7 @@
   color: var(--provider-text);
   font-size: 17px;
   line-height: 1.45;
-  font-weight: 650;
+  font-weight: var(--eh-weight-semibold);
 }
 
 .providerScope :global(.provider-next-step-action) {
