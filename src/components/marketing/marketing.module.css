@@ -5,9 +5,9 @@
 .previewHead div:nth-child(2) { display:flex; flex-direction:column; gap:2px; flex:1; }
 .previewHead small { color:var(--eh-text-secondary); }
 .previewHead strong { font-size:14px; }
-.livePill { padding:6px 9px; border-radius:999px; background:var(--eh-green-50); color:var(--eh-green-700); font-size:11px; font-weight:750; }
+.livePill { padding:6px 9px; border-radius:var(--eh-radius-pill); background:var(--eh-green-50); color:var(--eh-green-700); font-size:11px; font-weight:750; }
 .previewBody { padding:20px; background:#fbfcfb; }
-.userBubble { margin-left:auto; max-width:84%; background:var(--eh-green-100); border-radius:16px 16px 5px 16px; padding:13px 14px; font-size:14px; line-height:1.5; }
+.userBubble { margin-left:auto; max-width:84%; background:var(--eh-green-100); border-radius:16px 16px 5px 16px; padding:13px 14px; font-size:14px; line-height:var(--eh-leading-normal); }
 .assistantBox { margin-top:16px; }
 .assistantBox > p { margin:0 0 12px; color:#4f5b53; font-size:13px; line-height:1.55; }
 .choice { min-height:58px; display:grid; grid-template-columns:34px 1fr 18px; align-items:center; gap:10px; padding:9px 10px; border:1px solid var(--eh-border); border-radius:13px; background:white; margin-top:8px; }
@@ -21,7 +21,7 @@
 .previewCard { border:1px solid var(--eh-border); border-radius:20px; background:white; overflow:hidden; }
 .previewCardHead { padding:16px 18px; border-bottom:1px solid var(--eh-border); display:flex; align-items:center; justify-content:space-between; gap:12px; }
 .previewCardHead strong { font-size:14px; }
-.previewCardHead span { padding:5px 8px; border-radius:999px; background:var(--eh-green-50); color:var(--eh-green-700); font-size:10px; font-weight:760; }
+.previewCardHead span { padding:5px 8px; border-radius:var(--eh-radius-pill); background:var(--eh-green-50); color:var(--eh-green-700); font-size:10px; font-weight:760; }
 .timeline { padding:10px 18px 18px; }
 .timelineRow { display:grid; grid-template-columns:64px 14px 1fr; gap:10px; min-height:76px; align-items:start; }
 .timelineRow time { padding-top:16px; color:var(--eh-text-secondary); font-size:11px; }
@@ -40,7 +40,7 @@
   .productPreview { max-width:620px; }
 }
 @media (max-width: 540px) {
-  .productPreview { box-shadow:none; border-radius:18px; }
+  .productPreview { box-shadow:var(--eh-shadow-none); border-radius:18px; }
   .previewHead { min-height:64px; }
   .previewFoot { min-height:52px; }
 }
@@ -157,17 +157,17 @@
 
 /* mock helpers (hero-visuals) */
 .heroServiceGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.heroServiceChip { min-height: 40px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--eh-border); border-radius: 10px; background: #fff; font-size: 12.5px; font-weight: 600; color: #3f4943; }
+.heroServiceChip { min-height: 40px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--eh-border); border-radius: 10px; background: #fff; font-size: 12.5px; font-weight: var(--eh-weight-semibold); color: #3f4943; }
 .heroMockNote { margin: 12px 0 0; font-size: 12px; color: var(--eh-text-secondary); }
 .heroStatRow { display: flex; align-items: baseline; gap: 10px; margin: 2px 0 14px; }
-.heroStatRow strong { font-size: 44px; font-weight: 700; letter-spacing: -.04em; color: var(--eh-green-700); line-height: 1; }
+.heroStatRow strong { font-size: 44px; font-weight: var(--eh-weight-bold); letter-spacing: -.04em; color: var(--eh-green-700); line-height: 1; }
 .heroStatRow span { color: var(--eh-text-secondary); font-size: 13px; line-height: 1.4; }
-.heroFactRow { display: flex; align-items: flex-start; gap: 8px; font-size: 13px; color: #3f4943; line-height: 1.5; margin-top: 10px; }
+.heroFactRow { display: flex; align-items: flex-start; gap: 8px; font-size: 13px; color: #3f4943; line-height: var(--eh-leading-normal); margin-top: 10px; }
 .heroFactRow svg { color: var(--eh-green-700); flex: 0 0 auto; margin-top: 2px; }
 .heroPlanGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 6px; }
 .heroPlan { border: 1px solid var(--eh-border); border-radius: 14px; padding: 14px; display: flex; flex-direction: column; gap: 3px; background: #fff; }
-.heroPlan small { font-size: 10.5px; text-transform: uppercase; letter-spacing: .07em; font-weight: 700; color: var(--eh-text-secondary); }
-.heroPlan strong { font-size: 30px; font-weight: 700; letter-spacing: -.03em; color: var(--eh-text); line-height: 1.05; }
+.heroPlan small { font-size: 10.5px; text-transform: uppercase; letter-spacing: .07em; font-weight: var(--eh-weight-bold); color: var(--eh-text-secondary); }
+.heroPlan strong { font-size: 30px; font-weight: var(--eh-weight-bold); letter-spacing: -.03em; color: var(--eh-text); line-height: 1.05; }
 .heroPlan span { font-size: 12px; color: var(--eh-text-secondary); }
 .heroPlanFeatured { border-color: rgba(16,82,88,.35); box-shadow: 0 0 0 2px rgba(16,82,88,.08) inset; }
 .heroPlanFeatured strong { color: var(--eh-green-700); }
@@ -182,7 +182,7 @@
 .heroMockLink:hover { transform: translateY(-4px); }
 .heroMockLink:focus-visible { outline: 3px solid rgba(16,82,88,.35); outline-offset: 4px; border-radius: 24px; }
 .heroMockHint { position: absolute; top: -16px; left: 50%; translate: -50% 8px; z-index: 4; display: inline-flex; align-items: center; gap: 6px;
-  background: var(--eh-green-700); color: #fff; border-radius: 999px; padding: 8px 14px;
+  background: var(--eh-green-700); color: #fff; border-radius: var(--eh-radius-pill); padding: 8px 14px;
   font-size: 12px; font-weight: 650; letter-spacing: -.01em; white-space: nowrap;
   box-shadow: 0 14px 30px -12px rgba(10,53,57,.55);
   opacity: 0; translate: 0 8px; transition: opacity .2s ease, translate .2s ease; pointer-events: none; }
@@ -220,7 +220,7 @@
 /* ============ v9: hero copy column craft ============ */
 
 /* Eyebrow becomes a designed badge */
-.eyebrow { background: var(--eh-surface); border: 1px solid var(--eh-border-strong); border-radius: 999px;
+.eyebrow { background: var(--eh-surface); border: 1px solid var(--eh-border-strong); border-radius: var(--eh-radius-pill);
   padding: 7px 15px 7px 11px; box-shadow: 0 6px 16px -10px rgba(10,53,57,.28);
   font-weight: 680; letter-spacing: -.005em; color: var(--eh-text); }
 
@@ -290,7 +290,7 @@
   mask-image: radial-gradient(700px 400px at 50% 50%, rgba(0,0,0,.6), transparent 75%); }
 .gatewayInner { position: relative; width: min(1200px, calc(100% - 40px)); margin: 0 auto; padding: 104px 0; }
 .gatewayHead { text-align: center; max-width: 700px; margin: 0 auto 64px; }
-.gatewayHead h2 { margin: 0; font-size: clamp(30px,4vw,48px); font-weight: 700; letter-spacing: -.035em; line-height: 1.08; }
+.gatewayHead h2 { margin: 0; font-size: clamp(30px,4vw,48px); font-weight: var(--eh-weight-bold); letter-spacing: -.035em; line-height: 1.08; }
 .gatewayHead h2 mark { background: none; color: var(--eh-green-700); }
 .gatewayHead p { margin: 16px 0 0; color: var(--eh-text-secondary); font-size: 17px; line-height: 1.65; }
 .gatewayCols { display: grid; grid-template-columns: 1fr auto 1fr; gap: 40px; align-items: center; }
@@ -302,13 +302,13 @@
   border-radius: 12px; background: var(--eh-green-soft); color: var(--eh-green-700); }
 .gatewayCard strong { display: block; font-size: 14.5px; letter-spacing: -.01em; }
 .gatewayCard small { display: block; color: var(--eh-text-secondary); font-size: 12px; margin-top: 1px; }
-.gatewayDot { flex: 0 0 auto; width: 8px; height: 8px; border-radius: 999px; background: var(--eh-green-700); }
+.gatewayDot { flex: 0 0 auto; width: 8px; height: 8px; border-radius: var(--eh-radius-pill); background: var(--eh-green-700); }
 .gatewayHub { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 0 8px; }
 .gatewayHubLogo { width: 92px; height: 92px; display: grid; place-items: center; border-radius: 28px;
   background: linear-gradient(160deg, #0f6a72 0%, #0a3539 100%); color: #fff;
   box-shadow: 0 20px 50px -18px rgba(10,53,57,.55), 0 0 0 10px rgba(16,82,88,.07); }
 .gatewayHubLogo svg { width: 46px; height: 42px; }
-.gatewayHubLabel { font-size: 14px; font-weight: 700; color: var(--eh-text); }
+.gatewayHubLabel { font-size: 14px; font-weight: var(--eh-weight-bold); color: var(--eh-text); }
 .gatewayLines { position: absolute; inset: 0; pointer-events: none; }
 .gatewayLines path { stroke: rgba(16,82,88,.22); stroke-width: 1.6; fill: none; }
 

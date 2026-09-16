@@ -1,5 +1,5 @@
 /* Scoped styles for the /ansprechpartner screen — DESIGN.md §2: no inline styles. */
 .roleIcon { font-size: 22px; }
-.phoneLink { color: var(--green); font-weight: 700; }
+.phoneLink { color: var(--green); font-weight: var(--eh-weight-bold); }
 .sheetBody { padding: 0 22px 10px; }
 .sheetGap { height: 18px; }

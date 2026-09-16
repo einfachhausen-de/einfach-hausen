@@ -132,7 +132,7 @@
   background: var(--eh-canvas);
   font-family: var(--eh-font);
   font-size: var(--eh-body);
-  line-height: 1.6;
+  line-height: var(--eh-leading-loose);
   -webkit-font-smoothing: antialiased;
   font-feature-settings: 'cv11', 'ss01', 'calt';
 }

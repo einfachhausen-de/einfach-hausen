@@ -63,7 +63,7 @@
   font-size: clamp(2.1rem, 4.6vw + 1rem, 3.9rem);
   text-wrap: balance;
 }
-.arena-hero-sub { margin: 0; color: color-mix(in srgb, var(--eh-color-paper) 72%, transparent); font-size: 1.02rem; line-height: 1.6; }
+.arena-hero-sub { margin: 0; color: color-mix(in srgb, var(--eh-color-paper) 72%, transparent); font-size: 1.02rem; line-height: var(--eh-leading-loose); }
 .arena-features { list-style: none; margin: 8px 0 0; padding: 0; border-top: 1px solid color-mix(in srgb, var(--eh-color-paper) 16%, transparent); }
 .arena-features li {
   display: grid;
@@ -72,7 +72,7 @@
   padding: 20px 0;
   border-bottom: 1px solid color-mix(in srgb, var(--eh-color-paper) 16%, transparent);
 }
-.arena-features .num { color: color-mix(in srgb, var(--eh-color-paper) 60%, transparent); font-weight: 700; font-variant-numeric: tabular-nums; }
+.arena-features .num { color: color-mix(in srgb, var(--eh-color-paper) 60%, transparent); font-weight: var(--eh-weight-bold); font-variant-numeric: tabular-nums; }
 .arena-features strong { display: block; font-size: 1.02rem; }
 .arena-features p { margin: 4px 0 0; color: color-mix(in srgb, var(--eh-color-paper) 62%, transparent); font-size: 0.92rem; line-height: 1.55; }
 .arena-hero-foot {
@@ -114,7 +114,7 @@
   column-gap: 12px;
   padding: 18px 20px;
   font-size: 0.88rem;
-  font-weight: 600;
+  font-weight: var(--eh-weight-semibold);
 }
 @media (min-width: 1024px) {
   .arena-topbar { padding: 22px 36px; }
@@ -132,12 +132,12 @@
 .arena-forminner { width: 100%; max-width: 520px; }
 .arena-forminner > .arena-eyebrow { color: var(--eh-color-deep); margin-bottom: 14px; }
 .arena-rule { border: 0; border-top: 1px solid var(--eh-color-line); margin: 22px 0; }
-.arena-label { display: block; font-weight: 700; font-size: 0.95rem; margin: 0 0 8px; }
+.arena-label { display: block; font-weight: var(--eh-weight-bold); font-size: 0.95rem; margin: 0 0 8px; }
 .arena-label-row { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin: 18px 0 8px; }
 .arena-label-row .arena-label { margin: 0; }
 .arena-mini-link {
   background: none; border: 0; padding: 0; cursor: pointer;
-  font-size: 0.85rem; font-weight: 600; color: var(--eh-color-deep);
+  font-size: 0.85rem; font-weight: var(--eh-weight-semibold); color: var(--eh-color-deep);
   text-decoration: underline; text-underline-offset: 3px;
 }
 .arena-input {
@@ -185,7 +185,7 @@
   display: flex; align-items: center; justify-content: space-between;
   gap: 12px; padding: 14px 22px;
   background: var(--eh-color-petrol); color: var(--eh-color-paper);
-  font-size: 1.02rem; font-weight: 700;
+  font-size: 1.02rem; font-weight: var(--eh-weight-bold);
   border: 0; border-radius: 8px; cursor: pointer;
 }
 .arena-submit:hover { background: var(--eh-color-deep); }
@@ -200,23 +200,23 @@
   color: var(--eh-color-deep);
 }
 .arena-demo-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-weight: 800; letter-spacing: 0.04em; }
-.arena-demo-top .arena-mini-link { font-weight: 700; }
+.arena-demo-top .arena-mini-link { font-weight: var(--eh-weight-bold); }
 .arena-demo-sub { margin: 8px 0 0; }
-.arena-demo-sub strong { font-weight: 700; }
+.arena-demo-sub strong { font-weight: var(--eh-weight-bold); }
 .arena-demo-btns { display: flex; gap: 16px; margin-top: 8px; }
 .arena-switch { text-align: center; margin-top: 20px; color: var(--eh-color-secondary); font-size: 0.92rem; }
-.arena-switch .arena-mini-link { font-weight: 700; }
+.arena-switch .arena-mini-link { font-weight: var(--eh-weight-bold); }
 .arena-ssl {
   display: flex; align-items: center; justify-content: center; gap: 8px;
   margin-top: 26px; color: var(--eh-color-secondary); font-size: 0.8rem;
 }
 .arena-error {
   margin-top: 16px; padding: 12px 14px; border-radius: 8px;
-  background: color-mix(in srgb, var(--eh-color-error) 12%, var(--eh-color-white)); color: var(--eh-color-error); font-size: 0.9rem; font-weight: 600;
+  background: color-mix(in srgb, var(--eh-color-error) 12%, var(--eh-color-white)); color: var(--eh-color-error); font-size: 0.9rem; font-weight: var(--eh-weight-semibold);
 }
 .arena-notice {
   margin-top: 16px; padding: 12px 14px; border-radius: 8px;
-  background: color-mix(in srgb, var(--eh-color-success) 12%, var(--eh-color-white)); color: var(--eh-color-deep); font-size: 0.9rem; font-weight: 600;
+  background: color-mix(in srgb, var(--eh-color-success) 12%, var(--eh-color-white)); color: var(--eh-color-deep); font-size: 0.9rem; font-weight: var(--eh-weight-semibold);
 }
 
 #role-toggle-partner, #role-toggle-kunde { display: inline-flex; align-items: center; gap: 6px; }
@@ -230,11 +230,11 @@
 /* Canonical inline-style replacements (EH tokens only, no literals) */
 .arena-brand-link{display:block;color:var(--eh-color-paper);text-decoration:none}
 .arena-brand-logo{height:44px;width:auto;display:block}
-.arena-brand-tag{display:block;margin-top:10px;font-size:var(--eh-font-eyebrow);letter-spacing:.24em;color:color-mix(in srgb, var(--eh-color-paper) 65%, transparent);font-weight:700}
-.arena-topbar-link{display:inline-flex;align-items:center;gap:10px;color:var(--eh-color-deep);text-decoration:none;font-weight:700}
+.arena-brand-tag{display:block;margin-top:10px;font-size:var(--eh-font-eyebrow);letter-spacing:.24em;color:color-mix(in srgb, var(--eh-color-paper) 65%, transparent);font-weight:var(--eh-weight-bold)}
+.arena-topbar-link{display:inline-flex;align-items:center;gap:10px;color:var(--eh-color-deep);text-decoration:none;font-weight:var(--eh-weight-bold)}
 .arena-topbar-logo{height:30px;width:auto;display:block}
 .arena-topbar-label{display:inline-flex;align-items:center;gap:6px;font-size:var(--eh-font-label)}
-.arena-role-toggle{color:var(--eh-color-deep);font-weight:700}
+.arena-role-toggle{color:var(--eh-color-deep);font-weight:var(--eh-weight-bold)}
 .arena-role-toggle svg{vertical-align:-2px}
 .arena-mt{margin-top:18px}
 .arena-hint{font-size:13px;color:var(--eh-color-secondary);margin:6px 0 0}

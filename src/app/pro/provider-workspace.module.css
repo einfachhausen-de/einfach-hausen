@@ -29,7 +29,7 @@
   align-items: center;
   padding: 11px 14px;
   font-size: 14px;
-  font-weight: 700;
+  font-weight: var(--eh-weight-bold);
   transition: transform 160ms ease-out;
 }
 
@@ -68,7 +68,7 @@
   min-height: 44px;
   color: #66706a;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: var(--eh-weight-semibold);
 }
 
 .providerScope :global(.app-shell-v3.pro-theme .sidebar-nav a:hover) {
@@ -181,7 +181,7 @@
   margin: 12px 0 0;
   color: var(--provider-muted);
   font-size: 16px;
-  line-height: 1.6;
+  line-height: var(--eh-leading-loose);
 }
 
 .providerScope :global(.provider-primary-action),
@@ -196,7 +196,7 @@
   color: white;
   padding: 0 16px;
   font-size: 14px;
-  font-weight: 700;
+  font-weight: var(--eh-weight-bold);
   white-space: nowrap;
 }
 
@@ -222,7 +222,7 @@
   margin: 5px 0 0;
   color: var(--provider-muted);
   font-size: 13px;
-  line-height: 1.5;
+  line-height: var(--eh-leading-normal);
 }
 
 .providerScope :global(.provider-section-head > a) {
@@ -231,7 +231,7 @@
   align-items: center;
   color: var(--provider-green-700);
   font-size: 13px;
-  font-weight: 700;
+  font-weight: var(--eh-weight-bold);
 }
 
 .providerScope :global(.provider-state) {
@@ -374,7 +374,7 @@
 
 .providerScope :global(.provider-quick-links a) {
   min-height: 44px;
-  border-radius: 999px;
+  border-radius: var(--eh-radius-pill);
   display: inline-flex;
   flex: 0 0 auto;
   align-items: center;
@@ -476,7 +476,7 @@
   margin-top: 11px;
   color: var(--provider-muted);
   font-size: var(--eh-font-meta);
-  font-weight: 600;
+  font-weight: var(--eh-weight-semibold);
 }
 
 .providerScope :global(.pro-request .request-main > b) {
@@ -498,7 +498,7 @@
 
 .providerScope :global(.new) {
   margin-bottom: 7px;
-  border-radius: 999px;
+  border-radius: var(--eh-radius-pill);
   background: var(--provider-green-100);
   color: var(--provider-green-700);
   padding: 4px 7px;
@@ -509,7 +509,7 @@
 .providerScope :global(.quoted-badge) {
   position: static;
   align-self: center;
-  border-radius: 999px;
+  border-radius: var(--eh-radius-pill);
   background: var(--provider-green-100);
   color: var(--provider-green-700);
   padding: 6px 9px;
@@ -559,7 +559,7 @@
 }
 
 .providerScope :global(.status) {
-  border-radius: 999px;
+  border-radius: var(--eh-radius-pill);
   background: #eef1ef;
   color: #57615a;
   padding: 5px 8px;
@@ -694,7 +694,7 @@
   border-radius: var(--eh-shape-panel);
   background: var(--provider-surface);
   color: var(--provider-text);
-  box-shadow: none;
+  box-shadow: var(--eh-shadow-none);
 }
 
 .providerScope :global(.contact-request-note),
@@ -744,7 +744,7 @@
   border-radius: var(--eh-shape-panel);
   background: var(--provider-surface);
   color: var(--provider-text);
-  box-shadow: none;
+  box-shadow: var(--eh-shadow-none);
 }
 
 .providerScope :global(.quote-form),
@@ -898,7 +898,7 @@
   border: 1px solid #cfe2d5;
   border-radius: var(--eh-shape-panel);
   background: var(--provider-green-50);
-  box-shadow: none;
+  box-shadow: var(--eh-shadow-none);
   padding-inline: 12px;
 }
 
@@ -1200,7 +1200,7 @@
   color: white;
   padding: 0 16px;
   font: inherit;
-  font-weight: 700;
+  font-weight: var(--eh-weight-bold);
 }
 
 .providerScope :global(a:focus-visible),
@@ -1348,7 +1348,7 @@
   margin: 3px 0 0;
   color: var(--provider-muted);
   font-size: var(--eh-font-meta);
-  line-height: 1.5;
+  line-height: var(--eh-leading-normal);
 }
 
 .providerScope :global(.provider-next-step) {
@@ -1450,7 +1450,7 @@
   padding: 12px 14px;
   color: var(--provider-text);
   font-size: 13px;
-  font-weight: 700;
+  font-weight: var(--eh-weight-bold);
 }
 
 .providerScope :global(.provider-disclosure > summary::-webkit-details-marker) {
@@ -1463,7 +1463,7 @@
   color: var(--provider-muted);
   font-size: 20px;
   line-height: 1;
-  font-weight: 400;
+  font-weight: var(--eh-weight-regular);
 }
 
 .providerScope :global(.provider-disclosure[open] > summary::after) {
@@ -1504,7 +1504,7 @@
   color: var(--provider-muted);
   font-size: var(--eh-font-meta);
   line-height: 1.4;
-  font-weight: 500;
+  font-weight: var(--eh-weight-medium);
 }
 
 .providerScope :global(.member-head),
@@ -1915,7 +1915,7 @@
   box-shadow: 0 14px 38px rgba(14, 61, 51, 0.05);
 }
 .providerScope :global(.pdx-section-head a) {
-  border-radius: 999px;
+  border-radius: var(--eh-radius-pill);
   padding: 8px 10px;
   transition: background 180ms ease, color 180ms ease;
 }
@@ -1936,7 +1936,7 @@
   }
   .providerScope :global(.partner-standard-banner) {
     border-radius: 15px;
-    box-shadow: none;
+    box-shadow: var(--eh-shadow-none);
   }
   .providerScope :global(.pdx-stats) {
     border-radius: var(--eh-shape-panel);

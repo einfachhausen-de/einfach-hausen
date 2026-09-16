@@ -28,7 +28,7 @@
   background: var(--owner-green-900);
   color: #fff;
   font-size: 14px;
-  font-weight: 700;
+  font-weight: var(--eh-weight-bold);
   transition: transform 160ms ease-out;
 }
 
@@ -243,7 +243,7 @@
   background: var(--owner-green-700);
   color: #fff;
   font: inherit;
-  font-weight: 700;
+  font-weight: var(--eh-weight-bold);
   cursor: pointer;
   text-decoration: none;
 }
@@ -374,7 +374,7 @@
   margin: 0;
   color: var(--owner-muted);
   font-size: 14px;
-  line-height: 1.6;
+  line-height: var(--eh-leading-loose);
 }
 
 .ownerScope :global(.owner-dashboard-composer) {
@@ -387,7 +387,7 @@
   border: 1px solid var(--owner-border-strong);
   border-radius: var(--eh-shape-panel);
   background: #fbfcfb;
-  box-shadow: none;
+  box-shadow: var(--eh-shadow-none);
 }
 
 .ownerScope :global(.owner-dashboard-composer .agent-composer textarea) {
@@ -472,7 +472,7 @@
 .ownerScope :global(.owner-section-heading h2) {
   margin: 5px 0 0;
   font-size: 23px;
-  line-height: 1.2;
+  line-height: var(--eh-leading-tight);
   letter-spacing: -0.025em;
   font-weight: 570;
 }
@@ -483,7 +483,7 @@
   align-items: center;
   color: var(--owner-green-700);
   font-size: var(--eh-font-meta);
-  font-weight: 700;
+  font-weight: var(--eh-weight-bold);
 }
 
 .ownerScope :global(.owner-next-list) {
@@ -531,7 +531,7 @@
 .ownerScope :global(.owner-next-copy small) {
   color: var(--owner-green-700);
   font-size: var(--eh-font-meta);
-  font-weight: 700;
+  font-weight: var(--eh-weight-bold);
 }
 
 .ownerScope :global(.owner-next-copy strong) {
@@ -577,7 +577,7 @@
   margin: 4px 0 0;
   color: var(--owner-muted);
   font-size: var(--eh-font-meta);
-  line-height: 1.5;
+  line-height: var(--eh-leading-normal);
 }
 
 .ownerScope :global(.owner-house-link) {
@@ -611,7 +611,7 @@
   gap: 6px;
   color: var(--owner-green-700);
   font-size: var(--eh-font-meta);
-  font-weight: 700;
+  font-weight: var(--eh-weight-bold);
 }
 
 .ownerScope :global(.owner-house-link > a svg) {
@@ -843,7 +843,7 @@
   border-bottom: 1px solid var(--owner-border);
   border-radius: 0;
   background: transparent;
-  box-shadow: none;
+  box-shadow: var(--eh-shadow-none);
 }
 
 .ownerScope :global(.mobile-job-card > strong) {
@@ -873,7 +873,7 @@
 .ownerScope :global(.status) {
   padding: 5px 8px;
   font-size: var(--eh-font-meta);
-  font-weight: 700;
+  font-weight: var(--eh-weight-bold);
 }
 
 .ownerScope :global(.detail-head) {
@@ -924,7 +924,7 @@
   border: 1px solid var(--eh-success-border);
   border-radius: var(--eh-shape-panel);
   background: var(--owner-green-50);
-  box-shadow: none;
+  box-shadow: var(--eh-shadow-none);
 }
 
 .ownerScope :global(.quote-top strong) {
@@ -957,7 +957,7 @@
   border-bottom: 1px solid var(--owner-border);
   border-radius: 0;
   background: transparent;
-  box-shadow: none;
+  box-shadow: var(--eh-shadow-none);
 }
 
 .ownerScope :global(.stack > .appointment:first-child),
@@ -986,7 +986,7 @@
   padding-inline: 10px;
   border-radius: var(--eh-shape-panel);
   background: var(--owner-green-50);
-  box-shadow: none;
+  box-shadow: var(--eh-shadow-none);
 }
 
 .ownerScope :global(.contact-category-groups) {
@@ -1226,7 +1226,7 @@
 
 .ownerScope :global(.asset-form label small) {
   color: var(--owner-muted);
-  font-weight: 500;
+  font-weight: var(--eh-weight-medium);
 }
 
 .ownerScope :global(.asset-form .btn) {
@@ -1284,7 +1284,7 @@
   max-width: 720px;
   color: var(--owner-muted);
   font-size: 14px;
-  line-height: 1.6;
+  line-height: var(--eh-leading-loose);
 }
 
 .ownerScope :global(.consultation-points),
@@ -1324,12 +1324,12 @@
 .ownerScope :global(.package-card) {
   border-color: var(--owner-border);
   border-radius: var(--eh-shape-panel);
-  box-shadow: none;
+  box-shadow: var(--eh-shadow-none);
 }
 
 .ownerScope :global(.plan-card.featured) {
   border-color: #9fcfd2;
-  box-shadow: none;
+  box-shadow: var(--eh-shadow-none);
 }
 
 .ownerScope :global(.plan-price) {
@@ -1379,7 +1379,7 @@
   border: 1px solid var(--owner-border);
   border-radius: var(--eh-shape-panel);
   background: #fff;
-  box-shadow: none;
+  box-shadow: var(--eh-shadow-none);
 }
 
 .ownerScope :global(.empty) {
@@ -1401,7 +1401,7 @@
   max-width: 520px;
   margin-top: 6px;
   font-size: var(--eh-font-meta);
-  line-height: 1.5;
+  line-height: var(--eh-leading-normal);
 }
 
 .ownerScope :global(.empty svg) {

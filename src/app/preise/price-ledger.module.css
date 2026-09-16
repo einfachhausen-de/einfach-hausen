@@ -88,7 +88,7 @@
   padding-top: 0;
   padding-bottom: 18px;
   border-bottom: 1px solid var(--eh-line-strong);
-  font-weight: 600;
+  font-weight: var(--eh-weight-semibold);
 }
 
 .ledgerTable tbody tr:last-child th,
@@ -99,14 +99,14 @@
 .rowLabel {
   width: 38%;
   font-size: 14.5px;
-  font-weight: 500;
+  font-weight: var(--eh-weight-medium);
   color: var(--eh-ink);
 }
 
 .planName {
   display: block;
   font-size: 11.5px;
-  font-weight: 700;
+  font-weight: var(--eh-weight-bold);
   letter-spacing: 0.11em;
   text-transform: uppercase;
   color: var(--eh-teal-500);
@@ -124,7 +124,7 @@
 .planUnit {
   margin-left: 4px;
   font-size: 13px;
-  font-weight: 500;
+  font-weight: var(--eh-weight-medium);
   letter-spacing: 0;
   color: var(--eh-ink-mute);
 }

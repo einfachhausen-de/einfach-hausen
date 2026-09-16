@@ -27,10 +27,10 @@
   outline-offset: 4px;
 }
 .copy { position: relative; z-index: 2; max-width: 21rem; }
-.eyebrow { color: #105258; font-size: .75rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+.eyebrow { color: var(--eh-color-petrol); font-size: .75rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
 .title { margin: 10px 0 0; font-size: clamp(1.6rem, 3vw, 2.35rem); line-height: .98; letter-spacing: -.045em; }
 .description { margin: 14px 0 0; color: #647174; line-height: 1.45; }
-.cta { display: inline-flex; align-items: center; gap: 8px; margin-top: 22px; color: #105258; font-weight: 760; }
+.cta { display: inline-flex; align-items: center; gap: 8px; margin-top: 22px; color: var(--eh-color-petrol); font-weight: 760; }
 .link > span:last-of-type { align-self: flex-end; margin: -34px -14px -42px auto; }
 @media (max-width: 640px) {
   .link { min-height: 350px; padding: 24px; }

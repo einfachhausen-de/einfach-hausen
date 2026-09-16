@@ -16,7 +16,7 @@
 .lead {
   margin: 0;
   font-size: clamp(18px, 1.7vw, 23px);
-  line-height: 1.5;
+  line-height: var(--eh-leading-normal);
   letter-spacing: -0.02em;
   color: rgba(255, 255, 255, 0.94);
   font-weight: 460;
@@ -66,13 +66,13 @@
   border-color: var(--eh-teal-300);
   color: var(--eh-teal-100);
   background: rgba(220, 235, 236, 0.08);
-  font-weight: 600;
+  font-weight: var(--eh-weight-semibold);
 }
 
 .link {
   color: var(--eh-teal-300);
   text-decoration: none;
-  font-weight: 700;
+  font-weight: var(--eh-weight-bold);
   border-bottom: 1px solid color-mix(in srgb, var(--eh-teal-300) 40%, transparent);
   padding-bottom: 2px;
   transition: border-color 160ms ease;

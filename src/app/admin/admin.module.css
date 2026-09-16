@@ -16,15 +16,15 @@
   margin: 0;
   font-size: 19px;
   font-weight: 800;
-  color: #10222a;
+  color: var(--eh-color-ink);
   letter-spacing: -0.02em;
 }
 
 .overviewIntro p {
   margin: 4px 0 0;
-  color: #4b5b60;
+  color: var(--eh-color-secondary);
   font-size: 13px;
-  line-height: 1.5;
+  line-height: var(--eh-leading-normal);
 }
 
 .kpis {
@@ -38,7 +38,7 @@
   padding: 16px;
   border: 1px solid #e4e2dc;
   border-radius: 16px;
-  background: #ffffff;
+  background: var(--eh-color-white);
   box-shadow: 0 1px 3px rgba(16, 34, 42, 0.04);
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
@@ -54,14 +54,14 @@
 .kpiLabel {
   color: #5f6e75;
   font-size: 11px;
-  font-weight: 700;
+  font-weight: var(--eh-weight-bold);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
 
 .kpiValue {
   margin-top: 6px;
-  color: #105258;
+  color: var(--eh-color-petrol);
   font-size: 28px;
   line-height: 1.1;
   font-weight: 800;
@@ -73,7 +73,7 @@
   margin-top: 6px;
   color: #5f6e75;
   font-size: 11px;
-  font-weight: 500;
+  font-weight: var(--eh-weight-medium);
 }
 
 .monitorGrid {
@@ -89,7 +89,7 @@
   padding: 20px;
   border: 1px solid #e4e2dc;
   border-radius: 20px;
-  background: #ffffff;
+  background: var(--eh-color-white);
   box-shadow: 0 1px 3px rgba(16, 34, 42, 0.04);
 }
 
@@ -100,12 +100,12 @@
   margin: 0 0 16px;
   font-size: 14px;
   font-weight: 800;
-  color: #10222a;
+  color: var(--eh-color-ink);
   letter-spacing: -0.01em;
 }
 
 .monitorCard h3 svg {
-  color: #105258;
+  color: var(--eh-color-petrol);
 }
 
 .monitorList {
@@ -144,8 +144,8 @@
 
 .monitorCopy strong {
   font-size: 13px;
-  font-weight: 700;
-  color: #10222a;
+  font-weight: var(--eh-weight-bold);
+  color: var(--eh-color-ink);
 }
 
 .monitorCopy small {
@@ -177,7 +177,7 @@
   padding: 22px;
   border: 1px solid #e4e2dc;
   border-radius: 20px;
-  background: #ffffff;
+  background: var(--eh-color-white);
   box-shadow: 0 1px 3px rgba(16, 34, 42, 0.04);
 }
 
@@ -193,23 +193,23 @@
   margin: 0; 
   font-size: 18px; 
   font-weight: 800; 
-  color: #10222a; 
+  color: var(--eh-color-ink); 
   letter-spacing: -0.02em; 
 }
 
 .auditHeader p { 
   margin: 4px 0 0; 
-  color: #4b5b60; 
+  color: var(--eh-color-secondary); 
   font-size: 13px; 
 }
 
 .auditCount { 
-  color: #105258; 
+  color: var(--eh-color-petrol); 
   font-size: 12px; 
   font-weight: 800;
   background: #eef5f5;
   padding: 4px 10px;
-  border-radius: 999px;
+  border-radius: var(--eh-radius-pill);
 }
 
 .auditList { display: grid; gap: 0; }
@@ -225,8 +225,8 @@
 .auditEntry:first-child { border-top: 0; }
 .auditEntry time { color: #5f6e75; font-size: 12px; font-variant-numeric: tabular-nums; }
 .auditCopy { min-width: 0; display: grid; gap: 3px; }
-.auditCopy strong { font-size: 13px; font-weight: 700; color: #10222a; }
-.auditCopy span, .auditCopy small { overflow: hidden; color: #4b5b60; font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
+.auditCopy strong { font-size: 13px; font-weight: var(--eh-weight-bold); color: var(--eh-color-ink); }
+.auditCopy span, .auditCopy small { overflow: hidden; color: var(--eh-color-secondary); font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
 .auditCopy small { color: #5f6e75; }
 
 @media (max-width: 640px) {

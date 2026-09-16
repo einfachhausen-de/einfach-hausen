@@ -48,7 +48,7 @@
 
 .lifecycle li[data-state='done'],
 .lifecycle li[data-state='current'] {
-  border-top-color: #105258;
+  border-top-color: var(--eh-color-petrol);
   color: #171a18;
 }
 
@@ -58,16 +58,16 @@
   height: 24px;
   flex: 0 0 24px;
   place-items: center;
-  border-radius: 999px;
+  border-radius: var(--eh-radius-pill);
   background: #f2f4f2;
   font-size: 12px;
-  font-weight: 700;
+  font-weight: var(--eh-weight-bold);
 }
 
 .lifecycle li[data-state='done'] > span,
 .lifecycle li[data-state='current'] > span {
   background: #eaf5ee;
-  color: #105258;
+  color: var(--eh-color-petrol);
 }
 
 .lifecycle li div {
@@ -82,7 +82,7 @@
 }
 
 .lifecycle li small {
-  color: #105258;
+  color: var(--eh-color-petrol);
   font-size: 10px;
 }
 
@@ -127,7 +127,7 @@
 
   .lifecycle li[data-state='done'],
   .lifecycle li[data-state='current'] {
-    border-left-color: #105258;
+    border-left-color: var(--eh-color-petrol);
   }
 
   .approvalForm {

@@ -6,7 +6,7 @@
 .chatCta { margin: 16px 18px 0; }
 .quoteCard { margin-top: 24px; }
 .quoteCardTitle { padding: 12px 0 4px; font-size: 17px; font-weight: 800; }
-.successNote { color: var(--green); font-weight: 700; padding: 8px 0 14px; }
+.successNote { color: var(--green); font-weight: var(--eh-weight-bold); padding: 8px 0 14px; }
 .fieldSpaced { margin-bottom: 12px; }
 .fieldSpacedLg { margin-bottom: 14px; }
 .gap { height: 14px; }
