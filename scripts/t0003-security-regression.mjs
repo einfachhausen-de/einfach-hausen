@@ -104,7 +104,13 @@ try{
   }
   const actions=fs.readFileSync(path.join(root,'src/app/actions.ts'),'utf8');
   const intakeMedia=fs.readFileSync(path.join(root,'src/lib/intake-media.ts'),'utf8');
-  check('new job media is stored below data/private',actions.includes("from '@/lib/intake-media'")&&actions.includes('savePrivateMediaUpload')&&intakeMedia.includes("'data', 'private', 'job-media'")&&!actions.includes('saveUpload(photo'));
+  // Die Invariante ist "Job-Medien landen in der privaten Ablage, nie im
+  // oeffentlichen Baum". Der Pfad laeuft seit dem PRIVATE_ROOT-Umbau ueber
+  // privateRoot() - die frueher geprueften literalen Segmente 'data','private'
+  // sind genau die Zeichenkette, die den Turbopack-Build zerlegt hat, sobald
+  // dort echte Dateien lagen. Geprueft wird jetzt die Funktion plus, dass
+  // intake-media nirgends auf den oeffentlichen Baum zeigt.
+  check('new job media is stored below the private root',actions.includes("from '@/lib/intake-media'")&&actions.includes('savePrivateMediaUpload')&&intakeMedia.includes('privateRoot()')&&intakeMedia.includes("from './security/private-files'")&&!intakeMedia.includes("'public'")&&!actions.includes('saveUpload(photo'));
   const jobMedia=fs.readFileSync(path.join(root,'src/app/api/job-media/[id]/route.ts'),'utf8');
   check('job media route authenticates and fails cross-user closed',jobMedia.includes('getCurrentUser')&&jobMedia.includes('canReadJobMedia')&&jobMedia.includes('return notFound()')&&jobMedia.includes('resolvePrivateFile'));
 
