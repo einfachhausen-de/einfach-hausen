@@ -1,13 +1,40 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { Bell, CalendarClock, FileText, Search } from 'lucide-react';
+import Link from 'next/link';
+import { Bell, CalendarClock, ChevronRight, FileText, Search } from 'lucide-react';
 import { AppShell } from '@/components/shell';
-import { EHButton, EHCallout, EHMetricsBar, EHOwnerSection, EHPageHeader, EHRecordList, EHStatus, type EHRecordEntry } from '@/design-system';
+import { EHButton, EHCallout, EHMetricsBar, EHOwnerSection, EHRecordList, EHStatus, type EHRecordEntry } from '@/design-system';
 import { requireUser } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { dateLabel, euro } from '@/lib/format';
 import { ownerInstant } from '@/lib/owner-format';
 import { primaryProperty } from '@/lib/properties';
+
+/**
+ * Werkbank-Kopf und Kennzahlenzeile dieser Seite. Ausschliesslich Design-Tokens,
+ * keine Rohwerte: die Vorlage setzt Adresse und Name in Zeilengroesse statt in
+ * einen Werbekopf, und die drei Kennzahlen bleiben auf dem Telefon eine Reihe.
+ * Die Kennzahlenleiste der Bibliothek kippt unter 760px auf zwei Spalten; hier
+ * wird nur diese eine Rasterzeile der Seite zurueckgeholt. Der Selektor traegt
+ * :nth-child(n), damit er die Bibliotheksregel `.metricsBar > div:nth-child(n+3)`
+ * eindeutig schlaegt.
+ */
+const werkbankLayout = `
+.eh-werkbank-kopf { display:flex; align-items:center; gap:12px; padding-bottom:16px; border-bottom:1px solid var(--eh-rule); }
+.eh-werkbank-kopf-copy { flex:1; min-width:0; display:grid; gap:2px; }
+.eh-werkbank-kopf-copy h1 { font-size:var(--eh-font-body); font-weight:var(--eh-weight-semibold); line-height:var(--eh-leading-tight); }
+.eh-werkbank-kopf-copy span { font-size:var(--eh-font-label); line-height:var(--eh-leading-normal); color:var(--eh-muted); }
+.eh-werkbank-kopf-tools { flex:none; display:flex; gap:12px; }
+.eh-werkbank-fokus { display:flex; align-items:center; gap:14px; min-height:80px; padding:14px 16px; border:1px solid var(--eh-rule); border-radius:var(--eh-radius-panel); background:var(--eh-color-white); text-decoration:none; }
+.eh-werkbank-fokus-zahl { flex:none; font-size:var(--eh-font-section); font-weight:var(--eh-weight-semibold); line-height:var(--eh-leading-tight); color:var(--eh-color-terra); font-variant-numeric:tabular-nums; }
+.eh-werkbank-fokus-text { flex:1; min-width:0; display:grid; gap:2px; }
+.eh-werkbank-fokus-text strong { font-size:var(--eh-font-body); font-weight:var(--eh-weight-semibold); line-height:var(--eh-leading-tight); }
+.eh-werkbank-fokus-text span { font-size:var(--eh-font-label); line-height:var(--eh-leading-normal); color:var(--eh-color-secondary); }
+.eh-werkbank-fokus-pfeil { flex:none; width:44px; height:44px; display:grid; place-items:center; border-radius:var(--eh-radius-pill); background:var(--eh-color-petrol); color:var(--eh-color-white); }
+.eh-werkbank-kennzahlen > dl { grid-auto-flow:column; grid-template-columns:repeat(3,minmax(0,1fr)); }
+.eh-werkbank-kennzahlen > dl > div:nth-child(n) { min-height:76px; padding:12px 14px; border-top:0; }
+.eh-werkbank-kennzahlen > dl > div:nth-child(n) + div { border-left:1px solid var(--eh-rule); }
+`;
 
 /** Kurzes Tagesdatum der Hausakte: "14.09.". Die Chronik sortiert am ISO-Wert. */
 function shortDay(value: string): string {
@@ -74,16 +101,33 @@ export default async function Dashboard() {
   }));
 
   return <AppShell role="homeowner" active="/app" title="Start">
-    <EHPageHeader title={address || 'Adresse ergänzen'} context={name || undefined} actions={<>
-      <EHButton href="/app/jobs" variant="secondary" size="small" aria-label="Aufträge durchsuchen"><Search size={18} /></EHButton>
-      <EHButton href="/notifications" variant="secondary" size="small" aria-label={unread ? `${unread} ungelesene Benachrichtigungen` : 'Benachrichtigungen'}><Bell size={18} />{unread > 0 && <EHStatus tone="info">{unread > 99 ? '99+' : unread}</EHStatus>}</EHButton>
-    </>} />
+    <style>{werkbankLayout}</style>
+    <header className="eh-werkbank-kopf">
+      <div className="eh-werkbank-kopf-copy">
+        <h1>{address || 'Adresse ergänzen'}</h1>
+        {name && <span>{name}</span>}
+      </div>
+      <div className="eh-werkbank-kopf-tools">
+        <EHButton href="/app/jobs" variant="secondary" size="small" aria-label="Aufträge durchsuchen"><Search size={18} /></EHButton>
+        <EHButton href="/notifications" variant="secondary" size="small" aria-label={unread ? `${unread} ungelesene Benachrichtigungen` : 'Benachrichtigungen'}><Bell size={18} />{unread > 0 && <EHStatus tone="info">{unread > 99 ? '99+' : unread}</EHStatus>}</EHButton>
+      </div>
+    </header>
+    <Link className="eh-werkbank-fokus" href="/app/jobs">
+      <strong className="eh-werkbank-fokus-zahl">{waiting.length}</strong>
+      <span className="eh-werkbank-fokus-text">
+        <strong>Warten auf dich</strong>
+        <span>Entscheidungen offen</span>
+      </span>
+      <span className="eh-werkbank-fokus-pfeil" aria-hidden="true"><ChevronRight size={18} /></span>
+    </Link>
     {profile?.onboarding_step && profile.onboarding_step !== 'done' && <EHCallout title="Einrichtung unvollständig"><p>Ergänze die Angaben zu deinem Zuhause.</p><EHButton href="/app/onboarding" variant="secondary">Einrichtung fortsetzen</EHButton></EHCallout>}
-    <EHMetricsBar label="Überblick" items={[
-      { id: 'termine', label: 'Termine', value: appointments },
-      { id: 'dokumente', label: 'Dokumente', value: documentCount },
-      { id: 'auftraege', label: 'Aufträge', value: jobs },
-    ]} />
+    <div className="eh-werkbank-kennzahlen">
+      <EHMetricsBar label="Überblick" items={[
+        { id: 'termine', label: 'Termine', value: appointments },
+        { id: 'dokumente', label: 'Dokumente', value: documentCount },
+        { id: 'auftraege', label: 'Aufträge', value: jobs },
+      ]} />
+    </div>
     <EHOwnerSection title={`Wartet auf dich (${waiting.length})`}>
       <EHRecordList label="Wartet auf dich" items={waiting} empty="Nichts offen." />
     </EHOwnerSection>
