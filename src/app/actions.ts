@@ -25,6 +25,9 @@ import { isContractKind, isCostInterval } from '@/lib/contracts';
 import { headers } from 'next/headers';
 import { checkRateLimit, consumeRateLimitAttempt, applyRateLimitLockout, rateLimitBlockedEvent, recordRateLimitFailure, recordRateLimitSuccess } from '@/lib/security/rate-limit';
 import { logAdminAudit, logSecurityEvent } from '@/lib/security/audit';
+import { DEMO_LOGIN_ENABLED, DEMO_PASSWORD, demoEmailFor, isDemoEmail } from '@/lib/demo-accounts';
+import { ensureLocalDemoAccounts } from '@/lib/ensure-local-demo-accounts';
+import { safeNextPath } from '@/lib/safe-redirect';
 import {
   registerSchema,
   loginSchema,
@@ -94,10 +97,10 @@ async function clientIp(): Promise<string> {
   } catch { return 'local'; }
 }
 
-export async function registerAction(fd: FormData) {
+export async function registerAction(fd: FormData): Promise<{ error: string } | { redirectTo: string }> {
   const ip = await clientIp();
   const limit = checkRateLimit('register', ip);
-  if (!limit.allowed) { rateLimitBlockedEvent('register', ip, limit.retryAfterSeconds); redirect('/register?error=Zu%20viele%20Versuche.%20Bitte%20sp%C3%A4ter%20erneut%20versuchen'); }
+  if (!limit.allowed) { rateLimitBlockedEvent('register', ip, limit.retryAfterSeconds); return { error: 'Zu viele Versuche. Bitte später erneut versuchen' }; }
   const parsed = registerSchema.safeParse({
     role: text(fd,'role'), email: text(fd,'email'), password: String(fd.get('password') ?? '').trim(),
     firstName: text(fd,'firstName'), lastName: text(fd,'lastName'), phone: text(fd,'phone'),
@@ -107,9 +110,9 @@ export async function registerAction(fd: FormData) {
     emergencyMode: text(fd,'emergencyMode'), emergencyStart: text(fd,'emergencyStart') || '18:00', emergencyEnd: text(fd,'emergencyEnd') || '22:00',
     emergencyMarkup: int(fd,'emergencyMarkup') ?? 0, openingHours: text(fd,'openingHours'), bookableHours: text(fd,'bookableHours'),
   });
-  if (!parsed.success) { recordRateLimitFailure('register', ip); logSecurityEvent('security_validation_reject', 'register', `fields=${parsed.error.issues.length}`); redirect('/register?error=Bitte%20alle%20Pflichtfelder%20ausf%C3%BCllen'); }
+  if (!parsed.success) { recordRateLimitFailure('register', ip); logSecurityEvent('security_validation_reject', 'register', `fields=${parsed.error.issues.length}`); return { error: 'Bitte alle Pflichtfelder ausfüllen' }; }
   const { role, email, password, firstName: first, lastName: last } = parsed.data;
-  if (db.prepare('SELECT id FROM users WHERE email=?').get(email)) { recordRateLimitFailure('register', ip); logSecurityEvent('security_validation_reject', 'register', 'duplicate_email'); redirect('/login?error=Konto%20existiert%20bereits'); }
+  if (db.prepare('SELECT id FROM users WHERE email=?').get(email)) { recordRateLimitFailure('register', ip); logSecurityEvent('security_validation_reject', 'register', 'duplicate_email'); return { error: 'Konto existiert bereits' }; }
   const d = parsed.data;
   const emergencyDays=fd.getAll('emergencyDay').map(String).filter(v=>/^[0-6]$/.test(v)).join(',')||'1,2,3,4,5';
   const logoFile=fd.get('logo'); const logoPath=role==='provider'&&logoFile instanceof File&&logoFile.size?await savePublicImageUpload(logoFile):null;
@@ -120,7 +123,7 @@ export async function registerAction(fd: FormData) {
   const admin = supabaseAdmin();
   if (!admin) {
     logSecurityEvent('security_validation_reject', 'register', 'supabase_admin_unavailable');
-    redirect('/register?error=Registrierung%20aktuell%20nicht%20verf%C3%BCgbar');
+    return { error: 'Registrierung aktuell nicht verfügbar' };
   }
   const created = await admin.auth.admin.createUser({
     email,
@@ -131,7 +134,7 @@ export async function registerAction(fd: FormData) {
   if (created.error || !created.data?.user) {
     const reason = created.error?.message ?? 'unknown';
     logSecurityEvent('auth_register_fail', email, `supabase_create=${reason.slice(0, 120)}`);
-    redirect('/register?error=Registrierung%20fehlgeschlagen.%20Existiert%20die%20E-Mail%20bereits%3F');
+    return { error: 'Registrierung fehlgeschlagen. Existiert die E-Mail bereits?' };
   }
   const authSubject = created.data.user.id as string;
   const hash = await bcrypt.hash(password, 12);
@@ -186,13 +189,17 @@ export async function registerAction(fd: FormData) {
   const supabaseSession = await establishSupabaseSession(email, password);
   if (!supabaseSession) {
     logSecurityEvent('auth_register', email, 'supabase_session_establishment_failed');
-    redirect('/login?notice=Konto%20erstellt.%20Bitte%20einmalig%20anmelden.');
+    return { redirectTo: '/login?notice=Konto erstellt. Bitte einmalig anmelden.' };
   }
-  redirect(role==='provider'?'/pro':initialRequest?'/app/hausmeister?answered=1':'/app/onboarding');
+  return { redirectTo: role==='provider'?'/pro':initialRequest?'/app/hausmeister?answered=1':'/app/onboarding' };
 }
 
-export async function loginAction(fd: FormData) {
-  const parsed = loginSchema.safeParse({ email: text(fd,'email'), password: String(fd.get('password') ?? '').trim() });
+export async function loginAction(fd: FormData): Promise<{ error: string } | { redirectTo: string }> {
+  const parsed = loginSchema.safeParse({ email: demoEmailFor(text(fd,'email')), password: String(fd.get('password') ?? '').trim() });
+  if (parsed.success && DEMO_LOGIN_ENABLED && isDemoEmail(parsed.data.email) && parsed.data.password === DEMO_PASSWORD) {
+    ensureLocalDemoAccounts();
+    recordRateLimitSuccess('login', parsed.data.email);
+  }
   const ip = await clientIp();
   // Two independent dimensions: one IP cannot spray unlimited accounts, and
   // one account cannot be hammered from unlimited sources.
@@ -201,9 +208,9 @@ export async function loginAction(fd: FormData) {
   const ipLimit = checkRateLimit('login', `ip:${ip}`);
   if (!emailLimit.allowed || !ipLimit.allowed) {
     rateLimitBlockedEvent('login', identifier, Math.max(emailLimit.allowed ? 0 : emailLimit.retryAfterSeconds, ipLimit.retryAfterSeconds));
-    redirect('/login?error=Zu%20viele%20Versuche.%20Bitte%20sp%C3%A4ter%20erneut%20versuchen');
+    return { error: 'Zu viele Versuche. Bitte später erneut versuchen' };
   }
-  if (!parsed.success) { recordRateLimitFailure('login', `ip:${ip}`); logSecurityEvent('security_validation_reject', 'login', 'invalid_input'); redirect('/login?error=E-Mail%20oder%20Passwort%20ist%20falsch'); }
+  if (!parsed.success) { recordRateLimitFailure('login', `ip:${ip}`); logSecurityEvent('security_validation_reject', 'login', 'invalid_input'); return { error: 'E-Mail oder Passwort ist falsch' }; }
   const { email, password } = parsed.data;
   // Count the attempt BEFORE the expensive comparison so a concurrent batch
   // cannot all pass the gate before any failure is recorded.
@@ -211,7 +218,7 @@ export async function loginAction(fd: FormData) {
   const ipConsumed = consumeRateLimitAttempt('login', `ip:${ip}`);
   if (!emailConsumed.consumed || !ipConsumed.consumed || emailConsumed.blocked || ipConsumed.blocked) {
     rateLimitBlockedEvent('login', email, 3600);
-    redirect('/login?error=Zu%20viele%20Versuche.%20Bitte%20sp%C3%A4ter%20erneut%20versuchen');
+    return { error: 'Zu viele Versuche. Bitte später erneut versuchen' };
   }
   const row=db.prepare('SELECT id,password_hash,role FROM users WHERE email=?').get(email) as {id:number,password_hash:string,role:'homeowner'|'provider'}|undefined;
   // Always run bcrypt exactly once against comparable material.
@@ -220,7 +227,7 @@ export async function loginAction(fd: FormData) {
     applyRateLimitLockout('login', email);
     applyRateLimitLockout('login', `ip:${ip}`);
     logSecurityEvent('auth_login_fail', email, `ip=${ip}`);
-    redirect('/login?error=E-Mail%20oder%20Passwort%20ist%20falsch');
+    return { error: 'E-Mail oder Passwort ist falsch' };
   }
   recordRateLimitSuccess('login', email);
   recordRateLimitSuccess('login', `ip:${ip}`);
@@ -235,10 +242,13 @@ export async function loginAction(fd: FormData) {
     const supabaseSession = await establishSupabaseSession(email, password);
     if (!supabaseSession) {
       logSecurityEvent('auth_login_fail', email, 'supabase_session_failed');
-      redirect('/login?error=Anmeldung%20fehlgeschlagen.%20Bitte%20erneut%20versuchen');
+      return { error: 'Anmeldung fehlgeschlagen. Bitte erneut versuchen' };
     }
   }
-  redirect(row.role==='provider'?'/pro':'/app');
+  // Return the destination instead of redirect(). This action is awaited from
+  // a client form wrapper; throwing NEXT_REDIRECT there aborts the in-flight
+  // transition and surfaces "AbortError: Transition was skipped" in preview.
+  return { redirectTo: safeNextPath(text(fd,'next'), row.role==='provider'?'/pro':'/app') };
 }
 export async function logoutAction(){ await destroySession(); redirect('/'); }
 
@@ -519,7 +529,7 @@ export async function createInvoiceAction(jobId:number,fd:FormData){
     const invoiceId=Number(result.lastInsertRowid); const insertItem=db.prepare(`INSERT INTO invoice_items(invoice_id,position,description,quantity,unit,unit_price_net,tax_rate_bps,line_net,line_tax,line_gross) VALUES(?,?,?,?,?,?,?,?,?,?)`); for(const item of calculated)insertItem.run(invoiceId,item.position,item.description,item.quantity,item.unit,item.unitPrice,item.taxBps,item.lineNet,item.lineTax,item.gross); return invoiceId;
   });
   const invoiceId=tx();
-  createNotification(row.homeowner_id,'Neue Rechnung',`${row.business_name} hat dir Rechnung ${invoiceNumber} für „${row.title}“ gesendet.`,`/app/invoices/${invoiceId}`,'invoice');
+  createNotification(row.homeowner_id,'Neue Rechnung',`${row.business_name} hat dir Rechnung ${invoiceNumber} f��r „${row.title}“ gesendet.`,`/app/invoices/${invoiceId}`,'invoice');
   appendJobEvent(jobId,`${row.business_name} hat Rechnung ${invoiceNumber} gesendet. Sie liegt jetzt in deiner Hausakte.`,{invoiceId,invoiceNumber,totalGross:total});
   revalidatePath(`/pro/jobs/${jobId}`);revalidatePath('/pro/orders');revalidatePath(`/app/jobs/${jobId}`);revalidatePath('/app/documents');revalidatePath('/notifications');
   redirect(`/pro/invoices/${invoiceId}?sent=1`);

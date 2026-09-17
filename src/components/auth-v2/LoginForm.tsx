@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Eye, EyeOff, Lock } from "lucide-react";
 import { EHCheckbox } from "@/design-system";
 import { DEMO_PASSWORD, DEMO_USERS, demoEmailFor } from "@/lib/demo-accounts";
+import { safeNextPath } from "@/lib/safe-redirect";
 import { loginAction, registerAction } from "@/app/actions";
 import { ForgotPasswordModal } from "./ForgotPasswordModal";
 import { LegalModal } from "./LegalModal";
@@ -12,6 +13,7 @@ export type Role = "kunde" | "handwerker";
 export type AuthMode = "login" | "register";
 interface LoginFormProps {
   role?: Role;
+  authMode?: AuthMode;
   initialRole?: Role;
   initialAuthMode?: AuthMode;
   nextPath?: string;
@@ -22,29 +24,40 @@ interface LoginFormProps {
   /** Server message from a redirect (?error=…). */
   error?: string;
   onRoleChange?: (role: Role) => void;
+  onAuthModeChange?: (mode: AuthMode) => void;
 }
 
 type LegalType = "agb" | "datenschutz" | "impressum" | "sicherheit" | "partnerkriterien";
 
-function isNextRedirect(error: unknown): boolean {
-  const digest = (error as { digest?: string })?.digest ?? "";
-  if (typeof digest === "string" && digest.startsWith("NEXT_REDIRECT")) return true;
-  return error instanceof Error && error.message.includes("NEXT_REDIRECT");
+function applyAuthResult(
+  result: { error?: string; redirectTo?: string } | void,
+  onError: (message: string) => void,
+) {
+  if (result?.error) {
+    onError(result.error);
+    return;
+  }
+  if (result?.redirectTo) {
+    window.location.assign(result.redirectTo);
+  }
 }
 
 export function LoginForm({
   role: propRole,
+  authMode: propAuthMode,
   initialRole = "kunde",
   initialAuthMode = "login",
-  nextPath: _nextPath,
+  nextPath,
   initialRequest,
   notice,
   error,
   onRoleChange,
+  onAuthModeChange,
 }: LoginFormProps = {}) {
   const [internalRole, setInternalRole] = useState<Role>(initialRole);
   const role = propRole ?? internalRole;
-  const [authMode, setAuthMode] = useState<AuthMode>(initialAuthMode);
+  const [internalAuthMode, setInternalAuthMode] = useState<AuthMode>(initialAuthMode);
+  const authMode = propAuthMode ?? internalAuthMode;
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [firstName, setFirstName] = useState("");
@@ -69,32 +82,33 @@ export function LoginForm({
     else setInternalRole(value);
   };
 
+  const setAuthMode = (value: AuthMode) => {
+    if (isLoading) return;
+    if (onAuthModeChange) onAuthModeChange(value);
+    else setInternalAuthMode(value);
+  };
+
   const switchAuthMode = (mode: AuthMode) => {
     if (isLoading) return;
     setAuthMode(mode);
     setErrorMessage(null);
   };
 
-  async function doLogin(email: string, pw: string) {
+  async function doLogin(email: string, pw: string, targetRole?: Role) {
     setIsLoading(true);
     setErrorMessage(null);
-    try {
-      const data = new FormData();
-      data.set("email", demoEmailFor(email));
-      data.set("password", pw);
-      // Keep authentication in the server action so local SQLite auth and
-      // Supabase auth share one redirect path. Calling the client Supabase
-      // SDK here made local preview logins fail before the action could issue
-      // the SQLite session cookie, which also caused skipped router transitions.
-      await loginAction(data);
-    } catch (error) {
-      // redirect() must bubble so the App Router can finish the navigation.
-      // Swallowing NEXT_REDIRECT aborts the in-flight transition and surfaces
-      // "AbortError: Transition was skipped" in the preview.
-      if (isNextRedirect(error)) throw error;
-      setErrorMessage(error instanceof Error ? error.message : "Anmeldung fehlgeschlagen.");
+    const loginRole = targetRole ?? role;
+    const data = new FormData();
+    data.set("email", demoEmailFor(email));
+    data.set("password", pw);
+    data.set("next", safeNextPath(nextPath, loginRole === "handwerker" ? "/pro" : "/app"));
+    // Failed logins return { error } instead of redirecting back to /login.
+    // That avoids a second App Router transition (NEXT_REDIRECT + skipped
+    // View Transition) when this client wrapper already owns the form action.
+    applyAuthResult(await loginAction(data), (message) => {
+      setErrorMessage(message);
       setIsLoading(false);
-    }
+    });
   }
 
   // Fill-only: inserts demo credentials into the fields, never signs in.
@@ -111,7 +125,7 @@ export function LoginForm({
 
   // Explicit demo start: fills AND signs in. Only these clearly labelled
   // buttons may trigger a sign-in without an explicit form submit.
-  const handleStartDemo = (targetRole: Role) => {
+  const handleStartDemo = async (targetRole: Role) => {
     if (isLoading) return;
     const demo = targetRole === "kunde" ? DEMO_USERS.kunde : DEMO_USERS.handwerker;
     setRole(targetRole);
@@ -119,7 +133,7 @@ export function LoginForm({
     setErrorMessage(null);
     setIdentifier(demo.username);
     setPassword(DEMO_PASSWORD);
-    void doLogin(demo.email, DEMO_PASSWORD);
+    await doLogin(demo.email, DEMO_PASSWORD, targetRole);
   };
 
   async function loginFormAction(fd: FormData) {
@@ -157,31 +171,28 @@ export function LoginForm({
       return;
     }
     setIsLoading(true);
-    try {
-      const data = new FormData();
-      data.set("role", role === "handwerker" ? "provider" : "homeowner");
-      data.set("email", email);
-      data.set("password", pw);
-      data.set("firstName", first);
-      data.set("lastName", last);
-      data.set("postcode", String(fd.get("postcode") ?? "").trim());
-      // The sentence a visitor typed into the public intake form travels with
-      // the registration. registerAction answers it as a Hausmeister question
-      // once the account exists and then lands on /app/hausmeister?answered=1.
-      if (initialRequest) data.set("initialRequest", initialRequest.slice(0, 700));
-      if (role === "handwerker") {
-        data.set("businessName", String(fd.get("businessName") ?? "").trim());
-        data.set("trades", String(fd.get("trades") ?? "").trim());
-        data.set("streetAddress", String(fd.get("streetAddress") ?? "").trim());
-      } else {
-        data.set("address", String(fd.get("address") ?? "").trim());
-      }
-      await registerAction(data);
-    } catch (error) {
-      if (isNextRedirect(error)) throw error;
-      setErrorMessage(error instanceof Error ? error.message : "Registrierung fehlgeschlagen.");
-      setIsLoading(false);
+    const data = new FormData();
+    data.set("role", role === "handwerker" ? "provider" : "homeowner");
+    data.set("email", email);
+    data.set("password", pw);
+    data.set("firstName", first);
+    data.set("lastName", last);
+    data.set("postcode", String(fd.get("postcode") ?? "").trim());
+    // The sentence a visitor typed into the public intake form travels with
+    // the registration. registerAction answers it as a Hausmeister question
+    // once the account exists and then lands on /app/hausmeister?answered=1.
+    if (initialRequest) data.set("initialRequest", initialRequest.slice(0, 700));
+    if (role === "handwerker") {
+      data.set("businessName", String(fd.get("businessName") ?? "").trim());
+      data.set("trades", String(fd.get("trades") ?? "").trim());
+      data.set("streetAddress", String(fd.get("streetAddress") ?? "").trim());
+    } else {
+      data.set("address", String(fd.get("address") ?? "").trim());
     }
+    applyAuthResult(await registerAction(data), (message) => {
+      setErrorMessage(message);
+      setIsLoading(false);
+    });
   }
 
   const formTitle = authMode === "login"
@@ -191,7 +202,7 @@ export function LoginForm({
       : "Als Handwerksbetrieb registrieren";
   const formText = authMode === "login"
     ? role === "kunde"
-      ? "Melde dich an, um Hausakte, Anliegen und Termine zu öffnen."
+      ? "Melde dich an, um Hausakte, Anliegen und Termine zu ��ffnen."
       : "Melde dich an, um Anfragen, Aufträge und Termine zu bearbeiten."
     : role === "kunde"
       ? "Dein Zugang zur Hausakte und zu allen nächsten Schritten rund um dein Zuhause."
@@ -215,7 +226,7 @@ export function LoginForm({
 
       {authMode === "login" ? (
         <form className="arena-stack" action={loginFormAction} aria-busy={isLoading}>
-          <button id="btn-demo-kunde" type="button" className="arena-social" disabled={isLoading} onClick={() => handleStartDemo("kunde")}>
+          <button id="btn-demo-kunde" type="submit" className="arena-social" disabled={isLoading} formNoValidate formAction={() => handleStartDemo("kunde")}>
             Eigentümer-Demo starten
           </button>
           <div className="arena-field">
@@ -290,9 +301,15 @@ export function LoginForm({
       ) : (
         <form className="arena-stack" action={registerFormAction} aria-busy={isLoading}>
           {role === "handwerker" && (
-            <div className="arena-field">
-              <label className="arena-label" htmlFor="reg-business">Unternehmensname</label>
-              <input className="arena-input" id="reg-business" name="businessName" value={businessName} onChange={(event) => setBusinessName(event.target.value)} required />
+            <div className="arena-grid2">
+              <div className="arena-field">
+                <label className="arena-label" htmlFor="reg-business">Unternehmensname</label>
+                <input className="arena-input" id="reg-business" name="businessName" value={businessName} onChange={(event) => setBusinessName(event.target.value)} required />
+              </div>
+              <div className="arena-field">
+                <label className="arena-label" htmlFor="reg-trades">Gewerke / Leistungen</label>
+                <input className="arena-input" id="reg-trades" name="trades" placeholder="z. B. Elektro, SHK, Garten" value={trades} onChange={(event) => setTrades(event.target.value)} required />
+              </div>
             </div>
           )}
           <div className="arena-grid2">
@@ -305,31 +322,21 @@ export function LoginForm({
               <input className="arena-input" id="reg-last-name" name="lastName" autoComplete="family-name" value={lastName} onChange={(event) => setLastName(event.target.value)} required />
             </div>
           </div>
-          {role === "handwerker" && (
-            <div className="arena-field">
-              <label className="arena-label" htmlFor="reg-trades">Gewerke / Leistungen</label>
-              <input className="arena-input" id="reg-trades" name="trades" placeholder="z. B. Elektro, SHK, Garten" value={trades} onChange={(event) => setTrades(event.target.value)} required />
-            </div>
-          )}
-          <div className="arena-field">
-            <label className="arena-label" htmlFor="reg-email">E-Mail</label>
-            <input
-              className="arena-input"
-              id="reg-email"
-              name="email"
-              type="email"
-              inputMode="email"
-              autoComplete="email"
-              placeholder="name@email.com"
-              value={identifier}
-              onChange={(event) => setIdentifier(event.target.value)}
-              required
-            />
-          </div>
           <div className="arena-grid2">
             <div className="arena-field">
-              <label className="arena-label" htmlFor="reg-postcode">Postleitzahl</label>
-              <input className="arena-input" id="reg-postcode" name="postcode" inputMode="numeric" autoComplete="postal-code" value={postcode} onChange={(event) => setPostcode(event.target.value)} />
+              <label className="arena-label" htmlFor="reg-email">E-Mail</label>
+              <input
+                className="arena-input"
+                id="reg-email"
+                name="email"
+                type="email"
+                inputMode="email"
+                autoComplete="email"
+                placeholder="name@email.com"
+                value={identifier}
+                onChange={(event) => setIdentifier(event.target.value)}
+                required
+              />
             </div>
             <div className="arena-field">
               <label className="arena-label" htmlFor="reg-password">Passwort</label>
@@ -347,18 +354,24 @@ export function LoginForm({
               />
             </div>
           </div>
-          <p id="reg-password-hint" className="arena-hint">Mindestens 8 Zeichen.</p>
-          <div className="arena-field">
-            <label className="arena-label" htmlFor="reg-address">{role === "kunde" ? "Adresse des Hauses" : "Betriebsadresse"}</label>
-            <input
-              className="arena-input"
-              id="reg-address"
-              name={role === "kunde" ? "address" : "streetAddress"}
-              autoComplete="street-address"
-              value={address}
-              onChange={(event) => setAddress(event.target.value)}
-            />
+          <div className="arena-grid2">
+            <div className="arena-field">
+              <label className="arena-label" htmlFor="reg-postcode">Postleitzahl</label>
+              <input className="arena-input" id="reg-postcode" name="postcode" inputMode="numeric" autoComplete="postal-code" value={postcode} onChange={(event) => setPostcode(event.target.value)} />
+            </div>
+            <div className="arena-field">
+              <label className="arena-label" htmlFor="reg-address">{role === "kunde" ? "Adresse des Hauses" : "Betriebsadresse"}</label>
+              <input
+                className="arena-input"
+                id="reg-address"
+                name={role === "kunde" ? "address" : "streetAddress"}
+                autoComplete="street-address"
+                value={address}
+                onChange={(event) => setAddress(event.target.value)}
+              />
+            </div>
           </div>
+          <p id="reg-password-hint" className="arena-hint">Mindestens 8 Zeichen.</p>
           <EHCheckbox
             id="checkbox-show-register-password"
             checked={showPassword}
@@ -394,13 +407,17 @@ export function LoginForm({
         <p className="arena-demo-sub">Öffentliche Vorschau: <strong>kunde · handwerker</strong></p>
         <div className="arena-demo-btns">
           {authMode !== "login" && (
-            <button id="btn-demo-kunde" type="button" className="arena-mini-link" disabled={isLoading} onClick={() => handleStartDemo("kunde")}>
-              Eigentümer-Demo starten
-            </button>
+            <form action={() => handleStartDemo("kunde")}>
+              <button id="btn-demo-kunde" type="submit" className="arena-mini-link" disabled={isLoading}>
+                Eigentümer-Demo starten
+              </button>
+            </form>
           )}
-          <button id="btn-demo-handwerker" type="button" className="arena-mini-link" disabled={isLoading} onClick={() => handleStartDemo("handwerker")}>
-            Handwerker-Demo starten
-          </button>
+          <form action={() => handleStartDemo("handwerker")}>
+            <button id="btn-demo-handwerker" type="submit" className="arena-mini-link" disabled={isLoading}>
+              Handwerker-Demo starten
+            </button>
+          </form>
         </div>
       </div>
 
