@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { CalendarDays,CheckCircle2,MapPin,MessageSquare,Phone,ShieldCheck,UserRound } from 'lucide-react';
 import { WerkbankRahmen } from '@/components/werkbank-rahmen';
@@ -8,7 +9,26 @@ import { db } from '@/lib/db';
 import { acceptQuoteAction,cancelJobAction,createCheckoutAction,createClaimAction,reviewAction,sendMessageAction,sendSavedContactMessageAction,turnContactIntoServiceAction } from '@/app/actions';
 import { dateLabel,euro,statusLabel } from '@/lib/format';
 import { getQuoteRecommendations } from '@/lib/orchestrator';
-import { EHActions,EHButton,EHCallout,EHConversation,EHEmptyState,EHErrorState,EHField,EHFormFeedback,EHFormSection,EHInput,EHMetricsBar,EHPageHeader,EHRecordList,EHSelect,EHStatus,EHSubmitButton,EHText,EHTextarea,EHWorkflowForm,EHWorkflowStack,EHWorkSection,EHWorkspaceGrid } from '@/design-system';
+import { EHActions,EHButton,EHCallout,EHConversation,EHEmptyState,EHErrorState,EHField,EHFormFeedback,EHFormSection,EHInput,EHMetricsBar,EHRecordList,EHSelect,EHStatus,EHSubmitButton,EHText,EHTextarea,EHWorkflowForm,EHWorkflowStack,EHWorkSection } from '@/design-system';
+
+/**
+ * Rechte Spalte und Kopf dieser Seite. Dieselben Token wie auf /app und /app/jobs:
+ * Karten, Registerlinie, keine zweite Stilfamilie.
+ */
+const werkbankLayout = `
+.eh-werkbank-rail-h { font-size:10.5px; letter-spacing:.09em; text-transform:uppercase; color:var(--eh-muted); font-weight:700; margin:0 0 10px; }
+.eh-werkbank-karte { background:var(--eh-color-white); border:1px solid var(--eh-color-line); border-radius:var(--eh-radius-control); padding:13px 14px; margin-bottom:12px; }
+.eh-werkbank-karte h4 { margin:0 0 9px; font-size:13.5px; display:flex; align-items:center; gap:8px; }
+.eh-werkbank-row { display:flex; padding:4px 0; font-size:12.5px; gap:12px; }
+.eh-werkbank-row > :last-child { margin-left:auto; color:var(--eh-muted); text-align:right; }
+.eh-werkbank-kopf { display:flex; align-items:center; gap:12px; padding-bottom:16px; border-bottom:1px solid var(--eh-rule); }
+.eh-werkbank-kopf-copy { flex:1; min-width:0; display:grid; gap:2px; }
+.eh-werkbank-kopf-tools { flex:none; display:flex; align-items:center; gap:8px; }
+.eh-werkbank-kopf-copy h1 { font-size:var(--eh-font-body); font-weight:var(--eh-weight-semibold); line-height:var(--eh-leading-tight); }
+.eh-werkbank-kopf-copy span { font-size:var(--eh-font-label); line-height:var(--eh-leading-normal); color:var(--eh-muted); }
+.eh-werkbank-leer { color:var(--eh-muted); font-size:12.5px; margin:0; }
+.eh-werkbank-row a { color:inherit; }
+`;
 
 function emergencyAvailability(value?:string|null){
   if(!value)return 'Zeit nach Rückmeldung';
@@ -35,16 +55,48 @@ export default async function JobDetail({params,searchParams}:{params:Promise<{i
     const contact=db.prepare(`SELECT a.provider_id,a.contact_user_id,u.first_name,u.last_name,u.phone,u.email,m.job_title,p.business_name FROM job_assignments a JOIN users u ON u.id=a.contact_user_id JOIN provider_members m ON m.user_id=a.contact_user_id JOIN provider_profiles p ON p.user_id=a.provider_id WHERE a.job_id=?`).get(job.id) as any;
     const messages=contact?db.prepare('SELECT * FROM contact_messages WHERE homeowner_id=? AND contact_user_id=? ORDER BY created_at').all(u.id,contact.contact_user_id) as any[]:[];
     const dispatches=db.prepare(`SELECT COUNT(*) total FROM job_dispatches WHERE job_id=?`).get(job.id) as any;
-    return <WerkbankRahmen role="homeowner" active="/app/jobs">
+    return <WerkbankRahmen role="homeowner" active="/app/jobs" rail={<>
+        <p className="eh-werkbank-rail-h">Kontext dieser Seite</p>
+        <div className="eh-werkbank-karte">
+          <h4>Nächster Schritt</h4>
+          {contact?<>
+            <EHText>{`Schreib ${contact.first_name} direkt – daraus entsteht noch kein Auftrag.`}</EHText>
+            <EHButton href={`/app/messages?contact=${contact.contact_user_id}`} arrow>Nachricht schreiben</EHButton>
+            {contact.phone&&<EHButton href={`tel:${contact.phone}`} variant="secondary">Anrufen</EHButton>}
+          </>:<EHText muted>{(dispatches.total||0)>0?`${dispatches.total} geprüfte Betriebe sind angefragt. Sobald einer übernimmt, kannst du direkt schreiben oder anrufen.`:'Es ist noch kein Betrieb angefragt.'}</EHText>}
+        </div>
+        <div className="eh-werkbank-karte">
+          <h4>Dein Kontakt</h4>
+          {contact?<>
+            <div className="eh-werkbank-row"><span>Ansprechpartner</span><span>{`${contact.first_name} ${contact.last_name}`}</span></div>
+            <div className="eh-werkbank-row"><span>Betrieb</span><Link href={`/app/partners/${contact.provider_id}?job=${job.id}`}>{contact.business_name}</Link></div>
+            <div className="eh-werkbank-row"><span>Telefon</span><span>{contact.phone||'Keine Nummer hinterlegt'}</span></div>
+            <div className="eh-werkbank-row"><span>E-Mail</span><span>{contact.email||'Keine Adresse hinterlegt'}</span></div>
+          </>:<p className="eh-werkbank-leer">Ein persönlicher Ansprechpartner wird zugewiesen, sobald ein Betrieb übernimmt.</p>}
+        </div>
+        <div className="eh-werkbank-karte">
+          <h4>Gut zu wissen</h4>
+          <p className="eh-werkbank-leer">Du hast nur einen Ansprechpartner gewählt: kein Auftrag, kein Preis, keine Verpflichtung.</p>
+        </div>
+      </>}>
+      <style>{werkbankLayout}</style>
+      <header className="eh-werkbank-kopf">
+        <div className="eh-werkbank-kopf-copy">
+          <h1>{job.title.replace(/^Ansprechpartner:\s*/,'')}</h1>
+          <span>{[job.category,job.postcode].filter(Boolean).join(' · ')}</span>
+        </div>
+        <div className="eh-werkbank-kopf-tools">
+          <EHStatus tone={contact?"success":"neutral"}>{contact?'Verbunden':'Ansprechpartner gesucht'}</EHStatus>
+        </div>
+      </header>
       <EHWorkflowStack>
-      <EHPageHeader title={job.title.replace(/^Ansprechpartner:\s*/,'')} context={[job.category,job.postcode].filter(Boolean).join(' · ')} actions={<EHStatus tone={contact?"success":"neutral"}>{contact?'Verbunden':'Ansprechpartner gesucht'}</EHStatus>} />
       <EHMetricsBar label="Ansprechpartner" items={[
         { id: 'partner', label: 'Angefragte Partner', value: dispatches.total||0, hint: 'regionale Betriebe' },
         { id: 'nachrichten', label: 'Nachrichten', value: messages.length, hint: contact ? 'im Verlauf' : 'noch keine' },
         { id: 'ort', label: 'Ort', value: job.postcode||'–' },
         { id: 'kontakt', label: 'Kontakt', value: contact ? 'Verbunden' : 'Wird gesucht' },
       ]} />
-      <EHWorkspaceGrid main={<>
+      <>
       <EHWorkSection title="Dein Anliegen">
         <EHRecordList label="Eckdaten des Anliegens" items={[
           { id: 'ort', title: job.postcode||'Ohne PLZ', detail: 'Ort', icon: <MapPin size={20} /> },
@@ -85,26 +137,7 @@ export default async function JobDetail({params,searchParams}:{params:Promise<{i
           </EHWorkflowForm>
         </EHWorkSection>
       </>}
-      </>} aside={<>
-        <EHWorkSection title="Nächster Schritt">
-          {contact?<>
-            <EHText>{`Schreib ${contact.first_name} direkt – daraus entsteht noch kein Auftrag.`}</EHText>
-            <EHButton href={`/app/messages?contact=${contact.contact_user_id}`} arrow>Nachricht schreiben</EHButton>
-            {contact.phone&&<EHButton href={`tel:${contact.phone}`} variant="secondary">Anrufen</EHButton>}
-          </>:<EHText muted>{(dispatches.total||0)>0?`${dispatches.total} geprüfte Betriebe sind angefragt. Sobald einer übernimmt, kannst du direkt schreiben oder anrufen.`:'Es ist noch kein Betrieb angefragt.'}</EHText>}
-        </EHWorkSection>
-        <EHWorkSection title="Dein Kontakt">
-          {contact?<EHRecordList label="Kontaktdaten" items={[
-            { id: 'name', title: `${contact.first_name} ${contact.last_name}`, detail: contact.job_title||'Ansprechpartner' },
-            { id: 'betrieb', title: contact.business_name, detail: 'Betrieb', href: `/app/partners/${contact.provider_id}?job=${job.id}` },
-            { id: 'telefon', title: contact.phone||'Keine Nummer hinterlegt', detail: 'Telefon' },
-            { id: 'mail', title: contact.email||'Keine Adresse hinterlegt', detail: 'E-Mail' },
-          ]} />:<EHText muted>Ein persönlicher Ansprechpartner wird zugewiesen, sobald ein Betrieb übernimmt.</EHText>}
-        </EHWorkSection>
-        <EHWorkSection title="Gut zu wissen">
-          <EHText muted>Du hast nur einen Ansprechpartner gewählt: kein Auftrag, kein Preis, keine Verpflichtung.</EHText>
-        </EHWorkSection>
-      </>} />
+      </>
       </EHWorkflowStack>
     </WerkbankRahmen>;
   }
@@ -118,9 +151,49 @@ export default async function JobDetail({params,searchParams}:{params:Promise<{i
   const cheapest=quotes.length?Math.min(...quotes.map(q=>q.amount)):null;
   const available=quotes.filter(q=>q.available_at).sort((a,b)=>new Date(a.available_at).getTime()-new Date(b.available_at).getTime()); const fastest=available[0]?.id;
 
-  return <WerkbankRahmen role="homeowner" active="/app/jobs">
+  return <WerkbankRahmen role="homeowner" active="/app/jobs" rail={<>
+      <p className="eh-werkbank-rail-h">Kontext dieser Seite</p>
+      <div className="eh-werkbank-karte">
+        <h4>Auftrag im Überblick</h4>
+        <div className="eh-werkbank-row"><span>Status</span><span>{statusLabel(job.status)}</span></div>
+        <div className="eh-werkbank-row"><span>Bereich</span><span>{job.category||'Ohne Bereich'}</span></div>
+        <div className="eh-werkbank-row"><span>Ort</span><span>{job.postcode||'Ohne PLZ'}</span></div>
+        <div className="eh-werkbank-row"><span>Wunschtermin</span><span>{dateLabel(job.preferred_date)}</span></div>
+        <div className="eh-werkbank-row"><span>Richtpreis</span><span>{job.budget_min&&job.budget_max?`${euro(job.budget_min)}–${euro(job.budget_max)}`:'wird ermittelt'}</span></div>
+      </div>
+      <div className="eh-werkbank-karte">
+        <h4>Nächster Schritt</h4>
+        {paid?.status==='paid'
+          ? <><EHText>Der Auftrag ist bezahlt. Der Beleg liegt in deiner Hausakte.</EHText><EHButton href="/app/documents" variant="secondary" arrow>Beleg ansehen</EHButton></>
+          : accepted&&contact
+            ? <><EHText>{`Stimme Termin und Details mit ${contact.first_name} ab.`}</EHText><EHButton href={`/app/messages?contact=${contact.contact_user_id}`} arrow>Nachricht schreiben</EHButton></>
+            : accepted
+              ? <EHText muted>Der Partner weist jetzt einen Ansprechpartner zu. Danach kannst du direkt schreiben oder anrufen.</EHText>
+              : quotes.length>0
+                ? <EHText muted>Vergleiche unten die Angebote und buche den Partner, der dir zusagt.</EHText>
+                : <EHText muted>Einfach Hausen klärt Verfügbarkeit und Angebote mit passenden Partnern.</EHText>}
+      </div>
+      <div className="eh-werkbank-karte">
+        <h4>Dein Ansprechpartner</h4>
+        {contact?<>
+          <div className="eh-werkbank-row"><span>Ansprechpartner</span><span>{`${contact.first_name} ${contact.last_name}`}</span></div>
+          <div className="eh-werkbank-row"><span>Betrieb</span><span>{contact.business_name}</span></div>
+          <div className="eh-werkbank-row"><span>Telefon</span><span>{contact.phone||'Keine Nummer hinterlegt'}</span></div>
+        </>:<p className="eh-werkbank-leer">Noch kein Ansprechpartner. Er wird benannt, sobald ein Partner den Auftrag übernimmt.</p>}
+      </div>
+    </>}>
+    <style>{werkbankLayout}</style>
+    <header className="eh-werkbank-kopf">
+      <div className="eh-werkbank-kopf-copy">
+        <h1>{job.title}</h1>
+        <span>{[job.category,job.postcode].filter(Boolean).join(' · ')}</span>
+      </div>
+      <div className="eh-werkbank-kopf-tools">
+        <EHStatus tone="neutral">{statusLabel(job.status)}</EHStatus>
+        {job.urgency==='emergency'&&<EHStatus tone="error">NOTFALL</EHStatus>}
+      </div>
+    </header>
     <EHWorkflowStack>
-    <EHPageHeader title={job.title} context={[job.category,job.postcode].filter(Boolean).join(' · ')} actions={<><EHStatus tone="neutral">{statusLabel(job.status)}</EHStatus>{job.urgency==='emergency'&&<EHStatus tone="error">NOTFALL</EHStatus>}</>} />
     {sp.error&&<EHErrorState text={sp.error} />}{sp.cancelled==='1'&&<EHFormFeedback kind="success">Auftrag wurde storniert.</EHFormFeedback>}{sp.payment==='processing'&&<EHFormFeedback kind="success">Zahlung eingegangen. Der endgültige Status wird sicher über Stripe bestätigt.</EHFormFeedback>}{sp.payment==='unavailable'&&<EHErrorState text="Onlinezahlung ist derzeit nicht vollständig konfiguriert. Es wurde kein Zahlungsstatus geändert. Stimme die Zahlung direkt mit deinem Ansprechpartner ab oder versuche es später erneut." />}{sp.payment==='cancelled'&&<EHErrorState text="Zahlung wurde abgebrochen. Es wurde nichts belastet." />}
     <EHMetricsBar label="Stand deines Auftrags" items={[
       { id: 'angebote', label: 'Angebote', value: quotes.length, hint: cheapest!=null ? `ab ${euro(cheapest)}` : 'noch keine' },
@@ -128,7 +201,7 @@ export default async function JobDetail({params,searchParams}:{params:Promise<{i
       { id: 'termin', label: 'Wunschtermin', value: dateLabel(job.preferred_date) },
       { id: 'nachrichten', label: 'Nachrichten', value: messages.length, hint: contact ? 'mit deinem Ansprechpartner' : 'noch kein Kontakt' },
     ]} />
-    <EHWorkspaceGrid main={<>
+    <>
     <EHWorkSection title="Dein Auftrag">
       <EHRecordList label="Eckdaten des Auftrags" items={[
         { id: 'ort', title: job.postcode||'Ohne PLZ', detail: 'Ort', icon: <MapPin size={20} /> },
@@ -227,35 +300,7 @@ export default async function JobDetail({params,searchParams}:{params:Promise<{i
         </EHFormSection>
       </EHWorkflowForm>
     </EHWorkSection>}
-    </>} aside={<>
-      <EHWorkSection title="Auftrag im Überblick">
-        <EHRecordList label="Eckdaten des Auftrags" items={[
-          { id: 'status', title: statusLabel(job.status), detail: 'Status' },
-          { id: 'kategorie', title: job.category||'Ohne Bereich', detail: 'Bereich' },
-          { id: 'ort', title: job.postcode||'Ohne PLZ', detail: 'Ort' },
-          { id: 'termin', title: dateLabel(job.preferred_date), detail: 'Wunschtermin' },
-          { id: 'richtpreis', title: job.budget_min&&job.budget_max?`${euro(job.budget_min)}–${euro(job.budget_max)}`:'wird ermittelt', detail: 'Richtpreis' },
-        ]} />
-      </EHWorkSection>
-      <EHWorkSection title="Nächster Schritt">
-        {paid?.status==='paid'
-          ? <><EHText>Der Auftrag ist bezahlt. Der Beleg liegt in deiner Hausakte.</EHText><EHButton href="/app/documents" variant="secondary" arrow>Beleg ansehen</EHButton></>
-          : accepted&&contact
-            ? <><EHText>{`Stimme Termin und Details mit ${contact.first_name} ab.`}</EHText><EHButton href={`/app/messages?contact=${contact.contact_user_id}`} arrow>Nachricht schreiben</EHButton></>
-            : accepted
-              ? <EHText muted>Der Partner weist jetzt einen Ansprechpartner zu. Danach kannst du direkt schreiben oder anrufen.</EHText>
-              : quotes.length>0
-                ? <EHText muted>Vergleiche unten die Angebote und buche den Partner, der dir zusagt.</EHText>
-                : <EHText muted>Einfach Hausen klärt Verfügbarkeit und Angebote mit passenden Partnern.</EHText>}
-      </EHWorkSection>
-      <EHWorkSection title="Dein Ansprechpartner">
-        {contact?<EHRecordList label="Ansprechpartner" items={[
-          { id: 'name', title: `${contact.first_name} ${contact.last_name}`, detail: contact.job_title||'Ansprechpartner' },
-          { id: 'betrieb', title: contact.business_name, detail: 'Betrieb' },
-          { id: 'telefon', title: contact.phone||'Keine Nummer hinterlegt', detail: 'Telefon' },
-        ]} />:<EHText muted>Noch kein Ansprechpartner. Er wird benannt, sobald ein Partner den Auftrag übernimmt.</EHText>}
-      </EHWorkSection>
-    </>} />
+    </>
     </EHWorkflowStack>
   </WerkbankRahmen>;
 }
