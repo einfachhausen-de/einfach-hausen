@@ -1,13 +1,10 @@
 'use client';
 
 import React, { useState } from "react";
-import { useRouter } from "next/navigation";
 import { ArrowRight, Eye, EyeOff, Lock } from "lucide-react";
 import { EHWorkflowHeading } from "@/design-system";
-import { getLoginSupabase } from "@/lib/supabase";
 import { DEMO_PASSWORD, DEMO_USERS, demoEmailFor } from "@/lib/demo-accounts";
-import { registerAction } from "@/app/actions";
-import { safeNextPath } from "@/lib/safe-redirect";
+import { loginAction, registerAction } from "@/app/actions";
 import { ForgotPasswordModal } from "./ForgotPasswordModal";
 import { LegalModal } from "./LegalModal";
 
@@ -39,7 +36,6 @@ export function LoginForm({
   error,
   onRoleChange,
 }: LoginFormProps = {}) {
-  const router = useRouter();
   const [internalRole, setInternalRole] = useState<Role>(initialRole);
   const role = propRole ?? internalRole;
   const [authMode, setAuthMode] = useState<AuthMode>(initialAuthMode);
@@ -73,19 +69,20 @@ export function LoginForm({
     setErrorMessage(null);
   };
 
-  async function doLogin(email: string, pw: string, loginRole: Role = role) {
+  async function doLogin(email: string, pw: string) {
     setIsLoading(true);
     setErrorMessage(null);
     try {
-      const supabase = await getLoginSupabase(remember);
-      const { error } = await supabase.auth.signInWithPassword({ email: demoEmailFor(email), password: pw });
-      if (error) {
-        setErrorMessage(error.message === "Invalid login credentials" ? "E-Mail oder Passwort falsch." : "Anmeldung fehlgeschlagen. Bitte versuch es erneut.");
-        setIsLoading(false);
-        return;
-      }
-      router.replace(safeNextPath(nextPath, loginRole === "handwerker" ? "/pro" : "/app"));
+      const data = new FormData();
+      data.set("email", demoEmailFor(email));
+      data.set("password", pw);
+      // Keep authentication in the server action so local SQLite auth and
+      // Supabase auth share one redirect path. Calling the client Supabase
+      // SDK here made local preview logins fail before the action could issue
+      // the SQLite session cookie, which also caused skipped router transitions.
+      await loginAction(data);
     } catch (error) {
+      if (error instanceof Error && error.message.includes("NEXT_REDIRECT")) return;
       setErrorMessage(error instanceof Error ? error.message : "Anmeldung fehlgeschlagen.");
       setIsLoading(false);
     }
