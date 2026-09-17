@@ -2335,7 +2335,7 @@ a.ownerDashboardStatusItem:hover {
 /* Werkbank (Variante A): ein Datensatz, drei Ansichten. Der Zustand steht in ARIA, nie in einer Klasse. */
 .pageHeader { display:flex; flex-wrap:wrap; align-items:baseline; justify-content:space-between; gap:12px 24px; padding-bottom:16px; border-bottom:1px solid var(--eh-rule); }
 .pageHeaderCopy { display:grid; gap:4px; min-width:0; }
-.pageTitle { font-size:var(--eh-font-section); font-weight:var(--eh-weight-semibold); line-height:var(--eh-leading-tight); }
+.pageTitle { font-size:var(--eh-app-large); font-weight:var(--eh-weight-semibold); line-height:var(--eh-leading-tight); }
 .pageContext { font-size:var(--eh-font-label); line-height:var(--eh-leading-normal); color:var(--eh-muted); }
 .pageActions { display:flex; flex-wrap:wrap; gap:12px; }
 .metricsBar { display:grid; grid-auto-flow:column; grid-auto-columns:minmax(0,1fr); margin:0; border:1px solid var(--eh-rule); border-radius:var(--eh-radius-panel); background:var(--eh-color-white); }
