@@ -25,7 +25,9 @@ durch Jeremy — grüne Gates ersetzen keine Gestaltungsfreigabe.
 
 ## 3. Vorgabe (nur lesen, nie schreiben)
 
-`/Users/jeremyschulze/workbuddy-ai/einfachhausen/vergleich/werkbank-vergleich/vergleich.html`
+Im Repo: `docs/brand/werkbank-vergleich/vergleich.html` (inkl. `referenz.png`,
+`inter-variable.woff2`, `ist/`-Screenshots daneben). Älterer Mac-Pfad, falls lokal
+vorhanden: `/Users/jeremyschulze/workbuddy-ai/einfachhausen/vergleich/werkbank-vergleich/vergleich.html`.
 (652 Zeilen, 6 Soll-Entwürfe). Tokens: `--r-pan:8px`, `--shadow-card` einlagig,
 Inter. Echte Werte: `packages/eh-design/src/tokens.css`
 (`--eh-radius-panel:0.5rem`, `--eh-shadow-card:0 2px 10px rgba(16,34,42,.08)`).
