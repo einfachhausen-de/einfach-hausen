@@ -70,7 +70,7 @@ export default async function AdminOps({searchParams}:{searchParams:Promise<Reco
     ]} />
     <EHWorkspaceGrid main={<>
       <EHWorkSection title="Lookup">
-        <form action="/admin/ops"><EHField id="ops-q" label="E-Mail oder Name"><EHInput id="ops-q" name="q" defaultValue={q} placeholder="E-Mail oder Name"/></EHField><EHButton type="submit">Suchen</EHButton></form>
+        <form action="/admin/ops"><EHField id="ops-q" label="Nutzer suchen"><EHInput id="ops-q" name="q" defaultValue={q} placeholder="E-Mail oder Name"/></EHField><EHButton type="submit">Suchen</EHButton></form>
         <EHRecordList label="Lookup-Treffer" items={matchItems} empty={q?'Keine Treffer.':'Noch keine Suche gestartet.'} />
       </EHWorkSection>
       <EHWorkSection title="Feature-Flags">
