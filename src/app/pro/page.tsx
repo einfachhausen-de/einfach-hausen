@@ -1,5 +1,5 @@
 import { BadgeCheck, CalendarClock, Flame, Leaf, Sprout } from 'lucide-react';
-import { EHAppHeader, EHMetricsBar, EHPriorityAction, EHRecordList, EHRecordViews, EHStatus, EHWorkspaceGrid, EHWorkSection, type EHRecordEntry } from '@/design-system';
+import { EHPageHeader, EHMetricsBar, EHPriorityAction, EHRecordList, EHRecordViews, EHStatus, EHWorkspaceGrid, EHWorkSection, type EHRecordEntry } from '@/design-system';
 import { AppShell } from '@/components/shell';
 import { ProviderAccessBoundary, ProviderState } from '@/components/provider/workspace';
 import { requireUser } from '@/lib/auth';
@@ -117,10 +117,14 @@ export default async function Pro() {
     <AppShell role="provider" active="/pro" title="Arbeitsbereich" subtitle={`${ctx.businessName} · ${ctx.jobTitle || 'Ansprechpartner'}`}>
       <ProviderAccessBoundary canManageJobs={ctx.canManageJobs} />
 
-      <EHAppHeader
-        eyebrow={ctx.businessName}
+      {/* Kompakter Werkzeugkopf statt EHAppHeader: Eyebrow, grosser Titel und
+          Erklaertext machten aus der Betriebsstartseite eine Marketingseite
+          (Symptom "Dokument statt Werkzeug"). Die Zielvorlage a-liste.png
+          traegt an dieser Stelle einen kleinen Titel direkt ueber den
+          Kennzahlen. */}
+      <EHPageHeader
         title={`${greeting()}, ${u.first_name}.`}
-        text={ctx.canManageJobs ? 'Anfragen prüfen. Arbeit planen. Den nächsten Auftrag voranbringen.' : 'Deine zugewiesene Arbeit und die nächsten Termine im Überblick.'}
+        context={ctx.businessName}
       />
 
       <p>{location}</p>

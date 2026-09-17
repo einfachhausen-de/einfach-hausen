@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import Link from 'next/link';
-import { Bell, CalendarClock, ChevronRight, FileText, Search } from 'lucide-react';
+import { CalendarClock, ChevronRight, FileText } from 'lucide-react';
 import { AppShell } from '@/components/shell';
 import { EHButton, EHCallout, EHMetricsBar, EHOwnerSection, EHRecordList, EHStatus, type EHRecordEntry } from '@/design-system';
 import { requireUser } from '@/lib/auth';
@@ -38,7 +38,6 @@ const werkbankLayout = `
 .eh-werkbank-kopf-copy { flex:1; min-width:0; display:grid; gap:2px; }
 .eh-werkbank-kopf-copy h1 { font-size:var(--eh-font-body); font-weight:var(--eh-weight-semibold); line-height:var(--eh-leading-tight); }
 .eh-werkbank-kopf-copy span { font-size:var(--eh-font-label); line-height:var(--eh-leading-normal); color:var(--eh-muted); }
-.eh-werkbank-kopf-tools { flex:none; display:flex; gap:12px; }
 .eh-werkbank-fokus { display:flex; align-items:center; gap:14px; min-height:80px; padding:14px 16px; border:1px solid var(--eh-rule); border-radius:var(--eh-radius-panel); background:var(--eh-color-white); text-decoration:none; }
 .eh-werkbank-fokus-zahl { flex:none; font-size:var(--eh-font-section); font-weight:var(--eh-weight-semibold); line-height:var(--eh-leading-tight); color:var(--eh-color-terra); font-variant-numeric:tabular-nums; }
 .eh-werkbank-fokus-text { flex:1; min-width:0; display:grid; gap:2px; }
@@ -142,10 +141,9 @@ export default async function Dashboard() {
         <h1>{address || 'Adresse ergänzen'}</h1>
         {name && <span>{name}</span>}
       </div>
-      <div className="eh-werkbank-kopf-tools">
-        <EHButton href="/app/jobs" variant="secondary" size="small" aria-label="Aufträge durchsuchen"><Search size={18} /></EHButton>
-        <EHButton href="/notifications" variant="secondary" size="small" aria-label={unread ? `${unread} ungelesene Benachrichtigungen` : 'Benachrichtigungen'}><Bell size={18} />{unread > 0 && <EHStatus tone="info">{unread > 99 ? '99+' : unread}</EHStatus>}</EHButton>
-      </div>
+      {/* Suche und Glocke sitzen bereits in der AppShell-Topbar
+          (src/components/shell.tsx:79) und waren hier ein zweites Mal
+          sichtbar. Der Objektkopf traegt nur noch Adresse und Name. */}
     </header>
     <Link className="eh-werkbank-fokus" href="/app/jobs">
       <strong className="eh-werkbank-fokus-zahl">{waiting.length}</strong>
