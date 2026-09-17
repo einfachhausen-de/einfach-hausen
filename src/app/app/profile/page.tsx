@@ -1,6 +1,5 @@
 import { EHButton, EHPageHeader, EHList, EHCallout, EHField, EHInput, EHWorkspaceGrid, EHIdentitySummary, EHWorkflowForm, EHWorkflowStack, EHFormSection, EHFieldGrid, EHMetricsBar, EHRecordList, EHStatus, EHSubmitButton, EHText, EHWorkSection, type EHRecordEntry } from '@/design-system';
 import { WerkbankRahmen } from '@/components/werkbank-rahmen';
-import { ownerAccountTabs } from '@/components/nav-config';
 import { InstallAppCard } from '@/components/install-app-card';
 import { requireUser } from '@/lib/auth';
 import { db } from '@/lib/db';
@@ -38,8 +37,8 @@ export default async function Profile(){
     {id:'abgleich',title:'Profiladresse ↔ Hausakte',detail:!property?'Ohne Hausakte gibt es nichts abzugleichen':addressMatch?'Beide tragen dieselbe Adresse':'Die Adressen weichen voneinander ab',status:!property?<EHStatus tone="neutral">Kein Abgleich</EHStatus>:addressMatch?<EHStatus tone="success">Stimmt überein</EHStatus>:<EHStatus tone="warning">Weicht ab</EHStatus>},
   ];
   return <WerkbankRahmen role="homeowner" active="/app/profile" brandSub={property?.address || p?.address}
-    breadcrumbs={[{ href: '/app', label: 'Start' }, { label: 'Profil & Einstellungen' }]}
-    tabs={ownerAccountTabs.map(tab=>({href:tab.href,label:tab.label,active:tab.href==='/app/profile'}))}>
+
+>
     <EHWorkflowStack>
     <EHPageHeader title="Profil & Einstellungen" context={u.email} />
     <EHMetricsBar label="Profil & Einstellungen" items={[

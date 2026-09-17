@@ -1,6 +1,5 @@
 import { EHEmptyState, EHField, EHFieldGrid, EHFormFeedback, EHFormSection, EHInput, EHMetricsBar, EHPageHeader, EHRecordList, EHRecordViews, EHSelect, EHStatus, EHSubmitButton, EHText, EHTextarea, EHWorkSection, EHWorkspaceGrid, EHWorkflowForm, EHWorkflowStack, EHButton } from '@/design-system';
 import { AppShell } from '@/components/shell';
-import { crumbs } from '@/components/nav-config';
 import { requireUser } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { addHouseHistoryAction,createHouseTransferAction } from '@/app/actions';
@@ -27,7 +26,7 @@ const berlinDay = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Berlin', 
 
 export default async function HouseHistory({searchParams}:{searchParams:Promise<Record<string,string>>}){
   const user=await requireUser('homeowner'); const sp=await searchParams; const property=primaryProperty(user.id);
-  if (!property) return <AppShell role="homeowner" active="/app/home/history" title="Haus-Historie" breadcrumbs={crumbs('/app/home','Historie')}>
+  if (!property) return <AppShell role="homeowner" active="/app/home/history" title="Haus-Historie">
     <EHPageHeader title="Haus-Historie" />
     <EHEmptyState title="Keine aktive Hausakte" text="Lege zuerst dein Zuhause an. Danach kannst du frühere Arbeiten, Wartungen und Dokumente hier sammeln." action={<EHButton href="/app/home">Mein Haus einrichten</EHButton>} />
   </AppShell>;
@@ -59,7 +58,7 @@ export default async function HouseHistory({searchParams}:{searchParams:Promise<
   }));
   // Der erste Eintrag der Eigentuemerhistorie ist kein Wechsel.
   const ownerChanges=Math.max(0,ownerships.length-1);
-  return <AppShell role="homeowner" active="/app/home/history" title="Haus-Historie" breadcrumbs={crumbs('/app/home','Historie')}>
+  return <AppShell role="homeowner" active="/app/home/history" title="Haus-Historie">
     <EHWorkflowStack>
     <EHPageHeader title="Haus-Historie" context={`${entries.length} ${entries.length === 1 ? 'dokumentierte Arbeit' : 'dokumentierte Arbeiten'}`} actions={<EHButton href="#historie-anlegen" arrow>Arbeit dokumentieren</EHButton>} />
     <EHMetricsBar label="Haus-Historie" items={[

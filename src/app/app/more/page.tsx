@@ -39,7 +39,7 @@ export default async function More(){
     href: `/app/jobs/${job.id}`,
   }));
 
-  return <AppShell role="homeowner" active="/app/more" title="Mehr" breadcrumbs={[{ href: '/app', label: 'Start' }, { label: 'Bereiche & Konto' }]}>
+  return <AppShell role="homeowner" active="/app/more" title="Mehr">
     <EHPageHeader title="Bereiche & Konto" context={unread > 0 ? `${unread} ungelesene ${unread === 1 ? 'Mitteilung' : 'Mitteilungen'}` : undefined} />
     <EHMetricsBar label="Bereiche & Konto" items={[
       { id: 'bereiche', label: 'Bereiche', value: String(ownerAreas.length), hint: 'Wege in der App' },

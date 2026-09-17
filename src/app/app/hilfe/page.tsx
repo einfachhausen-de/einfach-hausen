@@ -1,6 +1,5 @@
 import { CalendarDays, ClipboardList, MessageCircle, Wrench } from 'lucide-react';
 import { WerkbankRahmen } from '@/components/werkbank-rahmen';
-import { crumbs } from '@/components/nav-config';
 import { requireUser } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { dateLabel, euroExact, statusLabel } from '@/lib/format';
@@ -38,7 +37,7 @@ export default async function HilfePage() {
   }));
 
   return (
-    <WerkbankRahmen role="homeowner" active="/app/more" breadcrumbs={crumbs(null,'Hilfe & Kontakt')}>
+    <WerkbankRahmen role="homeowner" active="/app/more">
       <EHWorkflowStack>
       <EHPageHeader title="Hilfe & Kontakt" context={openJobs.length > 0 ? `${openJobs.length} ${openJobs.length === 1 ? 'Vorgang' : 'Vorgänge'} in Bearbeitung` : 'Alles abgeschlossen'} />
       <EHMetricsBar label="Dein Stand" items={[

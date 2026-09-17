@@ -1,6 +1,5 @@
 import Link from 'next/link';
 import { AppShell } from '@/components/shell';
-import { crumbs } from '@/components/nav-config';
 import { HausmeisterAssistant } from '@/components/homeowner/hausmeister-assistant';
 import { createConsultationAction } from '@/app/actions';
 import { requireUser } from '@/lib/auth';
@@ -34,7 +33,7 @@ export default async function Consultation({ searchParams }: { searchParams: Pro
     href: `/app/jobs/${request.id}`,
   }));
 
-  return <AppShell role="homeowner" active="/app" title="Beratung" breadcrumbs={crumbs('/app','Beratung')}>
+  return <AppShell role="homeowner" active="/app" title="Beratung">
     <EHPageHeader title="Beratung" context={lastRequest ? `Letzte Anfrage ${dateLabel(lastRequest.created_at)}` : 'Noch keine Anfrage'} />
     <EHMetricsBar label="Beratung" items={[
       { id: 'anfragen', label: 'Anfragen', value: String(requests.length), hint: 'seit Beginn' },

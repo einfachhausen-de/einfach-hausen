@@ -1,6 +1,5 @@
 import fs from 'node:fs';
 import { WerkbankRahmen } from '@/components/werkbank-rahmen';
-import { crumbs } from '@/components/nav-config';
 import { EHButton, EHEmptyState, EHMetricsBar, EHPageHeader, EHRecordList, EHRecordViews, EHStatus, EHText, EHWorkSection, EHWorkspaceGrid, type EHRecordEntry } from '@/design-system';
 import { requireUser } from '@/lib/auth';
 import { db } from '@/lib/db';
@@ -96,7 +95,7 @@ export default async function Documents(){
       href:`/app/documents/${p.job_id}/receipt`,
     })),
   ].sort((a,b)=>(b.date??'').localeCompare(a.date??''));
-  return <WerkbankRahmen role="homeowner" active="/app/documents" breadcrumbs={crumbs('/app/home','Dokumente')}>
+  return <WerkbankRahmen role="homeowner" active="/app/documents">
     <EHPageHeader title="Dokumente & Rechnungen" context={openInvoices.length>0 ? `Offen: ${euroExact(openTotal)}` : undefined} />
     <EHMetricsBar label="Dokumente" items={[
       {id:'gesamt',label:'Dokumente',value:String(documentTotal),hint:'in dieser Ablage'},

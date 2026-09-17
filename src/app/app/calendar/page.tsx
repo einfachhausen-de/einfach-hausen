@@ -1,6 +1,5 @@
 import { CalendarClock } from 'lucide-react';
 import { WerkbankRahmen } from '@/components/werkbank-rahmen';
-import { crumbs } from '@/components/nav-config';
 import { EHEmptyState, EHButton, EHMetricsBar, EHOwnerFilters, EHOwnerSection, EHPageHeader, EHRecordList, EHStatus, EHText, EHWorkSection, EHWorkspaceGrid, type EHRecordEntry } from '@/design-system';
 import { requireUser } from '@/lib/auth';
 import { db } from '@/lib/db';
@@ -56,7 +55,7 @@ export default async function Calendar({searchParams}:{searchParams:Promise<Reco
   const upcomingOpen = upcomingTotal - upcomingConfirmed;
   const upcoming = db.prepare(`SELECT a.id,a.job_id,a.start_at,a.status,j.title,p.business_name FROM appointments a JOIN jobs j ON j.id=a.job_id LEFT JOIN provider_profiles p ON p.user_id=a.provider_id WHERE a.homeowner_id=? AND datetime(a.start_at)>=datetime('now') ORDER BY datetime(a.start_at) ASC,a.id ASC LIMIT 5`).all(user.id) as Appointment[];
   const next = upcoming[0];
-  return <WerkbankRahmen role="homeowner" active="/app/calendar" breadcrumbs={crumbs('/app/jobs','Termine')}>
+  return <WerkbankRahmen role="homeowner" active="/app/calendar">
     <EHPageHeader title="Deine Termine" context={past ? `${totalLabel} · Seite ${page} von ${pages}` : totalLabel} />
     <EHMetricsBar label="Termine" items={[
       {id:'gesamt',label:'Termine gesamt',value:allTotal,hint:'in deiner Akte'},

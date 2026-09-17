@@ -1,5 +1,4 @@
 import { AppShell } from '@/components/shell';
-import { crumbs } from '@/components/nav-config';
 import { EHActions, EHButton, EHEmptyState, EHMetricsBar, EHPageHeader, EHRecordList, EHRecordViews, EHRouteTabs, EHStatus, EHSubmitButton, EHText, EHWorkSection, EHWorkspaceGrid } from '@/design-system';
 import { completeMaintenanceTaskAction } from '@/app/actions';
 import { requireUser } from '@/lib/auth';
@@ -79,7 +78,7 @@ export default async function YearPage({ searchParams }: {
     ) : undefined,
   }));
 
-  return <AppShell role="homeowner" active="/app/year" title="Mein Jahr" subtitle="Wartung, Termine und Hausaufgaben" breadcrumbs={crumbs('/app/home','Mein Jahr')}>
+  return <AppShell role="homeowner" active="/app/year" title="Mein Jahr" subtitle="Wartung, Termine und Hausaufgaben">
     <EHPageHeader title="Mein Jahr" context={`${view === 'plan' ? 'Plan' : 'Historie'} ${year}`} actions={<EHButton href="/app/hausmeister" arrow>Neue Aufgabe planen</EHButton>} />
     <EHMetricsBar label="Mein Jahr" items={[
       { id: 'wartungen', label: 'Wartungen', value: String(tasks.length), hint: view === 'history' ? 'nach Fälligkeit' : 'offen im gewählten Jahr' },

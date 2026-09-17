@@ -76,14 +76,10 @@ export default async function Contracts({ searchParams }: { searchParams: Promis
     : null;
   const outbound = selected ? affiliateLink(selected.kind) : undefined;
 
-  const trail = tab === 'sparcheck'
-    ? [{ href: '/app', label: 'Start' }, { href: '/app/contracts', label: 'Verträge & Tarife' }, { label: 'Spar-Check' }]
-    : [{ href: '/app', label: 'Start' }, { label: 'Verträge & Tarife' }];
-
   // Beide Ansichten hängen in der Seitenleiste (Verträge & Tarife-Gruppe),
   // darum keine Pillen mehr im Inhalt.
 
-  return <WerkbankRahmen role="homeowner" active="/app/contracts" breadcrumbs={trail}>
+  return <WerkbankRahmen role="homeowner" active="/app/contracts">
     <EHWorkflowStack>
       <EHPageHeader
         title="Verträge & Tarife"

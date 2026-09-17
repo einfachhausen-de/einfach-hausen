@@ -1,5 +1,4 @@
 import { AppShell } from '@/components/shell';
-import { crumbs } from '@/components/nav-config';
 import { HomeownerHausmeisterComposer } from '@/components/homeowner/homeowner-hausmeister-composer';
 import { HausmeisterQuotaStatus } from '@/components/homeowner/hausmeister-quota-status';
 import { startHausmeisterRouteAction } from '@/app/actions';
@@ -73,7 +72,7 @@ export default async function Hausmeister({searchParams}:{searchParams:Promise<R
     ...messages.map(message => ({id:String(message.id),mine:message.role==='user',author:speaker(message.role),body:message.body})),
   ];
 
-  return <AppShell role="homeowner" active="/app" title="Hausmeister" breadcrumbs={crumbs('/app','Hausmeister')}>
+  return <AppShell role="homeowner" active="/app" title="Hausmeister">
     <EHPageHeader title="Hausmeister" context={thread ? `Letzte Nachricht ${dateLabel(thread.updated_at)}` : 'Noch kein Gespräch'} />
     <EHMetricsBar label="Hausmeister" items={[
       {id:'nachrichten',label:'Nachrichten',value:String(messageCount),hint:thread?'im laufenden Gespräch':'noch kein Gespräch begonnen'},

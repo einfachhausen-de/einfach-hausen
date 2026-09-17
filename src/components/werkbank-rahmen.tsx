@@ -7,7 +7,6 @@ import { db } from '@/lib/db';
 import { matchesArea, ownerAreas, providerAreas, ownerAreaSubNav, providerAreaSubNav, type ContextTab } from './nav-config';
 import { OwnerMobileMenu } from './owner-menu';
 import { BottomNav } from './bottom-nav';
-import { Breadcrumbs, type Crumb } from './breadcrumbs';
 import s from './shell.module.css';
 
 /**
@@ -17,12 +16,11 @@ import s from './shell.module.css';
  * 1180/1120/980/760 stehen am Ende von shell.module.css. Keine versiegelte
  * Datei wird angefasst; alle Farben/Schriften/Radien kommen aus eh-Tokens.
  */
-export async function WerkbankRahmen({ role, active, children, rail, breadcrumbs, tabs, brandSub, searchLabel }: {
+export async function WerkbankRahmen({ role, active, children, rail, tabs, brandSub, searchLabel }: {
   role: 'homeowner' | 'provider';
   active: string;
   children: ReactNode;
   rail?: ReactNode;
-  breadcrumbs?: readonly Crumb[];
   tabs?: readonly ContextTab[];
   brandSub?: string;
   searchLabel?: string;
@@ -40,6 +38,12 @@ export async function WerkbankRahmen({ role, active, children, rail, breadcrumbs
 
   const areas = pro ? providerAreas : ownerAreas;
   const subNav = pro ? providerAreaSubNav(active) : ownerAreaSubNav(active);
+  // Die erste Gruppe trägt den Namen des aktiven Hauptmenüpunkts — die
+  // Seitenleiste zeigt immer den Inhalt des aktiven Bereichs, nicht starr
+  // dieselbe Überschrift.
+  const subGrouplabel = subNav.area?.label ?? 'Arbeitsbereich';
+  const profileOn = active === '/app/profile';
+  const settingsOn = active === '/app/settings';
   // Keine automatischen Kontext-Tabs: Die Seitenleiste zeigt dieselben
   // Unterpunkte bereits. Nur explizit übergebene `tabs` (Profil/Einstellungen,
   // die nicht in der Seitenleiste stehen) werden noch gerendert.
@@ -67,8 +71,8 @@ export async function WerkbankRahmen({ role, active, children, rail, breadcrumbs
       </div>
       <div className={s['wb-body']}>
         <aside className={s['wb-side']} aria-label="Unternavigation">
-          {subNav.items.length > 0 && (<nav aria-label="Arbeitsbereich">
-            <p className={s['wb-grp']}>Arbeitsbereich</p>
+          {subNav.items.length > 0 && (<nav aria-label={subGrouplabel}>
+            <p className={s['wb-grp']}>{subGrouplabel}</p>
             {subNav.items.map((item: { href: string; label: string; active: boolean }) => {
               const itemOn = item.active;
               return <Link key={item.href} href={item.href} aria-current={itemOn ? 'page' : undefined} className={itemOn ? s['wb-on'] : undefined}>{item.label}</Link>;
@@ -80,13 +84,19 @@ export async function WerkbankRahmen({ role, active, children, rail, breadcrumbs
               {area.children.map(c => <Link key={c.href} href={c.href}>{c.label}</Link>)}
             </nav>
           ))}
+          {!pro && (
+            <nav aria-label="Konto">
+              <p className={s['wb-grp']}>Konto</p>
+              <Link href="/app/profile" aria-current={profileOn ? 'page' : undefined} className={profileOn ? s['wb-on'] : undefined}>Profil</Link>
+              <Link href="/app/settings" aria-current={settingsOn ? 'page' : undefined} className={settingsOn ? s['wb-on'] : undefined}>App-Einstellungen</Link>
+            </nav>
+          )}
           <div className={s['wb-me']}>
             <span className={s['wb-meav']} aria-hidden="true">{initials}</span>
             <span className={s['wb-mename']}><b>{user ? `${user.first_name} ${user.last_name}` : 'Profil'}</b><small>{pro ? 'Partnerkonto' : 'Eigenheim-Konto'}</small></span>
           </div>
         </aside>
         <main className={s['wb-main']}>
-          {breadcrumbs && breadcrumbs.length > 0 && <Breadcrumbs trail={breadcrumbs} />}
           {tabs && tabs.length > 0 && <EHRouteTabs label="Kontextnavigation" items={tabs} />}
           {children}
         </main>

@@ -1,6 +1,5 @@
 import { RefreshCw } from 'lucide-react';
 import { WerkbankRahmen } from '@/components/werkbank-rahmen';
-import { crumbs } from '@/components/nav-config';
 import { EHButton, EHCheckbox, EHEmptyState, EHField, EHFormSection, EHSelect, EHStepProgress, EHTextarea, EHInput, EHStatus, EHSubmitButton, EHMetricsBar, EHPageHeader, EHRecordList, EHRecordViews, EHText, EHWorkSection, EHWorkflowForm, EHWorkflowStack, EHWorkspaceGrid, type EHRecordEntry } from '@/design-system';
 import { requireUser } from '@/lib/auth';
 import { db } from '@/lib/db';
@@ -46,7 +45,7 @@ export default async function Sale() {
   const user = await requireUser('homeowner');
   const property = primaryProperty(user.id);
   if (!property) {
-    return <WerkbankRahmen role="homeowner" active="/app/home/sale" breadcrumbs={crumbs('/app/home','Verkauf & Bewertung')}><EHEmptyState title="Hausprofil fehlt" text="Lege zuerst dein Zuhause an. Danach kannst du Bewertung und Verkauf vorbereitet organisieren." action={<EHButton href="/app/home">Mein Haus einrichten</EHButton>} /></WerkbankRahmen>;
+    return <WerkbankRahmen role="homeowner" active="/app/home/sale"><EHEmptyState title="Hausprofil fehlt" text="Lege zuerst dein Zuhause an. Danach kannst du Bewertung und Verkauf vorbereitet organisieren." action={<EHButton href="/app/home">Mein Haus einrichten</EHButton>} /></WerkbankRahmen>;
   }
 
   const valuations = db.prepare(`SELECT * FROM property_valuations WHERE property_id=? AND homeowner_id=? ORDER BY created_at DESC LIMIT 10`).all(property.id, user.id) as any[];
@@ -85,7 +84,7 @@ export default async function Sale() {
     status: <EHStatus tone="success">Freigabe aktiv</EHStatus>,
   }));
 
-  return <WerkbankRahmen role="homeowner" active="/app/home/sale" brandSub={property.address} breadcrumbs={crumbs('/app/home','Verkauf & Bewertung')}>
+  return <WerkbankRahmen role="homeowner" active="/app/home/sale" brandSub={property.address}>
     <EHWorkflowStack>
     <EHPageHeader title="Verkauf & Bewertung" context={property.address || property.postcode || undefined} />
 

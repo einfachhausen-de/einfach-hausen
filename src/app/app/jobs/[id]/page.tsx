@@ -1,7 +1,6 @@
 import { notFound } from 'next/navigation';
 import { CalendarDays,CheckCircle2,MapPin,MessageSquare,Phone,ShieldCheck,UserRound } from 'lucide-react';
 import { WerkbankRahmen } from '@/components/werkbank-rahmen';
-import { crumbs } from '@/components/nav-config';
 import { JobMedia } from '@/components/job-media';
 import { mediaKindFromPath } from '@/lib/intake-media';
 import { requireUser } from '@/lib/auth';
@@ -36,7 +35,7 @@ export default async function JobDetail({params,searchParams}:{params:Promise<{i
     const contact=db.prepare(`SELECT a.provider_id,a.contact_user_id,u.first_name,u.last_name,u.phone,u.email,m.job_title,p.business_name FROM job_assignments a JOIN users u ON u.id=a.contact_user_id JOIN provider_members m ON m.user_id=a.contact_user_id JOIN provider_profiles p ON p.user_id=a.provider_id WHERE a.job_id=?`).get(job.id) as any;
     const messages=contact?db.prepare('SELECT * FROM contact_messages WHERE homeowner_id=? AND contact_user_id=? ORDER BY created_at').all(u.id,contact.contact_user_id) as any[]:[];
     const dispatches=db.prepare(`SELECT COUNT(*) total FROM job_dispatches WHERE job_id=?`).get(job.id) as any;
-    return <WerkbankRahmen role="homeowner" active="/app/jobs" breadcrumbs={crumbs('/app/jobs','Ansprechpartner')}>
+    return <WerkbankRahmen role="homeowner" active="/app/jobs">
       <EHWorkflowStack>
       <EHPageHeader title={job.title.replace(/^Ansprechpartner:\s*/,'')} context={[job.category,job.postcode].filter(Boolean).join(' · ')} actions={<EHStatus tone={contact?"success":"neutral"}>{contact?'Verbunden':'Ansprechpartner gesucht'}</EHStatus>} />
       <EHMetricsBar label="Ansprechpartner" items={[
@@ -119,7 +118,7 @@ export default async function JobDetail({params,searchParams}:{params:Promise<{i
   const cheapest=quotes.length?Math.min(...quotes.map(q=>q.amount)):null;
   const available=quotes.filter(q=>q.available_at).sort((a,b)=>new Date(a.available_at).getTime()-new Date(b.available_at).getTime()); const fastest=available[0]?.id;
 
-  return <WerkbankRahmen role="homeowner" active="/app/jobs" breadcrumbs={crumbs('/app/jobs','Auftrag')}>
+  return <WerkbankRahmen role="homeowner" active="/app/jobs">
     <EHWorkflowStack>
     <EHPageHeader title={job.title} context={[job.category,job.postcode].filter(Boolean).join(' · ')} actions={<><EHStatus tone="neutral">{statusLabel(job.status)}</EHStatus>{job.urgency==='emergency'&&<EHStatus tone="error">NOTFALL</EHStatus>}</>} />
     {sp.error&&<EHErrorState text={sp.error} />}{sp.cancelled==='1'&&<EHFormFeedback kind="success">Auftrag wurde storniert.</EHFormFeedback>}{sp.payment==='processing'&&<EHFormFeedback kind="success">Zahlung eingegangen. Der endgültige Status wird sicher über Stripe bestätigt.</EHFormFeedback>}{sp.payment==='unavailable'&&<EHErrorState text="Onlinezahlung ist derzeit nicht vollständig konfiguriert. Es wurde kein Zahlungsstatus geändert. Stimme die Zahlung direkt mit deinem Ansprechpartner ab oder versuche es später erneut." />}{sp.payment==='cancelled'&&<EHErrorState text="Zahlung wurde abgebrochen. Es wurde nichts belastet." />}

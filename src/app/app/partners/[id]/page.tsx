@@ -1,7 +1,6 @@
 import { EHEmptyState, EHErrorState, EHButton, EHField, EHFormFeedback, EHInput, EHMetricsBar, EHPageHeader, EHRecordList, EHStatus, EHSubmitButton, EHText, EHWorkflowStack, EHWorkSection, EHWorkspaceGrid } from '@/design-system';
 import { notFound } from 'next/navigation';
 import { WerkbankRahmen } from '@/components/werkbank-rahmen';
-import { crumbs } from '@/components/nav-config';
 import { requireUser } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { reportReviewAction } from '@/app/actions';
@@ -18,7 +17,7 @@ export default async function PartnerProfile({params,searchParams}:{params:Promi
   const verifications=[provider.insurance_verified,provider.qualification_verified,provider.contract_verified,provider.quality_standard_verified];
   const verifiedCount=verifications.filter(Boolean).length;
   const returnLabel=sp.job?'Zum Angebot zurück':'Aufträge ansehen';
-  return <WerkbankRahmen role="homeowner" active="/app/partners" breadcrumbs={crumbs('/app/messages','Partnerprofil')}>
+  return <WerkbankRahmen role="homeowner" active="/app/partners">
     <EHWorkflowStack>
     {sp.message&&<EHFormFeedback kind="success">{String(sp.message)}</EHFormFeedback>}
     {sp.error&&<EHErrorState text={String(sp.error)} />}
