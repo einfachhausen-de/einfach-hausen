@@ -29,10 +29,17 @@ interface LoginFormProps {
 
 type LegalType = "agb" | "datenschutz" | "impressum" | "sicherheit" | "partnerkriterien";
 
-function isNextRedirect(error: unknown): boolean {
-  const digest = (error as { digest?: string })?.digest ?? "";
-  if (typeof digest === "string" && digest.startsWith("NEXT_REDIRECT")) return true;
-  return error instanceof Error && error.message.includes("NEXT_REDIRECT");
+function applyAuthResult(
+  result: { error?: string; redirectTo?: string } | void,
+  onError: (message: string) => void,
+) {
+  if (result?.error) {
+    onError(result.error);
+    return;
+  }
+  if (result?.redirectTo) {
+    window.location.assign(result.redirectTo);
+  }
 }
 
 export function LoginForm({
@@ -98,11 +105,10 @@ export function LoginForm({
     // Failed logins return { error } instead of redirecting back to /login.
     // That avoids a second App Router transition (NEXT_REDIRECT + skipped
     // View Transition) when this client wrapper already owns the form action.
-    const result = await loginAction(data);
-    if (result?.error) {
-      setErrorMessage(result.error);
+    applyAuthResult(await loginAction(data), (message) => {
+      setErrorMessage(message);
       setIsLoading(false);
-    }
+    });
   }
 
   // Fill-only: inserts demo credentials into the fields, never signs in.
@@ -165,31 +171,28 @@ export function LoginForm({
       return;
     }
     setIsLoading(true);
-    try {
-      const data = new FormData();
-      data.set("role", role === "handwerker" ? "provider" : "homeowner");
-      data.set("email", email);
-      data.set("password", pw);
-      data.set("firstName", first);
-      data.set("lastName", last);
-      data.set("postcode", String(fd.get("postcode") ?? "").trim());
-      // The sentence a visitor typed into the public intake form travels with
-      // the registration. registerAction answers it as a Hausmeister question
-      // once the account exists and then lands on /app/hausmeister?answered=1.
-      if (initialRequest) data.set("initialRequest", initialRequest.slice(0, 700));
-      if (role === "handwerker") {
-        data.set("businessName", String(fd.get("businessName") ?? "").trim());
-        data.set("trades", String(fd.get("trades") ?? "").trim());
-        data.set("streetAddress", String(fd.get("streetAddress") ?? "").trim());
-      } else {
-        data.set("address", String(fd.get("address") ?? "").trim());
-      }
-      await registerAction(data);
-    } catch (error) {
-      if (isNextRedirect(error)) throw error;
-      setErrorMessage(error instanceof Error ? error.message : "Registrierung fehlgeschlagen.");
-      setIsLoading(false);
+    const data = new FormData();
+    data.set("role", role === "handwerker" ? "provider" : "homeowner");
+    data.set("email", email);
+    data.set("password", pw);
+    data.set("firstName", first);
+    data.set("lastName", last);
+    data.set("postcode", String(fd.get("postcode") ?? "").trim());
+    // The sentence a visitor typed into the public intake form travels with
+    // the registration. registerAction answers it as a Hausmeister question
+    // once the account exists and then lands on /app/hausmeister?answered=1.
+    if (initialRequest) data.set("initialRequest", initialRequest.slice(0, 700));
+    if (role === "handwerker") {
+      data.set("businessName", String(fd.get("businessName") ?? "").trim());
+      data.set("trades", String(fd.get("trades") ?? "").trim());
+      data.set("streetAddress", String(fd.get("streetAddress") ?? "").trim());
+    } else {
+      data.set("address", String(fd.get("address") ?? "").trim());
     }
+    applyAuthResult(await registerAction(data), (message) => {
+      setErrorMessage(message);
+      setIsLoading(false);
+    });
   }
 
   const formTitle = authMode === "login"
@@ -199,7 +202,7 @@ export function LoginForm({
       : "Als Handwerksbetrieb registrieren";
   const formText = authMode === "login"
     ? role === "kunde"
-      ? "Melde dich an, um Hausakte, Anliegen und Termine zu öffnen."
+      ? "Melde dich an, um Hausakte, Anliegen und Termine zu ��ffnen."
       : "Melde dich an, um Anfragen, Aufträge und Termine zu bearbeiten."
     : role === "kunde"
       ? "Dein Zugang zur Hausakte und zu allen nächsten Schritten rund um dein Zuhause."

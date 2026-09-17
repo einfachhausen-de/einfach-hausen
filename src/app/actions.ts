@@ -97,10 +97,10 @@ async function clientIp(): Promise<string> {
   } catch { return 'local'; }
 }
 
-export async function registerAction(fd: FormData) {
+export async function registerAction(fd: FormData): Promise<{ error: string } | { redirectTo: string }> {
   const ip = await clientIp();
   const limit = checkRateLimit('register', ip);
-  if (!limit.allowed) { rateLimitBlockedEvent('register', ip, limit.retryAfterSeconds); redirect('/register?error=Zu%20viele%20Versuche.%20Bitte%20sp%C3%A4ter%20erneut%20versuchen'); }
+  if (!limit.allowed) { rateLimitBlockedEvent('register', ip, limit.retryAfterSeconds); return { error: 'Zu viele Versuche. Bitte später erneut versuchen' }; }
   const parsed = registerSchema.safeParse({
     role: text(fd,'role'), email: text(fd,'email'), password: String(fd.get('password') ?? '').trim(),
     firstName: text(fd,'firstName'), lastName: text(fd,'lastName'), phone: text(fd,'phone'),
@@ -110,9 +110,9 @@ export async function registerAction(fd: FormData) {
     emergencyMode: text(fd,'emergencyMode'), emergencyStart: text(fd,'emergencyStart') || '18:00', emergencyEnd: text(fd,'emergencyEnd') || '22:00',
     emergencyMarkup: int(fd,'emergencyMarkup') ?? 0, openingHours: text(fd,'openingHours'), bookableHours: text(fd,'bookableHours'),
   });
-  if (!parsed.success) { recordRateLimitFailure('register', ip); logSecurityEvent('security_validation_reject', 'register', `fields=${parsed.error.issues.length}`); redirect('/register?error=Bitte%20alle%20Pflichtfelder%20ausf%C3%BCllen'); }
+  if (!parsed.success) { recordRateLimitFailure('register', ip); logSecurityEvent('security_validation_reject', 'register', `fields=${parsed.error.issues.length}`); return { error: 'Bitte alle Pflichtfelder ausfüllen' }; }
   const { role, email, password, firstName: first, lastName: last } = parsed.data;
-  if (db.prepare('SELECT id FROM users WHERE email=?').get(email)) { recordRateLimitFailure('register', ip); logSecurityEvent('security_validation_reject', 'register', 'duplicate_email'); redirect('/login?error=Konto%20existiert%20bereits'); }
+  if (db.prepare('SELECT id FROM users WHERE email=?').get(email)) { recordRateLimitFailure('register', ip); logSecurityEvent('security_validation_reject', 'register', 'duplicate_email'); return { error: 'Konto existiert bereits' }; }
   const d = parsed.data;
   const emergencyDays=fd.getAll('emergencyDay').map(String).filter(v=>/^[0-6]$/.test(v)).join(',')||'1,2,3,4,5';
   const logoFile=fd.get('logo'); const logoPath=role==='provider'&&logoFile instanceof File&&logoFile.size?await savePublicImageUpload(logoFile):null;
@@ -123,7 +123,7 @@ export async function registerAction(fd: FormData) {
   const admin = supabaseAdmin();
   if (!admin) {
     logSecurityEvent('security_validation_reject', 'register', 'supabase_admin_unavailable');
-    redirect('/register?error=Registrierung%20aktuell%20nicht%20verf%C3%BCgbar');
+    return { error: 'Registrierung aktuell nicht verfügbar' };
   }
   const created = await admin.auth.admin.createUser({
     email,
@@ -134,7 +134,7 @@ export async function registerAction(fd: FormData) {
   if (created.error || !created.data?.user) {
     const reason = created.error?.message ?? 'unknown';
     logSecurityEvent('auth_register_fail', email, `supabase_create=${reason.slice(0, 120)}`);
-    redirect('/register?error=Registrierung%20fehlgeschlagen.%20Existiert%20die%20E-Mail%20bereits%3F');
+    return { error: 'Registrierung fehlgeschlagen. Existiert die E-Mail bereits?' };
   }
   const authSubject = created.data.user.id as string;
   const hash = await bcrypt.hash(password, 12);
@@ -189,12 +189,12 @@ export async function registerAction(fd: FormData) {
   const supabaseSession = await establishSupabaseSession(email, password);
   if (!supabaseSession) {
     logSecurityEvent('auth_register', email, 'supabase_session_establishment_failed');
-    redirect('/login?notice=Konto%20erstellt.%20Bitte%20einmalig%20anmelden.');
+    return { redirectTo: '/login?notice=Konto erstellt. Bitte einmalig anmelden.' };
   }
-  redirect(role==='provider'?'/pro':initialRequest?'/app/hausmeister?answered=1':'/app/onboarding');
+  return { redirectTo: role==='provider'?'/pro':initialRequest?'/app/hausmeister?answered=1':'/app/onboarding' };
 }
 
-export async function loginAction(fd: FormData): Promise<{ error: string } | void> {
+export async function loginAction(fd: FormData): Promise<{ error: string } | { redirectTo: string }> {
   const parsed = loginSchema.safeParse({ email: demoEmailFor(text(fd,'email')), password: String(fd.get('password') ?? '').trim() });
   if (parsed.success && DEMO_LOGIN_ENABLED && isDemoEmail(parsed.data.email) && parsed.data.password === DEMO_PASSWORD) {
     ensureLocalDemoAccounts();
@@ -245,7 +245,10 @@ export async function loginAction(fd: FormData): Promise<{ error: string } | voi
       return { error: 'Anmeldung fehlgeschlagen. Bitte erneut versuchen' };
     }
   }
-  redirect(safeNextPath(text(fd,'next'), row.role==='provider'?'/pro':'/app'));
+  // Return the destination instead of redirect(). This action is awaited from
+  // a client form wrapper; throwing NEXT_REDIRECT there aborts the in-flight
+  // transition and surfaces "AbortError: Transition was skipped" in preview.
+  return { redirectTo: safeNextPath(text(fd,'next'), row.role==='provider'?'/pro':'/app') };
 }
 export async function logoutAction(){ await destroySession(); redirect('/'); }
 
