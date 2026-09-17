@@ -26,6 +26,7 @@
     border-radius: 24px;
     box-shadow: 0 25px 50px color-mix(in srgb, var(--eh-color-deep) 18%, transparent);
     overflow: hidden;
+    transition: max-width 0.45s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   .arena-main {
@@ -182,6 +183,10 @@
   @media (prefers-reduced-motion: reduce) {
     .arena-loading-spinner {
       animation-duration: 1.6s;
+    }
+
+    .arena-card {
+      transition: none;
     }
   }
 
@@ -375,6 +380,17 @@
     font-size: 13px;
   }
 
+  .arena-demo-btns {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px 16px;
+  }
+
+  .arena-demo-btns form {
+    display: contents;
+  }
+
   .arena-demo-top,
   .arena-demo-sub {
     position: absolute;
@@ -430,12 +446,42 @@
 
     .arena-card {
       grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-      min-height: 700px;
+      min-height: 720px;
+      height: 720px;
       border-radius: 40px;
     }
 
+    .arena-card--register {
+      max-width: 1240px;
+      grid-template-columns: minmax(0, 1.28fr) minmax(0, 1fr);
+    }
+
+    .arena-card--register .arena-forminner {
+      max-width: 560px;
+    }
+
+    .arena-card--register .arena-topbar {
+      margin-bottom: 16px;
+    }
+
+    .arena-card--register .arena-stack {
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .arena-card--register .arena-ssl {
+      margin-top: 4px;
+    }
+
+    .arena-card--register .arena-main {
+      padding: 24px 40px;
+      justify-content: flex-start;
+    }
+
     .arena-main {
+      min-height: 0;
       padding: 36px 40px;
+      overflow: auto;
     }
 
     .arena-hero {

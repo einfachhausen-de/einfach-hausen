@@ -12,6 +12,7 @@ export type Role = "kunde" | "handwerker";
 export type AuthMode = "login" | "register";
 interface LoginFormProps {
   role?: Role;
+  authMode?: AuthMode;
   initialRole?: Role;
   initialAuthMode?: AuthMode;
   nextPath?: string;
@@ -22,6 +23,7 @@ interface LoginFormProps {
   /** Server message from a redirect (?error=…). */
   error?: string;
   onRoleChange?: (role: Role) => void;
+  onAuthModeChange?: (mode: AuthMode) => void;
 }
 
 type LegalType = "agb" | "datenschutz" | "impressum" | "sicherheit" | "partnerkriterien";
@@ -34,6 +36,7 @@ function isNextRedirect(error: unknown): boolean {
 
 export function LoginForm({
   role: propRole,
+  authMode: propAuthMode,
   initialRole = "kunde",
   initialAuthMode = "login",
   nextPath: _nextPath,
@@ -41,10 +44,12 @@ export function LoginForm({
   notice,
   error,
   onRoleChange,
+  onAuthModeChange,
 }: LoginFormProps = {}) {
   const [internalRole, setInternalRole] = useState<Role>(initialRole);
   const role = propRole ?? internalRole;
-  const [authMode, setAuthMode] = useState<AuthMode>(initialAuthMode);
+  const [internalAuthMode, setInternalAuthMode] = useState<AuthMode>(initialAuthMode);
+  const authMode = propAuthMode ?? internalAuthMode;
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [firstName, setFirstName] = useState("");
@@ -67,6 +72,12 @@ export function LoginForm({
     if (isLoading) return;
     if (onRoleChange) onRoleChange(value);
     else setInternalRole(value);
+  };
+
+  const setAuthMode = (value: AuthMode) => {
+    if (isLoading) return;
+    if (onAuthModeChange) onAuthModeChange(value);
+    else setInternalAuthMode(value);
   };
 
   const switchAuthMode = (mode: AuthMode) => {
@@ -284,9 +295,15 @@ export function LoginForm({
       ) : (
         <form className="arena-stack" action={registerFormAction} aria-busy={isLoading}>
           {role === "handwerker" && (
-            <div className="arena-field">
-              <label className="arena-label" htmlFor="reg-business">Unternehmensname</label>
-              <input className="arena-input" id="reg-business" name="businessName" value={businessName} onChange={(event) => setBusinessName(event.target.value)} required />
+            <div className="arena-grid2">
+              <div className="arena-field">
+                <label className="arena-label" htmlFor="reg-business">Unternehmensname</label>
+                <input className="arena-input" id="reg-business" name="businessName" value={businessName} onChange={(event) => setBusinessName(event.target.value)} required />
+              </div>
+              <div className="arena-field">
+                <label className="arena-label" htmlFor="reg-trades">Gewerke / Leistungen</label>
+                <input className="arena-input" id="reg-trades" name="trades" placeholder="z. B. Elektro, SHK, Garten" value={trades} onChange={(event) => setTrades(event.target.value)} required />
+              </div>
             </div>
           )}
           <div className="arena-grid2">
@@ -299,31 +316,21 @@ export function LoginForm({
               <input className="arena-input" id="reg-last-name" name="lastName" autoComplete="family-name" value={lastName} onChange={(event) => setLastName(event.target.value)} required />
             </div>
           </div>
-          {role === "handwerker" && (
-            <div className="arena-field">
-              <label className="arena-label" htmlFor="reg-trades">Gewerke / Leistungen</label>
-              <input className="arena-input" id="reg-trades" name="trades" placeholder="z. B. Elektro, SHK, Garten" value={trades} onChange={(event) => setTrades(event.target.value)} required />
-            </div>
-          )}
-          <div className="arena-field">
-            <label className="arena-label" htmlFor="reg-email">E-Mail</label>
-            <input
-              className="arena-input"
-              id="reg-email"
-              name="email"
-              type="email"
-              inputMode="email"
-              autoComplete="email"
-              placeholder="name@email.com"
-              value={identifier}
-              onChange={(event) => setIdentifier(event.target.value)}
-              required
-            />
-          </div>
           <div className="arena-grid2">
             <div className="arena-field">
-              <label className="arena-label" htmlFor="reg-postcode">Postleitzahl</label>
-              <input className="arena-input" id="reg-postcode" name="postcode" inputMode="numeric" autoComplete="postal-code" value={postcode} onChange={(event) => setPostcode(event.target.value)} />
+              <label className="arena-label" htmlFor="reg-email">E-Mail</label>
+              <input
+                className="arena-input"
+                id="reg-email"
+                name="email"
+                type="email"
+                inputMode="email"
+                autoComplete="email"
+                placeholder="name@email.com"
+                value={identifier}
+                onChange={(event) => setIdentifier(event.target.value)}
+                required
+              />
             </div>
             <div className="arena-field">
               <label className="arena-label" htmlFor="reg-password">Passwort</label>
@@ -341,18 +348,24 @@ export function LoginForm({
               />
             </div>
           </div>
-          <p id="reg-password-hint" className="arena-hint">Mindestens 8 Zeichen.</p>
-          <div className="arena-field">
-            <label className="arena-label" htmlFor="reg-address">{role === "kunde" ? "Adresse des Hauses" : "Betriebsadresse"}</label>
-            <input
-              className="arena-input"
-              id="reg-address"
-              name={role === "kunde" ? "address" : "streetAddress"}
-              autoComplete="street-address"
-              value={address}
-              onChange={(event) => setAddress(event.target.value)}
-            />
+          <div className="arena-grid2">
+            <div className="arena-field">
+              <label className="arena-label" htmlFor="reg-postcode">Postleitzahl</label>
+              <input className="arena-input" id="reg-postcode" name="postcode" inputMode="numeric" autoComplete="postal-code" value={postcode} onChange={(event) => setPostcode(event.target.value)} />
+            </div>
+            <div className="arena-field">
+              <label className="arena-label" htmlFor="reg-address">{role === "kunde" ? "Adresse des Hauses" : "Betriebsadresse"}</label>
+              <input
+                className="arena-input"
+                id="reg-address"
+                name={role === "kunde" ? "address" : "streetAddress"}
+                autoComplete="street-address"
+                value={address}
+                onChange={(event) => setAddress(event.target.value)}
+              />
+            </div>
           </div>
+          <p id="reg-password-hint" className="arena-hint">Mindestens 8 Zeichen.</p>
           <EHCheckbox
             id="checkbox-show-register-password"
             checked={showPassword}

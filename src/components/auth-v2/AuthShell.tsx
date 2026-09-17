@@ -27,11 +27,12 @@ export function AuthShell({
   error?: string;
 }) {
   const [role, setRole] = useState<Role>(initialRole);
+  const [authMode, setAuthMode] = useState<AuthMode>(initialAuthMode);
   const [activeLegalModal, setActiveLegalModal] = useState<LegalType | null>(null);
 
   return (
     <div className="arena-auth">
-      <div className="arena-card">
+      <div className={authMode === "register" ? "arena-card arena-card--register" : "arena-card"}>
         <main className="arena-main">
           <div className="arena-forminner">
             <div className="arena-topbar">
@@ -51,12 +52,14 @@ export function AuthShell({
 
             <LoginForm
               role={role}
+              authMode={authMode}
               initialAuthMode={initialAuthMode}
               nextPath={nextPath}
               initialRequest={initialRequest}
               notice={notice}
               error={error}
               onRoleChange={setRole}
+              onAuthModeChange={setAuthMode}
             />
           </div>
         </main>
