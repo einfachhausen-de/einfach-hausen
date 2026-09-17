@@ -36,6 +36,7 @@ const werkbankLayout = `
 .eh-werkbank-row > :last-child { margin-left:auto; color:var(--eh-muted); }
 .eh-werkbank-kopf { display:flex; align-items:center; gap:12px; padding-bottom:16px; border-bottom:1px solid var(--eh-rule); }
 .eh-werkbank-kopf-copy { flex:1; min-width:0; display:grid; gap:2px; }
+.eh-werkbank-kopf-cta { flex:none; display:inline-flex; align-items:center; gap:8px; background:var(--eh-color-petrol); color:var(--eh-color-white); border-radius:var(--eh-radius-control); padding:10px 18px; font-weight:600; text-decoration:none; font-size:13.5px; }
 .eh-werkbank-kopf-copy h1 { font-size:var(--eh-font-body); font-weight:var(--eh-weight-semibold); line-height:var(--eh-leading-tight); }
 .eh-werkbank-kopf-copy span { font-size:var(--eh-font-label); line-height:var(--eh-leading-normal); color:var(--eh-muted); }
 .eh-werkbank-fokus { display:flex; align-items:center; gap:14px; min-height:80px; padding:14px 16px; border:1px solid var(--eh-rule); border-radius:var(--eh-radius-panel); background:var(--eh-color-white); text-decoration:none; }
@@ -80,7 +81,7 @@ function documentFacts(relativePath: string): string {
 
 export default async function Dashboard() {
   const user = await requireUser('homeowner');
-  const profile = db.prepare('SELECT address,onboarding_step FROM homeowner_profiles WHERE user_id=?').get(user.id) as { address?: string; onboarding_step?: string } | undefined;
+  const profile = db.prepare('SELECT address,postcode,onboarding_step FROM homeowner_profiles WHERE user_id=?').get(user.id) as { address?: string; postcode?: string; onboarding_step?: string } | undefined;
   const property = primaryProperty(user.id);
   const address = property?.address || profile?.address || '';
   const name = `${user.first_name} ${user.last_name}`.trim();
@@ -91,6 +92,17 @@ export default async function Dashboard() {
   const jobs = (db.prepare(`SELECT COUNT(*) c FROM jobs WHERE homeowner_id=? AND request_kind='service' AND status IN ('open','quoted','accepted','in_progress')`).get(user.id) as { c: number }).c;
   const documents = db.prepare(`SELECT d.id,d.title,d.path,d.created_at FROM documents d JOIN jobs j ON j.id=d.job_id WHERE j.homeowner_id=? ORDER BY datetime(d.created_at) DESC LIMIT 3`).all(user.id) as { id: number; title: string; path: string; created_at: string }[];
   const documentCount = (db.prepare(`SELECT COUNT(*) c FROM documents d JOIN jobs j ON j.id=d.job_id WHERE j.homeowner_id=?`).get(user.id) as { c: number }).c;
+  const upcoming = db.prepare(`SELECT a.job_id,a.start_at,j.title,p.business_name FROM appointments a JOIN jobs j ON j.id=a.job_id LEFT JOIN provider_profiles p ON p.user_id=a.provider_id WHERE a.homeowner_id=? AND a.status='confirmed' AND datetime(a.start_at)>=datetime('now') ORDER BY datetime(a.start_at) LIMIT 5`).all(user.id) as { job_id: number; start_at: string; title: string; business_name: string | null }[];
+  // Echte Profilvollstaendigkeit statt erfundener Balkenwerte: dieselben vier
+  // Angaben wie auf /app/profile, damit beide Seiten nicht auseinanderlaufen.
+  const profileFields = [
+    !!(user.first_name && user.last_name),
+    !!(user as { phone?: string }).phone,
+    !!profile?.address,
+    !!profile?.postcode,
+  ];
+  const profileFilled = profileFields.filter(Boolean).length;
+  const profilePct = Math.round(profileFilled / profileFields.length * 100);
 
   const waiting: EHRecordEntry[] = [
     ...offers.map(offer => ({
@@ -120,6 +132,16 @@ export default async function Dashboard() {
     href: `/api/documents/${document.id}`,
   }));
 
+  const termine: EHRecordEntry[] = upcoming.map(appt => ({
+    id: `upcoming-${appt.job_id}-${appt.start_at}`,
+    title: appt.title,
+    detail: [appt.business_name, dateLabel(appt.start_at)].filter(Boolean).join(' · '),
+    date: String(appt.start_at).slice(0, 10),
+    status: <EHStatus tone="info">Bestätigt</EHStatus>,
+    icon: <CalendarClock size={20} />,
+    href: `/app/jobs/${appt.job_id}`,
+  }));
+
   return <WerkbankRahmen role="homeowner" active="/app" brandSub={address} rail={<>
       <p className="eh-werkbank-rail-h">Kontext dieser Seite</p>
       <div className="eh-werkbank-karte">
@@ -128,11 +150,11 @@ export default async function Dashboard() {
         <Link href="/app/jobs" className="eh-werkbank-go">Alle ansehen →</Link>
       </div>
       <div className="eh-werkbank-karte">
-        <h4>Vollständigkeit</h4>
-        <div className="eh-werkbank-bar"><i style={{ width: '68%' }} /></div>
-        <div className="eh-werkbank-row"><span>Technik</span><span>4 von 6</span></div>
-        <div className="eh-werkbank-row"><span>Verträge</span><span>3 von 5</span></div>
-        <div className="eh-werkbank-row"><span>Nachweise</span><span>2 von 4</span></div>
+        <h4>Profil</h4>
+        <div className="eh-werkbank-bar"><i style={{ width: `${profilePct}%` }} /></div>
+        <div className="eh-werkbank-row"><span>Angaben</span><span>{profileFilled} von {profileFields.length}</span></div>
+        <div className="eh-werkbank-row"><span>Offene Vorgänge</span><span>{jobs}</span></div>
+        <div className="eh-werkbank-row"><span>Dokumente</span><span>{documentCount}</span></div>
       </div>
     </>}>
     <style>{werkbankLayout}</style>
@@ -141,9 +163,7 @@ export default async function Dashboard() {
         <h1>{address || 'Adresse ergänzen'}</h1>
         {name && <span>{name}</span>}
       </div>
-      {/* Suche und Glocke sitzen bereits in der AppShell-Topbar
-          (src/components/shell.tsx:79) und waren hier ein zweites Mal
-          sichtbar. Der Objektkopf traegt nur noch Adresse und Name. */}
+      <Link className="eh-werkbank-kopf-cta" href="/app/hausmeister">+ Anliegen</Link>
     </header>
     <Link className="eh-werkbank-fokus" href="/app/jobs">
       <strong className="eh-werkbank-fokus-zahl">{waiting.length}</strong>
@@ -167,6 +187,9 @@ export default async function Dashboard() {
     </EHOwnerSection>
     <EHOwnerSection title="Hausakte" action={{ href: '/app/documents', label: `Alle ${documentCount}` }}>
       <EHRecordList label="Hausakte" items={hausakte} empty="Keine Dokumente." />
+    </EHOwnerSection>
+    <EHOwnerSection title="Nächste Termine" action={{ href: '/app/calendar', label: 'Kalender' }}>
+      <EHRecordList label="Nächste Termine" items={termine} empty="Keine anstehenden Termine." />
     </EHOwnerSection>
   </WerkbankRahmen>;
 }
