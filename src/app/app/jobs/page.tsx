@@ -202,12 +202,12 @@ export default async function Jobs({
 
   return <AppShell role="homeowner" active="/app/jobs" title="Aufträge">
     <EHPageHeader title="Deine Aufträge" context={`${jobs.length} ${jobs.length === 1 ? 'Auftrag' : 'Aufträge'}`} actions={<EHButton href="/app/hausmeister" arrow>Anliegen beschreiben</EHButton>} />
-    {jobs.length > 0 && <EHMetricsBar label="Aufträge" items={[
+    <EHMetricsBar label="Aufträge" items={[
       { id: 'gesamt', label: 'Aufträge gesamt', value: String(jobs.length), hint: 'in deiner Akte' },
       { id: 'offen', label: 'Offen', value: String(openJobs.length), hint: quotedJobs.length > 0 ? `${quotedJobs.length} mit Angebot` : 'noch ohne Angebot' },
       { id: 'arbeit', label: 'In Arbeit', value: String(inProgressJobs.length), hint: 'beauftragt und laufend' },
       { id: 'fertig', label: 'Abgeschlossen', value: String(completedJobs.length), hint: 'erledigte Aufträge' },
-    ]} />}
+    ]} />
     <EHOwnerSearch action="/app/jobs" query={firstParam(params.q)} placeholder="Auftrag, Gewerk oder Betrieb" hidden={currentView === 'current' ? undefined : {name:'view',value:currentView}} />
     <EHOwnerFilters label="Aufträge filtern" items={[
       {href:filterHref('current'),label:'Aktuell',active:currentView==='current'},

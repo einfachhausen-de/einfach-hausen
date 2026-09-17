@@ -98,12 +98,12 @@ export default async function Documents(){
   ].sort((a,b)=>(b.date??'').localeCompare(a.date??''));
   return <AppShell role="homeowner" active="/app/documents" breadcrumbs={crumbs('/app/home','Dokumente')}>
     <EHPageHeader title="Dokumente & Rechnungen" context={openInvoices.length>0 ? `Offen: ${euroExact(openTotal)}` : undefined} />
-    {!empty && <EHMetricsBar label="Dokumente" items={[
+    <EHMetricsBar label="Dokumente" items={[
       {id:'gesamt',label:'Dokumente',value:String(documentTotal),hint:'in dieser Ablage'},
       {id:'rechnungen',label:'Rechnungen',value:String(invoices.length),hint:openInvoices.length>0?`${euroExact(openTotal)} offen`:undefined},
       {id:'nachweise',label:'Nachweise',value:String(uploaded.length),hint:'Dateien aus Aufträgen'},
       {id:'groesse',label:'Gesamtgröße',value:sizeLabel(storedTotal),hint:'Nachweise auf der Platte'},
-    ]} />}
+    ]} />
     <EHWorkspaceGrid main={empty
       ? <EHEmptyState title="Noch keine Dokumente" text="Rechnungen, Belege und Leistungsnachweise landen hier nach einer Abwicklung. Für ein neues Anliegen startest du beim Hausmeister." action={<EHButton href="/app/hausmeister" arrow>Anliegen beschreiben</EHButton>} />
       : <EHRecordViews label="Dokumente & Rechnungen" storageKey="dokumente" defaultView="chronik" switcherLabel="Dokumente: Ansicht wechseln" items={items} />} aside={<>

@@ -93,12 +93,12 @@ export default async function Messages({ searchParams }: { searchParams: Promise
 
       <ProviderAccessBoundary canManageJobs={ctx.canManageJobs} />
 
-      {customers.length > 0 && <EHMetricsBar label="Kundenkontakte" items={[
+      <EHMetricsBar label="Kundenkontakte" items={[
         { id: 'kunden', label: 'Kunden', value: customers.length, hint: 'direkte Kontakte des Betriebs' },
         { id: 'ungelesen', label: 'Ungelesen', value: unreadTotal, hint: unreadContacts > 0 ? `${unreadContacts} Kontakte warten auf Antwort` : 'alle Nachrichten gelesen' },
         { id: 'verlauf', label: 'Im Verlauf', value: messages.length, hint: selected ? `mit ${selected.first_name} ${selected.last_name}` : 'kein Kontakt gewählt' },
         { id: 'auftraege', label: 'Auftragsnachrichten', value: jobMessages, hint: 'aus laufenden Aufträgen' },
-      ]} />}
+      ]} />
 
       <EHWorkspaceGrid main={
         customers.length === 0 ? (

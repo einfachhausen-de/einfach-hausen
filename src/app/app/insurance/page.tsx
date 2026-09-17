@@ -68,12 +68,12 @@ export default async function InsuranceSupport({ searchParams }: { searchParams:
     {sp.error && <EHErrorState text={sp.error} />}
     {submitted && <EHFormFeedback kind="success">Servicefall übernommen. Einfach Hausen und der zuständige Partner sehen den Vorgang jetzt im bestehenden Auftragskontext. Deine Versicherung wurde dadurch nicht automatisch kontaktiert.</EHFormFeedback>}
 
-    {jobs.length > 0 && <EHMetricsBar label="Versicherungsunterstützung" items={[
+    <EHMetricsBar label="Versicherungsunterstützung" items={[
       { id: 'auftraege', label: 'Beauftragte Aufträge', value: String(jobs.length), hint: 'mit Versicherungsbezug' },
       { id: 'servicefaelle', label: 'Servicefälle', value: String(openClaims.length), hint: `${reviewingClaims.length} in Prüfung` },
       { id: 'offen', label: 'Ohne Vorgang', value: String(withoutClaim.length), hint: 'noch übergebbar' },
       { id: 'geloest', label: 'Gelöst', value: String(resolvedClaims.length), hint: 'abgeschlossen' },
-    ]} />}
+    ]} />
 
     <EHWorkspaceGrid main={jobs.length === 0 ? (
       <EHEmptyState title="Noch kein passender Auftrag vorhanden" text="Versicherungsunterstützung lässt sich hier nur an einen eigenen, bereits angenommenen Auftrag hängen. So werden keine fremden Vorgänge oder losen Schadendaten zugeordnet."  action={<><EHButton href="/app/jobs">Aufträge ansehen</EHButton><EHButton href="/app/consultation" variant="secondary">Erst Ansprechpartner fragen</EHButton></>} />

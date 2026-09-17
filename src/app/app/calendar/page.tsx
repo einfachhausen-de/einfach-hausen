@@ -58,12 +58,12 @@ export default async function Calendar({searchParams}:{searchParams:Promise<Reco
   const next = upcoming[0];
   return <AppShell role="homeowner" active="/app/calendar" title="Termine" breadcrumbs={crumbs('/app/jobs','Termine')}>
     <EHPageHeader title="Deine Termine" context={past ? `${totalLabel} · Seite ${page} von ${pages}` : totalLabel} />
-    {allTotal > 0 && <EHMetricsBar label="Termine" items={[
+    <EHMetricsBar label="Termine" items={[
       {id:'gesamt',label:'Termine gesamt',value:allTotal,hint:'in deiner Akte'},
       {id:'woche',label:'Diese Woche',value:weekTotal,hint:'Kalenderwoche'},
       {id:'bestaetigt',label:'Bestätigt',value:upcomingConfirmed,hint:upcomingOpen > 0 ? `${upcomingOpen} offen` : 'noch anstehend'},
       {id:'naechster',label:'Nächster Termin',value:next ? shortDay(next.start_at) : '–',hint:next ? partnerLabel(next) : 'keiner vereinbart'},
-    ]} />}
+    ]} />
     <EHOwnerFilters label="Zeitraum" items={[{href:'/app/calendar',label:'Anstehend',active:!past},{href:'/app/calendar?view=past',label:'Vergangen',active:past}]} />
     <EHWorkspaceGrid main={rows.length===0 ? (
       <EHEmptyState title={past ? 'Keine vergangenen Termine' : 'Keine anstehenden Termine'} text={past ? 'Vergangene Besuche erscheinen später hier.' : 'Neue Anliegen kannst du beschreiben. Bestehende Absprachen findest du in deinen Aufträgen.'} action={<EHButton href="/app/jobs" variant="secondary">Aufträge ansehen</EHButton>} />

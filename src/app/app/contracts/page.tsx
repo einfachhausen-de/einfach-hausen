@@ -98,12 +98,12 @@ export default async function Contracts({ searchParams }: { searchParams: Promis
 
       {tab === 'vertraege' ? (
         <>
-          {active.length > 0 && <EHMetricsBar label="Verträge" items={[
+          <EHMetricsBar label="Verträge" items={[
             { id: 'aktiv', label: 'Aktive Verträge', value: String(active.length), hint: `${contracts.length} erfasst` },
             { id: 'kosten', label: 'Kosten pro Monat', value: euroExact(monthlyTotal), hint: 'nur aktive Verträge' },
             { id: 'jahr', label: 'Kosten pro Jahr', value: euroExact(yearlyTotal), hint: 'aus den erfassten Intervallen' },
             { id: 'fristen', label: 'Fristen · 90 Tage', value: String(withDeadline.length), hint: withDeadline.length > 0 ? 'jetzt handeln' : 'nichts offen' },
-          ]} />}
+          ]} />
 
           <EHWorkspaceGrid main={<>
           {withDeadline.length > 0 && <EHWorkSection title="Jetzt handeln">

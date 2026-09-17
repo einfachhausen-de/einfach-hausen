@@ -62,12 +62,12 @@ export default async function HouseHistory({searchParams}:{searchParams:Promise<
   return <AppShell role="homeowner" active="/app/home/history" title="Haus-Historie" breadcrumbs={crumbs('/app/home','Historie')}>
     <EHWorkflowStack>
     <EHPageHeader title="Haus-Historie" context={`${entries.length} ${entries.length === 1 ? 'dokumentierte Arbeit' : 'dokumentierte Arbeiten'}`} actions={<EHButton href="#historie-anlegen" arrow>Arbeit dokumentieren</EHButton>} />
-    {entries.length > 0 && <EHMetricsBar label="Haus-Historie" items={[
+    <EHMetricsBar label="Haus-Historie" items={[
       { id: 'arbeiten', label: 'Arbeiten', value: entries.length, hint: 'dokumentiert in der Akte' },
       { id: 'kosten', label: 'Kosten', value: costEntryCount > 0 ? euroExact(costTotal) : '–', hint: costEntryCount > 0 ? `aus ${costEntryCount} ${costEntryCount === 1 ? 'Eintrag' : 'Einträgen'}` : 'keine Kosten erfasst' },
       { id: 'garantien', label: 'Garantien', value: guaranteeEntries.length, hint: guaranteeEntries.length === 0 ? 'keine hinterlegt' : `${activeGuarantees} noch gültig` },
       { id: 'wechsel', label: 'Eigentümerwechsel', value: ownerChanges, hint: ownerships.length > 1 ? `${ownerships.length} Eigentümer erfasst` : 'kein Wechsel erfasst' },
-    ]} />}
+    ]} />
     {sp.transfer&&<EHFormFeedback kind="success">Übergabelink erstellt. Nur die angegebene Käufer-E-Mail kann ihn innerhalb von {HOUSE_TRANSFER_TTL_DAYS} Tagen annehmen.</EHFormFeedback>}
     <EHWorkSection title="Dokumentierte Arbeiten">
     {entries.length > 0 && <EHRecordViews label="Haus-Historie" storageKey="historie" defaultView="chronik" items={entries.map(e=>({ id: String(e.id), title: e.title,

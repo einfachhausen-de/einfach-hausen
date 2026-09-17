@@ -114,12 +114,12 @@ export default async function Messages({ searchParams }: { searchParams: Promise
     composer={<OwnerMessageComposer contactUserId={active.contact_user_id} peerName={active.first_name} unreadCount={Number(active.unread_count || 0)} />} />
     : entry?.platformUserId ? <EHCallout title="Aktuell keine aktive Nachrichtenverbindung"><p>Der gespeicherte Kontakt und seine Zuordnungen bleiben erhalten. Ein App-Chat ist nur bei einer aktiven Partnerverbindung verfügbar.</p></EHCallout> : undefined;
   return <AppShell role="homeowner" active="/app/messages" title="Ansprechpartner" subtitle="Dein persönliches Netzwerk fürs Haus">
-    {contacts.length > 0 && <EHMetricsBar label="Ansprechpartner" items={[
+    <EHMetricsBar label="Ansprechpartner" items={[
       { id: 'kontakte', label: 'Kontakte', value: String(contacts.length), hint: 'in deinem Netzwerk' },
       { id: 'verbunden', label: 'Verknüpft', value: String(linkedTotal), hint: 'mit Partnerprofil' },
       { id: 'ungelesen', label: 'Ungelesen', value: String(unreadTotal), hint: unreadTotal > 0 ? 'neue Nachrichten' : 'nichts ungelesen' },
       { id: 'bereiche', label: 'Belegte Bereiche', value: String(usedCategories.length), hint: `von ${CONTACT_DIRECTORY_CATEGORIES.length} Bereichen` },
-    ]} />}
+    ]} />
     <EHWorkspaceGrid main={
       <EHContactWorkspace categories={CONTACT_DIRECTORY_CATEGORIES} contacts={contacts} mode={mode} mainId={main?.id} subcategoryId={sub?.id} entryId={entryId} query={text('q').slice(0, 200)} requestId={randomUUID()} notice={text('saved') === '1' ? 'Gespeichert. Dein Kontakt und alle Zuordnungen sind aktuell.' : undefined} action={submitDirectoryAction} shortcutAction={submitDirectoryShortcut} counts={countsByMain} conversation={mode === 'detail' ? conversation : undefined} />
     } aside={<>
