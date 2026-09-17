@@ -2,7 +2,7 @@ import { isFeatureEnabled } from '@/lib/feature-flags';
 import { toggleFeatureFlagAction, requeueDeadNotificationAction } from '@/app/actions';
 import { requireAdmin } from '@/lib/admin-auth';
 import { db } from '@/lib/db';
-import { EHAppHeader, EHButton, EHMetricsBar, EHRecordList, EHScope, EHStatus, EHText, EHWorkSection, EHWorkspaceGrid, type EHRecordEntry } from '@/design-system';
+import { EHAppHeader, EHButton, EHField, EHInput, EHMetricsBar, EHRecordList, EHScope, EHStatus, EHText, EHWorkSection, EHWorkspaceGrid, type EHRecordEntry } from '@/design-system';
 
 /** Die Flags, die diese Seite schaltet; die Kennzahl oben zaehlt genau diese Liste. */
 const FLAGS=['ki_chat','pilot_cohort_open'];
@@ -35,7 +35,7 @@ export default async function AdminOps({searchParams}:{searchParams:Promise<Reco
     title:f.flag,
     detail:f.enabled?'aktiv':'inaktiv',
     status:<EHStatus tone={f.enabled?'success':'neutral'}>{f.enabled?'Aktiv':'Inaktiv'}</EHStatus>,
-    action:<form action={toggleFeatureFlagAction.bind(null,f.flag)}><button className="btn ghost">{f.enabled?'Deaktivieren':'Aktivieren'}</button></form>,
+    action:<form action={toggleFeatureFlagAction.bind(null,f.flag)}><EHButton type="submit" variant="secondary" size="small">{f.enabled?'Deaktivieren':'Aktivieren'}</EHButton></form>,
   }));
   const matchItems:EHRecordEntry[]=matches.map((u:any)=>({
     id:`treffer-${u.id}`,
@@ -53,7 +53,7 @@ export default async function AdminOps({searchParams}:{searchParams:Promise<Reco
     id:`dead-${d.id}`,
     title:d.title,
     detail:[d.kind,new Date(d.created_at).toLocaleString('de-DE')].filter(Boolean).join(' · '),
-    action:<form action={requeueDeadNotificationAction.bind(null,d.id)}><button className="btn ghost">Erneut zustellen</button></form>,
+    action:<form action={requeueDeadNotificationAction.bind(null,d.id)}><EHButton type="submit" variant="secondary" size="small">Erneut zustellen</EHButton></form>,
   }));
   const traceItems:EHRecordEntry[]=trace.map((t:any,i:number)=>({
     id:`trace-${i}`,
@@ -70,7 +70,7 @@ export default async function AdminOps({searchParams}:{searchParams:Promise<Reco
     ]} />
     <EHWorkspaceGrid main={<>
       <EHWorkSection title="Lookup">
-        <form className="admin-form" action="/admin/ops"><input name="q" defaultValue={q} placeholder="E-Mail oder Name" aria-label="Suche"/><button className="btn primary">Suchen</button></form>
+        <form action="/admin/ops"><EHField id="ops-q" label="E-Mail oder Name"><EHInput id="ops-q" name="q" defaultValue={q} placeholder="E-Mail oder Name"/></EHField><EHButton type="submit">Suchen</EHButton></form>
         <EHRecordList label="Lookup-Treffer" items={matchItems} empty={q?'Keine Treffer.':'Noch keine Suche gestartet.'} />
       </EHWorkSection>
       <EHWorkSection title="Feature-Flags">

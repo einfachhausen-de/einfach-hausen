@@ -91,7 +91,7 @@ export default async function CrmPage({ searchParams }: { searchParams: Promise<
           text="Pipeline für Handwerkspartner, Eigentümer-Anfragen und Marktpotenziale."
           actions={
             <form action={syncBusinessResearchAction}>
-              <button className="btn primary"><Database size={16} /> Research-Daten synchronisieren</button>
+              <EHButton type="submit"><Database size={16} /> Research-Daten synchronisieren</EHButton>
             </form>
           }
         />
@@ -143,7 +143,7 @@ export default async function CrmPage({ searchParams }: { searchParams: Promise<
               </select>
             </label>
             <div className="flex items-end">
-              <button className="btn primary">Filtern</button>
+              <EHButton type="submit">Filtern</EHButton>
             </div>
           </form>
         </div>
@@ -246,7 +246,7 @@ export default async function CrmPage({ searchParams }: { searchParams: Promise<
                         <label className="md:col-span-2">Notiz
                           <input name="notes" defaultValue={lead.notes || ''} placeholder="z. B. Rückruf vereinbart" />
                         </label>
-                        <button className="btn primary md:col-span-2">Änderungen speichern</button>
+                        <div className="md:col-span-2"><EHButton type="submit">Änderungen speichern</EHButton></div>
                       </form>
                     </article>
                   );
@@ -312,7 +312,7 @@ export default async function CrmPage({ searchParams }: { searchParams: Promise<
               <label>Notiz
                 <textarea name="notes" rows={3} placeholder="Interesse, Status, nächste Vereinbarung …" />
               </label>
-              <button className="btn primary">Lead speichern</button>
+              <EHButton type="submit">Lead speichern</EHButton>
             </form>
           </EHWorkSection>
 

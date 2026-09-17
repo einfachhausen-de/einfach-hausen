@@ -1,4 +1,4 @@
-import { EHAccessPage, EHField, EHInput, EHFormFeedback } from '@/design-system';
+import { EHAccessPage, EHButton, EHField, EHInput, EHFormFeedback } from '@/design-system';
 import { adminLoginAction } from '@/app/actions';
 
 export default async function AdminLogin({ searchParams }: { searchParams: Promise<Record<string, string>> }) {
@@ -14,7 +14,7 @@ export default async function AdminLogin({ searchParams }: { searchParams: Promi
           <EHField id="password" label="Admin-Passwort" required>
             <EHInput type="password" name="password" id="password" required autoComplete="current-password" />
           </EHField>
-          <button type="submit" className="btn primary wide">Admin anmelden</button>
+          <EHButton type="submit">Admin anmelden</EHButton>
         </form>
       }
       help={[{ href: '/', label: 'Zurück zur App' }]}
