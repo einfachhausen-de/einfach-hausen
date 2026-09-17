@@ -1,8 +1,7 @@
-import { Building2, UserRound } from 'lucide-react';
+import { Building2 } from 'lucide-react';
 import { AppShell } from '@/components/shell';
-import { ProviderState } from '@/components/provider/workspace';
 import { requireUser } from '@/lib/auth';
-import { EHMetricsBar, EHButton, EHPageHeader, EHRecordList, EHStatus, EHCallout, EHField, EHSelect, EHText, EHWorkSection, EHWorkspaceGrid, type EHRecordEntry } from '@/design-system';
+import { EHMetricsBar, EHButton, EHEmptyState, EHPageHeader, EHRecordList, EHStatus, EHCallout, EHField, EHSelect, EHSubmitButton, EHText, EHWorkSection, EHWorkspaceGrid, type EHRecordEntry } from '@/design-system';
 import { db } from '@/lib/db';
 import { getProviderContext } from '@/lib/provider';
 import { providerHasCategory } from '@/lib/provider-categories';
@@ -30,12 +29,10 @@ export default async function ProLeads() {
   if (!ctx) {
     return (
       <AppShell role="provider" active="/pro/leads" title="Immobilien-Leads" subtitle="Zugang prüfen">
-        <ProviderState
-          icon={<Building2 size={21} />}
+        <EHEmptyState
           title="Keinem Unternehmen zugeordnet"
-          description="Dein Zugang ist aktuell keinem aktiven Partnerunternehmen zugeordnet. Freigegebene Immobilienkontakte können deshalb nicht angezeigt werden."
-          action={{ href: '/pro/hilfe', label: 'Hilfe & Kontakt' }}
-          tone="unavailable"
+          text="Dein Zugang ist aktuell keinem aktiven Partnerunternehmen zugeordnet. Freigegebene Immobilienkontakte können deshalb nicht angezeigt werden."
+          action={<EHButton href="/pro/hilfe" variant="secondary">Hilfe & Kontakt</EHButton>}
         />
       </AppShell>
     );
@@ -47,11 +44,10 @@ export default async function ProLeads() {
     return (
       <AppShell role="provider" active="/pro/leads" title="Immobilien-Leads" subtitle="Nur für passende Anbieter">
         <EHPageHeader title="Freigegebene Kontakte" context="Nur für passende Anbieter" />
-        <ProviderState
-          icon={<Building2 size={21} />}
+        <EHEmptyState
           title="Keine Makler-Kategorie aktiv"
-          description="Wenn dein Unternehmen auch Immobilienvermittlung anbietet, kannst du die Tätigkeit im Partnerprofil ergänzen. Es bleibt dasselbe Konto."
-          action={{ href: '/pro/profile', label: 'Partnerprofil öffnen' }}
+          text="Wenn dein Unternehmen auch Immobilienvermittlung anbietet, kannst du die Tätigkeit im Partnerprofil ergänzen. Es bleibt dasselbe Konto."
+          action={<EHButton href="/pro/profile" variant="secondary">Partnerprofil öffnen</EHButton>}
         />
       </AppShell>
     );
@@ -79,7 +75,7 @@ export default async function ProLeads() {
               {NEXT_STEPS.map((step) => <option key={step.value} value={step.value}>{step.label}</option>)}
             </EHSelect>
           </EHField>
-          <button className="btn primary">Status speichern</button>
+          <EHSubmitButton pendingLabel="Wird gespeichert…">Status speichern</EHSubmitButton>
         </form>
       ),
     };
@@ -96,7 +92,7 @@ export default async function ProLeads() {
   return (
     <AppShell role="provider" active="/pro/leads" title="Immobilien-Leads" subtitle="Nur ausdrücklich freigegebene Kontakte">
       <EHPageHeader title="Freigegebene Kontakte" context={`${matches.length} ${matches.length === 1 ? 'freigegebener Kontakt' : 'freigegebene Kontakte'}`} />
-      <EHCallout title="Nur freigegebene Daten"><p>Private Dokumente und vollständige Hausakten bleiben gesperrt. Die Freigabe ist zweckgebunden.</p></EHCallout>
+      <EHCallout title="Nur freigegebene Daten"><EHText>Private Dokumente und vollständige Hausakten bleiben gesperrt. Die Freigabe ist zweckgebunden.</EHText></EHCallout>
 
       {matches.length > 0 && (
         <EHMetricsBar label="Freigegebene Kontakte" items={[
@@ -109,10 +105,9 @@ export default async function ProLeads() {
 
       <EHWorkspaceGrid main={matches.length > 0
         ? <EHRecordList label="Freigegebene Immobilienkontakte" items={items} />
-        : <ProviderState
-            icon={<UserRound size={21} />}
+        : <EHEmptyState
             title="Noch keine freigegebenen Immobilienanfragen"
-            description="Passende Eigentümer sehen dein Unternehmen zunächst als Vorschlag. Erst nach deren ausdrücklicher Freigabe erscheint der Kontakt hier."
+            text="Passende Eigentümer sehen dein Unternehmen zunächst als Vorschlag. Erst nach deren ausdrücklicher Freigabe erscheint der Kontakt hier."
           />} aside={<>
         <EHWorkSection title="Nach Status">
           <EHRecordList label="Freigegebene Kontakte nach Status" empty="Noch kein Kontakt freigegeben." items={Array.from(byStatus.entries()).sort((a, b) => b[1] - a[1]).map(([status, count]) => ({

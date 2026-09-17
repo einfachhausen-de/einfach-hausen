@@ -5,7 +5,11 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/AuthContext";
 import { getSupabase } from "@/lib/supabase";
 import { BackIcon, PlusIcon2 } from "@/components/icons";
-import styles from "./ansprechpartner.module.css";
+import { EHScope, EHWorkflowStack, EHPageHeader, EHRecordList, EHWorkSection, EHButton, EHDialog, EHField, EHInput, EHEmptyState, type EHRecordEntry } from "@/design-system";
+
+function roleIcon(rolle: string) {
+  return rolle === "Elektriker" ? "⚡" : rolle === "Schornsteinfeger" ? "🧹" : rolle === "Verwaltung" ? "🏢" : "👤";
+}
 
 export default function AnsprechpartnerPage() {
   const router = useRouter();
@@ -21,15 +25,39 @@ export default function AnsprechpartnerPage() {
     const { data }: any = await supabase.from("ansprechpartner").select("*").order("created_at", { ascending: false });
     setListe(data ?? []);
   }
+  const items: EHRecordEntry[] = liste.map((p: any) => ({
+    id: String(p.id),
+    title: p.name,
+    detail: p.rolle,
+    icon: roleIcon(p.rolle),
+    action: p.telefon ? <EHButton size="small" variant="secondary" href={`tel:${p.telefon}`}>📞 {p.telefon}</EHButton> : undefined,
+  }));
   return (
-    <div className="safe-top safe-bottom page ob-page">
-      <header className="ob-header"><button className="back-btn" onClick={() => router.back()}><BackIcon /></button><button className="back-btn" onClick={() => setAddOpen(true)}><PlusIcon2 /></button></header>
-      <section className="ob-head"><h1>Ansprechpartner 👤</h1><p>Alle wichtigen Kontakte für dein Zuhause.</p></section>
-      {liste.length === 0 ? (<div className="empty-box"><p>Noch keine Kontakte gespeichert.</p></div>) : (
-        <div className="req-card">{liste.map((p: any, i: number) => (<div className="req-item" key={p.id}>{i > 0 && <div className="req-divider" />}<div className={`req-icon ${styles.roleIcon}`}>{p.rolle === "Elektriker" ? "⚡" : p.rolle === "Schornsteinfeger" ? "🧹" : p.rolle === "Verwaltung" ? "🏢" : "👤"}</div><div className="req-body"><strong className="req-title">{p.name}</strong><p className="req-text">{p.rolle}</p>{p.telefon && <a href={`tel:${p.telefon}`} className={`req-plz ${styles.phoneLink}`}>📞 {p.telefon}</a>}</div></div>))}</div>
-      )}
-      {addOpen && (<><div className="menu-overlay open" onClick={() => setAddOpen(false)} /><div className="sheet"><div className="sheet-handle" /><div className="sheet-head"><h3>Neuer Kontakt</h3></div><div className={styles.sheetBody}><div className="if-wrap"><span className="if-label">Name</span><input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></div><div className="if-wrap"><span className="if-label">Rolle</span><input value={form.rolle} onChange={(e) => setForm({ ...form, rolle: e.target.value })} placeholder="z. B. Elektriker" /></div><div className="if-wrap"><span className="if-label">Telefon</span><input inputMode="tel" value={form.telefon} onChange={(e) => setForm({ ...form, telefon: e.target.value })} /></div><div className="if-wrap"><span className="if-label">E-Mail</span><input inputMode="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} /></div><button className="btn-primary btn-full" disabled={!form.name} onClick={save}>Speichern</button><div className={styles.sheetGap} /></div></div></>)}
-      <div className="home-indicator" />
-    </div>
+    <EHScope app>
+      <EHWorkflowStack>
+        <EHButton variant="quiet" onClick={() => router.back()} aria-label="Zurück"><BackIcon /></EHButton>
+        <EHPageHeader
+          title="Ansprechpartner 👤"
+          context="Alle wichtigen Kontakte für dein Zuhause."
+          actions={<EHButton variant="secondary" size="small" onClick={() => setAddOpen(true)} aria-label="Neuer Kontakt"><PlusIcon2 /></EHButton>}
+        />
+        <EHWorkSection title="Deine Kontakte">
+          {liste.length === 0
+            ? <EHEmptyState title="Noch keine Kontakte" text="Noch keine Kontakte gespeichert." />
+            : <EHRecordList label="Ansprechpartner" items={items} />}
+        </EHWorkSection>
+        <EHDialog
+          open={addOpen}
+          onClose={() => setAddOpen(false)}
+          title="Neuer Kontakt"
+          actions={<EHButton onClick={save} disabled={!form.name}>Speichern</EHButton>}
+        >
+          <EHField id="ap-name" label="Name"><EHInput id="ap-name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></EHField>
+          <EHField id="ap-rolle" label="Rolle"><EHInput id="ap-rolle" value={form.rolle} onChange={(e) => setForm({ ...form, rolle: e.target.value })} placeholder="z. B. Elektriker" /></EHField>
+          <EHField id="ap-telefon" label="Telefon"><EHInput id="ap-telefon" inputMode="tel" value={form.telefon} onChange={(e) => setForm({ ...form, telefon: e.target.value })} /></EHField>
+          <EHField id="ap-email" label="E-Mail"><EHInput id="ap-email" inputMode="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} /></EHField>
+        </EHDialog>
+      </EHWorkflowStack>
+    </EHScope>
   );
 }

@@ -76,7 +76,7 @@ export async function AppShell({ role, active, children, title, subtitle, breadc
     mainNav={mainNav}
     account={<SidebarAccountMenu name={user?`${user.first_name} ${user.last_name}`:'Profil'} initials={initials} accountLabel={pro?'Partnerkonto':'Eigenheim-Konto'} profileHref={profileHref} settingsHref={pro?'/pro/profile':'/app/settings'} helpHref={pro?'/pro/hilfe':'/app/hilfe'} />}
     mobileMenu={mobileMenu}
-    notifications={<>{!pro && <HouseAssistant placement="toolbar" />}<Link href={pro?'/pro/notifications':'/notifications'} className={s.search}><Search size={16}/><span>Suchen</span></Link><Link href="/notifications" aria-label={unread?`${unread} ungelesene Benachrichtigungen`:'Benachrichtigungen'}><Bell size={22}/>{unread>0&&<span>{unread>99?'99+':unread}</span>}</Link>{pro && <Link href={profileHref} aria-label="Profil">{initials}</Link>}</>}
+    notifications={<>{!pro && <HouseAssistant placement="toolbar" />}<Link href={pro?'/pro/notifications':'/notifications'} className={s.search}><Search size={16}/><span>Suchen</span></Link><Link href="/notifications" className={s.toolIcon} aria-label={unread?`${unread} ungelesene Benachrichtigungen`:'Benachrichtigungen'}><Bell size={22}/>{unread>0&&<span className={s.toolBadge}>{unread>99?'99+':unread}</span>}</Link>{pro && <Link href={profileHref} className={s.toolAvatar} aria-label="Profil">{initials}</Link>}</>}
     bottomNav={<BottomNav role={role} active={active}/>} rail={rail}>{breadcrumbs&&breadcrumbs.length>0&&<Breadcrumbs trail={breadcrumbs}/>}{contextTabs&&contextTabs.length>0&&<EHRouteTabs label="Kontextnavigation" items={contextTabs}/>}{children}</EHWorkspaceFrame></EHScope>;
 }
 

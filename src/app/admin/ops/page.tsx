@@ -2,7 +2,7 @@ import { isFeatureEnabled } from '@/lib/feature-flags';
 import { toggleFeatureFlagAction, requeueDeadNotificationAction } from '@/app/actions';
 import { requireAdmin } from '@/lib/admin-auth';
 import { db } from '@/lib/db';
-import { EHButton, EHField, EHInput, EHMetricsBar, EHPageHeader, EHRecordList, EHScope, EHStatus, EHText, EHWorkSection, EHWorkspaceGrid, type EHRecordEntry } from '@/design-system';
+import { EHButton, EHField, EHInput, EHMetricsBar, EHPageHeader, EHRecordList, EHScope, EHSection, EHStatus, EHText, EHWorkSection, EHWorkspaceGrid, EHWorkflowStack, type EHRecordEntry } from '@/design-system';
 
 /** Die Flags, die diese Seite schaltet; die Kennzahl oben zaehlt genau diese Liste. */
 const FLAGS=['ki_chat','pilot_cohort_open'];
@@ -60,7 +60,7 @@ export default async function AdminOps({searchParams}:{searchParams:Promise<Reco
     title:`${t.decision} · ${t.business_name||t.reason_key||'ohne Zuordnung'}`,
     detail:[t.detail,`Job ${t.job_id}`,new Date(t.created_at).toLocaleString('de-DE')].filter(Boolean).join(' · '),
   }));
-  return <EHScope app><main className="admin-page">
+  return <EHScope app><main><EHSection compact><EHWorkflowStack>
     <EHPageHeader title="Operations" context="Betriebsverwaltung" />
     <EHMetricsBar label="Operations" items={[
       {id:'flags',label:'Aktive Feature-Flags',value:`${enabledFlags} von ${flags.length}`,hint:'in dieser Umgebung'},
@@ -91,5 +91,5 @@ export default async function AdminOps({searchParams}:{searchParams:Promise<Reco
         <EHRecordList label="Letzte Matching-Entscheidungen" items={traceItems} empty="Keine Entscheidungen protokolliert." />
       </EHWorkSection>
     </>} />
-  </main></EHScope>;
+  </EHWorkflowStack></EHSection></main></EHScope>;
 }

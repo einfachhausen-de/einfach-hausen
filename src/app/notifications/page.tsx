@@ -1,8 +1,7 @@
-import Link from 'next/link';
 import { CheckCheck } from 'lucide-react';
 import { AppShell } from '@/components/shell';
 import { requireUser } from '@/lib/auth';
-import { EHPageHeader, EHList, EHEmptyState, EHButton, EHStatus } from '@/design-system';
+import { EHPageHeader, EHList, EHEmptyState, EHButton, EHStatus, EHActions, EHText } from '@/design-system';
 import { db } from '@/lib/db';
 import { setNotificationReadStateAction, markAllNotificationsReadForCurrentUserAction } from './actions';
 
@@ -30,16 +29,16 @@ export default async function Notifications({ searchParams }: { searchParams: Pr
           action: <form action={setNotificationReadStateAction}>
             <input type="hidden" name="id" value={n.id}/>
             {isUnread
-              ? <button name="read" value="1" aria-label={`Als gelesen markieren: ${n.title}`}>Gelesen</button>
-              : <button name="read" value="0" aria-label={`Als ungelesen markieren: ${n.title}`}>Ungelesen</button>}
+              ? <EHButton type="submit" name="read" value="1" size="small" variant="secondary" aria-label={`Als gelesen markieren: ${n.title}`}>Gelesen</EHButton>
+              : <EHButton type="submit" name="read" value="0" size="small" variant="secondary" aria-label={`Als ungelesen markieren: ${n.title}`}>Ungelesen</EHButton>}
           </form>,
         };
       })} />
       {rows.length === 0 && <EHEmptyState title="Noch keine Benachrichtigungen" text="Wichtige Änderungen erscheinen hier automatisch." />}
-      {pageCount > 1 && <nav className="pager" aria-label="Seiten">
-        {safePage > 1 && <Link className="btn ghost" href={`/notifications?page=${safePage - 1}`}>Zurück</Link>}
-        <span>Seite {safePage} von {pageCount}</span>
-        {safePage < pageCount && <Link className="btn ghost" href={`/notifications?page=${safePage + 1}`}>Weiter</Link>}
-      </nav>}
+      {pageCount > 1 && <EHActions>
+        {safePage > 1 && <EHButton href={`/notifications?page=${safePage - 1}`} variant="secondary" size="small">Zurück</EHButton>}
+        <EHText size="meta">Seite {safePage} von {pageCount}</EHText>
+        {safePage < pageCount && <EHButton href={`/notifications?page=${safePage + 1}`} variant="secondary" size="small">Weiter</EHButton>}
+      </EHActions>}
   </AppShell>;
 }

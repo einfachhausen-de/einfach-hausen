@@ -1,3 +1,0 @@
-/* Scoped styles for the /chat screen — DESIGN.md §2: no inline styles. */
-.partnerName { font-size: 18px; font-weight: var(--eh-weight-heavy); color: var(--ink); }
-.headerSpacer { width: 20px; }

@@ -1,12 +1,10 @@
-import { BadgeCheck, CalendarCheck, Database, FileWarning, Handshake, ListChecks, LogOut, ShieldCheck, Star } from 'lucide-react';
-import Link from 'next/link';
+import { CalendarCheck, Database, ListChecks, LogOut, ShieldCheck, Star } from 'lucide-react';
 import { requireAdmin } from '@/lib/admin-auth';
 import { db } from '@/lib/db';
-import { EHButton, EHMetricsBar, EHPageHeader, EHRecordList, EHScope, EHStatus, EHWorkSection, EHWorkspaceGrid, type EHRecordEntry } from '@/design-system';
+import { EHActions, EHButton, EHCheckbox, EHField, EHFieldGrid, EHFormFeedback, EHFormSection, EHInput, EHMetricsBar, EHPageHeader, EHRecordList, EHScope, EHSection, EHSelect, EHStatus, EHText, EHTextLink, EHTextarea, EHWorkSection, EHWorkspaceGrid, EHWorkflowForm, EHWorkflowStack, type EHRecordEntry } from '@/design-system';
 import { adminLogoutAction,adminUpdateClaimAction,moderateReviewAction } from '@/app/actions';
 import { adminReviewVerificationLifecycleAction,adminUpdatePartnerContractLifecycleAction } from './actions';
 import { statusLabel } from '@/lib/format';
-import styles from './admin.module.css';
 
 export default async function Admin({searchParams}:{searchParams:Promise<Record<string,string>>}){
   await requireAdmin();
@@ -68,36 +66,86 @@ export default async function Admin({searchParams}:{searchParams:Promise<Record<
     detail:[r.reporter,r.reason].filter(Boolean).join(' · '),
     status:<EHStatus tone="warning">Meldung offen</EHStatus>,
   }));
-  return <EHScope app><main className="admin-page"><EHPageHeader title="Einfach Hausen · Admin" context="Betriebsverwaltung" actions={<><EHButton href="/admin/crm"><Database size={16}/>Leads &amp; CRM</EHButton><form action={adminLogoutAction}><EHButton type="submit" variant="secondary"><LogOut size={16}/>Abmelden</EHButton></form></>} />{sp.error&&<div className="alert error" role="alert">{sp.error}</div>}<EHMetricsBar label="Verwaltung" items={[
+  return <EHScope app><main><EHSection compact><EHWorkflowStack><EHPageHeader title="Einfach Hausen · Admin" context="Betriebsverwaltung" actions={<><EHButton href="/admin/crm"><Database size={16}/>Leads &amp; CRM</EHButton><form action={adminLogoutAction}><EHButton type="submit" variant="secondary"><LogOut size={16}/>Abmelden</EHButton></form></>} />{sp.error&&<EHFormFeedback kind="error">{sp.error}</EHFormFeedback>}<EHMetricsBar label="Verwaltung" items={[
       {id:'pruefungen',label:'Offene Partnerprüfungen',value:String(pendingVerifications.length),hint:`${verifications.length} Prüfungen insgesamt`},
       {id:'servicefaelle',label:'Offene Servicefälle',value:String(openClaims.length),hint:`${claims.length} Fälle insgesamt`},
       {id:'meldungen',label:'Offene Bewertungsmeldungen',value:String(openReportQueue.length),hint:`${openReports.length} Meldungen insgesamt`},
       {id:'partner',label:'Freigegebene Partner',value:`${overview.verifiedProviders} von ${overview.providers}`,hint:'im Partnernetzwerk'},
-    ]} /><EHWorkspaceGrid main={<><section className={styles.overview} aria-labelledby="admin-overview-title"><div className={styles.overviewIntro}><div><h2 id="admin-overview-title">Betriebsübersicht</h2><p>Ein kompakter Blick auf Nutzer, Vorgänge und Zustellungen – ohne sensible Inhalte.</p></div></div><div className={styles.kpis}><div className={styles.kpi}><span className={styles.kpiLabel}>Nutzer</span><strong className={styles.kpiValue}>{overview.users}</strong><small className={styles.kpiMeta}>Eigentümer und Partner</small></div><div className={styles.kpi}><span className={styles.kpiLabel}>Partner</span><strong className={styles.kpiValue}>{overview.providers}</strong><small className={styles.kpiMeta}>{overview.verifiedProviders} geprüft</small></div><div className={styles.kpi}><span className={styles.kpiLabel}>Anfragen</span><strong className={styles.kpiValue}>{overview.requests}</strong><small className={styles.kpiMeta}>{overview.openRequests} offen</small></div><div className={styles.kpi}><span className={styles.kpiLabel}>Bookings</span><strong className={styles.kpiValue}>{overview.bookings}</strong><small className={styles.kpiMeta}>Termine insgesamt</small></div><div className={styles.kpi}><span className={styles.kpiLabel}>Matching</span><strong className={styles.kpiValue}>{overview.matches}</strong><small className={styles.kpiMeta}>Partner-Zuordnungen</small></div><div className={styles.kpi}><span className={styles.kpiLabel}>Benachrichtigungen</span><strong className={styles.kpiValue}>{overview.unreadNotifications}</strong><small className={styles.kpiMeta}>ungelesen</small></div></div></section><section className={styles.monitorGrid} aria-label="Aktuelle Produktaktivität"><article className={styles.monitorCard}><h3><ListChecks size={17}/>Anfragen</h3>{recentJobs.length?<ul className={styles.monitorList}>{recentJobs.map(job=><li className={styles.monitorItem} key={job.id}><span className={styles.monitorCopy}><strong>{job.title}</strong><small>{job.first_name} {job.last_name} · {statusLabel(job.status)}</small></span><EHStatus tone={job.status === 'open' ? 'warning' : job.status === 'completed' ? 'success' : 'neutral'}>{statusLabel(job.status)}</EHStatus></li>)}</ul>:<p className={styles.emptyMonitor}>Noch keine Anfragen.</p>}</article><article className={styles.monitorCard}><h3><CalendarCheck size={17}/>Bookings</h3>{recentBookings.length?<ul className={styles.monitorList}>{recentBookings.map((booking,index)=><li className={styles.monitorItem} key={`${booking.start_at}-${index}`}><span className={styles.monitorCopy}><strong>{booking.title}</strong><small>{booking.business_name} · {String(booking.start_at).slice(0,10)}</small></span><EHStatus tone={booking.status === 'completed' ? 'success' : booking.status === 'cancelled' ? 'error' : 'info'}>{statusLabel(booking.status)}</EHStatus></li>)}</ul>:<p className={styles.emptyMonitor}>Noch keine Bookings.</p>}</article><article className={styles.monitorCard}><h3><Star size={17}/>Bewertungen</h3>{recentReviews.length?<ul className={styles.monitorList}>{recentReviews.map((review,index)=><li className={styles.monitorItem} key={`${review.created_at}-${index}`}><span className={styles.monitorCopy}><strong>{review.business_name}</strong><small>{review.title}</small></span><EHStatus tone="success">{review.rating}/5</EHStatus></li>)}</ul>:<p className={styles.emptyMonitor}>Noch keine Bewertungen.</p>}</article></section><section className={styles.auditPanel} aria-labelledby="audit-title"><div className={styles.auditHeader}><div><h2 id="audit-title">Admin-Audit-Log</h2><p>Privilegierte Aktionen, chronologisch und ohne geheime Werte.</p></div><span className={styles.auditCount}>{auditEntries.length} Einträge</span></div>{auditEntries.length?<div className={styles.auditList}>{auditEntries.map((entry,index)=><article className={styles.auditEntry} key={`${entry.created_at}-${entry.action}-${index}`}><time dateTime={entry.created_at}>{entry.created_at}</time><div className={styles.auditCopy}><strong>{entry.action}</strong><span>{entry.actor} · {entry.target||'System'}</span>{entry.detail&&<small>{entry.detail}</small>}</div></article>)}</div>:<p className={styles.emptyMonitor}>Noch keine Admin-Aktionen protokolliert.</p>}</section><div className="admin-grid">
-    <section className="admin-panel"><h2><BadgeCheck/> Partnernetzwerk</h2>{verifications.length===0&&<p className="muted">Keine Partnerprüfungen vorhanden.</p>}<div className="stack">{verifications.map(v=><article className="admin-card" key={v.id}><div className="admin-card-head"><div><strong>{v.business_name}</strong><small>{v.first_name} {v.last_name} · {v.email}<br/>{v.trades} · {v.postcode}</small></div><div className="admin-status-stack"><EHStatus tone={v.status === 'approved' ? 'success' : v.status === 'rejected' ? 'error' : 'warning'}>Prüfung {statusLabel(v.status)}</EHStatus><EHStatus tone={v.contract_status === 'active' ? 'success' : v.contract_status === 'ended' ? 'error' : 'neutral'}>Vertrag {statusLabel(v.contract_status||'pending')}</EHStatus></div></div><a className="admin-file" href={`/api/admin/verification-file/${v.id}`} target="_blank" rel="noreferrer">Prüfdokument öffnen</a>{v.provider_note&&<p>{v.provider_note}</p>}
-      <form action={adminReviewVerificationLifecycleAction.bind(null,v.id)} className="admin-form"><textarea name="adminNote" rows={2} defaultValue={v.admin_note||''} placeholder="Prüfnotiz"/><div className="action-row"><EHButton type="submit" name="decision" value="approved"><ShieldCheck size={16}/>Unternehmen freigeben</EHButton><EHButton type="submit" name="decision" value="rejected" variant="secondary">Ablehnen</EHButton></div></form>
-      <div className="admin-contract"><h3><Handshake size={16}/> Einfach-Hausen-Partnervertrag</h3><form action={adminUpdatePartnerContractLifecycleAction.bind(null,v.provider_id)} className="admin-form"><div className="two"><label>Status<select name="status" defaultValue={v.contract_status||'pending'}><option value="pending">Ausstehend</option><option value="active">Aktiv</option><option value="suspended">Pausiert</option><option value="ended">Beendet</option></select></label><label>Reaktionsziel (Min.)<input name="responseTarget" type="number" min="5" max="240" defaultValue={v.response_target_minutes||30}/></label></div><div className="admin-zero-commission"><strong>0 % Auftragsprovision</strong><span>Partner behalten 100 % ihres Auftragswertes. Monetarisierung erfolgt ausschließlich über Partner-Tarife.</span></div><label>Kundenvorteil (bps)<input name="discountBps" type="number" min="0" max="3000" defaultValue={v.customer_discount_bps??0}/></label><p className="muted">Status „Aktiv“ wird serverseitig nur übernommen, wenn die Unternehmensprüfung freigegeben und alle vier folgenden Prüfungen bestätigt sind.</p><div className="contract-checkboxes"><label><input type="checkbox" name="insurance" defaultChecked={!!v.insurance_verified}/> Betriebshaftpflicht geprüft</label><label><input type="checkbox" name="qualification" defaultChecked={!!v.qualification_verified}/> Qualifikation/Zulassung geprüft</label><label><input type="checkbox" name="contract" defaultChecked={!!v.contract_verified}/> Partnervertrag unterschrieben</label><label><input type="checkbox" name="quality" defaultChecked={!!v.quality_standard_verified}/> Qualitätsstandard akzeptiert</label></div><textarea name="contractNotes" rows={2} defaultValue={v.contract_notes||''} placeholder="Konditionen / interne Notizen"/><EHButton type="submit">Partnervertrag speichern</EHButton></form></div>
-    </article>)}</div></section>
-    <section className="admin-panel"><h2><Star/> Bewertungs-Moderation</h2>
-      <p className="muted">Operations-Lookup und Outbox: <Link href="/admin/ops">/admin/ops</Link></p>
-      {openReports.length===0&&<p className="muted">Keine gemeldeten Bewertungen.</p>}
-      <div className="stack">{openReports.map(report=><article className="admin-card" key={report.id}>
-        <div className="admin-card-head"><div>
-          <strong>★ {report.rating}/5 — {report.partner}</strong>
-          <small>Gemeldet von {report.reporter} · {new Date(report.created_at).toLocaleDateString('de-DE')}</small>
-        </div><EHStatus tone={report.status==='open' ? 'warning' : 'neutral'}>{report.status==='open'?'Offen':report.status==='actioned'?'Bearbeitet':'Verworfen'}</EHStatus></div>
-        <p>{report.comment||'(ohne Text)'}{report.reason&&<> — <strong>Grund:</strong> {report.reason}</>}</p>
-        <div className="action-row">
-          {report.status==='open'&&<>
-            <form action={moderateReviewAction.bind(null,report.id)} className="admin-form"><input type="hidden" name="decision" value="hide"/><EHButton type="submit">Bewertung ausblenden</EHButton></form>
-            <form action={moderateReviewAction.bind(null,report.id)} className="admin-form"><input type="hidden" name="decision" value="dismiss"/><EHButton type="submit" variant="secondary">Meldung verwerfen</EHButton></form>
-          </>}
-          {report.hidden&&<form action={moderateReviewAction.bind(null,report.id)} className="admin-form"><input type="hidden" name="decision" value="restore"/><EHButton type="submit" variant="secondary">Wieder einblenden</EHButton></form>}
-        </div>
-      </article>)}</div>
-    </section>
-    <section className="admin-panel"><h2><FileWarning/> Servicefälle</h2>{claims.length===0&&<p className="muted">Keine Servicefälle vorhanden.</p>}<div className="stack">{claims.map(c=><article className="admin-card" key={c.id}><div className="admin-card-head"><div><strong>{c.title}</strong><small>Kunde: {c.homeowner_email}<br/>Partner: {c.business_name} · {c.provider_email}</small></div><EHStatus tone={c.status === 'resolved' ? 'success' : c.status === 'rejected' ? 'error' : 'info'}>{statusLabel(c.status)}</EHStatus></div><p>{c.description}</p><form action={adminUpdateClaimAction.bind(null,c.id)} className="admin-form"><label>Status<select name="status" defaultValue={c.status}><option value="pending">Offen</option><option value="reviewing">In Prüfung</option><option value="resolved">Gelöst</option><option value="rejected">Abgelehnt</option></select></label><textarea name="adminNote" rows={3} defaultValue={c.admin_note||''} placeholder="Rückmeldung / Entscheidung"/><EHButton type="submit">Fall aktualisieren</EHButton></form></article>)}</div></section>
-  </div></>} aside={<>
+    ]} /><EHWorkspaceGrid main={<><EHWorkSection title="Betriebsübersicht"><EHText muted>Ein kompakter Blick auf Nutzer, Vorgänge und Zustellungen – ohne sensible Inhalte.</EHText><EHMetricsBar label="Betriebsübersicht" items={[{id:'nutzer',label:'Nutzer',value:String(overview.users),hint:'Eigentümer und Partner'},{id:'partnernetz',label:'Partner',value:String(overview.providers),hint:`${overview.verifiedProviders} geprüft`},{id:'anfragen',label:'Anfragen',value:String(overview.requests),hint:`${overview.openRequests} offen`},{id:'bookings',label:'Bookings',value:String(overview.bookings),hint:'Termine insgesamt'},{id:'matching',label:'Matching',value:String(overview.matches),hint:'Partner-Zuordnungen'},{id:'mitteilungen',label:'Benachrichtigungen',value:String(overview.unreadNotifications),hint:'ungelesen'}]} /></EHWorkSection><EHWorkSection title="Anfragen"><EHRecordList label="Neueste Anfragen" empty="Noch keine Anfragen." items={recentJobs.map((job:any)=>({id:`anfrage-${job.id}`,title:job.title,detail:`${job.first_name} ${job.last_name} · ${statusLabel(job.status)}`,status:<EHStatus tone={job.status === 'open' ? 'warning' : job.status === 'completed' ? 'success' : 'neutral'}>{statusLabel(job.status)}</EHStatus>,icon:<ListChecks size={20}/>}))} /></EHWorkSection><EHWorkSection title="Bookings"><EHRecordList label="Neueste Bookings" empty="Noch keine Bookings." items={recentBookings.map((booking:any,index:number)=>({id:`booking-${booking.start_at}-${index}`,title:booking.title,detail:`${booking.business_name} · ${String(booking.start_at).slice(0,10)}`,status:<EHStatus tone={booking.status === 'completed' ? 'success' : booking.status === 'cancelled' ? 'error' : 'info'}>{statusLabel(booking.status)}</EHStatus>,icon:<CalendarCheck size={20}/>}))} /></EHWorkSection><EHWorkSection title="Bewertungen"><EHRecordList label="Neueste Bewertungen" empty="Noch keine Bewertungen." items={recentReviews.map((review:any,index:number)=>({id:`bewertung-${review.created_at}-${index}`,title:review.business_name,detail:review.title,status:<EHStatus tone="success">{review.rating}/5</EHStatus>,icon:<Star size={20}/>}))} /></EHWorkSection><EHWorkSection title="Admin-Audit-Log"><EHText muted>Privilegierte Aktionen, chronologisch und ohne geheime Werte. {auditEntries.length} Einträge.</EHText><EHRecordList label="Admin-Audit-Log" empty="Noch keine Admin-Aktionen protokolliert." items={auditEntries.map((entry:any,index:number)=>({id:`audit-${entry.created_at}-${entry.action}-${index}`,title:entry.action,detail:[`${entry.actor} · ${entry.target||'System'}`,entry.detail].filter(Boolean).join(' — '),dateLabel:String(entry.created_at)}))} /></EHWorkSection><EHWorkflowStack>
+        <EHWorkSection title="Partnernetzwerk">
+          {verifications.length===0&&<EHText muted>Keine Partnerprüfungen vorhanden.</EHText>}
+          <EHWorkflowStack>{verifications.map((v:any)=>{
+            const kontakt=[v.first_name,v.last_name,v.email].filter(Boolean).join(' ');
+            const betrieb=[v.trades,v.postcode].filter(Boolean).join(' · ');
+            return <EHWorkflowStack key={v.id}>
+              <EHFormSection title={v.business_name||`Anbieter ${v.provider_id}`} description={[kontakt,betrieb].filter(Boolean).join(' · ')}>
+                <EHActions>
+                  <EHStatus tone={v.status === 'approved' ? 'success' : v.status === 'rejected' ? 'error' : 'warning'}>Prüfung {statusLabel(v.status)}</EHStatus>
+                  <EHStatus tone={v.contract_status === 'active' ? 'success' : v.contract_status === 'ended' ? 'error' : 'neutral'}>Vertrag {statusLabel(v.contract_status||'pending')}</EHStatus>
+                </EHActions>
+                <EHButton href={`/api/admin/verification-file/${v.id}`} target="_blank" rel="noreferrer" variant="secondary">Prüfdokument öffnen</EHButton>
+                {v.provider_note&&<EHText>{v.provider_note}</EHText>}
+                <EHWorkflowForm action={adminReviewVerificationLifecycleAction.bind(null,v.id)}>
+                  <EHField id={`pruefnotiz-${v.id}`} label="Prüfnotiz"><EHTextarea id={`pruefnotiz-${v.id}`} name="adminNote" rows={2} defaultValue={v.admin_note||''} placeholder="Prüfnotiz"/></EHField>
+                  <EHActions>
+                    <EHButton type="submit" name="decision" value="approved"><ShieldCheck size={16}/>Unternehmen freigeben</EHButton>
+                    <EHButton type="submit" name="decision" value="rejected" variant="secondary">Ablehnen</EHButton>
+                  </EHActions>
+                </EHWorkflowForm>
+                <EHWorkflowForm action={adminUpdatePartnerContractLifecycleAction.bind(null,v.provider_id)}>
+                  <EHFormSection title="Einfach-Hausen-Partnervertrag">
+                    <EHFieldGrid>
+                      <EHField id={`vertrag-status-${v.id}`} label="Status"><EHSelect id={`vertrag-status-${v.id}`} name="status" defaultValue={v.contract_status||'pending'}><option value="pending">Ausstehend</option><option value="active">Aktiv</option><option value="suspended">Pausiert</option><option value="ended">Beendet</option></EHSelect></EHField>
+                      <EHField id={`reaktionsziel-${v.id}`} label="Reaktionsziel (Min.)"><EHInput id={`reaktionsziel-${v.id}`} name="responseTarget" type="number" min={5} max={240} defaultValue={v.response_target_minutes||30}/></EHField>
+                    </EHFieldGrid>
+                    <EHField id={`kundenvorteil-${v.id}`} label="Kundenvorteil (bps)" hint="Status „Aktiv“ wird serverseitig nur übernommen, wenn die Unternehmensprüfung freigegeben und alle vier folgenden Prüfungen bestätigt sind."><EHInput id={`kundenvorteil-${v.id}`} name="discountBps" type="number" min={0} max={3000} defaultValue={v.customer_discount_bps??0}/></EHField>
+                    <EHCheckbox name="insurance" defaultChecked={!!v.insurance_verified} label="Betriebshaftpflicht geprüft"/>
+                    <EHCheckbox name="qualification" defaultChecked={!!v.qualification_verified} label="Qualifikation/Zulassung geprüft"/>
+                    <EHCheckbox name="contract" defaultChecked={!!v.contract_verified} label="Partnervertrag unterschrieben"/>
+                    <EHCheckbox name="quality" defaultChecked={!!v.quality_standard_verified} label="Qualitätsstandard akzeptiert"/>
+                    <EHText muted>0 % Auftragsprovision — Partner behalten 100 % ihres Auftragswertes. Monetarisierung erfolgt ausschließlich über Partner-Tarife.</EHText>
+                    <EHField id={`vertrag-notizen-${v.id}`} label="Konditionen / interne Notizen"><EHTextarea id={`vertrag-notizen-${v.id}`} name="contractNotes" rows={2} defaultValue={v.contract_notes||''} placeholder="Konditionen / interne Notizen"/></EHField>
+                    <EHActions><EHButton type="submit">Partnervertrag speichern</EHButton></EHActions>
+                  </EHFormSection>
+                </EHWorkflowForm>
+              </EHFormSection>
+            </EHWorkflowStack>;
+          })}</EHWorkflowStack>
+        </EHWorkSection>
+        <EHWorkSection title="Bewertungs-Moderation">
+          <EHText muted>Operations-Lookup und Outbox: <EHTextLink href="/admin/ops">/admin/ops</EHTextLink></EHText>
+          {openReports.length===0&&<EHText muted>Keine gemeldeten Bewertungen.</EHText>}
+          <EHWorkflowStack>{openReports.map((report:any)=>(
+            <EHWorkflowForm key={report.id} action={moderateReviewAction.bind(null,report.id)}>
+              <EHFormSection title={`★ ${report.rating}/5 — ${report.partner}`} description={`Gemeldet von ${report.reporter} · ${new Date(report.created_at).toLocaleDateString('de-DE')}`}>
+                <EHStatus tone={report.status==='open' ? 'warning' : 'neutral'}>{report.status==='open'?'Offen':report.status==='actioned'?'Bearbeitet':'Verworfen'}</EHStatus>
+                <EHText>{report.comment||'(ohne Text)'}{report.reason&&<> — Grund: {report.reason}</>}</EHText>
+                <EHActions>
+                  {report.status==='open'&&<>
+                    <EHButton type="submit" name="decision" value="hide">Bewertung ausblenden</EHButton>
+                    <EHButton type="submit" name="decision" value="dismiss" variant="secondary">Meldung verwerfen</EHButton>
+                  </>}
+                  {report.hidden&&<EHButton type="submit" name="decision" value="restore" variant="secondary">Wieder einblenden</EHButton>}
+                </EHActions>
+              </EHFormSection>
+            </EHWorkflowForm>
+          ))}</EHWorkflowStack>
+        </EHWorkSection>
+        <EHWorkSection title="Servicefälle">
+          {claims.length===0&&<EHText muted>Keine Servicefälle vorhanden.</EHText>}
+          <EHWorkflowStack>{claims.map((c:any)=>(
+            <EHWorkflowForm key={c.id} action={adminUpdateClaimAction.bind(null,c.id)}>
+              <EHFormSection title={c.title} description={`Kunde: ${c.homeowner_email} · Partner: ${c.business_name} · ${c.provider_email}`}>
+                <EHStatus tone={c.status === 'resolved' ? 'success' : c.status === 'rejected' ? 'error' : 'info'}>{statusLabel(c.status)}</EHStatus>
+                <EHText>{c.description}</EHText>
+                <EHField id={`fall-status-${c.id}`} label="Status"><EHSelect id={`fall-status-${c.id}`} name="status" defaultValue={c.status}><option value="pending">Offen</option><option value="reviewing">In Prüfung</option><option value="resolved">Gelöst</option><option value="rejected">Abgelehnt</option></EHSelect></EHField>
+                <EHField id={`fall-notiz-${c.id}`} label="Rückmeldung / Entscheidung"><EHTextarea id={`fall-notiz-${c.id}`} name="adminNote" rows={3} defaultValue={c.admin_note||''} placeholder="Rückmeldung / Entscheidung"/></EHField>
+                <EHActions><EHButton type="submit">Fall aktualisieren</EHButton></EHActions>
+              </EHFormSection>
+            </EHWorkflowForm>
+          ))}</EHWorkflowStack>
+        </EHWorkSection>
+      </EHWorkflowStack></>} aside={<>
     <EHWorkSection title="Prüf-Warteschlange">
       <EHRecordList label="Offene Partnerprüfungen" items={verificationQueue} empty="Keine offenen Partnerprüfungen." />
     </EHWorkSection>
@@ -107,5 +155,5 @@ export default async function Admin({searchParams}:{searchParams:Promise<Record<
     <EHWorkSection title="Gemeldete Bewertungen">
       <EHRecordList label="Offene Bewertungsmeldungen" items={reportQueue} empty="Keine offenen Bewertungsmeldungen." />
     </EHWorkSection>
-  </>} /></main></EHScope>;
+  </>} /></EHWorkflowStack></EHSection></main></EHScope>;
 }

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { getSupabase } from "@/lib/supabase";
 import { BackIcon, ChatBubbleIcon } from "@/components/icons";
-import styles from "../anfrage.module.css";
+import { EHScope, EHWorkflowStack, EHPageHeader, EHRecordList, EHWorkSection, EHButton, EHStatus, EHField, EHInput, EHTextarea, EHFormFeedback, EHLoadingState, type EHRecordEntry } from "@/design-system";
 
 export default function AnfrageDetailPage() {
   const { id } = useParams();
@@ -44,30 +44,58 @@ export default function AnfrageDetailPage() {
     setAngebote((data as any) ?? []);
   }
 
-  if (!anfrage) return <div className="page center-page"><p>Lädt…</p></div>;
+  if (!anfrage) return <EHScope app><EHLoadingState label="Lädt…" /></EHScope>;
   const hasAccepted = angebote.some((a) => a.status === "angenommen");
+  const detailItems: EHRecordEntry[] = [
+    { id: "beschreibung", title: "Beschreibung", detail: anfrage.beschreibung || "—" },
+    { id: "ort", title: "Ort", detail: `${anfrage.plz} ${anfrage.ort}` },
+    ...(anfrage.budget ? [{ id: "budget", title: "Budget", detail: anfrage.budget } as EHRecordEntry] : []),
+  ];
+  const angebotItems: EHRecordEntry[] = angebote.map((ag) => ({
+    id: String(ag.id),
+    title: ag.firma,
+    detail: `${ag.text} · ⭐ ${ag.bewertung} • ${ag.entfernung} km`,
+    value: `${ag.preis} €`,
+    icon: <ChatBubbleIcon />,
+    status: ag.status === "angenommen" ? <EHStatus tone="success">Angenommen</EHStatus> : undefined,
+    action: ag.status !== "angenommen" && !proMode
+      ? <EHButton size="small" onClick={() => annehmen(ag.id)}>Annehmen</EHButton>
+      : undefined,
+  }));
   return (
-    <div className="safe-top safe-bottom page ob-page">
-      <header className="ob-header"><button className="back-btn" onClick={() => router.back()}><BackIcon /></button></header>
-      <section className="ob-head"><h1>{anfrage.titel}</h1></section>
-      <div className="summary-card"><div className="sum-row"><span>Beschreibung</span><strong>{anfrage.beschreibung || "—"}</strong></div><div className="sum-row"><span>Ort</span><strong>{anfrage.plz} {anfrage.ort}</strong></div>{anfrage.budget && <div className="sum-row"><span>Budget</span><strong>{anfrage.budget}</strong></div>}</div>
-      <h3 className={`own-section-title ${styles.sectionTitle}`}>Angebote ({angebote.length})</h3>
-      {angebote.length === 0 && (<div className="empty-box"><p>Noch keine Angebote. Dienstleister prüfen deine Anfrage.</p></div>)}
-      <div className="req-card">{angebote.map((ag, i) => (<div className="req-item" key={ag.id}>{i > 0 && <div className="req-divider" />}<div className="req-icon"><ChatBubbleIcon /></div><div className="req-body"><strong className="req-title">{ag.firma}</strong><p className="req-text">{ag.text}</p><p className="req-plz">⭐ {ag.bewertung} • {ag.entfernung} km</p></div><div className="req-right"><span className="req-price">{ag.preis} €</span>{ag.status === "angenommen" ? (<span className="badge badge-green">Angenommen</span>) : !proMode ? (<button className="quote-btn" onClick={() => annehmen(ag.id)}>Annehmen</button>) : null}</div></div>))}</div>
-      {!proMode && hasAccepted && (<button className={`btn-primary btn-full ${styles.chatCta}`} onClick={() => router.push(`/chat/${id}`)}>💬 Mit Handwerker chatten</button>)}
-      {proMode && (
-        <div className={`summary-card ${styles.quoteCard}`}>
-          <h3 className={styles.quoteCardTitle}>Angebot abgeben</h3>
-          {gesendet ? (<p className={styles.successNote}>✅ Angebot gesendet!</p>) : (
-            <>
-              <div className={`if-wrap ${styles.fieldSpaced}`}><span className="if-label">Nachricht an den Eigentümer</span><textarea rows={4} value={angebotText} onChange={(e) => setAngebotText(e.target.value)} placeholder="Warum bist du der Richtige? Enthaltene Leistungen…" /></div>
-              <div className={`if-wrap ${styles.fieldSpacedLg}`}><span className="if-label">Preis (€)</span><input inputMode="decimal" value={angebotPreis} onChange={(e) => setAngebotPreis(e.target.value)} placeholder="z. B. 1250" /></div>
-              <button className="btn-primary btn-full" disabled={!angebotText || !angebotPreis} onClick={angebotSenden}>Angebot senden</button><div className={styles.gap} />
-            </>
-          )}
-        </div>
-      )}
-      <div className="home-indicator" />
-    </div>
+    <EHScope app>
+      <EHWorkflowStack>
+        <EHButton variant="quiet" onClick={() => router.back()} aria-label="Zurück"><BackIcon /></EHButton>
+        <EHPageHeader title={anfrage.titel} context={`${anfrage.plz} ${anfrage.ort}`} />
+        <EHWorkSection title="Zusammenfassung">
+          <EHRecordList label="Details zur Anfrage" items={detailItems} />
+        </EHWorkSection>
+        <EHWorkSection title={`Angebote (${angebote.length})`}>
+          {angebote.length === 0
+            ? <EHFormFeedback kind="info">Noch keine Angebote. Dienstleister prüfen deine Anfrage.</EHFormFeedback>
+            : <EHRecordList label="Angebote" items={angebotItems} />}
+        </EHWorkSection>
+        {!proMode && hasAccepted && (
+          <EHButton href={`/chat/${id}`} arrow>💬 Mit Handwerker chatten</EHButton>
+        )}
+        {proMode && (
+          <EHWorkSection title="Angebot abgeben">
+            {gesendet ? (
+              <EHFormFeedback kind="success">✅ Angebot gesendet!</EHFormFeedback>
+            ) : (
+              <>
+                <EHField id="angebot-text" label="Nachricht an den Eigentümer">
+                  <EHTextarea id="angebot-text" rows={4} value={angebotText} onChange={(e) => setAngebotText(e.target.value)} placeholder="Warum bist du der Richtige? Enthaltene Leistungen…" />
+                </EHField>
+                <EHField id="angebot-preis" label="Preis (€)">
+                  <EHInput id="angebot-preis" inputMode="decimal" value={angebotPreis} onChange={(e) => setAngebotPreis(e.target.value)} placeholder="z. B. 1250" />
+                </EHField>
+                <EHButton disabled={!angebotText || !angebotPreis} onClick={angebotSenden}>Angebot senden</EHButton>
+              </>
+            )}
+          </EHWorkSection>
+        )}
+      </EHWorkflowStack>
+    </EHScope>
   );
 }

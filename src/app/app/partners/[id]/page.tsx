@@ -1,6 +1,4 @@
-import Link from 'next/link';
-import { ChevronRight } from 'lucide-react';
-import { EHEmptyState, EHErrorState, EHButton, EHField, EHFormFeedback, EHInput, EHMetricsBar, EHPageHeader, EHRecordList, EHStatus, EHSubmitButton, EHText, EHWorkSection, EHWorkspaceGrid } from '@/design-system';
+import { EHEmptyState, EHErrorState, EHButton, EHField, EHFormFeedback, EHInput, EHMetricsBar, EHPageHeader, EHRecordList, EHStatus, EHSubmitButton, EHText, EHWorkflowStack, EHWorkSection, EHWorkspaceGrid } from '@/design-system';
 import { notFound } from 'next/navigation';
 import { AppShell } from '@/components/shell';
 import { crumbs } from '@/components/nav-config';
@@ -21,6 +19,7 @@ export default async function PartnerProfile({params,searchParams}:{params:Promi
   const verifiedCount=verifications.filter(Boolean).length;
   const returnLabel=sp.job?'Zum Angebot zurück':'Aufträge ansehen';
   return <AppShell role="homeowner" active="/app/partners" title="Partnerprofil" subtitle="Geprüfter Einfach-Hausen-Partner" breadcrumbs={crumbs('/app/messages','Partnerprofil')}>
+    <EHWorkflowStack>
     {sp.message&&<EHFormFeedback kind="success">{String(sp.message)}</EHFormFeedback>}
     {sp.error&&<EHErrorState text={String(sp.error)} />}
     <EHPageHeader title={provider.business_name} context={`Geprüfter Partner · ${rating.toFixed(1)} von 5 aus ${ratingCount} Bewertungen`} actions={<EHButton href={returnHref} variant="secondary">Zurück</EHButton>} />
@@ -49,7 +48,7 @@ export default async function PartnerProfile({params,searchParams}:{params:Promi
           action: <details><summary>Melden</summary><form action={reportReviewAction.bind(null,r.id)}><EHField id={`report-${r.id}`} label="Grund der Meldung"><EHInput id={`report-${r.id}`} name="reason" maxLength={500} placeholder="Was stimmt an dieser Bewertung nicht?" aria-label="Grund der Meldung" required/></EHField><EHSubmitButton pendingLabel="Meldung wird gesendet …">Bewertung melden</EHSubmitButton></form></details>,
         }))} />}
     </EHWorkSection>
-    <Link href={returnHref} className="btn primary wide partner-return">{returnLabel} <ChevronRight size={16}/></Link>
+    <EHButton href={returnHref} arrow>{returnLabel}</EHButton>
     </>} aside={<>
       <EHWorkSection title="Nächster Schritt">
         {sp.job
@@ -68,5 +67,6 @@ export default async function PartnerProfile({params,searchParams}:{params:Promi
         <EHText muted>Nur Betriebe mit aktivem Partnervertrag erscheinen hier. Versicherung, Qualifikation und Qualitätsstandard prüft Einfach Hausen vor der Aufnahme.</EHText>
       </EHWorkSection>
     </>} />
+    </EHWorkflowStack>
   </AppShell>;
 }

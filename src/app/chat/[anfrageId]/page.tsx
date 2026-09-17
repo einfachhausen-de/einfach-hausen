@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "@/components/AuthContext";
 import { getSupabase } from "@/lib/supabase";
 import { BackIcon, ArrowRightWhite } from "@/components/icons";
-import styles from "./chat.module.css";
+import { EHScope, EHWorkflowStack, EHConversation, EHButton, EHField, EHInput } from "@/design-system";
 
 type Msg = { id: string; sender_id: string; text: string; created_at: string };
 
@@ -16,6 +16,7 @@ export default function ChatPage() {
   const [msgs, setMsgs] = useState<Msg[]>([]);
   const [partnerName, setPartnerName] = useState("Chat");
   const [partnerId, setPartnerId] = useState<string | null>(null);
+  const [isOwner, setIsOwner] = useState(true);
   const [input, setInput] = useState("");
   const endRef = useRef<HTMLDivElement>(null);
 
@@ -32,9 +33,10 @@ export default function ChatPage() {
         .single()
         .then(async ({ data: anfrage }: any) => {
           if (!anfrage) return;
-          const isOwner = anfrage.user_id === user.id;
+          const owner = anfrage.user_id === user.id;
+          setIsOwner(owner);
           let otherId = anfrage.user_id;
-          if (isOwner) {
+          if (owner) {
             const { data: ag }: any = await supabase.from("angebote").select("pro_id, firma").eq("anfrage_id", anfrageId as string).limit(1).single();
             if (ag) {
               otherId = ag.pro_id;
@@ -73,31 +75,34 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="safe-top safe-bottom page ki-page">
-      <header className="ob-header">
-        <button className="back-btn" onClick={() => router.back()}>
-          <BackIcon />
-        </button>
-        <strong className={styles.partnerName}>{partnerName}</strong>
-        <span className={styles.headerSpacer} />
-      </header>
-      <div className="ki-messages">
-        {msgs.map((m) => (
-          <div key={m.id} className={`bubble ${m.sender_id === user?.id ? "user" : "ai"}`}>
-            {m.text}
-          </div>
-        ))}
+    <EHScope app>
+      <EHWorkflowStack>
+        <EHButton variant="quiet" onClick={() => router.back()} aria-label="Zurück"><BackIcon /></EHButton>
+        <EHConversation
+          role={isOwner ? "owner" : "provider"}
+          name={partnerName}
+          detail={`Anfrage ${anfrageId}`}
+          messages={msgs.map((m) => ({
+            id: m.id,
+            mine: m.sender_id === user?.id,
+            author: m.sender_id === user?.id ? "Du" : partnerName,
+            body: m.text,
+          }))}
+          composer={
+            <EHField id="chat-input" label={`Nachricht an ${partnerName}`}>
+              <EHInput
+                id="chat-input"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && send()}
+                placeholder="Nachricht schreiben…"
+              />
+              <EHButton onClick={send} aria-label="Nachricht senden"><ArrowRightWhite /></EHButton>
+            </EHField>
+          }
+        />
         <div ref={endRef} />
-      </div>
-      <div className="ki-composer">
-        <div className="ki-input-row">
-          <input value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && send()} placeholder="Nachricht schreiben…" />
-          <button className="ki-send" onClick={send}>
-            <ArrowRightWhite />
-          </button>
-        </div>
-      </div>
-      <div className="home-indicator" />
-    </div>
+      </EHWorkflowStack>
+    </EHScope>
   );
 }

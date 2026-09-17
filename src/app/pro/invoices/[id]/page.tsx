@@ -1,7 +1,6 @@
-import { EHDocumentFrame } from "@/design-system";
+import { EHButton, EHDocumentFrame, EHFormFeedback, EHSubmitButton, EHWorkflowForm } from "@/design-system";
 import { PrintButton } from "@/components/print-button";
 import { notFound } from 'next/navigation';
-import Link from 'next/link';
 import { FileText, XCircle } from 'lucide-react';
 import { requireUser } from '@/lib/auth';
 import { canAccessProviderJob } from '@/lib/provider';
@@ -28,15 +27,15 @@ export default async function ProviderInvoice({
   return (
     <EHDocumentFrame><main className="invoice-page pro-invoice-page">
       <div className="invoice-page-tools print-hide" aria-label="Rechnungsaktionen">
-        <Link href={`/pro/jobs/${invoice.job_id}`} className="btn light"><FileText size={16} />Zum Auftrag</Link>
+        <EHButton href={`/pro/jobs/${invoice.job_id}`} variant="secondary"><FileText size={16} />Zum Auftrag</EHButton>
         <PrintButton />
         {invoice.status === 'sent' && (
-          <form action={cancelInvoiceAction.bind(null, invoice.id)}>
-            <button className="btn ghost pro-ghost"><XCircle size={16} />Rechnung stornieren</button>
-          </form>
+          <EHWorkflowForm action={cancelInvoiceAction.bind(null, invoice.id)}>
+            <EHSubmitButton pendingLabel="Wird storniert…"><XCircle size={16} />Rechnung stornieren</EHSubmitButton>
+          </EHWorkflowForm>
         )}
       </div>
-      {sp.sent && <div className="alert success print-hide" role="status">Rechnung wurde an den Eigentümer gesendet.</div>}
+      {sp.sent && <div className="print-hide"><EHFormFeedback kind="success">Rechnung wurde an den Eigentümer gesendet.</EHFormFeedback></div>}
       <InvoiceView invoice={invoice} />
     </main></EHDocumentFrame>
   );

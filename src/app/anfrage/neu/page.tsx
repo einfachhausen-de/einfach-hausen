@@ -4,9 +4,15 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getSupabase } from "@/lib/supabase";
 import { categories } from "@/lib/categories";
-import Stepper from "@/components/Stepper";
-import { CameraIcon, MicIcon, ArrowRightWhite, CheckIcon, PinSmallIcon, BackIcon } from "@/components/icons";
-import styles from "../anfrage.module.css";
+import { CameraIcon, MicIcon, BackIcon } from "@/components/icons";
+import { EHScope, EHWorkflowStack, EHPageHeader, EHStepProgress, EHPanel, EHCheckbox, EHField, EHFieldGrid, EHInput, EHTextarea, EHButton, EHActions, EHRecordList, EHEmptyState, type EHRecordEntry } from "@/design-system";
+
+const STEPS = [
+  { id: "kategorie", label: "Kategorie" },
+  { id: "beschreibung", label: "Beschreibung" },
+  { id: "ort", label: "Ort & Termin" },
+  { id: "zusammenfassung", label: "Zusammenfassung" },
+];
 
 export default function NeueAnfragePage() {
   const router = useRouter();
@@ -38,48 +44,111 @@ export default function NeueAnfragePage() {
   }
   if (sent) {
     return (
-      <div className="page center-page safe-top safe-bottom">
-        <div className="success-circle">✅</div>
-        <h1>Anfrage gesendet!</h1>
-        <p className={styles.muted}>Dienstleister in deiner Umgebung werden benachrichtigt.</p>
-        <div className="home-indicator" />
-      </div>
+      <EHScope app>
+        <EHEmptyState title="Anfrage gesendet!" text="Dienstleister in deiner Umgebung werden benachrichtigt." />
+      </EHScope>
     );
   }
+  const current = STEPS[step - 1].id;
   return (
-    <div className="safe-top safe-bottom page ob-page">
-      <header className="ob-header"><button className="back-btn" onClick={() => (step === 1 ? router.back() : setStep(step - 1))}><BackIcon /></button></header>
-      <Stepper current={step} />
-      {step === 1 && (
-        <>
-          <section className="ob-head"><h1>Worum geht es?</h1><p>Wähle die passende Kategorie für dein Anliegen.</p></section>
-          <div className={`cat-panel ${styles.panelSpaced}`}><div className="cat-grid">{categories.slice(0, 9).map((c) => (<button key={c.id} className={`cat-tile ${cat === c.id ? "sel" : ""}`} onClick={() => { setCat(c.id); setSub(null); }}><span className="cat-tile-title">{c.title}</span><span className={`cat-check ${cat === c.id ? "on" : ""}`}>{cat === c.id && <CheckIcon size={12} />}</span></button>))}</div></div>
-          {selCat && (<div className="subcat-section"><h3>Was genau soll gemacht werden?</h3><div className={`subcat-list ${styles.listSpaced}`}>{selCat.subs.map((s) => (<button key={s.id} className={`subcat-item ${sub === s.id ? "sel" : ""}`} onClick={() => setSub(s.id)}><span className={`checkbox-square ${sub === s.id ? "on" : ""}`}>{sub === s.id && <CheckIcon size={11} />}</span><span className="subcat-text"><strong>{s.title}</strong><span>{s.sub}</span></span></button>))}</div></div>)}
-          <div className="ob-actions"><button className="btn-primary btn-full" disabled={!cat || !sub} onClick={() => setStep(2)}>Weiter</button></div>
-        </>
-      )}
-      {step === 2 && (
-        <>
-          <section className="ob-head"><h1>Beschreibe dein Vorhaben</h1><p>Je mehr Details, desto passende Angebote.</p></section>
-          <div className="ob-form"><div className="if-wrap anf-titel"><span className="if-label">Titel</span><input value={titel} onChange={(e) => setTitel(e.target.value)} placeholder="z. B. Badezimmer renovieren" /></div><div className="textarea-wrap"><span className="if-label">Beschreibung</span><textarea rows={6} maxLength={1000} value={beschreibung} onChange={(e) => setBeschreibung(e.target.value)} placeholder="Was soll gemacht werden? Raumgröße, Materialwünsche, Besonderheiten…" /><span className="char-count">{beschreibung.length} / 1000</span></div><div className="ki-chips"><button type="button" className="ki-chip" onClick={() => setFotos((f) => [...f, `Foto ${f.length + 1}`])}><CameraIcon /> Foto hinzufügen</button><button type="button" className="ki-chip"><MicIcon /> Sprache</button></div>{fotos.length > 0 && <div className="chips">{fotos.map((f, i) => (<span className="chip" key={i} onClick={() => setFotos((p) => p.filter((_, j) => j !== i))}>{f} ✕</span>))}</div>}</div>
-          <div className="ob-actions"><button className="btn-primary btn-full" disabled={!titel} onClick={() => setStep(3)}>Weiter</button></div>
-        </>
-      )}
-      {step === 3 && (
-        <>
-          <section className="ob-head"><h1>Wo & wann?</h1><p>Wo soll der Auftrag ausgeführt werden?</p></section>
-          <div className="ob-form"><div className="icon-field"><div className="icon-bubble"><PinSmallIcon /></div><div className="if-wrap"><span className="if-label">PLZ & Ort</span><div className="anf-plz-row"><input inputMode="numeric" maxLength={5} value={plz} onChange={(e) => setPlz(e.target.value)} placeholder="85609" /><input value={ort} onChange={(e) => setOrt(e.target.value)} placeholder="Aschheim" /></div></div></div><div className="if-wrap"><span className="if-label">Wunschtermin (optional)</span><input type="date" value={termin} onChange={(e) => setTermin(e.target.value)} /></div><div className="if-wrap"><span className="if-label">Budget (optional)</span><input inputMode="decimal" value={budget} onChange={(e) => setBudget(e.target.value)} placeholder="z. B. 2.000 – 5.000 €" /></div><div className="toggle-card"><div className="toggle-icon">⚡</div><div className="toggle-text"><strong>Dringend</strong><span>Soll der Auftrag schnellstmöglich starten?</span></div><button type="button" className={`switch ${dringend ? "on" : ""}`} onClick={() => setDringend((v) => !v)}><span className="knob" /></button></div></div>
-          <div className="ob-actions"><button className="btn-primary btn-full" disabled={!plz || !ort} onClick={() => setStep(4)}>Weiter: Zusammenfassung</button></div>
-        </>
-      )}
-      {step === 4 && (
-        <>
-          <section className="ob-head"><h1>Zusammenfassung</h1><p>Prüfe deine Angaben und sende die Anfrage.</p></section>
-          <div className="summary-card"><div className="sum-row"><span>Kategorie</span><strong>{selCat?.title} – {selCat?.subs.find((s) => s.id === sub)?.title}</strong></div><div className="sum-row"><span>Titel</span><strong>{titel}</strong></div><div className="sum-row"><span>Beschreibung</span><strong>{beschreibung || "—"}</strong></div><div className="sum-row"><span>Ort</span><strong>{plz} {ort}</strong></div>{termin && <div className="sum-row"><span>Wunschtermin</span><strong>{termin}</strong></div>}{budget && <div className="sum-row"><span>Budget</span><strong>{budget}</strong></div>}<div className="sum-row"><span>Dringend</span><strong>{dringend ? "Ja ⚡" : "Nein"}</strong></div></div>
-          <div className="ob-actions"><button className="btn-primary btn-full" onClick={submit}>Anfrage senden <ArrowRightWhite /></button></div>
-        </>
-      )}
-      <div className="home-indicator" />
-    </div>
+    <EHScope app>
+      <EHWorkflowStack>
+        <EHButton variant="quiet" onClick={() => (step === 1 ? router.back() : setStep(step - 1))} aria-label="Zurück"><BackIcon /></EHButton>
+        <EHStepProgress steps={STEPS} current={current} />
+        {step === 1 && (
+          <>
+            <EHPageHeader title="Worum geht es?" context="Wähle die passende Kategorie für dein Anliegen." />
+            <EHPanel title="Kategorie">
+              {categories.slice(0, 9).map((c) => (
+                <EHCheckbox key={c.id} label={c.title} checked={cat === c.id} onChange={() => { setCat(c.id); setSub(null); }} />
+              ))}
+            </EHPanel>
+            {selCat && (
+              <EHPanel title="Was genau soll gemacht werden?">
+                {selCat.subs.map((s) => (
+                  <EHCheckbox
+                    key={s.id}
+                    label={<span><strong>{s.title}</strong> — {s.sub}</span>}
+                    checked={sub === s.id}
+                    onChange={() => setSub(s.id)}
+                  />
+                ))}
+              </EHPanel>
+            )}
+            <EHActions><EHButton disabled={!cat || !sub} onClick={() => setStep(2)}>Weiter</EHButton></EHActions>
+          </>
+        )}
+        {step === 2 && (
+          <>
+            <EHPageHeader title="Beschreibe dein Vorhaben" context="Je mehr Details, desto passende Angebote." />
+            <EHPanel title="Details">
+              <EHField id="anf-titel" label="Titel">
+                <EHInput id="anf-titel" value={titel} onChange={(e) => setTitel(e.target.value)} placeholder="z. B. Badezimmer renovieren" />
+              </EHField>
+              <EHField id="anf-beschreibung" label="Beschreibung" hint={`${beschreibung.length} / 1000`}>
+                <EHTextarea id="anf-beschreibung" rows={6} maxLength={1000} value={beschreibung} onChange={(e) => setBeschreibung(e.target.value)} placeholder="Was soll gemacht werden? Raumgröße, Materialwünsche, Besonderheiten…" />
+              </EHField>
+              <EHActions>
+                <EHButton variant="secondary" onClick={() => setFotos((f) => [...f, `Foto ${f.length + 1}`])}><CameraIcon /> Foto hinzufügen</EHButton>
+                <EHButton variant="secondary"><MicIcon /> Sprache</EHButton>
+              </EHActions>
+              {fotos.length > 0 && (
+                <EHActions>
+                  {fotos.map((f, i) => (
+                    <EHButton key={i} size="small" variant="secondary" onClick={() => setFotos((p) => p.filter((_, j) => j !== i))}>{f} ✕</EHButton>
+                  ))}
+                </EHActions>
+              )}
+            </EHPanel>
+            <EHActions><EHButton disabled={!titel} onClick={() => setStep(3)}>Weiter</EHButton></EHActions>
+          </>
+        )}
+        {step === 3 && (
+          <>
+            <EHPageHeader title="Wo & wann?" context="Wo soll der Auftrag ausgeführt werden?" />
+            <EHPanel title="Ort & Termin">
+              <EHFieldGrid>
+                <EHField id="anf-plz" label="PLZ">
+                  <EHInput id="anf-plz" inputMode="numeric" maxLength={5} value={plz} onChange={(e) => setPlz(e.target.value)} placeholder="85609" />
+                </EHField>
+                <EHField id="anf-ort" label="Ort">
+                  <EHInput id="anf-ort" value={ort} onChange={(e) => setOrt(e.target.value)} placeholder="Aschheim" />
+                </EHField>
+              </EHFieldGrid>
+              <EHField id="anf-termin" label="Wunschtermin (optional)">
+                <EHInput id="anf-termin" type="date" value={termin} onChange={(e) => setTermin(e.target.value)} />
+              </EHField>
+              <EHField id="anf-budget" label="Budget (optional)">
+                <EHInput id="anf-budget" inputMode="decimal" value={budget} onChange={(e) => setBudget(e.target.value)} placeholder="z. B. 2.000 – 5.000 €" />
+              </EHField>
+              <EHCheckbox
+                label={<span><strong>Dringend</strong> — Soll der Auftrag schnellstmöglich starten?</span>}
+                checked={dringend}
+                onChange={() => setDringend((v) => !v)}
+              />
+            </EHPanel>
+            <EHActions><EHButton disabled={!plz || !ort} onClick={() => setStep(4)}>Weiter: Zusammenfassung</EHButton></EHActions>
+          </>
+        )}
+        {step === 4 && (
+          <>
+            <EHPageHeader title="Zusammenfassung" context="Prüfe deine Angaben und sende die Anfrage." />
+            <EHRecordList
+              label="Zusammenfassung deiner Anfrage"
+              items={[
+                { id: "kategorie", title: "Kategorie", detail: `${selCat?.title} – ${selCat?.subs.find((s) => s.id === sub)?.title}` },
+                { id: "titel", title: "Titel", detail: titel },
+                { id: "beschreibung", title: "Beschreibung", detail: beschreibung || "—" },
+                { id: "ort", title: "Ort", detail: `${plz} ${ort}` },
+                ...(termin ? [{ id: "termin", title: "Wunschtermin", detail: termin } as EHRecordEntry] : []),
+                ...(budget ? [{ id: "budget", title: "Budget", detail: budget } as EHRecordEntry] : []),
+                { id: "dringend", title: "Dringend", detail: dringend ? "Ja ⚡" : "Nein" },
+              ]}
+            />
+            <EHActions><EHButton onClick={submit} arrow>Anfrage senden</EHButton></EHActions>
+          </>
+        )}
+      </EHWorkflowStack>
+    </EHScope>
   );
 }

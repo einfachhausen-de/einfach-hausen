@@ -1,9 +1,11 @@
 "use client";
 
-import { EHField, EHInput } from "@/design-system";
+import {
+  EHActions, EHButton, EHField, EHFieldGrid, EHFormFeedback, EHInput,
+  EHLoadingState, EHText, EHWorkflowStack,
+} from "@/design-system";
 import { uiToast } from "@/components/ui-toast";
 import { useEffect, useState } from "react";
-import styles from "./account-forms.module.css";
 
 // EH T-0207: AI access settings — BYOK (own OpenAI-compatible key), freemium
 // quota display and rewarded-ad credit grant. The key is stored encrypted
@@ -98,36 +100,36 @@ export function AiSettings() {
   }
 
   if (loading && !quota && !byok) {
-    return <p role="status" className={styles.note}>KI-Einstellungen werden geladen …</p>;
+    return <EHLoadingState label="KI-Einstellungen werden geladen …" />;
   }
 
   return (
-    <div>
-      {loadError && (
-        <div role="alert" className={styles.blockGap}>
-          <p className={styles.errorText}>{loadError}</p>
-          <button className="btn-ghost" onClick={load} disabled={busy}>Erneut versuchen</button>
-        </div>
-      )}
+    <EHWorkflowStack>
+      {loadError && <>
+        <EHFormFeedback kind="error">{loadError}</EHFormFeedback>
+        <EHActions>
+          <EHButton variant="secondary" onClick={load} disabled={busy}>Erneut versuchen</EHButton>
+        </EHActions>
+      </>}
       {quota && (
-        <p className={styles.note}>
+        <EHText muted>
           KI-Kontingent: {quota.freemiumRemaining} von {quota.freemiumAllowed} frei · {quota.credits} Bonus-Aktionen
-        </p>
+        </EHText>
       )}
-      {message && <p className={styles.successText}>{message}</p>}
-      {error && <p className={styles.errorText}>{error}</p>}
+      {message && <EHFormFeedback kind="success">{message}</EHFormFeedback>}
+      {error && <EHFormFeedback kind="error">{error}</EHFormFeedback>}
 
-      {byok?.enabled ? (
-        <div className={styles.blockGap}>
-          <p className={styles.noteSoft}>Eigener Key aktiv ({byok.masked}) — Anfragen laufen über dein eigenes Anbieter-Konto. Dessen Limits und Kosten gelten.</p>
-          <button className="btn-ghost" onClick={disableKey} disabled={busy}>BYOK deaktivieren</button>
-        </div>
-      ) : (
-        <div className={styles.formGrid}>
-          <p className={styles.noteSoft}>
-            Power-User: hinterlege deinen eigenen API-Key (OpenAI-kompatibel, z. B. Google AI Studio oder OpenRouter).
-            Die KI läuft dann über dein eigenes Anbieter-Konto — dessen Limits und Kosten gelten. Der Key wird verschlüsselt gespeichert.
-          </p>
+      {byok?.enabled ? <>
+        <EHText muted>Eigener Key aktiv ({byok.masked}) — Anfragen laufen über dein eigenes Anbieter-Konto. Dessen Limits und Kosten gelten.</EHText>
+        <EHActions>
+          <EHButton variant="secondary" onClick={disableKey} disabled={busy}>BYOK deaktivieren</EHButton>
+        </EHActions>
+      </> : <>
+        <EHText muted>
+          Power-User: hinterlege deinen eigenen API-Key (OpenAI-kompatibel, z. B. Google AI Studio oder OpenRouter).
+          Die KI läuft dann über dein eigenes Anbieter-Konto — dessen Limits und Kosten gelten. Der Key wird verschlüsselt gespeichert.
+        </EHText>
+        <EHFieldGrid>
           <EHField id="eh-byok-key" label="API-Key" hint="Mindestens 16 Zeichen. Wird nur verschlüsselt gespeichert und nie angezeigt.">
             <EHInput id="eh-byok-key" type="password" value={apiKey} onChange={(e) => setApiKey(e.target.value)} autoComplete="off" required minLength={16} placeholder="sk-…" />
           </EHField>
@@ -137,14 +139,16 @@ export function AiSettings() {
           <EHField id="eh-byok-model" label="Modell (optional)" hint="Leer lassen für das Standard-Modell.">
             <EHInput id="eh-byok-model" value={model} onChange={(e) => setModel(e.target.value)} autoComplete="off" placeholder="z. B. google/gemini-flash-1.5" />
           </EHField>
-          <button className="btn-ghost" onClick={saveKey} disabled={busy || apiKey.length < 16}>Key verschlüsselt speichern</button>
-        </div>
-      )}
+        </EHFieldGrid>
+        <EHActions>
+          <EHButton variant="secondary" onClick={saveKey} disabled={busy || apiKey.length < 16}>Key verschlüsselt speichern</EHButton>
+        </EHActions>
+      </>}
 
-      <div className={styles.blockGap}>
-        <button className="btn-ghost" type="button" data-testid="watch-ad-button" disabled={true} aria-disabled="true" aria-label="Werbeclip ansehen noch nicht verfügbar" title="Werbeclips sind noch nicht angebunden — aktuell kein Guthaben über diese Schaltfläche.">Werbeclip ansehen: +10 KI-Aktionen (noch nicht verfügbar)</button>
-        <p className={styles.noteSoft}>Werbeclips sind noch nicht verfügbar. Solange bleibt diese Schaltfläche deaktiviert — es wird kein Guthaben gebucht und keine Anfrage gesendet.</p>
-      </div>
-    </div>
+      <EHActions>
+        <EHButton variant="secondary" type="button" data-testid="watch-ad-button" disabled={true} aria-disabled="true" aria-label="Werbeclip ansehen noch nicht verfügbar" title="Werbeclips sind noch nicht angebunden — aktuell kein Guthaben über diese Schaltfläche.">Werbeclip ansehen: +10 KI-Aktionen (noch nicht verfügbar)</EHButton>
+      </EHActions>
+      <EHText muted>Werbeclips sind noch nicht verfügbar. Solange bleibt diese Schaltfläche deaktiviert — es wird kein Guthaben gebucht und keine Anfrage gesendet.</EHText>
+    </EHWorkflowStack>
   );
 }

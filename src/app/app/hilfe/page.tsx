@@ -4,7 +4,7 @@ import { crumbs } from '@/components/nav-config';
 import { requireUser } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { dateLabel, euroExact, statusLabel } from '@/lib/format';
-import { EHButton, EHMetricsBar, EHPageHeader, EHRecordList, EHStatus, EHText, EHWorkSection, EHWorkspaceGrid, type EHRecordEntry } from '@/design-system';
+import { EHButton, EHCallout, EHMetricsBar, EHPageHeader, EHRecordList, EHStatus, EHText, EHWorkSection, EHWorkflowStack, EHWorkspaceGrid, type EHRecordEntry } from '@/design-system';
 
 const NEXT_STEPS: EHRecordEntry[] = [
   { id: 'request', title: 'Anliegen beschreiben', href: '/app/hausmeister', icon: <Wrench size={20} /> },
@@ -39,6 +39,7 @@ export default async function HilfePage() {
 
   return (
     <AppShell role="homeowner" active="/app/more" title="Hilfe" breadcrumbs={crumbs(null,'Hilfe & Kontakt')}>
+      <EHWorkflowStack>
       <EHPageHeader title="Hilfe & Kontakt" context={openJobs.length > 0 ? `${openJobs.length} ${openJobs.length === 1 ? 'Vorgang' : 'Vorgänge'} in Bearbeitung` : 'Alles abgeschlossen'} />
       <EHMetricsBar label="Dein Stand" items={[
         { id: 'auftraege', label: 'Offene Aufträge', value: String(openJobs.length), hint: 'laufende Vorgänge' },
@@ -47,10 +48,9 @@ export default async function HilfePage() {
         { id: 'rechnungen', label: 'Offene Rechnungen', value: String(openInvoices.length), hint: openInvoices.length > 0 ? `${euroExact(openTotal)} offen` : 'nichts offen' },
       ]} />
       <EHWorkspaceGrid main={<>
-        <div className="alert emergency-112" role="alert">
-          <strong>Lebensgefahr, Brand oder Gasgeruch?</strong>
-          <span>Sofort <a href="tel:112">112</a> anrufen. Bei Gasgeruch: Fenster öffnen, keine Schalter betätigen, Gebäude verlassen. Einfach Hausen ersetzt keinen öffentlichen Notruf.</span>
-        </div>
+        <EHCallout title="Lebensgefahr, Brand oder Gasgeruch?">
+          <p>Sofort <a href="tel:112">112</a> anrufen. Bei Gasgeruch: Fenster öffnen, keine Schalter betätigen, Gebäude verlassen. Einfach Hausen ersetzt keinen öffentlichen Notruf.</p>
+        </EHCallout>
         <EHWorkSection title="Dein nächster Schritt">
           <EHRecordList label="Dein nächster Schritt" items={NEXT_STEPS} />
         </EHWorkSection>
@@ -77,6 +77,7 @@ export default async function HilfePage() {
           <EHButton href="/app/emergency" variant="secondary" arrow>Notfall melden</EHButton>
         </EHWorkSection>
       </>} />
+      </EHWorkflowStack>
     </AppShell>
   );
 }

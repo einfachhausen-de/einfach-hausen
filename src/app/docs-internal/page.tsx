@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import fs from "node:fs";
 import path from "node:path";
+import { EHScope, EHSection, EHHeading, EHText, EHList } from "@/design-system";
 import { requireAdmin } from "@/lib/admin-auth";
 
 export const metadata: Metadata = {
@@ -22,33 +22,25 @@ export default async function DocsInternalIndex() {
     files = [];
   }
   return (
-    <div>
-      <h1>Entwickler-Docs</h1>
-      <p
-        className="muted"
-      >
-        Interne Markdown-Dokumente aus <code>docs/*.md</code>. Nur f&uuml;r Admins.
-      </p>
-      {files.length === 0 ? (
-        <p>Keine Dokumente gefunden.</p>
-      ) : (
-        <ul>
-          {files.map((f) => {
-            const slug = f.replace(/\.md$/i, "");
-            return (
-              <li
-                key={f}
-              >
-                <Link
-                  href={`/docs-internal/${encodeURIComponent(slug)}`}
-                >
-                  {f}
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
-      )}
-    </div>
+    <EHScope>
+      <EHSection compact>
+        <EHHeading as="h1" scale="page">Entwickler-Docs</EHHeading>
+        <EHText muted>
+          Interne Markdown-Dokumente aus <code>docs/*.md</code>. Nur f&uuml;r Admins.
+        </EHText>
+        {files.length === 0 ? (
+          <EHText>Keine Dokumente gefunden.</EHText>
+        ) : (
+          <EHList
+            label="Entwickler-Dokumente"
+            items={files.map((f) => ({
+              id: f,
+              title: f,
+              href: `/docs-internal/${encodeURIComponent(f.replace(/\.md$/i, ""))}`,
+            }))}
+          />
+        )}
+      </EHSection>
+    </EHScope>
   );
 }

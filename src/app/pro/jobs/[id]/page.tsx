@@ -9,11 +9,6 @@ import {
   XCircle,
 } from 'lucide-react';
 import { AppShell } from '@/components/shell';
-import {
-  ProviderAccessBoundary,
-  ProviderNextStep,
-  ProviderState,
-} from '@/components/provider/workspace';
 import { JobMedia } from '@/components/job-media';
 import { mediaKindFromPath } from '@/lib/intake-media';
 import { requireUser } from '@/lib/auth';
@@ -33,8 +28,12 @@ import { canAccessProviderJob, getProviderMembers } from '@/lib/provider';
 import { DocumentForm } from './document-form';
 import { InvoiceForm } from './invoice-form';
 import { invoiceStatusLabel } from '@/lib/invoices';
-import { SubmitButton } from '@/components/ui/submit-button';
-import { EHErrorState, EHList, EHCallout, EHStatus, EHQuoteForm, EHAssignmentForm, EHJobMessageForm, EHAttachmentPanel, EHWorkspaceGrid, EHWorkSection, EHPageHeader, EHRecordList, EHText, EHButton, EHMetricsBar, type EHRecordEntry } from '@/design-system';
+import {
+  EHActions, EHAttachmentPanel, EHAssignmentForm, EHButton, EHCallout, EHConversation,
+  EHDetailDisclosure, EHEmptyState, EHErrorState, EHJobMessageForm, EHList, EHMetricsBar,
+  EHPageHeader, EHQuoteForm, EHRecordList, EHStatus, EHSubmitButton, EHText, EHWorkflowForm,
+  EHWorkflowStack, EHWorkSection, EHWorkspaceGrid, type EHRecordEntry,
+} from '@/design-system';
 
 export default async function ProJob({
   params,
@@ -127,6 +126,7 @@ export default async function ProJob({
       icon: <ReceiptText size={20} />,
     }] : []),
   ];
+  const contacts = members.map((member) => ({ id: member.user_id, label: `${member.first_name} ${member.last_name}${member.user_id === u.id ? ' · Ich' : ''} · ${member.job_title || 'Ansprechpartner'}` }));
 
   return (
     <AppShell
@@ -135,272 +135,265 @@ export default async function ProJob({
       title={isContact ? 'Kontaktanfrage' : isAccepted ? 'Auftrag' : 'Anfrage'}
       subtitle={access.category}
     >
-      {sp.error && <EHErrorState text={sp.error} />}
+      <EHWorkflowStack>
+        {sp.error && <EHErrorState text={sp.error} />}
 
-      <EHMetricsBar label="Stand des Vorgangs" items={[
-        { id: 'status', label: 'Status', value: statusText, hint: [access.category, Number.isFinite(access.distance_km) ? `${access.distance_km.toFixed(1)} km entfernt` : null].filter(Boolean).join(' · ') },
-        { id: 'angebot', label: 'Eigenes Angebot', value: isContact ? 'Ohne Preis' : quote ? euro(quote.amount) : 'offen', hint: isContact ? 'Kontaktanfrage ohne Auftragswert' : quote ? (quote.available_at ? `Verfügbar ${dateLabel(quote.available_at)}` : 'Termin nach Abstimmung') : 'Preis und Termin noch offen' },
-        { id: 'nachrichten', label: 'Nachrichten', value: messages.length, hint: mine ? `mit ${access.homeowner_first}` : assignment ? 'bei einem anderen Ansprechpartner' : 'noch kein Kundenkontakt' },
-        { id: 'unterlagen', label: 'Unterlagen', value: docs.length + invoices.length, hint: isAccepted ? `${invoices.length} Rechnungen · ${docs.length} Nachweise` : 'erst nach Annahme' },
-      ]} />
+        <EHPageHeader
+          title={access.title.replace(/^Ansprechpartner:\s*/, '')}
+          context={[statusText, access.category].filter(Boolean).join(' · ')}
+        />
 
-      <EHWorkspaceGrid main={<>
-      <EHPageHeader
-        title={access.title.replace(/^Ansprechpartner:\s*/, '')}
-        context={[statusText, access.category].filter(Boolean).join(' · ')}
-      />
-      <EHWorkSection title="Anliegen">
-        <EHText>{access.description || 'Keine Beschreibung hinterlegt.'}</EHText>
-        {access.photo_id && (
-          <JobMedia
-            src={`/api/job-media/${access.photo_id}`}
-            alt="Foto, Video oder Sprachnachricht zum Thema"
-            kind={mediaKindFromPath(access.photo_path)}
-          />
-        )}
-      </EHWorkSection>
-</>} aside={<>
-      <EHWorkSection title="Nächster Schritt">
-        <EHText muted={!nextStep.href}>{nextStep.text}</EHText>
-        {nextStep.href && <EHButton href={nextStep.href} arrow>{nextStep.label}</EHButton>}
-      </EHWorkSection>
-      <EHWorkSection title="Auf einen Blick">
-        <EHRecordList label="Auftrag auf einen Blick" items={glance} />
-      </EHWorkSection>
-      <EHWorkSection title="Kunde">
-        <EHRecordList label="Kundendaten" items={[
-          { id: 'name', title: `${access.homeowner_first} ${access.homeowner_last}`.trim() || 'Ohne Namen', detail: 'Eigentümer' },
-          { id: 'ort', title: access.address || access.postcode || 'Kein Ort hinterlegt', detail: 'Ort' },
-          { id: 'telefon', title: mine ? (access.homeowner_phone || 'Keine Nummer hinterlegt') : 'Erst nach Zuweisung sichtbar', detail: 'Telefon' },
+        <EHMetricsBar label="Stand des Vorgangs" items={[
+          { id: 'status', label: 'Status', value: statusText, hint: [access.category, Number.isFinite(access.distance_km) ? `${access.distance_km.toFixed(1)} km entfernt` : null].filter(Boolean).join(' · ') },
+          { id: 'angebot', label: 'Eigenes Angebot', value: isContact ? 'Ohne Preis' : quote ? euro(quote.amount) : 'offen', hint: isContact ? 'Kontaktanfrage ohne Auftragswert' : quote ? (quote.available_at ? `Verfügbar ${dateLabel(quote.available_at)}` : 'Termin nach Abstimmung') : 'Preis und Termin noch offen' },
+          { id: 'nachrichten', label: 'Nachrichten', value: messages.length, hint: mine ? `mit ${access.homeowner_first}` : assignment ? 'bei einem anderen Ansprechpartner' : 'noch kein Kundenkontakt' },
+          { id: 'unterlagen', label: 'Unterlagen', value: docs.length + invoices.length, hint: isAccepted ? `${invoices.length} Rechnungen · ${docs.length} Nachweise` : 'erst nach Annahme' },
         ]} />
-      </EHWorkSection>
-</>} />
 
-      <ProviderAccessBoundary canManageJobs={ctx.canManageJobs} />
-
-      {!isAccepted && ctx.canManageJobs && access.status !== 'completed' && isContact && (
-        <>
-          <EHCallout title="Nur persönlicher Ansprechpartner gesucht">
-            <p>Der Eigentümer möchte zunächst einen fachlichen Menschen sprechen. Es wird noch kein Auftrag und kein Preis vereinbart.</p>
-          </EHCallout>
-          <ProviderNextStep description="Konkreten Ansprechpartner auswählen und den Kontakt übernehmen.">
-            <EHAssignmentForm
-              id="provider-accept-contact"
-              action={acceptContactRequestAction.bind(null, access.id)}
-              mode="accept-contact"
-              contacts={members.map((member) => ({ id: member.user_id, label: `${member.first_name} ${member.last_name}${member.user_id === u.id ? ' · Ich' : ''} · ${member.job_title || 'Ansprechpartner'}` }))}
-              selectedId={u.id}
-            />
-          </ProviderNextStep>
-          <form action={declineDispatchAction.bind(null, access.id)} className="decline-form">
-            <SubmitButton className="btn ghost pro-ghost wide" pendingLabel="Wird abgelehnt…"><XCircle size={16} />Kontaktanfrage ablehnen</SubmitButton>
-          </form>
-        </>
-      )}
-
-      {!isAccepted && ctx.canManageJobs && access.status !== 'completed' && !isContact && (
-        <>
-          {access.urgency === 'emergency' && (
-            <div className="pro-emergency-note" role="status">
-              <strong>🚨 Notfallanfrage</strong>
-              <p>
-                {Number.isFinite(access.distance_km) ? `${access.distance_km.toFixed(1)} km entfernt · ` : ''}
-                {prefs?.emergency_mode === '24_7' ? '24/7-Bereitschaft aktiv' : `deine Bereitschaft ${prefs?.emergency_start || '–'}–${prefs?.emergency_end || '–'} Uhr`}
-                {prefs?.emergency_markup_bps ? ` · maximal ${(prefs.emergency_markup_bps / 100).toFixed(0)} % Notfallzuschlag` : ' · kein hinterlegter Notfallzuschlag'}.
-                Gib im Angebot den tatsächlichen Gesamtpreis und den frühesten realistischen Termin an.
-              </p>
-            </div>
-          )}
-          <ProviderNextStep
-            title={access.urgency === 'emergency' ? 'Notfall beantworten' : 'Nächster Schritt'}
-            description="Preis, frühesten realistischen Termin und Leistungsumfang als Angebot senden."
-          >
-            <EHQuoteForm
-              id="provider-quote"
-              action={submitQuoteAction.bind(null, access.id)}
-              amountCents={quote?.amount}
-              availableAt={quote?.available_at || ''}
-              message={quote?.message || ''}
-              updating={Boolean(quote)}
-            />
-          </ProviderNextStep>
-          {!quote && (
-            <form action={declineDispatchAction.bind(null, access.id)} className="decline-form">
-              <SubmitButton className="btn ghost pro-ghost wide" pendingLabel="Wird abgelehnt…"><XCircle size={16} />Anfrage ablehnen</SubmitButton>
-            </form>
-          )}
-        </>
-      )}
-
-      {isAccepted && (
-        <>
-          <div role="status">
-            <EHStatus tone="success">{isContact ? 'Du bist mit dem Eigentümer verbunden. Noch kein Auftrag.' : `Kunde hat den Auftrag bei ${ctx.businessName} gebucht.`}</EHStatus>
-          </div>
-
-          <EHWorkSection title="Ansprechpartner">
-            <EHRecordList label="Ansprechpartner" items={[{
-              id: 'ansprechpartner',
-              title: assignment ? `${assignment.first_name} ${assignment.last_name}` : 'Noch nicht zugewiesen',
-              detail: assignment?.job_title || 'Bitte Ansprechpartner auswählen',
-              status: mine ? <EHStatus tone="success">Du</EHStatus> : undefined,
-              icon: <UserRound size={20} />,
-            }]} />
+        <EHWorkspaceGrid main={<>
+          <EHWorkSection title="Anliegen">
+            <EHText>{access.description || 'Keine Beschreibung hinterlegt.'}</EHText>
+            {access.photo_id && (
+              <JobMedia
+                src={`/api/job-media/${access.photo_id}`}
+                alt="Foto, Video oder Sprachnachricht zum Thema"
+                kind={mediaKindFromPath(access.photo_path)}
+              />
+            )}
           </EHWorkSection>
 
-          {ctx.canManageJobs && !assignment && (
-            <ProviderNextStep description="Einen konkreten Ansprechpartner festlegen, damit die weitere Bearbeitung eindeutig ist.">
-              <EHAssignmentForm
-                id="provider-assign-contact"
-                action={assignJobContactAction.bind(null, access.id)}
-                mode="assign"
-                contacts={members.map((member) => ({ id: member.user_id, label: `${member.first_name} ${member.last_name}${member.user_id === u.id ? ' · Ich' : ''} · ${member.job_title || 'Ansprechpartner'}` }))}
-                selectedId={u.id}
-              />
-            </ProviderNextStep>
-          )}
-
-          {ctx.canManageJobs && assignment && (
-            <details className="provider-disclosure">
-              <summary>Ansprechpartner ändern</summary>
-              <EHAssignmentForm
-                id="provider-reassign-contact"
-                action={assignJobContactAction.bind(null, access.id)}
-                mode="reassign"
-                contacts={members.map((member) => ({ id: member.user_id, label: `${member.first_name} ${member.last_name}${member.user_id === u.id ? ' · Ich' : ''} · ${member.job_title || 'Ansprechpartner'}` }))}
-                selectedId={assignment.contact_user_id}
-              />
-            </details>
-          )}
-
-          {mine && isContact && (
-            <ProviderNextStep description="Eigentümer direkt anschreiben und die fachliche Frage klären.">
-              <a className="provider-primary-action" href={`/pro/messages?homeowner=${access.homeowner_id}`}>
-                Nachricht öffnen <MessageSquare size={16} />
-              </a>
-            </ProviderNextStep>
-          )}
-
-          {mine && !isContact && access.status === 'accepted' && (
-            <ProviderNextStep description="Arbeit starten, sobald Termin und Ausführung mit dem Kunden abgestimmt sind.">
-              <form action={markInProgressAction.bind(null, access.id)}>
-                <SubmitButton className="btn light" pendingLabel="Wird gestartet…">Arbeit starten</SubmitButton>
-              </form>
-            </ProviderNextStep>
-          )}
-
-          {mine && !isContact && access.status === 'in_progress' && (
-            <ProviderNextStep description="Auftrag abschließen, wenn die vereinbarte Leistung vollständig erledigt ist.">
-              <form action={markCompleteAction.bind(null, access.id)}>
-                <SubmitButton className="btn light" pendingLabel="Wird gespeichert…">Als erledigt markieren</SubmitButton>
-              </form>
-            </ProviderNextStep>
-          )}
-
-          {mine && !isContact && access.status === 'completed' && (
-            <ProviderNextStep description="Rechnung prüfen, erstellen und dem Eigentümer senden.">
-              <InvoiceForm
-                  buyer={`${access.homeowner_first} ${access.homeowner_last}`.trim()}
-                  job={access.title}
-                jobId={access.id}
-                defaultAmount={quote?.amount || access.budget_max || 0}
-                primary
-                open
-              />
-            </ProviderNextStep>
-          )}
-
-          {mine && (
+          {!isAccepted && ctx.canManageJobs && access.status !== 'completed' && isContact && (
             <>
-              <EHWorkSection title="Kundenkontakt">
-              <div className="direct-contact-actions">
-                {!isContact && (
-                  <a className="btn ghost pro-ghost" href={`/pro/messages?homeowner=${access.homeowner_id}`}>
-                    <MessageSquare size={16} />Direkt schreiben
-                  </a>
-                )}
-                {access.homeowner_phone && (
-                  <a className="btn ghost pro-ghost" href={`tel:${access.homeowner_phone}`}>
-                    <Phone size={16} />Anrufen
-                  </a>
-                )}
-              </div>
-              <div className="partner-job-note">
-                <strong>{access.homeowner_first} {access.homeowner_last}</strong>
-                <p>
-                  {isContact
-                    ? 'Du bist der persönliche Ansprechpartner für dieses Thema. Beantworte Fragen direkt. Falls daraus Arbeit entsteht, entscheidet der Kunde separat, ob ein Auftrag organisiert werden soll.'
-                    : 'Du bist der persönliche Ansprechpartner. Stimme Termin und Rückfragen direkt mit dem Kunden ab. Einfach Hausen bleibt für Vermittlung, Hausakte und Servicefälle im Hintergrund verfügbar.'}
-                </p>
-              </div>
-
-              <div className="chat pro-chat">
-                {messages.length === 0 && (
-                  <div className="contact-chat-intro">
-                    <MessageSquare />
-                    <p>Noch keine Nachricht in diesem Vorgang. Nutze den Kundenkontakt nur für konkrete Rückfragen oder Absprachen.</p>
-                  </div>
-                )}
-                {messages.map((message: any) => (
-                  <div className={message.sender_id === u.id ? 'msg mine' : 'msg'} key={message.id}>
-                    <small>{message.sender_id === u.id ? 'Du' : access.homeowner_first}</small>
-                    <p>{message.body}</p>
-                  </div>
-                ))}
-                <EHJobMessageForm
-                  id="provider-job-message"
-                  action={isContact
-                    ? sendSavedContactMessageAction.bind(null, u.id, access.homeowner_id)
-                    : sendMessageAction.bind(null, access.id, access.homeowner_id)}
+              <EHCallout title="Nur persönlicher Ansprechpartner gesucht">
+                <EHText muted>Der Eigentümer möchte zunächst einen fachlichen Menschen sprechen. Es wird noch kein Auftrag und kein Preis vereinbart.</EHText>
+              </EHCallout>
+              <EHWorkSection title="Kontakt übernehmen">
+                <EHText muted>Konkreten Ansprechpartner auswählen und den Kontakt übernehmen.</EHText>
+                <EHAssignmentForm
+                  id="provider-accept-contact"
+                  action={acceptContactRequestAction.bind(null, access.id)}
+                  mode="accept-contact"
+                  contacts={contacts}
+                  selectedId={u.id}
                 />
-              </div>
               </EHWorkSection>
+              <EHWorkflowForm action={declineDispatchAction.bind(null, access.id)}>
+                <EHSubmitButton pendingLabel="Wird abgelehnt…"><XCircle size={16} />Kontaktanfrage ablehnen</EHSubmitButton>
+              </EHWorkflowForm>
             </>
           )}
 
-          {claim && (
-            <div className="claim-notice pro-claim" role="status">
-              <div>
-                <strong>Servicefall · {statusLabel(claim.status)}</strong>
-                <p>{claim.description}</p>
-                {claim.admin_note && <small>Plattform-Rückmeldung: {claim.admin_note}</small>}
-              </div>
-            </div>
-          )}
-
-          {mine && !isContact && (
+          {!isAccepted && ctx.canManageJobs && access.status !== 'completed' && !isContact && (
             <>
-              <EHWorkSection title={`Rechnungen · ${invoices.length}`}>
-              {invoices.length > 0 ? (
-                <EHList label="Rechnungen" items={invoices.map((invoice) => ({
-                  id: String(invoice.id),
-                  title: `${invoice.invoice_number} · ${euro(invoice.total_gross)}`,
-                  text: `${invoiceStatusLabel(invoice.status)} · fällig ${dateLabel(invoice.due_date)}`,
-                  href: `/pro/invoices/${invoice.id}`,
-                }))} />
-              ) : (
-                <ProviderState
-                  compact
-                  icon={<ReceiptText size={20} />}
-                  title="Noch keine Rechnung"
-                  description="Erstelle die Rechnung, sobald die Leistung und der abzurechnende Umfang feststehen."
-                />
+              {access.urgency === 'emergency' && (
+                <EHCallout title="Notfallanfrage">
+                  <EHText>
+                    {[
+                      Number.isFinite(access.distance_km) ? `${access.distance_km.toFixed(1)} km entfernt` : null,
+                      prefs?.emergency_mode === '24_7' ? '24/7-Bereitschaft aktiv' : `deine Bereitschaft ${prefs?.emergency_start || '–'}–${prefs?.emergency_end || '–'} Uhr`,
+                      prefs?.emergency_markup_bps ? `maximal ${(prefs.emergency_markup_bps / 100).toFixed(0)} % Notfallzuschlag` : 'kein hinterlegter Notfallzuschlag',
+                    ].filter(Boolean).join(' · ')}.
+                    {' '}Gib im Angebot den tatsächlichen Gesamtpreis und den frühesten realistischen Termin an.
+                  </EHText>
+                </EHCallout>
               )}
-              {access.status !== 'completed' && (
-                <InvoiceForm
-                  buyer={`${access.homeowner_first} ${access.homeowner_last}`.trim()}
-                  job={access.title}
-                  jobId={access.id}
-                  defaultAmount={quote?.amount || access.budget_max || 0}
+              <EHWorkSection title={access.urgency === 'emergency' ? 'Notfall beantworten' : 'Angebot senden'}>
+                <EHText muted>Preis, frühesten realistischen Termin und Leistungsumfang als Angebot senden.</EHText>
+                <EHQuoteForm
+                  id="provider-quote"
+                  action={submitQuoteAction.bind(null, access.id)}
+                  amountCents={quote?.amount}
+                  availableAt={quote?.available_at || ''}
+                  message={quote?.message || ''}
+                  updating={Boolean(quote)}
                 />
-              )}
-
-              <EHAttachmentPanel files={docs.map((document) => ({id: String(document.id), name: document.title, kind: document.kind, detail: 'Unterlage zum Auftrag', href: `/api/documents/${document.id}`}))} upload={<DocumentForm jobId={access.id} />} />
               </EHWorkSection>
+              {!quote && (
+                <EHWorkflowForm action={declineDispatchAction.bind(null, access.id)}>
+                  <EHSubmitButton pendingLabel="Wird abgelehnt…"><XCircle size={16} />Anfrage ablehnen</EHSubmitButton>
+                </EHWorkflowForm>
+              )}
             </>
           )}
-        </>
-      )}
+
+          {isAccepted && (
+            <>
+              <div role="status">
+                <EHStatus tone="success">{isContact ? 'Du bist mit dem Eigentümer verbunden. Noch kein Auftrag.' : `Kunde hat den Auftrag bei ${ctx.businessName} gebucht.`}</EHStatus>
+              </div>
+
+              <EHWorkSection title="Ansprechpartner">
+                <EHRecordList label="Ansprechpartner" items={[{
+                  id: 'ansprechpartner',
+                  title: assignment ? `${assignment.first_name} ${assignment.last_name}` : 'Noch nicht zugewiesen',
+                  detail: assignment?.job_title || 'Bitte Ansprechpartner auswählen',
+                  status: mine ? <EHStatus tone="success">Du</EHStatus> : undefined,
+                  icon: <UserRound size={20} />,
+                }]} />
+              </EHWorkSection>
+
+              {ctx.canManageJobs && !assignment && (
+                <EHWorkSection title="Ansprechpartner festlegen">
+                  <EHText muted>Einen konkreten Ansprechpartner festlegen, damit die weitere Bearbeitung eindeutig ist.</EHText>
+                  <EHAssignmentForm
+                    id="provider-assign-contact"
+                    action={assignJobContactAction.bind(null, access.id)}
+                    mode="assign"
+                    contacts={contacts}
+                    selectedId={u.id}
+                  />
+                </EHWorkSection>
+              )}
+
+              {ctx.canManageJobs && assignment && (
+                <EHDetailDisclosure id="ansprechpartner-aendern" title="Ansprechpartner ändern" description="Zuweisung im Betrieb neu festlegen">
+                  <EHAssignmentForm
+                    id="provider-reassign-contact"
+                    action={assignJobContactAction.bind(null, access.id)}
+                    mode="reassign"
+                    contacts={contacts}
+                    selectedId={assignment.contact_user_id}
+                  />
+                </EHDetailDisclosure>
+              )}
+
+              {mine && isContact && (
+                <EHWorkSection title="Eigentümer anschreiben">
+                  <EHText muted>Eigentümer direkt anschreiben und die fachliche Frage klären.</EHText>
+                  <EHButton href={`/pro/messages?homeowner=${access.homeowner_id}`} arrow>Nachricht öffnen</EHButton>
+                </EHWorkSection>
+              )}
+
+              {mine && !isContact && access.status === 'accepted' && (
+                <EHWorkSection title="Arbeit starten">
+                  <EHText muted>Arbeit starten, sobald Termin und Ausführung mit dem Kunden abgestimmt sind.</EHText>
+                  <EHWorkflowForm action={markInProgressAction.bind(null, access.id)}>
+                    <EHSubmitButton pendingLabel="Wird gestartet…">Arbeit starten</EHSubmitButton>
+                  </EHWorkflowForm>
+                </EHWorkSection>
+              )}
+
+              {mine && !isContact && access.status === 'in_progress' && (
+                <EHWorkSection title="Auftrag abschließen">
+                  <EHText muted>Auftrag abschließen, wenn die vereinbarte Leistung vollständig erledigt ist.</EHText>
+                  <EHWorkflowForm action={markCompleteAction.bind(null, access.id)}>
+                    <EHSubmitButton pendingLabel="Wird gespeichert…">Als erledigt markieren</EHSubmitButton>
+                  </EHWorkflowForm>
+                </EHWorkSection>
+              )}
+
+              {mine && !isContact && access.status === 'completed' && (
+                <EHWorkSection title="Rechnung erstellen">
+                  <EHText muted>Rechnung prüfen, erstellen und dem Eigentümer senden.</EHText>
+                  <InvoiceForm
+                      buyer={`${access.homeowner_first} ${access.homeowner_last}`.trim()}
+                      job={access.title}
+                    jobId={access.id}
+                    defaultAmount={quote?.amount || access.budget_max || 0}
+                    primary
+                    open
+                  />
+                </EHWorkSection>
+              )}
+
+              {mine && (
+                <EHWorkSection title="Kundenkontakt">
+                  <EHActions>
+                    {!isContact && (
+                      <EHButton href={`/pro/messages?homeowner=${access.homeowner_id}`} variant="secondary"><MessageSquare size={16} />Direkt schreiben</EHButton>
+                    )}
+                    {access.homeowner_phone && (
+                      <EHButton href={`tel:${access.homeowner_phone}`} variant="secondary"><Phone size={16} />Anrufen</EHButton>
+                    )}
+                  </EHActions>
+                  <EHCallout title={`${access.homeowner_first} ${access.homeowner_last}`.trim() || 'Eigentümer'}>
+                    <EHText muted>
+                      {isContact
+                        ? 'Du bist der persönliche Ansprechpartner für dieses Thema. Beantworte Fragen direkt. Falls daraus Arbeit entsteht, entscheidet der Kunde separat, ob ein Auftrag organisiert werden soll.'
+                        : 'Du bist der persönliche Ansprechpartner. Stimme Termin und Rückfragen direkt mit dem Kunden ab. Einfach Hausen bleibt für Vermittlung, Hausakte und Servicefälle im Hintergrund verfügbar.'}
+                    </EHText>
+                  </EHCallout>
+                  <EHConversation
+                    role="provider"
+                    name={`${access.homeowner_first} ${access.homeowner_last}`.trim() || 'Eigentümer'}
+                    detail={[access.category, isContact ? 'Kontaktanfrage' : 'Auftrag'].filter(Boolean).join(' · ')}
+                    phone={access.homeowner_phone || undefined}
+                    messages={messages.map((message: any) => ({
+                      id: String(message.id),
+                      mine: message.sender_id === u.id,
+                      author: message.sender_id === u.id ? 'Du' : access.homeowner_first,
+                      body: message.body,
+                    }))}
+                    composer={
+                      <EHJobMessageForm
+                        id="provider-job-message"
+                        action={isContact
+                          ? sendSavedContactMessageAction.bind(null, u.id, access.homeowner_id)
+                          : sendMessageAction.bind(null, access.id, access.homeowner_id)}
+                      />
+                    }
+                  />
+                </EHWorkSection>
+              )}
+
+              {claim && (
+                <EHCallout title={`Servicefall · ${statusLabel(claim.status)}`}>
+                  <EHText>{claim.description}</EHText>
+                  {claim.admin_note && <EHText muted>Plattform-Rückmeldung: {claim.admin_note}</EHText>}
+                </EHCallout>
+              )}
+
+              {mine && !isContact && (
+                <EHWorkSection title={`Rechnungen · ${invoices.length}`}>
+                  {invoices.length > 0 ? (
+                    <EHList label="Rechnungen" items={invoices.map((invoice) => ({
+                      id: String(invoice.id),
+                      title: `${invoice.invoice_number} · ${euro(invoice.total_gross)}`,
+                      text: `${invoiceStatusLabel(invoice.status)} · fällig ${dateLabel(invoice.due_date)}`,
+                      href: `/pro/invoices/${invoice.id}`,
+                    }))} />
+                  ) : (
+                    <EHEmptyState title="Noch keine Rechnung" text="Erstelle die Rechnung, sobald die Leistung und der abzurechnende Umfang feststehen." />
+                  )}
+                  {access.status !== 'completed' && (
+                    <InvoiceForm
+                      buyer={`${access.homeowner_first} ${access.homeowner_last}`.trim()}
+                      job={access.title}
+                      jobId={access.id}
+                      defaultAmount={quote?.amount || access.budget_max || 0}
+                    />
+                  )}
+
+                  <EHAttachmentPanel files={docs.map((document) => ({id: String(document.id), name: document.title, kind: document.kind, detail: 'Unterlage zum Auftrag', href: `/api/documents/${document.id}`}))} upload={<DocumentForm jobId={access.id} />} />
+                </EHWorkSection>
+              )}
+            </>
+          )}
+        </>} aside={<>
+          <EHWorkSection title="Nächster Schritt">
+            <EHText muted={!nextStep.href}>{nextStep.text}</EHText>
+            {nextStep.href && <EHButton href={nextStep.href} arrow>{nextStep.label}</EHButton>}
+          </EHWorkSection>
+          <EHWorkSection title="Auf einen Blick">
+            <EHRecordList label="Auftrag auf einen Blick" items={glance} />
+          </EHWorkSection>
+          <EHWorkSection title="Kunde">
+            <EHRecordList label="Kundendaten" items={[
+              { id: 'name', title: `${access.homeowner_first} ${access.homeowner_last}`.trim() || 'Ohne Namen', detail: 'Eigentümer' },
+              { id: 'ort', title: access.address || access.postcode || 'Kein Ort hinterlegt', detail: 'Ort' },
+              { id: 'telefon', title: mine ? (access.homeowner_phone || 'Keine Nummer hinterlegt') : 'Erst nach Zuweisung sichtbar', detail: 'Telefon' },
+            ]} />
+          </EHWorkSection>
+          <EHWorkSection title="Zugriff im Betrieb">
+            <EHStatus tone={ctx.canManageJobs ? 'success' : 'neutral'}>Aufträge verwalten {ctx.canManageJobs ? 'AN' : 'AUS'}</EHStatus>
+            <EHText muted>
+              {ctx.canManageJobs
+                ? 'Du siehst betriebliche Anfragen, kannst Angebote abgeben und gebuchte Vorgänge zuweisen.'
+                : 'Du siehst nur dir zugewiesene Aufträge und Kontakte und bearbeitest dort Ausführung, Kundenkontakt, Dokumente und Rechnungen.'}
+            </EHText>
+          </EHWorkSection>
+        </>} />
+      </EHWorkflowStack>
     </AppShell>
   );
 }

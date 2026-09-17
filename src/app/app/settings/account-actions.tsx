@@ -3,7 +3,9 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { getSupabase } from "@/lib/supabase";
-import styles from "./account-forms.module.css";
+import {
+  EHActions, EHButton, EHCallout, EHFormFeedback, EHText, EHWorkflowStack,
+} from "@/design-system";
 
 // GDPR self-service (EH T-0203): JSON export of the own account and real
 // deletion. The server derives the identity from the session; no ids travel
@@ -50,33 +52,40 @@ export function AccountActions() {
 
   if (confirmOpen) {
     return (
-      <div role="alertdialog" aria-label="Konto wirklich löschen?" className={styles.dangerBox}>
-        <strong>Konto wirklich löschen?</strong>
-        <p className={styles.noteSpaced}>
-          Deine persönlichen Inhalte werden dauerhaft gelöscht und dein Login unwiderruflich beendet.
-          Belegdaten wie Rechnungen bleiben aus gesetzlichen Gründen erhalten, ohne deine Identität.
-        </p>
-        {error && <p className={styles.errorText}>{error}</p>}
-        <button className={`btn-danger ${styles.btnGapRight}`} disabled={busy !== null} onClick={deleteAccount}>
-          {busy === "delete" ? "Wird gelöscht…" : "Endgültig löschen"}
-        </button>
-        <button className="btn-ghost" onClick={() => setConfirmOpen(false)} disabled={busy !== null}>Abbrechen</button>
+      <div role="alertdialog" aria-label="Konto wirklich löschen?">
+        <EHCallout title="Konto wirklich löschen?">
+          <EHWorkflowStack>
+            <EHText>
+              Deine persönlichen Inhalte werden dauerhaft gelöscht und dein Login unwiderruflich beendet.
+              Belegdaten wie Rechnungen bleiben aus gesetzlichen Gründen erhalten, ohne deine Identität.
+            </EHText>
+            {error && <EHFormFeedback kind="error">{error}</EHFormFeedback>}
+            <EHActions>
+              <EHButton variant="danger" disabled={busy !== null} onClick={deleteAccount}>
+                {busy === "delete" ? "Wird gelöscht…" : "Endgültig löschen"}
+              </EHButton>
+              <EHButton variant="secondary" onClick={() => setConfirmOpen(false)} disabled={busy !== null}>Abbrechen</EHButton>
+            </EHActions>
+          </EHWorkflowStack>
+        </EHCallout>
       </div>
     );
   }
 
   return (
-    <div>
-      <p className={styles.note}>
+    <EHWorkflowStack>
+      <EHText muted>
         Lade deine gespeicherten Daten als JSON-Datei herunter oder lösche dein Konto und alle persönlichen Inhalte.
-      </p>
-      {error && <p className={styles.errorText}>{error}</p>}
-      <button className={`btn-ghost ${styles.btnGapRight}`} onClick={exportData} disabled={busy !== null}>
-        {busy === "export" ? "Wird vorbereitet…" : "Daten exportieren"}
-      </button>
-      <button className="btn-danger" onClick={() => setConfirmOpen(true)} disabled={busy !== null}>
-        Konto löschen
-      </button>
-    </div>
+      </EHText>
+      {error && <EHFormFeedback kind="error">{error}</EHFormFeedback>}
+      <EHActions>
+        <EHButton variant="secondary" onClick={exportData} disabled={busy !== null}>
+          {busy === "export" ? "Wird vorbereitet…" : "Daten exportieren"}
+        </EHButton>
+        <EHButton variant="danger" onClick={() => setConfirmOpen(true)} disabled={busy !== null}>
+          Konto löschen
+        </EHButton>
+      </EHActions>
+    </EHWorkflowStack>
   );
 }

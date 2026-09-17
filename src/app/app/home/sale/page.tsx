@@ -1,8 +1,7 @@
-import Link from 'next/link';
-import { Building2, MessageCircle, RefreshCw, UserRound } from 'lucide-react';
+import { RefreshCw } from 'lucide-react';
 import { AppShell } from '@/components/shell';
 import { crumbs } from '@/components/nav-config';
-import { EHButton, EHEmptyState, EHField, EHSelect, EHTextarea, EHInput, EHStatus, EHSubmitButton, EHPanel, EHMetricsBar, EHPageHeader, EHRecordList, EHRecordViews, EHText, EHWorkSection, EHWorkspaceGrid, type EHRecordEntry } from '@/design-system';
+import { EHButton, EHCheckbox, EHEmptyState, EHField, EHFormSection, EHSelect, EHStepProgress, EHTextarea, EHInput, EHStatus, EHSubmitButton, EHMetricsBar, EHPageHeader, EHRecordList, EHRecordViews, EHText, EHWorkSection, EHWorkflowForm, EHWorkflowStack, EHWorkspaceGrid, type EHRecordEntry } from '@/design-system';
 import { requireUser } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { primaryProperty } from '@/lib/properties';
@@ -10,7 +9,6 @@ import { euro } from '@/lib/format';
 import { startSaleProcessAction } from '@/app/actions';
 import { isBrokerEligibleForProperty } from '@/lib/broker-matching';
 import { approveBrokerShareAction, requestPropertyValuationAction, revokeBrokerShareAction, storeExistingValuationAction } from './actions';
-import styles from './sale.module.css';
 
 const valuationTypeLabels: Record<string, string> = {
   orientation: 'Orientierungswert',
@@ -48,7 +46,7 @@ export default async function Sale() {
   const user = await requireUser('homeowner');
   const property = primaryProperty(user.id);
   if (!property) {
-    return <AppShell role="homeowner" active="/app/home/sale" breadcrumbs={crumbs('/app/home','Verkauf & Bewertung')}><div className="empty owner-empty-action"><Building2 aria-hidden="true" /><strong>Hausprofil fehlt</strong><p>Lege zuerst dein Zuhause an. Danach kannst du Bewertung und Verkauf vorbereitet organisieren.</p><Link className="btn primary" href="/app/home">Mein Haus einrichten</Link></div></AppShell>;
+    return <AppShell role="homeowner" active="/app/home/sale" breadcrumbs={crumbs('/app/home','Verkauf & Bewertung')}><EHEmptyState title="Hausprofil fehlt" text="Lege zuerst dein Zuhause an. Danach kannst du Bewertung und Verkauf vorbereitet organisieren." action={<EHButton href="/app/home">Mein Haus einrichten</EHButton>} /></AppShell>;
   }
 
   const valuations = db.prepare(`SELECT * FROM property_valuations WHERE property_id=? AND homeowner_id=? ORDER BY created_at DESC LIMIT 10`).all(property.id, user.id) as any[];
@@ -88,6 +86,7 @@ export default async function Sale() {
   }));
 
   return <AppShell role="homeowner" active="/app/home/sale" title="Verkauf & Bewertung" breadcrumbs={crumbs('/app/home','Verkauf & Bewertung')}>
+    <EHWorkflowStack>
     <EHPageHeader title="Verkauf & Bewertung" context={property.address || property.postcode || undefined} />
 
     <EHMetricsBar label="Verkauf & Bewertung" items={[
@@ -99,24 +98,23 @@ export default async function Sale() {
 
     <EHWorkspaceGrid main={<>
     <EHWorkSection title="Immobilienbewertung">
-    <EHPanel title="Neue Bewertung">
-      <form action={requestPropertyValuationAction}>
+    <EHFormSection title="Neue Bewertung">
+      <EHWorkflowForm action={requestPropertyValuationAction}>
         <EHField id="sale-type" label="Gewünschte Art"><EHSelect id="sale-type" name="valuationType" defaultValue="orientation"><option value="orientation">Orientierungswert</option><option value="expert">Sachverständigenbewertung</option><option value="market">Makler-Marktwert</option></EHSelect></EHField>
         <EHField id="sale-notes" label="Hinweis"><EHTextarea id="sale-notes" name="notes" rows={3} placeholder="Optional: Besonderheiten oder Modernisierungen" /></EHField>
         <EHSubmitButton>Bewertung anfragen</EHSubmitButton>
-      </form>
-    </EHPanel>
-    <EHPanel title="Vorhandene Einschätzung">
-      <form action={storeExistingValuationAction}>
+      </EHWorkflowForm>
+    </EHFormSection>
+    <EHFormSection title="Vorhandene Einschätzung">
+      <EHWorkflowForm action={storeExistingValuationAction}>
         <EHField id="sale-min" label="Von €"><EHInput id="sale-min" name="estimatedMin" type="number" min="0" step="1000" required /></EHField>
         <EHField id="sale-max" label="Bis €"><EHInput id="sale-max" name="estimatedMax" type="number" min="0" step="1000" required /></EHField>
         <EHField id="sale-src" label="Quelle / Art"><EHSelect id="sale-src" name="valuationType" defaultValue="market"><option value="orientation">Orientierungswert</option><option value="expert">Sachverständigenbewertung</option><option value="market">Makler-Marktwert</option></EHSelect></EHField>
         <EHField id="sale-note" label="Hinweis"><EHTextarea id="sale-note" name="notes" rows={3} placeholder="Optional: Quelle, Datum oder Besonderheiten" /></EHField>
         <EHSubmitButton>Vorhandene Bewertung speichern</EHSubmitButton>
-      </form>
-    </EHPanel>
+      </EHWorkflowForm>
+    </EHFormSection>
 
-    <EHPanel title={`Bewertungsverlauf · ${valuations.length} ${valuations.length === 1 ? 'Vorgang' : 'Vorgänge'}`}>
     {valuations.length > 0 && <EHRecordViews label="Bewertungsverlauf" storageKey="verkauf" defaultView="chronik" items={valuations.map((valuation) => {
       const completed = valuation.status === 'completed' && valuation.estimated_min != null && valuation.estimated_max != null;
       return {
@@ -129,15 +127,13 @@ export default async function Sale() {
       };
     })} />}
     {valuations.length === 0 && <EHEmptyState title="Noch keine Bewertung" text="Eine Anfrage und eine bereits vorhandene Einschätzung werden getrennt im Verlauf dokumentiert." />}
-    </EHPanel>
     </EHWorkSection>
 
     <EHWorkSection title="Ich möchte verkaufen">
-    {!lead ? <EHEmptyState title="Passende Makler für dein Haus finden" text="Noch werden keine Kontaktdaten weitergegeben." action={<form action={startSaleProcessAction}><button className="btn primary">Makler finden</button></form>} /> : <>
-      <section className={styles.lifecycle} aria-labelledby="sale-status-title">
-        <div className={styles.lifecycleHead}><div><small id="sale-status-title">Aktueller Verkaufsstatus</small><strong>{saleStatusLabels[lead.status] || lead.status}</strong><span>Aktualisiert am {formatDate(lead.updated_at)}</span></div>{lead.status !== 'sold' && <form action={startSaleProcessAction}><button className="btn ghost"><RefreshCw size={16} aria-hidden="true" /> Maklerabgleich aktualisieren</button></form>}</div>
-        <ol>{saleStages.map(([status, label], index) => <li key={status} data-state={index < currentStage ? 'done' : index === currentStage ? 'current' : 'next'}><span>{index + 1}</span><div><strong>{label}</strong>{index === currentStage && <small>Aktueller Schritt</small>}</div></li>)}</ol>
-      </section>
+    {!lead ? <EHEmptyState title="Passende Makler für dein Haus finden" text="Noch werden keine Kontaktdaten weitergegeben." action={<EHWorkflowForm action={startSaleProcessAction}><EHSubmitButton pendingLabel="Maklerabgleich läuft …">Makler finden</EHSubmitButton></EHWorkflowForm>} /> : <>
+      <EHStepProgress steps={saleStages.map(([id, label]) => ({ id, label }))} current={lead.status} />
+      <EHText muted>Aktueller Verkaufsstatus: {saleStatusLabels[lead.status] || lead.status} · Aktualisiert am {formatDate(lead.updated_at)}</EHText>
+      {lead.status !== 'sold' && <EHWorkflowForm action={startSaleProcessAction}><EHButton type="submit" variant="secondary"><RefreshCw size={16} aria-hidden="true" /> Maklerabgleich aktualisieren</EHButton></EHWorkflowForm>}
 
       {matches.length > 0 && <EHRecordViews label="Vorgeschlagene Makler" storageKey="verkauf-makler" items={matches.map((match: any) => {
         const activeShare = match.share_status === 'active';
@@ -155,11 +151,11 @@ export default async function Sale() {
           ].filter(Boolean).join(' · '),
           status: <EHStatus tone={activeShare ? 'success' : 'neutral'}>{activeShare ? 'Freigabe aktiv' : 'Vorschlag'}</EHStatus>,
           action: activeShare
-            ? <form action={revokeBrokerShareAction.bind(null, match.id)}><button className="btn ghost">Freigabe widerrufen</button></form>
-            : <form action={approveBrokerShareAction.bind(null, match.id)} className={styles.approvalForm}><label><input type="checkbox" name="confirmShare" value="yes" required /><span>Ich gebe {match.business_name} meine Kontaktdaten und die Objektzusammenfassung ausdrücklich für die Verkaufsanbahnung frei.</span></label><button className="btn primary">Freigabe erteilen</button></form>,
+            ? <EHWorkflowForm action={revokeBrokerShareAction.bind(null, match.id)}><EHButton type="submit" variant="secondary">Freigabe widerrufen</EHButton></EHWorkflowForm>
+            : <EHWorkflowForm action={approveBrokerShareAction.bind(null, match.id)}><EHCheckbox name="confirmShare" value="yes" required label={<span>Ich gebe {match.business_name} meine Kontaktdaten und die Objektzusammenfassung ausdrücklich für die Verkaufsanbahnung frei.</span>} /><EHSubmitButton pendingLabel="Freigabe wird erteilt …">Freigabe erteilen</EHSubmitButton></EHWorkflowForm>,
         };
       })} />}
-      {matches.length === 0 && <div className="empty owner-empty-action"><UserRound aria-hidden="true" /><strong>Noch kein passender Makler im Netzwerk</strong><p>Deine Verkaufsabsicht bleibt gespeichert. Ohne passenden aktiven und geprüften Suchprofil-Treffer werden keine Kontaktdaten freigegeben.</p><Link className="btn ghost" href="/app/hausmeister"><MessageCircle size={16} aria-hidden="true" /> Frage zum Verkauf klären</Link></div>}
+      {matches.length === 0 && <EHEmptyState title="Noch kein passender Makler im Netzwerk" text="Deine Verkaufsabsicht bleibt gespeichert. Ohne passenden aktiven und geprüften Suchprofil-Treffer werden keine Kontaktdaten freigegeben." action={<EHButton href="/app/hausmeister" variant="secondary">Frage zum Verkauf klären</EHButton>} />}
     </>}
     </EHWorkSection>
     </>} aside={<>
@@ -189,5 +185,6 @@ export default async function Sale() {
         <EHButton href="/app/hausmeister" variant="secondary" arrow>Frage zum Verkauf klären</EHButton>
       </EHWorkSection>
     </>} />
+    </EHWorkflowStack>
   </AppShell>;
 }

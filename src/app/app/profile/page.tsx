@@ -1,4 +1,4 @@
-import { EHButton, EHPageHeader, EHList, EHCallout, EHField, EHInput, EHWorkspaceGrid, EHIdentitySummary, EHWorkflowForm, EHFormSection, EHFieldGrid, EHMetricsBar, EHRecordList, EHStatus, EHSubmitButton, EHText, EHWorkSection, type EHRecordEntry } from '@/design-system';
+import { EHButton, EHPageHeader, EHList, EHCallout, EHField, EHInput, EHWorkspaceGrid, EHIdentitySummary, EHWorkflowForm, EHWorkflowStack, EHFormSection, EHFieldGrid, EHMetricsBar, EHRecordList, EHStatus, EHSubmitButton, EHText, EHWorkSection, type EHRecordEntry } from '@/design-system';
 import { AppShell } from '@/components/shell';
 import { ownerAccountTabs } from '@/components/nav-config';
 import { InstallAppCard } from '@/components/install-app-card';
@@ -40,6 +40,7 @@ export default async function Profile(){
   return <AppShell role="homeowner" active="/app/profile" title="Profil & Einstellungen" subtitle="Konto und Einstellungen"
     breadcrumbs={[{ href: '/app', label: 'Start' }, { label: 'Profil & Einstellungen' }]}
     tabs={ownerAccountTabs.map(tab=>({href:tab.href,label:tab.label,active:tab.href==='/app/profile'}))}>
+    <EHWorkflowStack>
     <EHPageHeader title="Profil & Einstellungen" context={u.email} />
     <EHMetricsBar label="Profil & Einstellungen" items={[
       {id:'profil',label:'Profil',value:`${Math.round(filled/fields.length*100)} %`,hint:`${filled} von ${fields.length} Angaben`},
@@ -84,12 +85,11 @@ export default async function Profile(){
     </EHWorkSection>
     <div data-testid="owner-logout-section">
     <EHWorkflowForm action={logoutAction}><EHSubmitButton pendingLabel="Wird abgemeldet …">Ausloggen</EHSubmitButton></EHWorkflowForm>
-    <form action={logoutAction}>
-      <button type="submit" className="sm-logout" data-testid="owner-logout-profile" aria-label="Abmelden">Abmelden</button>
-    </form>
+    <EHWorkflowForm action={logoutAction}><EHButton type="submit" variant="secondary" data-testid="owner-logout-profile" aria-label="Abmelden">Abmelden</EHButton></EHWorkflowForm>
     </div>
     <InstallAppCard/>
     <EHCallout title="WhatsApp ist noch nicht freigeschaltet"><p>In der App kannst du den Hausmeister bereits nutzen. Der WhatsApp-Kanal wird erst angeboten, sobald der Business-Kanal tatsächlich verfügbar ist.</p></EHCallout>
     <EHCallout title="Deine Hausdaten bleiben privat."><p>Partner sehen nur die Informationen, die für einen konkreten Kontakt oder Auftrag notwendig sind.</p></EHCallout>
+    </EHWorkflowStack>
   </AppShell>;
 }

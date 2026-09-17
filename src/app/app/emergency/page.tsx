@@ -1,7 +1,7 @@
 import { AppShell } from '@/components/shell';
 import { crumbs } from '@/components/nav-config';
 import { requireUser } from '@/lib/auth';
-import { EHButton, EHPageHeader, EHPanel, EHErrorState, EHField, EHSelect, EHTextarea, EHSubmitButton, EHMetricsBar, EHRecordList, EHStatus, EHText, EHWorkSection, EHWorkspaceGrid, type EHRecordEntry } from '@/design-system';
+import { EHButton, EHCallout, EHPageHeader, EHErrorState, EHField, EHSelect, EHTextarea, EHSubmitButton, EHMetricsBar, EHRecordList, EHStatus, EHText, EHWorkSection, EHWorkflowForm, EHWorkflowStack, EHWorkspaceGrid, type EHRecordEntry } from '@/design-system';
 import { db } from '@/lib/db';
 import { dateLabel, statusLabel } from '@/lib/format';
 import { createEmergencyAction } from '@/app/actions';
@@ -33,6 +33,7 @@ export default async function Emergency({searchParams}:{searchParams:Promise<Rec
   }));
 
   return <AppShell role="homeowner" active="/app" title="Notfall" breadcrumbs={crumbs('/app','Notfall')}>
+    <EHWorkflowStack>
     <EHPageHeader title="Notfall melden" context={target} />
     <EHMetricsBar label="Notfall" items={[
       { id:'gesamt', label:'Notfälle gemeldet', value:String(emergencies.length), hint:'seit Beginn' },
@@ -42,13 +43,10 @@ export default async function Emergency({searchParams}:{searchParams:Promise<Rec
     ]} />
     <EHWorkspaceGrid main={<>
       {sp.error&&<EHErrorState text={sp.error} />}
-      <div className="alert emergency-112" role="alert">
-        <strong>Lebensgefahr, Brand oder Gasgeruch?</strong>
-        <span>Sofort <a href="tel:112">112</a> anrufen. Bei Gasgeruch: Fenster öffnen, keine Schalter betätigen, Gebäude verlassen. Einfach Hausen ersetzt keinen öffentlichen Notruf.</span>
-      </div>
-      <EHPanel>
-      <form action={createEmergencyAction}><EHField id="emg-type" label="Notfall"><EHSelect id="emg-type" name="emergencyType" required defaultValue=""><option value="" disabled>Bitte auswählen</option><option value="water">Wasserrohrbruch / Wasserschaden</option><option value="heating">Heizung ausgefallen</option><option value="electric">Stromproblem</option><option value="roof">Dach- oder Sturmschaden</option><option value="lock">Tür / Schloss</option><option value="sanitary">Sanitär-Notfall</option><option value="other">Sonstiger Notfall</option></EHSelect></EHField><EHField id="emg-desc" label="Was ist passiert?"><EHTextarea id="emg-desc" name="description" rows={5} required placeholder="Zum Beispiel: Unter der Spüle läuft stark Wasser aus …"/></EHField><EHSubmitButton>Jetzt Helfer suchen</EHSubmitButton></form>
-      </EHPanel>
+      <EHCallout title="Lebensgefahr, Brand oder Gasgeruch?">
+        <p>Sofort <a href="tel:112">112</a> anrufen. Bei Gasgeruch: Fenster öffnen, keine Schalter betätigen, Gebäude verlassen. Einfach Hausen ersetzt keinen öffentlichen Notruf.</p>
+      </EHCallout>
+      <EHWorkflowForm action={createEmergencyAction}><EHField id="emg-type" label="Notfall"><EHSelect id="emg-type" name="emergencyType" required defaultValue=""><option value="" disabled>Bitte auswählen</option><option value="water">Wasserrohrbruch / Wasserschaden</option><option value="heating">Heizung ausgefallen</option><option value="electric">Stromproblem</option><option value="roof">Dach- oder Sturmschaden</option><option value="lock">Tür / Schloss</option><option value="sanitary">Sanitär-Notfall</option><option value="other">Sonstiger Notfall</option></EHSelect></EHField><EHField id="emg-desc" label="Was ist passiert?"><EHTextarea id="emg-desc" name="description" rows={5} required placeholder="Zum Beispiel: Unter der Spüle läuft stark Wasser aus …"/></EHField><EHSubmitButton>Jetzt Helfer suchen</EHSubmitButton></EHWorkflowForm>
     </>} aside={<>
       <EHWorkSection title="Dein letzter Notfall">
         {last ? <>
@@ -67,5 +65,6 @@ export default async function Emergency({searchParams}:{searchParams:Promise<Rec
         <EHButton href="/app/hilfe" variant="secondary" arrow>Hilfe & Kontakt</EHButton>
       </EHWorkSection>
     </>} />
+    </EHWorkflowStack>
   </AppShell>;
 }

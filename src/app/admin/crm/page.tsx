@@ -2,7 +2,7 @@ import { ArrowLeft, Database, Globe2, Mail, MessageCircle, Phone } from 'lucide-
 import { requireAdmin } from '@/lib/admin-auth';
 import { CRM_LEAD_TYPES, CRM_PERMISSIONS, CRM_SOURCES, CRM_STATUSES, crmCategories, crmStats, listCrmLeads, syncCrmLifecycle } from '@/lib/crm';
 import { addCrmLeadAction, syncBusinessResearchAction, updateCrmLeadAction } from './actions';
-import { EHButton, EHCallout, EHEmptyState, EHMetricsBar, EHPageHeader, EHRecordList, EHScope, EHStatus, EHText, EHWorkSection, EHWorkspaceGrid } from '@/design-system';
+import { EHActions, EHButton, EHCallout, EHEmptyState, EHField, EHFieldGrid, EHFormFeedback, EHFormSection, EHInput, EHMetricsBar, EHPageHeader, EHRecordList, EHScope, EHSection, EHSelect, EHStatus, EHText, EHTextarea, EHWorkSection, EHWorkspaceGrid, EHWorkflowForm, EHWorkflowStack } from '@/design-system';
 
 const labels: Record<string, string> = {
   collected: 'Gesammelt',
@@ -80,253 +80,229 @@ export default async function CrmPage({ searchParams }: { searchParams: Promise<
 
   return (
     <EHScope app>
-      <main className="admin-page">
-        <div className="mb-4">
-          <EHButton href="/admin" variant="quiet" size="small"><ArrowLeft size={16} /> Zurück zur Betriebsverwaltung</EHButton>
-        </div>
+      <main>
+        <EHSection compact>
+          <EHWorkflowStack>
+            <EHActions>
+              <EHButton href="/admin" variant="quiet" size="small"><ArrowLeft size={16} /> Zurück zur Betriebsverwaltung</EHButton>
+            </EHActions>
 
-        <EHPageHeader
-          title="Leads & Outreach CRM"
-          context="Betriebsverwaltung"
-          actions={
-            <form action={syncBusinessResearchAction}>
-              <EHButton type="submit"><Database size={16} /> Research-Daten synchronisieren</EHButton>
-            </form>
-          }
-        />
+            <EHPageHeader
+              title="Leads & Outreach CRM"
+              context="Betriebsverwaltung"
+              actions={
+                <form action={syncBusinessResearchAction}>
+                  <EHButton type="submit"><Database size={16} /> Research-Daten synchronisieren</EHButton>
+                </form>
+              }
+            />
 
-        {feedback && (
-          <div className="mb-6">
-            <div className={sp.error ? 'alert error' : 'alert success'} role={sp.error ? 'alert' : 'status'}>{feedback}</div>
-          </div>
-        )}
+            {feedback && <EHFormFeedback kind={sp.error ? 'error' : 'success'}>{feedback}</EHFormFeedback>}
 
-        <div className="mb-6">
-          <EHMetricsBar label="Leads und Outreach" items={[
-            { id: 'gesamt', label: 'Leads gesamt', value: compact(stats.total), hint: `${result.total.toLocaleString('de-DE')} in dieser Auswahl` },
-            { id: 'faellig', label: 'Fällige Folgekontakte', value: compact(stats.dueFollowUps), hint: 'heute oder überfällig' },
-            { id: 'antworten', label: 'Antworten', value: compact(statusCount('replied')), hint: `${statusCount('qualified')} qualifiziert` },
-            { id: 'konten', label: 'Plattformkonten', value: compact(statusCount('converted')), hint: `${statusCount('invited')} eingeladen` },
-          ]} />
-        </div>
+            <EHMetricsBar label="Leads und Outreach" items={[
+              { id: 'gesamt', label: 'Leads gesamt', value: compact(stats.total), hint: `${result.total.toLocaleString('de-DE')} in dieser Auswahl` },
+              { id: 'faellig', label: 'Fällige Folgekontakte', value: compact(stats.dueFollowUps), hint: 'heute oder überfällig' },
+              { id: 'antworten', label: 'Antworten', value: compact(statusCount('replied')), hint: `${statusCount('qualified')} qualifiziert` },
+              { id: 'konten', label: 'Plattformkonten', value: compact(statusCount('converted')), hint: `${statusCount('invited')} eingeladen` },
+            ]} />
 
-        <div className="mb-6">
-          <form method="get" className="admin-card grid gap-3 bg-[color:var(--eh-color-white)] md:grid-cols-2 xl:grid-cols-6">
-            <label>Suche
-              <input name="q" defaultValue={sp.q || ''} placeholder="Firma, Ort, PLZ, E-Mail …" />
-            </label>
-            <label>Leadtyp
-              <select name="type" defaultValue={sp.type || ''}>
-                <option value="">Alle Leadtypen</option>
-                {CRM_LEAD_TYPES.map(x => <option key={x} value={x}>{labels[x] || x}</option>)}
-              </select>
-            </label>
-            <label>Status
-              <select name="status" defaultValue={sp.status || ''}>
-                <option value="">Alle Status</option>
-                {CRM_STATUSES.map(x => <option key={x} value={x}>{labels[x] || x}</option>)}
-              </select>
-            </label>
-            <label>Gewerk
-              <select name="category" defaultValue={sp.category || ''}>
-                <option value="">Alle Gewerke</option>
-                {categories.map(x => <option key={x.category} value={x.category}>{x.category} · {compact(x.count)}</option>)}
-              </select>
-            </label>
-            <label>Folgetermin
-              <select name="followup" defaultValue={sp.followup || ''}>
-                <option value="">Alle Folgetermine</option>
-                <option value="due">Heute / überfällig</option>
-                <option value="scheduled">Geplant</option>
-                <option value="none">Ohne Folgetermin</option>
-              </select>
-            </label>
-            <div className="flex items-end">
-              <EHButton type="submit">Filtern</EHButton>
-            </div>
-          </form>
-        </div>
+            <EHWorkspaceGrid main={<>
+              <EHWorkSection title="Leads filtern">
+                <EHWorkflowForm action="/admin/crm">
+                  <EHFieldGrid>
+                    <EHField id="filter-suche" label="Suche">
+                      <EHInput id="filter-suche" name="q" defaultValue={sp.q || ''} placeholder="Firma, Ort, PLZ, E-Mail …" />
+                    </EHField>
+                    <EHField id="filter-typ" label="Leadtyp">
+                      <EHSelect id="filter-typ" name="type" defaultValue={sp.type || ''}>
+                        <option value="">Alle Leadtypen</option>
+                        {CRM_LEAD_TYPES.map(x => <option key={x} value={x}>{labels[x] || x}</option>)}
+                      </EHSelect>
+                    </EHField>
+                    <EHField id="filter-status" label="Status">
+                      <EHSelect id="filter-status" name="status" defaultValue={sp.status || ''}>
+                        <option value="">Alle Status</option>
+                        {CRM_STATUSES.map(x => <option key={x} value={x}>{labels[x] || x}</option>)}
+                      </EHSelect>
+                    </EHField>
+                    <EHField id="filter-gewerk" label="Gewerk">
+                      <EHSelect id="filter-gewerk" name="category" defaultValue={sp.category || ''}>
+                        <option value="">Alle Gewerke</option>
+                        {categories.map(x => <option key={x.category} value={x.category}>{x.category} · {compact(x.count)}</option>)}
+                      </EHSelect>
+                    </EHField>
+                    <EHField id="filter-folge" label="Folgetermin">
+                      <EHSelect id="filter-folge" name="followup" defaultValue={sp.followup || ''}>
+                        <option value="">Alle Folgetermine</option>
+                        <option value="due">Heute / überfällig</option>
+                        <option value="scheduled">Geplant</option>
+                        <option value="none">Ohne Folgetermin</option>
+                      </EHSelect>
+                    </EHField>
+                    <div><EHButton type="submit">Filtern</EHButton></div>
+                  </EHFieldGrid>
+                </EHWorkflowForm>
+              </EHWorkSection>
 
-        <EHWorkspaceGrid main={
-          <EHWorkSection title="Leads">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <EHText size="meta" muted>{result.total.toLocaleString('de-DE')} Treffer · Seite {result.page} von {result.pages}</EHText>
-              <div className="flex flex-wrap gap-2">
-                {result.page > 1 && <EHButton href={pageHref(result.page - 1)} variant="secondary" size="small">Zurück</EHButton>}
-                {result.page < result.pages && <EHButton href={pageHref(result.page + 1)} variant="secondary" size="small">Weiter</EHButton>}
-              </div>
-            </div>
+              <EHWorkSection title="Leads">
+                <EHActions>
+                  <EHText size="meta" muted>{result.total.toLocaleString('de-DE')} Treffer · Seite {result.page} von {result.pages}</EHText>
+                  {result.page > 1 && <EHButton href={pageHref(result.page - 1)} variant="secondary" size="small">Zurück</EHButton>}
+                  {result.page < result.pages && <EHButton href={pageHref(result.page + 1)} variant="secondary" size="small">Weiter</EHButton>}
+                </EHActions>
 
-            {result.rows.length === 0
-              ? <EHEmptyState title="Keine Leads für diese Filter" text="Suche oder Filter anpassen, um wieder Einträge zu sehen." />
-              : <div className="stack">
-                {result.rows.map(lead => {
-                  const canContact = ['allowed', 'consented'].includes(lead.contact_permission) && lead.status !== 'do_not_contact';
-                  const place = [lead.address, lead.postcode, lead.locality].filter(Boolean).join(' ');
-                  return (
-                    <article key={lead.id} className="admin-card grid gap-4 bg-[color:var(--eh-color-white)] lg:grid-cols-[minmax(240px,1fr)_minmax(300px,1fr)]">
-                      <div className="min-w-0">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <EHStatus tone={lead.lead_type === 'provider' ? 'info' : 'neutral'}>{labels[lead.lead_type] || lead.lead_type}</EHStatus>
-                          <EHStatus tone={leadTone(lead.status)}>{labels[lead.status] || lead.status}</EHStatus>
-                        </div>
+                {result.rows.length === 0
+                  ? <EHEmptyState title="Keine Leads für diese Filter" text="Suche oder Filter anpassen, um wieder Einträge zu sehen." />
+                  : <EHWorkflowStack>
+                    {result.rows.map(lead => {
+                      const canContact = ['allowed', 'consented'].includes(lead.contact_permission) && lead.status !== 'do_not_contact';
+                      const place = [lead.address, lead.postcode, lead.locality].filter(Boolean).join(' ');
+                      return (
+                        <EHWorkflowForm key={lead.id} action={updateCrmLeadAction.bind(null, lead.id)}>
+                          <EHFormSection title={lead.company_name || lead.name} description={[lead.category, place].filter(Boolean).join(' · ') || 'Ort nicht hinterlegt'}>
+                            <EHActions>
+                              <EHStatus tone={lead.lead_type === 'provider' ? 'info' : 'neutral'}>{labels[lead.lead_type] || lead.lead_type}</EHStatus>
+                              <EHStatus tone={leadTone(lead.status)}>{labels[lead.status] || lead.status}</EHStatus>
+                              {lead.next_follow_up_at && <EHStatus tone="warning">Folgekontakt {new Date(`${lead.next_follow_up_at}T12:00:00`).toLocaleDateString('de-DE')}</EHStatus>}
+                              {lead.converted_user_id && <EHStatus tone="success">Plattformkonto aktiv</EHStatus>}
+                            </EHActions>
 
-                        <p className="mt-2 truncate text-base font-bold">{lead.company_name || lead.name}</p>
-                        <div className="mt-1">
-                          <EHText size="meta" muted>{[lead.category, place].filter(Boolean).join(' · ') || 'Ort nicht hinterlegt'}</EHText>
-                        </div>
+                            <EHActions>
+                              {lead.email && (canContact
+                                ? <EHButton href={`mailto:${lead.email}`} variant="quiet" size="small"><Mail size={14} />{lead.email}</EHButton>
+                                : <EHText size="meta" muted><Mail size={14} /> {lead.email}</EHText>)}
+                              {lead.phone && (canContact
+                                ? <EHButton href={`tel:${lead.phone}`} variant="quiet" size="small"><Phone size={14} />{lead.phone}</EHButton>
+                                : <EHText size="meta" muted><Phone size={14} /> {lead.phone}</EHText>)}
+                              {lead.website && <EHButton href={lead.website} variant="quiet" size="small"><Globe2 size={14} />Webseite</EHButton>}
+                              {lead.profile_url && <EHButton href={lead.profile_url} variant="quiet" size="small"><MessageCircle size={14} />Profil</EHButton>}
+                            </EHActions>
 
-                        <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2 text-sm">
-                          {lead.email && (canContact ? (
-                            <a className="inline-flex items-center gap-1.5 font-semibold text-[color:var(--eh-color-petrol)] underline" href={`mailto:${lead.email}`}><Mail size={14} />{lead.email}</a>
-                          ) : (
-                            <span className="inline-flex items-center gap-1.5 text-[color:var(--eh-muted)]"><Mail size={14} />{lead.email}</span>
-                          ))}
-                          {lead.phone && (canContact ? (
-                            <a className="inline-flex items-center gap-1.5 font-semibold text-[color:var(--eh-color-petrol)] underline" href={`tel:${lead.phone}`}><Phone size={14} />{lead.phone}</a>
-                          ) : (
-                            <span className="inline-flex items-center gap-1.5 text-[color:var(--eh-muted)]"><Phone size={14} />{lead.phone}</span>
-                          ))}
-                          {lead.website && (
-                            <a className="inline-flex items-center gap-1.5 font-semibold text-[color:var(--eh-color-petrol)] underline" href={lead.website} target="_blank" rel="noreferrer"><Globe2 size={14} />Webseite</a>
-                          )}
-                          {lead.profile_url && (
-                            <a className="inline-flex items-center gap-1.5 font-semibold text-[color:var(--eh-color-petrol)] underline" href={lead.profile_url} target="_blank" rel="noreferrer"><MessageCircle size={14} />Profil</a>
-                          )}
-                        </div>
+                            <EHText size="meta" muted>Quelle: {labels[lead.source_type] || lead.source_type}{lead.source_detail ? ` · ${lead.source_detail}` : ''}</EHText>
 
-                        <div className="mt-3">
-                          <EHText size="meta" muted>Quelle: {labels[lead.source_type] || lead.source_type}{lead.source_detail ? ` · ${lead.source_detail}` : ''}</EHText>
-                        </div>
-                        {lead.next_follow_up_at && (
-                          <div className="mt-2">
-                            <EHStatus tone="warning">Folgekontakt {new Date(`${lead.next_follow_up_at}T12:00:00`).toLocaleDateString('de-DE')}</EHStatus>
-                          </div>
-                        )}
-                        {lead.converted_user_id && (
-                          <div className="mt-2">
-                            <EHStatus tone="success">Plattformkonto aktiv</EHStatus>
-                          </div>
-                        )}
-                      </div>
+                            <EHFieldGrid>
+                              <EHField id={`lead-status-${lead.id}`} label="Status">
+                                <EHSelect id={`lead-status-${lead.id}`} name="status" defaultValue={lead.status}>
+                                  {CRM_STATUSES.map(x => <option key={x} value={x}>{labels[x] || x}</option>)}
+                                </EHSelect>
+                              </EHField>
+                              <EHField id={`lead-freigabe-${lead.id}`} label="Kontaktfreigabe">
+                                <EHSelect id={`lead-freigabe-${lead.id}`} name="permission" defaultValue={lead.contact_permission}>
+                                  {CRM_PERMISSIONS.map(x => <option key={x} value={x}>{labels[x] || x}</option>)}
+                                </EHSelect>
+                              </EHField>
+                              <EHField id={`lead-quelle-${lead.id}`} label="Quelle">
+                                <EHSelect id={`lead-quelle-${lead.id}`} name="sourceType" defaultValue={lead.source_type}>
+                                  {CRM_SOURCES.map(x => <option key={x} value={x}>{labels[x] || x}</option>)}
+                                </EHSelect>
+                              </EHField>
+                              <EHField id={`lead-quelldetail-${lead.id}`} label="Quellendetail">
+                                <EHInput id={`lead-quelldetail-${lead.id}`} name="sourceDetail" defaultValue={lead.source_detail || ''} />
+                              </EHField>
+                              <EHField id={`lead-folge-${lead.id}`} label="Folgekontakt">
+                                <EHInput id={`lead-folge-${lead.id}`} name="nextFollowUpAt" type="date" defaultValue={lead.next_follow_up_at || ''} disabled={lead.status === 'do_not_contact' || lead.contact_permission === 'do_not_contact'} />
+                              </EHField>
+                              <EHField id={`lead-kanal-${lead.id}`} label="Kanal">
+                                <EHSelect id={`lead-kanal-${lead.id}`} name="channel" defaultValue="">
+                                  <option value="">Keiner</option>
+                                  <option value="email">E-Mail</option>
+                                  <option value="phone">Telefon</option>
+                                  <option value="social">Social</option>
+                                  <option value="website">Website</option>
+                                  <option value="other">Sonstiges</option>
+                                </EHSelect>
+                              </EHField>
+                            </EHFieldGrid>
 
-                      <form action={updateCrmLeadAction.bind(null, lead.id)} className="admin-card grid gap-3 bg-[color:var(--eh-color-paper)] md:grid-cols-2">
-                        <label>Status
-                          <select name="status" defaultValue={lead.status}>
-                            {CRM_STATUSES.map(x => <option key={x} value={x}>{labels[x] || x}</option>)}
-                          </select>
-                        </label>
-                        <label>Kontaktfreigabe
-                          <select name="permission" defaultValue={lead.contact_permission}>
-                            {CRM_PERMISSIONS.map(x => <option key={x} value={x}>{labels[x] || x}</option>)}
-                          </select>
-                        </label>
-                        <label>Quelle
-                          <select name="sourceType" defaultValue={lead.source_type}>
-                            {CRM_SOURCES.map(x => <option key={x} value={x}>{labels[x] || x}</option>)}
-                          </select>
-                        </label>
-                        <label>Quellendetail
-                          <input name="sourceDetail" defaultValue={lead.source_detail || ''} />
-                        </label>
-                        <label>Folgekontakt
-                          <input name="nextFollowUpAt" type="date" defaultValue={lead.next_follow_up_at || ''} disabled={lead.status === 'do_not_contact' || lead.contact_permission === 'do_not_contact'} />
-                        </label>
-                        <label>Kanal
-                          <select name="channel" defaultValue="">
-                            <option value="">Keiner</option>
-                            <option value="email">E-Mail</option>
-                            <option value="phone">Telefon</option>
-                            <option value="social">Social</option>
-                            <option value="website">Website</option>
-                            <option value="other">Sonstiges</option>
-                          </select>
-                        </label>
-                        <label className="md:col-span-2">Notiz
-                          <input name="notes" defaultValue={lead.notes || ''} placeholder="z. B. Rückruf vereinbart" />
-                        </label>
-                        <div className="md:col-span-2"><EHButton type="submit">Änderungen speichern</EHButton></div>
-                      </form>
-                    </article>
-                  );
-                })}
-              </div>}
-          </EHWorkSection>
-        } aside={<>
-          <EHWorkSection title="Lead erfassen">
-            <form action={addCrmLeadAction} className="grid gap-3">
-              <div className="two">
-                <label>Leadtyp
-                  <select name="leadType" defaultValue="provider">
-                    {CRM_LEAD_TYPES.map(x => <option key={x} value={x}>{labels[x]}</option>)}
-                  </select>
-                </label>
-                <label>Quelle
-                  <select name="sourceType" defaultValue="manual">
-                    {CRM_SOURCES.map(x => <option key={x} value={x}>{labels[x] || x}</option>)}
-                  </select>
-                </label>
-              </div>
-              <label>Name / Ansprechpartner
-                <input name="name" required minLength={2} placeholder="Vor- und Nachname" />
-              </label>
-              <label>Firma (optional)
-                <input name="companyName" placeholder="Firmenname" />
-              </label>
-              <label>Gewerk / Kernkompetenz
-                <input name="category" placeholder="z. B. Sanitär" />
-              </label>
-              <div className="two">
-                <label>PLZ
-                  <input name="postcode" placeholder="PLZ" />
-                </label>
-                <label>Ort
-                  <input name="locality" placeholder="Ort" />
-                </label>
-              </div>
-              <input type="hidden" name="country" value="DE" />
-              <label>E-Mail
-                <input name="email" type="email" placeholder="name@beispiel.de" />
-              </label>
-              <label>Telefon
-                <input name="phone" placeholder="Telefonnummer" />
-              </label>
-              <label>Website
-                <input name="website" placeholder="https://" />
-              </label>
-              <label>Profil URL
-                <input name="profileUrl" placeholder="https://" />
-              </label>
-              <label>Quelle / Kampagne
-                <input name="sourceDetail" placeholder="z. B. Facebook-Gruppe" />
-              </label>
-              <label>Folgekontakt
-                <input name="nextFollowUpAt" type="date" />
-              </label>
-              <label>Kontaktfreigabe
-                <select name="permission" defaultValue="unknown">
-                  {CRM_PERMISSIONS.map(x => <option key={x} value={x}>{labels[x] || x}</option>)}
-                </select>
-              </label>
-              <label>Notiz
-                <textarea name="notes" rows={3} placeholder="Interesse, Status, nächste Vereinbarung …" />
-              </label>
-              <EHButton type="submit">Lead speichern</EHButton>
-            </form>
-          </EHWorkSection>
+                            <EHField id={`lead-notiz-${lead.id}`} label="Notiz">
+                              <EHInput id={`lead-notiz-${lead.id}`} name="notes" defaultValue={lead.notes || ''} placeholder="z. B. Rückruf vereinbart" />
+                            </EHField>
+                            <div><EHButton type="submit">Änderungen speichern</EHButton></div>
+                          </EHFormSection>
+                        </EHWorkflowForm>
+                      );
+                    })}
+                  </EHWorkflowStack>}
+              </EHWorkSection>
+            </>} aside={<>
+              <EHWorkSection title="Lead erfassen">
+                <EHWorkflowForm action={addCrmLeadAction}>
+                  <EHFormSection title="Neuer Lead">
+                    <EHFieldGrid>
+                      <EHField id="neu-typ" label="Leadtyp">
+                        <EHSelect id="neu-typ" name="leadType" defaultValue="provider">
+                          {CRM_LEAD_TYPES.map(x => <option key={x} value={x}>{labels[x]}</option>)}
+                        </EHSelect>
+                      </EHField>
+                      <EHField id="neu-quelle" label="Quelle">
+                        <EHSelect id="neu-quelle" name="sourceType" defaultValue="manual">
+                          {CRM_SOURCES.map(x => <option key={x} value={x}>{labels[x] || x}</option>)}
+                        </EHSelect>
+                      </EHField>
+                    </EHFieldGrid>
+                    <EHField id="neu-name" label="Name / Ansprechpartner" required>
+                      <EHInput id="neu-name" name="name" required minLength={2} placeholder="Vor- und Nachname" />
+                    </EHField>
+                    <EHField id="neu-firma" label="Firma (optional)">
+                      <EHInput id="neu-firma" name="companyName" placeholder="Firmenname" />
+                    </EHField>
+                    <EHField id="neu-gewerk" label="Gewerk / Kernkompetenz">
+                      <EHInput id="neu-gewerk" name="category" placeholder="z. B. Sanitär" />
+                    </EHField>
+                    <EHFieldGrid>
+                      <EHField id="neu-plz" label="PLZ">
+                        <EHInput id="neu-plz" name="postcode" placeholder="PLZ" />
+                      </EHField>
+                      <EHField id="neu-ort" label="Ort">
+                        <EHInput id="neu-ort" name="locality" placeholder="Ort" />
+                      </EHField>
+                    </EHFieldGrid>
+                    <input type="hidden" name="country" value="DE" />
+                    <EHField id="neu-email" label="E-Mail">
+                      <EHInput id="neu-email" name="email" type="email" placeholder="name@beispiel.de" />
+                    </EHField>
+                    <EHField id="neu-telefon" label="Telefon">
+                      <EHInput id="neu-telefon" name="phone" placeholder="Telefonnummer" />
+                    </EHField>
+                    <EHField id="neu-webseite" label="Website">
+                      <EHInput id="neu-webseite" name="website" placeholder="https://" />
+                    </EHField>
+                    <EHField id="neu-profil" label="Profil URL">
+                      <EHInput id="neu-profil" name="profileUrl" placeholder="https://" />
+                    </EHField>
+                    <EHField id="neu-kampagne" label="Quelle / Kampagne">
+                      <EHInput id="neu-kampagne" name="sourceDetail" placeholder="z. B. Facebook-Gruppe" />
+                    </EHField>
+                    <EHField id="neu-folge" label="Folgekontakt">
+                      <EHInput id="neu-folge" name="nextFollowUpAt" type="date" />
+                    </EHField>
+                    <EHField id="neu-freigabe" label="Kontaktfreigabe">
+                      <EHSelect id="neu-freigabe" name="permission" defaultValue="unknown">
+                        {CRM_PERMISSIONS.map(x => <option key={x} value={x}>{labels[x] || x}</option>)}
+                      </EHSelect>
+                    </EHField>
+                    <EHField id="neu-notiz" label="Notiz">
+                      <EHTextarea id="neu-notiz" name="notes" rows={3} placeholder="Interesse, Status, nächste Vereinbarung …" />
+                    </EHField>
+                    <EHActions><EHButton type="submit">Lead speichern</EHButton></EHActions>
+                  </EHFormSection>
+                </EHWorkflowForm>
+              </EHWorkSection>
 
-          <EHWorkSection title="Pipeline-Verteilung">
-            <EHRecordList label="Leads nach Status" empty="Keine Leads vorhanden." items={stats.byStatus.map(x => ({
-              id: `status-${x.status}`,
-              title: labels[x.status] || x.status,
-              value: x.count.toLocaleString('de-DE'),
-            }))} />
-          </EHWorkSection>
+              <EHWorkSection title="Pipeline-Verteilung">
+                <EHRecordList label="Leads nach Status" empty="Keine Leads vorhanden." items={stats.byStatus.map(x => ({
+                  id: `status-${x.status}`,
+                  title: labels[x.status] || x.status,
+                  value: x.count.toLocaleString('de-DE'),
+                }))} />
+              </EHWorkSection>
 
-          <EHCallout title="Datenschutz & Kontaktfreigabe">
-            <EHText>Jeder Datensatz trennt Recherche von Outreach. Direktkontakte sind nur bei expliziter Erlaubnis zulässig.</EHText>
-          </EHCallout>
-        </>} />
+              <EHCallout title="Datenschutz & Kontaktfreigabe">
+                <EHText>Jeder Datensatz trennt Recherche von Outreach. Direktkontakte sind nur bei expliziter Erlaubnis zulässig.</EHText>
+              </EHCallout>
+            </>} />
+          </EHWorkflowStack>
+        </EHSection>
       </main>
     </EHScope>
   );

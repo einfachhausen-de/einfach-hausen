@@ -6,7 +6,7 @@ import { useAuth } from "@/components/AuthContext";
 import { getSupabase } from "@/lib/supabase";
 import { BackIcon } from "@/components/icons";
 import { VisualAuftraege, VisualGebiet, VisualFertig } from "@/components/onboard-visuals";
-import styles from "../onboarding-pro.module.css";
+import { EHScope, EHWorkflowStack, EHPageHeader, EHPanel, EHCheckbox, EHField, EHInput, EHSelect, EHButton, EHActions } from "@/design-system";
 
 const leistungen = [
   { id: "bad", emoji: "🛁", titel: "Badezimmer", sub: "Fliesen, Sanitär, Umbau" },
@@ -16,6 +16,8 @@ const leistungen = [
   { id: "heizung", emoji: "🔥", titel: "Heizung", sub: "Wartung, Einbau" },
   { id: "dach", emoji: "🏠", titel: "Dach & Fassade", sub: "Dach, Dämmung, Anstrich" },
 ];
+
+const UMKREIS_OPTIONEN = Array.from({ length: 20 }, (_, i) => (i + 1) * 5);
 
 export default function OnboardingProSchrittPage() {
   const params = useParams();
@@ -48,41 +50,47 @@ export default function OnboardingProSchrittPage() {
   const head = heads[step] ?? heads.auftraege;
 
   return (
-    <div className={`safe-top page ob-page ${styles.bottomPad}`}>
-      <header className="ob-header"><button className="back-btn" onClick={() => router.back()}><BackIcon /></button></header>
-      {step === "auftraege" && <VisualAuftraege />}
-      {step === "gebiet" && <VisualGebiet />}
-      {step === "fertig" && <VisualFertig />}
-      <div className={`ob-head ${styles.headCenter}`}><h1>{head.h}</h1><p className={styles.leadNarrow}>{head.p}</p></div>
-      {step === "auftraege" && (
-        <>
-          <div className={`subcat-section ${styles.subcatPad}`}>
-            <div className="subcat-list">
+    <EHScope app>
+      <EHWorkflowStack>
+        <EHButton variant="quiet" onClick={() => router.back()} aria-label="Zurück"><BackIcon /></EHButton>
+        {step === "auftraege" && <VisualAuftraege />}
+        {step === "gebiet" && <VisualGebiet />}
+        {step === "fertig" && <VisualFertig />}
+        <EHPageHeader title={head.h} context={head.p} />
+        {step === "auftraege" && (
+          <>
+            <EHPanel title="Leistungen">
               {leistungen.map((l) => (
-                <button key={l.id} className={`subcat-item ${sel.includes(l.id) ? "sel" : ""}`} onClick={() => setSel((s) => (s.includes(l.id) ? s.filter((x) => x !== l.id) : [...s, l.id]))}>
-                  <span className="toggle-icon">{l.emoji}</span>
-                  <span className="subcat-text"><strong>{l.titel}</strong><span>{l.sub}</span></span>
-                  <span className={`checkbox-square ${sel.includes(l.id) ? "on" : ""}`} />
-                </button>
+                <EHCheckbox
+                  key={l.id}
+                  label={<span>{l.emoji} <strong>{l.titel}</strong> — {l.sub}</span>}
+                  checked={sel.includes(l.id)}
+                  onChange={() => setSel((s) => (s.includes(l.id) ? s.filter((x) => x !== l.id) : [...s, l.id]))}
+                />
               ))}
-            </div>
-          </div>
-          <div className="ob-actions"><button className="btn-primary btn-full" disabled={sel.length === 0} onClick={async () => { await saveMeta({ leistungen: sel }); router.push("/onboarding/pro/gebiet"); }}>Weiter ({sel.length} ausgewählt)</button></div>
-        </>
-      )}
-      {step === "gebiet" && (
-        <>
-          <div className="ob-form">
-            <div className="if-wrap"><span className="if-label">Postleitzahl (Einsatzgebiet)</span><input inputMode="numeric" maxLength={5} value={plz} onChange={(e) => setPlz(e.target.value)} placeholder="z. B. 22587" /></div>
-            <div className={styles.rangeBlock}><div className={styles.rangeHead}><strong className={styles.rangeLabel}>Umkreis: {umkreis} km</strong></div><input className={styles.rangeInput} type="range" min={5} max={100} step={5} value={umkreis} onChange={(e) => setUmkreis(Number(e.target.value))} /></div>
-          </div>
-          <div className="ob-actions"><button className="btn-primary btn-full" disabled={plz.length !== 5} onClick={async () => { await saveMeta({ plz_liste: [plz], umkreis_km: umkreis }); router.push("/onboarding/pro/fertig"); }}>Weiter</button></div>
-        </>
-      )}
-      {step === "fertig" && (
-        <div className="ob-actions"><div className={`success-circle ${styles.successMargin}`}>✓</div><button className="btn-primary btn-full" disabled={busy} onClick={finish}>{busy ? "Speichere…" : "Zum Dashboard"}</button></div>
-      )}
-      <div className="home-indicator" />
-    </div>
+            </EHPanel>
+            <EHActions><EHButton disabled={sel.length === 0} onClick={async () => { await saveMeta({ leistungen: sel }); router.push("/onboarding/pro/gebiet"); }}>Weiter ({sel.length} ausgewählt)</EHButton></EHActions>
+          </>
+        )}
+        {step === "gebiet" && (
+          <>
+            <EHPanel title="Einsatzgebiet">
+              <EHField id="ob-plz" label="Postleitzahl (Einsatzgebiet)">
+                <EHInput id="ob-plz" inputMode="numeric" maxLength={5} value={plz} onChange={(e) => setPlz(e.target.value)} placeholder="z. B. 22587" />
+              </EHField>
+              <EHField id="ob-umkreis" label={`Umkreis: ${umkreis} km`}>
+                <EHSelect id="ob-umkreis" value={umkreis} onChange={(e) => setUmkreis(Number(e.target.value))}>
+                  {UMKREIS_OPTIONEN.map((km) => <option key={km} value={km}>{km} km</option>)}
+                </EHSelect>
+              </EHField>
+            </EHPanel>
+            <EHActions><EHButton disabled={plz.length !== 5} onClick={async () => { await saveMeta({ plz_liste: [plz], umkreis_km: umkreis }); router.push("/onboarding/pro/fertig"); }}>Weiter</EHButton></EHActions>
+          </>
+        )}
+        {step === "fertig" && (
+          <EHActions><EHButton disabled={busy} onClick={finish}>{busy ? "Speichere…" : "Zum Dashboard"}</EHButton></EHActions>
+        )}
+      </EHWorkflowStack>
+    </EHScope>
   );
 }
