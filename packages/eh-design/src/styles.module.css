@@ -307,7 +307,7 @@
 .workflowStack { display: grid; gap: 24px; min-width: 0; }
 .workflowForm { display: grid; gap: 32px; min-width: 0; }
 .formSection { display: grid; gap: 20px; min-width: 0; margin: 0; padding: 24px; border: 1px solid var(--eh-color-line); border-radius: var(--eh-radius-panel); background: var(--eh-color-white); color: var(--eh-color-ink); }
-.formSection legend { padding-inline: 8px; max-width: 100%; font-size: 1.125rem; line-height: 1.4; font-weight: var(--eh-weight-semibold); }
+.formSection legend { float: left; width: 100%; padding-inline: 0; max-width: 100%; font-size: 1.125rem; line-height: 1.4; font-weight: var(--eh-weight-semibold); }
 .fieldGrid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); align-items: start; gap: 24px; }
 .formFeedback { border: 1px solid var(--eh-color-line); padding: 20px 24px; background: var(--eh-color-white); color: var(--eh-color-ink); font-size: var(--eh-font-input); line-height: var(--eh-leading-loose); }
 .formFeedback[data-kind="error"] { border-color: var(--eh-color-error); }
@@ -2369,7 +2369,7 @@ a.ownerDashboardStatusItem:hover {
 .recordCardFoot { display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin-top:4px; padding-top:10px; border-top:1px solid var(--eh-rule); }
 .recordTimeline { list-style:none; margin:0; padding:0; display:grid; gap:10px; }
 .recordEvent { display:grid; grid-template-columns:64px 34px minmax(0,1fr); gap:12px; align-items:start; }
-.recordEventTime { padding-top:14px; font-size:var(--eh-font-label); line-height:var(--eh-leading-normal); color:var(--eh-muted); font-variant-numeric:tabular-nums; }
+.recordEventTime { padding-top:14px; font-size:var(--eh-font-label); line-height:var(--eh-leading-normal); color:var(--eh-muted); font-variant-numeric:tabular-nums; white-space:nowrap; }
 .recordEventBody { display:grid; gap:6px; padding:14px 16px; border:1px solid var(--eh-rule); border-radius:var(--eh-radius-panel); background:var(--eh-color-white); color:inherit; text-decoration:none; }
 .recordEventTop { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px 12px; }
 .recordNote { font-size:var(--eh-font-label); line-height:var(--eh-leading-normal); color:var(--eh-muted); }
