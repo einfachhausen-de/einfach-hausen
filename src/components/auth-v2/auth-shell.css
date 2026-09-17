@@ -99,7 +99,7 @@
     position: absolute;
     left: 20px;
     right: 20px;
-    bottom: 20px;
+    bottom: 32px;
     z-index: 1;
     padding: 16px;
     background: var(--eh-color-white);
@@ -446,6 +446,10 @@
       min-height: 100%;
       margin: 16px;
       border-radius: 32px;
+    }
+
+    .arena-hero-card {
+      bottom: 48px;
     }
   }
 
