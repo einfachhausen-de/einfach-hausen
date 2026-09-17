@@ -185,6 +185,14 @@ export function LoginForm({
 
   return (
     <div id="login-card-container">
+      {isLoading && (
+        <div className="arena-loading" role="status" aria-live="polite">
+          <span className="arena-loading-spinner" aria-hidden="true" />
+          <span className="arena-loading-text">
+            {authMode === "login" ? "Wird angemeldet …" : "Konto wird erstellt …"}
+          </span>
+        </div>
+      )}
       <h1>{formTitle}</h1>
       <p className="arena-lead">{formText}</p>
 
