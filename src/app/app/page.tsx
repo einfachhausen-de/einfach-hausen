@@ -161,6 +161,7 @@ export default async function Dashboard() {
         { id: 'termine', label: 'Termine', value: appointments },
         { id: 'dokumente', label: 'Dokumente', value: documentCount },
         { id: 'auftraege', label: 'Aufträge', value: jobs },
+        { id: 'ungelesen', label: 'Ungelesen', value: unread },
       ]} />
     </div>
     <EHOwnerSection title={`Wartet auf dich (${waiting.length})`}>
