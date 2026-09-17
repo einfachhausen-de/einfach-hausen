@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Eye, EyeOff, Lock } from "lucide-react";
+import { EHCheckbox } from "@/design-system";
 import { DEMO_PASSWORD, DEMO_USERS, demoEmailFor } from "@/lib/demo-accounts";
 import { loginAction, registerAction } from "@/app/actions";
 import { ForgotPasswordModal } from "./ForgotPasswordModal";
@@ -263,16 +264,13 @@ export function LoginForm({
               </button>
             </div>
           </div>
-          <label className="arena-check">
-            <input
-              type="checkbox"
-              id="checkbox-remember-me"
-              checked={remember}
-              disabled={isLoading}
-              onChange={(event) => setRemember(event.target.checked)}
-            />
-            Angemeldet bleiben
-          </label>
+          <EHCheckbox
+            id="checkbox-remember-me"
+            checked={remember}
+            disabled={isLoading}
+            onChange={(event) => setRemember(event.target.checked)}
+            label="Angemeldet bleiben"
+          />
           <button id="btn-submit-login" className="arena-submit" type="submit" disabled={isLoading}>
             {isLoading ? "Wird angemeldet …" : "Anmelden"}
           </button>
@@ -361,16 +359,13 @@ export function LoginForm({
               onChange={(event) => setAddress(event.target.value)}
             />
           </div>
-          <label className="arena-check">
-            <input
-              type="checkbox"
-              id="checkbox-show-register-password"
-              checked={showPassword}
-              disabled={isLoading}
-              onChange={(event) => setShowPassword(event.target.checked)}
-            />
-            Passwort anzeigen
-          </label>
+          <EHCheckbox
+            id="checkbox-show-register-password"
+            checked={showPassword}
+            disabled={isLoading}
+            onChange={(event) => setShowPassword(event.target.checked)}
+            label="Passwort anzeigen"
+          />
           <button id="btn-submit-register" className="arena-submit" type="submit" disabled={isLoading}>
             {isLoading ? "Konto wird erstellt …" : "Konto erstellen"}
           </button>
