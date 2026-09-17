@@ -33,7 +33,7 @@
 [data-tone="deep"] .register, .recordCover .register { color: var(--eh-color-sand); }
 /* T-0146 contrast follow-up (DECISION 2026-09-07): terra text on sand fails 4.5:1 — register digits on emphasis (sand) render ink like all sand-cover text. */
 [data-emphasis="true"] .register { color: var(--eh-color-ink); }
-.heading { color: inherit; font-family: inherit; font-weight: var(--eh-weight-heavy); line-height: 1.05; letter-spacing: -.045em; text-wrap: balance; }
+.heading { color: inherit; font-family: inherit; font-weight: var(--eh-weight-semibold); line-height: 1.05; letter-spacing: -.02em; text-wrap: balance; }
 .heading[data-scale="display"] { font-size: var(--eh-font-display); line-height: .99; letter-spacing: -.052em; }
 .heading[data-scale="page"] { font-size: var(--eh-font-page); }
 .heading[data-scale="section"] { font-size: var(--eh-font-section); }
@@ -118,7 +118,7 @@
 .facts { display: grid; grid-template-columns: repeat(auto-fit,minmax(min(100%,190px),1fr)); border-top: 1px solid var(--eh-rule); gap: 32px; }
 .facts > div { padding-top: 26px; display: flex; flex-direction: column; gap: 12px; }
 .facts dt { font-size: var(--eh-font-label); }
-.facts dd { order: -1; margin: 0; font-size: clamp(2.5rem,5vw,4rem); font-weight: var(--eh-weight-bold); letter-spacing: -.045em; line-height: 1.1; }
+.facts dd { order: -1; margin: 0; font-size: clamp(2.5rem,5vw,4rem); font-weight: var(--eh-weight-bold); letter-spacing: -.02em; line-height: 1.1; }
 .facts dd.factSource { order: 1; font-size: var(--eh-font-meta); font-weight: var(--eh-weight-regular); letter-spacing: var(--eh-track-normal); line-height: var(--eh-leading-normal); color: var(--eh-muted); }
 .comparison { display: grid; grid-template-columns: 1fr 1fr; border-block: 1px solid var(--eh-rule); }
 .comparison > div { padding: 32px; display: flex; flex-direction: column; gap: 22px; }
@@ -711,9 +711,9 @@
   margin: 0;
   color: var(--eh-color-ink);
   font-size: var(--eh-font-section);
-  font-weight: var(--eh-weight-heavy);
+  font-weight: var(--eh-weight-semibold);
   line-height: 1.06;
-  letter-spacing: -.045em;
+  letter-spacing: -.02em;
 }
 
 .ownerDashboardHeaderCopy > p:last-child {
@@ -1406,7 +1406,7 @@ a.ownerDashboardStatusItem:hover {
   margin: 0;
   color: var(--eh-color-ink);
   font-size: clamp(2.25rem, 3.2vw, 3.25rem);
-  font-weight: var(--eh-weight-heavy);
+  font-weight: var(--eh-weight-semibold);
   line-height: 1.03;
   letter-spacing: -.048em;
 }
@@ -2095,7 +2095,7 @@ a.ownerDashboardStatusItem:hover {
 @media (max-width: 899px) { .contactDirectoryGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 599px) { .contactDirectoryCard { grid-template-columns: minmax(0, 1fr); gap: 10px; padding: 14px; } .contactDirectoryIcon { width: 40px; height: 40px; } .contactDirectoryArrow { display: none; } }
 .managerHero { min-width: 0; }
-.managerHero h1 { margin: 6px 0 4px; color: var(--eh-color-ink); font-size: var(--eh-font-section); font-weight: var(--eh-weight-heavy); line-height: 1.06; letter-spacing: -.045em; }
+.managerHero h1 { margin: 6px 0 4px; color: var(--eh-color-ink); font-size: var(--eh-font-section); font-weight: var(--eh-weight-semibold); line-height: 1.06; letter-spacing: -.02em; }
 .managerHero > p:last-child { color: var(--eh-color-secondary); font-size: var(--eh-font-input); }
 .managerEyebrow { margin: 0; color: var(--eh-color-petrol); font-size: var(--eh-font-eyebrow); font-weight: var(--eh-weight-bold); letter-spacing: .09em; text-transform: uppercase; }
 .managerAttention { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 18px 22px; border-radius: var(--eh-radius-panel); background: var(--eh-color-deep); color: var(--eh-color-white); }
@@ -2130,7 +2130,7 @@ a.ownerDashboardStatusItem:hover {
 /* Owner workspace coherence · operator correction 2026-09-13. Scoped components only. */
 .ownerPageHeader { display:flex; align-items:center; justify-content:space-between; gap:24px; padding-bottom:28px; border-bottom:1px solid var(--eh-color-line); }
 .ownerPageHeader > div { min-width:0; }
-.ownerPageHeader h1 { margin:0; font-size:44px; line-height:1.12; letter-spacing:-.04em; font-weight:var(--eh-weight-heavy); }
+.ownerPageHeader h1 { margin:0; font-size:44px; line-height:1.12; letter-spacing:-.04em; font-weight:var(--eh-weight-semibold); }
 .ownerPageHeader p { max-width:65ch; margin:12px 0 0; font-size:16px; line-height: var(--eh-leading-loose); color:var(--eh-color-secondary); }
 .ownerPageHeader .ownerPageContext { margin:0 0 12px; font-size:15px; color:var(--eh-color-petrol); }
 .ownerPageHeader > a { flex-shrink:0; }
