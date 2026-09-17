@@ -12,6 +12,7 @@ import { InstallAppCard } from '@/components/install-app-card';
 import {
   EHPanel, EHList, EHErrorState, EHStatus, EHText, EHActions, EHFormFeedback, EHPageHeader,
   EHWorkflowForm, EHFormSection, EHFieldGrid, EHField, EHInput, EHTextarea, EHSelect, EHCheckbox, EHSubmitButton,
+  EHButton, EHMetricsBar, EHRecordList, EHWorkSection, EHWorkspaceGrid,
 } from '@/design-system';
 
 function trustStatus(ok: boolean, label: string) {
@@ -44,8 +45,21 @@ export default async function ProProfile({ searchParams }: { searchParams: Promi
   const services = db.prepare('SELECT slug,title,category FROM service_catalog WHERE active=1 ORDER BY category,title').all() as any[];
   const selectedServices = new Set((db.prepare(`SELECT service_slug FROM provider_service_offerings WHERE provider_id=? AND active=1`).all(ctx.providerId) as Array<{ service_slug: string }>).map(r => r.service_slug));
   const brokerProfile = db.prepare('SELECT * FROM broker_search_profiles WHERE provider_id=?').get(ctx.providerId) as any;
+  // Kennzahlen und rechte Spalte lesen denselben Stand wie die Panels in der
+  // Hauptspalte: Freigabe, Vertrauenschecks, Anfragearten und Wochenkapazitaet.
+  const trustChecks = [activation.insuranceVerified, activation.qualificationVerified, activation.contractVerified, activation.qualityStandardVerified];
+  const trustDone = trustChecks.filter(Boolean).length;
+  const requestKinds = [prefs?.accepts_normal_jobs !== 0, prefs?.accepts_short_notice !== 0, prefs?.accepts_consultation !== 0, !!prefs?.accepts_emergencies];
+  const requestKindsOn = requestKinds.filter(Boolean).length;
   return <AppShell role="provider" active="/pro/profile" title="Profil & Vertrauen" subtitle={p?.business_name || ctx.businessName}>
     <EHPageHeader title="Profil & Vertrauen" context={[p?.business_name || ctx.businessName, ctx.canManageJobs ? 'Änderungen möglich' : 'Nur Ansicht'].join(' · ')} />
+    <EHMetricsBar label="Stand des Betriebs" items={[
+      { id: 'freigabe', label: 'Freigabe', value: activation.receivesNewJobs ? 'Erteilt' : 'Offen', hint: activation.receivesNewJobs ? 'Neue Anfragen werden verteilt' : `${activation.missing.length} Punkte offen` },
+      { id: 'checks', label: 'Vertrauenschecks', value: `${trustDone}/4`, hint: 'Versicherung · Qualifikation · Vertrag · Qualität' },
+      { id: 'anfragen', label: 'Anfragearten', value: `${requestKindsOn}/4`, hint: 'normal · kurzfristig · Beratung · Notfall' },
+      { id: 'kapazitaet', label: 'Kapazität', value: prefs?.weekly_capacity ? `${prefs.weekly_capacity}/Woche` : 'unbegrenzt', hint: 'Aufträge pro Woche' },
+    ]} />
+    <EHWorkspaceGrid main={<>
     <ProviderAccessBoundary canManageJobs={ctx.canManageJobs} />
     <InstallAppCard />
     {sp.verification === 'submitted' && <EHFormFeedback kind="success">Unternehmensnachweise wurden eingereicht. Bis zur erneuten Freigabe werden keine neuen Anfragen verteilt.</EHFormFeedback>}
@@ -196,5 +210,31 @@ export default async function ProProfile({ searchParams }: { searchParams: Promi
       <EHActions><EHSubmitButton pendingLabel="Wird gespeichert …">Profil speichern</EHSubmitButton></EHActions>
     </EHWorkflowForm>
     <EHActions><EHWorkflowForm action={logoutAction}><EHSubmitButton pendingLabel="Wird abgemeldet …">Ausloggen</EHSubmitButton></EHWorkflowForm></EHActions>
+    </>} aside={<>
+      <EHWorkSection title="Nächster Schritt">
+        {activation.receivesNewJobs
+          ? <><EHText>Der Betrieb ist freigegeben und erhält neue Anfragen. Der gebuchte Tarif ändert daran nichts.</EHText><EHButton href="/pro/leads" arrow>Offene Anfragen ansehen</EHButton></>
+          : <><EHText muted>{activation.missing.length > 0 ? `Noch offen: ${activation.missing.join(' · ')}` : 'Die Partnerfreigabe ist noch nicht abgeschlossen.'}</EHText><EHButton href="/pro/hilfe" variant="secondary" arrow>Hilfe zur Freigabe</EHButton></>}
+      </EHWorkSection>
+      <EHWorkSection title="Betrieb">
+        <EHRecordList label="Betriebsdaten" items={[
+          { id: 'name', title: p?.business_name || ctx.businessName, detail: 'Firmenname' },
+          { id: 'gewerke', title: p?.trades || 'Keine Gewerke hinterlegt', detail: 'Gewerke / Leistungen' },
+          { id: 'gebiet', title: p?.postcode ? `${p.postcode} · ${p.radius_km || 25} km Radius` : 'Kein Einsatzgebiet hinterlegt', detail: 'Einsatzgebiet' },
+          { id: 'reaktion', title: p?.response_target_minutes ? `${p.response_target_minutes} Min.` : 'Kein Reaktionsziel hinterlegt', detail: 'Reaktionsziel' },
+          { id: 'tarif', title: subscription?.title || 'Free', detail: 'Partner-Tarif' },
+        ]} />
+      </EHWorkSection>
+      <EHWorkSection title="Vertrauen & Team">
+        <EHActions>
+          {trustStatus(activation.insuranceVerified, 'Versicherung')}
+          {trustStatus(activation.qualificationVerified, 'Qualifikation')}
+          {trustStatus(activation.contractVerified, 'Partnervertrag')}
+          {trustStatus(activation.qualityStandardVerified, 'Qualitätsstandard')}
+        </EHActions>
+        <EHText muted>{ctx.isOwner ? 'Firmendaten, Nachweise und Teamzugänge verwaltet das Firmenkonto.' : 'Firmendaten und Nachweise ändert nur das Firmenkonto. Du siehst den aktuellen Stand.'}</EHText>
+        <EHButton href="/pro/team" variant="secondary" arrow>Team ansehen</EHButton>
+      </EHWorkSection>
+    </>} />
   </AppShell>;
 }

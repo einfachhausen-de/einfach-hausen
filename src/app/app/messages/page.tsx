@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { notFound } from 'next/navigation';
-import { EHContactWorkspace, EHConversation, EHCallout, type EHDirectoryMode } from '@/design-system';
+import { EHContactWorkspace, EHConversation, EHCallout, EHButton, EHMetricsBar, EHRecordList, EHText, EHWorkSection, EHWorkspaceGrid, type EHDirectoryMode } from '@/design-system';
 import { AppShell } from '@/components/shell';
 import { requireUser } from '@/lib/auth';
 import { db } from '@/lib/db';
@@ -64,7 +64,7 @@ export default async function Messages({ searchParams }: { searchParams: Promise
   const activeById = new Map(activeContacts.map(contact => [contact.contact_user_id, contact]));
   const contacts = stored.value.map(contact => {
     const profile = contact.platformUserId ? activeById.get(contact.platformUserId) : undefined;
-    return profile ? { ...contact, name: `${profile.first_name} ${profile.last_name}`.trim(), company: profile.business_name || '', phone: profile.phone || '', email: profile.email || '', unreadCount: Number(profile.unread_count || 0) } : contact;
+    return profile ? { ...contact, name: `${profile.first_name} ${profile.last_name}`.trim(), company: profile.business_name || '', phone: profile.phone || '', email: profile.email || '', unreadCount: Number(profile.unread_count || 0) } : { ...contact, unreadCount: 0 };
   });
   const subcategoryToMain = new Map(CONTACT_DIRECTORY_CATEGORIES.flatMap(main => main.subcategories.map(sub => [sub.id, main.id] as const)));
   const countsByMain: Record<string, number> = Object.fromEntries(CONTACT_DIRECTORY_CATEGORIES.map(main => [main.id, 0]));
@@ -76,6 +76,15 @@ export default async function Messages({ searchParams }: { searchParams: Promise
     }
   }
   const active = entry?.platformUserId ? activeById.get(entry.platformUserId) : undefined;
+
+  // Kennzahlen und rechte Spalte lesen denselben Kontaktbestand wie das
+  // Verzeichnis in der Hauptspalte: gespeicherte Kontakte, davon verknuepfte
+  // Partnerprofile, ungelesene Nachrichten und belegte Bereiche.
+  const unreadTotal = contacts.reduce((sum, contact) => sum + Number(contact.unreadCount || 0), 0);
+  const linkedTotal = contacts.filter(contact => contact.platformUserId !== null).length;
+  const unreadContacts = contacts.filter(contact => Number(contact.unreadCount || 0) > 0).sort((a, b) => Number(b.unreadCount || 0) - Number(a.unreadCount || 0));
+  const usedCategories = CONTACT_DIRECTORY_CATEGORIES.filter(category => (countsByMain[category.id] ?? 0) > 0);
+
   const messages = mode === 'detail' && active
     ? db.prepare(`SELECT 'direct' source,cm.id,cm.sender_id,cm.body,cm.read_at,cm.created_at,NULL context_title,NULL job_id
         FROM contact_messages cm
@@ -105,6 +114,37 @@ export default async function Messages({ searchParams }: { searchParams: Promise
     composer={<OwnerMessageComposer contactUserId={active.contact_user_id} peerName={active.first_name} unreadCount={Number(active.unread_count || 0)} />} />
     : entry?.platformUserId ? <EHCallout title="Aktuell keine aktive Nachrichtenverbindung"><p>Der gespeicherte Kontakt und seine Zuordnungen bleiben erhalten. Ein App-Chat ist nur bei einer aktiven Partnerverbindung verfügbar.</p></EHCallout> : undefined;
   return <AppShell role="homeowner" active="/app/messages" title="Ansprechpartner" subtitle="Dein persönliches Netzwerk fürs Haus">
-    <EHContactWorkspace categories={CONTACT_DIRECTORY_CATEGORIES} contacts={contacts} mode={mode} mainId={main?.id} subcategoryId={sub?.id} entryId={entryId} query={text('q').slice(0, 200)} requestId={randomUUID()} notice={text('saved') === '1' ? 'Gespeichert. Dein Kontakt und alle Zuordnungen sind aktuell.' : undefined} action={submitDirectoryAction} shortcutAction={submitDirectoryShortcut} counts={countsByMain} conversation={mode === 'detail' ? conversation : undefined} />
+    {contacts.length > 0 && <EHMetricsBar label="Ansprechpartner" items={[
+      { id: 'kontakte', label: 'Kontakte', value: String(contacts.length), hint: 'in deinem Netzwerk' },
+      { id: 'verbunden', label: 'Verknüpft', value: String(linkedTotal), hint: 'mit Partnerprofil' },
+      { id: 'ungelesen', label: 'Ungelesen', value: String(unreadTotal), hint: unreadTotal > 0 ? 'neue Nachrichten' : 'nichts ungelesen' },
+      { id: 'bereiche', label: 'Belegte Bereiche', value: String(usedCategories.length), hint: `von ${CONTACT_DIRECTORY_CATEGORIES.length} Bereichen` },
+    ]} />}
+    <EHWorkspaceGrid main={
+      <EHContactWorkspace categories={CONTACT_DIRECTORY_CATEGORIES} contacts={contacts} mode={mode} mainId={main?.id} subcategoryId={sub?.id} entryId={entryId} query={text('q').slice(0, 200)} requestId={randomUUID()} notice={text('saved') === '1' ? 'Gespeichert. Dein Kontakt und alle Zuordnungen sind aktuell.' : undefined} action={submitDirectoryAction} shortcutAction={submitDirectoryShortcut} counts={countsByMain} conversation={mode === 'detail' ? conversation : undefined} />
+    } aside={<>
+      <EHWorkSection title="Ungelesene Nachrichten">
+        <EHRecordList label="Kontakte mit ungelesenen Nachrichten" empty="Keine ungelesene Nachricht. Neue Antworten erscheinen hier." items={unreadContacts.map(contact => ({
+          id: String(contact.id),
+          title: contact.name,
+          detail: contact.company || undefined,
+          value: `${contact.unreadCount} neu`,
+          href: contact.platformUserId !== null ? `/app/messages?contact=${contact.platformUserId}` : `/app/messages?entry=${contact.id}`,
+        }))} />
+      </EHWorkSection>
+      <EHWorkSection title="Deine Bereiche">
+        <EHRecordList label="Belegte Bereiche" empty="Noch kein Kontakt einem Bereich zugeordnet." items={usedCategories.map(category => ({
+          id: category.id,
+          title: category.label,
+          detail: `${countsByMain[category.id]} ${countsByMain[category.id] === 1 ? 'Kontakt' : 'Kontakte'}`,
+          href: `/app/messages?main=${category.id}`,
+        }))} />
+      </EHWorkSection>
+      <EHWorkSection title="Kontakte verwalten">
+        <EHText muted>Angeheftete Kontakte und Notfall-Nummern pflegst du in der Verwaltung. Neue Betriebe speicherst du direkt im Verzeichnis.</EHText>
+        <EHButton href="/app/messages?mode=manage" variant="secondary" arrow>Kontakte verwalten</EHButton>
+        <EHButton href="/app/emergency" variant="secondary">Notfall-Bereich</EHButton>
+      </EHWorkSection>
+    </>} />
   </AppShell>;
 }

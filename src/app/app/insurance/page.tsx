@@ -2,7 +2,7 @@ import { AppShell } from '@/components/shell';
 import { HausmeisterAssistant } from '@/components/homeowner/hausmeister-assistant';
 import { createInsuranceSupportAction } from '@/app/actions';
 import { requireUser } from '@/lib/auth';
-import { EHButton, EHEmptyState, EHErrorState, EHField, EHFormFeedback, EHMetricsBar, EHPageHeader, EHRecordViews, EHStatus, EHSubmitButton, EHTextarea, type EHRecordEntry } from '@/design-system';
+import { EHButton, EHEmptyState, EHErrorState, EHField, EHFormFeedback, EHMetricsBar, EHPageHeader, EHRecordList, EHRecordViews, EHStatus, EHSubmitButton, EHText, EHTextarea, EHWorkSection, EHWorkspaceGrid, type EHRecordEntry } from '@/design-system';
 import { db } from '@/lib/db';
 
 type InsuranceJob = {
@@ -34,6 +34,13 @@ export default async function InsuranceSupport({ searchParams }: { searchParams:
   `).all(user.id) as InsuranceJob[];
   const successId = Number(sp.success);
   const submitted = Number.isSafeInteger(successId) && jobs.some(job => job.id === successId);
+  // Die Kennzahlen zaehlen die vorhandenen Vorgaenge, nicht die Formulare:
+  // so bleibt die Zahl oben gleich, egal ob gerade eine Anfrage offen ist.
+  const openClaims = jobs.filter(job => job.claim_id);
+  const withoutClaim = jobs.filter(job => !job.claim_id);
+  const reviewingClaims = jobs.filter(job => job.claim_status === 'reviewing');
+  const resolvedClaims = jobs.filter(job => job.claim_status === 'resolved');
+  const nextJob = withoutClaim[0];
   const items: EHRecordEntry[] = jobs.map(job => (job.claim_id
     ? {
         id: String(job.id),
@@ -61,17 +68,38 @@ export default async function InsuranceSupport({ searchParams }: { searchParams:
     {sp.error && <EHErrorState text={sp.error} />}
     {submitted && <EHFormFeedback kind="success">Servicefall übernommen. Einfach Hausen und der zuständige Partner sehen den Vorgang jetzt im bestehenden Auftragskontext. Deine Versicherung wurde dadurch nicht automatisch kontaktiert.</EHFormFeedback>}
 
-    {jobs.length === 0 ? (
+    {jobs.length > 0 && <EHMetricsBar label="Versicherungsunterstützung" items={[
+      { id: 'auftraege', label: 'Beauftragte Aufträge', value: String(jobs.length), hint: 'mit Versicherungsbezug' },
+      { id: 'servicefaelle', label: 'Servicefälle', value: String(openClaims.length), hint: `${reviewingClaims.length} in Prüfung` },
+      { id: 'offen', label: 'Ohne Vorgang', value: String(withoutClaim.length), hint: 'noch übergebbar' },
+      { id: 'geloest', label: 'Gelöst', value: String(resolvedClaims.length), hint: 'abgeschlossen' },
+    ]} />}
+
+    <EHWorkspaceGrid main={jobs.length === 0 ? (
       <EHEmptyState title="Noch kein passender Auftrag vorhanden" text="Versicherungsunterstützung lässt sich hier nur an einen eigenen, bereits angenommenen Auftrag hängen. So werden keine fremden Vorgänge oder losen Schadendaten zugeordnet."  action={<><EHButton href="/app/jobs">Aufträge ansehen</EHButton><EHButton href="/app/consultation" variant="secondary">Erst Ansprechpartner fragen</EHButton></>} />
     ) : (
-      <>
-        <EHMetricsBar label="Versicherungsunterstützung" items={[
-          { id: 'auftraege', label: 'Beauftragte Aufträge', value: String(jobs.length) },
-          { id: 'servicefaelle', label: 'Servicefälle', value: String(jobs.filter(job => job.claim_id).length) },
-        ]} />
-        <EHRecordViews label="Aufträge mit Versicherungsunterstützung" storageKey="versicherung" defaultView="liste" switcherLabel="Versicherung: Ansicht wechseln" items={items} />
-      </>
-    )}
+      <EHRecordViews label="Aufträge mit Versicherungsunterstützung" storageKey="versicherung" defaultView="liste" switcherLabel="Versicherung: Ansicht wechseln" items={items} />
+    )} aside={<>
+      <EHWorkSection title="Laufende Servicefälle">
+        <EHRecordList label="Servicefälle zu deinen Aufträgen" empty="Zu keinem Auftrag läuft gerade ein Servicefall." items={openClaims.map(job => ({
+          id: `fall-${job.id}`,
+          title: job.title,
+          detail: job.business_name,
+          status: <EHStatus tone={claimTone(job.claim_status)}>{claimStatus(job.claim_status)}</EHStatus>,
+          href: `/app/jobs/${job.id}`,
+        }))} />
+      </EHWorkSection>
+      <EHWorkSection title="Nächster Schritt">
+        {nextJob
+          ? <><EHText>{`Für „${nextJob.title}“ ist noch kein Vorgang angelegt.`}</EHText><EHButton href={`/app/jobs/${nextJob.id}`} arrow>Auftrag öffnen</EHButton></>
+          : jobs.length === 0
+            ? <EHText muted>Sobald ein Auftrag angenommen ist, lässt sich hier eine Versicherungsanfrage daran hängen.</EHText>
+            : <EHText muted>Jeder beauftragte Auftrag hat einen Vorgang. Neue Unterstützung entsteht im jeweiligen Auftrag.</EHText>}
+      </EHWorkSection>
+      <EHWorkSection title="Zuständigkeit">
+        <EHText muted>Den Vorgang koordiniert Einfach Hausen im bestehenden Auftragskontext. Ein Versicherer wird dadurch nicht automatisch kontaktiert.</EHText>
+      </EHWorkSection>
+    </>} />
 
     <HausmeisterAssistant/>
   </AppShell>;

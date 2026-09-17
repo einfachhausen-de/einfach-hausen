@@ -1,5 +1,5 @@
 import { AppShell } from '@/components/shell';
-import { EHButton, EHCheckbox, EHEmptyState, EHErrorState, EHFormFeedback, EHMetricsBar, EHPageHeader, EHRecordList, EHRecordViews, EHStatus, EHSubmitButton, EHWorkSection } from '@/design-system';
+import { EHButton, EHCheckbox, EHEmptyState, EHErrorState, EHFormFeedback, EHMetricsBar, EHPageHeader, EHRecordList, EHRecordViews, EHStatus, EHSubmitButton, EHText, EHWorkSection, EHWorkspaceGrid } from '@/design-system';
 import { requireUser } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { purchasePackageAction, startMembershipCheckoutAction } from '@/app/actions';
@@ -7,7 +7,7 @@ import { euroExact, statusLabel } from '@/lib/format';
 
 type Plan = { slug: string; title: string; monthly_amount: number; description: string; annual_house_check: number };
 type Package = { slug: string; title: string; price_amount: number; description: string; services_json: string };
-type Subscription = { plan_slug: string; title: string; status: string; stripe_subscription_id: string | null };
+type Subscription = { plan_slug: string; title: string; status: string; stripe_subscription_id: string | null; monthly_amount: number };
 
 export default async function Plans({ searchParams }: { searchParams: Promise<Record<string, string>> }) {
   const user = await requireUser('homeowner');
@@ -15,7 +15,7 @@ export default async function Plans({ searchParams }: { searchParams: Promise<Re
   const pilot = db.prepare('SELECT discount_bps FROM pilot_cohort WHERE user_id=?').get(user.id) as { discount_bps: number } | undefined;
   const plans = db.prepare('SELECT * FROM membership_plans WHERE active=1 ORDER BY monthly_amount').all() as Plan[];
   const packages = db.prepare('SELECT * FROM service_packages WHERE active=1 ORDER BY price_amount').all() as Package[];
-  const current = db.prepare('SELECT s.*,p.title FROM subscriptions s JOIN membership_plans p ON p.slug=s.plan_slug WHERE s.homeowner_id=?').get(user.id) as Subscription | undefined;
+  const current = db.prepare('SELECT s.*,p.title,p.monthly_amount FROM subscriptions s JOIN membership_plans p ON p.slug=s.plan_slug WHERE s.homeowner_id=?').get(user.id) as Subscription | undefined;
   const orders = db.prepare('SELECT o.*,p.title FROM package_orders o JOIN service_packages p ON p.slug=o.package_slug WHERE o.homeowner_id=? ORDER BY o.created_at DESC').all(user.id) as { id: number; title: string; status: string }[];
   const price = (amount: number) => pilot ? Math.max(0, Math.round(amount * (10000 - pilot.discount_bps) / 10000)) : amount;
   const stateText: Record<string, string> = {
@@ -49,11 +49,11 @@ export default async function Plans({ searchParams }: { searchParams: Promise<Re
     <EHMetricsBar label="Dein Hauskonto" items={[
       { id: 'status', label: 'Status', value: <EHStatus tone={current?.status === 'past_due' ? 'warning' : current?.status === 'active' ? 'success' : 'neutral'}>{current ? stateLabel[current.status] || 'Status prüfen' : 'Ohne bezahlte Mitgliedschaft'}</EHStatus> },
       { id: 'mitgliedschaft', label: 'Mitgliedschaft', value: current ? current.title : 'Kostenloses Hauskonto', hint: statusHint },
-      { id: 'pakete', label: 'Gebuchte Pakete', value: String(orders.length) },
-      { id: 'leistung', label: 'Nicht enthalten', value: 'Arbeit & Material', hint: 'Zusätzliche Handwerkerleistungen sind nicht automatisch enthalten.' },
-      ...(pilot ? [{ id: 'vorteil', label: 'Pilot-Vorteil', value: `${(pilot.discount_bps / 100).toLocaleString('de-DE')} %`, hint: 'In den angezeigten Preisen bereits berücksichtigt' }] : []),
+      { id: 'kosten', label: 'Kosten pro Monat', value: current ? `${euroExact(price(current.monthly_amount))} / Monat` : '0 €', hint: pilot ? `inkl. ${(pilot.discount_bps / 100).toLocaleString('de-DE')} % Pilot-Vorteil` : 'dein Mitgliedsbeitrag' },
+      { id: 'pakete', label: 'Gebuchte Pakete', value: String(orders.length), hint: orders.length === 1 ? 'Einzelpaket' : 'Einzelpakete' },
     ]} />
 
+    <EHWorkspaceGrid main={<>
     <EHWorkSection title="Monatliche Mitgliedschaften">
       {plans.length === 0 && <EHEmptyState title="Gerade keine Tarife auswählbar" text="Dein aktueller Status bleibt oben sichtbar. Bitte versuche es später erneut." />}
       {plans.length > 0 && <EHRecordViews label="Monatliche Mitgliedschaften" storageKey="tarife" defaultView="liste" switcherLabel="Tarife: Ansicht wechseln" items={plans.map(plan => {
@@ -98,10 +98,28 @@ export default async function Plans({ searchParams }: { searchParams: Promise<Re
       })} />}
     </EHWorkSection>
 
-    <EHWorkSection title="Deine Paketbuchungen">
-      {orders.length > 0
-        ? <EHRecordList label="Gebuchte Pakete" items={orders.map(order => ({ id: String(order.id), title: order.title, status: <EHStatus>{statusLabel(order.status)}</EHStatus> }))} />
-        : <EHEmptyState title="Noch keine Pakete gebucht" text="Nach einer Buchung siehst du hier den gespeicherten Status." />}
-    </EHWorkSection>
+    </>} aside={<>
+      <EHWorkSection title="Deine Mitgliedschaft">
+        {current ? <>
+          <EHText>{current.title}</EHText>
+          <EHStatus tone={current.status === 'past_due' ? 'warning' : current.status === 'active' ? 'success' : 'neutral'}>{stateLabel[current.status] || 'Status prüfen'}</EHStatus>
+          <EHText muted>{`${euroExact(price(current.monthly_amount))} pro Monat${pilot ? ` · inkl. ${(pilot.discount_bps / 100).toLocaleString('de-DE')} % Pilot-Vorteil` : ''}`}</EHText>
+          <EHText muted>{statusHint}</EHText>
+        </> : <>
+          <EHText>Kostenloses Hauskonto</EHText>
+          <EHText muted>{statusHint}</EHText>
+          <EHButton href="/preise" variant="secondary" arrow>Tarife ansehen</EHButton>
+        </>}
+      </EHWorkSection>
+      <EHWorkSection title="Deine Paketbuchungen">
+        {orders.length > 0
+          ? <EHRecordList label="Gebuchte Pakete" items={orders.map(order => ({ id: String(order.id), title: order.title, status: <EHStatus>{statusLabel(order.status)}</EHStatus> }))} />
+          : <EHEmptyState title="Noch keine Pakete gebucht" text="Nach einer Buchung siehst du hier den gespeicherten Status." />}
+      </EHWorkSection>
+      <EHWorkSection title="Leistungsumfang">
+        <EHText muted>Arbeit und Material sind in keiner Mitgliedschaft enthalten. Zusätzliche Handwerkerleistungen buchst du als Einzelpaket oder klärst sie direkt mit dem Betrieb.</EHText>
+        <EHButton href="/preise" variant="secondary" arrow>Öffentliche Tarifübersicht</EHButton>
+      </EHWorkSection>
+    </>} />
   </AppShell>;
 }

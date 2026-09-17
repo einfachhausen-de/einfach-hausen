@@ -2,7 +2,7 @@ import { Building2, UserRound } from 'lucide-react';
 import { AppShell } from '@/components/shell';
 import { ProviderState } from '@/components/provider/workspace';
 import { requireUser } from '@/lib/auth';
-import { EHMetricsBar, EHPageHeader, EHRecordList, EHStatus, EHCallout, EHField, EHSelect, type EHRecordEntry } from '@/design-system';
+import { EHMetricsBar, EHButton, EHPageHeader, EHRecordList, EHStatus, EHCallout, EHField, EHSelect, EHText, EHWorkSection, EHWorkspaceGrid, type EHRecordEntry } from '@/design-system';
 import { db } from '@/lib/db';
 import { getProviderContext } from '@/lib/provider';
 import { providerHasCategory } from '@/lib/provider-categories';
@@ -16,6 +16,12 @@ const NEXT_STEPS = [
   { value: 'sold', label: 'Verkauft' },
   { value: 'rejected', label: 'Nicht passend' },
 ] as const;
+
+/** Status der Freigabe; 'contact_released' ist der Startpunkt jedes Kontakts. */
+const STATUS_LABEL: Record<string, string> = {
+  contact_released: 'Freigegeben',
+  ...Object.fromEntries(NEXT_STEPS.map((step) => [step.value, step.label] as const)),
+};
 
 export default async function ProLeads() {
   const user = await requireUser('provider');
@@ -79,6 +85,14 @@ export default async function ProLeads() {
     };
   });
 
+  // Die Verteilung liest denselben Status wie die Auswahlliste in jeder Zeile:
+  // sie zeigt, wie weit die freigegebenen Kontakte gediehen sind.
+  const byStatus = new Map<string, number>();
+  for (const match of matches) {
+    const key = String(match.status);
+    byStatus.set(key, (byStatus.get(key) ?? 0) + 1);
+  }
+
   return (
     <AppShell role="provider" active="/pro/leads" title="Immobilien-Leads" subtitle="Nur ausdrücklich freigegebene Kontakte">
       <EHPageHeader title="Freigegebene Kontakte" context={`${matches.length} ${matches.length === 1 ? 'freigegebener Kontakt' : 'freigegebene Kontakte'}`} />
@@ -93,15 +107,25 @@ export default async function ProLeads() {
         ]} />
       )}
 
-      {matches.length > 0 && <EHRecordList label="Freigegebene Immobilienkontakte" items={items} />}
-
-      {matches.length === 0 && (
-        <ProviderState
-          icon={<UserRound size={21} />}
-          title="Noch keine freigegebenen Immobilienanfragen"
-          description="Passende Eigentümer sehen dein Unternehmen zunächst als Vorschlag. Erst nach deren ausdrücklicher Freigabe erscheint der Kontakt hier."
-        />
-      )}
+      <EHWorkspaceGrid main={matches.length > 0
+        ? <EHRecordList label="Freigegebene Immobilienkontakte" items={items} />
+        : <ProviderState
+            icon={<UserRound size={21} />}
+            title="Noch keine freigegebenen Immobilienanfragen"
+            description="Passende Eigentümer sehen dein Unternehmen zunächst als Vorschlag. Erst nach deren ausdrücklicher Freigabe erscheint der Kontakt hier."
+          />} aside={<>
+        <EHWorkSection title="Nach Status">
+          <EHRecordList label="Freigegebene Kontakte nach Status" empty="Noch kein Kontakt freigegeben." items={Array.from(byStatus.entries()).sort((a, b) => b[1] - a[1]).map(([status, count]) => ({
+            id: `status-${status}`,
+            title: STATUS_LABEL[status] ?? status,
+            detail: `${count} ${count === 1 ? 'Kontakt' : 'Kontakte'}`,
+          }))} />
+        </EHWorkSection>
+        <EHWorkSection title="Vermittlung">
+          <EHText muted>Ein Kontakt entsteht erst mit der Freigabe durch den Eigentümer. Den Fortgang hältst du in der Zeile links fest; die Hausakte des Eigentümers bleibt davon getrennt.</EHText>
+          <EHButton href="/pro/profile" variant="secondary" arrow>Partnerprofil prüfen</EHButton>
+        </EHWorkSection>
+      </>} />
     </AppShell>
   );
 }

@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { ChevronRight } from 'lucide-react';
-import { EHEmptyState, EHErrorState, EHButton, EHField, EHFormFeedback, EHInput, EHMetricsBar, EHPageHeader, EHRecordList, EHSubmitButton, EHWorkSection } from '@/design-system';
+import { EHEmptyState, EHErrorState, EHButton, EHField, EHFormFeedback, EHInput, EHMetricsBar, EHPageHeader, EHRecordList, EHStatus, EHSubmitButton, EHText, EHWorkSection, EHWorkspaceGrid } from '@/design-system';
 import { notFound } from 'next/navigation';
 import { AppShell } from '@/components/shell';
 import { crumbs } from '@/components/nav-config';
@@ -15,28 +15,27 @@ export default async function PartnerProfile({params,searchParams}:{params:Promi
   const trades=String(provider.trades||'').split(',').map((x:string)=>x.trim()).filter(Boolean).slice(0,6);
   const returnHref=sp.job?`/app/jobs/${Number(sp.job)}`:'/app/jobs';
   const rating=Number(provider.rating||0); const ratingCount=Number(provider.rating_count||0);
+  // Vier Nachweise traegt jeder Partnervertrag: die Kennzahl zaehlt, wie viele
+  // davon bereits bestaetigt sind - nicht, wie viele Zeilen die Liste hat.
+  const verifications=[provider.insurance_verified,provider.qualification_verified,provider.contract_verified,provider.quality_standard_verified];
+  const verifiedCount=verifications.filter(Boolean).length;
+  const returnLabel=sp.job?'Zum Angebot zurück':'Aufträge ansehen';
   return <AppShell role="homeowner" active="/app/partners" title="Partnerprofil" subtitle="Geprüfter Einfach-Hausen-Partner" breadcrumbs={crumbs('/app/messages','Partnerprofil')}>
     {sp.message&&<EHFormFeedback kind="success">{String(sp.message)}</EHFormFeedback>}
     {sp.error&&<EHErrorState text={String(sp.error)} />}
     <EHPageHeader title={provider.business_name} context={`Geprüfter Partner · ${rating.toFixed(1)} von 5 aus ${ratingCount} Bewertungen`} actions={<EHButton href={returnHref} variant="secondary">Zurück</EHButton>} />
     <EHMetricsBar label="Partnerdaten" items={[
       { id: 'region', label: 'Region', value: `${provider.postcode} · bis ${provider.radius_km} km` },
-      { id: 'bereiche', label: 'Bereiche', value: String(trades.length||1) },
+      { id: 'bereiche', label: 'Bereiche', value: String(trades.length||1), hint: 'Leistungen' },
       { id: 'bewertung', label: 'Bewertung', value: `${rating.toFixed(1)} / 5`, hint: `${ratingCount} Bewertungen` },
+      { id: 'nachweise', label: 'Nachweise', value: `${verifiedCount} / 4`, hint: 'Prüfungen bestätigt' },
     ]} />
+    <EHWorkspaceGrid main={<>
     <EHWorkSection title="Profildaten">
       <EHRecordList label="Profildaten" items={[
         { id: 'leistungen', title: trades.length ? trades.join(' · ') : 'Kein Bereich hinterlegt', detail: 'Leistungen' },
         { id: 'standards', title: 'Vertraglich geprüft', detail: 'Standards' },
         { id: 'beschreibung', title: provider.description || 'Zuverlässiger regionaler Vertragspartner für Arbeiten rund ums Eigenheim.', detail: 'Beschreibung' },
-      ]} />
-    </EHWorkSection>
-    <EHWorkSection title="Prüfstatus">
-      <EHRecordList label="Prüfstatus" items={[
-        { id: 'versicherung', title: 'Versicherung', detail: provider.insurance_verified?'Geprüft':'In Prüfung' },
-        { id: 'qualifikation', title: 'Qualifikation', detail: provider.qualification_verified?'Geprüft':'In Prüfung' },
-        { id: 'vertrag', title: 'Partnervertrag', detail: provider.contract_verified?'Aktiv':'In Prüfung' },
-        { id: 'qualitaet', title: 'Qualitätsstandard', detail: provider.quality_standard_verified?'Bestätigt':'In Prüfung' },
       ]} />
     </EHWorkSection>
     <EHWorkSection title={`Bewertungen · ${ratingCount} insgesamt`}>
@@ -50,6 +49,24 @@ export default async function PartnerProfile({params,searchParams}:{params:Promi
           action: <details><summary>Melden</summary><form action={reportReviewAction.bind(null,r.id)}><EHField id={`report-${r.id}`} label="Grund der Meldung"><EHInput id={`report-${r.id}`} name="reason" maxLength={500} placeholder="Was stimmt an dieser Bewertung nicht?" aria-label="Grund der Meldung" required/></EHField><EHSubmitButton pendingLabel="Meldung wird gesendet …">Bewertung melden</EHSubmitButton></form></details>,
         }))} />}
     </EHWorkSection>
-    <Link href={returnHref} className="btn primary wide partner-return">{sp.job?'Zum Angebot zurück':'Aufträge ansehen'} <ChevronRight size={16}/></Link>
+    <Link href={returnHref} className="btn primary wide partner-return">{returnLabel} <ChevronRight size={16}/></Link>
+    </>} aside={<>
+      <EHWorkSection title="Nächster Schritt">
+        {sp.job
+          ? <><EHText>Dieser Betrieb hat dir für deinen Auftrag ein Angebot gemacht.</EHText><EHButton href={returnHref} arrow>{returnLabel}</EHButton></>
+          : <><EHText>Der Betrieb ist geprüft und nimmt Aufträge an.</EHText><EHButton href="/app/hausmeister" arrow>Anliegen beschreiben</EHButton></>}
+      </EHWorkSection>
+      <EHWorkSection title="Prüfstatus">
+        <EHRecordList label="Prüfstatus" items={[
+          { id: 'versicherung', title: 'Versicherung', status: <EHStatus tone={provider.insurance_verified?'success':'neutral'}>{provider.insurance_verified?'Geprüft':'In Prüfung'}</EHStatus> },
+          { id: 'qualifikation', title: 'Qualifikation', status: <EHStatus tone={provider.qualification_verified?'success':'neutral'}>{provider.qualification_verified?'Geprüft':'In Prüfung'}</EHStatus> },
+          { id: 'vertrag', title: 'Partnervertrag', status: <EHStatus tone={provider.contract_verified?'success':'neutral'}>{provider.contract_verified?'Aktiv':'In Prüfung'}</EHStatus> },
+          { id: 'qualitaet', title: 'Qualitätsstandard', status: <EHStatus tone={provider.quality_standard_verified?'success':'neutral'}>{provider.quality_standard_verified?'Bestätigt':'In Prüfung'}</EHStatus> },
+        ]} />
+      </EHWorkSection>
+      <EHWorkSection title="Gut zu wissen">
+        <EHText muted>Nur Betriebe mit aktivem Partnervertrag erscheinen hier. Versicherung, Qualifikation und Qualitätsstandard prüft Einfach Hausen vor der Aufnahme.</EHText>
+      </EHWorkSection>
+    </>} />
   </AppShell>;
 }

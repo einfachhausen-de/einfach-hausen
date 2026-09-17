@@ -2,7 +2,17 @@ import { requireUser } from '@/lib/auth';
 import { AppShell } from '@/components/shell';
 import { loadOnboardingState, saveOnboardingContactAction, saveOnboardingInterestsAction, saveOnboardingProfileAction } from './actions';
 import { db } from '@/lib/db';
-import { EHPanel, EHField, EHInput, EHSelect, EHCheckbox, EHSubmitButton, EHButton, EHErrorState, EHPageHeader } from '@/design-system';
+import { EHPanel, EHField, EHInput, EHSelect, EHCheckbox, EHSubmitButton, EHButton, EHErrorState, EHMetricsBar, EHPageHeader, EHRecordList, EHText, EHWorkSection, EHWorkspaceGrid } from '@/design-system';
+
+/** Die drei Kanaele, die saveOnboardingContactAction zulaesst (CHANNELS). */
+const CHANNEL_LABEL: Record<string, string> = { email: 'E-Mail', phone: 'Telefon', whatsapp: 'WhatsApp' };
+
+/** Was der gerade sichtbare Schritt von dir braucht - einer je Schritt. */
+const STEP_ASK: Record<string, string> = {
+  profile: 'Trag Straße und PLZ ein, damit Einfach Hausen Betriebe in deiner Region findet.',
+  interests: 'Wähle die Bereiche, die dich interessieren. Überspringen ist möglich.',
+  contact: 'Sag, über welchen Weg wir dich am besten erreichen.',
+};
 
 export default async function OnboardingPage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
   await requireUser('homeowner');
@@ -12,10 +22,16 @@ export default async function OnboardingPage({ searchParams }: { searchParams: P
 
   return (
     <AppShell role="homeowner" active="/app" title="Einrichtung" subtitle={`Schritt ${state.stepIndex} von ${state.totalSteps}`}>
-      <div className="onboarding-flow">
-        <EHPageHeader title="Einrichtung" context={`Schritt ${state.stepIndex} von ${state.totalSteps}`} />
-        <progress value={state.stepIndex} max={state.totalSteps} aria-label={`Fortschritt: Schritt ${state.stepIndex} von ${state.totalSteps}`} />
-        {error && <EHErrorState text={error} />}
+      <EHPageHeader title="Einrichtung" context={`Schritt ${state.stepIndex} von ${state.totalSteps}`} />
+      <progress value={state.stepIndex} max={state.totalSteps} aria-label={`Fortschritt: Schritt ${state.stepIndex} von ${state.totalSteps}`} />
+      {error && <EHErrorState text={error} />}
+      <EHMetricsBar label="Einrichtung" items={[
+        { id: 'fortschritt', label: 'Fortschritt', value: `${state.stepIndex} / ${state.totalSteps}`, hint: 'Schritte der Einrichtung' },
+        { id: 'adresse', label: 'Adresse', value: state.postcode || '–', hint: state.address ? 'Straße hinterlegt' : 'noch offen' },
+        { id: 'interessen', label: 'Interessen', value: String(state.interests.length), hint: `${categories.length} Bereiche zur Auswahl` },
+        { id: 'kontaktweg', label: 'Kontaktweg', value: CHANNEL_LABEL[state.preferredChannel] || '–', hint: state.preferredChannel ? 'gewählt' : 'noch offen' },
+      ]} />
+      <EHWorkspaceGrid main={<>
         {state.step === 'profile' && (
           <EHPanel title="Adresse">
             <form action={saveOnboardingProfileAction}>
@@ -49,7 +65,22 @@ export default async function OnboardingPage({ searchParams }: { searchParams: P
             </form>
           </EHPanel>
         )}
-      </div>
+      </>} aside={<>
+        <EHWorkSection title="Nächster Schritt">
+          <EHText>{STEP_ASK[state.step]}</EHText>
+        </EHWorkSection>
+        <EHWorkSection title="Deine Angaben">
+          <EHRecordList label="Angaben aus der Einrichtung" items={[
+            { id: 'adresse', title: state.address || 'Noch nicht hinterlegt', detail: 'Straße und Hausnummer' },
+            { id: 'plz', title: state.postcode || 'Noch nicht hinterlegt', detail: 'PLZ' },
+            { id: 'interessen', title: state.interests.length ? state.interests.join(' · ') : 'Noch keine gewählt', detail: `${state.interests.length} von ${categories.length} Bereichen` },
+            { id: 'kontaktweg', title: CHANNEL_LABEL[state.preferredChannel] || 'Noch nicht gewählt', detail: 'Bevorzugter Kontaktweg' },
+          ]} />
+        </EHWorkSection>
+        <EHWorkSection title="Wozu die Angaben dienen">
+          <EHText muted>Adresse und Interessen steuern, welche Betriebe und Anliegen dir vorgeschlagen werden. Alles bleibt in deiner Hausakte und lässt sich später im Profil ändern.</EHText>
+        </EHWorkSection>
+      </>} />
     </AppShell>
   );
 }

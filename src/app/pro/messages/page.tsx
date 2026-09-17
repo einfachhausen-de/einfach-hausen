@@ -1,13 +1,11 @@
-import Link from 'next/link';
-import { MessageSquare, Phone, UserRound } from 'lucide-react';
+import { MessageSquare } from 'lucide-react';
 import { AppShell } from '@/components/shell';
 import { ProviderAccessBoundary, ProviderState } from '@/components/provider/workspace';
 import { requireUser } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { getProviderContext } from '@/lib/provider';
-import { EHInbox, EHContactGroup, EHConversation, EHFormFeedback, EHPageHeader } from '@/design-system';
+import { EHInbox, EHContactGroup, EHConversation, EHFormFeedback, EHPageHeader, EHButton, EHMetricsBar, EHRecordList, EHText, EHWorkSection, EHWorkspaceGrid } from '@/design-system';
 import { ProviderMessageComposer } from './thread-client';
-import styles from './messages.module.css';
 
 type ThreadMessage = {
   source: 'direct' | 'job';
@@ -84,6 +82,10 @@ export default async function Messages({ searchParams }: { searchParams: Promise
     : [];
   const unreadCount = selected ? Number(selected.unread_count || 0) : 0;
   const unreadTotal = customers.reduce((total, customer) => total + Number(customer.unread_count || 0), 0);
+  // Kennzahlen und rechte Spalte lesen denselben Kundenbestand wie die Inbox in
+  // der Hauptspalte: Kontakte, ungelesene Nachrichten und der gewaehlte Verlauf.
+  const unreadContacts = customers.filter((customer) => Number(customer.unread_count || 0) > 0).length;
+  const jobMessages = messages.filter((message) => message.source === 'job').length;
 
   return (
     <AppShell role="provider" active="/pro/messages" title="Nachrichten" subtitle="Direkter Kundenkontakt">
@@ -91,7 +93,15 @@ export default async function Messages({ searchParams }: { searchParams: Promise
 
       <ProviderAccessBoundary canManageJobs={ctx.canManageJobs} />
 
-      {customers.length === 0 ? (
+      {customers.length > 0 && <EHMetricsBar label="Kundenkontakte" items={[
+        { id: 'kunden', label: 'Kunden', value: customers.length, hint: 'direkte Kontakte des Betriebs' },
+        { id: 'ungelesen', label: 'Ungelesen', value: unreadTotal, hint: unreadContacts > 0 ? `${unreadContacts} Kontakte warten auf Antwort` : 'alle Nachrichten gelesen' },
+        { id: 'verlauf', label: 'Im Verlauf', value: messages.length, hint: selected ? `mit ${selected.first_name} ${selected.last_name}` : 'kein Kontakt gewählt' },
+        { id: 'auftraege', label: 'Auftragsnachrichten', value: jobMessages, hint: 'aus laufenden Aufträgen' },
+      ]} />}
+
+      <EHWorkspaceGrid main={
+        customers.length === 0 ? (
         <ProviderState
           icon={<MessageSquare size={21} />}
           title="Noch keine direkten Kontakte"
@@ -103,7 +113,27 @@ export default async function Messages({ searchParams }: { searchParams: Promise
             messages={messages.map(message=>({id:`${message.source}-${message.id}`,mine:message.sender_id===u.id,author:`${message.sender_id===u.id?'Du':selected.first_name}${message.source==='job'&&message.context_title?` · Auftrag: ${message.context_title}`:''}`,body:message.body}))}
             composer={<ProviderMessageComposer homeownerId={selected.homeowner_id} peerName={selected.first_name} unreadCount={unreadCount}/>}/>:null}
         </EHInbox>
-      )}
+      )} aside={<>
+        <EHWorkSection title="Nächster Schritt">
+          {selected
+            ? unreadCount > 0
+              ? <><EHText>{`${unreadCount} ungelesene ${unreadCount === 1 ? 'Nachricht' : 'Nachrichten'} von ${selected.first_name} ${selected.last_name}.`}</EHText><EHButton href={`/pro/messages?homeowner=${selected.homeowner_id}`} arrow>Kontakt öffnen</EHButton></>
+              : <><EHText muted>{`Bei ${selected.first_name} ${selected.last_name} ist alles beantwortet.`}</EHText>{selected.phone && <EHButton href={`tel:${selected.phone}`} variant="secondary">Anrufen</EHButton>}</>
+            : <EHText muted>Wähle links einen Kundenkontakt aus.</EHText>}
+        </EHWorkSection>
+        <EHWorkSection title="Kunde">
+          {selected ? <EHRecordList label="Kundendaten" items={[
+            { id: 'name', title: `${selected.first_name} ${selected.last_name}`, detail: 'Kunde' },
+            { id: 'ort', title: selected.address || selected.postcode || 'Kein Ort hinterlegt', detail: 'Ort' },
+            { id: 'telefon', title: selected.phone || 'Keine Nummer hinterlegt', detail: 'Telefon' },
+            { id: 'auftrag', title: selected.last_job_title || 'Kein Auftrag hinterlegt', detail: 'Letzter Auftrag' },
+          ]} /> : <EHText muted>Kein Kontakt ausgewählt.</EHText>}
+        </EHWorkSection>
+        <EHWorkSection title="Gut zu wissen">
+          <EHText muted>Der direkte Kundenkontakt ist für Rückfragen und Absprachen da. Angebote und Rechnungen laufen über den jeweiligen Auftrag.</EHText>
+          <EHButton href="/pro/orders" variant="secondary" arrow>Aufträge ansehen</EHButton>
+        </EHWorkSection>
+      </>} />
     </AppShell>
   );
 }

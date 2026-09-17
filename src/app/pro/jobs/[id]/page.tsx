@@ -5,7 +5,6 @@ import {
   MessageSquare,
   Phone,
   ReceiptText,
-  ShieldCheck,
   UserRound,
   XCircle,
 } from 'lucide-react';
@@ -35,7 +34,7 @@ import { DocumentForm } from './document-form';
 import { InvoiceForm } from './invoice-form';
 import { invoiceStatusLabel } from '@/lib/invoices';
 import { SubmitButton } from '@/components/ui/submit-button';
-import { EHErrorState, EHList, EHCallout, EHStatus, EHQuoteForm, EHAssignmentForm, EHJobMessageForm, EHAttachmentPanel, EHWorkspaceGrid, EHWorkSection, EHPageHeader, EHRecordList, EHText, type EHRecordEntry } from '@/design-system';
+import { EHErrorState, EHList, EHCallout, EHStatus, EHQuoteForm, EHAssignmentForm, EHJobMessageForm, EHAttachmentPanel, EHWorkspaceGrid, EHWorkSection, EHPageHeader, EHRecordList, EHText, EHButton, EHMetricsBar, type EHRecordEntry } from '@/design-system';
 
 export default async function ProJob({
   params,
@@ -90,15 +89,41 @@ export default async function ProJob({
     : [];
   const mine = assignment?.contact_user_id === u.id;
 
+  const statusText = isContact ? (isAccepted ? 'Verbunden' : 'Kontakt gesucht') : statusLabel(access.status);
+  // Der naechste Schritt haengt am Vorgangsstand und an der Rolle im Betrieb; die
+  // Formulare selbst bleiben in der Hauptspalte.
+  const nextStep: { text: string; href?: string; label?: string } = !isAccepted
+    ? ctx.canManageJobs
+      ? access.status === 'completed'
+        ? { text: 'Dieser Vorgang ist abgeschlossen. Es ist keine Aktion mehr offen.' }
+        : isContact
+          ? { text: 'Ansprechpartner auswählen und den Kontakt übernehmen.' }
+          : { text: 'Angebot senden: Preis, frühesten realistischen Termin und Leistungsumfang festlegen.' }
+      : { text: 'Nur die Betriebsleitung kann diesen Vorgang annehmen.' }
+    : !assignment
+      ? { text: 'Ansprechpartner festlegen, damit die weitere Bearbeitung eindeutig ist.' }
+      : !mine
+        ? { text: 'Dieser Vorgang liegt bei einem anderen Ansprechpartner des Betriebs.' }
+        : isContact
+          ? { text: 'Eigentümer direkt anschreiben und die fachliche Frage klären.', href: `/pro/messages?homeowner=${access.homeowner_id}`, label: 'Nachricht öffnen' }
+          : access.status === 'accepted'
+            ? { text: 'Arbeit starten, sobald Termin und Ausführung mit dem Kunden abgestimmt sind.' }
+            : access.status === 'in_progress'
+              ? { text: 'Auftrag abschließen, wenn die vereinbarte Leistung vollständig erledigt ist.' }
+              : access.status === 'completed'
+                ? { text: 'Rechnung erstellen und dem Eigentümer senden.' }
+                : { text: 'Für diesen Vorgang ist kein nächster Schritt hinterlegt.' };
   const glance: EHRecordEntry[] = [
-    { id: 'ort', title: isAccepted && access.address ? access.address : access.postcode, icon: <MapPin size={20} /> },
-    ...(!isContact ? [{ id: 'termin', title: dateLabel(access.preferred_date), icon: <CalendarDays size={20} /> }] : []),
+    { id: 'status', title: statusText, detail: 'Status' },
+    { id: 'bereich', title: access.category || 'Ohne Bereich', detail: 'Bereich' },
+    { id: 'ort', title: isAccepted && access.address ? access.address : access.postcode, detail: 'Ort', icon: <MapPin size={20} /> },
+    ...(!isContact ? [{ id: 'termin', title: dateLabel(access.preferred_date), detail: 'Wunschtermin', icon: <CalendarDays size={20} /> }] : []),
     ...(!isContact ? [{
       id: 'richtpreis',
-      title: 'Richtpreis',
-      value: access.budget_min && access.budget_max
+      title: access.budget_min && access.budget_max
         ? `${euro(access.budget_min)} – ${euro(access.budget_max)}`
         : euro(access.budget_max),
+      detail: 'Richtpreis',
       icon: <ReceiptText size={20} />,
     }] : []),
   ];
@@ -112,14 +137,20 @@ export default async function ProJob({
     >
       {sp.error && <EHErrorState text={sp.error} />}
 
+      <EHMetricsBar label="Stand des Vorgangs" items={[
+        { id: 'status', label: 'Status', value: statusText, hint: [access.category, Number.isFinite(access.distance_km) ? `${access.distance_km.toFixed(1)} km entfernt` : null].filter(Boolean).join(' · ') },
+        { id: 'angebot', label: 'Eigenes Angebot', value: isContact ? 'Ohne Preis' : quote ? euro(quote.amount) : 'offen', hint: isContact ? 'Kontaktanfrage ohne Auftragswert' : quote ? (quote.available_at ? `Verfügbar ${dateLabel(quote.available_at)}` : 'Termin nach Abstimmung') : 'Preis und Termin noch offen' },
+        { id: 'nachrichten', label: 'Nachrichten', value: messages.length, hint: mine ? `mit ${access.homeowner_first}` : assignment ? 'bei einem anderen Ansprechpartner' : 'noch kein Kundenkontakt' },
+        { id: 'unterlagen', label: 'Unterlagen', value: docs.length + invoices.length, hint: isAccepted ? `${invoices.length} Rechnungen · ${docs.length} Nachweise` : 'erst nach Annahme' },
+      ]} />
+
       <EHWorkspaceGrid main={<>
       <EHPageHeader
         title={access.title.replace(/^Ansprechpartner:\s*/, '')}
-        context={[isContact ? (isAccepted ? 'Verbunden' : 'Kontakt gesucht') : statusLabel(access.status), access.category].filter(Boolean).join(' · ')}
+        context={[statusText, access.category].filter(Boolean).join(' · ')}
       />
-</>} aside={<EHWorkSection title="Auf einen Blick">
-      <EHRecordList label="Auftrag auf einen Blick" items={glance} />
-        {access.description && <EHText>{access.description}</EHText>}
+      <EHWorkSection title="Anliegen">
+        <EHText>{access.description || 'Keine Beschreibung hinterlegt.'}</EHText>
         {access.photo_id && (
           <JobMedia
             src={`/api/job-media/${access.photo_id}`}
@@ -127,7 +158,23 @@ export default async function ProJob({
             kind={mediaKindFromPath(access.photo_path)}
           />
         )}
-</EHWorkSection>} />
+      </EHWorkSection>
+</>} aside={<>
+      <EHWorkSection title="Nächster Schritt">
+        <EHText muted={!nextStep.href}>{nextStep.text}</EHText>
+        {nextStep.href && <EHButton href={nextStep.href} arrow>{nextStep.label}</EHButton>}
+      </EHWorkSection>
+      <EHWorkSection title="Auf einen Blick">
+        <EHRecordList label="Auftrag auf einen Blick" items={glance} />
+      </EHWorkSection>
+      <EHWorkSection title="Kunde">
+        <EHRecordList label="Kundendaten" items={[
+          { id: 'name', title: `${access.homeowner_first} ${access.homeowner_last}`.trim() || 'Ohne Namen', detail: 'Eigentümer' },
+          { id: 'ort', title: access.address || access.postcode || 'Kein Ort hinterlegt', detail: 'Ort' },
+          { id: 'telefon', title: mine ? (access.homeowner_phone || 'Keine Nummer hinterlegt') : 'Erst nach Zuweisung sichtbar', detail: 'Telefon' },
+        ]} />
+      </EHWorkSection>
+</>} />
 
       <ProviderAccessBoundary canManageJobs={ctx.canManageJobs} />
 
@@ -187,8 +234,8 @@ export default async function ProJob({
 
       {isAccepted && (
         <>
-          <div className="alert success" role="status">
-            <ShieldCheck /> {isContact ? 'Du bist mit dem Eigentümer verbunden. Noch kein Auftrag.' : `Kunde hat den Auftrag bei ${ctx.businessName} gebucht.`}
+          <div role="status">
+            <EHStatus tone="success">{isContact ? 'Du bist mit dem Eigentümer verbunden. Noch kein Auftrag.' : `Kunde hat den Auftrag bei ${ctx.businessName} gebucht.`}</EHStatus>
           </div>
 
           <EHWorkSection title="Ansprechpartner">

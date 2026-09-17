@@ -8,6 +8,7 @@ import {
   EHPageHeader, EHWorkflowStack, EHWorkflowForm, EHWorkflowHeading, EHStepProgress,
   EHFormSection, EHFieldGrid, EHField, EHInput, EHSelect, EHTextarea, EHCheckbox,
   EHFormFeedback, EHSubmitButton, EHActions, EHTextLink, EHText, EHPanel, EHEmptyState,
+  EHButton, EHMetricsBar, EHRecordList, EHStatus, EHWorkSection, EHWorkspaceGrid,
 } from "@/design-system";
 
 export default async function ProviderOnboardingWizard({searchParams}: {
@@ -36,12 +37,28 @@ export default async function ProviderOnboardingWizard({searchParams}: {
     .all() as {slug:string;title:string;category:string}[];
   const categories=[...new Set(catalog.map(service=>service.category))];
   const nextLabel=step==="abschluss"?"Abschließen":"Weiter";
+  // Kennzahlen und rechte Spalte lesen dieselben gespeicherten Angaben wie das
+  // Formular darunter; keine der Zahlen ist geschaetzt.
+  const filled=[profile?.business_name,profile?.legal_form,profile?.founded_year,profile?.employees,profile?.website,profile?.street_address,profile?.description,profile?.postcode,profile?.radius_km].filter(value=>value!==undefined&&value!==null&&value!=="").length;
+  const openSteps=[
+    {id:"firmendaten",label:"Firmendaten",done:Boolean(profile?.business_name&&profile?.street_address),hint:"Firmenname und Firmensitz"},
+    {id:"leistungen",label:"Leistungen",done:selected.size>0,hint:`${selected.size} von ${catalog.length} ausgewählt`},
+    {id:"arbeitsgebiet",label:"Arbeitsgebiet",done:Boolean(profile?.postcode),hint:profile?.postcode?`${profile.postcode} · ${profile.radius_km||25} km`:"Postleitzahl noch offen"},
+  ];
+  const nextOpen=openSteps.find(entry=>!entry.done);
 
   return <AppShell role="provider" active="/pro" title="Einrichtung" subtitle={ctx.businessName}>
     <EHWorkflowStack>
       <EHPageHeader title="Einrichtung" context={["Firmenkonto", ctx.businessName].join(" · ")}/>
+      <EHMetricsBar label="Einrichtung" items={[
+        {id:"schritt",label:"Aktueller Schritt",value:`${index+1} von ${WIZARD_STEPS.length}`,hint:STEP_LABELS[step]},
+        {id:"angaben",label:"Betriebsangaben",value:`${filled} von 9`,hint:"Felder mit Inhalt"},
+        {id:"leistungen",label:"Leistungen gewählt",value:String(selected.size),hint:`${catalog.length} im Katalog`},
+        {id:"gebiet",label:"Arbeitsgebiet",value:profile?.postcode||"–",hint:profile?.postcode?`${profile.radius_km||25} km Radius`:"PLZ noch offen"},
+      ]} />
       <EHStepProgress current={step} steps={WIZARD_STEPS.map(id=>({id,label:STEP_LABELS[id]}))}/>
       {sp.error && <EHFormFeedback kind="error">{sp.error}</EHFormFeedback>}
+      <EHWorkspaceGrid main={<>
       <EHWorkflowHeading title={STEP_LABELS[step]}/>
       <EHWorkflowForm action={saveWizardStepAction}>
         <input type="hidden" name="step" value={step}/>
@@ -93,6 +110,24 @@ export default async function ProviderOnboardingWizard({searchParams}: {
           <EHTextLink href="/pro">Zur Übersicht ohne diesen Schritt zu speichern</EHTextLink>
         </EHActions>
       </EHWorkflowForm>
+      </>} aside={<>
+        <EHWorkSection title="Was noch fehlt">
+          <EHRecordList label="Offene Angaben in der Einrichtung" items={openSteps.map(entry=>({
+            id:entry.id,
+            title:entry.label,
+            detail:entry.hint,
+            status:entry.done?<EHStatus tone="success">Vollständig</EHStatus>:<EHStatus tone="warning">Offen</EHStatus>,
+            href:`/pro/onboarding?step=${entry.id}`,
+          }))} />
+        </EHWorkSection>
+        <EHWorkSection title="Nächster Schritt">
+          {nextOpen?<>
+            <EHText>{nextOpen.label}</EHText>
+            <EHText muted>{nextOpen.hint}</EHText>
+            <EHButton href={`/pro/onboarding?step=${nextOpen.id}`} variant="secondary" arrow>Schritt öffnen</EHButton>
+          </>:<EHText muted>Alle Angaben sind vollständig. Prüfe sie im letzten Schritt und schließe die Einrichtung ab.</EHText>}
+        </EHWorkSection>
+      </>} />
     </EHWorkflowStack>
   </AppShell>;
 }

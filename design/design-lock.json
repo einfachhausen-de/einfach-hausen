@@ -5,7 +5,7 @@
     ".github/CODEOWNERS": "344048476ff047355aa71baf270bf7ebe41f418ad90195a32009424cc0670e79",
     ".github/workflows/eh-design.yml": "79881db9c76ed3111d37017ea987cb4561d0758d401a1f64a4e2e756183730e1",
     "DESIGN.md": "2d8d1cc248529e06f418612edcddf362e91287d9bc629ff789f9fdc3d564702a",
-    "design/design-debt.json": "f2f50c263accec73418ae5ed9d28abacd34cf325ccd7b8736863f2bb1c7e4254",
+    "design/design-debt.json": "61b13f142b827bbdfc814ba7531e1f02f9273aaed8cfa0c78fe4a832aed63540",
     "design/design-policy.json": "d7cc6bb9de766a9eabaaf1619cbc7f47e0fbf4217b37e7f4bae3f94b00febd53",
     "packages/eh-design/assets/inter-variable.woff2": "0de3908cf5ef213ab1404cc5da94a976faaa886c3479a274a7d66ad80b37c64a",
     "packages/eh-design/assets/logo-full.png": "ca128f0ecfcffc93853f5271453f318be28ed4462850b06072c33afbeb1353cd",

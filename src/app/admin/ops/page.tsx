@@ -2,8 +2,10 @@ import { isFeatureEnabled } from '@/lib/feature-flags';
 import { toggleFeatureFlagAction, requeueDeadNotificationAction } from '@/app/actions';
 import { requireAdmin } from '@/lib/admin-auth';
 import { db } from '@/lib/db';
-import Link from 'next/link';
-import { EHAppHeader } from '@/design-system';
+import { EHAppHeader, EHButton, EHMetricsBar, EHRecordList, EHScope, EHStatus, EHText, EHWorkSection, EHWorkspaceGrid, type EHRecordEntry } from '@/design-system';
+
+/** Die Flags, die diese Seite schaltet; die Kennzahl oben zaehlt genau diese Liste. */
+const FLAGS=['ki_chat','pilot_cohort_open'];
 
 export default async function AdminOps({searchParams}:{searchParams:Promise<Record<string,string|undefined>>}){
   await requireAdmin();
@@ -22,29 +24,72 @@ export default async function AdminOps({searchParams}:{searchParams:Promise<Reco
     FROM match_decision_trace d JOIN users pr ON pr.id=d.provider_id
     LEFT JOIN provider_profiles p ON p.user_id=d.provider_id
     ORDER BY d.created_at DESC LIMIT 15`).all() as any[];
-  return <main className="admin-page"><EHAppHeader eyebrow="Betriebsverwaltung" title="Operations" text="Lookup, Zustellstatus, Matching-Trace, Flags." />
-    <section className="admin-panel"><h2>Intern</h2>
-      <div className="stack"><div className="admin-card"><Link href="/docs-internal">Entwickler-Docs (intern)</Link></div></div>
-    </section>
-    <section className="admin-panel"><h2>Feature-Flags</h2>
-      <div className="stack">{['ki_chat','pilot_cohort_open'].map(flag=>{
-        const enabled=isFeatureEnabled(flag);
-        return <article className="admin-card" key={flag}><div className="admin-card-head"><div><strong>{flag}</strong><small>{enabled?'aktiv':'inaktiv'}</small></div>
-          <form action={toggleFeatureFlagAction.bind(null, flag)}><button className="btn ghost">{enabled?'Deaktivieren':'Aktivieren'}</button></form>
-        </div></article>;})}
-      </div>
-    </section>
-    <section className="admin-panel"><h2>Lookup</h2>
-      <form className="admin-form" action="/admin/ops"><input name="q" defaultValue={q} placeholder="E-Mail oder Name" aria-label="Suche"/><button className="btn primary">Suchen</button></form>
-      {q&&<div className="stack">{matches.length===0&&<p className="muted">Keine Treffer.</p>}
-        {matches.map(u=><article className="admin-card" key={u.id}><div className="admin-card-head"><div><strong>{u.first_name} {u.last_name}</strong><small>{u.email} · {u.role} · id={u.id} · registriert {new Date(u.created_at).toLocaleDateString('de-DE')} · {u.jobs} Aufträge / {u.quotes} Angebote {u.auth_subject?'· Supabase gebunden':'· KEINE Identity gebunden'}</small></div></div></article>)}</div>}
-    </section>
-    <section className="admin-panel"><h2>Zustellstatus (Outbox)</h2>
-      <div className="stack">{outbox.map(o=><div className="admin-card" key={o.status}><strong>{o.status}</strong><span> {o.c}</span></div>)}</div>
-      {dead.length>0&&<><h3>Tote Briefe (letzte 10)</h3><div className="stack">{dead.map(d=><article className="admin-card" key={d.id}><small>{d.kind} · {new Date(d.created_at).toLocaleString('de-DE')}</small><form action={requeueDeadNotificationAction.bind(null, d.id)}><button className="btn ghost">Erneut zustellen</button></form></article>)}</div></>}
-    </section>
-    <section className="admin-panel"><h2>Matching-Trace</h2>
-      <div className="stack">{trace.map((t,i)=><article className="admin-card" key={i}><small>{new Date(t.created_at).toLocaleString('de-DE')} · Job {t.job_id} · {t.business_name||t.reason_key}</small><strong>{t.decision}</strong><p>{t.detail}</p></article>)}</div>
-    </section>
-  </main>;
+  // Kennzahlen und rechte Spalte lesen dieselben Zeilen wie die Listen darunter:
+  // die Zahl oben ist die Laenge der Warteschlange, nicht eine zweite Zaehlung.
+  const flags=FLAGS.map(flag=>({flag,enabled:isFeatureEnabled(flag)}));
+  const enabledFlags=flags.filter(f=>f.enabled).length;
+  const deliveries=outbox.reduce((sum:number,o:any)=>sum+(typeof o.c==='number'?o.c:0),0);
+  const deadCount=Number(outbox.find((o:any)=>o.status==='dead')?.c??0);
+  const flagItems:EHRecordEntry[]=flags.map(f=>({
+    id:`flag-${f.flag}`,
+    title:f.flag,
+    detail:f.enabled?'aktiv':'inaktiv',
+    status:<EHStatus tone={f.enabled?'success':'neutral'}>{f.enabled?'Aktiv':'Inaktiv'}</EHStatus>,
+    action:<form action={toggleFeatureFlagAction.bind(null,f.flag)}><button className="btn ghost">{f.enabled?'Deaktivieren':'Aktivieren'}</button></form>,
+  }));
+  const matchItems:EHRecordEntry[]=matches.map((u:any)=>({
+    id:`treffer-${u.id}`,
+    title:`${u.first_name} ${u.last_name}`.trim()||u.email,
+    detail:[u.email,u.role,`${u.jobs} Aufträge / ${u.quotes} Angebote`,u.auth_subject?'Supabase gebunden':'KEINE Identity gebunden'].filter(Boolean).join(' · '),
+    dateLabel:new Date(u.created_at).toLocaleDateString('de-DE'),
+  }));
+  const outboxItems:EHRecordEntry[]=outbox.map((o:any)=>({
+    id:`outbox-${o.status}`,
+    title:o.status,
+    value:String(o.c),
+    status:<EHStatus tone={o.status==='dead'?'error':o.status==='sent'?'success':'warning'}>{o.status==='dead'?'Fehlgeschlagen':o.status==='sent'?'Zugestellt':'Offen'}</EHStatus>,
+  }));
+  const deadItems:EHRecordEntry[]=dead.map((d:any)=>({
+    id:`dead-${d.id}`,
+    title:d.title,
+    detail:[d.kind,new Date(d.created_at).toLocaleString('de-DE')].filter(Boolean).join(' · '),
+    action:<form action={requeueDeadNotificationAction.bind(null,d.id)}><button className="btn ghost">Erneut zustellen</button></form>,
+  }));
+  const traceItems:EHRecordEntry[]=trace.map((t:any,i:number)=>({
+    id:`trace-${i}`,
+    title:`${t.decision} · ${t.business_name||t.reason_key||'ohne Zuordnung'}`,
+    detail:[t.detail,`Job ${t.job_id}`,new Date(t.created_at).toLocaleString('de-DE')].filter(Boolean).join(' · '),
+  }));
+  return <EHScope app><main className="admin-page">
+    <EHAppHeader eyebrow="Betriebsverwaltung" title="Operations" text="Lookup, Zustellstatus, Matching-Trace, Flags." />
+    <EHMetricsBar label="Operations" items={[
+      {id:'flags',label:'Aktive Feature-Flags',value:`${enabledFlags} von ${flags.length}`,hint:'in dieser Umgebung'},
+      {id:'zustellungen',label:'Zustellungen',value:String(deliveries),hint:'Benachrichtigungen in der Outbox'},
+      {id:'tote-briefe',label:'Tote Briefe',value:String(deadCount),hint:deadCount>0?'brauchen eine Entscheidung':'keine offen'},
+      {id:'matching',label:'Matching-Entscheidungen',value:String(trace.length),hint:'zuletzt protokolliert'},
+    ]} />
+    <EHWorkspaceGrid main={<>
+      <EHWorkSection title="Lookup">
+        <form className="admin-form" action="/admin/ops"><input name="q" defaultValue={q} placeholder="E-Mail oder Name" aria-label="Suche"/><button className="btn primary">Suchen</button></form>
+        <EHRecordList label="Lookup-Treffer" items={matchItems} empty={q?'Keine Treffer.':'Noch keine Suche gestartet.'} />
+      </EHWorkSection>
+      <EHWorkSection title="Feature-Flags">
+        <EHRecordList label="Feature-Flags" items={flagItems} empty="Keine Flags konfiguriert." />
+      </EHWorkSection>
+      <EHWorkSection title="Intern">
+        <EHText muted>Entwickler-Dokumentation, nur für das Operationsteam.</EHText>
+        <EHButton href="/docs-internal" variant="secondary" arrow>Entwickler-Docs öffnen</EHButton>
+      </EHWorkSection>
+    </>} aside={<>
+      <EHWorkSection title="Zustellstatus">
+        <EHRecordList label="Zustellstatus der Outbox" items={outboxItems} empty="Keine Benachrichtigungen vorhanden." />
+      </EHWorkSection>
+      <EHWorkSection title="Tote Briefe">
+        <EHRecordList label="Tote Briefe" items={deadItems} empty="Keine toten Briefe." />
+      </EHWorkSection>
+      <EHWorkSection title="Matching-Trace">
+        <EHRecordList label="Letzte Matching-Entscheidungen" items={traceItems} empty="Keine Entscheidungen protokolliert." />
+      </EHWorkSection>
+    </>} />
+  </main></EHScope>;
 }

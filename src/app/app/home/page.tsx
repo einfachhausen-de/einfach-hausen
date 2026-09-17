@@ -3,7 +3,7 @@ import { AppShell } from '@/components/shell';
 import {
   EHButton, EHEmptyState, EHText, EHPropertyOverview, EHDetailDisclosure,
   EHWorkspaceGrid, EHWorkSection, EHWorkflowStack,
-  EHSubmitButton, EHMetricsBar, EHPageHeader, EHRecordViews, EHStatus,
+  EHSubmitButton, EHMetricsBar, EHPageHeader, EHRecordList, EHRecordViews, EHStatus,
 } from '@/design-system';
 import { HouseProfileForm, HouseAssetForm, HOUSE_ASSET_KINDS } from '@/components/homeowner/house-profile-forms';
 import { requireUser } from '@/lib/auth';
@@ -21,15 +21,30 @@ export default async function MyHome() {
   const docs=db.prepare(`SELECT COUNT(*) c FROM documents d JOIN jobs j ON j.id=d.job_id WHERE j.homeowner_id=?`).get(u.id) as any;
   const invoiceCount=(db.prepare(`SELECT COUNT(*) c FROM invoices WHERE homeowner_id=?`).get(u.id) as {c:number}).c;
   const historyCount=property?(db.prepare(`SELECT COUNT(*) c FROM house_history_entries WHERE property_id=?`).get(property.id) as {c:number}).c:0;
+  // Kennzahlen und rechte Spalte lesen denselben Bestand wie die Listen in der
+  // Hauptspalte: Vorgaenge des Eigentuemers, offene Wartungen der Immobilie und
+  // die vier Angaben, die das Hausprofil unten pflegt.
+  const jobCount=(db.prepare(`SELECT COUNT(*) c FROM jobs WHERE homeowner_id=?`).get(u.id) as {c:number}).c;
+  const openTaskCount=property?(db.prepare(`SELECT COUNT(*) c FROM maintenance_tasks WHERE property_id=? AND status='open'`).get(property.id) as {c:number}).c:0;
+  const overdueTaskCount=property?(db.prepare(`SELECT COUNT(*) c FROM maintenance_tasks WHERE property_id=? AND status='open' AND date(due_date)<date('now')`).get(property.id) as {c:number}).c:0;
+  const profileFacts=[p?.address,p?.build_year,p?.living_area,p?.plot_area];
+  const profileFilled=profileFacts.filter(value=>value!==null&&value!==undefined&&value!=='').length;
+  const profileGaps=[
+    ...(p?.address?[]:[{id:'address',title:'Adresse'}]),
+    ...(p?.build_year?[]:[{id:'build_year',title:'Baujahr'}]),
+    ...(p?.living_area?[]:[{id:'living_area',title:'Wohnfläche'}]),
+    ...(p?.plot_area?[]:[{id:'plot_area',title:'Grundstück'}]),
+  ];
   const surroundings=[p?.postcode, p?.house_type].filter(Boolean).join(' · ');
   return <AppShell role="homeowner" active="/app/home" title="Hausakte">
     <EHWorkflowStack>
       <EHPageHeader title={p?.address || 'Hausdaten ergänzen'} context={surroundings || undefined}
         actions={<EHButton href="/app/year" variant="secondary">Jahresplan öffnen</EHButton>} />
       <EHMetricsBar label="Hausakte" items={[
-        { id: 'assets', label: 'Technik & Geräte', value: assets.length },
-        { id: 'papers', label: 'Dokumente & Rechnungen', value: docs.c + invoiceCount },
-        { id: 'works', label: 'Frühere Arbeiten', value: historyCount },
+        { id: 'papers', label: 'Dokumente', value: docs.c + invoiceCount, hint: 'Belege & Rechnungen' },
+        { id: 'jobs', label: 'Vorgänge', value: jobCount, hint: 'Aufträge in deiner Akte' },
+        { id: 'tasks', label: 'Wartungen', value: openTaskCount, hint: overdueTaskCount > 0 ? `${overdueTaskCount} überfällig` : 'offen' },
+        { id: 'profile', label: 'Vollständigkeit', value: `${profileFilled}/4`, hint: 'Hausdaten erfasst' },
       ]} />
       <EHPropertyOverview title="Hausdaten"
         facts={[
@@ -60,14 +75,20 @@ export default async function MyHome() {
               })} />
             </EHWorkSection>}
           </EHWorkSection>
-        </>} aside={<EHWorkSection title="Termine" link={{ href: '/app/year', label: 'Jahresplan' }}>
+        </>} aside={<>
+          <EHWorkSection title="Termine" link={{ href: '/app/year', label: 'Jahresplan' }}>
           {appointments.length ? <EHRecordViews label="Bestätigte Termine" storageKey="hausakte" items={appointments.map(a => ({
             id: String(a.id), title: a.title, detail: a.business_name, dateLabel: dateLabel(a.start_at), href: '/app/jobs/' + a.job_id, icon: <CalendarDays size={20} />,
           }))} /> : <EHText muted>Keine bestätigten Termine hinterlegt.</EHText>}
           <EHDetailDisclosure id="technik-anlegen" title="Technik hinzufügen" description="Gerät, Anlage oder Ausstattung erfassen">
             <HouseAssetForm action={addHouseAssetAction} />
           </EHDetailDisclosure>
-        </EHWorkSection>} />
+          </EHWorkSection>
+          <EHWorkSection title="Hausakte vervollständigen" link={{ href: '#hausprofil', label: 'Hausdaten bearbeiten' }}>
+            <EHText muted>{assets.length} {assets.length === 1 ? 'Technik-Eintrag' : 'Technik-Einträge'} · {historyCount} {historyCount === 1 ? 'frühere Arbeit' : 'frühere Arbeiten'}</EHText>
+            <EHRecordList label="Fehlende Hausdaten" items={profileGaps} empty="Alle Hausdaten sind erfasst." />
+          </EHWorkSection>
+        </>} />
       </section>
       <EHDetailDisclosure id="hausprofil" title="Hausdaten bearbeiten" description="Adresse, Gebäude und Flächen">
         <HouseProfileForm action={saveHouseProfileAction} profile={p} />

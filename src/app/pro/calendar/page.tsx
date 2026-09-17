@@ -1,7 +1,7 @@
 import { CalendarDays } from 'lucide-react';
 import { AppShell } from '@/components/shell';
 import { ProviderAccessBoundary, ProviderState } from '@/components/provider/workspace';
-import { EHMetricsBar, EHPageHeader, EHRecordViews, EHStatus, EHWorkSection, type EHRecordEntry } from '@/design-system';
+import { EHMetricsBar, EHButton, EHPageHeader, EHRecordList, EHRecordViews, EHStatus, EHText, EHWorkSection, EHWorkspaceGrid, type EHRecordEntry } from '@/design-system';
 import { requireUser } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { statusLabel } from '@/lib/format';
@@ -59,6 +59,9 @@ export default async function ProCalendar() {
   const overdue = items.filter((i) => !i._done && Number.isFinite(i._time) && new Date(i._time).getTime() <= now.getTime() && berlinDayKey(new Date(i._time)) !== todayKey);
   const undated = items.filter((i) => !i._done && !Number.isFinite(i._time));
   const done = items.filter((i) => i._done);
+  // Der naechste Termin ist der erste, der noch aussteht: heute vor spaeter.
+  // Undatierte Termine bleiben aussen vor, weil sie kein belastbares Datum tragen.
+  const next = today[0] ?? upcoming[0];
 
   return (
     <AppShell role="provider" active="/pro/calendar" title="Termine" subtitle={ctx.canManageJobs ? 'Betriebstermine' : 'Deine Termine'}>
@@ -74,56 +77,71 @@ export default async function ProCalendar() {
         ]} />
       )}
 
-      {items.length === 0 && (
-        <EHWorkSection title="Termine · 0 Termine">
-          <ProviderState
-            icon={<CalendarDays size={21} />}
-            title="Noch keine Termine"
-            description="Sobald ein bestätigter Kundentermin hinterlegt ist, erscheint er hier zusammen mit Auftrag und Ansprechpartner."
-            action={{ href: '/pro/orders', label: 'Aufträge ansehen' }}
-          />
+      <EHWorkspaceGrid main={<>
+        {items.length === 0 && (
+          <EHWorkSection title="Termine · 0 Termine">
+            <ProviderState
+              icon={<CalendarDays size={21} />}
+              title="Noch keine Termine"
+              description="Sobald ein bestätigter Kundentermin hinterlegt ist, erscheint er hier zusammen mit Auftrag und Ansprechpartner."
+              action={{ href: '/pro/orders', label: 'Aufträge ansehen' }}
+            />
+          </EHWorkSection>
+        )}
+
+        {items.length > 0 && (
+          <div id="pro-cal-overdue">
+            <EHWorkSection title={`Überfällig · ${overdue.length}`}>
+              {overdue.length > 0 ? <EHRecordViews label="Überfällige Termine" items={overdue} storageKey="pro-cal-ueberfaellig" switcherLabel="Überfällige Termine: Ansicht wechseln" /> : (
+                <ProviderState compact icon={<CalendarDays size={21} />} title="Nichts überfällig" description="Alle Termine sind im Plan." tone="success" />
+              )}
+            </EHWorkSection>
+          </div>
+        )}
+
+        {items.length > 0 && (
+          <div id="pro-cal-today">
+            <EHWorkSection title={`Heute · ${today.length}`}>
+              {today.length > 0 ? <EHRecordViews label="Termine heute" items={today} storageKey="pro-cal-heute" switcherLabel="Termine heute: Ansicht wechseln" /> : (
+                <ProviderState compact icon={<CalendarDays size={21} />} title="Heute keine Termine" description="Der Tag ist frei für Vorbereitung und Anfragen." />
+              )}
+            </EHWorkSection>
+          </div>
+        )}
+
+        {items.length > 0 && (
+          <div id="pro-cal-upcoming">
+            <EHWorkSection title={`Anstehend · ${upcoming.length + undated.length}`}>
+              {(upcoming.length + undated.length) > 0 ? <EHRecordViews label="Anstehende Termine" items={[...upcoming, ...undated]} storageKey="pro-cal-anstehend" switcherLabel="Anstehende Termine: Ansicht wechseln" /> : (
+                <ProviderState compact icon={<CalendarDays size={21} />} title="Keine Folgetermine" description="Sobald ein weiterer Kundentermin bestätigt ist, steht er hier." />
+              )}
+            </EHWorkSection>
+          </div>
+        )}
+
+        {items.length > 0 && (
+          <div id="pro-cal-done">
+            <EHWorkSection title={`Erledigt · ${done.length}`}>
+              {done.length > 0 ? <EHRecordViews label="Erledigte Termine" items={done} storageKey="pro-cal-erledigt" switcherLabel="Erledigte Termine: Ansicht wechseln" /> : (
+                <ProviderState compact icon={<CalendarDays size={21} />} title="Noch nichts erledigt" description="Abgeschlossene Termine bleiben hier nachvollziehbar." />
+              )}
+            </EHWorkSection>
+          </div>
+        )}
+      </>} aside={<>
+        <EHWorkSection title="Nächster Termin">
+          {next ? <>
+            <EHText>{next.dateLabel}</EHText>
+            <EHText muted>{next.detail}</EHText>
+            {next.status}
+            {next.href && <EHButton href={next.href} variant="secondary" arrow>{next.title}</EHButton>}
+          </> : <EHText muted>Kein anstehender Termin. Sobald ein Kundentermin bestätigt ist, steht er hier mit Datum und Ansprechpartner.</EHText>}
         </EHWorkSection>
-      )}
-
-      {items.length > 0 && (
-        <div id="pro-cal-overdue">
-          <EHWorkSection title={`Überfällig · ${overdue.length}`}>
-            {overdue.length > 0 ? <EHRecordViews label="Überfällige Termine" items={overdue} storageKey="pro-cal-ueberfaellig" switcherLabel="Überfällige Termine: Ansicht wechseln" /> : (
-              <ProviderState compact icon={<CalendarDays size={21} />} title="Nichts überfällig" description="Alle Termine sind im Plan." tone="success" />
-            )}
-          </EHWorkSection>
-        </div>
-      )}
-
-      {items.length > 0 && (
-        <div id="pro-cal-today">
-          <EHWorkSection title={`Heute · ${today.length}`}>
-            {today.length > 0 ? <EHRecordViews label="Termine heute" items={today} storageKey="pro-cal-heute" switcherLabel="Termine heute: Ansicht wechseln" /> : (
-              <ProviderState compact icon={<CalendarDays size={21} />} title="Heute keine Termine" description="Der Tag ist frei für Vorbereitung und Anfragen." />
-            )}
-          </EHWorkSection>
-        </div>
-      )}
-
-      {items.length > 0 && (
-        <div id="pro-cal-upcoming">
-          <EHWorkSection title={`Anstehend · ${upcoming.length + undated.length}`}>
-            {(upcoming.length + undated.length) > 0 ? <EHRecordViews label="Anstehende Termine" items={[...upcoming, ...undated]} storageKey="pro-cal-anstehend" switcherLabel="Anstehende Termine: Ansicht wechseln" /> : (
-              <ProviderState compact icon={<CalendarDays size={21} />} title="Keine Folgetermine" description="Sobald ein weiterer Kundentermin bestätigt ist, steht er hier." />
-            )}
-          </EHWorkSection>
-        </div>
-      )}
-
-      {items.length > 0 && (
-        <div id="pro-cal-done">
-          <EHWorkSection title={`Erledigt · ${done.length}`}>
-            {done.length > 0 ? <EHRecordViews label="Erledigte Termine" items={done} storageKey="pro-cal-erledigt" switcherLabel="Erledigte Termine: Ansicht wechseln" /> : (
-              <ProviderState compact icon={<CalendarDays size={21} />} title="Noch nichts erledigt" description="Abgeschlossene Termine bleiben hier nachvollziehbar." />
-            )}
-          </EHWorkSection>
-        </div>
-      )}
+        <EHWorkSection title="Weitere anstehende Termine">
+          <EHRecordList label="Weitere anstehende Termine" items={[...today, ...upcoming].filter((item) => item !== next).slice(0, 4)} empty="Noch keine weiteren Termine vereinbart." />
+        </EHWorkSection>
+        <EHButton href="/pro/orders" variant="secondary" arrow>Aufträge ansehen</EHButton>
+      </>} />
     </AppShell>
   );
 }

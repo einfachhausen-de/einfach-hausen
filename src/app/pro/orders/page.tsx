@@ -1,5 +1,5 @@
 import { ClipboardList, UserRound } from 'lucide-react';
-import { EHMetricsBar, EHPageHeader, EHRecordList, EHRecordViews, EHStatus, EHWorkSection, type EHRecordEntry } from '@/design-system';
+import { EHButton, EHMetricsBar, EHPageHeader, EHRecordList, EHRecordViews, EHStatus, EHText, EHWorkSection, EHWorkspaceGrid, type EHRecordEntry } from '@/design-system';
 import { AppShell } from '@/components/shell';
 import { ProviderAccessBoundary, ProviderState } from '@/components/provider/workspace';
 import { requireUser } from '@/lib/auth';
@@ -9,7 +9,7 @@ import { getProviderContext } from '@/lib/provider';
 
 const DONE_STATUSES = new Set(['completed', 'cancelled', 'closed']);
 
-type OrderItem = EHRecordEntry & { _done: boolean; _contact: boolean };
+type OrderItem = EHRecordEntry & { _done: boolean; _contact: boolean; _amount: number | null };
 
 export default async function Orders() {
   const u = await requireUser('provider');
@@ -53,12 +53,17 @@ export default async function Orders() {
       href: `/pro/jobs/${row.id}`,
       _done: !isContact && DONE_STATUSES.has(String(row.status ?? '')),
       _contact: isContact,
+      _amount: typeof row.amount === 'number' ? row.amount : null,
     };
   };
   const items: OrderItem[] = rows.map(toItem);
   const activeJobs = items.filter((i) => !i._contact && !i._done);
   const contacts = items.filter((i) => i._contact);
   const done = items.filter((i) => i._done);
+  // Das offene Volumen summiert nur die Angebotsbetraege der aktiven Auftraege;
+  // Kontakte tragen bewusst keinen Preis und bleiben deshalb aussen vor.
+  const openVolume = activeJobs.reduce((sum, item) => sum + (item._amount ?? 0), 0);
+  const withoutQuote = activeJobs.filter((item) => item._amount === null);
 
   return (
     <AppShell role="provider" active="/pro/orders" title="Aufträge" subtitle={ctx.canManageJobs ? 'Betrieb · Kontakte und laufende Arbeiten' : 'Deine zugewiesenen Themen'}>
@@ -71,49 +76,64 @@ export default async function Orders() {
           { id: 'aktiv', label: 'Aktive Aufträge', value: activeJobs.length, hint: 'Vorbereiten oder fortführen' },
           { id: 'kontakte', label: 'Kontakte', value: contacts.length, hint: 'Persönliche Ansprechpartner' },
           { id: 'abgeschlossen', label: 'Abgeschlossen', value: done.length, hint: 'Erledigt oder storniert' },
+          { id: 'volumen', label: 'Offenes Volumen', value: euroExact(openVolume), hint: 'Angebotssumme aktiver Aufträge' },
         ]} />
       )}
 
-      {items.length === 0 && (
-        <EHWorkSection title="Arbeitsliste · 0 Vorgänge im aktuellen Zugriff.">
-          <ProviderState
-            icon={<ClipboardList size={21} />}
-            title="Noch keine Aufträge oder Kontakte"
-            description={ctx.canManageJobs ? 'Sobald ein Kontakt übernommen oder ein Angebot gesendet wurde, bleibt der Vorgang hier bis zum Abschluss nachvollziehbar.' : 'Sobald dir ein Vorgang zugewiesen wurde, erscheint er hier.'}
-            action={{ href: '/pro/leads', label: 'Offene Anfragen ansehen' }}
-          />
+      <EHWorkspaceGrid main={<>
+        {items.length === 0 && (
+          <EHWorkSection title="Arbeitsliste · 0 Vorgänge im aktuellen Zugriff.">
+            <ProviderState
+              icon={<ClipboardList size={21} />}
+              title="Noch keine Aufträge oder Kontakte"
+              description={ctx.canManageJobs ? 'Sobald ein Kontakt übernommen oder ein Angebot gesendet wurde, bleibt der Vorgang hier bis zum Abschluss nachvollziehbar.' : 'Sobald dir ein Vorgang zugewiesen wurde, erscheint er hier.'}
+              action={{ href: '/pro/leads', label: 'Offene Anfragen ansehen' }}
+            />
+          </EHWorkSection>
+        )}
+
+        {items.length > 0 && (
+          <div id="pro-orders-active">
+            <EHWorkSection title={`Aktive Aufträge · ${activeJobs.length}`}>
+              {activeJobs.length > 0 ? <EHRecordViews label="Aktive Aufträge" items={activeJobs} storageKey="pro-auftraege-aktiv" switcherLabel="Aktive Aufträge: Ansicht wechseln" /> : (
+                <ProviderState compact icon={<ClipboardList size={21} />} title="Keine aktiven Aufträge" description="Sobald ein Angebot angenommen oder ein Auftrag zugewiesen wurde, erscheint er hier." />
+              )}
+            </EHWorkSection>
+          </div>
+        )}
+
+        {items.length > 0 && (
+          <div id="pro-orders-contacts">
+            <EHWorkSection title={`Kontakte · ${contacts.length}`}>
+              {contacts.length > 0 ? <EHRecordList label="Persönliche Ansprechpartner" items={contacts} /> : (
+                <ProviderState compact icon={<ClipboardList size={21} />} title="Keine Kontakte" description="Sobald du einen Kundenkontakt übernimmst, bleibt er hier nachvollziehbar." />
+              )}
+            </EHWorkSection>
+          </div>
+        )}
+
+        {items.length > 0 && (
+          <div id="pro-orders-done">
+            <EHWorkSection title={`Abgeschlossen · ${done.length}`}>
+              {done.length > 0 ? <EHRecordList label="Erledigte Vorgänge" items={done} /> : (
+                <ProviderState compact icon={<ClipboardList size={21} />} title="Noch nichts abgeschlossen" description="Erledigte Vorgänge bleiben hier zur Nachvollziehbarkeit erhalten." />
+              )}
+            </EHWorkSection>
+          </div>
+        )}
+      </>} aside={<>
+        <EHWorkSection title="Ohne Angebot">
+          {items.length === 0
+            ? <EHText muted>Ohne Vorgänge gibt es nichts vorzubereiten. Neue Anfragen erscheinen unter „Offene Anfragen“.</EHText>
+            : withoutQuote.length > 0
+              ? <EHRecordList label="Aktive Aufträge ohne hinterlegtes Angebot" items={withoutQuote} />
+              : <EHText muted>Für alle aktiven Aufträge ist ein Angebot hinterlegt.</EHText>}
         </EHWorkSection>
-      )}
-
-      {items.length > 0 && (
-        <div id="pro-orders-active">
-          <EHWorkSection title={`Aktive Aufträge · ${activeJobs.length}`}>
-            {activeJobs.length > 0 ? <EHRecordViews label="Aktive Aufträge" items={activeJobs} storageKey="pro-auftraege-aktiv" switcherLabel="Aktive Aufträge: Ansicht wechseln" /> : (
-              <ProviderState compact icon={<ClipboardList size={21} />} title="Keine aktiven Aufträge" description="Sobald ein Angebot angenommen oder ein Auftrag zugewiesen wurde, erscheint er hier." />
-            )}
-          </EHWorkSection>
-        </div>
-      )}
-
-      {items.length > 0 && (
-        <div id="pro-orders-contacts">
-          <EHWorkSection title={`Kontakte · ${contacts.length}`}>
-            {contacts.length > 0 ? <EHRecordList label="Persönliche Ansprechpartner" items={contacts} /> : (
-              <ProviderState compact icon={<ClipboardList size={21} />} title="Keine Kontakte" description="Sobald du einen Kundenkontakt übernimmst, bleibt er hier nachvollziehbar." />
-            )}
-          </EHWorkSection>
-        </div>
-      )}
-
-      {items.length > 0 && (
-        <div id="pro-orders-done">
-          <EHWorkSection title={`Abgeschlossen · ${done.length}`}>
-            {done.length > 0 ? <EHRecordList label="Erledigte Vorgänge" items={done} /> : (
-              <ProviderState compact icon={<ClipboardList size={21} />} title="Noch nichts abgeschlossen" description="Erledigte Vorgänge bleiben hier zur Nachvollziehbarkeit erhalten." />
-            )}
-          </EHWorkSection>
-        </div>
-      )}
+        <EHWorkSection title="Zuletzt abgeschlossen">
+          <EHRecordList label="Zuletzt abgeschlossene Vorgänge" items={done.slice(0, 3)} empty="Noch nichts abgeschlossen." />
+        </EHWorkSection>
+        <EHButton href="/pro/leads" variant="secondary" arrow>Offene Anfragen ansehen</EHButton>
+      </>} />
     </AppShell>
   );
 }

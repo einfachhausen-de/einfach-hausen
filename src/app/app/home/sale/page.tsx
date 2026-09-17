@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { Building2, MessageCircle, RefreshCw, UserRound } from 'lucide-react';
 import { AppShell } from '@/components/shell';
 import { crumbs } from '@/components/nav-config';
-import { EHEmptyState, EHField, EHSelect, EHTextarea, EHInput, EHStatus, EHSubmitButton, EHPanel, EHMetricsBar, EHPageHeader, EHRecordViews, EHWorkSection } from '@/design-system';
+import { EHButton, EHEmptyState, EHField, EHSelect, EHTextarea, EHInput, EHStatus, EHSubmitButton, EHPanel, EHMetricsBar, EHPageHeader, EHRecordList, EHRecordViews, EHText, EHWorkSection, EHWorkspaceGrid, type EHRecordEntry } from '@/design-system';
 import { requireUser } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { primaryProperty } from '@/lib/properties';
@@ -70,14 +70,34 @@ export default async function Sale() {
 
   const currentStage = lead ? Math.max(0, saleStages.findIndex(([status]) => status === lead.status)) : -1;
 
+  // Kennzahlen und rechte Spalte lesen dieselben Listen, damit die Zahl oben
+  // und die Eintraege rechts nicht auseinanderlaufen.
+  const activeMatches = matches.filter((match: any) => match.share_status === 'active');
+  const latestCompleted = valuations.find((valuation) => valuation.status === 'completed' && valuation.estimated_min != null && valuation.estimated_max != null);
+  const lastValuation = valuations[0];
+  // Der Orientierungswert kommt aus dem Hausprofil; fehlt er dort, zaehlt die
+  // zuletzt gespeicherte Bewertung. Sonst bleibt der Wert ehrlich leer.
+  const orientationValue = property.estimated_value_min != null && property.estimated_value_max != null
+    ? `${euro(property.estimated_value_min)} – ${euro(property.estimated_value_max)}`
+    : latestCompleted ? `${euro(latestCompleted.estimated_min)} – ${euro(latestCompleted.estimated_max)}` : 'Noch nicht hinterlegt';
+  const shareItems: EHRecordEntry[] = activeMatches.map((match: any) => ({
+    id: `share-${match.id}`,
+    title: match.business_name,
+    detail: [`Freigabe seit ${formatDate(match.granted_at)}`, permissionLabels(match.permissions_json).join(', ')].filter(Boolean).join(' · '),
+    status: <EHStatus tone="success">Freigabe aktiv</EHStatus>,
+  }));
+
   return <AppShell role="homeowner" active="/app/home/sale" title="Verkauf & Bewertung" breadcrumbs={crumbs('/app/home','Verkauf & Bewertung')}>
     <EHPageHeader title="Verkauf & Bewertung" context={property.address || property.postcode || undefined} />
 
-    <EHMetricsBar label="Immobilie" items={[
-      { id: 'object', label: 'Immobilie', value: property.property_type || 'Eigenheim', hint: property.living_area ? `${property.living_area} m²` : undefined },
-      { id: 'value', label: 'Orientierungswert', value: property.estimated_value_min != null && property.estimated_value_max != null ? `${euro(property.estimated_value_min)} – ${euro(property.estimated_value_max)}` : 'Noch nicht hinterlegt' },
+    <EHMetricsBar label="Verkauf & Bewertung" items={[
+      { id: 'object', label: 'Immobilie', value: property.property_type || 'Eigenheim', hint: property.living_area ? `${property.living_area} m²` : 'Hausprofil' },
+      { id: 'value', label: 'Orientierungswert', value: orientationValue, hint: property.estimated_value_min != null ? 'aus dem Hausprofil' : latestCompleted ? 'aus der letzten Bewertung' : 'noch keine Grundlage' },
+      { id: 'bewertungen', label: 'Bewertungen', value: String(valuations.length), hint: lastValuation ? `zuletzt ${formatDate(lastValuation.created_at)}` : 'noch kein Vorgang' },
+      { id: 'makler', label: 'Makler-Vorschläge', value: String(matches.length), hint: activeMatches.length > 0 ? `${activeMatches.length} freigegeben` : 'keine Freigabe erteilt' },
     ]} />
 
+    <EHWorkspaceGrid main={<>
     <EHWorkSection title="Immobilienbewertung">
     <EHPanel title="Neue Bewertung">
       <form action={requestPropertyValuationAction}>
@@ -142,5 +162,32 @@ export default async function Sale() {
       {matches.length === 0 && <div className="empty owner-empty-action"><UserRound aria-hidden="true" /><strong>Noch kein passender Makler im Netzwerk</strong><p>Deine Verkaufsabsicht bleibt gespeichert. Ohne passenden aktiven und geprüften Suchprofil-Treffer werden keine Kontaktdaten freigegeben.</p><Link className="btn ghost" href="/app/hausmeister"><MessageCircle size={16} aria-hidden="true" /> Frage zum Verkauf klären</Link></div>}
     </>}
     </EHWorkSection>
+    </>} aside={<>
+      <EHWorkSection title="Verkaufsstand">
+        {lead ? <>
+          <EHStatus tone={lead.status === 'sold' ? 'success' : 'info'}>{saleStatusLabels[lead.status] || lead.status}</EHStatus>
+          <EHText muted>Stand {formatDate(lead.updated_at)} · Schritt {currentStage + 1} von {saleStages.length}</EHText>
+          <EHText muted>Die einzelnen Schritte stehen links unter „Ich möchte verkaufen“.</EHText>
+        </> : <EHText muted>Noch keine Verkaufsabsicht hinterlegt. Der Abgleich sucht passende Makler, ohne Kontaktdaten freizugeben.</EHText>}
+      </EHWorkSection>
+      <EHWorkSection title="Letzte Bewertung">
+        {lastValuation ? <>
+          <EHText>{lastValuation.status === 'completed' && lastValuation.estimated_min != null
+            ? `${euro(lastValuation.estimated_min)} – ${euro(lastValuation.estimated_max)}`
+            : valuationTypeLabels[lastValuation.valuation_type] || 'Bewertung'}</EHText>
+          <EHStatus tone={lastValuation.status === 'completed' ? 'success' : lastValuation.status === 'cancelled' ? 'neutral' : 'info'}>
+            {lastValuation.status === 'completed' ? 'Gespeichert' : lastValuation.status === 'cancelled' ? 'Abgebrochen' : 'Anfrage offen'}
+          </EHStatus>
+          <EHText muted>{valuationTypeLabels[lastValuation.valuation_type] || lastValuation.valuation_type} · {formatDate(lastValuation.created_at)}</EHText>
+        </> : <EHText muted>Noch keine Bewertung. Eine Anfrage oder eine vorhandene Einschätzung erscheint hier mit Datum und Art.</EHText>}
+      </EHWorkSection>
+      <EHWorkSection title="Freigegebene Makler">
+        <EHRecordList label="Freigegebene Makler" items={shareItems} empty="Noch keine Kontaktdaten freigegeben. Vorschläge bleiben ohne Freigabe für den Betrieb gesperrt." />
+      </EHWorkSection>
+      <EHWorkSection title="Fragen zum Verkauf">
+        <EHText muted>Unsicher bei Preis, Unterlagen oder Ablauf? Der Hausmeister ordnet dein Thema ein, bevor du etwas freigibst.</EHText>
+        <EHButton href="/app/hausmeister" variant="secondary" arrow>Frage zum Verkauf klären</EHButton>
+      </EHWorkSection>
+    </>} />
   </AppShell>;
 }

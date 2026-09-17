@@ -1,18 +1,52 @@
-import { EHPageHeader, EHList, EHCallout, EHField, EHInput, EHWorkspaceGrid, EHIdentitySummary, EHWorkflowForm, EHFormSection, EHFieldGrid, EHSubmitButton, EHWorkSection } from '@/design-system';
+import { EHButton, EHPageHeader, EHList, EHCallout, EHField, EHInput, EHWorkspaceGrid, EHIdentitySummary, EHWorkflowForm, EHFormSection, EHFieldGrid, EHMetricsBar, EHRecordList, EHStatus, EHSubmitButton, EHText, EHWorkSection, type EHRecordEntry } from '@/design-system';
 import { AppShell } from '@/components/shell';
 import { ownerAccountTabs } from '@/components/nav-config';
 import { InstallAppCard } from '@/components/install-app-card';
 import { requireUser } from '@/lib/auth';
 import { db } from '@/lib/db';
+import { primaryProperty } from '@/lib/properties';
 import { logoutAction,saveProfileAction } from '@/app/actions';
+
+/** Die Angaben, aus denen sich die Vollständigkeit des Profils ergibt. */
+type ProfileField = { id: string; label: string; value: string; filled: boolean };
 
 export default async function Profile(){
   const u=await requireUser('homeowner'); const p=db.prepare('SELECT * FROM homeowner_profiles WHERE user_id=?').get(u.id) as any;
+  const property=primaryProperty(u.id);
   const initials=`${u.first_name?.[0]||''}${u.last_name?.[0]||''}`.toUpperCase();
+  // Kennzahlen und rechte Spalte lesen dieselbe Liste: die Prozentzahl oben und
+  // die Eintraege rechts koennen nicht auseinanderlaufen.
+  const fields:ProfileField[]=[
+    {id:'name',label:'Vor- und Nachname',value:`${u.first_name||''} ${u.last_name||''}`.trim(),filled:!!(u.first_name&&u.last_name)},
+    {id:'mobil',label:'Mobilnummer',value:u.phone||'',filled:!!u.phone},
+    {id:'strasse',label:'Straße',value:p?.address||'',filled:!!p?.address},
+    {id:'plz',label:'PLZ',value:p?.postcode||'',filled:!!p?.postcode},
+  ];
+  const filled=fields.filter(f=>f.filled).length;
+  const complete=filled===fields.length;
+  // Abgleich Profiladresse gegen die Hausakte: beide werden beim Speichern des
+  // Profils zusammengefuehrt, koennen aber getrennt gepflegt worden sein.
+  const addressMatch=!!property&&(property.postcode||'')===(p?.postcode||'')&&(property.address||'')===(p?.address||'');
+  const fieldItems:EHRecordEntry[]=fields.map(f=>({
+    id:f.id,
+    title:f.label,
+    detail:f.filled?f.value:'Noch nicht hinterlegt',
+    status:f.filled?<EHStatus tone="success">Hinterlegt</EHStatus>:<EHStatus tone="warning">Fehlt</EHStatus>,
+  }));
+  const verificationItems:EHRecordEntry[]=[
+    {id:'haus',title:'Hausakte',detail:property?(property.address||'Ohne hinterlegte Adresse'):'Noch nicht angelegt',status:property?<EHStatus tone="success">Verknüpft</EHStatus>:<EHStatus tone="neutral">Fehlt</EHStatus>},
+    {id:'abgleich',title:'Profiladresse ↔ Hausakte',detail:!property?'Ohne Hausakte gibt es nichts abzugleichen':addressMatch?'Beide tragen dieselbe Adresse':'Die Adressen weichen voneinander ab',status:!property?<EHStatus tone="neutral">Kein Abgleich</EHStatus>:addressMatch?<EHStatus tone="success">Stimmt überein</EHStatus>:<EHStatus tone="warning">Weicht ab</EHStatus>},
+  ];
   return <AppShell role="homeowner" active="/app/profile" title="Profil & Einstellungen" subtitle="Konto und Einstellungen"
     breadcrumbs={[{ href: '/app', label: 'Start' }, { label: 'Profil & Einstellungen' }]}
     tabs={ownerAccountTabs.map(tab=>({href:tab.href,label:tab.label,active:tab.href==='/app/profile'}))}>
     <EHPageHeader title="Profil & Einstellungen" context={u.email} />
+    <EHMetricsBar label="Profil & Einstellungen" items={[
+      {id:'profil',label:'Profil',value:`${Math.round(filled/fields.length*100)} %`,hint:`${filled} von ${fields.length} Angaben`},
+      {id:'kontakt',label:'Kontakt',value:u.phone?'vollständig':'unvollständig',hint:'Mobilnummer für Rückfragen'},
+      {id:'adresse',label:'Adresse',value:p?.address&&p?.postcode?'vollständig':'unvollständig',hint:p?.postcode?`PLZ ${p.postcode}`:'PLZ fehlt'},
+      {id:'haus',label:'Hausakte',value:property?'verknüpft':'fehlt',hint:property?(property.postcode?`PLZ ${property.postcode}`:'ohne PLZ'):'kein Haus angelegt'},
+    ]} />
     <EHWorkspaceGrid main={<EHWorkflowForm action={saveProfileAction}>
       <EHFormSection title="Persönliche Daten" description="So erreichen dich deine Ansprechpartner.">
         <EHFieldGrid>
@@ -24,7 +58,22 @@ export default async function Profile(){
         <EHField id="profile-address" label="Adresse"><EHInput id="profile-address" name="address" autoComplete="street-address" defaultValue={p?.address||''}/></EHField>
         <EHSubmitButton>Änderungen speichern</EHSubmitButton>
       </EHFormSection>
-    </EHWorkflowForm>} aside={<EHIdentitySummary initials={initials} name={`${u.first_name} ${u.last_name}`} email={u.email} />}/>
+    </EHWorkflowForm>} aside={<>
+      <EHIdentitySummary initials={initials} name={`${u.first_name} ${u.last_name}`} email={u.email} />
+      <EHWorkSection title="Profilvollständigkeit">
+        <EHStatus tone={complete?'success':'warning'}>{complete?'Alle Angaben hinterlegt':'Noch unvollständig'}</EHStatus>
+        <EHText muted>{complete
+          ? 'Ansprechpartner sehen Name, Mobilnummer und Adresse, sobald ein Kontakt oder Auftrag es verlangt.'
+          : `${filled} von ${fields.length} Angaben sind hinterlegt. Fehlende Angaben ergänzt du im Formular links.`}</EHText>
+        <EHRecordList label="Angaben im Profil" items={fieldItems} />
+      </EHWorkSection>
+      <EHWorkSection title="Verifikation">
+        <EHStatus tone={addressMatch?'success':property?'warning':'neutral'}>{addressMatch?'Adresse abgeglichen':property?'Abgleich offen':'Keine Hausakte'}</EHStatus>
+        <EHText muted>Deine E-Mail-Adresse ist deine Anmeldung. Die Profiladresse wird beim Speichern in die Hausakte übernommen; stimmen beide überein, arbeiten alle Bereiche mit derselben Adresse.</EHText>
+        <EHRecordList label="Abgleich mit der Hausakte" items={verificationItems} />
+        <EHButton href="/app/home" variant="secondary" arrow>Mein Haus öffnen</EHButton>
+      </EHWorkSection>
+    </>}/>
     <EHWorkSection title="Konto & App">
     <EHList label="Profilbereiche" items={[
       { id: 'plans', title: 'Zahlungen & Mitgliedschaft', href: '/app/plans' },

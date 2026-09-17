@@ -28,34 +28,6 @@
     "raw-value\u0000font-size: 18px": 1,
     "raw-value\u0000background: #eef5f5": 1
   },
-  "src/app/admin/crm/page.tsx": {
-    "literal-color\u0000#faf8f4": 4,
-    "literal-color\u0000#10222a": 15,
-    "literal-color\u0000#105258": 15,
-    "literal-color\u0000#0b3a3f": 1,
-    "literal-color\u0000#e4e2dc": 38,
-    "literal-color\u0000#0d474d": 3,
-    "literal-color\u0000#5f6e75": 9,
-    "literal-color\u0000#eef5f5": 4,
-    "literal-color\u0000#dcebec": 1,
-    "literal-color\u0000#f3f6f5": 2,
-    "literal-color\u0000#edf0ed": 2,
-    "literal-color\u0000#eef1ff": 1,
-    "literal-color\u0000#45569d": 1,
-    "literal-color\u0000#f4ebdd": 1,
-    "literal-color\u0000#4b5b60": 11,
-    "literal-color\u0000#a84d29": 1,
-    "small-type\u0000text-xs": 34,
-    "small-type\u0000text-[11px]": 12,
-    "small-type\u0000text-[10px]": 2,
-    "decorative-effect\u0000rounded-full": 2,
-    "visual-utility\u0000border-red-200": 1,
-    "visual-utility\u0000bg-red-50": 1,
-    "visual-utility\u0000text-red-800": 1,
-    "visual-utility\u0000border-emerald-200": 1,
-    "visual-utility\u0000bg-emerald-50": 1,
-    "visual-utility\u0000text-emerald-800": 1
-  },
   "src/app/anfrage/anfrage.module.css": {
     "raw-value\u0000font-size: 17px": 1
   },
@@ -1926,9 +1898,6 @@
     "raw-value\u0000background:#eaf5ee": 1,
     "raw-value\u0000color:#0e3d33": 1,
     "raw-value\u0000font-size:16px": 1
-  },
-  "src/app/pro/plans/page.tsx": {
-    "state-class\u0000current": 1
   },
   "src/app/pro/provider-workspace.module.css": {
     "literal-color\u0000rgba(255, 255, 255, 0.97)": 1,

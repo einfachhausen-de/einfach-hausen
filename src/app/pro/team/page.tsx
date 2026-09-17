@@ -1,7 +1,7 @@
 import { Fragment } from 'react';
 import { AppShell } from '@/components/shell';
 import { requireUser } from '@/lib/auth';
-import { EHPageHeader, EHWorkspaceGrid, EHWorkSection, EHStatus, EHButton, EHField, EHInput, EHCheckbox, EHWorkflowStack, EHWorkflowForm, EHFormSection, EHFormFeedback, EHSubmitButton, EHText, EHEmptyState } from '@/design-system';
+import { EHPageHeader, EHWorkspaceGrid, EHWorkSection, EHStatus, EHButton, EHField, EHInput, EHCheckbox, EHWorkflowStack, EHWorkflowForm, EHFormSection, EHFormFeedback, EHSubmitButton, EHText, EHEmptyState, EHMetricsBar } from '@/design-system';
 import { addProviderMemberAction, updateProviderMemberAction } from '@/app/actions';
 import { getProviderContext, getProviderMembers } from '@/lib/provider';
 
@@ -11,6 +11,10 @@ export default async function Team({ searchParams }: { searchParams: Promise<Rec
   if (!ctx) return <AppShell role="provider" active="/pro/team" title="Team"><EHPageHeader title="Team" /><EHEmptyState title="Kein Betrieb zugeordnet" text="Für die Teamverwaltung ist ein zugeordneter Betrieb erforderlich." /></AppShell>;
   const sp = await searchParams;
   const members = getProviderMembers(ctx.providerId);
+  // Die vier Kennzahlen lesen dieselbe Mitgliederliste wie die Formulare
+  // darunter: jede Zahl ist eine echte Zeile aus getProviderMembers.
+  const activeMembers = members.filter(member => member.active);
+  const managingMembers = members.filter(member => member.can_manage_jobs);
 
   const memberSection = <EHWorkSection title={`Team · ${members.length}`}>
       {members.map(member => {
@@ -54,18 +58,28 @@ export default async function Team({ searchParams }: { searchParams: Promise<Rec
       </EHFormSection>
     </EHWorkflowForm></div>;
 
+  const rolesSection = <EHWorkSection title="Rollen &amp; Rechte">
+    <EHText muted>Jeder Ansprechpartner hat einen eigenen Zugang. „Aufträge verwalten“ erlaubt Angebote, Termine und Teampflege; ohne dieses Recht bleibt die Ansicht auf die eigenen zugewiesenen Vorgänge beschränkt.</EHText>
+    <EHText muted>{ctx.canManageJobs
+      ? `${managingMembers.length} von ${members.length} Zugängen dürfen Aufträge steuern.`
+      : 'Dein Zugang sieht die Teamübersicht, Änderungen bleiben der Betriebsleitung vorbehalten.'}</EHText>
+  </EHWorkSection>;
+
   return <AppShell role="provider" active="/pro/team" title="Team" subtitle={ctx.businessName}>
     <EHWorkflowStack>
       <EHPageHeader title="Team" context={ctx.businessName} actions={ctx.canManageJobs ? <EHButton href="#team-anlegen" arrow>Ansprechpartner hinzufügen</EHButton> : undefined} />
+      <EHMetricsBar label="Team" items={[
+        { id: 'personen', label: 'Ansprechpartner', value: members.length, hint: 'im Betrieb geführt' },
+        { id: 'aktiv', label: 'Aktive Zugänge', value: activeMembers.length, hint: 'können sich anmelden' },
+        { id: 'verwaltung', label: 'Auftragsverwaltung', value: managingMembers.length, hint: 'dürfen Aufträge steuern' },
+        { id: 'deaktiviert', label: 'Deaktivierte Zugänge', value: members.length - activeMembers.length, hint: 'ohne App-Zugang' },
+      ]} />
       {!ctx.canManageJobs && <EHFormFeedback kind="info">Du kannst die Teamübersicht ansehen. Änderungen sind Personen mit der Berechtigung „Aufträge verwalten“ vorbehalten.</EHFormFeedback>}
       {sp.error && <EHFormFeedback kind="error">{sp.error}</EHFormFeedback>}
       {sp.member === 'created' && <EHFormFeedback kind="success">Ansprechpartner wurde angelegt und kann sich direkt einloggen.</EHFormFeedback>}
-      {/* Ohne Auftragsverwaltung gibt es kein Anlegeformular für die zweite
-          Spalte. Das Raster bliebe dann mit einer leeren Spalte stehen, also
-          fällt es in diesem Fall weg. */}
-      {addMemberForm
-        ? <EHWorkspaceGrid main={memberSection} aside={<EHWorkflowStack>{addMemberForm}</EHWorkflowStack>} />
-        : memberSection}
+      {/* Das Anlegeformular steht nur mit Auftragsverwaltung zur Verfügung.
+          Die rechte Spalte bleibt trotzdem belegt: sie erklärt die Rollen. */}
+      <EHWorkspaceGrid main={memberSection} aside={<EHWorkflowStack>{rolesSection}{addMemberForm}</EHWorkflowStack>} />
     </EHWorkflowStack>
   </AppShell>;
 }

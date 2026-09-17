@@ -1,4 +1,4 @@
-import { EHEmptyState, EHField, EHFieldGrid, EHFormFeedback, EHFormSection, EHInput, EHPageHeader, EHRecordList, EHRecordViews, EHSelect, EHStatus, EHSubmitButton, EHText, EHTextarea, EHWorkSection, EHWorkspaceGrid, EHWorkflowForm, EHWorkflowStack, EHButton } from '@/design-system';
+import { EHEmptyState, EHField, EHFieldGrid, EHFormFeedback, EHFormSection, EHInput, EHMetricsBar, EHPageHeader, EHRecordList, EHRecordViews, EHSelect, EHStatus, EHSubmitButton, EHText, EHTextarea, EHWorkSection, EHWorkspaceGrid, EHWorkflowForm, EHWorkflowStack, EHButton } from '@/design-system';
 import { AppShell } from '@/components/shell';
 import { crumbs } from '@/components/nav-config';
 import { requireUser } from '@/lib/auth';
@@ -22,6 +22,9 @@ function day(value: string | null | undefined): string {
   return value ? new Date(value.length === 10 ? value + 'T12:00:00' : value).toLocaleDateString('de-DE') : '';
 }
 
+/** Vergleichstag in Berliner Zeit, damit eine Garantie am richtigen Tag endet. */
+const berlinDay = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Berlin', year: 'numeric', month: '2-digit', day: '2-digit' });
+
 export default async function HouseHistory({searchParams}:{searchParams:Promise<Record<string,string>>}){
   const user=await requireUser('homeowner'); const sp=await searchParams; const property=primaryProperty(user.id);
   if (!property) return <AppShell role="homeowner" active="/app/home/history" title="Haus-Historie" breadcrumbs={crumbs('/app/home','Historie')}>
@@ -32,9 +35,39 @@ export default async function HouseHistory({searchParams}:{searchParams:Promise<
   const invites=db.prepare(`SELECT * FROM provider_invites WHERE property_id=? AND status='pending' ORDER BY created_at DESC`).all(property.id) as any[];
   const transfers=db.prepare(`SELECT * FROM house_transfers WHERE property_id=? ORDER BY created_at DESC LIMIT 5`).all(property.id) as any[];
   const ownerships=db.prepare(`SELECT o.*,u.first_name,u.last_name FROM property_ownerships o JOIN users u ON u.id=o.homeowner_id WHERE o.property_id=? ORDER BY o.started_at DESC,o.id DESC`).all(property.id) as any[];
+  // Kennzahlen und rechte Spalte lesen denselben Bestand wie die Chronik in der
+  // Hauptspalte: dokumentierte Arbeiten, ihre Kosten, hinterlegte Garantien und
+  // die Zahl der Eigentuemerwechsel in der Akte.
+  const today=berlinDay.format(new Date());
+  const costTotal=entries.reduce((sum,e)=>sum+(typeof e.cost_amount==='number'?e.cost_amount:0),0);
+  const costEntryCount=entries.filter(e=>typeof e.cost_amount==='number'&&e.cost_amount>0).length;
+  const costTotals=new Map<string,number>();
+  for(const e of entries){
+    if(typeof e.cost_amount!=='number'||e.cost_amount<=0)continue;
+    const key=e.category||'Sonstiges';
+    costTotals.set(key,(costTotals.get(key)??0)+e.cost_amount);
+  }
+  const costByCategory=Array.from(costTotals).sort((a,b)=>b[1]-a[1]).map(([category,sum])=>({id:`kosten-${category}`,title:category,value:euroExact(sum)}));
+  const guaranteeEntries=entries.filter(e=>e.guarantee_until);
+  const activeGuarantees=guaranteeEntries.filter(e=>String(e.guarantee_until).slice(0,10)>=today).length;
+  const careItems=entries.filter(e=>e.guarantee_until||e.maintenance_due).map(e=>({
+    id:String(e.id), title:e.title,
+    detail:[e.guarantee_until?`Garantie bis ${day(e.guarantee_until)}`:null,e.maintenance_due?`Wartung ${day(e.maintenance_due)}`:null].filter(Boolean).join(' · '),
+    date:String(e.guarantee_until||e.maintenance_due).slice(0,10),
+    dateLabel:day(e.guarantee_until||e.maintenance_due),
+    status:e.guarantee_until&&String(e.guarantee_until).slice(0,10)>=today?<EHStatus tone="success">Garantie aktiv</EHStatus>:undefined,
+  }));
+  // Der erste Eintrag der Eigentuemerhistorie ist kein Wechsel.
+  const ownerChanges=Math.max(0,ownerships.length-1);
   return <AppShell role="homeowner" active="/app/home/history" title="Haus-Historie" breadcrumbs={crumbs('/app/home','Historie')}>
     <EHWorkflowStack>
     <EHPageHeader title="Haus-Historie" context={`${entries.length} ${entries.length === 1 ? 'dokumentierte Arbeit' : 'dokumentierte Arbeiten'}`} actions={<EHButton href="#historie-anlegen" arrow>Arbeit dokumentieren</EHButton>} />
+    {entries.length > 0 && <EHMetricsBar label="Haus-Historie" items={[
+      { id: 'arbeiten', label: 'Arbeiten', value: entries.length, hint: 'dokumentiert in der Akte' },
+      { id: 'kosten', label: 'Kosten', value: costEntryCount > 0 ? euroExact(costTotal) : '–', hint: costEntryCount > 0 ? `aus ${costEntryCount} ${costEntryCount === 1 ? 'Eintrag' : 'Einträgen'}` : 'keine Kosten erfasst' },
+      { id: 'garantien', label: 'Garantien', value: guaranteeEntries.length, hint: guaranteeEntries.length === 0 ? 'keine hinterlegt' : `${activeGuarantees} noch gültig` },
+      { id: 'wechsel', label: 'Eigentümerwechsel', value: ownerChanges, hint: ownerships.length > 1 ? `${ownerships.length} Eigentümer erfasst` : 'kein Wechsel erfasst' },
+    ]} />}
     {sp.transfer&&<EHFormFeedback kind="success">Übergabelink erstellt. Nur die angegebene Käufer-E-Mail kann ihn innerhalb von {HOUSE_TRANSFER_TTL_DAYS} Tagen annehmen.</EHFormFeedback>}
     <EHWorkSection title="Dokumentierte Arbeiten">
     {entries.length > 0 && <EHRecordViews label="Haus-Historie" storageKey="historie" defaultView="chronik" items={entries.map(e=>({ id: String(e.id), title: e.title,
@@ -81,12 +114,20 @@ export default async function HouseHistory({searchParams}:{searchParams:Promise<
       <EHText>Es wird dieselbe Immobilie mit ihrer Historie weitergeführt. Hausprofil, Anlagen, offene Wartungen und hausbezogene Ansprechpartner gehen mit. Private alte Nachrichten, Zahlungen und Aufträge bleiben beim bisherigen Eigentümer.</EHText>
       <EHFormFeedback kind="info">Der Übergabelink ist {HOUSE_TRANSFER_TTL_DAYS} Tage gültig. Nur die angegebene Käufer-E-Mail kann ihn annehmen. Danach wird die Freigabe automatisch ungültig.</EHFormFeedback>
       <EHButton href="/app/home/passport" variant="secondary">Hauspass ansehen</EHButton>
-    </EHWorkSection>} aside={<EHWorkflowForm action={createHouseTransferAction}>
+    </EHWorkSection>} aside={<>
+      <EHWorkSection title="Kosten nach Bereich">
+        <EHRecordList label="Kosten nach Bereich" items={costByCategory} empty="Noch keine Kosten erfasst." />
+      </EHWorkSection>
+      <EHWorkSection title="Garantien & Wartungen">
+        <EHRecordList label="Garantien und nächste Wartungen" items={careItems} empty="Keine Garantie und keine Wartung hinterlegt." />
+      </EHWorkSection>
+      <EHWorkflowForm action={createHouseTransferAction}>
       <EHFormSection title="Übergabe vorbereiten" description="Die Hausakte wechselt erst nach Annahme durch den Käufer den Eigentümer.">
         <EHField id="hist-targetemail" label="E-Mail des Käufers" required><EHInput id="hist-targetemail" name="targetEmail" type="email" required placeholder="käufer@example.de" /></EHField>
         <EHSubmitButton pendingLabel="Übergabe wird vorbereitet …">Übergabe vorbereiten</EHSubmitButton>
       </EHFormSection>
-    </EHWorkflowForm>} />
+    </EHWorkflowForm>
+    </>} />
     {transfers.length>0&&<EHWorkSection title="Übergabe-Verlauf"><EHRecordList label="Übergabe-Verlauf" items={transfers.map(t=>{const lifecycle=houseTransferLifecycleStatus(t);const expiresAt=houseTransferExpiresAt(t.created_at);const label=lifecycle==='accepted'?'Übergeben':lifecycle==='expired'?'Abgelaufen':lifecycle==='revoked'?'Widerrufen':'Bereit';return { id: String(t.id), title: breakableEmail(t.target_email), detail: lifecycle==='active'&&expiresAt?`gültig bis ${expiresAt.toLocaleDateString('de-DE')}`:undefined, date: String(t.created_at).slice(0, 10), status: <EHStatus tone={lifecycle==='accepted'?'success':lifecycle==='active'?'info':'neutral'}>{label}</EHStatus> };})} /></EHWorkSection>}
     </EHWorkflowStack>
   </AppShell>;

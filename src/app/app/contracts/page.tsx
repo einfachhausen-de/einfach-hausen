@@ -3,7 +3,7 @@ import {
   EHButton, EHCallout, EHEmptyState, EHField, EHFieldGrid, EHFormFeedback,
   EHFormSection, EHInput, EHList, EHMetricsBar, EHPageHeader, EHRecordList, EHRecordViews,
   EHSelect, EHStatus, EHSubmitButton, EHText,
-  EHTextarea, EHWorkSection, EHWorkflowForm, EHWorkflowStack, EHDetailDisclosure,
+  EHTextarea, EHWorkSection, EHWorkflowForm, EHWorkflowStack, EHWorkspaceGrid, EHDetailDisclosure,
 } from '@/design-system';
 import { requireUser } from '@/lib/auth';
 import { db } from '@/lib/db';
@@ -44,6 +44,18 @@ export default async function Contracts({ searchParams }: { searchParams: Promis
   const contracts = db.prepare(`SELECT * FROM house_contracts WHERE homeowner_id=? ORDER BY CASE status WHEN 'active' THEN 0 WHEN 'cancelled' THEN 1 ELSE 2 END, provider COLLATE NOCASE`).all(user.id) as ContractRow[];
   const active = contracts.filter((c) => c.status === 'active');
   const monthlyTotal = active.reduce((sum, c) => sum + (monthlyCents(c.cost_amount, c.cost_interval) ?? 0), 0);
+  // Jahreskosten und Spartenaufteilung lesen dieselben aktiven Vertraege wie
+  // die Monatskennzahl: die Zahlen oben und die Eintraege rechts bleiben damit
+  // nachvollziehbar, auch wenn ein Intervall nicht monatlich ist.
+  const yearlyTotal = active.reduce((sum, c) => sum + (yearlyCents(c.cost_amount, c.cost_interval) ?? 0), 0);
+  const monthlyByKind = new Map<string, { count: number; cents: number }>();
+  for (const row of active) {
+    const label = contractKindLabel(row.kind);
+    const group = monthlyByKind.get(label) ?? { count: 0, cents: 0 };
+    group.count += 1;
+    group.cents += monthlyCents(row.cost_amount, row.cost_interval) ?? 0;
+    monthlyByKind.set(label, group);
+  }
 
   const withDeadline = active
     .map((row) => ({ row, deadline: cancellationDeadline(row), state: deadlineState(cancellationDeadline(row)) }))
@@ -87,11 +99,13 @@ export default async function Contracts({ searchParams }: { searchParams: Promis
       {tab === 'vertraege' ? (
         <>
           {active.length > 0 && <EHMetricsBar label="Verträge" items={[
-            { id: 'aktiv', label: 'Aktive Verträge', value: String(active.length) },
+            { id: 'aktiv', label: 'Aktive Verträge', value: String(active.length), hint: `${contracts.length} erfasst` },
             { id: 'kosten', label: 'Kosten pro Monat', value: euroExact(monthlyTotal), hint: 'nur aktive Verträge' },
-            { id: 'fristen', label: 'Fristen · 90 Tage', value: String(withDeadline.length) },
+            { id: 'jahr', label: 'Kosten pro Jahr', value: euroExact(yearlyTotal), hint: 'aus den erfassten Intervallen' },
+            { id: 'fristen', label: 'Fristen · 90 Tage', value: String(withDeadline.length), hint: withDeadline.length > 0 ? 'jetzt handeln' : 'nichts offen' },
           ]} />}
 
+          <EHWorkspaceGrid main={<>
           {withDeadline.length > 0 && <EHWorkSection title="Jetzt handeln">
             <EHRecordList label="Fristen in den nächsten 90 Tagen" items={withDeadline.map(({ row, state }) => ({
               id: `frist-${row.id}`,
@@ -186,6 +200,27 @@ export default async function Contracts({ searchParams }: { searchParams: Promis
               </EHFormSection>
             </EHWorkflowForm>
           </EHWorkSection></section>
+          </>} aside={<>
+            <EHWorkSection title="Nächste Kündigungsfrist">
+              {withDeadline[0] ? <>
+                <EHText>{`${contractKindLabel(withDeadline[0].row.kind)} · ${withDeadline[0].row.provider}`}</EHText>
+                <EHStatus tone={DEADLINE_TONE[withDeadline[0].state]}>{deadlineLabel(withDeadline[0].row)}</EHStatus>
+                <EHButton href={`/app/contracts?tab=sparcheck&contract=${withDeadline[0].row.id}`} variant="secondary" arrow>Spar-Check öffnen</EHButton>
+              </> : <EHText muted>Keine Frist in den nächsten 90 Tagen. Sobald eine Kündigungsfrist näher rückt, steht sie hier.</EHText>}
+            </EHWorkSection>
+            <EHWorkSection title="Kosten nach Sparte">
+              <EHRecordList label="Monatskosten nach Sparte" empty="Noch kein aktiver Vertrag mit Kosten erfasst." items={Array.from(monthlyByKind.entries()).sort((a, b) => b[1].cents - a[1].cents).map(([kind, group]) => ({
+                id: `sparte-${kind}`,
+                title: kind,
+                detail: `${group.count} ${group.count === 1 ? 'Vertrag' : 'Verträge'}`,
+                value: euroExact(group.cents),
+              }))} />
+            </EHWorkSection>
+            <EHWorkSection title="Spar-Check">
+              <EHText muted>Der Spar-Check schätzt aus deinen hinterlegten Kosten eine Ersparnis-Spanne. Möglich ist das für Strom, Gas, DSL und Versicherungen.</EHText>
+              <EHButton href="/app/contracts?tab=sparcheck" variant="secondary" arrow>Spar-Check öffnen</EHButton>
+            </EHWorkSection>
+          </>} />
         </>
       ) : (
         <>
