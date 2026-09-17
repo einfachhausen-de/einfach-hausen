@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Einfach Hausen · App UX-Vorschläge</title>
+  <style>
+    @font-face {
+      font-family: Inter;
+      src: url("./inter-variable.woff2") format("woff2");
+      font-weight: 100 900;
+      font-display: swap;
+    }
+
+    :root {
+      --ink: #111111;
+      --muted: #5c5c5c;
+      --line: #d8d8d8;
+      --paper: #f4f1ea;
+      --card: #ffffff;
+      --accent: #c45c26;
+      --ok: #2f6b3a;
+      --warn: #8a5a12;
+      --danger: #9b2c2c;
+      --nav: #1a1a1a;
+      --shadow: 0 10px 28px rgba(17, 17, 17, 0.08);
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; }
+    body {
+      font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+      background: var(--paper);
+      color: var(--ink);
+      line-height: 1.45;
+    }
+
+    a { color: inherit; }
+    button { font: inherit; }
+
+    .page {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 32px 24px 80px;
+    }
+
+    header.hero {
+      display: grid;
+      gap: 12px;
+      padding-bottom: 28px;
+      border-bottom: 1px solid var(--line);
+      margin-bottom: 28px;
+    }
+
+    .kicker {
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 650;
+    }
+
+    h1 { font-size: 36px; line-height: 1.1; margin: 0; font-weight: 650; }
+    h2 { font-size: 22px; margin: 0 0 8px; font-weight: 650; }
+    h3 { font-size: 15px; margin: 0; font-weight: 650; }
+    p { margin: 0; color: var(--muted); }
+
+    .toc {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin: 22px 0 8px;
+    }
+
+    .toc a {
+      display: block;
+      background: var(--card);
+      border: 1px solid var(--line);
+      padding: 12px 14px;
+      text-decoration: none;
+      min-height: 72px;
+    }
+
+    .toc a strong { display: block; font-size: 13px; }
+    .toc a span { display: block; font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+    .prio {
+      display: inline-block;
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-weight: 700;
+      padding: 3px 7px;
+      border: 1px solid var(--line);
+      background: #fff;
+    }
+    .prio.p1 { border-color: var(--danger); color: var(--danger); }
+    .prio.p2 { border-color: var(--warn); color: var(--warn); }
+    .prio.p3 { border-color: var(--ok); color: var(--ok); }
+
+    section.proposal {
+      padding: 36px 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .meta {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+
+    .split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      margin-top: 18px;
+    }
+
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .panel-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--line);
+      background: #faf8f4;
+      font-size: 12px;
+      font-weight: 650;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .phone {
+      width: min(100%, 360px);
+      height: 620px;
+      margin: 16px auto;
+      background: #ece7dc;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid #d8d4c8;
+    }
+
+    .desktop {
+      width: 100%;
+      height: 420px;
+      background: #ece7dc;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .app {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      background: #f7f4ee;
+      color: var(--ink);
+    }
+
+    .app.desktop-app {
+      grid-template-rows: auto 1fr;
+      grid-template-columns: 232px 1fr;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px 10px;
+      border-bottom: 1px solid #e4dfd4;
+      background: #f7f4ee;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 700;
+      font-size: 13px;
+    }
+
+    .mark {
+      width: 18px;
+      height: 18px;
+      background: var(--ink);
+      clip-path: polygon(18% 88%, 18% 28%, 50% 8%, 82% 28%, 82% 88%);
+    }
+
+    .icon-btn {
+      width: 32px;
+      height: 32px;
+      border: 1px solid #d8d4c8;
+      background: #fff;
+      display: grid;
+      place-items: center;
+      font-size: 14px;
+    }
+
+    .content {
+      padding: 14px 16px 18px;
+      overflow: hidden;
+      align-content: start;
+    }
+
+    .tabbar {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      border-top: 1px solid #d8d4c8;
+      background: #fff;
+      min-height: 58px;
+    }
+
+    .tab {
+      display: grid;
+      place-items: center;
+      gap: 2px;
+      font-size: 10px;
+      color: #6a6a6a;
+      padding: 8px 2px;
+    }
+
+    .tab.active { color: var(--ink); font-weight: 700; }
+    .tab .dot {
+      width: 18px;
+      height: 3px;
+      background: currentColor;
+    }
+
+    .side {
+      background: #111;
+      color: #f4f1ea;
+      padding: 18px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .side .brand { color: #fff; margin-bottom: 18px; }
+    .side a {
+      display: block;
+      padding: 8px 10px;
+      text-decoration: none;
+      font-size: 13px;
+      color: #cfcfcf;
+    }
+    .side a.active {
+      background: #2a2a2a;
+      color: #fff;
+      font-weight: 650;
+    }
+
+    .desk-main {
+      display: grid;
+      grid-template-rows: auto 1fr;
+      min-width: 0;
+    }
+
+    .desk-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 22px;
+      border-bottom: 1px solid #e4dfd4;
+      background: #f7f4ee;
+    }
+
+    .h-xl { font-size: 22px; font-weight: 650; margin: 0 0 4px; }
+    .h-l { font-size: 18px; font-weight: 650; margin: 0 0 6px; }
+    .h-m { font-size: 14px; font-weight: 650; margin: 0; }
+    .small { font-size: 12px; color: #666; }
+
+    .stack { display: grid; gap: 10px; align-content: start; }
+    .row { display: flex; gap: 8px; align-items: center; }
+    .between { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+
+    .card {
+      background: #fff;
+      border: 1px solid #e1dcd0;
+      padding: 12px;
+    }
+
+    .card.accent {
+      border-left: 4px solid var(--accent);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 36px;
+      padding: 0 12px;
+      border: 1px solid var(--ink);
+      background: var(--ink);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 650;
+      text-decoration: none;
+    }
+
+    .btn.ghost {
+      background: #fff;
+      color: var(--ink);
+    }
+
+    .btn.wide { width: 100%; }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      padding: 0 8px;
+      border: 1px solid #d8d4c8;
+      background: #fff;
+      font-size: 11px;
+      font-weight: 650;
+    }
+
+    .chip.warn { border-color: #e3c48a; background: #fff7e8; color: #7a5410; }
+    .chip.ok { border-color: #b7d3bb; background: #eef7f0; color: #24552c; }
+    .chip.muted { color: #666; }
+
+    .search {
+      width: 100%;
+      min-height: 38px;
+      border: 1px solid #d8d4c8;
+      background: #fff;
+      padding: 0 12px;
+      font-size: 13px;
+      color: #888;
+      display: flex;
+      align-items: center;
+    }
+
+    .filters { display: flex; gap: 6px; overflow: hidden; }
+    .pill {
+      white-space: nowrap;
+      border: 1px solid #d8d4c8;
+      background: #fff;
+      padding: 6px 10px;
+      font-size: 12px;
+    }
+    .pill.on { background: var(--ink); color: #fff; border-color: var(--ink); }
+
+    .list { display: grid; gap: 8px; }
+    .item {
+      background: #fff;
+      border: 1px solid #e1dcd0;
+      padding: 11px 12px;
+      display: grid;
+      gap: 4px;
+    }
+
+    .broken {
+      opacity: 0.92;
+    }
+
+    .broken .overlap {
+      position: relative;
+    }
+
+    .broken .float-nav {
+      position: absolute;
+      right: 8px;
+      top: 8px;
+      background: #111;
+      color: #fff;
+      font-size: 10px;
+      padding: 8px;
+      width: 118px;
+      z-index: 3;
+    }
+
+    .broken .float-nav div { padding: 3px 0; border-bottom: 1px solid #333; }
+    .broken .empty {
+      min-height: 180px;
+      display: grid;
+      place-items: center;
+      color: #999;
+      font-size: 13px;
+      border: 1px dashed #d0cbbd;
+      background: #faf8f3;
+    }
+
+    .note {
+      margin-top: 14px;
+      background: #fff;
+      border: 1px solid var(--line);
+      padding: 14px 16px;
+      font-size: 14px;
+    }
+
+    .note strong { color: var(--ink); }
+
+    .why {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .why div {
+      background: #fff;
+      border: 1px solid var(--line);
+      padding: 12px;
+      font-size: 13px;
+    }
+
+    footer {
+      margin-top: 28px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    @media (max-width: 980px) {
+      .toc, .split, .why { grid-template-columns: 1fr; }
+      h1 { font-size: 28px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header class="hero">
+      <div class="kicker">Einfach Hausen · interne Vorschau · 18.09.2026</div>
+      <h1>App-Seiten klarer, ruhiger und bedienbarer machen</h1>
+      <p>
+        Kein Redesign. Gleiche Marke, gleiche Werkbank, gleiche Tokens.
+        Vorschlag: Navigation entwirren, Startseite als Haus-Lageblatt bauen,
+        leere Seiten mit nächstem Schritt füllen, Listen scannbar machen.
+      </p>
+      <nav class="toc">
+        <a href="#nav"><strong>1. Navigation</strong><span>Eine Leiste statt drei</span></a>
+        <a href="#start"><strong>2. Start</strong><span>Lage statt leerer Fläche</span></a>
+        <a href="#jobs"><strong>3. Aufträge</strong><span>Status zuerst, dann Details</span></a>
+        <a href="#docs"><strong>4. Dokumente</strong><span>Suchen, filtern, ablegen</span></a>
+        <a href="#nachrichten"><strong>5. Nachrichten</strong><span>Wer braucht Antwort?</span></a>
+        <a href="#haus"><strong>6. Hausakte</strong><span>Daten, nicht Formularwüste</span></a>
+        <a href="#partner"><strong>7. Partner-App</strong><span>Heute / nächste Termine</span></a>
+        <a href="#reihenfolge"><strong>8. Reihenfolge</strong><span>Was zuerst umsetzen</span></a>
+      </nav>
+    </header>
+
+    <section class="proposal" id="nav">
+      <div class="meta">
+        <span class="prio p1">Prio 1</span>
+        <span class="kicker">Owner-App · alle Seiten</span>
+      </div>
+      <h2>Eine Navigation. Nicht drei.</h2>
+      <p>
+        Heute überlagern sich Seitenkopf, dunkles Flyout und untere Tab-Leiste.
+        Auf dem Startbildschirm verdeckt das Menü den Inhalt. Das ist der größte
+        Bedienfehler nach der Werkbank-Migration.
+      </p>
+      <div class="split">
+        <article class="panel">
+          <div class="panel-head">Heute</div>
+          <div class="phone">
+            <div class="app broken">
+              <div class="topbar">
+                <div class="brand"><span class="mark"></span> Einfach Hausen</div>
+                <div class="icon-btn">☰</div>
+              </div>
+              <div class="content overlap">
+                <div class="float-nav">
+                  <div>Start</div>
+                  <div>Aufträge</div>
+                  <div>Nachrichten</div>
+                  <div>Dokumente</div>
+                  <div>Hausakte</div>
+                  <div>Partner</div>
+                  <div>Mehr</div>
+                </div>
+                <div class="h-l">Guten Morgen</div>
+                <div class="small">Gina · Musterstraße 12</div>
+                <div class="empty" style="margin-top:12px">Inhalt unter dem Menü</div>
+              </div>
+              <div class="tabbar">
+                <div class="tab active"><span class="dot"></span>Start</div>
+                <div class="tab"><span class="dot"></span>Aufträge</div>
+                <div class="tab"><span class="dot"></span>Nachrichten</div>
+                <div class="tab"><span class="dot"></span>Dokumente</div>
+                <div class="tab"><span class="dot"></span>Mehr</div>
+              </div>
+            </div>
+          </div>
+        </article>
+        <article class="panel">
+          <div class="panel-head">Vorschlag</div>
+          <div class="phone">
+            <div class="app">
+              <div class="topbar">
+                <div class="brand"><span class="mark"></span> Einfach Hausen</div>
+                <div class="row">
+                  <span class="chip">Gina</span>
+                  <div class="icon-btn">?</div>
+                </div>
+              </div>
+              <div class="content stack">
+                <div>
+                  <div class="h-l">Heute im Haus</div>
+                  <div class="small">Musterstraße 12 · 2 offene Punkte</div>
+                </div>
+                <div class="card accent">
+                  <div class="h-m">Heizung wartet auf Termin</div>
+                  <div class="small">Angebot von Haus &amp; Heiz seit 3 Tagen</div>
+                </div>
+              </div>
+              <div class="tabbar">
+                <div class="tab active"><span class="dot"></span>Start</div>
+                <div class="tab"><span class="dot"></span>Aufträge</div>
+                <div class="tab"><span class="dot"></span>Nachrichten</div>
+                <div class="tab"><span class="dot"></span>Dokumente</div>
+                <div class="tab"><span class="dot"></span>Mehr</div>
+              </div>
+            </div>
+          </div>
+        </article>
+      </div>
+      <div class="note">
+        <strong>Regel:</strong> Mobil nur untere 5 Tabs. Desktop nur linke Werkbank-Leiste.
+        Kein Hamburger, kein zweites Flyout. „Mehr“ sammelt Hausakte, Partner, Jahr, Profil.
+      </div>
+    </section>
+
+    <section class="proposal" id="start">
+      <div class="meta">
+        <span class="prio p1">Prio 1</span>
+        <span class="kicker">/app</span>
+      </div>
+      <h2>Startseite als Lageblatt, nicht als leere Begrüßung</h2>
+      <p>
+        Die aktuelle Startseite hat viel Luft, doppelte Begrüßung und kaum Handlung.
+        Besser: eine klare Lage, ein nächster Schritt, dann Haus-Kurzinfos.
+      </p>
+      <div class="split">
+        <article class="panel">
+          <div class="panel-head">Heute</div>
+          <div class="phone">
+            <div class="app">
+              <div class="topbar">
+                <div class="brand"><span class="mark"></span> Einfach Hausen</div>
+                <div class="icon-btn">☰</div>
+              </div>
+              <div class="content stack">
+                <div class="h-xl">Guten Morgen</div>
+                <div class="small">Willkommen zurück</div>
+                <div class="empty">Keine Karten · keine nächste Aktion</div>
+                <div class="btn ghost wide">Neues Anliegen</div>
+              </div>
+              <div class="tabbar">
+                <div class="tab active"><span class="dot"></span>Start</div>
+                <div class="tab"><span class="dot"></span>Aufträge</div>
+                <div class="tab"><span class="dot"></span>Nachrichten</div>
+                <div class="tab"><span class="dot"></span>Dokumente</div>
+                <div class="tab"><span class="dot"></span>Mehr</div>
+              </div>
+            </div>
+          </div>
+        </article>
+        <article class="panel">
+          <div class="panel-head">Vorschlag</div>
+          <div class="phone">
+            <div class="app">
+              <div class="topbar">
+                <div class="brand"><span class="mark"></span> Einfach Hausen</div>
+                <span class="chip">Musterstraße 12</span>
+              </div>
+              <div class="content stack">
+                <div>
+                  <div class="h-l">Heute im Haus</div>
+                  <div class="small">2 Punkte brauchen Sie · Gina ist erreichbar</div>
+                </div>
+                <div class="card accent">
+                  <div class="between">
+                    <div class="h-m">Heizungstermin bestätigen</div>
+                    <span class="chip warn">offen</span>
+                  </div>
+                  <div class="small">Haus &amp; Heiz · Do 10:00–12:00</div>
+                  <div class="row" style="margin-top:8px">
+                    <a class="btn" href="#jobs">Termin halten</a>
+                    <a class="btn ghost" href="#nachrichten">Nachricht</a>
+                  </div>
+                </div>
+                <div class="card">
+                  <div class="between">
+                    <div class="h-m">Rechnung Dachrinne</div>
+                    <span class="chip muted">ablegen</span>
+                  </div>
+                  <div class="small">PDF vom 12.09. · noch nicht in der Hausakte</div>
+                </div>
+                <div class="row">
+                  <div class="card" style="flex:1">
+                    <div class="small">Nächste Wartung</div>
+                    <div class="h-m">Heizung · Okt</div>
+                  </div>
+                  <div class="card" style="flex:1">
+                    <div class="small">Hausmanagerin</div>
+                    <div class="h-m">Gina Schulze</div>
+                  </div>
+                </div>
+                <a class="btn wide" href="#jobs">Neues Anliegen schildern</a>
+              </div>
+              <div class="tabbar">
+                <div class="tab active"><span class="dot"></span>Start</div>
+                <div class="tab"><span class="dot"></span>Aufträge</div>
+                <div class="tab"><span class="dot"></span>Nachrichten</div>
+                <div class="tab"><span class="dot"></span>Dokumente</div>
+                <div class="tab"><span class="dot"></span>Mehr</div>
+              </div>
+            </div>
+          </div>
+        </article>
+      </div>
+      <div class="why">
+        <div><strong>Oben:</strong> Was braucht mich jetzt?</div>
+        <div><strong>Mitte:</strong> Was läuft gerade im Haus?</div>
+        <div><strong>Unten:</strong> Immer derselbe Einstieg für ein neues Anliegen.</div>
+      </div>
+    </section>
+
+    <section class="proposal" id="jobs">
+      <div class="meta">
+        <span class="prio p1">Prio 1</span>
+        <span class="kicker">/app/jobs</span>
+      </div>
+      <h2>Aufträge: Status zuerst, Text kürzer, eine klare Aktion</h2>
+      <p>
+        Die Liste ist schon nah dran, wirkt aber wie eine Aktenablage.
+        Jede Zeile sollte in 2 Sekunden sagen: Was ist es, wie weit ist es, was tun?
+      </p>
+      <div class="split">
+        <article class="panel">
+          <div class="panel-head">Heute</div>
+          <div class="phone">
+            <div class="app">
+              <div class="topbar"><div class="brand"><span class="mark"></span> Aufträge</div></div>
+              <div class="content stack">
+                <div class="search">Suchen…</div>
+                <div class="item">
+                  <div class="h-m">Heizung macht Geräusche im Heizungskeller seit Montag früh</div>
+                  <div class="small">erstellt 12.09.2026 · Partner angefragt · ID 1842</div>
+                </div>
+                <div class="item">
+                  <div class="h-m">Dachrinne undicht über der Terrasse, Wasser läuft an der Wand</div>
+                  <div class="small">Angebot liegt vor · wartet auf Freigabe</div>
+                </div>
+                <div class="item">
+                  <div class="h-m">Jahreswartung Wärmepumpe</div>
+                  <div class="small">geplant</div>
+                </div>
+              </div>
+              <div class="tabbar">
+                <div class="tab"><span class="dot"></span>Start</div>
+                <div class="tab active"><span class="dot"></span>Aufträge</div>
+                <div class="tab"><span class="dot"></span>Nachrichten</div>
+                <div class="tab"><span class="dot"></span>Dokumente</div>
+                <div class="tab"><span class="dot"></span>Mehr</div>
+              </div>
+            </div>
+          </div>
+        </article>
+        <article class="panel">
+          <div class="panel-head">Vorschlag</div>
+          <div class="phone">
+            <div class="app">
+              <div class="topbar"><div class="brand"><span class="mark"></span> Aufträge</div><a class="btn" href="#">Neu</a></div>
+              <div class="content stack">
+                <div class="filters">
+                  <span class="pill on">Offen 2</span>
+                  <span class="pill">Läuft 1</span>
+                  <span class="pill">Erledigt</span>
+                </div>
+                <div class="item">
+                  <div class="between">
+                    <div class="h-m">Heizung</div>
+                    <span class="chip warn">Termin offen</span>
+                  </div>
+                  <div class="small">Haus &amp; Heiz · Angebot seit 3 Tagen</div>
+                </div>
+                <div class="item">
+                  <div class="between">
+                    <div class="h-m">Dachrinne</div>
+                    <span class="chip warn">Freigabe</span>
+                  </div>
+                  <div class="small">1.240,00 € · bitte prüfen</div>
+                </div>
+                <div class="item">
+                  <div class="between">
+                    <div class="h-m">Wärmepumpe</div>
+                    <span class="chip ok">geplant</span>
+                  </div>
+                  <div class="small">Wartung · 3. Oktober</div>
+                </div>
+              </div>
+              <div class="tabbar">
+                <div class="tab"><span class="dot"></span>Start</div>
+                <div class="tab active"><span class="dot"></span>Aufträge</div>
+                <div class="tab"><span class="dot"></span>Nachrichten</div>
+                <div class="tab"><span class="dot"></span>Dokumente</div>
+                <div class="tab"><span class="dot"></span>Mehr</div>
+              </div>
+            </div>
+          </div>
+        </article>
+      </div>
+      <div class="note">
+        <strong>Titel kürzen:</strong> „Heizung“ statt ganzer Satz.
+        Der Satz gehört in die Detailseite. Filter zählen, damit leere Zustände sichtbar sind.
+      </div>
+    </section>
+
+    <section class="proposal" id="docs">
+      <div class="meta">
+        <span class="prio p2">Prio 2</span>
+        <span class="kicker">/app/documents</span>
+      </div>
+      <h2>Dokumente wie eine Hausakte, nicht wie ein Dateiordner</h2>
+      <p>
+        Die Seite ist funktional, aber kalt. Eigentümer suchen nach „Rechnung Heizung“,
+        nicht nach Dateinamen. Oben ablegen, darunter zuletzt, daneben Typ-Filter.
+      </p>
+      <div class="split">
+        <article class="panel">
+          <div class="panel-head">Heute</div>
+          <div class="phone">
+            <div class="app">
+              <div class="topbar"><div class="brand"><span class="mark"></span> Dokumente</div></div>
+              <div class="content stack">
+                <div class="search">Datei suchen</div>
+                <div class="empty">Liste ohne Typ, ohne Datumshierarchie</div>
+              </div>
+              <div class="tabbar">
+                <div class="tab"><span class="dot"></span>Start</div>
+                <div class="tab"><span class="dot"></span>Aufträge</div>
+                <div class="tab"><span class="dot"></span>Nachrichten</div>
+                <div class="tab active"><span class="dot"></span>Dokumente</div>
+                <div class="tab"><span class="dot"></span>Mehr</div>
+              </div>
+            </div>
+          </div>
+        </article>
+        <article class="panel">
+          <div class="panel-head">Vorschlag</div>
+          <div class="phone">
+            <div class="app">
+              <div class="topbar"><div class="brand"><span class="mark"></span> Hausakte</div><a class="btn" href="#">Ablegen</a></div>
+              <div class="content stack">
+                <div class="search">Rechnung, Garantie, Plan…</div>
+                <div class="filters">
+                  <span class="pill on">Alle</span>
+                  <span class="pill">Rechnungen</span>
+                  <span class="pill">Verträge</span>
+                  <span class="pill">Pläne</span>
+                </div>
+                <div class="item">
+                  <div class="between"><div class="h-m">Rechnung Dachrinne</div><span class="chip muted">12.09.</span></div>
+                  <div class="small">Handwerk · 1.240,00 €</div>
+                </div>
+                <div class="item">
+                  <div class="between"><div class="h-m">Wärmepumpe Garantie</div><span class="chip ok">gültig</span></div>
+                  <div class="small">bis 2029 · Hersteller</div>
+                </div>
+                <div class="item">
+                  <div class="between"><div class="h-m">Grundriss EG</div><span class="chip muted">Plan</span></div>
+                  <div class="small">Hausakte · 2021</div>
+                </div>
+              </div>
+              <div class="tabbar">
+                <div class="tab"><span class="dot"></span>Start</div>
+                <div class="tab"><span class="dot"></span>Aufträge</div>
+                <div class="tab"><span class="dot"></span>Nachrichten</div>
+                <div class="tab active"><span class="dot"></span>Dokumente</div>
+                <div class="tab"><span class="dot"></span>Mehr</div>
+              </div>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="proposal" id="nachrichten">
+      <div class="meta">
+        <span class="prio p2">Prio 2</span>
+        <span class="kicker">/app/messages</span>
+      </div>
+      <h2>Nachrichten: unbeantwortet nach oben, Rest ruhig</h2>
+      <p>
+        Die Inbox darf nicht wie ein Chat-Archiv aussehen. Oben nur Threads,
+        die eine Antwort oder Freigabe brauchen. Gina bleibt der menschliche Kontakt.
+      </p>
+      <div class="split">
+        <article class="panel">
+          <div class="panel-head">Heute</div>
+          <div class="phone">
+            <div class="app">
+              <div class="topbar"><div class="brand"><span class="mark"></span> Nachrichten</div></div>
+              <div class="content">
+                <div class="empty">Gleiche Zeilenhöhe, kein Hinweis wer wartet</div>
+              </div>
+              <div class="tabbar">
+                <div class="tab"><span class="dot"></span>Start</div>
+                <div class="tab"><span class="dot"></span>Aufträge</div>
+                <div class="tab active"><span class="dot"></span>Nachrichten</div>
+                <div class="tab"><span class="dot"></span>Dokumente</div>
+                <div class="tab"><span class="dot"></span>Mehr</div>
+              </div>
+            </div>
+          </div>
+        </article>
+        <article class="panel">
+          <div class="panel-head">Vorschlag</div>
+          <div class="phone">
+            <div class="app">
+              <div class="topbar"><div class="brand"><span class="mark"></span> Nachrichten</div></div>
+              <div class="content stack">
+                <div class="small">Braucht Sie</div>
+                <div class="item">
+                  <div class="between"><div class="h-m">Haus &amp; Heiz</div><span class="chip warn">Antwort</span></div>
+                  <div class="small">Können wir Donnerstag kommen?</div>
+                </div>
+                <div class="small">Erledigt / gelesen</div>
+                <div class="item">
+                  <div class="between"><div class="h-m">Gina Schulze</div><span class="chip muted">gestern</span></div>
+                  <div class="small">Rechnung ist in der Hausakte.</div>
+                </div>
+              </div>
+              <div class="tabbar">
+                <div class="tab"><span class="dot"></span>Start</div>
+                <div class="tab"><span class="dot"></span>Aufträge</div>
+                <div class="tab active"><span class="dot"></span>Nachrichten</div>
+                <div class="tab"><span class="dot"></span>Dokumente</div>
+                <div class="tab"><span class="dot"></span>Mehr</div>
+              </div>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="proposal" id="haus">
+      <div class="meta">
+        <span class="prio p2">Prio 2</span>
+        <span class="kicker">/app/home</span>
+      </div>
+      <h2>Hausakte als Portrait, nicht als Einstellungsformular</h2>
+      <p>
+        Heute wirkt die Seite wie ein langes Formular. Besser: zuerst das Haus sehen,
+        dann nur die Felder, die für Wartung, Versicherung und Partner zählen.
+      </p>
+      <div class="split">
+        <article class="panel">
+          <div class="panel-head">Heute</div>
+          <div class="desktop">
+            <div class="app desktop-app">
+              <aside class="side">
+                <div class="brand"><span class="mark"></span> Einfach Hausen</div>
+                <a href="#start">Start</a>
+                <a class="active" href="#haus">Hausakte</a>
+                <a href="#jobs">Aufträge</a>
+                <a href="#docs">Dokumente</a>
+              </aside>
+              <div class="desk-main">
+                <div class="desk-top"><div class="h-m">Hausakte</div></div>
+                <div class="content">
+                  <div class="empty">Lange Feldliste, wenig Überblick</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </article>
+        <article class="panel">
+          <div class="panel-head">Vorschlag</div>
+          <div class="desktop">
+            <div class="app desktop-app">
+              <aside class="side">
+                <div class="brand"><span class="mark"></span> Einfach Hausen</div>
+                <a href="#start">Start</a>
+                <a class="active" href="#haus">Hausakte</a>
+                <a href="#jobs">Aufträge</a>
+                <a href="#docs">Dokumente</a>
+              </aside>
+              <div class="desk-main">
+                <div class="desk-top">
+                  <div>
+                    <div class="h-m">Musterstraße 12</div>
+                    <div class="small">Einfamilienhaus · 1987 · 142 m²</div>
+                  </div>
+                  <a class="btn ghost" href="#">Angaben ändern</a>
+                </div>
+                <div class="content">
+                  <div class="row" style="align-items:stretch">
+                    <div class="card" style="flex:1.2">
+                      <div class="small">Technik</div>
+                      <div class="h-m">Wärmepumpe 2021</div>
+                      <div class="small">Wartung fällig Oktober</div>
+                    </div>
+                    <div class="card" style="flex:1">
+                      <div class="small">Versicherung</div>
+                      <div class="h-m">Wohngebäude aktiv</div>
+                      <div class="small">Police in der Akte</div>
+                    </div>
+                    <div class="card" style="flex:1">
+                      <div class="small">Partner vor Ort</div>
+                      <div class="h-m">3 bestätigt</div>
+                      <div class="small">Heizung, Dach, Elektro</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="proposal" id="partner">
+      <div class="meta">
+        <span class="prio p2">Prio 2</span>
+        <span class="kicker">/pro</span>
+      </div>
+      <h2>Partner-App: Schichtplan statt Portalhub</h2>
+      <p>
+        Handwerker brauchen heute, nächsten Termin, offene Rückfragen.
+        Nicht denselben Marketing-Rhythmus wie die Website.
+      </p>
+      <div class="split">
+        <article class="panel">
+          <div class="panel-head">Heute</div>
+          <div class="desktop">
+            <div class="app desktop-app">
+              <aside class="side">
+                <div class="brand"><span class="mark"></span> Partner</div>
+                <a class="active" href="#">Übersicht</a>
+                <a href="#">Aufträge</a>
+                <a href="#">Team</a>
+              </aside>
+              <div class="desk-main">
+                <div class="desk-top"><div class="h-m">Willkommen</div></div>
+                <div class="content"><div class="empty">Große Kacheln, wenig Tagesbezug</div></div>
+              </div>
+            </div>
+          </div>
+        </article>
+        <article class="panel">
+          <div class="panel-head">Vorschlag</div>
+          <div class="desktop">
+            <div class="app desktop-app">
+              <aside class="side">
+                <div class="brand"><span class="mark"></span> Partner</div>
+                <a class="active" href="#">Heute</a>
+                <a href="#">Aufträge</a>
+                <a href="#">Team</a>
+              </aside>
+              <div class="desk-main">
+                <div class="desk-top">
+                  <div>
+                    <div class="h-m">Donnerstag, 18. September</div>
+                    <div class="small">2 Termine · 1 Rückfrage</div>
+                  </div>
+                  <a class="btn" href="#">Angebot senden</a>
+                </div>
+                <div class="content stack">
+                  <div class="item">
+                    <div class="between"><div class="h-m">10:00 Musterstraße 12</div><span class="chip warn">bestätigen</span></div>
+                    <div class="small">Heizung · Gina hat freigegeben</div>
+                  </div>
+                  <div class="item">
+                    <div class="between"><div class="h-m">14:30 Lindenweg 4</div><span class="chip ok">unterwegs</span></div>
+                    <div class="small">Dachrinne · Material ist da</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="proposal" id="reihenfolge">
+      <div class="meta">
+        <span class="prio p1">Prio 1</span>
+        <span class="kicker">Umsetzung</span>
+      </div>
+      <h2>Empfohlene Reihenfolge</h2>
+      <p>Kleine, sichtbare Schritte. Designsystem bleibt versiegelt.</p>
+      <div class="why">
+        <div>
+          <strong>1. Navigation entflechten</strong><br />
+          Hamburger/Flyout auf App-Seiten entfernen. Mobil Tabs, Desktop Werkbank.
+        </div>
+        <div>
+          <strong>2. Start als Lageblatt</strong><br />
+          Nächster Schritt, laufende Aufträge, Gina, neues Anliegen.
+        </div>
+        <div>
+          <strong>3. Listen scannbar</strong><br />
+          Aufträge, Nachrichten, Dokumente: Statuschip, Kurztitel, eine Aktion.
+        </div>
+      </div>
+      <div class="note" style="margin-top:18px">
+        <strong>Nicht anfassen:</strong> Farben, Logo, Inter, Hauskante, Werkbank-Rahmen,
+        Marketing-Seiten. Das ist Feinschliff in bestehenden Rezepten, kein neues Atelier.
+      </div>
+      <div class="note">
+        <strong>Nächster Schritt nach Freigabe:</strong> zuerst Navigation und Startseite
+        in der echten Owner-App umsetzen, dann Aufträge/Dokumente, dann Partner-Heute.
+      </div>
+    </section>
+
+    <footer>
+      Interne Entscheidungsvorlage. Keine produktive Änderung.
+      Quelle: aktuelle App-Seiten und Werkbank-Ist-Screenshots vom 17.09.2026.
+    </footer>
+  </div>
+</body>
+</html>
