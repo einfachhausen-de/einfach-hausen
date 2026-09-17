@@ -40,11 +40,9 @@ export async function WerkbankRahmen({ role, active, children, rail, breadcrumbs
 
   const areas = pro ? providerAreas : ownerAreas;
   const subNav = pro ? providerAreaSubNav(active) : ownerAreaSubNav(active);
-  const contextTabs = tabs ?? (pro ? null : (() => {
-    const { items } = ownerAreaSubNav(active);
-    if (items.length < 2) return undefined;
-    return items.map((c: { href: string; label: string; active: boolean }) => ({ href: c.href, label: c.label, active: c.active }));
-  })());
+  // Keine automatischen Kontext-Tabs: Die Seitenleiste zeigt dieselben
+  // Unterpunkte bereits. Nur explizit übergebene `tabs` (Profil/Einstellungen,
+  // die nicht in der Seitenleiste stehen) werden noch gerendert.
 
   return <EHScope app>
     <div className={s['wb']}>
@@ -89,7 +87,7 @@ export async function WerkbankRahmen({ role, active, children, rail, breadcrumbs
         </aside>
         <main className={s['wb-main']}>
           {breadcrumbs && breadcrumbs.length > 0 && <Breadcrumbs trail={breadcrumbs} />}
-          {contextTabs && contextTabs.length > 0 && <EHRouteTabs label="Kontextnavigation" items={contextTabs} />}
+          {tabs && tabs.length > 0 && <EHRouteTabs label="Kontextnavigation" items={tabs} />}
           {children}
         </main>
         {rail && <aside className={s['wb-rail']} aria-label="Kontext dieser Seite">

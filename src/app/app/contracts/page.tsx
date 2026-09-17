@@ -80,14 +80,10 @@ export default async function Contracts({ searchParams }: { searchParams: Promis
     ? [{ href: '/app', label: 'Start' }, { href: '/app/contracts', label: 'Verträge & Tarife' }, { label: 'Spar-Check' }]
     : [{ href: '/app', label: 'Start' }, { label: 'Verträge & Tarife' }];
 
-  // Both views live on the same route, so only the page knows which one is
-  // active - it passes its own tabs instead of letting the shell derive them.
-  const tabs = [
-    { href: '/app/contracts?tab=vertraege', label: 'Laufende Verträge', active: tab === 'vertraege' },
-    { href: '/app/contracts?tab=sparcheck', label: 'Spar-Check', active: tab === 'sparcheck' },
-  ];
+  // Beide Ansichten hängen in der Seitenleiste (Verträge & Tarife-Gruppe),
+  // darum keine Pillen mehr im Inhalt.
 
-  return <WerkbankRahmen role="homeowner" active="/app/contracts" breadcrumbs={trail} tabs={tabs}>
+  return <WerkbankRahmen role="homeowner" active="/app/contracts" breadcrumbs={trail}>
     <EHWorkflowStack>
       <EHPageHeader
         title="Verträge & Tarife"
