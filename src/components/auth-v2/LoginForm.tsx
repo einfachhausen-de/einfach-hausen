@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from "react";
+import { useState } from "react";
 import { Eye, EyeOff, Lock } from "lucide-react";
 import { DEMO_PASSWORD, DEMO_USERS, demoEmailFor } from "@/lib/demo-accounts";
 import { loginAction, registerAction } from "@/app/actions";
@@ -24,6 +24,12 @@ interface LoginFormProps {
 }
 
 type LegalType = "agb" | "datenschutz" | "impressum" | "sicherheit" | "partnerkriterien";
+
+function isNextRedirect(error: unknown): boolean {
+  const digest = (error as { digest?: string })?.digest ?? "";
+  if (typeof digest === "string" && digest.startsWith("NEXT_REDIRECT")) return true;
+  return error instanceof Error && error.message.includes("NEXT_REDIRECT");
+}
 
 export function LoginForm({
   role: propRole,
@@ -81,7 +87,10 @@ export function LoginForm({
       // the SQLite session cookie, which also caused skipped router transitions.
       await loginAction(data);
     } catch (error) {
-      if (error instanceof Error && error.message.includes("NEXT_REDIRECT")) return;
+      // redirect() must bubble so the App Router can finish the navigation.
+      // Swallowing NEXT_REDIRECT aborts the in-flight transition and surfaces
+      // "AbortError: Transition was skipped" in the preview.
+      if (isNextRedirect(error)) throw error;
       setErrorMessage(error instanceof Error ? error.message : "Anmeldung fehlgeschlagen.");
       setIsLoading(false);
     }
@@ -109,35 +118,40 @@ export function LoginForm({
     setErrorMessage(null);
     setIdentifier(demo.username);
     setPassword(DEMO_PASSWORD);
-    void doLogin(demo.email, DEMO_PASSWORD, targetRole);
+    void doLogin(demo.email, DEMO_PASSWORD);
   };
 
-  const handleLoginSubmit = (event: React.FormEvent) => {
-    event.preventDefault();
+  async function loginFormAction(fd: FormData) {
     if (isLoading) return;
-    if (!identifier.trim()) {
+    const email = String(fd.get("email") ?? "").trim();
+    const pw = String(fd.get("loginPassword") ?? "");
+    if (!email) {
       setErrorMessage("Bitte gib deine E-Mail-Adresse oder deinen Benutzernamen ein.");
       return;
     }
-    if (!password) {
+    if (!pw) {
       setErrorMessage("Bitte gib dein Passwort ein.");
       return;
     }
-    void doLogin(identifier, password);
-  };
-  const handleRegisterSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
+    await doLogin(email, pw);
+  }
+
+  async function registerFormAction(fd: FormData) {
     if (isLoading) return;
     setErrorMessage(null);
-    if (!firstName.trim() || !lastName.trim() || !identifier.trim() || !password) {
+    const first = String(fd.get("firstName") ?? "").trim();
+    const last = String(fd.get("lastName") ?? "").trim();
+    const email = String(fd.get("email") ?? "").trim();
+    const pw = String(fd.get("password") ?? "");
+    if (!first || !last || !email || !pw) {
       setErrorMessage("Bitte fülle alle erforderlichen Pflichtfelder aus.");
       return;
     }
-    if (password.length < 8) {
+    if (pw.length < 8) {
       setErrorMessage("Das Passwort braucht mindestens 8 Zeichen.");
       return;
     }
-    if (role === "handwerker" && !businessName.trim()) {
+    if (role === "handwerker" && !String(fd.get("businessName") ?? "").trim()) {
       setErrorMessage("Bitte gib den Namen deines Betriebs an.");
       return;
     }
@@ -145,30 +159,29 @@ export function LoginForm({
     try {
       const data = new FormData();
       data.set("role", role === "handwerker" ? "provider" : "homeowner");
-      data.set("email", identifier.trim());
-      data.set("password", password);
-      data.set("firstName", firstName.trim());
-      data.set("lastName", lastName.trim());
-      data.set("postcode", postcode.trim());
+      data.set("email", email);
+      data.set("password", pw);
+      data.set("firstName", first);
+      data.set("lastName", last);
+      data.set("postcode", String(fd.get("postcode") ?? "").trim());
       // The sentence a visitor typed into the public intake form travels with
       // the registration. registerAction answers it as a Hausmeister question
       // once the account exists and then lands on /app/hausmeister?answered=1.
       if (initialRequest) data.set("initialRequest", initialRequest.slice(0, 700));
       if (role === "handwerker") {
-        data.set("businessName", businessName.trim());
-        data.set("trades", trades.trim());
-        data.set("streetAddress", address.trim());
+        data.set("businessName", String(fd.get("businessName") ?? "").trim());
+        data.set("trades", String(fd.get("trades") ?? "").trim());
+        data.set("streetAddress", String(fd.get("streetAddress") ?? "").trim());
       } else {
-        data.set("address", address.trim());
+        data.set("address", String(fd.get("address") ?? "").trim());
       }
       await registerAction(data);
-      setIsLoading(false);
     } catch (error) {
-      if (error instanceof Error && error.message.includes("NEXT_REDIRECT")) return;
+      if (isNextRedirect(error)) throw error;
       setErrorMessage(error instanceof Error ? error.message : "Registrierung fehlgeschlagen.");
       setIsLoading(false);
     }
-  };
+  }
 
   const formTitle = authMode === "login"
     ? "Willkommen zurück"
@@ -200,7 +213,7 @@ export function LoginForm({
       {notice && <div className="arena-notice" role="status">{notice}</div>}
 
       {authMode === "login" ? (
-        <form className="arena-stack" onSubmit={handleLoginSubmit} aria-busy={isLoading}>
+        <form className="arena-stack" action={loginFormAction} aria-busy={isLoading}>
           <button id="btn-demo-kunde" type="button" className="arena-social" disabled={isLoading} onClick={() => handleStartDemo("kunde")}>
             Eigentümer-Demo starten
           </button>
@@ -277,7 +290,7 @@ export function LoginForm({
           </p>
         </form>
       ) : (
-        <form className="arena-stack" onSubmit={handleRegisterSubmit} aria-busy={isLoading}>
+        <form className="arena-stack" action={registerFormAction} aria-busy={isLoading}>
           {role === "handwerker" && (
             <div className="arena-field">
               <label className="arena-label" htmlFor="reg-business">Unternehmensname</label>
