@@ -1,3 +1,5 @@
+> **WERKBANK-MIGRATION 2026-09-17 LIVE (ef4c3e6, main gepusht):** 32 App-Seiten Alt-CSS→EH-Komponenten, shell-Topbar/Breakpoints, 7 CSS-Module gelöscht, Debt-sync rein deletiv. Gates: EH_DESIGN_CONSISTENT, tsc/eslint/build grün, GitNexus frisch indexiert. BEKANNT UNFERTIG: Werkbank-Komposition (vergleich.html-Soll) ist nicht gebaut — Screenshots belegen alte Struktur ohne Rahmen. Nächste Aktion: Komposition pilotiert ab `/app`, pro Gruppe visuelle Jeremy-Abnahme. Vollständige Übergabe: `docs/HANDOFF-2026-09-17-werkbank-migration.md`.
+
 > **COUNTS+ICONS 2026-09-14 LIVE (136fbf1, PR #107):** Alle 17 Bereiche mit Lucide-Icon + echter Anzahl. Gate 15/15, Smoke 18/18. Branch geraeumt.
 
 > **CMD-PALETTE 2026-09-14 LIVE (55a1861, PR #106):** Suche ist Command-Menue (Cmd+K/Cmd+S, Pfeile+Enter, Esc). Gate 15/15, Smoke 18/18. Branch geraeumt.
