@@ -1,5 +1,5 @@
 import { Fragment } from 'react';
-import { AppShell } from '@/components/shell';
+import { WerkbankRahmen } from '@/components/werkbank-rahmen';
 import { requireUser } from '@/lib/auth';
 import { EHPageHeader, EHWorkspaceGrid, EHWorkSection, EHStatus, EHButton, EHField, EHInput, EHCheckbox, EHWorkflowStack, EHWorkflowForm, EHFormSection, EHFormFeedback, EHSubmitButton, EHText, EHEmptyState, EHMetricsBar } from '@/design-system';
 import { addProviderMemberAction, updateProviderMemberAction } from '@/app/actions';
@@ -8,7 +8,7 @@ import { getProviderContext, getProviderMembers } from '@/lib/provider';
 export default async function Team({ searchParams }: { searchParams: Promise<Record<string, string>> }) {
   const u = await requireUser('provider');
   const ctx = getProviderContext(u.id);
-  if (!ctx) return <AppShell role="provider" active="/pro/team" title="Team"><EHPageHeader title="Team" /><EHEmptyState title="Kein Betrieb zugeordnet" text="Für die Teamverwaltung ist ein zugeordneter Betrieb erforderlich." /></AppShell>;
+  if (!ctx) return <WerkbankRahmen role="provider" active="/pro/team"><EHPageHeader title="Team" /><EHEmptyState title="Kein Betrieb zugeordnet" text="Für die Teamverwaltung ist ein zugeordneter Betrieb erforderlich." /></WerkbankRahmen>;
   const sp = await searchParams;
   const members = getProviderMembers(ctx.providerId);
   // Die vier Kennzahlen lesen dieselbe Mitgliederliste wie die Formulare
@@ -65,7 +65,7 @@ export default async function Team({ searchParams }: { searchParams: Promise<Rec
       : 'Dein Zugang sieht die Teamübersicht, Änderungen bleiben der Betriebsleitung vorbehalten.'}</EHText>
   </EHWorkSection>;
 
-  return <AppShell role="provider" active="/pro/team" title="Team" subtitle={ctx.businessName}>
+  return <WerkbankRahmen role="provider" active="/pro/team">
     <EHWorkflowStack>
       <EHPageHeader title="Team" context={ctx.businessName} actions={ctx.canManageJobs ? <EHButton href="#team-anlegen" arrow>Ansprechpartner hinzufügen</EHButton> : undefined} />
       <EHMetricsBar label="Team" items={[
@@ -81,5 +81,5 @@ export default async function Team({ searchParams }: { searchParams: Promise<Rec
           Die rechte Spalte bleibt trotzdem belegt: sie erklärt die Rollen. */}
       <EHWorkspaceGrid main={memberSection} aside={<EHWorkflowStack>{rolesSection}{addMemberForm}</EHWorkflowStack>} />
     </EHWorkflowStack>
-  </AppShell>;
+  </WerkbankRahmen>;
 }

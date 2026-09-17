@@ -8,7 +8,7 @@ import {
   UserRound,
   XCircle,
 } from 'lucide-react';
-import { AppShell } from '@/components/shell';
+import { WerkbankRahmen } from '@/components/werkbank-rahmen';
 import { JobMedia } from '@/components/job-media';
 import { mediaKindFromPath } from '@/lib/intake-media';
 import { requireUser } from '@/lib/auth';
@@ -129,11 +129,9 @@ export default async function ProJob({
   const contacts = members.map((member) => ({ id: member.user_id, label: `${member.first_name} ${member.last_name}${member.user_id === u.id ? ' · Ich' : ''} · ${member.job_title || 'Ansprechpartner'}` }));
 
   return (
-    <AppShell
+    <WerkbankRahmen
       role="provider"
       active={isAccepted ? '/pro/orders' : '/pro'}
-      title={isContact ? 'Kontaktanfrage' : isAccepted ? 'Auftrag' : 'Anfrage'}
-      subtitle={access.category}
     >
       <EHWorkflowStack>
         {sp.error && <EHErrorState text={sp.error} />}
@@ -394,6 +392,6 @@ export default async function ProJob({
           </EHWorkSection>
         </>} />
       </EHWorkflowStack>
-    </AppShell>
+    </WerkbankRahmen>
   );
 }

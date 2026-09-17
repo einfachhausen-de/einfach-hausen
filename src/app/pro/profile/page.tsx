@@ -1,5 +1,6 @@
 import { BadgeCheck, CreditCard, FileCheck2, ShieldCheck } from 'lucide-react';
-import { AppShell, SectionTitle } from '@/components/shell';
+import { SectionTitle } from '@/components/shell';
+import { WerkbankRahmen } from '@/components/werkbank-rahmen';
 import { ProviderAccessBoundary, ProviderState } from '@/components/provider/workspace';
 import { requireUser } from '@/lib/auth';
 import { db } from '@/lib/db';
@@ -22,7 +23,7 @@ function trustStatus(ok: boolean, label: string) {
 export default async function ProProfile({ searchParams }: { searchParams: Promise<Record<string, string>> }) {
   const u = await requireUser('provider'); const sp = await searchParams; const ctx = getProviderContext(u.id);
   if (!ctx) {
-    return <AppShell role="provider" active="/pro/profile" title="Profil & Vertrauen" subtitle="Zugang prüfen">
+    return <WerkbankRahmen role="provider" active="/pro/profile">
       <EHPageHeader title="Profil & Vertrauen" context="Zugang prüfen" />
       <ProviderState
         icon={<ShieldCheck size={21} />}
@@ -31,7 +32,7 @@ export default async function ProProfile({ searchParams }: { searchParams: Promi
         tone="unavailable"
         action={{ href: '/pro/hilfe', label: 'Hilfe zum Partnerzugang' }}
       />
-    </AppShell>;
+    </WerkbankRahmen>;
   }
   const p = db.prepare(`SELECT p.*,c.status contract_status,c.customer_discount_bps,c.insurance_verified,c.qualification_verified,c.contract_verified,c.quality_standard_verified,c.response_target_minutes,c.notes contract_notes
     FROM provider_profiles p LEFT JOIN partner_contracts c ON c.provider_id=p.user_id WHERE p.user_id=?`).get(ctx.providerId) as any;
@@ -51,7 +52,7 @@ export default async function ProProfile({ searchParams }: { searchParams: Promi
   const trustDone = trustChecks.filter(Boolean).length;
   const requestKinds = [prefs?.accepts_normal_jobs !== 0, prefs?.accepts_short_notice !== 0, prefs?.accepts_consultation !== 0, !!prefs?.accepts_emergencies];
   const requestKindsOn = requestKinds.filter(Boolean).length;
-  return <AppShell role="provider" active="/pro/profile" title="Profil & Vertrauen" subtitle={p?.business_name || ctx.businessName}>
+  return <WerkbankRahmen role="provider" active="/pro/profile">
     <EHPageHeader title="Profil & Vertrauen" context={[p?.business_name || ctx.businessName, ctx.canManageJobs ? 'Änderungen möglich' : 'Nur Ansicht'].join(' · ')} />
     <EHMetricsBar label="Stand des Betriebs" items={[
       { id: 'freigabe', label: 'Freigabe', value: activation.receivesNewJobs ? 'Erteilt' : 'Offen', hint: activation.receivesNewJobs ? 'Neue Anfragen werden verteilt' : `${activation.missing.length} Punkte offen` },
@@ -236,5 +237,5 @@ export default async function ProProfile({ searchParams }: { searchParams: Promi
         <EHButton href="/pro/team" variant="secondary" arrow>Team ansehen</EHButton>
       </EHWorkSection>
     </>} />
-  </AppShell>;
+  </WerkbankRahmen>;
 }

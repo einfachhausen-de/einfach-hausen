@@ -1,4 +1,4 @@
-import { AppShell } from '@/components/shell';
+import { WerkbankRahmen } from '@/components/werkbank-rahmen';
 import { crumbs } from '@/components/nav-config';
 import { requireUser } from '@/lib/auth';
 import { EHButton, EHCallout, EHPageHeader, EHErrorState, EHField, EHSelect, EHTextarea, EHSubmitButton, EHMetricsBar, EHRecordList, EHStatus, EHText, EHWorkSection, EHWorkflowForm, EHWorkflowStack, EHWorkspaceGrid, type EHRecordEntry } from '@/design-system';
@@ -32,7 +32,7 @@ export default async function Emergency({searchParams}:{searchParams:Promise<Rec
     href: `/app/jobs/${job.id}`,
   }));
 
-  return <AppShell role="homeowner" active="/app" title="Notfall" breadcrumbs={crumbs('/app','Notfall')}>
+  return <WerkbankRahmen role="homeowner" active="/app" brandSub={profile?.address} breadcrumbs={crumbs('/app','Notfall')}>
     <EHWorkflowStack>
     <EHPageHeader title="Notfall melden" context={target} />
     <EHMetricsBar label="Notfall" items={[
@@ -66,5 +66,5 @@ export default async function Emergency({searchParams}:{searchParams:Promise<Rec
       </EHWorkSection>
     </>} />
     </EHWorkflowStack>
-  </AppShell>;
+  </WerkbankRahmen>;
 }

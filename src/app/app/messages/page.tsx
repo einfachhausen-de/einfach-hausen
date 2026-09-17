@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { notFound } from 'next/navigation';
 import { EHContactWorkspace, EHConversation, EHCallout, EHButton, EHMetricsBar, EHRecordList, EHText, EHWorkSection, EHWorkspaceGrid, type EHDirectoryMode } from '@/design-system';
-import { AppShell } from '@/components/shell';
+import { WerkbankRahmen } from '@/components/werkbank-rahmen';
 import { requireUser } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { CONTACT_DIRECTORY_CATEGORIES, contactDirectoryCategory, contactDirectorySubcategory } from '@/lib/contact-directory-taxonomy';
@@ -113,7 +113,7 @@ export default async function Messages({ searchParams }: { searchParams: Promise
     messages={messages.map(message => ({ id: `${message.source}-${message.id}`, mine: message.sender_id === u.id, author: `${message.sender_id === u.id ? 'Du' : active.first_name}${message.source === 'job' && message.context_title ? ` · Auftrag: ${message.context_title}` : ''}`, body: message.body }))}
     composer={<OwnerMessageComposer contactUserId={active.contact_user_id} peerName={active.first_name} unreadCount={Number(active.unread_count || 0)} />} />
     : entry?.platformUserId ? <EHCallout title="Aktuell keine aktive Nachrichtenverbindung"><p>Der gespeicherte Kontakt und seine Zuordnungen bleiben erhalten. Ein App-Chat ist nur bei einer aktiven Partnerverbindung verfügbar.</p></EHCallout> : undefined;
-  return <AppShell role="homeowner" active="/app/messages" title="Ansprechpartner" subtitle="Dein persönliches Netzwerk fürs Haus">
+  return <WerkbankRahmen role="homeowner" active="/app/messages">
     <EHMetricsBar label="Ansprechpartner" items={[
       { id: 'kontakte', label: 'Kontakte', value: String(contacts.length), hint: 'in deinem Netzwerk' },
       { id: 'verbunden', label: 'Verknüpft', value: String(linkedTotal), hint: 'mit Partnerprofil' },
@@ -146,5 +146,5 @@ export default async function Messages({ searchParams }: { searchParams: Promise
         <EHButton href="/app/emergency" variant="secondary">Notfall-Bereich</EHButton>
       </EHWorkSection>
     </>} />
-  </AppShell>;
+  </WerkbankRahmen>;
 }

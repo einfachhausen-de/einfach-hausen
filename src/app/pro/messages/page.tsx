@@ -1,5 +1,5 @@
 import { MessageSquare } from 'lucide-react';
-import { AppShell } from '@/components/shell';
+import { WerkbankRahmen } from '@/components/werkbank-rahmen';
 import { ProviderAccessBoundary, ProviderState } from '@/components/provider/workspace';
 import { requireUser } from '@/lib/auth';
 import { db } from '@/lib/db';
@@ -24,7 +24,7 @@ export default async function Messages({ searchParams }: { searchParams: Promise
 
   if (!ctx) {
     return (
-      <AppShell role="provider" active="/pro/messages" title="Nachrichten" subtitle="Zugang prüfen">
+      <WerkbankRahmen role="provider" active="/pro/messages">
         <ProviderState
           icon={<MessageSquare size={21} />}
           title="Keinem Unternehmen zugeordnet"
@@ -32,7 +32,7 @@ export default async function Messages({ searchParams }: { searchParams: Promise
           action={{ href: '/pro/hilfe', label: 'Hilfe & Kontakt' }}
           tone="unavailable"
         />
-      </AppShell>
+      </WerkbankRahmen>
     );
   }
 
@@ -88,7 +88,7 @@ export default async function Messages({ searchParams }: { searchParams: Promise
   const jobMessages = messages.filter((message) => message.source === 'job').length;
 
   return (
-    <AppShell role="provider" active="/pro/messages" title="Nachrichten" subtitle="Direkter Kundenkontakt">
+    <WerkbankRahmen role="provider" active="/pro/messages">
       <EHPageHeader title="Nachrichten" context={`${customers.length} Kunden · ${unreadTotal} ungelesen`} />
 
       <ProviderAccessBoundary canManageJobs={ctx.canManageJobs} />
@@ -134,6 +134,6 @@ export default async function Messages({ searchParams }: { searchParams: Promise
           <EHButton href="/pro/orders" variant="secondary" arrow>Aufträge ansehen</EHButton>
         </EHWorkSection>
       </>} />
-    </AppShell>
+    </WerkbankRahmen>
   );
 }

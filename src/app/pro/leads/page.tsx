@@ -1,5 +1,5 @@
 import { Building2 } from 'lucide-react';
-import { AppShell } from '@/components/shell';
+import { WerkbankRahmen } from '@/components/werkbank-rahmen';
 import { requireUser } from '@/lib/auth';
 import { EHMetricsBar, EHButton, EHEmptyState, EHPageHeader, EHRecordList, EHStatus, EHCallout, EHField, EHSelect, EHSubmitButton, EHText, EHWorkSection, EHWorkspaceGrid, type EHRecordEntry } from '@/design-system';
 import { db } from '@/lib/db';
@@ -28,13 +28,13 @@ export default async function ProLeads() {
 
   if (!ctx) {
     return (
-      <AppShell role="provider" active="/pro/leads" title="Immobilien-Leads" subtitle="Zugang prüfen">
+      <WerkbankRahmen role="provider" active="/pro/leads">
         <EHEmptyState
           title="Keinem Unternehmen zugeordnet"
           text="Dein Zugang ist aktuell keinem aktiven Partnerunternehmen zugeordnet. Freigegebene Immobilienkontakte können deshalb nicht angezeigt werden."
           action={<EHButton href="/pro/hilfe" variant="secondary">Hilfe & Kontakt</EHButton>}
         />
-      </AppShell>
+      </WerkbankRahmen>
     );
   }
 
@@ -42,14 +42,14 @@ export default async function ProLeads() {
 
   if (!broker) {
     return (
-      <AppShell role="provider" active="/pro/leads" title="Immobilien-Leads" subtitle="Nur für passende Anbieter">
+      <WerkbankRahmen role="provider" active="/pro/leads">
         <EHPageHeader title="Freigegebene Kontakte" context="Nur für passende Anbieter" />
         <EHEmptyState
           title="Keine Makler-Kategorie aktiv"
           text="Wenn dein Unternehmen auch Immobilienvermittlung anbietet, kannst du die Tätigkeit im Partnerprofil ergänzen. Es bleibt dasselbe Konto."
           action={<EHButton href="/pro/profile" variant="secondary">Partnerprofil öffnen</EHButton>}
         />
-      </AppShell>
+      </WerkbankRahmen>
     );
   }
 
@@ -90,7 +90,7 @@ export default async function ProLeads() {
   }
 
   return (
-    <AppShell role="provider" active="/pro/leads" title="Immobilien-Leads" subtitle="Nur ausdrücklich freigegebene Kontakte">
+    <WerkbankRahmen role="provider" active="/pro/leads">
       <EHPageHeader title="Freigegebene Kontakte" context={`${matches.length} ${matches.length === 1 ? 'freigegebener Kontakt' : 'freigegebene Kontakte'}`} />
       <EHCallout title="Nur freigegebene Daten"><EHText>Private Dokumente und vollständige Hausakten bleiben gesperrt. Die Freigabe ist zweckgebunden.</EHText></EHCallout>
 
@@ -121,6 +121,6 @@ export default async function ProLeads() {
           <EHButton href="/pro/profile" variant="secondary" arrow>Partnerprofil prüfen</EHButton>
         </EHWorkSection>
       </>} />
-    </AppShell>
+    </WerkbankRahmen>
   );
 }

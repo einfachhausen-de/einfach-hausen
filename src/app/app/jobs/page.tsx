@@ -1,4 +1,4 @@
-import { AppShell } from '@/components/shell';
+import { WerkbankRahmen } from '@/components/werkbank-rahmen';
 import { EHEmptyState, EHButton, EHMetricsBar, EHPageHeader, EHOwnerFilters, EHOwnerSearch, EHOwnerSection, EHRecordList, EHRecordViews, EHStatus, EHText, EHWorkSection, EHWorkspaceGrid } from '@/design-system';
 import { requireUser } from '@/lib/auth';
 import { db } from '@/lib/db';
@@ -200,7 +200,7 @@ export default async function Jobs({
   }
   const jobTitle = (job: JobRow) => job.title.replace(/^Ansprechpartner:\s*/, '');
 
-  return <AppShell role="homeowner" active="/app/jobs" title="Aufträge">
+  return <WerkbankRahmen role="homeowner" active="/app/jobs">
     <EHPageHeader title="Deine Aufträge" context={`${jobs.length} ${jobs.length === 1 ? 'Auftrag' : 'Aufträge'}`} actions={<EHButton href="/app/hausmeister" arrow>Anliegen beschreiben</EHButton>} />
     <EHMetricsBar label="Aufträge" items={[
       { id: 'gesamt', label: 'Aufträge gesamt', value: String(jobs.length), hint: 'in deiner Akte' },
@@ -253,5 +253,5 @@ export default async function Jobs({
         }))} />
       </EHWorkSection>
     </>} />
-  </AppShell>;
+  </WerkbankRahmen>;
 }

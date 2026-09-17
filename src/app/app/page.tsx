@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import Link from 'next/link';
 import { CalendarClock, ChevronRight, FileText } from 'lucide-react';
-import { AppShell } from '@/components/shell';
+import { WerkbankRahmen } from '@/components/werkbank-rahmen';
 import { EHButton, EHCallout, EHMetricsBar, EHOwnerSection, EHRecordList, EHStatus, type EHRecordEntry } from '@/design-system';
 import { requireUser } from '@/lib/auth';
 import { db } from '@/lib/db';
@@ -120,7 +120,7 @@ export default async function Dashboard() {
     href: `/api/documents/${document.id}`,
   }));
 
-  return <AppShell role="homeowner" active="/app" rail={<>
+  return <WerkbankRahmen role="homeowner" active="/app" brandSub={address} rail={<>
       <p className="eh-werkbank-rail-h">Kontext dieser Seite</p>
       <div className="eh-werkbank-karte">
         <h4>Warten auf dich{waiting.length > 0 && <span className="eh-werkbank-badge">{waiting.length}</span>}</h4>
@@ -168,5 +168,5 @@ export default async function Dashboard() {
     <EHOwnerSection title="Hausakte" action={{ href: '/app/documents', label: `Alle ${documentCount}` }}>
       <EHRecordList label="Hausakte" items={hausakte} empty="Keine Dokumente." />
     </EHOwnerSection>
-  </AppShell>;
+  </WerkbankRahmen>;
 }

@@ -1,5 +1,7 @@
 import { ArrowLeft, Database, Globe2, Mail, MessageCircle, Phone } from 'lucide-react';
+import Link from 'next/link';
 import { requireAdmin } from '@/lib/admin-auth';
+import s from '@/components/shell.module.css';
 import { CRM_LEAD_TYPES, CRM_PERMISSIONS, CRM_SOURCES, CRM_STATUSES, crmCategories, crmStats, listCrmLeads, syncCrmLifecycle } from '@/lib/crm';
 import { addCrmLeadAction, syncBusinessResearchAction, updateCrmLeadAction } from './actions';
 import { EHActions, EHButton, EHCallout, EHEmptyState, EHField, EHFieldGrid, EHFormFeedback, EHFormSection, EHInput, EHMetricsBar, EHPageHeader, EHRecordList, EHScope, EHSection, EHSelect, EHStatus, EHText, EHTextarea, EHWorkSection, EHWorkspaceGrid, EHWorkflowForm, EHWorkflowStack } from '@/design-system';
@@ -80,7 +82,31 @@ export default async function CrmPage({ searchParams }: { searchParams: Promise<
 
   return (
     <EHScope app>
-      <main>
+      <div className={s['wb']}>
+      {/* Verwaltung nutzt WerkbankRahmen bewusst nicht: role kennt nur homeowner|provider (Owner-Navi, Profil-Link, BottomNav wären für Admin falsch), nav-config hat keine Admin-Bereiche. Lokaler Rahmen aus denselben wb-Klassen, Inhalt unverändert. Top-Navi/Werkzeuge entfallen: Betriebe/Vorgänge haben keine Routen — nichts erfunden. */}
+      <div className={s['wb-top']}>
+        <div className={s['wb-brand']}>
+          <span className={s['wb-mark']} aria-hidden="true">eh</span>
+          <span className={s['wb-name']}><b>einfach hausen</b><small>Verwaltung</small></span>
+        </div>
+      </div>
+      <div className={`${s['wb-body']} ${s['wb-norail']}`}>
+        <aside className={s['wb-side']} aria-label="Verwaltung">
+          <nav aria-label="Übersicht">
+            <p className={s['wb-grp']}>Übersicht</p>
+            <Link href="/admin">Übersicht</Link>
+            <Link href="/admin/crm" aria-current="page" className={s['wb-on']}>CRM</Link>
+            <Link href="/admin/ops">Operations</Link>
+          </nav>
+          <nav aria-label="Prüfen">
+            <p className={s['wb-grp']}>Prüfen</p>
+          </nav>
+          <nav aria-label="Daten">
+            <p className={s['wb-grp']}>Daten</p>
+          </nav>
+          {/* Soll-Gruppen „Prüfen“ (Nachweise/Servicefälle) und „Daten“ (Exporte) haben keine eigenen Routen — die Warteschlangen leben als Abschnitte im Inhalt. Keine Links erfunden. */}
+        </aside>
+        <main className={s['wb-main']}>
         <EHSection compact>
           <EHWorkflowStack>
             <EHActions>
@@ -304,6 +330,8 @@ export default async function CrmPage({ searchParams }: { searchParams: Promise<
           </EHWorkflowStack>
         </EHSection>
       </main>
+      </div>
+    </div>
     </EHScope>
   );
 }

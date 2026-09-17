@@ -1,7 +1,9 @@
+import Link from 'next/link';
 import { isFeatureEnabled } from '@/lib/feature-flags';
 import { toggleFeatureFlagAction, requeueDeadNotificationAction } from '@/app/actions';
 import { requireAdmin } from '@/lib/admin-auth';
 import { db } from '@/lib/db';
+import s from '@/components/shell.module.css';
 import { EHButton, EHField, EHInput, EHMetricsBar, EHPageHeader, EHRecordList, EHScope, EHSection, EHStatus, EHText, EHWorkSection, EHWorkspaceGrid, EHWorkflowStack, type EHRecordEntry } from '@/design-system';
 
 /** Die Flags, die diese Seite schaltet; die Kennzahl oben zaehlt genau diese Liste. */
@@ -60,7 +62,31 @@ export default async function AdminOps({searchParams}:{searchParams:Promise<Reco
     title:`${t.decision} · ${t.business_name||t.reason_key||'ohne Zuordnung'}`,
     detail:[t.detail,`Job ${t.job_id}`,new Date(t.created_at).toLocaleString('de-DE')].filter(Boolean).join(' · '),
   }));
-  return <EHScope app><main><EHSection compact><EHWorkflowStack>
+  return <EHScope app><div className={s['wb']}>
+    {/* Verwaltung nutzt WerkbankRahmen bewusst nicht: role kennt nur homeowner|provider (Owner-Navi, Profil-Link, BottomNav wären für Admin falsch), nav-config hat keine Admin-Bereiche. Lokaler Rahmen aus denselben wb-Klassen, Inhalt unverändert. Top-Navi/Werkzeuge entfallen: Betriebe/Vorgänge haben keine Routen — nichts erfunden. */}
+    <div className={s['wb-top']}>
+      <div className={s['wb-brand']}>
+        <span className={s['wb-mark']} aria-hidden="true">eh</span>
+        <span className={s['wb-name']}><b>einfach hausen</b><small>Verwaltung</small></span>
+      </div>
+    </div>
+    <div className={`${s['wb-body']} ${s['wb-norail']}`}>
+      <aside className={s['wb-side']} aria-label="Verwaltung">
+        <nav aria-label="Übersicht">
+          <p className={s['wb-grp']}>Übersicht</p>
+          <Link href="/admin">Übersicht</Link>
+          <Link href="/admin/crm">CRM</Link>
+          <Link href="/admin/ops" aria-current="page" className={s['wb-on']}>Operations</Link>
+        </nav>
+        <nav aria-label="Prüfen">
+          <p className={s['wb-grp']}>Prüfen</p>
+        </nav>
+        <nav aria-label="Daten">
+          <p className={s['wb-grp']}>Daten</p>
+        </nav>
+        {/* Soll-Gruppen „Prüfen“ (Nachweise/Servicefälle) und „Daten“ (Exporte) haben keine eigenen Routen — die Warteschlangen leben als Abschnitte im Inhalt. Keine Links erfunden. */}
+      </aside>
+      <main className={s['wb-main']}><EHSection compact><EHWorkflowStack>
     <EHPageHeader title="Operations" context="Betriebsverwaltung" />
     <EHMetricsBar label="Operations" items={[
       {id:'flags',label:'Aktive Feature-Flags',value:`${enabledFlags} von ${flags.length}`,hint:'in dieser Umgebung'},
@@ -91,5 +117,5 @@ export default async function AdminOps({searchParams}:{searchParams:Promise<Reco
         <EHRecordList label="Letzte Matching-Entscheidungen" items={traceItems} empty="Keine Entscheidungen protokolliert." />
       </EHWorkSection>
     </>} />
-  </EHWorkflowStack></EHSection></main></EHScope>;
+  </EHWorkflowStack></EHSection></main></div></div></EHScope>;
 }

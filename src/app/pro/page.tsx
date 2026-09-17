@@ -1,6 +1,6 @@
 import { BadgeCheck, CalendarClock, Flame, Leaf, Sprout } from 'lucide-react';
 import { EHPageHeader, EHMetricsBar, EHPriorityAction, EHRecordList, EHRecordViews, EHStatus, EHWorkspaceGrid, EHWorkSection, type EHRecordEntry } from '@/design-system';
-import { AppShell } from '@/components/shell';
+import { WerkbankRahmen } from '@/components/werkbank-rahmen';
 import { ProviderAccessBoundary, ProviderState } from '@/components/provider/workspace';
 import { requireUser } from '@/lib/auth';
 import { db } from '@/lib/db';
@@ -20,7 +20,9 @@ function requestBadge(job: any) {
 
 function timeAgo(iso: string | null | undefined) {
   if (!iso) return '';
-  const minutes = Math.max(1, Math.round((Date.now() - new Date(iso + 'Z').getTime()) / 60000));
+  const stamp = /[zZ]|[+-]\d{2}:?\d{2}$/.test(iso) ? iso : `${iso}Z`;
+  const minutes = Math.max(1, Math.round((Date.now() - new Date(stamp).getTime()) / 60000));
+  if (!Number.isFinite(minutes)) return '';
   if (minutes < 60) return `vor ${minutes} Min.`;
   const hours = Math.round(minutes / 60);
   if (hours < 24) return `vor ${hours} Std.`;
@@ -41,14 +43,14 @@ export default async function Pro() {
 
   if (!ctx) {
     return (
-      <AppShell role="provider" active="/pro" title="Partnerbereich" subtitle="Zugang prüfen">
+      <WerkbankRahmen role="provider" active="/pro">
         <ProviderState
           icon={<BadgeCheck size={21} />}
           title="Keinem Unternehmen zugeordnet"
           description="Dein App-Zugang ist aktuell keinem aktiven Partnerunternehmen zugeordnet. Bitte lass die Unternehmenszuordnung prüfen."
           tone="unavailable"
         />
-      </AppShell>
+      </WerkbankRahmen>
     );
   }
 
@@ -56,7 +58,7 @@ export default async function Pro() {
 
   if (!p?.verified || p.contract_status !== 'active') {
     return (
-      <AppShell role="provider" active="/pro" title="Partnerbereich" subtitle={ctx.businessName}>
+      <WerkbankRahmen role="provider" active="/pro">
         <ProviderState
           icon={<BadgeCheck size={21} />}
           title={!p?.verified ? 'Unternehmensprüfung ausstehend' : 'Partnervertrag noch nicht aktiv'}
@@ -64,7 +66,7 @@ export default async function Pro() {
           action={{ href: '/pro/profile', label: 'Partnerstatus ansehen' }}
           tone="unavailable"
         />
-      </AppShell>
+      </WerkbankRahmen>
     );
   }
 
@@ -114,7 +116,7 @@ export default async function Pro() {
   });
 
   return (
-    <AppShell role="provider" active="/pro" title="Arbeitsbereich" subtitle={`${ctx.businessName} · ${ctx.jobTitle || 'Ansprechpartner'}`}>
+    <WerkbankRahmen role="provider" active="/pro">
       <ProviderAccessBoundary canManageJobs={ctx.canManageJobs} />
 
       {/* Kompakter Werkzeugkopf statt EHAppHeader: Eyebrow, grosser Titel und
@@ -149,6 +151,6 @@ export default async function Pro() {
           <EHRecordList label="Kommende Vor-Ort-Termine" items={appointmentItems} empty="Keine anstehenden Termine." />
         </EHWorkSection>
       } />
-    </AppShell>
+    </WerkbankRahmen>
   );
 }

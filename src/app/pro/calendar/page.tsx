@@ -1,5 +1,5 @@
 import { CalendarDays } from 'lucide-react';
-import { AppShell } from '@/components/shell';
+import { WerkbankRahmen } from '@/components/werkbank-rahmen';
 import { ProviderAccessBoundary, ProviderState } from '@/components/provider/workspace';
 import { EHMetricsBar, EHButton, EHPageHeader, EHRecordList, EHRecordViews, EHStatus, EHText, EHWorkSection, EHWorkspaceGrid, type EHRecordEntry } from '@/design-system';
 import { requireUser } from '@/lib/auth';
@@ -36,7 +36,7 @@ export default async function ProCalendar() {
   const u = await requireUser('provider');
   const ctx = getProviderContext(u.id);
   if (!ctx) {
-    return <AppShell role="provider" active="/pro/calendar" title="Termine" subtitle="Zugang prüfen">
+    return <WerkbankRahmen role="provider" active="/pro/calendar">
       <ProviderState
         icon={<CalendarDays size={21} />}
         title="Termine derzeit nicht verfügbar"
@@ -44,7 +44,7 @@ export default async function ProCalendar() {
         tone="unavailable"
         action={{ href: '/pro/hilfe', label: 'Hilfe zum Partnerzugang' }}
       />
-    </AppShell>;
+    </WerkbankRahmen>;
   }
 
   const rows = ctx.canManageJobs
@@ -64,7 +64,7 @@ export default async function ProCalendar() {
   const next = today[0] ?? upcoming[0];
 
   return (
-    <AppShell role="provider" active="/pro/calendar" title="Termine" subtitle={ctx.canManageJobs ? 'Betriebstermine' : 'Deine Termine'}>
+    <WerkbankRahmen role="provider" active="/pro/calendar">
       <EHPageHeader title="Termine" context={`${items.length} Termine${ctx.canManageJobs ? ' des Betriebs' : ' mit dir als Ansprechpartner'}`} />
       <ProviderAccessBoundary canManageJobs={ctx.canManageJobs} />
 
@@ -142,6 +142,6 @@ export default async function ProCalendar() {
         </EHWorkSection>
         <EHButton href="/pro/orders" variant="secondary" arrow>Aufträge ansehen</EHButton>
       </>} />
-    </AppShell>
+    </WerkbankRahmen>
   );
 }

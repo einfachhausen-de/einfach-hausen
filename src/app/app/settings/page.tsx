@@ -1,5 +1,5 @@
 import { BellOff, ShieldCheck } from 'lucide-react';
-import { AppShell } from '@/components/shell';
+import { WerkbankRahmen } from '@/components/werkbank-rahmen';
 import { ownerAccountTabs } from '@/components/nav-config';
 import { EHPageHeader, EHPanel, EHList, EHButton, EHMetricsBar, EHRecordList, EHStatus, EHText, EHWorkSection, EHWorkspaceGrid, type EHRecordEntry } from '@/design-system';
 import { InstallAppCard } from '@/components/install-app-card';
@@ -50,7 +50,7 @@ export default async function AppSettingsPage() {
   }));
 
   return (
-    <AppShell role="homeowner" active="/app/settings" title="App-Einstellungen" subtitle="Installation, Offline-Modus und Benachrichtigungen"
+    <WerkbankRahmen role="homeowner" active="/app/settings"
       breadcrumbs={[{ href: '/app', label: 'Start' }, { href: '/app/profile', label: 'Profil & Einstellungen' }, { label: 'App-Einstellungen' }]}
       tabs={ownerAccountTabs.map(tab=>({href:tab.href,label:tab.label,active:tab.href==='/app/settings'}))}>
       <EHPageHeader title="App-Einstellungen" actions={<EHButton href="/app/profile" variant="secondary">Profil</EHButton>} />
@@ -123,6 +123,6 @@ export default async function AppSettingsPage() {
           <EHText muted>Konto seit {monthYearLabel(account?.created_at)}.</EHText>
         </EHWorkSection>
       </>} />
-    </AppShell>
+    </WerkbankRahmen>
   );
 }

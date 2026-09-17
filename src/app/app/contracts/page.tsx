@@ -1,4 +1,4 @@
-import { AppShell } from '@/components/shell';
+import { WerkbankRahmen } from '@/components/werkbank-rahmen';
 import {
   EHButton, EHCallout, EHEmptyState, EHField, EHFieldGrid, EHFormFeedback,
   EHFormSection, EHInput, EHList, EHMetricsBar, EHPageHeader, EHRecordList, EHRecordViews,
@@ -87,7 +87,7 @@ export default async function Contracts({ searchParams }: { searchParams: Promis
     { href: '/app/contracts?tab=sparcheck', label: 'Spar-Check', active: tab === 'sparcheck' },
   ];
 
-  return <AppShell role="homeowner" active="/app/contracts" title="Verträge & Tarife" subtitle="Laufende Verträge, Fristen und Sparpotenzial" breadcrumbs={trail} tabs={tabs}>
+  return <WerkbankRahmen role="homeowner" active="/app/contracts" breadcrumbs={trail} tabs={tabs}>
     <EHWorkflowStack>
       <EHPageHeader
         title="Verträge & Tarife"
@@ -267,5 +267,5 @@ export default async function Contracts({ searchParams }: { searchParams: Promis
         </>
       )}
     </EHWorkflowStack>
-  </AppShell>;
+  </WerkbankRahmen>;
 }

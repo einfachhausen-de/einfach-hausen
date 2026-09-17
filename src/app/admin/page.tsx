@@ -1,6 +1,8 @@
 import { CalendarCheck, Database, ListChecks, LogOut, ShieldCheck, Star } from 'lucide-react';
+import Link from 'next/link';
 import { requireAdmin } from '@/lib/admin-auth';
 import { db } from '@/lib/db';
+import s from '@/components/shell.module.css';
 import { EHActions, EHButton, EHCheckbox, EHField, EHFieldGrid, EHFormFeedback, EHFormSection, EHInput, EHMetricsBar, EHPageHeader, EHRecordList, EHScope, EHSection, EHSelect, EHStatus, EHText, EHTextLink, EHTextarea, EHWorkSection, EHWorkspaceGrid, EHWorkflowForm, EHWorkflowStack, type EHRecordEntry } from '@/design-system';
 import { adminLogoutAction,adminUpdateClaimAction,moderateReviewAction } from '@/app/actions';
 import { adminReviewVerificationLifecycleAction,adminUpdatePartnerContractLifecycleAction } from './actions';
@@ -66,7 +68,31 @@ export default async function Admin({searchParams}:{searchParams:Promise<Record<
     detail:[r.reporter,r.reason].filter(Boolean).join(' · '),
     status:<EHStatus tone="warning">Meldung offen</EHStatus>,
   }));
-  return <EHScope app><main><EHSection compact><EHWorkflowStack><EHPageHeader title="Einfach Hausen · Admin" context="Betriebsverwaltung" actions={<><EHButton href="/admin/crm"><Database size={16}/>Leads &amp; CRM</EHButton><form action={adminLogoutAction}><EHButton type="submit" variant="secondary"><LogOut size={16}/>Abmelden</EHButton></form></>} />{sp.error&&<EHFormFeedback kind="error">{sp.error}</EHFormFeedback>}<EHMetricsBar label="Verwaltung" items={[
+  return <EHScope app><div className={s['wb']}>
+    {/* Verwaltung nutzt WerkbankRahmen bewusst nicht: role kennt nur homeowner|provider (Owner-Navi, Profil-Link, BottomNav wären für Admin falsch), nav-config hat keine Admin-Bereiche. Lokaler Rahmen aus denselben wb-Klassen, Inhalt unverändert. Top-Navi/Werkzeuge entfallen: Betriebe/Vorgänge haben keine Routen — nichts erfunden. */}
+    <div className={s['wb-top']}>
+      <div className={s['wb-brand']}>
+        <span className={s['wb-mark']} aria-hidden="true">eh</span>
+        <span className={s['wb-name']}><b>einfach hausen</b><small>Verwaltung</small></span>
+      </div>
+    </div>
+    <div className={`${s['wb-body']} ${s['wb-norail']}`}>
+      <aside className={s['wb-side']} aria-label="Verwaltung">
+        <nav aria-label="Übersicht">
+          <p className={s['wb-grp']}>Übersicht</p>
+          <Link href="/admin" aria-current="page" className={s['wb-on']}>Übersicht</Link>
+          <Link href="/admin/crm">CRM</Link>
+          <Link href="/admin/ops">Operations</Link>
+        </nav>
+        <nav aria-label="Prüfen">
+          <p className={s['wb-grp']}>Prüfen</p>
+        </nav>
+        <nav aria-label="Daten">
+          <p className={s['wb-grp']}>Daten</p>
+        </nav>
+        {/* Soll-Gruppen „Prüfen“ (Nachweise/Servicefälle) und „Daten“ (Exporte) haben keine eigenen Routen — die Warteschlangen leben als Abschnitte im Inhalt. Keine Links erfunden. */}
+      </aside>
+      <main className={s['wb-main']}><EHSection compact><EHWorkflowStack><EHPageHeader title="Einfach Hausen · Admin" context="Betriebsverwaltung" actions={<><EHButton href="/admin/crm"><Database size={16}/>Leads &amp; CRM</EHButton><form action={adminLogoutAction}><EHButton type="submit" variant="secondary"><LogOut size={16}/>Abmelden</EHButton></form></>} />{sp.error&&<EHFormFeedback kind="error">{sp.error}</EHFormFeedback>}<EHMetricsBar label="Verwaltung" items={[
       {id:'pruefungen',label:'Offene Partnerprüfungen',value:String(pendingVerifications.length),hint:`${verifications.length} Prüfungen insgesamt`},
       {id:'servicefaelle',label:'Offene Servicefälle',value:String(openClaims.length),hint:`${claims.length} Fälle insgesamt`},
       {id:'meldungen',label:'Offene Bewertungsmeldungen',value:String(openReportQueue.length),hint:`${openReports.length} Meldungen insgesamt`},
@@ -155,5 +181,5 @@ export default async function Admin({searchParams}:{searchParams:Promise<Record<
     <EHWorkSection title="Gemeldete Bewertungen">
       <EHRecordList label="Offene Bewertungsmeldungen" items={reportQueue} empty="Keine offenen Bewertungsmeldungen." />
     </EHWorkSection>
-  </>} /></EHWorkflowStack></EHSection></main></EHScope>;
+  </>} /></EHWorkflowStack></EHSection></main></div></div></EHScope>;
 }
