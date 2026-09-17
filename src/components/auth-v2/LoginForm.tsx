@@ -75,24 +75,18 @@ export function LoginForm({
     setErrorMessage(null);
   };
 
-  async function doLogin(email: string, pw: string) {
+  async function doLogin(email: string, pw: string, _targetRole?: Role) {
     setIsLoading(true);
     setErrorMessage(null);
-    try {
-      const data = new FormData();
-      data.set("email", demoEmailFor(email));
-      data.set("password", pw);
-      // Keep authentication in the server action so local SQLite auth and
-      // Supabase auth share one redirect path. Calling the client Supabase
-      // SDK here made local preview logins fail before the action could issue
-      // the SQLite session cookie, which also caused skipped router transitions.
-      await loginAction(data);
-    } catch (error) {
-      // redirect() must bubble so the App Router can finish the navigation.
-      // Swallowing NEXT_REDIRECT aborts the in-flight transition and surfaces
-      // "AbortError: Transition was skipped" in the preview.
-      if (isNextRedirect(error)) throw error;
-      setErrorMessage(error instanceof Error ? error.message : "Anmeldung fehlgeschlagen.");
+    const data = new FormData();
+    data.set("email", demoEmailFor(email));
+    data.set("password", pw);
+    // Failed logins return { error } instead of redirecting back to /login.
+    // That avoids a second App Router transition (NEXT_REDIRECT + skipped
+    // View Transition) when this client wrapper already owns the form action.
+    const result = await loginAction(data);
+    if (result?.error) {
+      setErrorMessage(result.error);
       setIsLoading(false);
     }
   }
@@ -111,7 +105,7 @@ export function LoginForm({
 
   // Explicit demo start: fills AND signs in. Only these clearly labelled
   // buttons may trigger a sign-in without an explicit form submit.
-  const handleStartDemo = (targetRole: Role) => {
+  const handleStartDemo = async (targetRole: Role) => {
     if (isLoading) return;
     const demo = targetRole === "kunde" ? DEMO_USERS.kunde : DEMO_USERS.handwerker;
     setRole(targetRole);
@@ -119,7 +113,7 @@ export function LoginForm({
     setErrorMessage(null);
     setIdentifier(demo.username);
     setPassword(DEMO_PASSWORD);
-    void doLogin(demo.email, DEMO_PASSWORD);
+    await doLogin(demo.email, DEMO_PASSWORD, targetRole);
   };
 
   async function loginFormAction(fd: FormData) {
@@ -215,7 +209,7 @@ export function LoginForm({
 
       {authMode === "login" ? (
         <form className="arena-stack" action={loginFormAction} aria-busy={isLoading}>
-          <button id="btn-demo-kunde" type="button" className="arena-social" disabled={isLoading} onClick={() => handleStartDemo("kunde")}>
+          <button id="btn-demo-kunde" type="submit" className="arena-social" disabled={isLoading} formNoValidate formAction={() => handleStartDemo("kunde")}>
             Eigentümer-Demo starten
           </button>
           <div className="arena-field">
@@ -394,13 +388,17 @@ export function LoginForm({
         <p className="arena-demo-sub">Öffentliche Vorschau: <strong>kunde · handwerker</strong></p>
         <div className="arena-demo-btns">
           {authMode !== "login" && (
-            <button id="btn-demo-kunde" type="button" className="arena-mini-link" disabled={isLoading} onClick={() => handleStartDemo("kunde")}>
-              Eigentümer-Demo starten
-            </button>
+            <form action={() => handleStartDemo("kunde")}>
+              <button id="btn-demo-kunde" type="submit" className="arena-mini-link" disabled={isLoading}>
+                Eigentümer-Demo starten
+              </button>
+            </form>
           )}
-          <button id="btn-demo-handwerker" type="button" className="arena-mini-link" disabled={isLoading} onClick={() => handleStartDemo("handwerker")}>
-            Handwerker-Demo starten
-          </button>
+          <form action={() => handleStartDemo("handwerker")}>
+            <button id="btn-demo-handwerker" type="submit" className="arena-mini-link" disabled={isLoading}>
+              Handwerker-Demo starten
+            </button>
+          </form>
         </div>
       </div>
 

@@ -25,6 +25,7 @@ import { isContractKind, isCostInterval } from '@/lib/contracts';
 import { headers } from 'next/headers';
 import { checkRateLimit, consumeRateLimitAttempt, applyRateLimitLockout, rateLimitBlockedEvent, recordRateLimitFailure, recordRateLimitSuccess } from '@/lib/security/rate-limit';
 import { logAdminAudit, logSecurityEvent } from '@/lib/security/audit';
+import { demoEmailFor } from '@/lib/demo-accounts';
 import {
   registerSchema,
   loginSchema,
@@ -191,8 +192,8 @@ export async function registerAction(fd: FormData) {
   redirect(role==='provider'?'/pro':initialRequest?'/app/hausmeister?answered=1':'/app/onboarding');
 }
 
-export async function loginAction(fd: FormData) {
-  const parsed = loginSchema.safeParse({ email: text(fd,'email'), password: String(fd.get('password') ?? '').trim() });
+export async function loginAction(fd: FormData): Promise<{ error: string } | void> {
+  const parsed = loginSchema.safeParse({ email: demoEmailFor(text(fd,'email')), password: String(fd.get('password') ?? '').trim() });
   const ip = await clientIp();
   // Two independent dimensions: one IP cannot spray unlimited accounts, and
   // one account cannot be hammered from unlimited sources.
@@ -201,9 +202,9 @@ export async function loginAction(fd: FormData) {
   const ipLimit = checkRateLimit('login', `ip:${ip}`);
   if (!emailLimit.allowed || !ipLimit.allowed) {
     rateLimitBlockedEvent('login', identifier, Math.max(emailLimit.allowed ? 0 : emailLimit.retryAfterSeconds, ipLimit.retryAfterSeconds));
-    redirect('/login?error=Zu%20viele%20Versuche.%20Bitte%20sp%C3%A4ter%20erneut%20versuchen');
+    return { error: 'Zu viele Versuche. Bitte später erneut versuchen' };
   }
-  if (!parsed.success) { recordRateLimitFailure('login', `ip:${ip}`); logSecurityEvent('security_validation_reject', 'login', 'invalid_input'); redirect('/login?error=E-Mail%20oder%20Passwort%20ist%20falsch'); }
+  if (!parsed.success) { recordRateLimitFailure('login', `ip:${ip}`); logSecurityEvent('security_validation_reject', 'login', 'invalid_input'); return { error: 'E-Mail oder Passwort ist falsch' }; }
   const { email, password } = parsed.data;
   // Count the attempt BEFORE the expensive comparison so a concurrent batch
   // cannot all pass the gate before any failure is recorded.
@@ -211,7 +212,7 @@ export async function loginAction(fd: FormData) {
   const ipConsumed = consumeRateLimitAttempt('login', `ip:${ip}`);
   if (!emailConsumed.consumed || !ipConsumed.consumed || emailConsumed.blocked || ipConsumed.blocked) {
     rateLimitBlockedEvent('login', email, 3600);
-    redirect('/login?error=Zu%20viele%20Versuche.%20Bitte%20sp%C3%A4ter%20erneut%20versuchen');
+    return { error: 'Zu viele Versuche. Bitte später erneut versuchen' };
   }
   const row=db.prepare('SELECT id,password_hash,role FROM users WHERE email=?').get(email) as {id:number,password_hash:string,role:'homeowner'|'provider'}|undefined;
   // Always run bcrypt exactly once against comparable material.
@@ -220,7 +221,7 @@ export async function loginAction(fd: FormData) {
     applyRateLimitLockout('login', email);
     applyRateLimitLockout('login', `ip:${ip}`);
     logSecurityEvent('auth_login_fail', email, `ip=${ip}`);
-    redirect('/login?error=E-Mail%20oder%20Passwort%20ist%20falsch');
+    return { error: 'E-Mail oder Passwort ist falsch' };
   }
   recordRateLimitSuccess('login', email);
   recordRateLimitSuccess('login', `ip:${ip}`);
@@ -235,7 +236,7 @@ export async function loginAction(fd: FormData) {
     const supabaseSession = await establishSupabaseSession(email, password);
     if (!supabaseSession) {
       logSecurityEvent('auth_login_fail', email, 'supabase_session_failed');
-      redirect('/login?error=Anmeldung%20fehlgeschlagen.%20Bitte%20erneut%20versuchen');
+      return { error: 'Anmeldung fehlgeschlagen. Bitte erneut versuchen' };
     }
   }
   redirect(row.role==='provider'?'/pro':'/app');
@@ -519,7 +520,7 @@ export async function createInvoiceAction(jobId:number,fd:FormData){
     const invoiceId=Number(result.lastInsertRowid); const insertItem=db.prepare(`INSERT INTO invoice_items(invoice_id,position,description,quantity,unit,unit_price_net,tax_rate_bps,line_net,line_tax,line_gross) VALUES(?,?,?,?,?,?,?,?,?,?)`); for(const item of calculated)insertItem.run(invoiceId,item.position,item.description,item.quantity,item.unit,item.unitPrice,item.taxBps,item.lineNet,item.lineTax,item.gross); return invoiceId;
   });
   const invoiceId=tx();
-  createNotification(row.homeowner_id,'Neue Rechnung',`${row.business_name} hat dir Rechnung ${invoiceNumber} für „${row.title}“ gesendet.`,`/app/invoices/${invoiceId}`,'invoice');
+  createNotification(row.homeowner_id,'Neue Rechnung',`${row.business_name} hat dir Rechnung ${invoiceNumber} f��r „${row.title}“ gesendet.`,`/app/invoices/${invoiceId}`,'invoice');
   appendJobEvent(jobId,`${row.business_name} hat Rechnung ${invoiceNumber} gesendet. Sie liegt jetzt in deiner Hausakte.`,{invoiceId,invoiceNumber,totalGross:total});
   revalidatePath(`/pro/jobs/${jobId}`);revalidatePath('/pro/orders');revalidatePath(`/app/jobs/${jobId}`);revalidatePath('/app/documents');revalidatePath('/notifications');
   redirect(`/pro/invoices/${invoiceId}?sent=1`);
