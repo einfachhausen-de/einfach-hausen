@@ -125,9 +125,15 @@ db.prepare('UPDATE users SET auth_subject=? WHERE id=?').run(providerIdentity.id
 const port = await freePort();
 const base = `http://127.0.0.1:${port}`;
 const nextBin = path.join(root, 'node_modules/next/dist/bin/next');
+// Server und Admin-Cookie muessen denselben Cookie-Namen benutzen. Der
+// Admin-Aufbau las frueher process.env.SESSION_COOKIE_NAME - das ist im
+// Skript-Prozess nicht gesetzt (die Produktions-env kennt die Variable
+// nicht), das Cookie hiess also "undefined_admin" und der Admin-Login
+// scheiterte still. Folge: die /admin-Aufnahmen zeigten die Login-Seite.
+const SESSION_COOKIE = 'appvis_session';
 const server = spawn(process.execPath, [nextBin, 'start', '-H', '127.0.0.1', '-p', String(port)], {
   cwd: root,
-  env: { ...process.env, DATABASE_PATH: '/tmp/eh-app-visual.db', ADMIN_PASSWORD: `AppVisAdmin!${randomUUID()}`, SESSION_COOKIE_NAME: 'appvis_session', NEXT_PUBLIC_APP_URL: base, AUTH_MODE: 'supabase', E2E_INSECURE_COOKIES: '1', SUPABASE_URL: supabaseUrl, SUPABASE_ANON_KEY: anonKey, SUPABASE_SERVICE_ROLE_KEY: serviceKey },
+  env: { ...process.env, DATABASE_PATH: '/tmp/eh-app-visual.db', ADMIN_PASSWORD: `AppVisAdmin!${randomUUID()}`, SESSION_COOKIE_NAME: SESSION_COOKIE, NEXT_PUBLIC_APP_URL: base, AUTH_MODE: 'supabase', E2E_INSECURE_COOKIES: '1', SUPABASE_URL: supabaseUrl, SUPABASE_ANON_KEY: anonKey, SUPABASE_SERVICE_ROLE_KEY: serviceKey },
   stdio: 'ignore',
 });
 let browser;
@@ -198,7 +204,7 @@ try {
   const adminAuth = await importTs('../src/lib/admin-auth.ts', import.meta.url);
   const adminToken = adminAuth.issueAdminSessionToken();
   // admin-auth appends an _admin suffix to the SESSION_COOKIE_NAME override.
-  const adminCookieName = `${process.env.SESSION_COOKIE_NAME}_admin`;
+  const adminCookieName = `${SESSION_COOKIE}_admin`;
   await capture('admin', ownerIdentity, ['/admin', '/admin/ops'], { name: adminCookieName, value: adminToken.token, url: base });
 } finally {
   if (browser) await browser.close().catch(() => {});
