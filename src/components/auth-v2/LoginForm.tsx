@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Eye, EyeOff, Lock } from "lucide-react";
 import { EHCheckbox } from "@/design-system";
 import { DEMO_PASSWORD, DEMO_USERS, demoEmailFor } from "@/lib/demo-accounts";
+import { safeNextPath } from "@/lib/safe-redirect";
 import { loginAction, registerAction } from "@/app/actions";
 import { ForgotPasswordModal } from "./ForgotPasswordModal";
 import { LegalModal } from "./LegalModal";
@@ -39,7 +40,7 @@ export function LoginForm({
   authMode: propAuthMode,
   initialRole = "kunde",
   initialAuthMode = "login",
-  nextPath: _nextPath,
+  nextPath,
   initialRequest,
   notice,
   error,
@@ -86,12 +87,14 @@ export function LoginForm({
     setErrorMessage(null);
   };
 
-  async function doLogin(email: string, pw: string, _targetRole?: Role) {
+  async function doLogin(email: string, pw: string, targetRole?: Role) {
     setIsLoading(true);
     setErrorMessage(null);
+    const loginRole = targetRole ?? role;
     const data = new FormData();
     data.set("email", demoEmailFor(email));
     data.set("password", pw);
+    data.set("next", safeNextPath(nextPath, loginRole === "handwerker" ? "/pro" : "/app"));
     // Failed logins return { error } instead of redirecting back to /login.
     // That avoids a second App Router transition (NEXT_REDIRECT + skipped
     // View Transition) when this client wrapper already owns the form action.

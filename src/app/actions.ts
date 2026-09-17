@@ -25,7 +25,9 @@ import { isContractKind, isCostInterval } from '@/lib/contracts';
 import { headers } from 'next/headers';
 import { checkRateLimit, consumeRateLimitAttempt, applyRateLimitLockout, rateLimitBlockedEvent, recordRateLimitFailure, recordRateLimitSuccess } from '@/lib/security/rate-limit';
 import { logAdminAudit, logSecurityEvent } from '@/lib/security/audit';
-import { demoEmailFor } from '@/lib/demo-accounts';
+import { DEMO_LOGIN_ENABLED, DEMO_PASSWORD, demoEmailFor, isDemoEmail } from '@/lib/demo-accounts';
+import { ensureLocalDemoAccounts } from '@/lib/ensure-local-demo-accounts';
+import { safeNextPath } from '@/lib/safe-redirect';
 import {
   registerSchema,
   loginSchema,
@@ -194,6 +196,10 @@ export async function registerAction(fd: FormData) {
 
 export async function loginAction(fd: FormData): Promise<{ error: string } | void> {
   const parsed = loginSchema.safeParse({ email: demoEmailFor(text(fd,'email')), password: String(fd.get('password') ?? '').trim() });
+  if (parsed.success && DEMO_LOGIN_ENABLED && isDemoEmail(parsed.data.email) && parsed.data.password === DEMO_PASSWORD) {
+    ensureLocalDemoAccounts();
+    recordRateLimitSuccess('login', parsed.data.email);
+  }
   const ip = await clientIp();
   // Two independent dimensions: one IP cannot spray unlimited accounts, and
   // one account cannot be hammered from unlimited sources.
@@ -239,7 +245,7 @@ export async function loginAction(fd: FormData): Promise<{ error: string } | voi
       return { error: 'Anmeldung fehlgeschlagen. Bitte erneut versuchen' };
     }
   }
-  redirect(row.role==='provider'?'/pro':'/app');
+  redirect(safeNextPath(text(fd,'next'), row.role==='provider'?'/pro':'/app'));
 }
 export async function logoutAction(){ await destroySession(); redirect('/'); }
 

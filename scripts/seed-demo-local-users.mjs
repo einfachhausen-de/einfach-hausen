@@ -49,7 +49,7 @@ for (const demo of demos) {
 }
 
 try {
-  db.prepare("DELETE FROM auth_rate_limits WHERE key LIKE '%demo.einfachhausen.de%' OR key LIKE 'ip:%'").run();
+  db.prepare("DELETE FROM auth_rate_limits WHERE identifier LIKE '%demo.einfachhausen.de%'").run();
 } catch {
   // Rate-limit table is optional in older local DBs.
 }
