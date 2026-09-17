@@ -1,0 +1,651 @@
+<!doctype html>
+<html lang="de" data-page-node-id="tWxrA0cDEoDSfZk4IAjsTq">
+<head data-page-node-id="nx67oh2FyWCEurksGbuC9d">
+<meta charset="utf-8" data-page-node-id="gIgHn4WR1TNHHUnWFshg3j">
+<meta name="viewport" content="width=device-width,initial-scale=1" data-page-node-id="HmEU2wPVDquvfxF0uhQ96B">
+<title>App Desktop — Ist und Vorschlag</title>
+<style>
+/* Dieselben Werte wie packages/eh-design/src/tokens.css, Stand 17.09.2026.
+   Vorher wich der Entwurf an zwei Stellen ab: --r-pan war 10px statt 8px
+   (--eh-radius-panel ist 0.5rem) und --shadow-card war ein zweilagiger Schatten,
+   den es im Designsystem nicht gibt. */
+@font-face{font-family:Inter;src:url("/app-ux-vorschlaege/inter-variable.woff2") format("woff2");
+  font-weight:100 900;font-display:swap}
+:root{
+  --paper:#faf8f4; --petrol:#105258; --petrol-2:#0e494e; --deep:#0a3539; --ink:#10222a;
+  --sec:#4b5b60; --line:#e4e2dc; --sand:#ecdfc9; --terra:#a84d29; --white:#fff; --ok:#236344;
+  --page:#f2f0ea; --rail:#f7f5f0;
+  --r-ctl:6px; --r-pan:8px; --r-pill:999px;
+  --shadow-card:0 2px 10px rgba(16,34,42,.08);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--page);color:var(--ink);
+  font:14px/1.5 Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
+  font-feature-settings:"ss01","cv11";}
+.doc{max-width:1380px;margin:0 auto;padding:36px 28px 90px}
+
+.head{margin-bottom:18px}
+.head h1{font-size:28px;margin:0 0 6px;letter-spacing:-.02em}
+.head .lede{color:var(--sec);margin:0;max-width:920px}
+.bar-ok{background:#eef4ef;border:1px solid #cfe3d6;border-radius:10px;padding:10px 14px;margin:14px 0 0;font-size:13px;color:var(--ink)}
+.bar-ok b{color:var(--ok);margin-right:6px}
+
+.ref{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:22px;margin:18px 0 6px}
+@media(max-width:1000px){.ref{grid-template-columns:1fr}}
+.ref img{width:100%;display:block;border:1px solid var(--line);border-radius:10px;background:var(--white)}
+.ref figcaption{font-size:12px;color:var(--sec);margin-top:6px}
+.adopt{background:var(--white);border:1px solid var(--line);border-radius:10px;padding:18px 20px}
+.adopt > b{display:block;margin-bottom:8px}
+.adopt ul{margin:0;padding-left:20px;font-size:13.5px;color:var(--sec)}
+.adopt li{margin:5px 0}
+.tokens{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.tok{display:flex;align-items:center;gap:7px;font-size:12px;background:var(--white);
+     border:1px solid var(--line);border-radius:var(--r-pill);padding:4px 12px 4px 5px}
+.sw{width:16px;height:16px;border-radius:var(--r-pill);border:1px solid rgba(0,0,0,.08)}
+
+h2{font-size:18px;margin:36px 0 4px;letter-spacing:-.01em;
+   padding-top:18px;border-top:1px solid var(--line)}
+.route{font:12px ui-monospace,monospace;color:var(--sec);margin:0 0 6px;letter-spacing:.02em}
+.note{color:var(--sec);font-size:13px;margin:0 0 10px;max-width:980px}
+.note b{color:var(--ink)}
+figure{margin:0}
+.flabel{font-size:11px;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--sec);font-weight:700;margin:0 0 7px;display:flex;align-items:center;gap:8px}
+.flabel .pill-warn{background:#fdf4ec;color:var(--terra);border:1px solid #f0dcc6;border-radius:var(--r-pill);padding:1px 8px;font-weight:700;letter-spacing:0;text-transform:none;font-size:11px}
+.shot img{width:100%;display:block;border:1px solid var(--line);border-radius:10px;background:var(--white);box-shadow:var(--shadow-card)}
+.stack{display:grid;gap:14px;margin-bottom:8px}
+.legend{font-size:12.5px;color:var(--sec);margin:8px 0 0;line-height:1.5}
+.legend b{color:var(--ink)}
+
+.mc{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--white);
+    box-shadow:var(--shadow-card)}
+.mtop{display:flex;align-items:center;gap:14px;padding:0 18px;height:58px;
+  background:var(--white);border-bottom:1px solid var(--line)}
+.ws-brand{display:flex;align-items:center;gap:9px;padding-right:14px;border-right:1px solid var(--line);height:32px}
+.ws-mark{width:28px;height:28px;border-radius:6px;background:var(--petrol);
+  color:var(--white);display:grid;place-items:center;font-size:11.5px;font-weight:800;letter-spacing:.02em}
+.ws-name{line-height:1.1}
+.ws-name b{display:block;font-size:12.5px;font-weight:600;color:var(--deep)}
+.ws-name small{font-size:10.5px;color:var(--sec);font-weight:500}
+.ws-cv{color:var(--sec);font-size:10px;margin-left:2px}
+.ws-nav{display:flex;gap:2px;flex:1;justify-content:center;min-width:0;overflow:hidden}
+.ws-nav a{padding:7px 14px;border-radius:var(--r-pill);color:var(--sec);text-decoration:none;font-size:12.5px;font-weight:500;white-space:nowrap}
+.ws-nav a.on{background:var(--petrol);color:var(--white);font-weight:600}
+.ws-tools{display:flex;align-items:center;gap:8px;white-space:nowrap}
+.ws-find{display:inline-flex;align-items:center;gap:7px;padding:6px 14px;border:1px solid var(--line);
+  border-radius:var(--r-pill);background:var(--paper);color:var(--sec);text-decoration:none;font-size:12px;min-width:170px}
+.ws-find kbd{margin-left:auto;font:10.5px ui-monospace,monospace;color:var(--sec);
+  border:1px solid var(--line);border-radius:4px;padding:1px 5px;background:var(--white)}
+.ws-icon{width:32px;height:32px;border-radius:var(--r-pill);border:1px solid var(--line);
+  display:grid;place-items:center;color:var(--sec);background:var(--white);text-decoration:none;position:relative}
+.ws-icon.bad::after{content:attr(data-n);position:absolute;top:-3px;right:-3px;
+  background:var(--terra);color:var(--white);border-radius:var(--r-pill);font-size:9.5px;font-weight:700;padding:1px 5px;border:2px solid var(--white);line-height:1}
+.ws-avatar{width:32px;height:32px;border-radius:var(--r-pill);background:var(--sand);
+  color:var(--deep);display:grid;place-items:center;font-weight:700;font-size:11px}
+
+.mbody{display:grid;grid-template-columns:212px minmax(0,1fr) 240px;min-height:520px}
+.mbody.no-rail{grid-template-columns:212px minmax(0,1fr)}
+/* Die Haltepunkte stehen ganz am Ende des Stilblocks. Stehen sie weiter oben,
+   überschreiben die spaeter folgenden Basisregeln (.mside, .mmain, .mrail) sie
+   wieder - dann sind sie wirkungslos. Genau das war der Fehler. */
+
+.mside{background:var(--rail);border-right:1px solid var(--line);padding:12px 8px;display:flex;flex-direction:column;gap:2px}
+.mside .grp{font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:var(--sec);
+  font-weight:700;margin:11px 10px 4px;opacity:.85}
+.mside .grp:first-child{margin-top:4px}
+.mside a{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:6px;
+  color:var(--sec);text-decoration:none;font-size:12.5px}
+.mside a:hover{background:rgba(0,0,0,.04);color:var(--ink)}
+.mside a.on{background:var(--petrol);color:var(--white);font-weight:600}
+.mside a.on:hover{background:var(--petrol-2)}
+.mside a svg{flex:none;color:currentColor;opacity:.7}
+.mside a.on svg{opacity:1}
+.mside a.on .cnt{background:rgba(255,255,255,.22);color:var(--white)}
+.mside .cnt{margin-left:auto;font-size:10.5px;font-weight:700;background:var(--sand);
+  color:var(--deep);border-radius:var(--r-pill);padding:1px 7px;min-width:18px;text-align:center}
+.mside .me{margin-top:auto;padding-top:12px;border-top:1px solid var(--line);
+  display:flex;gap:9px;align-items:center;padding-left:10px;padding-bottom:4px}
+.mside .me .av{width:30px;height:30px;border-radius:var(--r-pill);background:var(--deep);
+  color:var(--white);display:grid;place-items:center;font-weight:700;font-size:11px;flex:none}
+.mside .me b{display:block;font-size:12px;line-height:1.15}
+.mside .me small{color:var(--sec);font-size:10.5px}
+
+.mmain{padding:22px 26px;min-width:0;display:flex;flex-direction:column;gap:16px;background:var(--white)}
+.ptitle{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.ptitle h3{margin:0;font-size:18px;letter-spacing:-.01em;font-weight:600}
+.ptitle .sub{color:var(--sec);font-size:12px}
+.ptitle .right{margin-left:auto;display:flex;gap:7px;align-items:center}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border:1px solid var(--line);
+  border-radius:var(--r-ctl);color:var(--ink);background:var(--white);text-decoration:none;font-size:12.5px;font-weight:500;
+  min-height:34px}
+.btn.pri{background:var(--petrol);border-color:var(--petrol);color:var(--white);font-weight:600}
+.btn.pri:hover{background:var(--petrol-2)}
+.btn svg{flex:none}
+
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);
+  border:1px solid var(--line);border-radius:var(--r-pan);overflow:hidden;background:var(--white)}
+.metrics > div{padding:14px 18px;border-left:1px solid var(--line)}
+.metrics > div:first-child{border-left:0}
+.metrics .n{font-size:22px;font-weight:700;letter-spacing:-.02em;line-height:1.05}
+.metrics .n.t{color:var(--terra)}
+.metrics .l{font-size:11.5px;color:var(--sec);margin-top:2px}
+
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{border:1px solid var(--line);border-radius:var(--r-pill);padding:4px 12px;font-size:11.5px;color:var(--sec);background:var(--white)}
+.chip.on{background:var(--paper);border-color:var(--ink);color:var(--ink);font-weight:600}
+.chip .b{background:var(--terra);color:var(--white);border-radius:var(--r-pill);font-size:9.5px;font-weight:700;padding:1px 6px;margin-left:5px}
+
+.rows{list-style:none;margin:0;padding:0;border:1px solid var(--line);border-radius:var(--r-pan);overflow:hidden;background:var(--white)}
+.rows li{display:flex;align-items:center;gap:12px;padding:12px 16px;border-top:1px solid var(--line);font-size:12.5px}
+.rows li:first-child{border-top:0}
+.rows .ic{width:28px;height:28px;border-radius:6px;background:var(--paper);
+  border:1px solid var(--line);display:grid;place-items:center;color:var(--petrol);flex:0 0 auto}
+.rows .t{min-width:0;flex:1}
+.rows .t b{display:block;font-weight:600;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rows .t small{color:var(--sec);font-size:11px;display:block;margin-top:1px;line-height:1.2}
+.rows .st{margin-left:auto;display:flex;align-items:center;gap:9px;white-space:nowrap}
+.amt{font-weight:700;font-variant-numeric:tabular-nums;font-size:13px}
+.pill{font-size:10.5px;font-weight:600;border-radius:var(--r-pill);padding:2px 9px;border:1px solid transparent;white-space:nowrap;line-height:1.4}
+.pill.w{background:#fbf1e6;color:var(--terra);border-color:#f0dcc6}
+.pill.i{background:#e7eef0;color:var(--petrol);border-color:#cfe0e3}
+.pill.o{background:#e8f1ea;color:var(--ok);border-color:#cfe3d6}
+.pill.p{background:var(--paper);color:var(--sec);border-color:var(--line)}
+
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.duo .box{background:var(--white);border:1px solid var(--line);border-radius:var(--r-pan);padding:14px 16px}
+.duo .box h5{margin:0 0 8px;font-size:12.5px;font-weight:600;display:flex;align-items:center}
+.duo .box h5 .lnk{margin-left:auto;color:var(--petrol);font-weight:600;font-size:11.5px}
+.mini{display:flex;gap:9px;padding:7px 0;border-top:1px solid var(--line);font-size:12px;align-items:center}
+.mini:first-of-type{border-top:0}
+.mini .ic{width:24px;height:24px;border-radius:5px;background:var(--paper);
+  border:1px solid var(--line);display:grid;place-items:center;color:var(--petrol);flex:0 0 auto}
+.mini b{display:block;font-weight:600;line-height:1.2}
+.mini small{color:var(--sec);font-size:10.5px;display:block;margin-top:1px}
+.mini .rt{margin-left:auto;white-space:nowrap}
+
+.ghdr{display:flex;align-items:center;gap:9px;margin:14px 0 6px;font-size:11px;
+  letter-spacing:.06em;text-transform:uppercase;color:var(--sec);font-weight:700}
+.ghdr .n{background:var(--paper);border:1px solid var(--line);border-radius:var(--r-pill);
+  padding:1px 8px;font-size:10.5px;letter-spacing:0}
+
+.person{display:flex;align-items:center;gap:11px;padding:11px 14px;border-top:1px solid var(--line)}
+.person:first-child{border-top:0}
+.person .av{width:34px;height:34px;border-radius:var(--r-pill);background:var(--deep);
+  color:var(--white);display:grid;place-items:center;font-weight:700;font-size:11.5px;flex:0 0 auto}
+.person .av.alt{background:var(--sand);color:var(--deep)}
+.person b{display:block;font-weight:600;line-height:1.2}
+.person small{color:var(--sec);font-size:11px;display:block;margin-top:1px}
+.person .rt{margin-left:auto;display:flex;gap:7px;align-items:center;white-space:nowrap}
+
+table.tbl{width:100%;border-collapse:separate;border-spacing:0;font-size:12.5px;
+  border:1px solid var(--line);border-radius:var(--r-pan);overflow:hidden;background:var(--white)}
+table.tbl th{text-align:left;font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;
+  color:var(--sec);padding:11px 16px;background:var(--paper);border-bottom:1px solid var(--line);font-weight:700}
+table.tbl td{padding:11px 16px;border-top:1px solid var(--line);vertical-align:middle}
+table.tbl tr:first-child td{border-top:0}
+table.tbl td:last-child,table.tbl th:last-child{text-align:right;white-space:nowrap}
+
+.mrail{padding:18px;min-width:0;background:var(--rail);
+  border-left:1px solid var(--line);display:flex;flex-direction:column;gap:10px}
+.mrail .rh{font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:var(--sec);
+  font-weight:700;margin:0 0 6px;opacity:.8}
+.mcard{background:var(--white);border:1px solid var(--line);border-radius:var(--r-pan);padding:12px 13px;
+  box-shadow:var(--shadow-card)}
+.mcard h4{margin:0 0 8px;font-size:12.5px;font-weight:600;display:flex;align-items:center;gap:7px}
+.mcard h4 .b{background:var(--terra);color:var(--white);border-radius:var(--r-pill);
+  font-size:10px;font-weight:700;padding:1px 7px;line-height:1.3}
+.mcard .item{display:flex;gap:8px;padding:7px 0;border-top:1px solid var(--line);font-size:12px;align-items:center}
+.mcard .item:first-of-type{border-top:0}
+.mcard .item b{display:block;font-weight:600;line-height:1.2}
+.mcard .item small{color:var(--sec);font-size:10.5px;display:block;margin-top:1px}
+.mcard .item .rt{margin-left:auto;white-space:nowrap;color:var(--sec);font-size:11.5px;font-variant-numeric:tabular-nums}
+.bar{height:7px;border-radius:var(--r-pill);background:var(--paper);overflow:hidden;margin:8px 0 6px}
+.bar i{display:block;height:100%;background:var(--petrol)}
+.stackbar{display:flex;height:9px;border-radius:var(--r-pill);overflow:hidden;margin:8px 0 8px}
+.stackbar i{display:block;height:100%}
+.mcard .go{display:flex;align-items:center;justify-content:center;gap:6px;background:var(--petrol);color:var(--white);
+  border-radius:var(--r-ctl);padding:8px;font-weight:600;margin-top:10px;text-decoration:none;font-size:12px}
+.mcard .go:hover{background:var(--petrol-2)}
+
+/* --- Haltepunkte, vom breitesten zum schmalsten ---------------------------
+   Sie muessen HIER stehen, hinter allen Basisregeln. Stehen sie weiter oben,
+   gewinnt die spaeter folgende Basisregel gleicher Staerke und der Haltepunkt
+   wirkt nicht. Genau das war der Fehler: die rechte Spalte blieb bei 900 px
+   sichtbar und schob sich unter die Tabelle.                                */
+
+@media(max-width:1180px){
+  .mbody{grid-template-columns:198px minmax(0,1fr) 220px}
+  .mbody.no-rail{grid-template-columns:198px minmax(0,1fr)}
+}
+
+/* Das Hauptmenue hat eine harte Mindestbreite (Logo + sechs Punkte + Werkzeuge ~921 px).
+   Darunter bekommt es eine eigene Zeile - dieselbe Loesung wie in der App (8f20654). */
+@media(max-width:1120px){
+  .mtop{flex-wrap:wrap;height:auto;min-height:58px;padding:9px 14px;gap:8px;row-gap:6px}
+  .ws-nav{order:3;flex:1 1 100%;justify-content:flex-start;overflow-x:auto;gap:0}
+  .ws-nav a{padding:7px 10px}
+  .ws-tools{margin-left:auto}
+  .ws-find{min-width:0}
+  .ws-find kbd{display:none}
+  .ws-brand{border-right:0;padding-right:0}
+}
+
+/* Unter 980 px faellt die rechte Spalte weg - dieselbe Schwelle wie in der App
+   ("unter 900 px bleiben Hauptmenue und rechte Spalte weg", Commit 8f20654). */
+@media(max-width:980px){
+  .mbody,.mbody.no-rail{grid-template-columns:184px minmax(0,1fr)}
+  .mrail{display:none}
+  .metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .metrics > div:nth-child(odd){border-left:0}
+  .duo{grid-template-columns:1fr}
+  /* Tabellen haben eine Mindestbreite aus Spalten und Padding. Statt sie stumm
+     abzuschneiden, darf der Mock bei sehr schmaler Ansicht scrollen. */
+  .mc{overflow-x:auto}
+}
+
+/* Unter 760 px reicht die Breite auch fuer eine Seitenleiste nicht mehr. Ohne
+   diese Regel bestimmt der Mock die Mindestbreite der ganzen Seite: er war bei
+   390 px Fensterbreite 442 px breit und zog die Ist-Aufnahme mit heraus. */
+@media(max-width:760px){
+  .mbody,.mbody.no-rail{grid-template-columns:minmax(0,1fr)}
+  .mside{display:none}
+  .mrail{display:none}
+  .mmain{padding:14px 12px;overflow-x:auto}
+  .metrics{grid-template-columns:1fr}
+  .metrics > div{border-left:0}
+  .mtop{padding:8px 10px;gap:6px}
+  .ws-find{display:none}
+  .doc{padding:22px 14px 60px}
+  /* Ohne min-width:0 erzwingt der Inhalt (vor allem die Tabellen) eine
+     Mindestbreite von rund 430 px. Dann ist der Mock breiter als das Fenster
+     und reisst die ganze Seite auf - mitsamt der Ist-Aufnahme darueber. */
+  .stack{grid-template-columns:minmax(0,1fr)}
+  .stack > *{min-width:0}
+  .mc,.mbody,.mmain,.shot,.shot img{min-width:0}
+}
+</style>
+</head>
+<body data-page-node-id="iYgvKuqzjRK6PCm5Oel5u5">
+<div class="doc" data-page-node-id="jGYYXTXGAZzuebhk717c1W">
+
+<div class="head" data-page-node-id="CQunjoaDWWfTNXEl4DM8KP">
+<h1 data-page-node-id="IxIQfdGe1AYsW8T3SLDoQn">App Desktop — Ist und Vorschlag</h1>
+<p class="lede" data-page-node-id="emxfmbJGnbC0IMFxWpamZm">Dieselbe Werkbank, dieselben Tokens, kein neues Design. Oben die echte Desktop-Aufnahme,
+darunter der Vorschlag in eurem Chrome: Topbar, Seitenleiste, Mitte, rechte Spalte.</p>
+<div class="bar-ok" data-page-node-id="OxZlSkG6eWiKhV3GNRVXUB"><b data-page-node-id="8QuDBDHL0QgfhNEW6Yeqap">✓</b>Hauptmenü in die Topbar · Seitenleiste mit Unterpunkten der aktuellen Seite · rechte Spalte mit seitenspezifischem Kontext · vierte Kennzahl.</div>
+</div>
+
+<div class="ref" data-page-node-id="D4EDZeu22PQHDuSktLHywV">
+  <figure data-page-node-id="jdGznd4Y7By2n1cTWariaI">
+    <img src="/app-ux-vorschlaege/referenz.png" alt="Referenz" data-page-node-id="dY2uhA0IfqLkYm9SosENt9">
+    <figcaption data-page-node-id="eIn8E938EWLLWMzDeo4IcJ">Deine Referenz — Circle-App, Desktop. Links Gliederung, Mitte Arbeit, rechts Kontext der Seite.</figcaption>
+  </figure>
+  <div class="adopt" data-page-node-id="zlW6UWjaPIEDtNCsYhsBBP">
+    <b data-page-node-id="XwiB4aZvrVyGyq7AcscTlC">Das übernehmen wir</b>
+    <ul data-page-node-id="26fIvWulME0inKCRwUbFlS">
+      <li data-page-node-id="AC8GfF7UkuAUYLB2jwbRmp"><b data-page-node-id="2yOu6aGqHhS3kklUKWv81W">Hauptmenü oben</b>, mittig, aktiver Punkt als petrolfarbene Pille.</li>
+      <li data-page-node-id="jC4Zqd6b0kAeYKOk4McMSU"><b data-page-node-id="1vRhCuURPW8MlBFYJBSGYw">Seitenleiste links</b> mit den <i data-page-node-id="zso9HzyBIFM5jfRdvUDSFp">Unterpunkten der aktuellen Seite</i>, gruppiert.</li>
+      <li data-page-node-id="Vywogx2sNnPnZIuTeLVgG0"><b data-page-node-id="XQATUohcSUA2Z6b0Spl1Qm">Rechte Spalte</b> mit Inhalt, der zur Seite gehört — nicht überall dasselbe.</li>
+      <li data-page-node-id="vMMXCJV6W4EuVE5UBsq4Ar"><b data-page-node-id="iFLpo5EtMFHGBqA8bejFjG">Vier Kennzahlen</b> unter dem Kopf.</li>
+    </ul>
+    <div class="tokens" data-page-node-id="X3kcHJ96p3iRXpUoCbgweR">
+      <span class="tok" data-page-node-id="ycZNjGA3c1RQmCDAd3raSH"><i class="sw" style="background:#105258" data-page-node-id="lovN5jZGl1BQlMoXkZcAZx"></i>petrol</span>
+      <span class="tok" data-page-node-id="OndMFPdelK3cSILxlYV594"><i class="sw" style="background:#0a3539" data-page-node-id="teiBycZi07J7qbvNfEmsDB"></i>deep</span>
+      <span class="tok" data-page-node-id="KjhySXpLv2xvC4GvzxGwpn"><i class="sw" style="background:#a84d29" data-page-node-id="Xh8i1cH8qoM3LoTFqgaHrp"></i>terra</span>
+      <span class="tok" data-page-node-id="dyjEwjhoj5ek1h0zpNUsqs"><i class="sw" style="background:#ecdfc9" data-page-node-id="kbOSDwpHCoj2qwDPuQ4kwN"></i>sand</span>
+      <span class="tok" data-page-node-id="BcnXReKpnohQC3AuqjlyC6"><i class="sw" style="background:#faf8f4" data-page-node-id="Co1d44bDBBhBHKOktFFujl"></i>paper</span>
+      <span class="tok" data-page-node-id="vPQFOAGiiIviEk87q7iDvG"><i class="sw" style="background:#e4e2dc" data-page-node-id="l4t0A8Cp6xkpBHGQHL21Xi"></i>line</span>
+    </div>
+  </div>
+</div>
+
+<h2 data-page-node-id="lpcgBRUyzva8CHVGDCJhja">Start — der Überblick</h2>
+<p class="route" data-page-node-id="0l16QXL8q2smBnXiMPMDBp">/app · Mitte: was heute ansteht · rechts: was auf dich wartet</p>
+<div class="stack" data-page-node-id="8tcwP2EDfk0xtd6CNUVjOV">
+  <figure class="shot" data-page-node-id="5oeoI5IJdfZQz1lFtjdvZp">
+    <p class="flabel" data-page-node-id="VPNF36IToutMdLDAQyDUeW">Ist — heute live <span class="pill-warn" data-page-node-id="soJBC7L3JT4gKZBHtRCCgB">Desktop 1320 px</span></p>
+    <img src="/app-ux-vorschlaege/ist/app/owner_app__desktop.png" alt="Ist: Start, Desktop" data-page-node-id="GpcbSidKo1mILdfv5mHVfe">
+  </figure>
+  <figure data-page-node-id="Qg18MbuQtu0lU2l6N7dSVo">
+    <p class="flabel" data-page-node-id="s2Cu0DMHRRJ1ZBNkLNHQdB">Soll — Vorschlag</p>
+    <div class="mc" data-page-node-id="Yef7mUW4hYGDgjOB7kcwUE">
+      <div class="mtop" data-page-node-id="JLTz1vK5TFF8XE3vO3Uv2n">
+        <div class="ws-brand" data-page-node-id="WnUTtsZ1c0Gs096dMmt8ZB"><div class="ws-mark" data-page-node-id="OfipvdpqI6FWSul8Zpal2P">eh</div><div class="ws-name" data-page-node-id="hqtwCwoCLhmGjdTbEH81L8"><b data-page-node-id="KhXqiPYBdhj7s7uj1x9D6s">einfach hausen</b><small data-page-node-id="gIPt53bbaLCAZQM5MEcPua">Fixturestraße 1</small></div><div class="ws-cv" data-page-node-id="P5IjTsFz0ErtdHR8dqRp3M">▾</div></div>
+        <nav class="ws-nav" data-page-node-id="uXqRAOe8P2MiQfK3wrkGfC"><a class="on" href="#" data-page-node-id="pBNTR98IrTBBUgW3PL8z1w">Start</a><a href="#" data-page-node-id="CvtfIWzAacKXmTx642ZosS">Hausakte</a><a href="#" data-page-node-id="pxdivZ9OPEz6CjDTFSlZYJ">Aufträge</a><a href="#" data-page-node-id="xBVh3Xwf7t3YXmI5Pwdvxr">Termine</a><a href="#" data-page-node-id="seVluIEo7ZkZe7vj2CBEVO">Verträge</a><a href="#" data-page-node-id="ggK36FQiR1ud9PSpwje5hq">Kontakte</a></nav>
+        <div class="ws-tools" data-page-node-id="dJlLW46C4xdK5GAsnlIW9Y"><a class="ws-find" href="#" data-page-node-id="RmbPrllYGJNDsJVgxpSrlX"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" data-page-node-id="AsiVQc58RCgVnQ6SgGElvx"><circle cx="11" cy="11" r="7" data-page-node-id="aZhFQzyYr4XcHvGbu1ITsq"/><path d="m20 20-3.5-3.5" data-page-node-id="dmPpL3ZViCJs1VIFTAZH6l"/></svg>Suchen<kbd data-page-node-id="zHuJc3pJw1unzD9cUPvSka">⌘K</kbd></a><a class="ws-icon bad" data-n="2" href="#" aria-label="Benachrichtigungen" data-page-node-id="FZdLl5xqOAzGRTig449Gr0"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="SDUTjzEH6chf2o3MzL96A1"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9" data-page-node-id="1k1i0tUls9Yc1q0797mXWf"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" data-page-node-id="dOD4fHI148Df5OfQEBnuhC"/></svg></a><a class="ws-avatar" href="#" data-page-node-id="8P9FP8DZGAZdU9DvnG7JKk">GK</a></div>
+      </div>
+      <div class="mbody" data-page-node-id="GbU39NWVjADSlmzgwzv9aa">
+        <aside class="mside" data-page-node-id="wutPnGzpapqvT7MGHVfX3E">
+          <p class="grp" data-page-node-id="iY5JElOc4leanECRryaZ9T">Arbeitsbereich</p>
+          <a class="on" href="#" data-page-node-id="NN2HlRYvwtBiYoH1FK2UZw"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="MxvfydLqo7OxvJGKkVNYbH"><path d="M3 11 12 3l9 8" data-page-node-id="hPpvhBRqSXuwhh1R4RQGb9"/><path d="M5 10v10h14V10" data-page-node-id="l0kcoKqEilQrp03yVtQpvd"/></svg>Übersicht</a>
+          <a href="#" data-page-node-id="afRECtaOi3hDg1mFSmoASQ"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="r6BKY2H8WQLoqa5xk91VRT"><circle cx="12" cy="12" r="9" data-page-node-id="GO7yK2O9WXOKxhmAfdNFbW"/><path d="M12 7v5l3 2" data-page-node-id="NoFrDU1P4zVWH1O3aGRuDj"/></svg>Was ansteht<span class="cnt" data-page-node-id="RcD8NcG5i1jVEfGucesMrl">2</span></a>
+          <a href="#" data-page-node-id="0lyHDmY9kK937q3uhCU57y"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="qNfdvgN9wytKC6DUHubpJ4"><rect x="3" y="5" width="18" height="16" rx="2" data-page-node-id="PhIIL5lqKauvpBoDe2Om0a"/><path d="M3 9h18M8 3v4M16 3v4" data-page-node-id="X4oszgwt9wjiBS14BadSNA"/></svg>Termine</a>
+          <p class="grp" data-page-node-id="Tpu1ZdpHDFaMC0lKVukQWx">Hausakte</p>
+          <a href="#" data-page-node-id="wHTLO8LMagOlEup1HmieSJ"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="avVOW0LkViN1ZExmYTYckg"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" data-page-node-id="1L5oKXoYyJdsEGBnH5sulj"/><path d="M14 2v6h6M9 13h6M9 17h4" data-page-node-id="ygV1kabShinRSumlOAonHh"/></svg>Dokumente</a>
+          <a href="#" data-page-node-id="4Ypycr46JAH1y583RnGWKb"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="IFXSvvPp8KCp3XoFQqNiBG"><circle cx="12" cy="12" r="3" data-page-node-id="GbLkpmvD2HDWw4Db4Ss37Y"/><path d="M12 1v6M12 17v6M4.2 4.2l4.3 4.3M15.5 15.5l4.3 4.3M1 12h6M17 12h6M4.2 19.8l4.3-4.3M15.5 8.5l4.3-4.3" data-page-node-id="viJBWC3ev4mSinDBIY039k"/></svg>Zählerstände</a>
+          <a href="#" data-page-node-id="7C3PqXsWdfFr17dh2IFEXT"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="tGbR0oOXvuIAaQSXI2GrQg"><path d="M3 21h18M5 21V7l8-4 8 4v14M9 9v.01M9 13v.01M9 17v.01M15 9v.01M15 13v.01M15 17v.01" data-page-node-id="UVFq1fLaHif2tf17Ii13M6"/></svg>Gebäude</a>
+          <p class="grp" data-page-node-id="5FZYuykfV3nT07z93irtCa">Konto</p>
+          <a href="#" data-page-node-id="vQBGWFevENaFwuCK1LjvsR"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="8B1BPAtcR87eyRKhVSWAfQ"><circle cx="12" cy="12" r="3" data-page-node-id="Utm5vK2EsgGUxtFCNaMGmN"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z" data-page-node-id="zieiwR7PncPSUc3FaHnDRE"/></svg>Einstellungen</a>
+          <div class="me" data-page-node-id="PjdHbxvRBrl4Suf9oMDgwj"><div class="av" data-page-node-id="3OUrFueWC10uRxIMJgUUhB">FE</div><span data-page-node-id="rFmCvEvj93oBFvhGoHk2uO"><b data-page-node-id="ml1asOFm48MPChZmHf5nbH">Fixture Eigentümer</b><small data-page-node-id="qWCY3Rva8U8iUhSTB1HAPL">Eigentümer-Konto</small></span></div>
+        </aside>
+        <main class="mmain" data-page-node-id="HzKSxwoljuKb9THq2Yikbd">
+          <div class="ptitle" data-page-node-id="VdvfvemG2s2Wnl9aUPdTxk"><h3 data-page-node-id="C9Rs5DteSfDuXIczoVL8bt">Fixturestraße 1, 46325 Borken</h3><span class="sub" data-page-node-id="8SxvTeNxZ7ihp6pkKeaKRs">Gina Kunde</span><div class="right" data-page-node-id="CUL69KQxIez8t63H4YrVmB"><a class="btn pri" href="#" data-page-node-id="o1SaBFi9wLjckAx8CCFmTB"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" data-page-node-id="G8hYZjetJ2PN8FOGhBwssu"><path d="M12 5v14M5 12h14" data-page-node-id="MvTLGLgvVSIWu7Cu6VungN"/></svg>Anliegen</a></div></div>
+          <div class="metrics" data-page-node-id="GHBPr1LfRmtfjanKHqIecG"><div data-page-node-id="aFwAhYFd7oruWx5fsQReBY"><div class="n t" data-page-node-id="uPAfh9i0lHBuhQ8SNlnUVA">2</div><div class="l" data-page-node-id="yN5kkGE1yRD48Yak9Pcv1p">Wartet auf dich</div></div><div data-page-node-id="3dZgdNSTLe0ElVF8wBwW8M"><div class="n" data-page-node-id="W6KstsOgCoPJdWGjusvg6G">5</div><div class="l" data-page-node-id="KCsgqYPVKR0vdwpmKlXGiq">Vorgänge</div></div><div data-page-node-id="lT3gpi27h8FoYDfEfeIoan"><div class="n" data-page-node-id="U08Gb2Lu3HydLRcHnFPfQi">4</div><div class="l" data-page-node-id="GPJ6aOqGz7DWjqGZSmf9jR">Dokumente</div></div><div data-page-node-id="mM0EpLVmSofto9DkBhNbgK"><div class="n" data-page-node-id="1MGwHKxeHIycHPengsAsLQ">1</div><div class="l" data-page-node-id="YVf6sGAOdsTOz6DuodvzAC">Termine</div></div></div>
+          <div class="duo" data-page-node-id="E5PDfThC6v9GvtlHT51T0e">
+            <div class="box" data-page-node-id="pG0xNlQr8yJzyGmHUSXCAw"><h5 data-page-node-id="T6Y3Fg85iwkjsgbGOCYHSA">Wartet auf dich<span class="lnk" data-page-node-id="p3OJKvGykyz5w65oo8a60m">Alle →</span></h5>
+              <div class="mini" data-page-node-id="aBtA4js1o4COIstApxSAoZ"><span class="ic" data-page-node-id="N75hfhJiHwJzHagfN6731N"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="DsLspj0AXYiX71JtZUUpi5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" data-page-node-id="x2GF8AqCHl9lJTi0p8iwol"/><path d="M14 2v6h6" data-page-node-id="erzh0U2O33oiiEKwRB0QGm"/></svg></span><span data-page-node-id="aL20YeateBwvKaSBdksLcv"><b data-page-node-id="cmrx7HdZzyqIyFJwqO0NVs">Rechnung freigeben</b><small data-page-node-id="UVqEkNsmnfDrukhJhsVw2Z">148,00 € · Frist 19.09.</small></span><span class="rt" data-page-node-id="2ofxaAk2I5aEWc2NJ3hXUF"><span class="pill w" data-page-node-id="ipKUHrlBGVhtWvBPFpAQET">offen</span></span></div>
+              <div class="mini" data-page-node-id="2VXvqyEeCGh2fonsmbAwRQ"><span class="ic" data-page-node-id="FWEEukYjCVsDY1F7m9F2Vw"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="WhKfz7TZCXEOf77mojZVJi"><rect x="3" y="5" width="18" height="16" rx="2" data-page-node-id="3ggP1zQDlLtamEPahRstLf"/><path d="M3 9h18M8 3v4M16 3v4" data-page-node-id="jUB52xpwQKOq8uthBFMXQR"/><circle cx="12" cy="14" r="1.5" data-page-node-id="m1iI8R9ksC4YSvdxWHxSU4"/></svg></span><span data-page-node-id="SDTVqvKZvbl4cBFZH9vwk7"><b data-page-node-id="CdP3dpiA6LmLJUfafh1KUR">Termin bestätigen</b><small data-page-node-id="TwXyPTJPLJjK73ntPyLEbH">Freitag, 18.09., 21:12</small></span><span class="rt" data-page-node-id="tafa9uxuGt78oUAfOUIDgw"><span class="pill i" data-page-node-id="LNIx3N9KpOc0VI3Zx57V2l">neu</span></span></div>
+            </div>
+            <div class="box" data-page-node-id="079uKw6c7my5W3KNPIiq1E"><h5 data-page-node-id="wZqsFp5x9UHz8uZpVuWvu4">Hausakte<span class="lnk" data-page-node-id="n0qoKQHP9T7lDLTB4lo75i">Alle 4 →</span></h5>
+              <div class="mini" data-page-node-id="CRpdvTBeDYqnpj0nCECbeF"><span class="ic" data-page-node-id="TxAzw5IuHHJYWlujx6dDyX"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="uDHApxSn5btDCtddGxE3eG"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" data-page-node-id="6wb8gR0I3zbk1Ice6Ribob"/><path d="M14 2v6h6" data-page-node-id="CjgBZpmDnoXAYZGBvazelx"/></svg></span><span data-page-node-id="cSmvrhzBmzsBGZ0u5F0j13"><b data-page-node-id="ewjqmHdXe0HfbwwT85RyBW">Rechnung Heizkörper entlüften</b><small data-page-node-id="Z2ThziZ5mBC3cR8uDCrwHS">PDF, 214 KB · 16.09.</small></span></div>
+              <div class="mini" data-page-node-id="sxW3t4snKT9EdsY4b4QXzT"><span class="ic" data-page-node-id="NGAKgVjrYZJqwmadKHuHz1"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="IbEKauSU5f65QS6IBmzSce"><circle cx="12" cy="12" r="9" data-page-node-id="5cb76dcL2wCeBJaNlXsImj"/><path d="M12 7v5l3 2" data-page-node-id="AzuO9bykqCmZVjSKMCCF7s"/></svg></span><span data-page-node-id="mzpgUJWmIPP6KO7AF70gqB"><b data-page-node-id="Hxnbfn6A5FHh6DKPc7RKxa">Wartungsprotokoll Heizung</b><small data-page-node-id="H444lXdpDdr64dklpkhwP2">PDF, 186 KB · 15.09.</small></span></div>
+              <div class="mini" data-page-node-id="yiDBwgR7noTsT0EjMqQKdm"><span class="ic" data-page-node-id="TYEbKAtbExG9Fn8U1sZ4LM"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="se9xdaYC8K9Nq9Xq8eTk7v"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" data-page-node-id="mVEZvnbZUWWMJXnofReCyM"/></svg></span><span data-page-node-id="quO6tIgmfBjHLUXHBhnx3a"><b data-page-node-id="tTzueqe17pQHOmbAm7XF9O">Angebot Badarmatur tropft</b><small data-page-node-id="pI731pgKq0YqVlOdrKeox3">PDF, 152 KB · 14.09.</small></span></div>
+            </div>
+          </div>
+          <div class="ghdr" data-page-node-id="MNBBuAH7H47o6zTwuApXVn">Nächste Termine</div>
+          <ul class="rows" data-page-node-id="LSWmGZcBFGn4MwTGfuurx7">
+            <li data-page-node-id="zn18qlGXI4sZRPC1mLUcZQ"><span class="ic" data-page-node-id="VenQNlpIfuRqJsc9Z2cFIe"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="6R6urLiJUXoytS524R047P"><rect x="3" y="5" width="18" height="16" rx="2" data-page-node-id="5eY6OAQx2nAz1K1hW4KjrA"/><path d="M3 9h18M8 3v4M16 3v4" data-page-node-id="ElUhlveuU3MjYWyiS0m4zg"/><circle cx="12" cy="14" r="1.5" data-page-node-id="JAe8tB1Q0nqgGElGFe4tF8"/></svg></span><div class="t" data-page-node-id="hcgjsQMZkFaNHhnAY9YV6N"><b data-page-node-id="srPkNhD7Cyzit0VAXvzTTV">Termin bestätigen</b><small data-page-node-id="cUeKvxxNiqIZAGMtmxuFhf">Fixture Partner · Fr., 18.09., 21:12</small></div><div class="st" data-page-node-id="utL2IhuhQioYNW26lU6x8I"><span class="pill i" data-page-node-id="4azUDHCwciVHSUZW0pFEPu">Bestätigen</span></div></li>
+          </ul>
+        </main>
+        <aside class="mrail" data-page-node-id="VKJvBFIDFGRCt2cGG7Ayv1">
+          <p class="rh" data-page-node-id="0D4S1BD8mBeU8JvozIEoc0">Kontext dieser Seite</p>
+          <div class="mcard" data-page-node-id="BfobJBqVHEyRpZWdnSYePt"><h4 data-page-node-id="mrsBc7jWuu7hCpQ0iQU2s4">Wartet auf dich<span class="b" data-page-node-id="Dlz10R3F8ux2TjF4T3bmbn">2</span></h4>
+            <div class="item" data-page-node-id="dftl4whj2spxykXttA28ik"><span class="ic" style="width:24px;height:24px;border-radius:5px;background:#fbf1e6;color:var(--terra);display:grid;place-items:center" data-page-node-id="1Zqi3lNizlixsyZv9SZqyX"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="MK4NXizT3e7EmCVtkhvfX9"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" data-page-node-id="dn6AlVJRBOOFHB2L0fIOFO"/><path d="M14 2v6h6" data-page-node-id="9TTU3pEEdybKbB7DP7PQCR"/></svg></span><span data-page-node-id="kHGryCsQdWq1O3LtH8nlQU"><b data-page-node-id="n3D3NPyu5uy4TJLbIHuESh">Rechnung freigeben</b><small data-page-node-id="52ZtmEPkTxbz1AxHpbkwrY">148,00 € · Frist 19.09.</small></span></div>
+            <div class="item" data-page-node-id="ANTFQqlZ5cakwFiNrzxC2e"><span class="ic" style="width:24px;height:24px;border-radius:5px;background:#e7eef0;color:var(--petrol);display:grid;place-items:center" data-page-node-id="gbWWuCG3H1BM67oYDBBCZK"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="khLOr0wqFvMTJRNeF28cSw"><rect x="3" y="5" width="18" height="16" rx="2" data-page-node-id="k1UBPJEV4Xdzan5Y8KspGY"/><path d="M3 9h18M8 3v4M16 3v4" data-page-node-id="0FIo5tW9NsakN1u3CqPBEy"/></svg></span><span data-page-node-id="QSjkInsUH524lzW90tX5t7"><b data-page-node-id="tx14XmxwprPrUYYEBtFnCz">Termin bestätigen</b><small data-page-node-id="srfjqwRSGRiANFTlm7PEFI">Fr., 18.09., 21:12</small></span></div>
+            <a class="go" href="#" data-page-node-id="98JuPjRg8HGFqIpVV1ya7i">Rechnung prüfen<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" data-page-node-id="dh5isRVgknTdpM04q7lCTV"><path d="m9 6 6 6-6 6" data-page-node-id="1sw6ztSIWgctFGZyidbYYO"/></svg></a>
+          </div>
+          <div class="mcard" data-page-node-id="H5oH2oiBR8fFCyXsXavdBE"><h4 data-page-node-id="al0HKnBKSskNtxrv7WvRYR">Vollständigkeit</h4>
+            <div class="bar" data-page-node-id="FSwCaLIZzYsP6P0vRf9JvB"><i style="width:68%" data-page-node-id="Yu5mwdGJHy04oViFyBRUHE"></i></div>
+            <div class="item" data-page-node-id="VeKoKeRHUxiuBLbqfPiRqn"><span data-page-node-id="MQj0Vq2FTQtzm5LreI8lwF">Technik</span><span class="rt" data-page-node-id="mt8feCveH36KB4W7mSnMKv">4 / 6</span></div>
+            <div class="item" data-page-node-id="ueQv4Z8IDbM2kO4H3L6UGt"><span data-page-node-id="Co6PtBSkRhwEHHT1QzKlLZ">Verträge</span><span class="rt" data-page-node-id="rLGGpkXvOlDFeY3B6jYD1h">3 / 5</span></div>
+            <div class="item" data-page-node-id="tfxzF7GhtCN7GNLIEOPbNK"><span data-page-node-id="h6eiSf40H4Rcf4Zn8aS752">Nachweise</span><span class="rt" data-page-node-id="vzqfKrEQjeA9XnGCrjb8Lb">2 / 4</span></div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </figure>
+</div>
+
+<h2 data-page-node-id="WKTqmOMctgKHSXX8NqmbUU">Aufträge — die Werkbank</h2>
+<p class="route" data-page-node-id="kbDMSZRu7eOYL1ydNS3Rle">/app/jobs · Mitte: Tabelle · rechts: Status und Termine</p>
+<div class="stack" data-page-node-id="Xk7lueFKdA1YzVYi9Fof3z">
+  <figure class="shot" data-page-node-id="Kq288OiB09XyEj9AefwozR">
+    <p class="flabel" data-page-node-id="HCmV2cXKyGk41nAm0fHdkq">Ist — heute live</p>
+    <img src="/app-ux-vorschlaege/ist/app/owner_app_jobs__desktop.png" alt="Ist: Aufträge, Desktop" data-page-node-id="p2XblW4iywqsGBNkusMcgF">
+  </figure>
+  <figure data-page-node-id="c2Y1XjYOKN9q2AL3TpxnEJ">
+    <p class="flabel" data-page-node-id="9Pd0IbHtqF6rhgcPiHm5US">Soll — Vorschlag</p>
+    <div class="mc" data-page-node-id="NcpePYWbQDqDIAmD1n1LUg">
+      <div class="mtop" data-page-node-id="v4393lXgSaUQLTO8UKN1JK">
+        <div class="ws-brand" data-page-node-id="6Y9qNUohyl5iMzPy4SNvB0"><div class="ws-mark" data-page-node-id="rqLKeoIvkueGpToGzjDz4r">eh</div><div class="ws-name" data-page-node-id="HnbbBV4faswYNhzJPGUtCr"><b data-page-node-id="AwPKJ8qNOU2CnMfaA9SWP9">einfach hausen</b><small data-page-node-id="VzwVCXeatPVAt2b7T3nivl">Fixturestraße 1</small></div><div class="ws-cv" data-page-node-id="2Wic9w0bBUGUWc2ybpSgDE">▾</div></div>
+        <nav class="ws-nav" data-page-node-id="sQgHBUSVFmj5VDNX3hEPjT"><a href="#" data-page-node-id="nFv9zjB5yfgc3w3kDHhl1u">Start</a><a href="#" data-page-node-id="3OVmVJcRrhZ0RHRfpmVQkS">Hausakte</a><a class="on" href="#" data-page-node-id="4FWuHFGU88imP2GNtYwquz">Aufträge</a><a href="#" data-page-node-id="eTpsromAaJSYCSedrqPLAy">Termine</a><a href="#" data-page-node-id="BmttpKDATFGnyTYsEc1qrv">Verträge</a><a href="#" data-page-node-id="x3nZAYbRWTJVBVBnLnAy44">Kontakte</a></nav>
+        <div class="ws-tools" data-page-node-id="KGzD3sFTAxWTjImpbFmKz6"><a class="ws-find" href="#" data-page-node-id="w36eYVKjTeJzGxN4e9GEf0"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" data-page-node-id="bJBPOih7LSDdMITtwgCCBE"><circle cx="11" cy="11" r="7" data-page-node-id="xlnMy2UdRsCWnA4kOrHUo5"/><path d="m20 20-3.5-3.5" data-page-node-id="NBLQC5zVtmjwmziy9bzl2A"/></svg>Auftrag oder Betrieb<kbd data-page-node-id="nVzN6SOawUyzpkqipNXX7y">⌘K</kbd></a><a class="ws-icon" href="#" aria-label="Benachrichtigungen" data-page-node-id="gl05VqP5XWWOvfCxgiDPIa"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="qLQeQXTxCBIHMk3eati5v9"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9" data-page-node-id="oMvJePwZHfRlS0nE35DCgO"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" data-page-node-id="oXjhrJ6OQOYJTVA9WPaCvC"/></svg></a><a class="ws-avatar" href="#" data-page-node-id="utAZJi5BDsN1zNW1y2EQlP">GK</a></div>
+      </div>
+      <div class="mbody" data-page-node-id="9vt1LwoojAFwYpER2Fg2Zj">
+        <aside class="mside" data-page-node-id="9vmzRV7E5TGSNo2EoBtxob">
+          <p class="grp" data-page-node-id="7HDG2L3m40wulCP3sF4LY3">Aufträge</p>
+          <a class="on" href="#" data-page-node-id="PBlh4kkC2aAYFnqUdTo8Yg"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="WDYGbYzl1diBewhzMZmSb0"><path d="M9 11h6M9 15h6M9 7h6M5 21h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2z" data-page-node-id="spGpBU8PSBdVOZSQRe3TCG"/></svg>Alle Vorgänge<span class="cnt" data-page-node-id="LlGT7RpctWjQItrV2x1w9S">5</span></a>
+          <a href="#" data-page-node-id="hJTCyCfNu0ZWTEiERUMBjr"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="7tkeldDUiDo3vI40grpce1"><path d="M12 5v14M5 12h14" data-page-node-id="6N4Pl57t0tySJ6WvgyB2Ag"/></svg>Offen<span class="cnt" data-page-node-id="AWqUlvbE8UEGKey0YZO1rr">1</span></a>
+          <a href="#" data-page-node-id="Dv1g2Q2HrEPrhJEUKp8cSa"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="LjJtcRrtYWfw5kNv3v4su6"><circle cx="12" cy="12" r="9" data-page-node-id="Js9rjyUvcXl9KXGZaxBnR1"/><path d="M12 7v5l3 2" data-page-node-id="tDp3Ae1axyGhOlGydT46JL"/></svg>In Arbeit<span class="cnt" data-page-node-id="YI4dokoAQPjVJnkx3RMlGO">1</span></a>
+          <a href="#" data-page-node-id="cEkACQObjmI36bmi7rcOwm"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="aBA7x0cmP9swMWL1pMKepM"><path d="m5 12 5 5 9-9" data-page-node-id="UToADhqmNBWBCin8yIbtNA"/></svg>Abgeschlossen<span class="cnt" data-page-node-id="yez0HtnGhjQ3GEXUuD1278">1</span></a>
+          <p class="grp" data-page-node-id="Cy0GAAGtn5sj1uKx27J2EM">Termine</p>
+          <a href="#" data-page-node-id="HBzEgK0C0OXKwiVHwjxIgf"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="neBJBdvOhIGgCZ38ShHpQs"><rect x="3" y="5" width="18" height="16" rx="2" data-page-node-id="oYI0yYzRbsZsdW9FkDVqft"/><path d="M3 9h18M8 3v4M16 3v4" data-page-node-id="kNGFY0Vtdh0P1kAWmJEsaS"/></svg>Anstehend</a>
+          <a href="#" data-page-node-id="KQBskc2QDD2o7IebA9U0kf"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="pdY7yR8iKgdktMEA3MhUw6"><rect x="3" y="5" width="18" height="16" rx="2" data-page-node-id="DcsyK2gDEcIhWG7aF82xjH"/><path d="M3 9h18M8 3v4M16 3v4" data-page-node-id="Mo1pdYQvYislVnW5YE35Kf"/><path d="M9 13l6 3M9 16l6-3" data-page-node-id="oudFDKnzUEYtLCgiP0HvtJ"/></svg>Vergangen</a>
+          <p class="grp" data-page-node-id="TLRiY1VghnQQwZMjW6Mavq">Anlegen</p>
+          <a href="#" data-page-node-id="spcgGtYvRNmeuTTTzJNKzv"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="UUsOIjPI3XCBE8bHGlZrxQ"><path d="M12 5v14M5 12h14" data-page-node-id="pzCiTGitdQ8PcGE6oZh5kJ"/></svg>Neues Anliegen</a>
+          <div class="me" data-page-node-id="UvkD5cRySetN1dx69pbY8d"><div class="av" data-page-node-id="IYtAx0zp85AlfUeiCif747">FE</div><span data-page-node-id="tnhPw3jUljgLxhPNIOYevT"><b data-page-node-id="pHt0XnDdGcRBcRE7NZzC5J">Fixture Eigentümer</b><small data-page-node-id="jX0VSDV4hynWvsEzFCS4tL">Eigentümer-Konto</small></span></div>
+        </aside>
+        <main class="mmain" data-page-node-id="U8Oxsu4xBgM7LxnUUtKxn1">
+          <div class="ptitle" data-page-node-id="cufjMbIzavKqwObkT4LK5I"><h3 data-page-node-id="WSLjK1GYbjBlgWoLbYtZHV">Aufträge</h3><span class="sub" data-page-node-id="5GwVJr61UswbEtvma8OTeH">5 Vorgänge</span><div class="right" data-page-node-id="50JAzE4RIjTHbhZTJe0ZYz"><a class="btn" href="#" data-page-node-id="8Ra9EQi3Juz8apxav0SfLu"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="Em6ojuc6YwPJmZuJXJ1ycF"><path d="M3 6h18M3 12h18M3 18h18" data-page-node-id="zMQiSfLBc8AxPcS9xatyUN"/></svg>Liste</a><a class="btn" href="#" data-page-node-id="n5WPJ0AdfzGWA4c90JkHyI"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="52RBCTgzDerlEr9ZGtBc7N"><rect x="3" y="3" width="8" height="8" rx="1" data-page-node-id="eMZerkxFYUsnZzJnHa41H4"/><rect x="13" y="3" width="8" height="8" rx="1" data-page-node-id="Dv1gnCHiW9DpWOHMtQx251"/><rect x="3" y="13" width="8" height="8" rx="1" data-page-node-id="9yhezRGGTCH9sqsCKEod3T"/><rect x="13" y="13" width="8" height="8" rx="1" data-page-node-id="74C1AKymdN0WIHALFmOd0b"/></svg>Karten</a><a class="btn" href="#" data-page-node-id="6SfVZn2CEJtpUEO3glSJms"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="QihbUfynkKUWPhhoyLOYKB"><circle cx="12" cy="12" r="9" data-page-node-id="QIbHnNBQcJDRw4c5TRsF82"/><path d="M12 7v5l3 2" data-page-node-id="VTURKoR1zMLPoHK2GB7rRB"/></svg>Chronik</a><a class="btn pri" href="#" data-page-node-id="zPwniSjy5EpxA9wvM8djqq"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" data-page-node-id="hxU6PQDvFDOBidHrbMqi6o"><path d="M12 5v14M5 12h14" data-page-node-id="x24Cu13PmthIOnZAOJet3i"/></svg>Anliegen</a></div></div>
+          <div class="chips" data-page-node-id="KjjgJ8Lm4kh2jdHFRjG12A"><span class="chip on" data-page-node-id="CMO7mw3xXqSrpzO9GfOdNZ">Alle</span><span class="chip" data-page-node-id="hn3g9nmoNzk4mpngJ12QvG">Offen<span class="b" data-page-node-id="nClWLE7KRgHvF9HdkOFmCQ">1</span></span><span class="chip" data-page-node-id="prpa5APJS6Mr3RAZ7h8REj">In Arbeit<span class="b" data-page-node-id="DcHzLGuMJdEvAAZ1D03COY">1</span></span><span class="chip" data-page-node-id="gbBQUTydbJRpGgSOgQLXhj">Abgeschlossen</span><span class="chip" data-page-node-id="or5xV0w3jsTfXPNL9CJZNY">Braucht dich<span class="b" data-page-node-id="1NoRurR0qvPbgAhhKj16xF">2</span></span></div>
+          <table class="tbl" data-page-node-id="tbpl74P0pZtWIp6vWxBBi2"><thead data-page-node-id="Xk1fHWbNFA04ktUjqVoEXt"><tr data-page-node-id="tbE6jce9aHSWPtMpCsUMln"><th data-page-node-id="5APmSoYFCF6O5fCeqBadFk">Vorgang</th><th data-page-node-id="BtqRbMbjg6qktUHByMQ9u5">Betrieb</th><th data-page-node-id="ZNXkZCD3ClqBcP69NB8R6c">Stand</th><th data-page-node-id="4Wz2BASFKsKCoVcj7DETWV">Betrag</th></tr></thead>
+            <tbody data-page-node-id="b6XJCRptFCtJCZYjVNXA2I">
+            <tr data-page-node-id="79VawESPrHarP10c1Hp6z1"><td data-page-node-id="AWaeA6TGIwvbuQ6sch1mLq"><b data-page-node-id="O8zsIB4Hj54TcnDepaNrzC">Heizkörper entlüften</b><br data-page-node-id="NJACbUQsXrHYaiblGaPtG6"><small style="color:var(--sec);font-size:11px" data-page-node-id="2IQUHSv7M5DYduyOtqybfg">Nr. 9004 · 16.09.</small></td><td data-page-node-id="nOGnfIDMEGJADhZBBsq0Wr">Demo Handwerker</td><td data-page-node-id="GY9isMWtDdqg7ocefZHyA2"><span class="pill i" data-page-node-id="In38JcIdO2r4HNBtwt8OwU">In Arbeit</span></td><td class="amt" data-page-node-id="hGCF4qxVuNWIEB57Gyb1M2">148,00 €</td></tr>
+            <tr data-page-node-id="w2SzZki8ivAxD7oJ86Q0oP"><td data-page-node-id="SrHRs38b8ek97H1y076jOk"><b data-page-node-id="mveH8q1mGMltEvHGPpiT6m">Badarmatur tropft</b><br data-page-node-id="goHx970ubZxDvLv7CNBmwp"><small style="color:var(--sec);font-size:11px" data-page-node-id="dwFMKk5OsyCgJ1qVBnA8pY">Nr. 9003 · 14.09.</small></td><td data-page-node-id="14LNCG6GtFJQUBFGwBiPAz">Demo Handwerker</td><td data-page-node-id="xWeyLqR5spn5EuIXWepEcD"><span class="pill w" data-page-node-id="cODKmMfm2b6TaO8wy9ZEYq">Entscheidung offen</span></td><td class="amt" data-page-node-id="G6TQgbQPiDoU9SZUyRDXHK">206,00 €</td></tr>
+            <tr data-page-node-id="k9bIxKFNBGrF6UjG82JdUZ"><td data-page-node-id="5fSHWVVImXPBd8vxlejPL4"><b data-page-node-id="kFDWVtPytVu34GoMIgDGYm">Thermostate tauschen</b><br data-page-node-id="tCySQUc3ji9IhRQNILkfWz"><small style="color:var(--sec);font-size:11px" data-page-node-id="MzM0boEEYzPCxkmXcCSiIB">Nr. 9005 · 12.09.</small></td><td data-page-node-id="jjQevWRcfzXw2mvV0OcNS2">Demo Handwerker</td><td data-page-node-id="ROtD4aYKd8NieZoiOQjqB2"><span class="pill o" data-page-node-id="cqZzebiHkGNqs6XbbR8B18">Abgeschlossen</span></td><td class="amt" data-page-node-id="DOqeaMe9ZkGdu8wnrdN2TM">—</td></tr>
+            <tr data-page-node-id="5B2vqTR99upvCUVGDYKYMz"><td data-page-node-id="7oY6IIY8w0N8pzFUCs5fHh"><b data-page-node-id="qg6i7s49WynawS0DKQQwbt">Heizungswartung</b><br data-page-node-id="uptyWrrwBvuzGanldL7p2E"><small style="color:var(--sec);font-size:11px" data-page-node-id="QwqjLALF7o6bCs5iFUZHVV">Nr. 9001 · 11.09.</small></td><td data-page-node-id="3WjqykMo951HHHlBM85hve"><span style="color:var(--sec)" data-page-node-id="vnEkrzt243PB66kucQAh2C">wird gesucht</span></td><td data-page-node-id="v3Ty6Gj8qh2LAgibCs4h4v"><span class="pill p" data-page-node-id="zuwzApei61vUdutG2jJvBX">Offen</span></td><td class="amt" data-page-node-id="hXEFbpnr4w3cFvCRf0E09Q">—</td></tr>
+            <tr data-page-node-id="3sDSiaU3awqrSlMvBuTk2D"><td data-page-node-id="G2U9EAcbIYyl1QLPAVcmML"><b data-page-node-id="DCHjDYQiqp4ETf62c9oZ0C">Dachrinne reinigen</b><br data-page-node-id="CnjVQK7wHttRvJuJJTFmRO"><small style="color:var(--sec);font-size:11px" data-page-node-id="o06B4hUKhHZTYJOT9r9vLH">Nr. 9002 · 10.09.</small></td><td data-page-node-id="8VQ0gFq0zcr0hO93ByKGC6"><span style="color:var(--sec)" data-page-node-id="ZehYZLXEXjOknWzfh4HEPD">wird gesucht</span></td><td data-page-node-id="JskDiILBgpmKqxVbmEgDNo"><span class="pill p" data-page-node-id="f6xkks5U5HINZEWIRMsV2k">Offen</span></td><td class="amt" data-page-node-id="2fD8YLvUb3Dn9ST5Mm5YNX">—</td></tr>
+            </tbody>
+          </table>
+        </main>
+        <aside class="mrail" data-page-node-id="hEetEhSZHt8I11zMcnXVST">
+          <p class="rh" data-page-node-id="HpZ1ipH1ojSL9qDIE3PlxQ">Kontext dieser Seite</p>
+          <div class="mcard" data-page-node-id="y6xTUaFOUzyZ2Tx7MSTCnu"><h4 data-page-node-id="ru6NAd2mSAIJqoIDS7IvAx">Status</h4>
+            <div class="stackbar" data-page-node-id="pyVDdH2Ad4gc3isrCyGFaJ"><i style="width:20%;background:var(--terra)" data-page-node-id="2l2gO9CY8WR4mZN9mATbeq"></i><i style="width:20%;background:var(--petrol)" data-page-node-id="bfvY3rA6X1iQJbp1LKvQsP"></i><i style="width:20%;background:var(--ok)" data-page-node-id="IvAnCyz0XHpQ2obx9AlThm"></i><i style="width:40%;background:var(--line)" data-page-node-id="6H7bK3KSxACT4BDkdMoa3x"></i></div>
+            <div class="item" data-page-node-id="a8jgWf2o84IYNHmcya1x8a"><span data-page-node-id="tFMHLNMAfm6ThZE9eAejB7">Braucht dich</span><span class="rt" data-page-node-id="qCV525UcOD2Y0QJYC4Aw2Q">1</span></div>
+            <div class="item" data-page-node-id="XMzhbhhdNm44U9IlFTEBE0"><span data-page-node-id="2FsqZyDGYYzETilCKNbHp3">In Arbeit</span><span class="rt" data-page-node-id="1bwSlnLRYHAxUpnzQaw2SA">1</span></div>
+            <div class="item" data-page-node-id="e1ZV1DrEe7VvYXezTkUtqU"><span data-page-node-id="iV4swxtJSlkDNxnCAX2NfN">Abgeschlossen</span><span class="rt" data-page-node-id="q3ejT7LyUiDBwOksBG8RA4">1</span></div>
+            <div class="item" data-page-node-id="nwbYt5W50Qfgxf2HIUwzh2"><span data-page-node-id="wW1HnO15sJMlr4HihnlFHX">Offen</span><span class="rt" data-page-node-id="0ehXYo6u2IcLDR6u8GG76J">2</span></div>
+          </div>
+          <div class="mcard" data-page-node-id="fb9SuBY6rC5bQzljzJvBdk"><h4 data-page-node-id="UUBqFC4WVfgISfYL42HrRA">Nächste Termine</h4>
+            <div class="item" data-page-node-id="PHA8B9AGT4es6R5yxvfQbd"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="KKd34fDd9e1SC4DkQWrYHh"><rect x="3" y="5" width="18" height="16" rx="2" data-page-node-id="5ncGYgWKEOR8ecLA6rC0QX"/><path d="M3 9h18M8 3v4M16 3v4" data-page-node-id="cdL6Tiw1YyKSMvExFSVOtr"/></svg><span data-page-node-id="CwwuA188y5YqoeAzg9UABU"><b data-page-node-id="5zT3JIX7ai4BMBQ9kz8p4l">Fr. 18.09.</b><small data-page-node-id="HQfhrJEXr4CgoTANeWoCZ8">21:12</small></span><span class="rt" data-page-node-id="EJzEHSEktGXDoupDDrNNmP">Fixture</span></div>
+            <div class="item" data-page-node-id="3FE66kUNb7ZJkSboMrAFeY"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="PpvJnHbCyt1WZYOkSR5Vjj"><path d="M16 21v-2a4 4 0 0 0-8 0v2M3 11a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4v6a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4z" data-page-node-id="4Mjjglp99vCCqwrGzSJxPx"/></svg><span data-page-node-id="d4Eh5uu9t4cpzpt1gKt1Yr"><b data-page-node-id="VHZoxTfU8oyy7qLKLCA0Gc">Partner</b></span></div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </figure>
+</div>
+
+<h2 data-page-node-id="uhbchbHMk3AXAdUQgnRYVx">Dokumente — die Ablage</h2>
+<p class="route" data-page-node-id="ns3H9680EVBVyLJ06q4yQM">/app/documents · Mitte: nach Typ gruppiert · rechts: Speicher und Neuzugänge</p>
+<div class="stack" data-page-node-id="fKftPEDKeX5FbDLRCkTHnu">
+  <figure class="shot" data-page-node-id="nseNITjsmqsbsVAKc9eetK">
+    <p class="flabel" data-page-node-id="ZLIc6zGgU5DeoGHPZtmyU6">Ist — heute live</p>
+    <img src="/app-ux-vorschlaege/ist/app/owner_app_documents__desktop.png" alt="Ist: Dokumente, Desktop" data-page-node-id="oEZAGkoRMjbvjePLyH0qcr">
+  </figure>
+  <figure data-page-node-id="hfxQZ4zsPWrsA0MGyFjNpv">
+    <p class="flabel" data-page-node-id="3fTynL7rltCtjfONjTTYiF">Soll — Vorschlag</p>
+    <div class="mc" data-page-node-id="1kCnLPxJG61WUAjGN3Ao04">
+      <div class="mtop" data-page-node-id="S0wjIqqGq8Yqy3FJQPeiRn">
+        <div class="ws-brand" data-page-node-id="Yljo5fE6lk3k2imdVMe2v6"><div class="ws-mark" data-page-node-id="46x9GStFz3xOceGihrG2OH">eh</div><div class="ws-name" data-page-node-id="iiHWvDC7LLz1wnyioYMLI0"><b data-page-node-id="suIGaDIUB3Isk0a1hDpYG7">einfach hausen</b><small data-page-node-id="yuZM5HJqXMBiYumOUnBiOz">Fixturestraße 1</small></div><div class="ws-cv" data-page-node-id="MkECg3pCb7YylagfkvOsMN">▾</div></div>
+        <nav class="ws-nav" data-page-node-id="XwBS1kDU7VEaUvOzBh1LP5"><a href="#" data-page-node-id="Vqk4fsoghxNUKmR2CaqlgZ">Start</a><a class="on" href="#" data-page-node-id="wh7zFPVdwECh3XXYjlCinF">Hausakte</a><a href="#" data-page-node-id="azoKDVWxvjlvSTgGEXd9vM">Aufträge</a><a href="#" data-page-node-id="lYsjtLEk6pUSptzQhSMx0R">Termine</a><a href="#" data-page-node-id="GQz3dPlTQoBGBHdsN9lvZt">Verträge</a><a href="#" data-page-node-id="WK9Jf1YnNAcW1cwtmkDS3r">Kontakte</a></nav>
+        <div class="ws-tools" data-page-node-id="NotCgWYkVELkA8WZmUWRoX"><a class="ws-find" href="#" data-page-node-id="UAfFsoRkSZC80CJMsE3Ftp"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" data-page-node-id="QdiFRo2xrxvJvRpEimIhWp"><circle cx="11" cy="11" r="7" data-page-node-id="DXmQjfsBEM53JLlTddXl0Y"/><path d="m20 20-3.5-3.5" data-page-node-id="qRJDpH55kRFfsbIO9sXMSj"/></svg>Dokument suchen<kbd data-page-node-id="N434HoGZLdNTQYQ3U0ZOrG">⌘K</kbd></a><a class="ws-icon" href="#" aria-label="Benachrichtigungen" data-page-node-id="4bsFyCilzJUgIS2JObNbur"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="YgVUDwzj0SGnYLXc2oyetd"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9" data-page-node-id="lYZnvP37Z4C3PkzUbz4OiV"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" data-page-node-id="vvCO2uXFo7bDjIMCHXouB1"/></svg></a><a class="ws-avatar" href="#" data-page-node-id="csiqvHHMKoVdhwwxoEmhO6">GK</a></div>
+      </div>
+      <div class="mbody" data-page-node-id="3YBpHp1VFVUrMecCT01L6V">
+        <aside class="mside" data-page-node-id="mYxxZECzqKOvVDx2PIWaXG">
+          <p class="grp" data-page-node-id="lc79LgjYgnjklWJXupDL5E">Hausakte</p>
+          <a href="#" data-page-node-id="VZSh3IDZmJq0sC4dRR7a8g"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="0vKRiFMR9bTWFt1gO6naqV"><path d="M3 11 12 3l9 8M5 10v10h14V10" data-page-node-id="vImEXEWuGlERAdzKfJ2CQD"/></svg>Übersicht</a>
+          <a class="on" href="#" data-page-node-id="kSeqDB6qjTNL5VqNCTeja3"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="KNTL91IVi5wtuvwhbjdHBp"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" data-page-node-id="Ku5RuEefsWBppnlZ6DFmuw"/><path d="M14 2v6h6" data-page-node-id="fQOvvKJ3ccwF7YGHHIu6gW"/></svg>Dokumente<span class="cnt" data-page-node-id="saaWysJUQe4NwsXyt1HpyZ">4</span></a>
+          <a href="#" data-page-node-id="BQ42moOOQiL8LhRkXhugiK"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="LcG0h9oS6pokYH08ADYR0X"><circle cx="12" cy="12" r="9" data-page-node-id="3a0p5yBQHS3b8lAAkvtsxL"/><path d="M12 7v5l3 2" data-page-node-id="RNDH1l44yuhI9HASkl4fIG"/></svg>Historie</a>
+          <a href="#" data-page-node-id="6A86Bm5ixuAYrKyiE1JuYF"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="6juLkiFzMLzSv1JdJw3HjR"><rect x="3" y="4" width="18" height="18" rx="2" data-page-node-id="JAgYxKSMh6WXtaqaD1ikQi"/><path d="M16 2v4M8 2v4M3 10h18" data-page-node-id="bGfJIaTlseV1uYpVdpegQE"/></svg>Mein Jahr</a>
+          <a href="#" data-page-node-id="4DiTlQF7iWiPG2ttplBH8H"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="KhdCYukyaPkC2eL5b5slqS"><path d="M3 21h18M5 21V7l8-4 8 4v14M9 13h6" data-page-node-id="9H8a4dpxtOBfkMENymU1AS"/></svg>Hauspass</a>
+          <p class="grp" data-page-node-id="ZysXZTxKc4JKcX5pu0OC5y">Gebäude</p>
+          <a href="#" data-page-node-id="dN7vNeUJYJmiFA2vji7v6G"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="PxFCA2xBLp0JlWDlD7ASQx"><circle cx="12" cy="12" r="3" data-page-node-id="TmOMQk1RXa4shG83lxqUOs"/><path d="M12 1v6M12 17v6M4.2 4.2l4.3 4.3M15.5 15.5l4.3 4.3M1 12h6M17 12h6" data-page-node-id="nfryJBeborMhKDBLEGfkSR"/></svg>Zählerstände</a>
+          <a href="#" data-page-node-id="4ELKUO8VCkxhtodZX7WXQY"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="FljXE3srq1t0iA2xzD7E6e"><path d="M3 21h18M5 21V7l8-4 8 4v14M9 9v.01M9 13v.01M9 17v.01" data-page-node-id="LK00GiMZKXui2H5yycwNeO"/></svg>Bauteile</a>
+        </aside>
+        <main class="mmain" data-page-node-id="DOrQwYJtDH4wWY571J8Znb">
+          <div class="ptitle" data-page-node-id="BJDI1rMz2AXdd2kKMZt6Bw"><h3 data-page-node-id="tVTBdJJByJLHAp7C3MY5kP">Dokumente</h3><span class="sub" data-page-node-id="Yq7JCXjkFBcTvdOYHF6FW3">4 abgelegt · 648 KB</span><div class="right" data-page-node-id="ZsLqRRAf9ESEzLFOlqolvH"><a class="btn" href="#" data-page-node-id="baBHkkHdVHrk8HADQzzmWr">Alle Typen</a><a class="btn pri" href="#" data-page-node-id="fD7yQ2EEGCIpdF8PnhmOX5"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" data-page-node-id="EADM31NkhYEGu5XSwWQPcL"><path d="M12 5v14M5 12h14" data-page-node-id="1FfBO4pApKXWItgKywixim"/></svg>Dokument</a></div></div>
+          <div class="ghdr" data-page-node-id="pHxisYPq8mrX1AbdxOvNuS">Rechnungen <span class="n" data-page-node-id="0aagEBYeCKvzXm3LDWKUsi">1</span></div>
+          <ul class="rows" data-page-node-id="WSEH5xwdRShf5MhUOIgo7M">
+            <li data-page-node-id="3QQ6oidbz4HsQzvvZ3Ikv7"><span class="ic" data-page-node-id="vrZ1RZmCGcqvyFY9VlVGzb"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="kHiO3P58uSlxlEGkxSOyfZ"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" data-page-node-id="Z9Jxr3fvxXCxr7TxORsmBY"/><path d="M14 2v6h6" data-page-node-id="KDdb9zX13ER3PmCD4Nov2E"/></svg></span><div class="t" data-page-node-id="k0UJERLWM1gRd1IMe6Hjtp"><b data-page-node-id="0iIEqaNlsYvk4RnrvjGjiq">Rechnung Heizkörper entlüften</b><small data-page-node-id="gHz4BGCrJ3911EdNHLPTNA">PDF, 214 KB · 16.09.2026 · Demo Handwerker</small></div><div class="st" data-page-node-id="isOt0hC3skyPq0HQBQSzv7"><span class="pill w" data-page-node-id="MIEI1XDC2f5Ljpx9zttjRN">Freigabe offen</span></div></li>
+          </ul>
+          <div class="ghdr" data-page-node-id="HI0cC4LlwzMrcXXGzM6jaG">Angebote <span class="n" data-page-node-id="u4PoyeTTsULcsYperL13TO">1</span></div>
+          <ul class="rows" data-page-node-id="KQ7qROiz9f8HeshPRfp1QZ">
+            <li data-page-node-id="8VYTrYkEu7lTaTAsJO83nZ"><span class="ic" data-page-node-id="vACIKfd0VBTpFhazlmeHIq"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="5KzrQ95cB8KcMAeAMz0AkD"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" data-page-node-id="YSVsr2V6jE8UUPfu4pcwL1"/></svg></span><div class="t" data-page-node-id="2r68PZ1t4SXshUhHbiyKDa"><b data-page-node-id="JU3eLWcAdscfJF4hgwlxWI">Angebot Badarmatur tropft</b><small data-page-node-id="544BpaeNR0tIo7FXpcFEix">PDF, 152 KB · 14.09.2026 · 206,00 €</small></div><div class="st" data-page-node-id="3IjklKA6zIjE08r0PtYEKw"><span class="pill i" data-page-node-id="UAlPa1ehxhdVf6hdFkZojA">Vergleichen</span></div></li>
+          </ul>
+          <div class="ghdr" data-page-node-id="BNYFqlrwylh4SegH9Mf9Yt">Garantien &amp; Nachweise <span class="n" data-page-node-id="6w4wLaa02gsnamPVDPQtHk">2</span></div>
+          <ul class="rows" data-page-node-id="eiRhYtlejRkNcB2Te0SLM2">
+            <li data-page-node-id="D58tCkd1LIzfoh7rqHQfsZ"><span class="ic" data-page-node-id="eN1Xq0oSBVIaKjtSsBBIEK"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="HUIWYe2Ta8IozWCAFBnKpF"><path d="m9 12 2 2 4-4M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z" data-page-node-id="GJIICGy3E2FeiGHArNIBhZ"/></svg></span><div class="t" data-page-node-id="Je0b0UzTdPrNkMW0ukQhIa"><b data-page-node-id="BtRAQ5aYElgySEMQw2jM8G">Wartungsprotokoll Heizung</b><small data-page-node-id="DmJc3nKORhe3WJyLXoE5RF">PDF, 186 KB · 15.09.2026</small></div><div class="st" data-page-node-id="kwdx7tLsmkAnV0mme43EnZ"><span class="pill o" data-page-node-id="7cnh0cE6xsnSxxzxlVsX7D">Abgelegt</span></div></li>
+            <li data-page-node-id="yqNiszi58xAl6KNF0HPpaH"><span class="ic" data-page-node-id="TQepRiWH4Oe1y2OA6dF8KH"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="L467Q8AOfin84YnXLobDrD"><path d="m9 12 2 2 4-4M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z" data-page-node-id="r5Qe3RCkKHbgZLjWHan1vn"/></svg></span><div class="t" data-page-node-id="e2HDapzJdMk4rmvbAgmUw9"><b data-page-node-id="711CsQana1GaW8tvXmC9Ah">Garantieschein Thermostate</b><small data-page-node-id="HXeQoHV8eliStcpFu5CllA">PDF, 96 KB · 13.09.2026 · 5 Jahre</small></div><div class="st" data-page-node-id="uPbP5B6pRs2NMBePBd71iQ"><span class="pill o" data-page-node-id="ve5tz0S3SiVjiSm9hQzus5">Garantie</span></div></li>
+          </ul>
+        </main>
+        <aside class="mrail" data-page-node-id="3nHNNnYfAewgXQVB9zFaUA">
+          <p class="rh" data-page-node-id="GJBtueaXnt9YVurM5IfGGE">Kontext dieser Seite</p>
+          <div class="mcard" data-page-node-id="BxJKKa5H8IhKbQr5R3ACPS"><h4 data-page-node-id="x49TEdhKBTrtLOYqPzEcsi">Speicher</h4>
+            <div class="bar" data-page-node-id="8LnQlTOs4f1MyEGQkk1IpR"><i style="width:6%" data-page-node-id="e976KDBAdtvtoUCXiMcPrZ"></i></div>
+            <div class="item" data-page-node-id="9Fj5t8DWY1FG8TTDAb2ECG"><span data-page-node-id="xUONVS9ozj4fFBtvFtQm9X">belegt</span><span class="rt" data-page-node-id="VkGnmrzVE672fpCCGtzV4m">648 KB</span></div>
+            <div class="item" data-page-node-id="PtD3TcWSIAgVGGZxFgPLhd"><span data-page-node-id="4F6uN3UuOyuI5DuKX8MVLz">Rechnungen</span><span class="rt" data-page-node-id="REtT87OnDnP6CaJpvbrQan">1</span></div>
+            <div class="item" data-page-node-id="EnpeyvegBKloevGU5nYKtl"><span data-page-node-id="N4oEhB0Etyd3JOdLdNOaKE">Angebote</span><span class="rt" data-page-node-id="elvgkBhASpN1xnJmY43NkE">1</span></div>
+            <div class="item" data-page-node-id="d9ZXhPMNbwJgqHO1tfPTdk"><span data-page-node-id="CTkPKTJ01SaaeaelOyqxmD">Garantien</span><span class="rt" data-page-node-id="AUCv3N4dzR2tHsyyjuc0mD">2</span></div>
+          </div>
+          <div class="mcard" data-page-node-id="et6UC6w4szLKsQE5bX7ZG1"><h4 data-page-node-id="fW0BB9CHJRzTOuGEQ8oiu9">Zuletzt hinzugefügt</h4>
+            <div class="item" data-page-node-id="8CrJR0nlkxZbSZCI7BaSDr"><span data-page-node-id="7shk5NaAw8gTJoP4DZGq9u">16.09.</span><span class="rt" data-page-node-id="ZdPGbf5BzYTw3Df2pJJI2a">Rechnung Heizkörper</span></div>
+            <div class="item" data-page-node-id="7N0IySEsAQGtxkCOJd3rwn"><span data-page-node-id="9NKVcEGbVj8yP6PGJUfpFQ">15.09.</span><span class="rt" data-page-node-id="0yEez1LFRaopTaLtFvXMN1">Wartungsprotokoll</span></div>
+            <div class="item" data-page-node-id="P1v89n6EE9enJ0gnODAxE7"><span data-page-node-id="NWYuNbHC64WO1d3uAuq1PC">14.09.</span><span class="rt" data-page-node-id="pfiURQpDV32UEDBrQt5CCm">Angebot Badarmatur</span></div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </figure>
+</div>
+
+<h2 data-page-node-id="pBHFEXQKec9OO9n1ZeEWVW">Kontakte — die Menschen</h2>
+<p class="route" data-page-node-id="ECgBZoPjaWDFr2ho0mAk2h">/app/messages · Mitte: Personen · rechts: Rückfragen und Erreichbarkeit</p>
+<div class="stack" data-page-node-id="H1154rnTCHol8yFCawAjpR">
+  <figure class="shot" data-page-node-id="3KbHwzukSJMDjzxcNUlBs6">
+    <p class="flabel" data-page-node-id="JZ5roAwXQ6v9oKiVyr6UeN">Ist — heute live</p>
+    <img src="/app-ux-vorschlaege/ist/app/owner_app_messages__desktop.png" alt="Ist: Kontakte, Desktop" data-page-node-id="vXe5hjrNxvzQpxVPEbFYLJ">
+  </figure>
+  <figure data-page-node-id="ch1jxSnrvZcH8BrKn7kciu">
+    <p class="flabel" data-page-node-id="3bOtuM3B18lIMxdTJaNjW1">Soll — Vorschlag</p>
+    <div class="mc" data-page-node-id="RGaKo76ZDogIYNExVJW8Ql">
+      <div class="mtop" data-page-node-id="rlzH8egy527opmUG5NA9Pq">
+        <div class="ws-brand" data-page-node-id="9eLHQXJrHLXH4LPceawyTr"><div class="ws-mark" data-page-node-id="AYBX0dD2Wq6rmDbNVXYLhv">eh</div><div class="ws-name" data-page-node-id="rUk4ExIAZAHSon9LCYUaut"><b data-page-node-id="AHuqElN0C2SmqhaCwEyGVk">einfach hausen</b><small data-page-node-id="xCKbTkplkOkUQGHKfhGJDo">Fixturestraße 1</small></div><div class="ws-cv" data-page-node-id="khTNIQgKJQbg8AqEyEchTo">▾</div></div>
+        <nav class="ws-nav" data-page-node-id="kKf1mzTJ9aECQvRFmxxeYW"><a href="#" data-page-node-id="CVlYg9fzNJ5Ep1TLv8FGFY">Start</a><a href="#" data-page-node-id="9QBYXAciJ16mbhviFHELH7">Hausakte</a><a href="#" data-page-node-id="DfE7QAaVMBTTJCsOq7ZWbP">Aufträge</a><a href="#" data-page-node-id="dh90BEE6rPdRfPEaAjcIjS">Termine</a><a href="#" data-page-node-id="CkHm5F5at4B43SDwF3q4ix">Verträge</a><a class="on" href="#" data-page-node-id="EbMyno90dzTnutINtyap66">Kontakte</a></nav>
+        <div class="ws-tools" data-page-node-id="Hyu2iGBir7jvxsULyaTGrv"><a class="ws-find" href="#" data-page-node-id="MET7mfrqQcSngYOGqCUDkk"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" data-page-node-id="MAnqIA6bzmCheW7GNADQB7"><circle cx="11" cy="11" r="7" data-page-node-id="uBcCBVuCdowo4pHma8q5A4"/><path d="m20 20-3.5-3.5" data-page-node-id="jezPqbocLODc2UFqBm2NFI"/></svg>Betrieb oder Person<kbd data-page-node-id="J7vZOHBh9xKcufq1lsYLNV">⌘K</kbd></a><a class="ws-icon bad" data-n="1" href="#" aria-label="Benachrichtigungen" data-page-node-id="DLztofW6ggRiPrypw2ffP1"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="ZiT7XsIxtZcNz3z0iRoRqT"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9" data-page-node-id="6JP1X2mgADkW4MonZsE1r7"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" data-page-node-id="aFOz9lKlnqsCc8gxy1AkHO"/></svg></a><a class="ws-avatar" href="#" data-page-node-id="R0xSWxkYykJ4QceedzkZb1">GK</a></div>
+      </div>
+      <div class="mbody" data-page-node-id="7XkisAtPoNTnWkyoXiz4hK">
+        <aside class="mside" data-page-node-id="KXHe45HI7LpnEvQi1iNjND">
+          <p class="grp" data-page-node-id="t3SdstGK2Ovfe7zH9wVaYX">Kontakte</p>
+          <a class="on" href="#" data-page-node-id="0UOyD3pf0Vu2dfPlHcrdJR"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="i1mqpdi8VD5VvV95dkzcgV"><path d="M16 21v-2a4 4 0 0 0-8 0v2M3 11a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4v6a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4z" data-page-node-id="MKefuZQraUojqrk3bvEI2V"/></svg>Alle Kontakte<span class="cnt" data-page-node-id="oRjDVZmwWUP9xTHcufDqn2">2</span></a>
+          <a href="#" data-page-node-id="nHkv4A5BpeCDXLY637PDm9"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="SJHoxRVHlkjxMZmNTlOe8L"><path d="M14 7 3 18M3 7l11 11M14 17H3M21 21V3" data-page-node-id="uRMnzHUkTddCdDy5g9EdET"/></svg>Handwerker</a>
+          <a href="#" data-page-node-id="LkKurLsYepeqdQtcxEtnF6"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="32Hpg1UNkhipmCYqYdgcKE"><path d="M3 9 12 3l9 6v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM9 21V12h6v9" data-page-node-id="kubH7aQO4YIybBhfe3Rz6S"/></svg>Nachbarn</a>
+          <p class="grp" data-page-node-id="Cf6eUfP0GddEGiAUOtBwOF">Nachrichten</p>
+          <a href="#" data-page-node-id="2oPBFBn0MjEBXPOjpydZmT"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="R06HMwaSD81UCz2afW5g6p"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" data-page-node-id="Gw0PKYlwcEv7s3srLBT5l7"/></svg>Ungelesen<span class="cnt" data-page-node-id="R6vJtVSu3GgHSZ894LuAT3">1</span></a>
+          <a href="#" data-page-node-id="39qnao7bklBqIiHEUCqems"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="tbQFRpBnwTHZULvd7dixbK"><rect x="3" y="3" width="18" height="18" rx="2" data-page-node-id="9OzfOE42flMcsdnj9EZ31P"/><path d="M3 9h18" data-page-node-id="MYt0Abyy27CRcP3AxEnPpS"/></svg>Archiv</a>
+        </aside>
+        <main class="mmain" data-page-node-id="DfLG4occAbszBa6xgzdmgs">
+          <div class="ptitle" data-page-node-id="OGT0R0EksqWB2HLxPcwQQ3"><h3 data-page-node-id="iwgpa73XDSi8uk8S8lgj08">Kontakte</h3><span class="sub" data-page-node-id="UlCqd1hQFH7xI9kAeGL7CG">2 gespeichert</span><div class="right" data-page-node-id="LAPsRVlluGHWvxxGtbWNto"><a class="btn pri" href="#" data-page-node-id="UpkdYY6xauJse3PAdApa5i"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" data-page-node-id="Uv47Rw5dhvFCxkna13TwOh"><path d="M12 5v14M5 12h14" data-page-node-id="D3PKM8ko28u2tVucEN6bo3"/></svg>Kontakt</a></div></div>
+          <ul class="rows" data-page-node-id="vEVhdgG9URF5AzCZRne312">
+            <li class="person" data-page-node-id="zM5lk6KGhPMa8uN0ORRpbl"><div class="av" data-page-node-id="gk4HbpovcgqHyyeEn7zd41">DH</div><div class="t" data-page-node-id="BTJaCwQMDzxGBEXVC0HuwX"><b data-page-node-id="OlSiFShSJkOcnyEt0DP6ZF">Demo Handwerker</b><small data-page-node-id="WZRFh7Y4dyhiYggfoEH2UJ">Heizung &amp; Sanitär · Ansprechpartner: Maria</small></div><div class="rt" data-page-node-id="7qeEtGt4B4l0nd5zsHB11a"><span class="pill w" data-page-node-id="2qbxPCd7owbOPCNBosvrxZ">1 neue Nachricht</span><a class="btn" href="#" data-page-node-id="DN33ld09YnzRKJC1Nygi9O">Schreiben</a></div></li>
+            <li class="person" data-page-node-id="UML5boZdBM5cHkETnCuN5q"><div class="av alt" data-page-node-id="pRACfzYVJmyUHscHAXm6pC">FP</div><div class="t" data-page-node-id="i2ZL6G8kz39BZdk0aMBH0u"><b data-page-node-id="kTwQ3r5CVLm7et6oH3GMpz">Fixture Partner</b><small data-page-node-id="0y7rbEirA3OdWsyrsvxYOP">Bezirksschornsteinfeger · Termin Fr., 18.09.</small></div><div class="rt" data-page-node-id="r22MU2hmKEtoEJmbGXixzh"><span class="pill i" data-page-node-id="Vy5zpQtrZRCgaac4D4OpbP">Termin</span><a class="btn" href="#" data-page-node-id="zCtvJSlxJayXtN33Uq3RQI">Anrufen</a></div></li>
+          </ul>
+          <div class="ghdr" data-page-node-id="AfGo6vdJdA5r44rhKtM7gq">Letzte Nachrichten</div>
+          <ul class="rows" data-page-node-id="2LB7rnEf4YkdncJ6Foe3RX">
+            <li data-page-node-id="C86hGxUlrzXhpFFgzqlcOS"><span class="ic" data-page-node-id="PnOPGuxIr5mTBw9rty2F7Y"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="ONoB5AbYW5AmmW0j9vDFRd"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" data-page-node-id="ASucHoCcWFJ3Wjm4QRNdJx"/></svg></span><div class="t" data-page-node-id="CuZ2K9U7OJIJvHUwOUGQoV"><b data-page-node-id="dMzIr0jV0Q4csdS5G1HWrg">„Ja, das kann ich mir ansehen."</b><small data-page-node-id="PqKaFasFxfjzy3ag3uhSE0">Demo Handwerker · 16.09., 21:04</small></div><div class="st" data-page-node-id="OXUCLATrxdMFh6ZLGudruj"><a class="btn" href="#" data-page-node-id="NWhHpzCxnq7bf2qiNmJvs9">Antworten</a></div></li>
+          </ul>
+        </main>
+        <aside class="mrail" data-page-node-id="9kPK1eSXWAgB7azyAQ0lit">
+          <p class="rh" data-page-node-id="SmKTIfXA7Ve9eXqn6WO9nD">Kontext dieser Seite</p>
+          <div class="mcard" data-page-node-id="bGFBIR8O6aaAFoWDZnoqBL"><h4 data-page-node-id="OUV0EMxvOF4Cwhhe0XUpRU">Offene Rückfragen<span class="b" data-page-node-id="3qLHHCNHpgHxN78EsM2OIB">1</span></h4>
+            <div class="item" data-page-node-id="N0mCxrzMYFTDn2iHiYgIYu"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="K63PDrtdcsh7NaPLgSOIU3"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" data-page-node-id="llKncGF0uU5fAps1HYuDoP"/></svg><span data-page-node-id="cLoVaxflwHl2bhhUEbKh49"><b data-page-node-id="Bh6XWk6Rpvlyz9IWfCC7kc">Demo Handwerker</b><small data-page-node-id="i9c8PTCCNiappVRQdleqS8">wartet seit 16.09., 21:04</small></span></div>
+            <a class="go" href="#" data-page-node-id="Pr8HgUMNKC4ZamiqidfFil">Antworten<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" data-page-node-id="TJtqy3lsxWixTMryLj8sVy"><path d="m9 6 6 6-6 6" data-page-node-id="REhtLF6r4lQBpGx5aF33QN"/></svg></a>
+          </div>
+          <div class="mcard" data-page-node-id="dBQ8SPIG2VnB3M6Rg3H1p5"><h4 data-page-node-id="vA4m7xMCcKBihDbnlxl8Bq">Erreichbarkeit</h4>
+            <div class="item" data-page-node-id="wFEX2VPC2A1xGNG2dOJANH"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="tnYCZO1YBXSqJzSDRTm2tm"><circle cx="12" cy="12" r="9" data-page-node-id="Y0BeA4zA9Bb2yBa7yOpDOz"/><path d="M12 7v5l3 2" data-page-node-id="bCWDRKNUy81ygSHNyMSyaz"/></svg><span data-page-node-id="zAuteEIfRxLesCHRQn7V83"><b data-page-node-id="4vAIHrMHeqdyPfoKHd7bDY">Demo Handwerker</b></span><span class="rt" data-page-node-id="dykqF1WtjepaekHWSThaor">Mo–Fr</span></div>
+            <div class="item" data-page-node-id="Z9n3w4pXOMn3daZ8763GAh"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="3MUjiX7CbrJfy5fP1hph5m"><circle cx="12" cy="12" r="9" data-page-node-id="sf0wDH3Ei93qXPyDflyi6q"/><path d="M12 7v5l3 2" data-page-node-id="4vwnNmfAFwUDQKcwEYe6Dh"/></svg><span data-page-node-id="pRu37bQnFyDS2X3b3czkqq"><b data-page-node-id="HDflgWjMSFhmBZLoBYi3Eh">Fixture Partner</b></span><span class="rt" data-page-node-id="zKoNjaZhohiXoy4FUHRMpB">nach Termin</span></div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </figure>
+</div>
+
+<h2 data-page-node-id="4AFChPRoXjCU3CV1BqhHyT">Partnerbereich — der Betrieb</h2>
+<p class="route" data-page-node-id="TpidueV1d6NP02xC31z6rb">/pro · Mitte: Anfragen mit Entfernung · rechts: Gebiet und Quote</p>
+<div class="stack" data-page-node-id="r9CiV1GNOtiAPWJc5TrbCD">
+  <figure class="shot" data-page-node-id="y73URrF3DgRybFMeZM1Qqa">
+    <p class="flabel" data-page-node-id="gNtqrF6nzQbftbC7Z73MJ9">Ist — heute live</p>
+    <img src="/app-ux-vorschlaege/ist/app/provider_pro__desktop.png" alt="Ist: Partnerbereich, Desktop" data-page-node-id="OAimH1vnbcMohGdZLVc2TV">
+  </figure>
+  <figure data-page-node-id="3DVDDB8r3pcw23s5bekng4">
+    <p class="flabel" data-page-node-id="bIgxlH3CokUonitPadYqgF">Soll — Vorschlag</p>
+    <div class="mc" data-page-node-id="FhrpeLGRbLY6XilL8wc5xt">
+      <div class="mtop" data-page-node-id="capgruMHAG6dTlmRL39R1L">
+        <div class="ws-brand" data-page-node-id="k3XN9pNah6IFJd7rGm2OfH"><div class="ws-mark" data-page-node-id="3rC9vkNEP4BjWTsiigzQzF">eh</div><div class="ws-name" data-page-node-id="FwVZai1pUQO9Ei0kfVjEiQ"><b data-page-node-id="6CFsS2tcfYXkxb1cnS5334">Demo Handwerk</b><small data-page-node-id="ZpJm3E0PtLzWg3Bm7QZNJ3">Geschäftsführung</small></div><div class="ws-cv" data-page-node-id="TWr5EvyzEXPZYTMAiP9pCL">▾</div></div>
+        <nav class="ws-nav" data-page-node-id="fitLh2iYozL8hAHtIYcfQC"><a class="on" href="#" data-page-node-id="rAWEUEXNBHjHQUFKiCXbbp">Anfragen</a><a href="#" data-page-node-id="A57Vq4DqBZlvqLUsEcDEIn">Aufträge</a><a href="#" data-page-node-id="kGVNhkVjIBSNr4kZukeQhQ">Termine</a><a href="#" data-page-node-id="ETDPMaOF680XqHbernkhhF">Nachrichten</a><a href="#" data-page-node-id="atd7Oppsy0CkXBgcIyixBv">Team</a></nav>
+        <div class="ws-tools" data-page-node-id="mrEsJ83R17yYwjWZd3wKTN"><a class="ws-find" href="#" data-page-node-id="JXQkQw4SKsx20Bep7hBM6S"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" data-page-node-id="VAqgyoXSdKS7QSTD3PkUGe"><circle cx="11" cy="11" r="7" data-page-node-id="L4fzSjNJsNAv6mt7ME9iLh"/><path d="m20 20-3.5-3.5" data-page-node-id="ovS5is7eepap0D9Hvui2KF"/></svg>Anfrage oder Ort<kbd data-page-node-id="pA2gPEWSpGrMm3lPwwtT1Y">⌘K</kbd></a><a class="ws-icon bad" data-n="1" href="#" aria-label="Benachrichtigungen" data-page-node-id="zTGIMJmXTmveFRohdfOalV"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="ByHUtnbzbDsuu3jFsAzdRu"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9" data-page-node-id="1sk4KOUFGRiJ7EuzPtSdRB"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" data-page-node-id="zAF0GRg9ZSQFiKA7Y12GCi"/></svg></a><a class="ws-avatar" href="#" data-page-node-id="eH279EQmK7oEtJC6wIBRCd">DH</a></div>
+      </div>
+      <div class="mbody" data-page-node-id="8EKkCHdCquCwJZS4ABc9QI">
+        <aside class="mside" data-page-node-id="AL4AQnjJ9ZqoFHQjfv7RHI">
+          <p class="grp" data-page-node-id="fdqOVAJD4n3a1bg3E3bKZC">Anfragen</p>
+          <a class="on" href="#" data-page-node-id="keJz86Z2ieQQMYjwpEJwzi"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="lflH8gqEfZBVmXP6EeV5fc"><path d="M3 12h6M3 6h18M3 18h12" data-page-node-id="FJAaMG7P16iYsQ8I1OkOa6"/></svg>Eingegangen<span class="cnt" data-page-node-id="SkEkslwF8gzRhK3Pg6MbnU">2</span></a>
+          <a href="#" data-page-node-id="47DLls5OWF0i6CTgXtRM5z"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="xFfw137NAffsqQ4WK9Evac"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" data-page-node-id="RYKC1rIizE8yJNsacHaJ7o"/></svg>Angebot offen</a>
+          <a href="#" data-page-node-id="5OWPmKc8DvQyEcCegMEAO8"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="Pd4wyJR3fDKQmA0cXTmulT"><circle cx="12" cy="12" r="9" data-page-node-id="MlIWlhTcaBl1WmwlvaLX8B"/><path d="m5 5 14 14" data-page-node-id="JjeS6RwPP1laV1HlLQeR3K"/></svg>Nicht passend</a>
+          <p class="grp" data-page-node-id="3qLvnFArcvJ0FMOrX9a2qj">Betrieb</p>
+          <a href="#" data-page-node-id="xuPAA0bgsG4pSqg9iZie6p"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="zriUQStMbbgqKyrjTpeAPq"><path d="M14 7 3 18M3 7l11 11M14 17H3M21 21V3" data-page-node-id="xdU8zFvajMgzZgFCSix6fP"/></svg>Leistungen</a>
+          <a href="#" data-page-node-id="EpAbFiEAWDm3hCR3YFVXzR"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="OKa02tJXWjU8fZdGDUOFU8"><circle cx="12" cy="12" r="9" data-page-node-id="uXvwgzN6bSjg46A0uce85T"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18" data-page-node-id="1BtAxYQDYCv1un0Fi8yFiR"/></svg>Gebiet</a>
+          <a href="#" data-page-node-id="X5hqJcmQmPSWkEgSFB0QlW"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="K67ngf9mTaMzyHuY7LfYG9"><path d="M16 21v-2a4 4 0 0 0-8 0v2M3 11a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4v6a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4z" data-page-node-id="rJTB8DaIqTgDtOsyB7tJSS"/></svg>Team</a>
+          <p class="grp" data-page-node-id="uIvJ8HJffrpcqXxTes2gKA">Konto</p>
+          <a href="#" data-page-node-id="DSxtJTWVJaLoa2wSE61REm"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="aM1neTKbzq2PnpDJETmkQu"><rect x="3" y="3" width="18" height="18" rx="2" data-page-node-id="sJ3PKyQPhfVHp915UGSnJI"/><path d="M9 9h6M9 13h6M9 17h4" data-page-node-id="e6KAjCn1KynIy6hZGZfvv1"/></svg>Tarif</a>
+          <a href="#" data-page-node-id="CqnaJ58bJYCds82iobSmwW"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="Ur99OrVrTTFb2SRpNl3Ugm"><path d="m9 12 2 2 4-4M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z" data-page-node-id="kyPlAQyKGEFhgPRKzPhGGh"/></svg>Nachweise<span class="cnt" data-page-node-id="Wpoq4xSmIldVVpnsslq9ZN">1</span></a>
+          <div class="me" data-page-node-id="VdXOBLNtcVsuK44RDG9U6u"><div class="av" data-page-node-id="H8X3tr2an8MnxehGxX4FmG">DH</div><span data-page-node-id="UfghBLrZ0YJglGLRa21gUi"><b data-page-node-id="kIxI8XHelW3to3eSMKhjar">Demo Handwerker</b><small data-page-node-id="E65FQ8fnGpD68BkUgl9sRl">Geschäftsführung</small></span></div>
+        </aside>
+        <main class="mmain" data-page-node-id="zBEnmFflOPztM2n7lKrkzL">
+          <div class="ptitle" data-page-node-id="EhCh8PEviWht3bMe8pdfwo"><h3 data-page-node-id="t0oNsZBCd2b5NzvrZvJJEe">Anfragen</h3><span class="sub" data-page-node-id="OBEueMLs736mPWSd9KeL53">50 km um 10115</span><div class="right" data-page-node-id="EhZL0cvB9l6EcsqPoICgHc"><a class="btn" href="#" data-page-node-id="6sZmCO1Ymr6ppvWHChLzkx">Auftragsverwaltung: AN</a><a class="btn pri" href="#" data-page-node-id="uHzP2ie39NSHNhTyfPVXIQ"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" data-page-node-id="tZReBCviigMcPG2zmWr4Xa"><path d="M12 5v14M5 12h14" data-page-node-id="jMN2YN6fOJOKpPBPoI309P"/></svg>Angebot abgeben</a></div></div>
+          <div class="metrics" data-page-node-id="yzUKR9G2xO8KegADj1pLLs"><div data-page-node-id="WD7UtRGiBsd2LiJvX0bunt"><div class="n t" data-page-node-id="CwstsQKYNVaRCL9uqIgKA2">2</div><div class="l" data-page-node-id="b3251z6MJu7DgTbazNGXoC">Neu</div></div><div data-page-node-id="HjpJm5Ev4N1XAZ44AuLSmc"><div class="n" data-page-node-id="LbppMcxwuJYYzha7fZgxhA">1</div><div class="l" data-page-node-id="Fi5R13umn7RUO58lo3bhSx">Angebot offen</div></div><div data-page-node-id="APLmK6Bzj6zFbdty6SZoc1"><div class="n" data-page-node-id="lHDNynADdv5bXTaNfWAYTE">1</div><div class="l" data-page-node-id="3RE7PDY8IiRGKRnrHBee52">Laufend</div></div><div data-page-node-id="ZUm8PbqR32oBhlyyI3gqQV"><div class="n" data-page-node-id="28zp3CFsybCNF8jMJLEQHI">64 %</div><div class="l" data-page-node-id="8wf2qKPFcEehJMraPRa5nY">Annahmequote</div></div></div>
+          <table class="tbl" data-page-node-id="bBqbFl0X4JYTggiTMw8eK0"><thead data-page-node-id="SIRKvCjwQHbGXf8DxlOHYm"><tr data-page-node-id="WluCeVkahBdKj5S2CPAa21"><th data-page-node-id="vsmzK4bbg6oMVlibKf6soA">Anfrage</th><th data-page-node-id="clFn2O0GEUoNLYP2UgTdQB">Ort</th><th data-page-node-id="iGH8JVUZAccZwBWaXaBsC3">Entfernung</th><th data-page-node-id="BR2WFbELEEJEI6vkVHObcw">Alter</th></tr></thead><tbody data-page-node-id="z7QVJiLGcbvbihdEBoD9dl">
+            <tr data-page-node-id="x8C3iqJNVVwV8FkjjMQhXM"><td data-page-node-id="fGtSeFMfdYYcGiSbt4MHcO"><b data-page-node-id="XwJN3hTa7Cbetu1GWTFF83">Heizungswartung</b><br data-page-node-id="cje9FkkMBWLpH5DrR1GuqO"><small style="color:var(--sec);font-size:11px" data-page-node-id="OOpYn0YsGnIEUXV4HBHyHF">Richtpreis 180 €</small></td><td data-page-node-id="NFPbIsonMMmPVnPmCR5CNT">46325 Borken</td><td data-page-node-id="DlNnJrngLaaRALErDeNWIG">12 km</td><td data-page-node-id="YMh2pR1pX8RNcQvxybeYUX"><span class="pill w" data-page-node-id="E7yn6dyExAMBjgcyRaIC90">3 Std.</span></td></tr>
+            <tr data-page-node-id="tRJCWLsnuA91N1rWddH2Ij"><td data-page-node-id="ZjRyT38LDQW5drgipDeHGo"><b data-page-node-id="JlR8kXAGZ4GGtIHL0qjgjh">Dachrinne reinigen</b><br data-page-node-id="UgZCYe9xxtF7rdROZc9fwD"><small style="color:var(--sec);font-size:11px" data-page-node-id="HHoVVBEQteNytyiXvzDkcB">Richtpreis 240 €</small></td><td data-page-node-id="uHVfyXnZ4WKQ4WU6DkCLGd">46325 Borken</td><td data-page-node-id="2uRzPUYnUwQ25kEDSHkeO9">8 km</td><td data-page-node-id="FCEAmps1TN7KbOH6CPjPhC"><span class="pill p" data-page-node-id="Feo9Tc5odgdSttYen6hNsJ">1 Tag</span></td></tr>
+          </tbody></table>
+        </main>
+        <aside class="mrail" data-page-node-id="NH8yBf5rnNduRaDFbzCAJT">
+          <p class="rh" data-page-node-id="nhhFodfAiiZ6HclkMFcNBT">Kontext dieser Seite</p>
+          <div class="mcard" data-page-node-id="dKEUsCkvHdUv5GMgwCNFDP"><h4 data-page-node-id="U3cZqiClgMLLZSATt6tk4Y">Dein Gebiet</h4>
+            <div class="item" data-page-node-id="Bw2Ln6LetlLOamxl9CTwsP"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="ylmQb5JBIYwvRHT9ym5wdq"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" data-page-node-id="ZDKdUs1Zf2d2qlZEKk2zBA"/><circle cx="12" cy="10" r="3" data-page-node-id="mkRpsaJL7tg0St8Cmb8r25"/></svg><span data-page-node-id="DonhVZbfef6IYgKQeqEQHj"><b data-page-node-id="I3eIno47NZnlbOCvkwCHjQ">PLZ</b></span><span class="rt" data-page-node-id="xJfp96QMadEp3FfguJOpmZ">10115</span></div>
+            <div class="item" data-page-node-id="arULagkoDwShuxPDlTRCGf"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="gZsV9B6ogMHLDE5xnXefoO"><circle cx="12" cy="12" r="9" data-page-node-id="oijZIHicL6OmcUj28ijAHx"/><path d="M3 12h18" data-page-node-id="FbeYhQWFFx4sLSTDwcY2XC"/></svg><span data-page-node-id="G84QnEyAHboAmvoaYjhPDA"><b data-page-node-id="bEzOhEE3Wiumm0YEcrcp8B">Umkreis</b></span><span class="rt" data-page-node-id="qnlM4JgFBnY3xdMWt8UwVv">50 km</span></div>
+            <div class="item" data-page-node-id="7etGBsfu98PfpBk9ODC9M7"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="HV0L4j1G72hY2rWsHQzLet"><path d="M14 7 3 18M3 7l11 11" data-page-node-id="VqEDb0dmHKt1P6VM9o5nzP"/></svg><span data-page-node-id="WjnIIUN2Z1d4uDQEKMFwfT"><b data-page-node-id="ptJC5FkMTvPGZSgJWpwBsq">Leistungen</b></span><span class="rt" data-page-node-id="oWD6RyQPYLQ1TNsDAJLjaK">6</span></div>
+            <a class="go" href="#" data-page-node-id="YQJ69JQEDSee2LkeAoxQUP">Gebiet anpassen<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" data-page-node-id="P8ObQz2XSNubL8koJ12iSl"><path d="m9 6 6 6-6 6" data-page-node-id="NWHWLQwt7K0jmyA36CyBat"/></svg></a>
+          </div>
+          <div class="mcard" data-page-node-id="XIBjun5CFBHzZgAMrgw6lH"><h4 data-page-node-id="ggBwYSnP9nEZcPvhxMA8rM">Diese Woche</h4>
+            <div class="item" data-page-node-id="8Kntv5FKpU6CEu8OWKoStC"><span data-page-node-id="ekpzBXDxiuveE2S2YGWtJc">Anfragen</span><span class="rt" data-page-node-id="37EvWLB1ZZhHrGRtH0lTCA">2</span></div>
+            <div class="item" data-page-node-id="hb6DqAuJAgPEr2zuodPIBP"><span data-page-node-id="nXE03LjRS1FRmHFqzNHjZU">Angebote</span><span class="rt" data-page-node-id="nHYCBwNAfHk2UaZ9RMHTnP">0</span></div>
+            <div class="item" data-page-node-id="uYz3xOKoOqLWlaEvwbB05o"><span data-page-node-id="a7M5q0pZuWLGBKYhYNz3eV">Zuschläge</span><span class="rt" data-page-node-id="i8TibVarqNnI4AtkjFwe9w">0</span></div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </figure>
+</div>
+
+<h2 data-page-node-id="ohEAbMNLRvL5kH1gstSFB7">Verwaltung — die Warteschlangen</h2>
+<p class="route" data-page-node-id="25rmLG8l8Pkr9GzhFWwnjp">/admin · Mitte: was zu prüfen ist · rechts: Systemzustand</p>
+<div class="stack" data-page-node-id="A07fJ1Y3f165dEDp91Ikul">
+  <figure class="shot" data-page-node-id="qH1RaLcOZwARvfuztV00Co">
+    <p class="flabel" data-page-node-id="kzOcBSU8p7uZwKS6zgo3n3">Ist — heute live</p>
+    <img src="/app-ux-vorschlaege/ist/app/admin_admin__desktop.png" alt="Ist: Verwaltung, Desktop" data-page-node-id="KU7C43AmGo9c6vNLp0xc7C">
+  </figure>
+  <figure data-page-node-id="zoZr0NhM0tw2JgKd0a3tB6">
+    <p class="flabel" data-page-node-id="R1FeVjtS3uKwxBYnsVG4XL">Soll — Vorschlag</p>
+    <div class="mc" data-page-node-id="6800S29aMWAcMBz3ocBSb9">
+      <div class="mtop" data-page-node-id="QZGOV29x3dh0kp0zsWGdgR">
+        <div class="ws-brand" data-page-node-id="7saSPstsw4LM5hUcygcOPN"><div class="ws-mark" data-page-node-id="0EqsDK4aSOiCeKFweMQMpG">eh</div><div class="ws-name" data-page-node-id="SMzs0KyUaly90ZPMpM1Dr6"><b data-page-node-id="XHAHAypN1WYsP2FEgykb9p">einfach hausen</b><small data-page-node-id="2sJxWesZGYs3qG37iqqOoW">Verwaltung</small></div></div>
+        <nav class="ws-nav" data-page-node-id="BJvQgqyBHflRVGpubVOZul"><a class="on" href="#" data-page-node-id="CaDFW2vjYxGas1O0ztDLRw">Übersicht</a><a href="#" data-page-node-id="DlDhsHrRGitopzykBgEMKf">Betriebe</a><a href="#" data-page-node-id="TLpLSlj0R2k46Q7ZoQbzjL">Vorgänge</a><a href="#" data-page-node-id="VZdsO0AHJC5vMOBx7Lzdr9">CRM</a></nav>
+        <div class="ws-tools" data-page-node-id="2gmAYlrPYvs5ElKvL4kacf"><a class="ws-find" href="#" data-page-node-id="nZsqeein86YwEN8rT5lfC9"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" data-page-node-id="VX3AI0tea7tZEVTNfMOhP6"><circle cx="11" cy="11" r="7" data-page-node-id="aPB48xdAWYy11HSFdhaAZL"/><path d="m20 20-3.5-3.5" data-page-node-id="ViNxWPJuAqNQ6HzGGnBucp"/></svg>Betrieb, Vorgang, Nutzer<kbd data-page-node-id="jOIpvS2QB3jbY5oQMx0W31">⌘K</kbd></a><a class="ws-icon" href="#" aria-label="Benachrichtigungen" data-page-node-id="1rxsGJsCU8kBIeXJM1wG07"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="DmPqp3Q1burIIY9q3pMb5G"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9" data-page-node-id="d2fbEwuBgyhLf1FCvSIkXl"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" data-page-node-id="A2nKd5NJzGjuUpZ5hxXuAU"/></svg></a><a class="ws-avatar" href="#" data-page-node-id="khWFa3dg5XaNLEisWr7kUG">AD</a></div>
+      </div>
+      <div class="mbody no-rail" data-page-node-id="R8zPQQ6s1iEHWpLlxLwLEA">
+        <aside class="mside" data-page-node-id="8qAIYjGzDPIVr6B7CzYO6b">
+          <p class="grp" data-page-node-id="V68prASi77eeix8F7TuqQ0">Übersicht</p>
+          <a class="on" href="#" data-page-node-id="i4hRBg8k0V5UT3wrEIMClB"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="iEmjb7dWC0QLj0DGI0ptJQ"><rect x="3" y="3" width="7" height="7" data-page-node-id="nu3WJ5iLsb8tnQFBDsePZb"/><rect x="14" y="3" width="7" height="7" data-page-node-id="p1L0WlJ2dkk2qBHUaUJRqw"/><rect x="3" y="14" width="7" height="7" data-page-node-id="zIVUetN4eVXmFsco5Vpv2J"/><rect x="14" y="14" width="7" height="7" data-page-node-id="cKoonC0sR9NCix60BlTMC3"/></svg>Kennzahlen</a>
+          <a href="#" data-page-node-id="rq1Z4kK43s7Suyf9xEPo0O"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="cgOFIZzONiRHVqXFpsNVPK"><path d="M3 6h18M3 12h18M3 18h12" data-page-node-id="VuVjGDckhCaTWT14201jda"/></svg>Warteschlangen</a>
+          <p class="grp" data-page-node-id="SQlHfITWyQhzwy0MfEJFyw">Prüfen</p>
+          <a href="#" data-page-node-id="xAIpXmdUsajAkb1kimhP63"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="Yjghd4JbYx2tIzxoDbxqNM"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" data-page-node-id="JkqUav67qBoTsF4xOXcYeC"/><path d="M14 2v6h6" data-page-node-id="W4YEckdL832RjbVrqCUUh9"/></svg>Nachweise<span class="cnt" data-page-node-id="a2VZDDqZxLcPaTpCFMhnNc">1</span></a>
+          <a href="#" data-page-node-id="fgwA5Ra1I8ycpHyEyOk7YD"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="7iN1l6slstSqgy42gMwNQM"><circle cx="12" cy="12" r="9" data-page-node-id="gaIJGI49XG0fQ0YFhpl0mn"/><path d="M12 8v4M12 16h.01" data-page-node-id="TTTx4vivLaDXCTPUXln7bq"/></svg>Servicefälle</a>
+          <p class="grp" data-page-node-id="HeqwPTdHJU4jGJGuVGQVbi">Daten</p>
+          <a href="#" data-page-node-id="9KHPEZQSumetpfkQ67aB9t"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="7Tj6Kbng0nsAet5bD3nqHZ"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" data-page-node-id="YnlXBZwzgDHgjK8C0a7bSi"/></svg>Exporte</a>
+        </aside>
+        <main class="mmain" data-page-node-id="i2n2XsU7EjLTA6ULmKU8GB">
+          <div class="ptitle" data-page-node-id="AU7SUIVUnbX7ujdFltvWGD"><h3 data-page-node-id="hKmYMDkD2J3050Qarwx71V">Übersicht</h3><span class="sub" data-page-node-id="ZHywNp22CaLBGNh2vwWPj6">17.09.2026, 00:30</span></div>
+          <div class="metrics" data-page-node-id="HFNaFDN9wVi7dD9EVJPzMJ"><div data-page-node-id="DrQxoQyZrlA3RbDacbeIJU"><div class="n" data-page-node-id="a4vGt9H7lxLMB1KRuwg9Er">5</div><div class="l" data-page-node-id="t852LFBsrNyiM3A3405idk">Eigentümer</div></div><div data-page-node-id="mjLCqeY3rD41KhshXUoqBD"><div class="n" data-page-node-id="RJffIjs7wRkX7AUT97Bgam">2</div><div class="l" data-page-node-id="hyql5r4ZLzlKY9ROslYHDm">Betriebe</div></div><div data-page-node-id="saer6KYxvqba7iheAE8x0N"><div class="n" data-page-node-id="B9HGo0pVYaGvTwz2MDAFv5">6</div><div class="l" data-page-node-id="8EbjFlM1B8ID3SbTba0IvA">Vorgänge</div></div><div data-page-node-id="O6DZE9jym3iyjpFlvzT8HF"><div class="n t" data-page-node-id="09cGehj30cbi9bG5vh3SKG">1</div><div class="l" data-page-node-id="dIpgBo8IWmKuw0p7xVfTeK">Zu prüfen</div></div></div>
+          <div class="ghdr" data-page-node-id="IXtY19rL2DDPrDpKO0JRgF">Warteschlange <span class="n" data-page-node-id="5BFm3nIzkFsySO7K8kETEg">1</span></div>
+          <table class="tbl" data-page-node-id="2ORNB2aRnOlEG40Zm2GH5u"><thead data-page-node-id="K5DwEONQcKcwbZTgAhTIur"><tr data-page-node-id="JeREuBCDkW52uiizVnyLK4"><th data-page-node-id="Tl1A7vNEsLEANZpxFoJyqm">Vorgang</th><th data-page-node-id="RLFNGB19GLugdI5HsgmQRL">Art</th><th data-page-node-id="Ai8MNZ7NMglXRyx1ncENm3">Seit</th><th data-page-node-id="QVrRUHbqGN9fOEOHe7UqyW"></th></tr></thead><tbody data-page-node-id="zImq3ARzN0tS7QpknROQAW">
+            <tr data-page-node-id="5BAtQHQLMbSZA434HMtAB1"><td data-page-node-id="kiSsjinxSVcNpGVwKtZffF"><b data-page-node-id="x59P3B0PIPoBKx9S9JcoNy">Demo Handwerker</b></td><td data-page-node-id="SF912huSGHlv3lqnscpnqD">Nachweis</td><td data-page-node-id="YCKLy3pNfMpFN3gEcjHPA2">16.09.</td><td data-page-node-id="EXqwEmawUJ6PCi2Kl02EPf"><a class="btn pri" href="#" data-page-node-id="bIZ7WYctuj4L89gGrkngRy">Prüfen</a></td></tr>
+          </tbody></table>
+          <div class="ghdr" data-page-node-id="ZEZrAe8mplGb5FUBt4BaQo">Zuletzt aktiv</div>
+          <ul class="rows" data-page-node-id="gNO4kSuGUWMg0iJZqywBVz">
+            <li data-page-node-id="nPrjWMr2OpbmQArjjH8lC8"><span class="ic" data-page-node-id="ucHvU6uHrxrcVD1z49AChB"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="hNmhAWh7s65zAIiriN8yFf"><circle cx="12" cy="12" r="9" data-page-node-id="bnaFP3GDs33bJtXEyZSki0"/><path d="M12 7v5l3 2" data-page-node-id="BHFEv9zpSuw5b78VgJspol"/></svg></span><div class="t" data-page-node-id="zAjKqxzXLkjYMjTGPeII4F"><b data-page-node-id="NS5jCGvMO6GegnyS9anVcs">Einfach Hausen Demo Handwerk</b><small data-page-node-id="emAXLRoxSbVgmef3jCj6hi">verifiziert · PLZ 10115</small></div><div class="st" data-page-node-id="PTwXtNQl1LIgB31dipxUtH"><span class="pill o" data-page-node-id="nZhisDmgz48IcgoPaBTtUv">Aktiv</span></div></li>
+            <li data-page-node-id="9AtbZwyPE1lbQnQzrjsJEw"><span class="ic" data-page-node-id="vaorc6fQZdiWlj37UIzUne"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" data-page-node-id="lcWCmrALNRyyDyFs0IuGxQ"><circle cx="12" cy="12" r="9" data-page-node-id="qFYrDzMRgGllKzM4MagHD0"/><path d="M12 7v5l3 2" data-page-node-id="caDdUbwRM2eIdeO8VKAmWQ"/></svg></span><div class="t" data-page-node-id="QlZeG934aUnGy0sBwhMbXM"><b data-page-node-id="lfIl06v9q0AdCeNK8PZrMp">Gina Kunde</b><small data-page-node-id="69VXTKM3UsstcbJPMNBgfZ">angemeldet · 16.09., 22:41</small></div><div class="st" data-page-node-id="yjWDBxB89bjtZCY7C7CTVV"><span class="pill p" data-page-node-id="kqKshAIpTcAuJvpLLXPEG4">Eigentümer</span></div></li>
+          </ul>
+        </main>
+      </div>
+    </div>
+  </figure>
+</div>
+
+<p class="note" style="margin-top:22px" data-page-node-id="5CzYvaNyHM94g2vSIzZfqp">Ist-Aufnahmen von der laufenden Seite (einfachhausen.de), Desktop 1320 × 900, 17.09.2026.
+Soll-Bilder sind HTML-Entwürfe mit den echten Design-Tokens. Nichts davon ist gebaut.</p>
+
+</div>
+</body>
+</html>
