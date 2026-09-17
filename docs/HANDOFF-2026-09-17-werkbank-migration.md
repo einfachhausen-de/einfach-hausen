@@ -1,6 +1,23 @@
 # HANDOFF 2026-09-17 — Werkbank-Migration (Alt-CSS → EH-Designsystem)
 
-Stand: main = `ef4c3e6`, gepusht auf origin/main. Vorher: `bc424a5`.
+Stand: main = `10b9093`, gepusht auf origin/main, live auf OCI (`/srv/einfach-hausen`,
+Health 200). Vorher: `ef4c3e6`.
+
+## 0. Nachtrag 2026-09-18 — Soll-Start live, Aufräumstand
+
+- PR #120 (Login-Redesign + Transitions-Fix) + Fix `421c1bf` (EHCheckbox, Inter)
+  + PR #121 (Demo-Seed, Fehler-Objekte) + PR #122 (Soll-Vorgabe
+  `docs/brand/app-ux-vorschlaege/` + Route `/app-ux-vorschlaege`) alle in main.
+- `/app` auf Soll `#start` (`10b9093`): +Anliegen-CTA, Nächste-Termine-Sektion,
+  Rail ohne Mock (echte Profilvollständigkeit). Screenshot-belegt (1536px).
+- Sealed-Fixes mit Jeremy-Go: FormSection-legend in der Karte (float), Chronik-Datum
+  nowrap (`c1ac66b`, per `eh-design-seal.mjs` neu versiegelt).
+- PR #119 geschlossen (leere Hülle). Remote nur noch `main` (15 Branches gelöscht,
+  alle gemergt/belegt redundant). Keine offenen PRs, keine losen Worktrees.
+- Login-Schutz: oberste Zeile `docs/NEXT_AGENT.md` — `src/components/auth-v2/`
+  nicht umbauen.
+- Vorbestand (nicht von uns): eslint-Warnung `_nextPath`, stale-Baseline-Hinweise
+  aus PR #120, Hydration-Warnung `/app/messages` (versiegelte EHContactWorkspace).
 
 ## 1. Was getan wurde (Commit ef4c3e6)
 
@@ -86,3 +103,42 @@ veraltet, `EHWorkflowForm`/`EHStepProgress` fehlen im Register, Zählstand 152�
 — aber DESIGN.md ist versiegelt, nur via Brand-Autorität ändern. Untracked liegen
 noch `.next.bak-vor-seo-pruefung/` + `tmp-deadcss.mjs` (WorkBuddy-Morgenreste,
 bewusst nicht angefasst).
+
+## 9. Anweisung Folge-Agent: Soll-Umbau Seite für Seite (Stand 2026-09-18)
+
+Auftrag: die Soll-Vorschläge aus `docs/brand/app-ux-vorschlaege/index.html`
+(identisch unter `/app-ux-vorschlaege` in der laufenden App) Seite für Seite in
+echte App-Seiten umbauen — weg vom Ist-Zustand. Musterbeispiel fertig live:
+`/app` nach `#start` (Commit `10b9093` lesen!).
+
+Reihenfolge:
+1. `#aufträge` → `src/app/app/jobs/page.tsx` (Mitte: Tabelle/Liste, rechts: Status + Termine)
+2. `#auftrag` → `src/app/app/jobs/[id]/page.tsx`
+3. `#dokumente`, `#verträge`, `#termine`, `#profil` → jeweilige `src/app/app/*`-Seiten
+4. Danach Pro-Seiten (`provider_pro_*`) und Admin (`admin_*`) nach denselben Soll-Bildern.
+Nach JEDER Seite: Stopp, Screenshot, Jeremy-Abnahme — kein „alle fertig" ohne Auge.
+
+Harte Regeln (Verstöße werden revertiert):
+- Nur `src/app/app/**` (+ ggf. `src/app/pro/**`, `src/app/admin/**`) und
+  `src/components/werkbank-rahmen.tsx` anfassen. NIEMALS `packages/eh-design/*`,
+  `DESIGN.md`, `globals.css`, `design-system.css`, `scripts/*` — versiegelt
+  (Ausnahme nur mit ausdrücklichem Jeremy-Go für genau diese Stelle, danach
+  `node scripts/eh-design-seal.mjs`).
+- Keine Mockdaten: jede Zahl/jeder Balken aus echten Loadern (`jobs`, `quotes`,
+  `appointments`, `provider_profiles`, `job_photos`, `documents`, `invoices`,
+  `house_contracts`). Erfundene Prozent-/Bruch-Werte sind verboten (siehe
+  68%-Mock-Entfernung in `10b9093`).
+- Keine zweite Stilfamilie: nur EH-Komponenten aus `@/design-system` + Token-CSS
+  (`var(--eh-*)`). Keine Hex-Farben, keine neuen `@media`-Breakpoints (1120/760
+  aus der Vorgabe gelten), kein `style={{}}` für Layout.
+- Texte, Routen, Server-Actions, Auth, Datenlogik unverändert — nur Komposition.
+- `src/components/auth-v2/` nicht anfassen (Login-Schutz, NEXT_AGENT-Zeile 1).
+
+Verifikation pro Seite (selbst ausführen, keine Gates erfinden):
+`./node_modules/.bin/tsc --noEmit` (0 Fehler),
+`./node_modules/.bin/eslint` auf geänderte Dateien (0 Fehler),
+`node scripts/eh-design-check.mjs` (Exit 0; stale-Hinweise aus PR #120 sind Vorbestand),
+Screenshot 1536px der echten Seite (Dev-Server Kap. 6: `AUTH_MODE=local
+SESSION_COOKIE_NAME=mh_session E2E_INSECURE_COOKIES=1 ./node_modules/.bin/next dev -p 3100`,
+Seed `node scripts/seed-local-user.mjs`).
+NICHT committen, NICHT deployen, NICHT versiegeln — Jeremy nimmt ab und gibt das Go.
