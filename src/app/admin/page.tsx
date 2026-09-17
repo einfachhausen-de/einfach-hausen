@@ -2,7 +2,7 @@ import { BadgeCheck, CalendarCheck, Database, FileWarning, Handshake, ListChecks
 import Link from 'next/link';
 import { requireAdmin } from '@/lib/admin-auth';
 import { db } from '@/lib/db';
-import { EHAppHeader, EHButton, EHMetricsBar, EHRecordList, EHScope, EHStatus, EHWorkSection, EHWorkspaceGrid, type EHRecordEntry } from '@/design-system';
+import { EHButton, EHMetricsBar, EHPageHeader, EHRecordList, EHScope, EHStatus, EHWorkSection, EHWorkspaceGrid, type EHRecordEntry } from '@/design-system';
 import { adminLogoutAction,adminUpdateClaimAction,moderateReviewAction } from '@/app/actions';
 import { adminReviewVerificationLifecycleAction,adminUpdatePartnerContractLifecycleAction } from './actions';
 import { statusLabel } from '@/lib/format';
@@ -68,7 +68,7 @@ export default async function Admin({searchParams}:{searchParams:Promise<Record<
     detail:[r.reporter,r.reason].filter(Boolean).join(' · '),
     status:<EHStatus tone="warning">Meldung offen</EHStatus>,
   }));
-  return <EHScope app><main className="admin-page"><EHAppHeader eyebrow="Betriebsverwaltung" title="Einfach Hausen · Admin" text="Vertragspartner, Qualitätsstandards, Leads und Servicefälle." actions={<><EHButton href="/admin/crm"><Database size={16}/>Leads &amp; CRM</EHButton><form action={adminLogoutAction}><EHButton type="submit" variant="secondary"><LogOut size={16}/>Abmelden</EHButton></form></>} />{sp.error&&<div className="alert error" role="alert">{sp.error}</div>}<EHMetricsBar label="Verwaltung" items={[
+  return <EHScope app><main className="admin-page"><EHPageHeader title="Einfach Hausen · Admin" context="Betriebsverwaltung" actions={<><EHButton href="/admin/crm"><Database size={16}/>Leads &amp; CRM</EHButton><form action={adminLogoutAction}><EHButton type="submit" variant="secondary"><LogOut size={16}/>Abmelden</EHButton></form></>} />{sp.error&&<div className="alert error" role="alert">{sp.error}</div>}<EHMetricsBar label="Verwaltung" items={[
       {id:'pruefungen',label:'Offene Partnerprüfungen',value:String(pendingVerifications.length),hint:`${verifications.length} Prüfungen insgesamt`},
       {id:'servicefaelle',label:'Offene Servicefälle',value:String(openClaims.length),hint:`${claims.length} Fälle insgesamt`},
       {id:'meldungen',label:'Offene Bewertungsmeldungen',value:String(openReportQueue.length),hint:`${openReports.length} Meldungen insgesamt`},

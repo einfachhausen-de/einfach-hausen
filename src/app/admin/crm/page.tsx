@@ -2,7 +2,7 @@ import { ArrowLeft, Database, Globe2, Mail, MessageCircle, Phone } from 'lucide-
 import { requireAdmin } from '@/lib/admin-auth';
 import { CRM_LEAD_TYPES, CRM_PERMISSIONS, CRM_SOURCES, CRM_STATUSES, crmCategories, crmStats, listCrmLeads, syncCrmLifecycle } from '@/lib/crm';
 import { addCrmLeadAction, syncBusinessResearchAction, updateCrmLeadAction } from './actions';
-import { EHAppHeader, EHButton, EHCallout, EHEmptyState, EHMetricsBar, EHRecordList, EHScope, EHStatus, EHText, EHWorkSection, EHWorkspaceGrid } from '@/design-system';
+import { EHButton, EHCallout, EHEmptyState, EHMetricsBar, EHPageHeader, EHRecordList, EHScope, EHStatus, EHText, EHWorkSection, EHWorkspaceGrid } from '@/design-system';
 
 const labels: Record<string, string> = {
   collected: 'Gesammelt',
@@ -85,10 +85,9 @@ export default async function CrmPage({ searchParams }: { searchParams: Promise<
           <EHButton href="/admin" variant="quiet" size="small"><ArrowLeft size={16} /> Zurück zur Betriebsverwaltung</EHButton>
         </div>
 
-        <EHAppHeader
-          eyebrow="Betriebsverwaltung"
+        <EHPageHeader
           title="Leads & Outreach CRM"
-          text="Pipeline für Handwerkspartner, Eigentümer-Anfragen und Marktpotenziale."
+          context="Betriebsverwaltung"
           actions={
             <form action={syncBusinessResearchAction}>
               <EHButton type="submit"><Database size={16} /> Research-Daten synchronisieren</EHButton>
