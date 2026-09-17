@@ -348,7 +348,19 @@
 .eh-workspaceAccount a { display:block;text-decoration:none;color:var(--eh-color-ink);overflow-wrap:anywhere; }
 .eh-workspaceAccount small { display:block;color:var(--eh-color-secondary);font-size:var(--eh-font-meta); }
 .eh-workspaceMain { min-width:0; }
-.eh-workspaceTop { height:80px;display:flex;align-items:center;justify-content:space-between;gap:24px;padding:0 40px;border-bottom:1px solid var(--eh-color-line);background:var(--eh-color-paper); }
+.eh-workspaceWithRail { grid-template-columns:248px minmax(0,1fr) 268px; }
+.eh-workspaceMainWithRail { display:grid;grid-template-columns:minmax(0,1fr) 268px;gap:0;align-items:start; }
+.eh-workspaceRail { padding:24px 24px 24px 0;min-width:0;background:var(--eh-color-paper);border-left:1px solid var(--eh-color-line);align-self:stretch; }
+.eh-workspaceTop { height:80px;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:0 28px;border-bottom:1px solid var(--eh-color-line);background:var(--eh-color-paper); }
+.eh-workspaceTop > * { flex:0 0 auto; }
+.eh-workspaceNavRow { display:flex; gap:3px; align-items:center; padding:0 28px; min-height:48px; background:var(--eh-color-white); border-bottom:1px solid var(--eh-color-line); }
+.eh-workspaceNavRow > div { display:flex; gap:3px; align-items:center; flex-wrap:wrap; }
+.eh-workspaceMainNav { display:flex;gap:3px;align-items:center;justify-content:center;min-width:0; }
+.eh-workspaceMainNav a { white-space:nowrap; }
+.eh-workspaceMainNav a { display:inline-flex;align-items:center;gap:8px;padding:8px 16px;border-radius:var(--eh-radius-control);color:var(--eh-color-secondary);text-decoration:none;font-size:var(--eh-font-label);font-weight:var(--eh-weight-medium); }
+.eh-workspaceMainNav a[aria-current="page"] { background:var(--eh-color-petrol);color:var(--eh-color-white); }
+.eh-workspaceMainNav a:hover:not([aria-current="page"]) { background:var(--eh-color-paper);color:var(--eh-color-ink); }
+@media (max-width:899px){.eh-workspaceMainNav{display:none;}.eh-workspaceRail{display:none;}.eh-workspaceWithRail,.eh-workspaceMainWithRail{grid-template-columns:248px minmax(0,1fr);}}
 .eh-workspaceContext { font-size:var(--eh-font-label);color:var(--eh-color-secondary); }
 .eh-workspaceTools { display:flex;gap:20px;align-items:center; }
 .eh-workspaceTools a { display:flex;align-items:center;gap:8px;color:var(--eh-color-petrol);min-height:44px;min-width:44px;justify-content:center;text-decoration:none; }

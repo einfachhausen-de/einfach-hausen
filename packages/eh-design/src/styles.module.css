@@ -348,7 +348,19 @@
 .workspaceAccount a { display:block;text-decoration:none;color:var(--eh-color-ink);overflow-wrap:anywhere; }
 .workspaceAccount small { display:block;color:var(--eh-color-secondary);font-size:var(--eh-font-meta); }
 .workspaceMain { min-width:0; }
-.workspaceTop { height:80px;display:flex;align-items:center;justify-content:space-between;gap:24px;padding:0 40px;border-bottom:1px solid var(--eh-color-line);background:var(--eh-color-paper); }
+.workspaceWithRail { grid-template-columns:248px minmax(0,1fr) 268px; }
+.workspaceMainWithRail { display:grid;grid-template-columns:minmax(0,1fr) 268px;gap:0;align-items:start; }
+.workspaceRail { padding:24px 24px 24px 0;min-width:0;background:var(--eh-color-paper);border-left:1px solid var(--eh-color-line);align-self:stretch; }
+.workspaceTop { height:80px;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:0 28px;border-bottom:1px solid var(--eh-color-line);background:var(--eh-color-paper); }
+.workspaceTop > * { flex:0 0 auto; }
+.workspaceNavRow { display:flex; gap:3px; align-items:center; padding:0 28px; min-height:48px; background:var(--eh-color-white); border-bottom:1px solid var(--eh-color-line); }
+.workspaceNavRow > div { display:flex; gap:3px; align-items:center; flex-wrap:wrap; }
+.workspaceMainNav { display:flex;gap:3px;align-items:center;justify-content:center;min-width:0; }
+.workspaceMainNav a { white-space:nowrap; }
+.workspaceMainNav a { display:inline-flex;align-items:center;gap:8px;padding:8px 16px;border-radius:var(--eh-radius-control);color:var(--eh-color-secondary);text-decoration:none;font-size:var(--eh-font-label);font-weight:var(--eh-weight-medium); }
+.workspaceMainNav a[aria-current="page"] { background:var(--eh-color-petrol);color:var(--eh-color-white); }
+.workspaceMainNav a:hover:not([aria-current="page"]) { background:var(--eh-color-paper);color:var(--eh-color-ink); }
+@media (max-width:899px){.workspaceMainNav{display:none;}.workspaceRail{display:none;}.workspaceWithRail,.workspaceMainWithRail{grid-template-columns:248px minmax(0,1fr);}}
 .workspaceContext { font-size:var(--eh-font-label);color:var(--eh-color-secondary); }
 .workspaceTools { display:flex;gap:20px;align-items:center; }
 .workspaceTools a { display:flex;align-items:center;gap:8px;color:var(--eh-color-petrol);min-height:44px;min-width:44px;justify-content:center;text-decoration:none; }

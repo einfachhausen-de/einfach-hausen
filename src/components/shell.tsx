@@ -1,26 +1,29 @@
 import {EHScope, EHRouteTabs, EHWorkspaceFrame, EHWorkspaceNavItem} from "@/design-system";
 import Link from 'next/link';
 import { HouseAssistant } from './house-assistant';
-import { Bell, Menu } from 'lucide-react';
+import { Bell, Menu, Search } from 'lucide-react';
 import { BottomNav } from './bottom-nav';
-import { matchesArea, ownerAreas, providerAreas, ownerContextTabs, providerContextTabs, activeArea, activeProviderArea, type ContextTab } from './nav-config';
+import { matchesArea, ownerAreas, providerAreas, ownerAreaSubNav, providerAreaSubNav, type ContextTab } from './nav-config';
 import { OwnerMobileMenu } from './owner-menu';
 import { SidebarAccountMenu } from './sidebar-account-menu';
 import { Breadcrumbs, type Crumb } from './breadcrumbs';
 import { getCurrentUser } from '@/lib/auth';
 import { db } from '@/lib/db';
+import type { ReactNode } from 'react';
+import s from './shell.module.css';
 
-export async function AppShell({ role, active, children, title, subtitle, breadcrumbs, tabs }: { role:'homeowner'|'provider'; active:string; children:React.ReactNode; title?:string; subtitle?:string; breadcrumbs?:readonly Crumb[]; tabs?:readonly ContextTab[] }) {
+export async function AppShell({ role, active, children, title, subtitle, breadcrumbs, tabs, rail }: { role:'homeowner'|'provider'; active:string; children:ReactNode; title?:string; subtitle?:string; breadcrumbs?:readonly Crumb[]; tabs?:readonly ContextTab[]; rail?:ReactNode }) {
   const pro = role === 'provider';
   const user=await getCurrentUser();
   const unread=user&&user.role===role?(db.prepare('SELECT COUNT(*) c FROM notifications WHERE user_id=? AND read_at IS NULL').get(user.id) as {c:number}).c:0;
   const profileHref=pro?'/pro/profile':'/app/profile';
   const initials=user?`${user.first_name?.[0]||''}${user.last_name?.[0]||''}`.toUpperCase():'EH';
 
-  // Contextual navigation: the pages of the current area, always directly under
-  // the breadcrumbs. Pages whose views live in the query string pass their own
-  // tabs; `tabs={[]}` is the explicit "this page wants none".
-  const contextTabs = tabs ?? (pro ? providerContextTabs(active) : ownerContextTabs(active));
+  const contextTabs = tabs ?? (pro ? null : (() => {
+    const {items} = ownerAreaSubNav(active);
+    if (items.length < 2) return undefined;
+    return items.map((c: { href: string; label: string; active: boolean }) => ({ href: c.href, label: c.label, active: c.active }));
+  })());
 
   const mobileMenu = pro ? (
     <details className="mobile-menu">
@@ -31,24 +34,50 @@ export async function AppShell({ role, active, children, title, subtitle, breadc
     <OwnerMobileMenu active={active} />
   );
 
-  // The top bar names the AREA, not the page. It used to receive `title`, which
-  // put the same words into the top bar, the breadcrumb and the page heading at
-  // once - and on detail pages it named the wrong thing outright: /app/jobs/[id]
-  // showed "Ansprechpartner" above an order, and /app/documents fell back to
-  // "Dein Zuhause" because it passes no title at all. activeArea() is the same
-  // source the sidebar and the bottom navigation read, so they cannot disagree.
-  const area = pro ? activeProviderArea(active) : activeArea(active);
-  const context = area?.label ?? title ?? (pro ? 'Partnerbereich' : 'Dein Zuhause');
+  // Hauptmenü oben: die Hauptbereiche als Pills. Welche Bereiche das sind, ist
+  // pro Rolle fest - ownerAreas für Eigentümer, providerAreas für Betriebe.
+  const areas = pro ? providerAreas : ownerAreas;
+  const mainNav = (
+    <div className={s.topnav} role="navigation" aria-label="Hauptnavigation">
+      {areas.map(area => {
+        const isActive = matchesArea(active, area) || area.children.some(c => c.href === active);
+        return <Link key={area.href} href={area.href} aria-current={isActive ? 'page' : undefined}>{area.shortLabel ?? area.label}</Link>;
+      })}
+    </div>
+  );
+
+  // Seitenleiste: die Unterpunkte des aktiven Bereichs, gruppiert nach
+  // Obergruppe (Hausakte, Arbeitsbereich, Konto ...). Vorher waren hier die
+  // fünf Hauptbereiche zu sehen - unabhängig von der Seite. Das war der
+  // Hauptunterschied zur Referenz.
+  const subNav = pro ? providerAreaSubNav(active) : ownerAreaSubNav(active);
+  const sidebarNav = (
+    <>
+      {subNav.items.length > 0 && (
+        <nav aria-label={pro ? 'Arbeitsbereich' : 'Arbeitsbereich'}>
+          <p className={s.subgrp}>Arbeitsbereich</p>
+          {subNav.items.map((item: { href: string; label: string; active: boolean }) => (
+            <Link key={item.href} href={item.href} aria-current={item.active ? 'page' : undefined}>{item.label}</Link>
+          ))}
+        </nav>
+      )}
+      {areas.filter(a => a.href !== subNav.area?.href).map(area => (
+        <nav key={area.href} aria-label={area.label}>
+          <p className={s.subgrp}>{area.label}</p>
+          {area.children.map(c => <Link key={c.href} href={c.href}>{c.label}</Link>)}
+        </nav>
+      ))}
+    </>
+  );
 
   return <EHScope app><EHWorkspaceFrame homeHref={pro?"/pro":"/app"}
-    context={context}
-    navigation={pro
-      ? providerAreas.map(area=>{const Icon=area.icon;return <EHWorkspaceNavItem key={area.href} href={area.href} active={matchesArea(active,area)} icon={<Icon size={22}/>}>{area.label}</EHWorkspaceNavItem>;})
-      : ownerAreas.map(area=>{const Icon=area.icon;return <EHWorkspaceNavItem key={area.href} href={area.href} active={matchesArea(active,area)} icon={<Icon size={22}/>}>{area.label}</EHWorkspaceNavItem>;})}
+    context={pro ? 'Partnerbereich' : 'Dein Zuhause'}
+    navigation={sidebarNav}
+    mainNav={mainNav}
     account={<SidebarAccountMenu name={user?`${user.first_name} ${user.last_name}`:'Profil'} initials={initials} accountLabel={pro?'Partnerkonto':'Eigenheim-Konto'} profileHref={profileHref} settingsHref={pro?'/pro/profile':'/app/settings'} helpHref={pro?'/pro/hilfe':'/app/hilfe'} />}
     mobileMenu={mobileMenu}
-    notifications={<>{!pro && <HouseAssistant placement="toolbar" />}<Link href="/notifications" aria-label={unread?`${unread} ungelesene Benachrichtigungen`:'Benachrichtigungen'}><Bell size={22}/>{unread>0&&<span>{unread>99?'99+':unread}</span>}</Link>{pro && <Link href={profileHref} aria-label="Profil">{initials}</Link>}</>}
-    bottomNav={<BottomNav role={role} active={active}/>}>{breadcrumbs&&breadcrumbs.length>0&&<Breadcrumbs trail={breadcrumbs}/>}{contextTabs&&contextTabs.length>0&&<EHRouteTabs label="Kontextnavigation" items={contextTabs}/>}{children}</EHWorkspaceFrame></EHScope>;
+    notifications={<>{!pro && <HouseAssistant placement="toolbar" />}<Link href={pro?'/pro/notifications':'/notifications'} className={s.search}><Search size={16}/><span>Suchen</span></Link><Link href="/notifications" aria-label={unread?`${unread} ungelesene Benachrichtigungen`:'Benachrichtigungen'}><Bell size={22}/>{unread>0&&<span>{unread>99?'99+':unread}</span>}</Link>{pro && <Link href={profileHref} aria-label="Profil">{initials}</Link>}</>}
+    bottomNav={<BottomNav role={role} active={active}/>} rail={rail}>{breadcrumbs&&breadcrumbs.length>0&&<Breadcrumbs trail={breadcrumbs}/>}{contextTabs&&contextTabs.length>0&&<EHRouteTabs label="Kontextnavigation" items={contextTabs}/>}{children}</EHWorkspaceFrame></EHScope>;
 }
 
 export function SectionTitle({ children, href }: {children:React.ReactNode; href?:string}) {
