@@ -45,7 +45,7 @@ mit echter Vollständigkeit x-von-4, offene Vorgänge, Dokumente).
 ## 4. Bilder
 
 - Soll-Referenz: [referenz.png](../app-ux-vorschlaege/referenz.png)
-  (raw: <https://raw.githubusercontent.com/Delqhi/einfach-hausen/main/docs/brand/app-ux-vorschlaege/referenz.png>)
+  (raw: <https://raw.githubusercontent.com/einfachhausen-de/einfach-hausen/main/docs/brand/app-ux-vorschlaege/referenz.png>)
 - Ist-Start: [owner_app__desktop.png](../app-ux-vorschlaege/ist/app/owner_app__desktop.png)
 - Ist-Verträge: [owner_app_contracts__desktop.png](../app-ux-vorschlaege/ist/app/owner_app_contracts__desktop.png)
 - Ist-Dokumente: [owner_app_documents__desktop.png](../app-ux-vorschlaege/ist/app/owner_app_documents__desktop.png)
