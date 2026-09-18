@@ -149,3 +149,37 @@ Screenshot 1536px der echten Seite (Dev-Server Kap. 6: `AUTH_MODE=local
 SESSION_COOKIE_NAME=mh_session E2E_INSECURE_COOKIES=1 ./node_modules/.bin/next dev -p 3100`,
 Seed `node scripts/seed-local-user.mjs`).
 NICHT committen, NICHT deployen, NICHT versiegeln — Jeremy nimmt ab und gibt das Go.
+
+## 9. Nachtrag 2026-09-18 — Repo-Gesamtpruefung + wb-norail-Fix (main f62f50b/5ee8c8d)
+
+- **Audit geliefert:** 4 parallele Tiefen-Reviews (Owner-App, Partner-App,
+  Admin/Infra, Legacy/Dead Code) + 24-Shot Muse-Visitaudit (1536px, beide
+  Portale). Konsolidiert in `docs/REPO_AUDIT_2026-09-18.md` (P0/P1/P2).
+- **Ergebnis-Kopfzeilen:** Daten + Auth gesund — keine Mocks, requireUser/
+  requireAdmin lückenlos. Das eigentliche Problem ist die Komposition
+  (drei Shell-Welten, wb-norail nie gesetzt, leere Sidebar-Gruppen).
+- **Fix live (f62f50b):** `WerkbankRahmen` setzt jetzt `.wb-norail`, wenn kein
+  `rail`-Prop. 8 Seiten verloren vorher eine leere 240-px-Spalte. Live gemessen:
+  `/app/documents` `/app/settings` `/app/messages` jetzt `212px 1324px`;
+  `/app` `/app/contracts` behalten `240px`-Rail. tsc 0, eslint 0/28 Warnings,
+  GitNexus detect-changes critical (23 Seiten nutzen den Rahmen) begründet —
+  Change ist rein mechanisch (Klasse setzen, CSS existierte und wird von /admin
+  seit Tagen korrekt genutzt).
+- **Kaputte Gates (veraltete Tests, keine App-Bugs):** `test:api-contract`
+  erwartet eine `role==='ai'?'assistant':'user'`-Translation in
+  `src/app/ki-chat/page.tsx` (inzwischen reiner Redirect-Stub);
+  `test:crm` wartet auf `article`-Lead-Karten, `/admin/crm` rendert
+  `EHWorkflowForm`. Beide müssen an den aktuellen Code angepasst werden.
+- **Nächste Aktion (Reihenfolge im Audit-Doc):** P0-2 leere Sidebar-Gruppen in
+  `nav-config.ts` (providerAreas Anfragen/Nachrichten/Team = `children:[]`),
+  dann P0-3 Legacy-Routen löschen (`/chat/[anfrageId]` T-0168-Verstoß:
+  ungeprüftes Subject↔App-User-Mapping + Realtime ohne prüfbare RLS;
+  `/anfrage/neu` schreibt in stillgelegte Supabase-Welt und leitet nach
+  `/app/jobs` weiter, wo der Datensatz nie ankommt), dann P0-5
+  `werkbankLayout`-CSS in ein gemeinsames Modul.
+- **Remote kanonisch umgestellt:** `origin` jetzt
+  `github.com/einfachhausen-de/einfach-hausen.git` (alte Delqhi-URL hatte
+  weiterhin funktioniert).
+- **Offen, nicht von uns:** `.orca/drops/` Screenshots untracked (bewusst nicht
+  committet); `test:e2e:architecture` lokal nicht lauffähig (braucht
+  Supabase-Produktionskeys, OCI-only).
