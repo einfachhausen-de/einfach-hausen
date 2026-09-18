@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import { WerkbankRahmen } from '@/components/werkbank-rahmen';
-import { EHButton, EHEmptyState, EHMetricsBar, EHPageHeader, EHRecordList, EHRecordViews, EHStatus, EHText, EHWorkSection, EHWorkspaceGrid, type EHRecordEntry } from '@/design-system';
+import { EHButton, EHEmptyState, EHMetricsBar, EHOwnerSection, EHPageHeader, EHRecordList, EHStatus, EHText, EHWorkSection, EHWorkspaceGrid, type EHRecordEntry } from '@/design-system';
 import { requireUser } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { euroExact } from '@/lib/format';
@@ -66,35 +66,38 @@ export default async function Documents(){
     byKind.set(key,group);
   }
   const documentTotal = invoices.length+uploaded.length+payments.length;
-  const items: EHRecordEntry[] = [
-    ...invoices.map(i=>({
-      id:`i-${i.id}`,
-      title:`Rechnung ${i.invoice_number}`,
-      detail:[i.business_name,i.title].filter(Boolean).join(' · '),
-      value:euroExact(i.total_gross),
-      date:isoDay(i.issue_date||i.created_at),
-      dateLabel:day(i.issue_date||i.created_at),
-      status:<EHStatus tone={invoiceTone(i.status)}>{invoiceStatusLabel(i.status)}</EHStatus>,
-      href:`/app/invoices/${i.id}`,
-    })),
-    ...uploads.map(d=>({
-      id:`d-${d.id}`,
-      title:d.document_title,
-      detail:[d.kind,d.business_name||'Einfach Hausen',d.job_title].filter(Boolean).join(' · '),
-      date:isoDay(d.created_at),
-      dateLabel:day(d.created_at),
-      href:`/api/documents/${d.id}`,
-    })),
-    ...payments.map(p=>({
-      id:`p-${p.id}`,
-      title:p.title,
-      detail:[p.business_name,'Zahlungsbeleg'].filter(Boolean).join(' · '),
-      value:euroExact(p.amount),
-      date:isoDay(p.paid_at||p.created_at),
-      dateLabel:day(p.paid_at||p.created_at),
-      href:`/app/documents/${p.job_id}/receipt`,
-    })),
-  ].sort((a,b)=>(b.date??'').localeCompare(a.date??''));
+  // Soll-Gruppierung (#dokumente): Rechnungen, Angebote & Nachweise, Belege —
+  // je Gruppe eine Sektion mit Anzahl, statt einer flachen Gesamtliste.
+  const invoiceItems: EHRecordEntry[] = invoices.map(i=>({
+    id:`i-${i.id}`,
+    title:`Rechnung ${i.invoice_number}`,
+    detail:[i.business_name,i.title].filter(Boolean).join(' · '),
+    value:euroExact(i.total_gross),
+    date:isoDay(i.issue_date||i.created_at),
+    dateLabel:day(i.issue_date||i.created_at),
+    status:<EHStatus tone={invoiceTone(i.status)}>{invoiceStatusLabel(i.status)}</EHStatus>,
+    href:`/app/invoices/${i.id}`,
+  }));
+  const uploadItems: EHRecordEntry[] = uploads.map(d=>({
+    id:`d-${d.id}`,
+    title:d.document_title,
+    detail:[KIND_LABEL[d.kind] ?? 'Sonstiges',d.business_name||'Einfach Hausen',d.job_title].filter(Boolean).join(' · '),
+    value:sizeLabel(d.bytes),
+    date:isoDay(d.created_at),
+    dateLabel:day(d.created_at),
+    href:`/api/documents/${d.id}`,
+  }));
+  const receiptItems: EHRecordEntry[] = payments.map(p=>({
+    id:`p-${p.id}`,
+    title:p.title,
+    detail:[p.business_name,'Zahlungsbeleg'].filter(Boolean).join(' · '),
+    value:euroExact(p.amount),
+    date:isoDay(p.paid_at||p.created_at),
+    dateLabel:day(p.paid_at||p.created_at),
+    href:`/app/documents/${p.job_id}/receipt`,
+  }));
+  const items = [...invoiceItems,...uploadItems,...receiptItems]
+    .sort((a,b)=>(b.date??'').localeCompare(a.date??''));
   return <WerkbankRahmen role="homeowner" active="/app/documents">
     <EHPageHeader title="Dokumente & Rechnungen" context={openInvoices.length>0 ? `Offen: ${euroExact(openTotal)}` : undefined} />
     <EHMetricsBar label="Dokumente" items={[
@@ -105,7 +108,17 @@ export default async function Documents(){
     ]} />
     <EHWorkspaceGrid main={empty
       ? <EHEmptyState title="Noch keine Dokumente" text="Rechnungen, Belege und Leistungsnachweise landen hier nach einer Abwicklung. Für ein neues Anliegen startest du beim Hausmeister." action={<EHButton href="/app/hausmeister" arrow>Anliegen beschreiben</EHButton>} />
-      : <EHRecordViews label="Dokumente & Rechnungen" storageKey="dokumente" defaultView="chronik" switcherLabel="Dokumente: Ansicht wechseln" items={items} />} aside={<>
+      : <>
+        {invoiceItems.length>0 && <EHOwnerSection title={`Rechnungen (${invoiceItems.length})`}>
+          <EHRecordList label="Rechnungen" items={invoiceItems} />
+        </EHOwnerSection>}
+        {uploadItems.length>0 && <EHOwnerSection title={`Angebote & Nachweise (${uploadItems.length})`}>
+          <EHRecordList label="Angebote und Nachweise" items={uploadItems} />
+        </EHOwnerSection>}
+        {receiptItems.length>0 && <EHOwnerSection title={`Zahlungsbelege (${receiptItems.length})`}>
+          <EHRecordList label="Zahlungsbelege" items={receiptItems} />
+        </EHOwnerSection>}
+      </>} aside={<>
       <EHWorkSection title="Speicherbelegung">
         <EHText muted>{uploads.length===0
           ? 'Nachweise aus Aufträgen werden hier mit ihrer echten Dateigröße geführt. Bisher liegt keine Datei.'
