@@ -257,3 +257,70 @@ gelockert.
    `/anfrage/*`, `/anfragen-pro`, `/ansprechpartner` → redirect,
    `/onboarding/pro/*`; `AuthContext.PRIVATE_PREFIXES` phantom routes mit abräumen.
 3. **P1** `/pro` Dashboard Empty State + `owner-menu.tsx` Focus-Trap/Escape.
+
+
+---
+
+## Kapitel 11 — P0-2/P0-3/P0-4: Sidebar, Legacy-Routen, Guard (660012b, main, gepusht)
+
+Damit sind **alle P0-Blocker aus dem Repo-Audit erledigt** (P0-1 wb-norail,
+P0-5 CSS-Konsolidierung, P0-2 Sidebar, P0-3 Legacy-Routen, P0-4 Guard).
+
+### P0-2 — leere Sidebar-Gruppen
+
+`werkbank-rahmen.tsx` hat Bereiche ohne Kinder trotzdem als Gruppenkopf
+gerendert. Live gemessen zeigten `/pro/orders`, `/pro`, `/pro/team` einen
+"Ansprechpartner"-Gruppenkopf mit **0 Links** (providerAreas haben dort
+`children: []`). Fix: `.filter(a => a.children.length > 0)` in der Sidebar-
+Iteration. Nachher: beide Portale zeigen nur Gruppen mit echten Links —
+verifiziert auf `/app`, `/app/jobs`, `/pro`, `/pro/orders`.
+
+### P0-3 — Legacy-Routen (T-0168-Verstoß beseitigt)
+
+Sieben Routen waren Client-Komponenten auf stillgelegtem Supabase-Datenmodell:
+`getSupabase()` direkt im Browser gegen `anfragen` / `anfrage_messages` /
+`angebote`, Realtime-Channel ohne prüfbare RLS, Supabase-Subject ungeprüft mit
+Application-User-ID gleichgesetzt. Sie sind jetzt serverseitige Redirects:
+
+| Alt | Neu | Autorisierung |
+|---|---|---|
+| `/chat/[anfrageId]` | `/app/messages?job=<id>` | `requireUser()` |
+| `/anfrage/neu` | `/app/hausmeister` | Ziel autorisiert |
+| `/anfrage/[id]` | `/app/jobs/[id]` | Ziel autorisiert |
+| `/anfragen-pro` | `/pro/orders` | Ziel autorisiert |
+| `/ansprechpartner` | `/app/messages` | Ziel autorisiert |
+| `/onboarding/pro/[schritt]` | `/pro/onboarding` | Ziel: `requireUser('provider')` |
+| `/onboarding/pro/gebiet` | `/pro/onboarding` | Ziel: `requireUser('provider')` |
+
+`/onboarding/pro/*` war ein ungelinktes Duplikat des kanonischen Wizards
+`/pro/onboarding` (Server-Component + SQLite). Alle 7 Redirects live
+verifiziert (angemeldet als Owner `kunde` und Provider `handwerker`).
+`mailer.ts` verlinkt `/anfrage/<id>` — der Link geht jetzt zum kanonischen
+Auftrag, Mitarbeiter/Besucher landen nicht mehr im Daten-Nirwana.
+
+### P0-4 — AuthContext Guard-Totholz
+
+`PRIVATE_PREFIXES` enthielt 10 Phantom-Prefixe für Routen, die nicht
+existieren oder inzwischen serverseitig weiterleiten. Der Guard ist
+Convenience-only (Server bleibt die Autorität); auf unknown paths muss eine
+404 gerendert werden, kein Client-Bounce. Entfernt: `/auftraege`,
+`/meine-angebote`, `/historie`, `/profil`, `/einstellungen`,
+`/benachrichtigungen`, `/dashboard`, `/ki-chat`, `/ansprechpartner`,
+`/anfragen-pro`. Behalten: `/mein-haus`, `/notifications` (beide aktiv).
+
+Sitemap-Kommentar bereinigt (gelöschte Routen nicht mehr als funktionale
+Tools aufgeführt — sie waren nie in der Sitemap, nur im Kommentar).
+
+### Gates (alle auf 660012b)
+
+tsc 0 · eslint 0 errors / 28 warnings · design-check 0 neue Schulden ·
+next build rc=0 · crm 20/20 · api-contract 17/17 · security + t0168-auth
+PASS · GitNexus: 9 Symbole / 24 Fluesse = critical (erwartet:
+WerkbankRahmen mit 23 Consumern + Routen-Umstellung), rein mechanisch.
+
+### Nächste Aktion
+
+P0 ist vollständig. Weiter mit **P1** aus `docs/REPO_AUDIT_2026-09-18.md`:
+`/pro` Dashboard Empty State, `owner-menu.tsx` Focus-Trap/Escape, dann P2.
+Danach: visuelle Abnahme durch Jeremy anhand der Vorschau-Datei
+`docs/preview-werkbank-2026-09-18.html` (aktualisieren, wenn gewünscht).
