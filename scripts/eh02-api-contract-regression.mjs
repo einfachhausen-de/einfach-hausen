@@ -25,9 +25,15 @@ for (const [method, endpoint, rel] of contracts) {
   assert.match(source, new RegExp(`export\\s+async\\s+function\\s+${method}\\b`), `${method} ${endpoint} missing`);
 }
 
-const chat = read('src/app/ki-chat/page.tsx');
-assert.match(chat, /role\s*===\s*["']ai["']\s*\?\s*["']assistant["']\s*:\s*["']user["']/, 'ki-chat must translate ai -> assistant');
-assert.match(chat, /content\s*:\s*text/, 'ki-chat must translate text -> content');
+// /ki-chat ist inzwischen ein Redirect-Stub nach /app/hausmeister (kein eigener
+// Chat mehr). Die Rollen-Translation liegt jetzt im KI-Endpoint und der
+// Hausmeister-Seite; beide duerfen nur user/assistant kennen, niemals "ai".
+const ki = read('src/app/api/ki/route.ts');
+assert.match(ki, /role\s*===\s*["']user["']\s*\|\|\s*m\.role\s*===\s*["']assistant["']/, 'api/ki must keep only user/assistant roles');
+const redirect = read('src/app/ki-chat/page.tsx');
+assert.match(redirect, /redirect\(["']\/app\/hausmeister/, 'ki-chat must redirect to /app/hausmeister');
+const hausmeister = read('src/app/app/hausmeister/page.tsx');
+assert.match(hausmeister, /role:\s*['"]user['"]\s*\|\s*['"]assistant['"]\s*\|\s*['"]event['"]/, 'hausmeister must type roles user/assistant/event');
 
 const boundary = read('src/app/error.tsx');
 assert.match(boundary, /fetch\(["']\/api\/errors["']/, 'error boundary must use the error sink');

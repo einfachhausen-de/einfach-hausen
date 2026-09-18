@@ -1,11 +1,12 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
-import { Bell, Search } from 'lucide-react';
+import { Bell } from 'lucide-react';
 import { EHScope, EHRouteTabs } from '@/design-system';
 import { getCurrentUser } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { matchesArea, ownerAreas, providerAreas, ownerAreaSubNav, providerAreaSubNav, type ContextTab } from './nav-config';
 import { OwnerMobileMenu } from './owner-menu';
+import { WerkbankSuche } from './werkbank-suche';
 import { BottomNav } from './bottom-nav';
 import s from './shell.module.css';
 
@@ -55,7 +56,7 @@ export async function WerkbankRahmen({ role, active, children, rail, tabs, brand
         <div className={s['wb-brand']}>
           <span className={s['wb-mark']} aria-hidden="true">eh</span>
           <span className={s['wb-name']}><b>{pro ? (business || 'Partnerbereich') : 'einfach hausen'}</b><small>{brandSub || (pro ? 'Geschäftsführung' : '')}</small></span>
-          <span className={s['wb-chev']} aria-hidden="true">▾</span>
+          
         </div>
         <nav className={s['wb-nav']} aria-label="Hauptnavigation">
           {areas.map(area => {
@@ -64,9 +65,9 @@ export async function WerkbankRahmen({ role, active, children, rail, tabs, brand
           })}
         </nav>
         <div className={s['wb-tools']}>
-          <Link href={pro ? '/pro/notifications' : '/notifications'} className={s.search}><Search size={16} /><span>{searchLabel || 'Suchen'}</span></Link>
+          <WerkbankSuche pro={pro} label={searchLabel || 'Suchen'} />
           <Link href={pro ? '/pro/notifications' : '/notifications'} className={s.toolIcon} aria-label={unread ? `${unread} ungelesene Benachrichtigungen` : 'Benachrichtigungen'}><Bell size={22} />{unread > 0 && <span className={s.toolBadge}>{unread > 99 ? '99+' : unread}</span>}</Link>
-          <Link href={profileHref} className={s.toolAvatar} aria-label="Profil">{initials}</Link>
+          <Link href={profileHref} className={s.toolAvatar} aria-label="Profil" aria-current={active === profileHref ? 'page' : undefined}>{initials}</Link>
         </div>
       </div>
       <div className={rail ? s['wb-body'] : s['wb-body'] + ' ' + s['wb-norail']}>
