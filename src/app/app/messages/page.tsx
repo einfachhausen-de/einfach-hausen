@@ -83,6 +83,9 @@ export default async function Messages({ searchParams }: { searchParams: Promise
   const unreadTotal = contacts.reduce((sum, contact) => sum + Number(contact.unreadCount || 0), 0);
   const linkedTotal = contacts.filter(contact => contact.platformUserId !== null).length;
   const unreadContacts = contacts.filter(contact => Number(contact.unreadCount || 0) > 0).sort((a, b) => Number(b.unreadCount || 0) - Number(a.unreadCount || 0));
+  // Erreichbarkeit aus echten Daten: verknüpfte Kontakte mit hinterlegter
+  // Rufnummer (Name, Betrieb, Telefon). Keine erfundenen Sprechzeiten.
+  const reachable = contacts.filter(contact => contact.platformUserId !== null && (contact.phone || '').trim() !== '').slice(0, 4);
   const usedCategories = CONTACT_DIRECTORY_CATEGORIES.filter(category => (countsByMain[category.id] ?? 0) > 0);
 
   const messages = mode === 'detail' && active
@@ -130,6 +133,14 @@ export default async function Messages({ searchParams }: { searchParams: Promise
           detail: contact.company || undefined,
           value: `${contact.unreadCount} neu`,
           href: contact.platformUserId !== null ? `/app/messages?contact=${contact.platformUserId}` : `/app/messages?entry=${contact.id}`,
+        }))} />
+      </EHWorkSection>
+      <EHWorkSection title="Erreichbarkeit">
+        <EHRecordList label="Erreichbare Kontakte" empty="Noch keine Rufnummer hinterlegt. Sobald ein verknüpfter Kontakt eine Nummer hat, steht er hier." items={reachable.map(contact => ({
+          id: String(contact.id),
+          title: contact.name,
+          detail: contact.company || undefined,
+          value: contact.phone,
         }))} />
       </EHWorkSection>
       <EHWorkSection title="Deine Bereiche">
