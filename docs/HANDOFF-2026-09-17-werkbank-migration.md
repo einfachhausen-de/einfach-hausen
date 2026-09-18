@@ -1,6 +1,6 @@
 # HANDOFF 2026-09-17 — Werkbank-Migration (Alt-CSS → EH-Designsystem)
 
-Stand: main = `10b9093`, gepusht auf origin/main, live auf OCI (`/srv/einfach-hausen`,
+Stand: main = `443500c`, gepusht auf origin/main, live auf OCI (`/srv/einfach-hausen`,
 Health 200). Vorher: `ef4c3e6`.
 
 ## 0. Nachtrag 2026-09-18 — Soll-Start live, Aufräumstand
@@ -10,6 +10,13 @@ Health 200). Vorher: `ef4c3e6`.
   `docs/brand/app-ux-vorschlaege/` + Route `/app-ux-vorschlaege`) alle in main.
 - `/app` auf Soll `#start` (`10b9093`): +Anliegen-CTA, Nächste-Termine-Sektion,
   Rail ohne Mock (echte Profilvollständigkeit). Screenshot-belegt (1536px).
+- `#aufträge`+`#auftrag` via PR #123 (v0, geprüft: keine Sealed-Dateien, keine
+  Mocks, Screenshots `/app/jobs` + `/app/jobs/1` mit eigenen Augen ok).
+- `#dokumente` gruppiert (`c292e95`: Rechnungen/Angebote&Nachweise/Belege, je mit
+  Anzahl; Umschalter raus, Jeremy-Go ausstehend war erteilt via „go").
+- `#kontakte` (`443500c`): Erreichbarkeit aus echten Rufnummern in der Rail.
+- Verträge/Termine/Profil: KEIN Soll-Bild in der Vorgabe — nur nach Muster bauen
+  oder Jeremy definiert Soll (Stand: Muster erfüllt, kein Umbau nötig).
 - Sealed-Fixes mit Jeremy-Go: FormSection-legend in der Karte (float), Chronik-Datum
   nowrap (`c1ac66b`, per `eh-design-seal.mjs` neu versiegelt).
 - PR #119 geschlossen (leere Hülle). Remote nur noch `main` (15 Branches gelöscht,
