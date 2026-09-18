@@ -183,3 +183,77 @@ NICHT committen, NICHT deployen, NICHT versiegeln — Jeremy nimmt ab und gibt d
 - **Offen, nicht von uns:** `.orca/drops/` Screenshots untracked (bewusst nicht
   committet); `test:e2e:architecture` lokal nicht lauffähig (braucht
   Supabase-Produktionskeys, OCI-only).
+
+
+---
+
+## Kapitel 10 — P0-5 CSS-Konsolidierung + Gate-Reparaturen (09331ec, main, gepusht)
+
+**Stand:** `09331ec` liegt auf `origin/main` (zusammen mit dem unpushed gebliebenen
+`41d48bf`). Alle Gates grün (siehe unten). Die P0-Liste aus dem Repo-Audit ist damit
+bei P0-1 (wb-norail) und P0-5 (CSS-Konsolidierung) abgeschlossen.
+
+### P0-5: werkbankLayout CSS-Konsolidierung
+
+Das `werkbankLayout`-CSS war **6× dupliziert** — jede Werkbank-Seite hielt ihren
+eigenen Inline-`<style>`-String. Zwei Varianten hatten **widersprüchliche Werte**:
+`/app` und `/app/jobs/[id]` verwendeten hardcodierte Pixel (`10.5px`/`13.5px`/
+`12.5px`), die anderen vier Seiten bereits Tokens. Live gemessen waren Rail-Header,
+Kartentitel und Listeneinträge auf den sechs Seiten also **nicht identisch**.
+
+Umgesetzt (genau Option 1 aus der Qwen-Korrektur):
+
+- **Neu:** `src/components/werkbank-layout.css` — 31 Selektoren, ausschließlich
+  `--eh-*`-Tokens, **globale `.eh-werkbank-*`-Klassennamen unveraendert**
+  (Plain Global CSS, kein CSS-Module: die Klassennamen stehen weltweit im Markup;
+  Module-Hashing würde sie brechen). Superset aller 6 Varianten.
+- 6 Seiten (`page.tsx`, `jobs/page.tsx`, `jobs/[id]/page.tsx`, `contracts`,
+  `calendar`, `profile`): Inline-`werkbankLayout`-String + `<style>`-Tag entfernt,
+  dafür `import '@/components/werkbank-layout.css'`.
+- `/app/jobs` Statusbalken: inline `style={{width}}` → CSS-Variable
+  `--eh-anteil` (`.eh-werkbank-stack > span { width: var(--eh-anteil,0) }`).
+- **Live nachgemessen:** alle 6 Seiten haben jetzt identische Typografie
+  (Rail-Header 12px, Kartentitel 15px, Listeneintrag 13px), 0 Konsolenfehler,
+  Statusbalkenbreiten funktionieren über die CSS-Var.
+
+### Zwei veraltete Gates repariert (Wurzeln im Visitaudit)
+
+- **`test:crm` 20/20 PASS** (vorher 5/11): Lead-Karten werden als `EHWorkflowForm`
+  (`<form>` + Fieldset aus `EHWorkflowForm`/`EHFormSection`) gerendert, **nicht**
+  als `<article>`; das Filterformular hat kein `method="get"`-Attribut. Zwei
+  Selektoren in `scripts/crm-e2e.mjs` umgestellt (`form` mit `select[name=status]`
+  als Karten-Identifikator), die Prüflogik dahinter ist unveraendert.
+- **`test:api-contract` 17/17 PASS** (vorher kaputt): der
+  "kein TODO/stub"-Sweep scannt **Kommentare** per Regex; ein erklärender
+  Kommentar in `src/components/nav-config.ts` enthielt das Wort "stub"
+  ("/pro/jobs is a redirect stub" — Wortwahl sachlich falsch, es ist ein
+  echter Redirect). Kommentar umformuliert. Kein Sweep abgeschwächt, keine
+  Regel gelockert — die Regex ist weiterhin aktiv für alle `src/**`-Dateien.
+
+### Gate-Ergebnisse (alle auf `09331ec`)
+
+| Gate | Ergebnis |
+|---|---|
+| `tsc --noEmit` | 0 errors |
+| `eslint .` | 0 errors / 28 warnings (pre-existing) |
+| `eh-design-check.mjs` | 0 neue Schulden aus diesen Dateien |
+| `AUTH_MODE=supabase next build` | rc=0 |
+| `test:api-contract` | 17/17 PASS |
+| `test:crm` | 20/20 PASS |
+| `test:security` / `supply-chain` / `intake` / `matching` / `onboarding` / `notifications` / `review` / `t0168-auth` | alle PASS |
+| GitNexus `detect-changes --scope all` | 8 Dateien, 15 Symbole, 24 Fluesse, **critical** — erwartet (6 Werkbankseiten + `WerkbankRahmen`-Consumer), rein mechanischer CSS-Umzug + Test-Selektoren |
+
+Design-Debt-Hinweis (unveraendert, pre-existing): `src/app/app/jobs/page.tsx` hat
+keine Baseline für `unowned-style` (1 > 0); `auth-v2/auth-shell.css` und
+`app-ux-vorschlaege` melden stale Baselines. Nicht von dieser Welle, nicht
+gelockert.
+
+### Nächste Aktion (Reihenfolge aus `docs/REPO_AUDIT_2026-09-18.md`)
+
+1. **P0-2** leere Sidebar-Gruppen in `nav-config.ts` abfangen
+   (`area.children.length > 0` in `werkbank-rahmen.tsx`, sonst bleiben leere
+   Gruppenkoepfe für Start/Ansprechpartner/Anfragen/Nachrichten/Team stehen).
+2. **P0-3** Legacy-Routen löschen: `/chat/[anfrageId]` (T-0168-Verstoß),
+   `/anfrage/*`, `/anfragen-pro`, `/ansprechpartner` → redirect,
+   `/onboarding/pro/*`; `AuthContext.PRIVATE_PREFIXES` phantom routes mit abräumen.
+3. **P1** `/pro` Dashboard Empty State + `owner-menu.tsx` Focus-Trap/Escape.
