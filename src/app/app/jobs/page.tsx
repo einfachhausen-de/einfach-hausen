@@ -1,9 +1,11 @@
+import Link from 'next/link';
 import { WerkbankRahmen } from '@/components/werkbank-rahmen';
-import { EHEmptyState, EHButton, EHMetricsBar, EHPageHeader, EHOwnerFilters, EHOwnerSearch, EHOwnerSection, EHRecordList, EHRecordViews, EHStatus, EHText, EHWorkSection, EHWorkspaceGrid } from '@/design-system';
+import { EHOwnerSearch } from '@/design-system';
 import { requireUser } from '@/lib/auth';
 import { db } from '@/lib/db';
-import { statusLabel } from '@/lib/format';
+import { euroExact, statusLabel } from '@/lib/format';
 import { ownerDate, ownerInstant } from '@/lib/owner-format';
+import { JobsAnsicht, JobsAnsichtSwitcher, type JobAnsichtRow } from './jobs-ansicht';
 
 type SearchParams = Record<string, string | string[] | undefined>;
 
@@ -26,6 +28,7 @@ type JobRow = {
   appointment_status: string | null;
   photo_id: number | null;
   photo_path: string | null;
+  amount: number | null;
 };
 
 function firstParam(
@@ -67,15 +70,66 @@ function jobScheduleCopy(job: JobRow): string {
   return job.status === 'completed' ? 'Auftrag abgeschlossen' : 'Noch kein Termin vereinbart';
 }
 
-// Naechster anstehender Termin. Steht bewusst ausserhalb des Renderpfads: im
-// Component-Body gilt Date.now() als unreine Funktion (react-hooks/purity),
-// hier - wie in jobScheduleCopy - ist der Aufruf unproblematisch.
-function nextUpcomingAppointment(jobs: JobRow[]): JobRow | undefined {
+function shortDay(value: string): string {
+  const raw = String(value);
+  const isDay = /^\d{4}-\d{2}-\d{2}$/.test(raw);
+  const instant = isDay ? new Date(`${raw}T12:00:00Z`) : ownerInstant(raw);
+  if (!instant) return raw.slice(0, 10);
+  return new Intl.DateTimeFormat('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit' }).format(instant);
+}
+
+function appointmentParts(value: string): { day: string; time: string } {
+  const instant = ownerInstant(value);
+  if (!instant) return { day: ownerDate(value), time: '' };
+  return {
+    day: new Intl.DateTimeFormat('de-DE', { timeZone: 'Europe/Berlin', weekday: 'short', day: '2-digit', month: '2-digit' }).format(instant),
+    time: new Intl.DateTimeFormat('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' }).format(instant),
+  };
+}
+
+function upcomingAppointments(jobs: JobRow[]): JobRow[] {
   const nowMs = Date.now();
   return jobs
     .filter((job) => job.appointment_start && (ownerInstant(job.appointment_start)?.getTime() ?? 0) >= nowMs)
-    .sort((a, b) => (ownerInstant(a.appointment_start)?.getTime() ?? 0) - (ownerInstant(b.appointment_start)?.getTime() ?? 0))[0];
+    .sort((a, b) => (ownerInstant(a.appointment_start)?.getTime() ?? 0) - (ownerInstant(b.appointment_start)?.getTime() ?? 0));
 }
+
+/**
+ * Rechte Spalte und Kopf dieser Seite. Dieselben Token wie auf /app:
+ * Karten, Registerlinie, keine zweite Stilfamilie. Die Balkenbreite ist der
+ * Anteil, kein Layout.
+ */
+const werkbankLayout = `
+.eh-werkbank-rail-h { font-size:10.5px; letter-spacing:.09em; text-transform:uppercase; color:var(--eh-muted); font-weight:700; margin:0 0 10px; }
+.eh-werkbank-karte { background:var(--eh-color-white); border:1px solid var(--eh-color-line); border-radius:var(--eh-radius-control); padding:13px 14px; margin-bottom:12px; }
+.eh-werkbank-karte h4 { margin:0 0 9px; font-size:13.5px; display:flex; align-items:center; gap:8px; }
+.eh-werkbank-item { display:flex; gap:9px; padding:7px 0; border-top:1px solid var(--eh-color-line); font-size:12.5px; align-items:center; }
+.eh-werkbank-item:first-of-type { border-top:0; }
+.eh-werkbank-item b { display:block; font-weight:600; }
+.eh-werkbank-item small { color:var(--eh-muted); font-size:11.5px; }
+.eh-werkbank-item > :last-child { margin-left:auto; color:var(--eh-muted); }
+.eh-werkbank-stack { display:flex; height:7px; border-radius:var(--eh-radius-pill); background:var(--eh-color-paper); overflow:hidden; margin:8px 0 6px; }
+.eh-werkbank-stack span { display:block; height:100%; }
+.eh-werkbank-anteil-terra { background:var(--eh-color-terra); }
+.eh-werkbank-anteil-petrol { background:var(--eh-color-petrol); }
+.eh-werkbank-anteil-ok { background:var(--eh-color-success); }
+.eh-werkbank-anteil-line { background:var(--eh-color-line); }
+.eh-werkbank-row { display:flex; padding:4px 0; font-size:12.5px; }
+.eh-werkbank-row > :last-child { margin-left:auto; color:var(--eh-muted); }
+.eh-werkbank-kopf { display:flex; align-items:center; gap:12px; padding-bottom:16px; border-bottom:1px solid var(--eh-rule); }
+.eh-werkbank-kopf-copy { flex:1; min-width:0; display:grid; gap:2px; }
+.eh-werkbank-kopf-tools { flex:none; display:flex; align-items:center; gap:8px; }
+.eh-werkbank-kopf-cta { flex:none; display:inline-flex; align-items:center; gap:8px; background:var(--eh-color-petrol); color:var(--eh-color-white); border-radius:var(--eh-radius-control); padding:10px 18px; font-weight:600; text-decoration:none; font-size:13.5px; }
+.eh-werkbank-kopf-copy h1 { font-size:var(--eh-font-body); font-weight:var(--eh-weight-semibold); line-height:var(--eh-leading-tight); }
+.eh-werkbank-kopf-copy span { font-size:var(--eh-font-label); line-height:var(--eh-leading-normal); color:var(--eh-muted); }
+.eh-werkbank-chips { display:flex; flex-wrap:wrap; gap:8px; margin:0 0 16px; }
+.eh-werkbank-chip { display:inline-flex; align-items:center; gap:6px; padding:6px 12px; border:1px solid var(--eh-color-line); border-radius:var(--eh-radius-pill); text-decoration:none; font-size:var(--eh-font-meta); color:var(--eh-color-ink); background:var(--eh-color-white); }
+.eh-werkbank-chip[aria-current="page"] { background:var(--eh-color-petrol); color:var(--eh-color-white); border-color:var(--eh-color-petrol); }
+.eh-werkbank-chip-n { font-variant-numeric:tabular-nums; }
+.eh-werkbank-tbl small { display:block; color:var(--eh-muted); font-size:11.5px; font-weight:400; margin-top:2px; }
+.eh-werkbank-tbl a { color:inherit; text-decoration:none; font-weight:600; }
+.eh-werkbank-leer { color:var(--eh-muted); font-size:12.5px; margin:0; }
+`;
 
 export default async function Jobs({
   searchParams,
@@ -124,7 +178,15 @@ export default async function Jobs({
           WHERE p.job_id=j.id
           ORDER BY p.id ASC
           LIMIT 1
-        ) AS photo_path
+        ) AS photo_path,
+        (
+          SELECT q2.amount
+          FROM quotes q2
+          WHERE q2.job_id=j.id
+            AND q2.status IN ('pending','accepted')
+          ORDER BY CASE WHEN j.accepted_quote_id IS NOT NULL AND q2.id=j.accepted_quote_id THEN 0 ELSE 1 END, q2.amount ASC
+          LIMIT 1
+        ) AS amount
       FROM jobs j
       LEFT JOIN quotes q
         ON q.job_id=j.id
@@ -188,70 +250,98 @@ export default async function Jobs({
       )
     : currentJobs;
 
-  // Kennzahlen und rechte Spalte lesen dieselbe Auftragsliste wie die Filter.
-  // Die Zahlen zaehlen ueber alle Auftraege, nicht nur ueber die sichtbare
-  // Ansicht - sonst waere "In Arbeit" vom Filter abhaengig.
   const quotedJobs = jobs.filter((job) => job.status === 'quoted');
-  const nextAppointment = nextUpcomingAppointment(jobs);
-  const byCategory = new Map<string, number>();
-  for (const job of jobs) {
-    const label = job.category?.trim() || 'Ohne Gewerk';
-    byCategory.set(label, (byCategory.get(label) ?? 0) + 1);
-  }
+  const upcoming = upcomingAppointments(jobs);
   const jobTitle = (job: JobRow) => job.title.replace(/^Ansprechpartner:\s*/, '');
+  const total = jobs.length;
+  const statusParts = [
+    { id: 'quoted', label: 'Braucht dich', count: quotedJobs.length, tone: 'terra' },
+    { id: 'progress', label: 'In Arbeit', count: inProgressJobs.length, tone: 'petrol' },
+    { id: 'done', label: 'Abgeschlossen', count: completedJobs.length, tone: 'ok' },
+    { id: 'open', label: 'Offen', count: jobs.filter((job) => job.status === 'open').length, tone: 'line' },
+    { id: 'accepted', label: statusLabel('accepted'), count: jobs.filter((job) => job.status === 'accepted').length, tone: 'petrol' },
+    { id: 'cancelled', label: statusLabel('cancelled'), count: jobs.filter((job) => job.status === 'cancelled').length, tone: 'line' },
+  ].filter((part) => part.count > 0);
+  const filters = [
+    { href: filterHref('current'), label: 'Aktuell', active: currentView === 'current' },
+    { href: filterHref('open'), label: 'Offen', count: openJobs.length, active: currentView === 'open' },
+    { href: filterHref('in_progress'), label: 'In Arbeit', count: inProgressJobs.length, active: currentView === 'in_progress' },
+    { href: filterHref('completed'), label: 'Abgeschlossen', count: completedJobs.length, active: currentView === 'completed' },
+  ];
 
-  return <WerkbankRahmen role="homeowner" active="/app/jobs">
-    <EHPageHeader title="Deine Aufträge" context={`${jobs.length} ${jobs.length === 1 ? 'Auftrag' : 'Aufträge'}`} actions={<EHButton href="/app/hausmeister" arrow>Anliegen beschreiben</EHButton>} />
-    <EHMetricsBar label="Aufträge" items={[
-      { id: 'gesamt', label: 'Aufträge gesamt', value: String(jobs.length), hint: 'in deiner Akte' },
-      { id: 'offen', label: 'Offen', value: String(openJobs.length), hint: quotedJobs.length > 0 ? `${quotedJobs.length} mit Angebot` : 'noch ohne Angebot' },
-      { id: 'arbeit', label: 'In Arbeit', value: String(inProgressJobs.length), hint: 'beauftragt und laufend' },
-      { id: 'fertig', label: 'Abgeschlossen', value: String(completedJobs.length), hint: 'erledigte Aufträge' },
-    ]} />
+  const rows: JobAnsichtRow[] = filteredJobs.map((job) => ({
+    id: String(job.id),
+    href: `/app/jobs/${job.id}`,
+    title: jobTitle(job),
+    numberLine: `Nr. ${job.id} · ${shortDay(job.created_at)}`,
+    business: job.accepted_business || '–',
+    statusLabel: jobStatusCopy(job),
+    tone: jobStatusTone(job.status),
+    amount: typeof job.amount === 'number' ? euroExact(job.amount) : '–',
+    detail: [job.category, job.accepted_business].filter(Boolean).join(' · '),
+    date: (job.appointment_start || job.preferred_date || job.updated_at).slice(0, 10),
+    dateLabel: ownerDate(job.appointment_start || job.preferred_date || job.updated_at),
+    note: jobScheduleCopy(job),
+  }));
+
+  return <WerkbankRahmen role="homeowner" active="/app/jobs" searchLabel="Auftrag oder Betrieb" rail={<>
+      <p className="eh-werkbank-rail-h">Kontext dieser Seite</p>
+      <div className="eh-werkbank-karte">
+        <h4>Status</h4>
+        {total > 0 && (
+          <div className="eh-werkbank-stack" aria-hidden="true">
+            {statusParts.map((part) => (
+              <span
+                key={part.id}
+                className={`eh-werkbank-anteil-${part.tone}`}
+                style={{ width: `${(part.count / total) * 100}%` }}
+              />
+            ))}
+          </div>
+        )}
+        {statusParts.map((part) => (
+          <div key={part.id} className="eh-werkbank-row"><span>{part.label}</span><span>{part.count}</span></div>
+        ))}
+        {total === 0 && <p className="eh-werkbank-leer">Noch keine Aufträge.</p>}
+      </div>
+      <div className="eh-werkbank-karte">
+        <h4>Nächste Termine</h4>
+        {upcoming.length ? upcoming.map((job) => {
+          const parts = appointmentParts(job.appointment_start as string);
+          return (
+            <Link key={`${job.id}-${job.appointment_start}`} href={`/app/jobs/${job.id}`} className="eh-werkbank-item">
+              <span><b>{parts.day}</b><small>{parts.time}</small></span>
+              <span>{job.accepted_business || jobTitle(job)}</span>
+            </Link>
+          );
+        }) : <p className="eh-werkbank-leer">Kein bestätigter Termin in deinen Aufträgen. Ein Wunschtermin steht in der Zeile des jeweiligen Auftrags.</p>}
+      </div>
+    </>}>
+    <style>{werkbankLayout}</style>
+    <header className="eh-werkbank-kopf">
+      <div className="eh-werkbank-kopf-copy">
+        <h1>Aufträge</h1>
+        <span>{`${jobs.length} ${jobs.length === 1 ? 'Auftrag' : 'Aufträge'}`}</span>
+      </div>
+      <div className="eh-werkbank-kopf-tools">
+        <JobsAnsichtSwitcher />
+        <Link className="eh-werkbank-kopf-cta" href="/app/hausmeister">+ Anliegen</Link>
+      </div>
+    </header>
     <EHOwnerSearch action="/app/jobs" query={firstParam(params.q)} placeholder="Auftrag, Gewerk oder Betrieb" hidden={currentView === 'current' ? undefined : {name:'view',value:currentView}} />
-    <EHOwnerFilters label="Aufträge filtern" items={[
-      {href:filterHref('current'),label:'Aktuell',active:currentView==='current'},
-      {href:filterHref('open'),label:'Offen',count:openJobs.length,active:currentView==='open'},
-      {href:filterHref('in_progress'),label:'In Arbeit',count:inProgressJobs.length,active:currentView==='in_progress'},
-      {href:filterHref('completed'),label:'Abgeschlossen',count:completedJobs.length,active:currentView==='completed'},
-    ]} />
-    <EHWorkspaceGrid main={
-    <EHOwnerSection title={viewTitle} text={`${filteredJobs.length} ${filteredJobs.length === 1 ? 'Auftrag' : 'Aufträge'}${query ? ' für deine Suche' : ''}`}>
-      {filteredJobs.length ? <EHRecordViews label={viewTitle} storageKey="auftraege" defaultView="liste" switcherLabel="Aufträge: Ansicht wechseln" items={filteredJobs.map(job => ({
-        id:String(job.id),href:`/app/jobs/${job.id}`,title:jobTitle(job),
-        detail:[job.category,job.accepted_business].filter(Boolean).join(' · '),
-        date:(job.appointment_start||job.preferred_date||job.updated_at).slice(0,10),
-        dateLabel:ownerDate(job.appointment_start||job.preferred_date||job.updated_at),
-        note:jobScheduleCopy(job),
-        status:<EHStatus tone={jobStatusTone(job.status)}>{jobStatusCopy(job)}</EHStatus>,
-        action:<span>{job.status==='quoted'?'Angebot prüfen':'Auftrag öffnen'}</span>,
-      }))} /> : <EHEmptyState title={query ? 'Keine passenden Aufträge' : 'Keine Aufträge in dieser Ansicht'} text={query ? 'Ändere deine Suche oder wähle einen anderen Status.' : 'Neue Anliegen kannst du oben beschreiben. Bereits vorhandene Aufträge findest du über die Statusfilter.'} />}
-    </EHOwnerSection>
-    } aside={<>
-      <EHWorkSection title="Nächster Termin">
-        {nextAppointment ? <>
-          <EHText>{ownerDate(nextAppointment.appointment_start)}</EHText>
-          <EHText muted>{nextAppointment.accepted_business || nextAppointment.category || 'Betrieb im Auftrag'}</EHText>
-          <EHButton href={`/app/jobs/${nextAppointment.id}`} variant="secondary" arrow>{jobTitle(nextAppointment)}</EHButton>
-        </> : <EHText muted>Kein bestätigter Termin in deinen Aufträgen. Ein Wunschtermin steht in der Zeile des jeweiligen Auftrags.</EHText>}
-      </EHWorkSection>
-      <EHWorkSection title="Angebote prüfen">
-        <EHRecordList label="Aufträge mit offenem Angebot" empty="Gerade liegt kein Angebot zur Prüfung vor." items={quotedJobs.map(job => ({
-          id: String(job.id),
-          title: jobTitle(job),
-          detail: [job.quotes > 0 ? `${job.quotes} ${job.quotes === 1 ? 'Angebot' : 'Angebote'}` : 'Angebotsstatus prüfen', job.category].filter(Boolean).join(' · '),
-          date: job.updated_at.slice(0, 10),
-          dateLabel: ownerDate(job.updated_at),
-          href: `/app/jobs/${job.id}`,
-        }))} />
-      </EHWorkSection>
-      <EHWorkSection title="Aufträge nach Gewerk">
-        <EHRecordList label="Aufträge nach Gewerk" empty="Noch kein Gewerk erfasst." items={Array.from(byCategory.entries()).sort((a, b) => b[1] - a[1]).map(([category, count]) => ({
-          id: `gewerk-${category}`,
-          title: category,
-          detail: `${count} ${count === 1 ? 'Auftrag' : 'Aufträge'}`,
-        }))} />
-      </EHWorkSection>
-    </>} />
+    <nav className="eh-werkbank-chips" aria-label="Aufträge filtern">
+      {filters.map((item) => (
+        <Link key={item.href} href={item.href} className="eh-werkbank-chip" aria-current={item.active ? 'page' : undefined}>
+          {item.label}
+          {'count' in item && item.count !== undefined && <span className="eh-werkbank-chip-n">{item.count}</span>}
+        </Link>
+      ))}
+    </nav>
+    <JobsAnsicht
+      label={viewTitle}
+      rows={rows}
+      emptyTitle={query ? 'Keine passenden Aufträge' : 'Keine Aufträge in dieser Ansicht'}
+      emptyText={query ? 'Ändere deine Suche oder wähle einen anderen Status.' : 'Neue Anliegen kannst du oben beschreiben. Bereits vorhandene Aufträge findest du über die Statusfilter.'}
+    />
   </WerkbankRahmen>;
 }
