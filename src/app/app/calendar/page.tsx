@@ -1,3 +1,4 @@
+import '@/components/werkbank-layout.css';
 import Link from 'next/link';
 import { CalendarClock } from 'lucide-react';
 import { WerkbankRahmen } from '@/components/werkbank-rahmen';
@@ -28,33 +29,6 @@ function shortDay(value: string | null | undefined): string {
  * Rasterzeile der Seite zurueckgeholt. Der Selektor traegt :nth-child(n),
  * damit er die Bibliotheksregel `.metricsBar > div:nth-child(n+3)` eindeutig
  * schlaegt. */
-const werkbankLayout = `
-.eh-werkbank-rail-h { font-size:var(--eh-font-eyebrow); letter-spacing:var(--eh-track-wide); text-transform:uppercase; color:var(--eh-muted); font-weight:var(--eh-weight-bold); margin:0 0 10px; }
-.eh-werkbank-karte { background:var(--eh-color-white); border:1px solid var(--eh-color-line); border-radius:var(--eh-radius-control); padding:13px 14px; margin-bottom:12px; }
-.eh-werkbank-karte h4 { margin:0 0 9px; font-size:var(--eh-font-label); display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
-.eh-werkbank-karte h4 .eh-werkbank-badge { margin-left:auto; }
-.eh-werkbank-badge { background:var(--eh-color-terra); color:var(--eh-color-white); border-radius:var(--eh-radius-pill); font-size:var(--eh-font-meta); font-weight:var(--eh-weight-bold); padding:1px 7px; }
-.eh-werkbank-item { display:flex; gap:9px; padding:7px 0; border-top:1px solid var(--eh-color-line); font-size:var(--eh-font-meta); align-items:center; }
-.eh-werkbank-item:first-of-type { border-top:0; }
-.eh-werkbank-item b { display:block; font-weight:var(--eh-weight-semibold); }
-.eh-werkbank-item small { color:var(--eh-muted); font-size:var(--eh-font-eyebrow); }
-.eh-werkbank-item > :last-child { margin-left:auto; color:var(--eh-muted); text-align:right; }
-.eh-werkbank-ic { width:24px; height:24px; display:grid; place-items:center; color:var(--eh-muted); flex:0 0 auto; font-size:var(--eh-font-meta); }
-.eh-werkbank-go { display:block; text-align:center; background:var(--eh-color-petrol); color:var(--eh-color-white); border-radius:var(--eh-radius-control); padding:8px; font-weight:var(--eh-weight-semibold); margin-top:10px; text-decoration:none; font-size:var(--eh-font-label); }
-.eh-werkbank-bar { height:7px; border-radius:var(--eh-radius-pill); background:var(--eh-color-paper); overflow:hidden; margin:8px 0 6px; }
-.eh-werkbank-bar i { display:block; height:100%; background:var(--eh-color-petrol); }
-.eh-werkbank-row { display:flex; padding:4px 0; font-size:var(--eh-font-meta); }
-.eh-werkbank-row > :last-child { margin-left:auto; color:var(--eh-muted); }
-.eh-werkbank-kopf { display:flex; align-items:center; gap:12px; padding-bottom:16px; border-bottom:1px solid var(--eh-rule); }
-.eh-werkbank-kopf-copy { flex:1; min-width:0; display:grid; gap:2px; }
-.eh-werkbank-kopf-tools { flex:none; display:flex; align-items:center; gap:8px; }
-.eh-werkbank-kopf-cta { flex:none; display:inline-flex; align-items:center; gap:8px; background:var(--eh-color-petrol); color:var(--eh-color-white); border-radius:var(--eh-radius-control); padding:10px 18px; font-weight:var(--eh-weight-semibold); text-decoration:none; font-size:var(--eh-font-label); }
-.eh-werkbank-kopf-copy h1 { font-size:var(--eh-font-body); font-weight:var(--eh-weight-semibold); line-height:var(--eh-leading-tight); }
-.eh-werkbank-kopf-copy span { font-size:var(--eh-font-label); line-height:var(--eh-leading-normal); color:var(--eh-muted); }
-.eh-werkbank-kennzahlen > dl { grid-auto-flow:column; grid-template-columns:repeat(3,minmax(0,1fr)); }
-.eh-werkbank-kennzahlen > dl > div:nth-child(n) { min-height:76px; padding:12px 14px; border-top:0; }
-.eh-werkbank-kennzahlen > dl > div:nth-child(n) + div { border-left:1px solid var(--eh-rule); }
-`;
 
 /** Ein Termin als Zeile: dieselbe Form tragen Hauptspalte und rechte Spalte. */
 function appointmentEntry(row: Appointment): EHRecordEntry {
@@ -111,7 +85,7 @@ export default async function Calendar({searchParams}:{searchParams:Promise<Reco
         <Link href="/app/home/history" className="eh-werkbank-go">Zur Haus-Historie →</Link>
       </div>
     </>}>
-    <style>{werkbankLayout}</style>
+    
     <header className="eh-werkbank-kopf">
       <div className="eh-werkbank-kopf-copy">
         <h1>Deine Termine</h1>

@@ -1,3 +1,4 @@
+import '@/components/werkbank-layout.css';
 import fs from 'node:fs';
 import Link from 'next/link';
 import { CalendarClock, ChevronRight, FileText } from 'lucide-react';
@@ -19,36 +20,6 @@ import { resolvePrivatePath } from '@/lib/security/private-files';
  * :nth-child(n), damit er die Bibliotheksregel `.metricsBar > div:nth-child(n+3)`
  * eindeutig schlaegt.
  */
-const werkbankLayout = `
-.eh-werkbank-rail-h { font-size:10.5px; letter-spacing:.09em; text-transform:uppercase; color:var(--eh-muted); font-weight:700; margin:0 0 10px; }
-.eh-werkbank-karte { background:var(--eh-color-white); border:1px solid var(--eh-color-line); border-radius:var(--eh-radius-control); padding:13px 14px; margin-bottom:12px; }
-.eh-werkbank-karte h4 { margin:0 0 9px; font-size:13.5px; display:flex; align-items:center; gap:8px; }
-.eh-werkbank-badge { background:var(--eh-color-terra); color:var(--eh-color-white); border-radius:var(--eh-radius-pill); font-size:10px; font-weight:700; padding:1px 7px; }
-.eh-werkbank-item { display:flex; gap:9px; padding:7px 0; border-top:1px solid var(--eh-color-line); font-size:12.5px; align-items:center; }
-.eh-werkbank-item:first-of-type { border-top:0; }
-.eh-werkbank-item b { display:block; font-weight:600; }
-.eh-werkbank-item small { color:var(--eh-muted); font-size:11.5px; }
-.eh-werkbank-ic { width:24px; height:24px; display:grid; place-items:center; color:var(--eh-muted); flex:0 0 auto; font-size:12px; }
-.eh-werkbank-go { display:block; text-align:center; background:var(--eh-color-petrol); color:var(--eh-color-white); border-radius:var(--eh-radius-control); padding:8px; font-weight:600; margin-top:10px; text-decoration:none; font-size:13px; }
-.eh-werkbank-bar { height:7px; border-radius:var(--eh-radius-pill); background:var(--eh-color-paper); overflow:hidden; margin:8px 0 6px; }
-.eh-werkbank-bar i { display:block; height:100%; background:var(--eh-color-petrol); }
-.eh-werkbank-row { display:flex; padding:4px 0; font-size:12.5px; }
-.eh-werkbank-row > :last-child { margin-left:auto; color:var(--eh-muted); }
-.eh-werkbank-kopf { display:flex; align-items:center; gap:12px; padding-bottom:16px; border-bottom:1px solid var(--eh-rule); }
-.eh-werkbank-kopf-copy { flex:1; min-width:0; display:grid; gap:2px; }
-.eh-werkbank-kopf-cta { flex:none; display:inline-flex; align-items:center; gap:8px; background:var(--eh-color-petrol); color:var(--eh-color-white); border-radius:var(--eh-radius-control); padding:10px 18px; font-weight:600; text-decoration:none; font-size:13.5px; }
-.eh-werkbank-kopf-copy h1 { font-size:var(--eh-font-body); font-weight:var(--eh-weight-semibold); line-height:var(--eh-leading-tight); }
-.eh-werkbank-kopf-copy span { font-size:var(--eh-font-label); line-height:var(--eh-leading-normal); color:var(--eh-muted); }
-.eh-werkbank-fokus { display:flex; align-items:center; gap:14px; min-height:80px; padding:14px 16px; border:1px solid var(--eh-rule); border-radius:var(--eh-radius-panel); background:var(--eh-color-white); text-decoration:none; }
-.eh-werkbank-fokus-zahl { flex:none; font-size:var(--eh-font-section); font-weight:var(--eh-weight-semibold); line-height:var(--eh-leading-tight); color:var(--eh-color-terra); font-variant-numeric:tabular-nums; }
-.eh-werkbank-fokus-text { flex:1; min-width:0; display:grid; gap:2px; }
-.eh-werkbank-fokus-text strong { font-size:var(--eh-font-body); font-weight:var(--eh-weight-semibold); line-height:var(--eh-leading-tight); }
-.eh-werkbank-fokus-text span { font-size:var(--eh-font-label); line-height:var(--eh-leading-normal); color:var(--eh-color-secondary); }
-.eh-werkbank-fokus-pfeil { flex:none; width:44px; height:44px; display:grid; place-items:center; border-radius:var(--eh-radius-pill); background:var(--eh-color-petrol); color:var(--eh-color-white); }
-.eh-werkbank-kennzahlen > dl { grid-auto-flow:column; grid-template-columns:repeat(3,minmax(0,1fr)); }
-.eh-werkbank-kennzahlen > dl > div:nth-child(n) { min-height:76px; padding:12px 14px; border-top:0; }
-.eh-werkbank-kennzahlen > dl > div:nth-child(n) + div { border-left:1px solid var(--eh-rule); }
-`;
 
 /** Kurzes Tagesdatum der Hausakte: "14.09.". Die Chronik sortiert am ISO-Wert. */
 function shortDay(value: string): string {
@@ -157,7 +128,7 @@ export default async function Dashboard() {
         <div className="eh-werkbank-row"><span>Dokumente</span><span>{documentCount}</span></div>
       </div>
     </>}>
-    <style>{werkbankLayout}</style>
+    
     <header className="eh-werkbank-kopf">
       <div className="eh-werkbank-kopf-copy">
         <h1>{address || 'Adresse ergänzen'}</h1>

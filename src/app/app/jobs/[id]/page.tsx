@@ -1,3 +1,4 @@
+import '@/components/werkbank-layout.css';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { CalendarDays,CheckCircle2,MapPin,MessageSquare,Phone,ShieldCheck,UserRound } from 'lucide-react';
@@ -15,20 +16,6 @@ import { EHActions,EHButton,EHCallout,EHConversation,EHEmptyState,EHErrorState,E
  * Rechte Spalte und Kopf dieser Seite. Dieselben Token wie auf /app und /app/jobs:
  * Karten, Registerlinie, keine zweite Stilfamilie.
  */
-const werkbankLayout = `
-.eh-werkbank-rail-h { font-size:10.5px; letter-spacing:.09em; text-transform:uppercase; color:var(--eh-muted); font-weight:700; margin:0 0 10px; }
-.eh-werkbank-karte { background:var(--eh-color-white); border:1px solid var(--eh-color-line); border-radius:var(--eh-radius-control); padding:13px 14px; margin-bottom:12px; }
-.eh-werkbank-karte h4 { margin:0 0 9px; font-size:13.5px; display:flex; align-items:center; gap:8px; }
-.eh-werkbank-row { display:flex; padding:4px 0; font-size:12.5px; gap:12px; }
-.eh-werkbank-row > :last-child { margin-left:auto; color:var(--eh-muted); text-align:right; }
-.eh-werkbank-kopf { display:flex; align-items:center; gap:12px; padding-bottom:16px; border-bottom:1px solid var(--eh-rule); }
-.eh-werkbank-kopf-copy { flex:1; min-width:0; display:grid; gap:2px; }
-.eh-werkbank-kopf-tools { flex:none; display:flex; align-items:center; gap:8px; }
-.eh-werkbank-kopf-copy h1 { font-size:var(--eh-font-body); font-weight:var(--eh-weight-semibold); line-height:var(--eh-leading-tight); }
-.eh-werkbank-kopf-copy span { font-size:var(--eh-font-label); line-height:var(--eh-leading-normal); color:var(--eh-muted); }
-.eh-werkbank-leer { color:var(--eh-muted); font-size:12.5px; margin:0; }
-.eh-werkbank-row a { color:inherit; }
-`;
 
 function emergencyAvailability(value?:string|null){
   if(!value)return 'Zeit nach Rückmeldung';
@@ -79,7 +66,7 @@ export default async function JobDetail({params,searchParams}:{params:Promise<{i
           <p className="eh-werkbank-leer">Du hast nur einen Ansprechpartner gewählt: kein Auftrag, kein Preis, keine Verpflichtung.</p>
         </div>
       </>}>
-      <style>{werkbankLayout}</style>
+      
       <header className="eh-werkbank-kopf">
         <div className="eh-werkbank-kopf-copy">
           <h1>{job.title.replace(/^Ansprechpartner:\s*/,'')}</h1>
@@ -182,7 +169,7 @@ export default async function JobDetail({params,searchParams}:{params:Promise<{i
         </>:<p className="eh-werkbank-leer">Noch kein Ansprechpartner. Er wird benannt, sobald ein Partner den Auftrag übernimmt.</p>}
       </div>
     </>}>
-    <style>{werkbankLayout}</style>
+    
     <header className="eh-werkbank-kopf">
       <div className="eh-werkbank-kopf-copy">
         <h1>{job.title}</h1>

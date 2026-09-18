@@ -127,8 +127,8 @@ export const providerAreas: readonly NavArea[] = [
     href: '/pro/orders',
     label: 'Aufträge',
     icon: ClipboardList,
-    // /pro/jobs is a redirect stub onto /pro/orders. /pro/invoices is not here:
-    // only /pro/invoices/[id] exists, the bare path has no page.
+    // /pro/jobs leitet auf /pro/orders weiter. /pro/invoices fehlt hier:
+    // nur /pro/invoices/[id] existiert, der nackte Pfad hat keine Seite.
     owns: ['/pro/jobs'],
     children: [
       { href: '/pro/orders', label: 'Aufträge' },

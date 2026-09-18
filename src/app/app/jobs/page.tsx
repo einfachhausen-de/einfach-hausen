@@ -1,3 +1,5 @@
+import type { CSSProperties } from 'react';
+import '@/components/werkbank-layout.css';
 import Link from 'next/link';
 import { WerkbankRahmen } from '@/components/werkbank-rahmen';
 import { EHOwnerSearch } from '@/design-system';
@@ -99,37 +101,6 @@ function upcomingAppointments(jobs: JobRow[]): JobRow[] {
  * Karten, Registerlinie, keine zweite Stilfamilie. Die Balkenbreite ist der
  * Anteil, kein Layout.
  */
-const werkbankLayout = `
-.eh-werkbank-rail-h { font-size:10.5px; letter-spacing:.09em; text-transform:uppercase; color:var(--eh-muted); font-weight:700; margin:0 0 10px; }
-.eh-werkbank-karte { background:var(--eh-color-white); border:1px solid var(--eh-color-line); border-radius:var(--eh-radius-control); padding:13px 14px; margin-bottom:12px; }
-.eh-werkbank-karte h4 { margin:0 0 9px; font-size:13.5px; display:flex; align-items:center; gap:8px; }
-.eh-werkbank-item { display:flex; gap:9px; padding:7px 0; border-top:1px solid var(--eh-color-line); font-size:12.5px; align-items:center; }
-.eh-werkbank-item:first-of-type { border-top:0; }
-.eh-werkbank-item b { display:block; font-weight:600; }
-.eh-werkbank-item small { color:var(--eh-muted); font-size:11.5px; }
-.eh-werkbank-item > :last-child { margin-left:auto; color:var(--eh-muted); }
-.eh-werkbank-stack { display:flex; height:7px; border-radius:var(--eh-radius-pill); background:var(--eh-color-paper); overflow:hidden; margin:8px 0 6px; }
-.eh-werkbank-stack span { display:block; height:100%; }
-.eh-werkbank-anteil-terra { background:var(--eh-color-terra); }
-.eh-werkbank-anteil-petrol { background:var(--eh-color-petrol); }
-.eh-werkbank-anteil-ok { background:var(--eh-color-success); }
-.eh-werkbank-anteil-line { background:var(--eh-color-line); }
-.eh-werkbank-row { display:flex; padding:4px 0; font-size:12.5px; }
-.eh-werkbank-row > :last-child { margin-left:auto; color:var(--eh-muted); }
-.eh-werkbank-kopf { display:flex; align-items:center; gap:12px; padding-bottom:16px; border-bottom:1px solid var(--eh-rule); }
-.eh-werkbank-kopf-copy { flex:1; min-width:0; display:grid; gap:2px; }
-.eh-werkbank-kopf-tools { flex:none; display:flex; align-items:center; gap:8px; }
-.eh-werkbank-kopf-cta { flex:none; display:inline-flex; align-items:center; gap:8px; background:var(--eh-color-petrol); color:var(--eh-color-white); border-radius:var(--eh-radius-control); padding:10px 18px; font-weight:600; text-decoration:none; font-size:13.5px; }
-.eh-werkbank-kopf-copy h1 { font-size:var(--eh-font-body); font-weight:var(--eh-weight-semibold); line-height:var(--eh-leading-tight); }
-.eh-werkbank-kopf-copy span { font-size:var(--eh-font-label); line-height:var(--eh-leading-normal); color:var(--eh-muted); }
-.eh-werkbank-chips { display:flex; flex-wrap:wrap; gap:8px; margin:0 0 16px; }
-.eh-werkbank-chip { display:inline-flex; align-items:center; gap:6px; padding:6px 12px; border:1px solid var(--eh-color-line); border-radius:var(--eh-radius-pill); text-decoration:none; font-size:var(--eh-font-meta); color:var(--eh-color-ink); background:var(--eh-color-white); }
-.eh-werkbank-chip[aria-current="page"] { background:var(--eh-color-petrol); color:var(--eh-color-white); border-color:var(--eh-color-petrol); }
-.eh-werkbank-chip-n { font-variant-numeric:tabular-nums; }
-.eh-werkbank-tbl small { display:block; color:var(--eh-muted); font-size:11.5px; font-weight:400; margin-top:2px; }
-.eh-werkbank-tbl a { color:inherit; text-decoration:none; font-weight:600; }
-.eh-werkbank-leer { color:var(--eh-muted); font-size:12.5px; margin:0; }
-`;
 
 export default async function Jobs({
   searchParams,
@@ -294,7 +265,7 @@ export default async function Jobs({
               <span
                 key={part.id}
                 className={`eh-werkbank-anteil-${part.tone}`}
-                style={{ width: `${(part.count / total) * 100}%` }}
+                style={{ '--eh-anteil': `${(part.count / total) * 100}%` } as CSSProperties}
               />
             ))}
           </div>
@@ -317,7 +288,7 @@ export default async function Jobs({
         }) : <p className="eh-werkbank-leer">Kein bestätigter Termin in deinen Aufträgen. Ein Wunschtermin steht in der Zeile des jeweiligen Auftrags.</p>}
       </div>
     </>}>
-    <style>{werkbankLayout}</style>
+    
     <header className="eh-werkbank-kopf">
       <div className="eh-werkbank-kopf-copy">
         <h1>Aufträge</h1>

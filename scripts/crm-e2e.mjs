@@ -156,12 +156,14 @@ async function addLead(page,input){
   ]);
 }
 
-function leadCard(page,text){return page.locator('article').filter({hasText:text}).first();}
+/* Lead-Karten werden als EHWorkflowForm (<form> + Fieldset) gerendert, nicht als <article>.
+   Die Status-Select gibt es nur in Aktualisierungsformularen — damit ist die Karte eindeutig. */
+function leadCard(page,text){return page.locator('form').filter({has:page.locator('select[name="status"]'),hasText:text}).first();}
 
 async function updateLeadCard(page,text,updates){
   const card=leadCard(page,text);
   await card.waitFor();
-  const form=card.locator('form');
+  const form=card;
   if(updates.status!==undefined)await form.locator('select[name="status"]').selectOption(updates.status);
   if(updates.permission!==undefined)await form.locator('select[name="permission"]').selectOption(updates.permission);
   if(updates.sourceType!==undefined)await form.locator('select[name="sourceType"]').selectOption(updates.sourceType);
@@ -248,7 +250,7 @@ try{
   check(Boolean(audit),'admin CRM mutation audit row recorded');
 
   await page.goto(`${base}/admin/crm`);
-  const filter=page.locator('form[method="get"]');
+  const filter=page.locator('form').filter({has:page.locator('input[name="q"]')});
   await filter.locator('input[name="q"]').fill(normalizedName);
   await filter.locator('select[name="followup"]').selectOption('due');
   await Promise.all([page.waitForURL(url=>url.pathname==='/admin/crm'&&url.searchParams.get('followup')==='due'),filter.getByRole('button',{name:'Filtern'}).click()]);
