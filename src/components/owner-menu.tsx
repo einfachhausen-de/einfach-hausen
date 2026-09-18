@@ -1,7 +1,7 @@
 "use client";
 
 import { EHLogo } from "@/design-system";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Bell, CircleHelp, LogOut, UserRound, WalletCards } from "lucide-react";
@@ -22,6 +22,54 @@ export function OwnerMobileMenu({ active }: { active: string }) {
   const [open, setOpen] = useState(false);
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
   const router = useRouter();
+  const menuRef = useRef<HTMLElement>(null);
+  const triggerRef = useRef<HTMLDetailsElement>(null);
+
+  // Keyboard users must not tab out of the open drawer: focus stays inside,
+  // Escape closes it and returns focus to the menu trigger.
+  useEffect(() => {
+    if (!open) return;
+    const menu = menuRef.current;
+    if (!menu) return;
+
+    const focusables = () =>
+      Array.from(
+        menu.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), input, select, textarea, [tabindex]:not([tabindex="-1"])',
+        ),
+      ).filter((el) => el.offsetParent !== null);
+    const first = focusables()[0];
+    if (first) setTimeout(() => first.focus(), 0);
+
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        setOpen(false);
+        triggerRef.current?.querySelector("summary")?.focus();
+        return;
+      }
+      if (e.key !== "Tab") return;
+      const items = focusables();
+      if (items.length === 0) return;
+      const f = items[0];
+      const l = items[items.length - 1];
+      if (e.shiftKey && document.activeElement === f) {
+        e.preventDefault();
+        l.focus();
+      } else if (!e.shiftKey && document.activeElement === l) {
+        e.preventDefault();
+        f.focus();
+      }
+    }
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [open]);
 
   // The rendered state falls back to the area's own active state, so the toggle
   // has to flip what is on screen - not a second, different default.
@@ -36,6 +84,7 @@ export function OwnerMobileMenu({ active }: { active: string }) {
 
   return (
     <details
+      ref={triggerRef}
       className="mobile-menu ehn-menu"
       open={open}
       onToggle={(event) => setOpen((event.target as HTMLDetailsElement).open)}
@@ -43,8 +92,13 @@ export function OwnerMobileMenu({ active }: { active: string }) {
       <summary aria-label="Hauptmenü öffnen"><HamburgerIcon /><span>Menü</span></summary>
       {open ? <div className="menu-overlay open" onClick={() => setOpen(false)} aria-hidden="true" data-testid="owner-menu-overlay" /> : null}
       <aside
+        ref={menuRef}
         className="side-menu ehn-drawer"
+        data-open={open ? "1" : "0"}
+        aria-hidden={!open}
         aria-label="Hauptnavigation"
+        role="dialog"
+        aria-modal="true"
         onPointerDown={(event) => {
           const panel = event.currentTarget;
           const startX = event.clientX;
