@@ -69,7 +69,7 @@ export async function WerkbankRahmen({ role, active, children, rail, tabs, brand
           <Link href={profileHref} className={s.toolAvatar} aria-label="Profil">{initials}</Link>
         </div>
       </div>
-      <div className={s['wb-body']}>
+      <div className={rail ? s['wb-body'] : s['wb-body'] + ' ' + s['wb-norail']}>
         <aside className={s['wb-side']} aria-label="Unternavigation">
           {subNav.items.length > 0 && (<nav aria-label={subGrouplabel}>
             <p className={s['wb-grp']}>{subGrouplabel}</p>
