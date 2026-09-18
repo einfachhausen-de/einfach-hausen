@@ -79,7 +79,10 @@ export async function WerkbankRahmen({ role, active, children, rail, tabs, brand
               return <Link key={item.href} href={item.href} aria-current={itemOn ? 'page' : undefined} className={itemOn ? s['wb-on'] : undefined}>{item.label}</Link>;
             })}
           </nav>)}
-          {areas.filter(a => a.href !== subNav.area?.href).map(area => (
+          {areas
+            .filter(a => a.href !== subNav.area?.href)
+            .filter(a => a.children.length > 0)
+            .map(area => (
             <nav key={area.href} aria-label={area.label}>
               <p className={s['wb-grp']}>{area.label}</p>
               {area.children.map(c => <Link key={c.href} href={c.href}>{c.label}</Link>)}

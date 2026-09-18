@@ -7,8 +7,8 @@ import { SERVICE_PATHS } from '@/components/marketing/service-catalog';
 /**
  * SEO P0: statische Sitemap aller oeffentlichen Marketing-Routen.
  * Privat: /app/*, /admin/*, /pro/*, Auth (/login, /register*), dynamische
- * App-Routen (/anfrage/*, /chat/*, /onboarding/*, /transfer/*), funktionale
- * Tools (/ki-chat, /mein-haus, /ansprechpartner, /anfragen-pro) sind
+ * App-Routen (/chat/*, /onboarding/*, /transfer/*), funktionale
+ * Tools (/mein-haus) sind
  * bewusst NICHT enthalten (diese tragen zusaetzlich noindex-Metadata).
  */
 export default function sitemap(): MetadataRoute.Sitemap {

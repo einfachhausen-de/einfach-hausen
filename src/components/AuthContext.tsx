@@ -23,10 +23,13 @@ const AuthContext = createContext<Ctx>({
 // /notfall is a PUBLIC product explainer (no session required); the
 // authenticated emergency flow lives at /app/emergency and is protected on
 // the server via requireUser('homeowner'). Never bounce public /notfall.
+// Legacy-Fragmente (/auftraege, /meine-angebote, /historie, /profil,
+// /einstellungen, /benachrichtigungen, /dashboard) und die inzwischen
+// weitergeleiteten Routen (/ki-chat, /ansprechpartner, /anfragen-pro) sind
+// entfernt: ihre Redirects laufen serverseitig, und auf unknown paths muss
+// eine 404 gerendert werden, kein Client-Bounce.
 const PRIVATE_PREFIXES = [
-  "/auftraege", "/meine-angebote", "/mein-haus", "/historie", "/ki-chat",
-  "/profil", "/einstellungen", "/benachrichtigungen", "/notifications",
-  "/ansprechpartner", "/dashboard", "/anfragen-pro",
+  "/mein-haus", "/notifications",
 ];
 // Canonical app/pro pages resolve Supabase identity and application role on
 // the server. The browser guard must never replace that authority with metadata.
