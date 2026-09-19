@@ -1,9 +1,9 @@
-import { AppShell } from '@/components/shell';
-import { EHButton, EHCheckbox, EHEmptyState, EHErrorState, EHFormFeedback, EHMetricsBar, EHPageHeader, EHRecordList, EHRecordViews, EHStatus, EHSubmitButton, EHText, EHWorkSection, EHWorkspaceGrid } from '@/design-system';
+import { EHButton, EHCheckbox, EHEmptyState, EHErrorState, EHFormFeedback, EHMetricsBar, EHPageHeader, EHRecordList, EHRecordViews, EHStatus, EHSubmitButton, EHText, EHWorkSection, EHWorkspaceGrid, EHWorkflowStack } from '@/design-system';
 import { requireUser } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { purchasePackageAction, startMembershipCheckoutAction } from '@/app/actions';
 import { euroExact, statusLabel } from '@/lib/format';
+import { WerkbankRahmen } from '@/components/werkbank-rahmen';
 
 type Plan = { slug: string; title: string; monthly_amount: number; description: string; annual_house_check: number };
 type Package = { slug: string; title: string; price_amount: number; description: string; services_json: string };
@@ -29,7 +29,8 @@ export default async function Plans({ searchParams }: { searchParams: Promise<Re
     ? stateText[current.status] || 'Bitte lass den Mitgliedschaftsstatus prüfen.'
     : 'Du brauchst kein kostenpflichtiges Abo, um mit deinem Hauskonto zu beginnen.';
 
-  return <AppShell role="homeowner" active="/app/plans" title="Tarif & Pakete" subtitle="Mitgliedschaft und einzelne Leistungen">
+  return <WerkbankRahmen role="homeowner" active="/app/plans">
+    <EHWorkflowStack>
     <EHPageHeader
       title="Tarif & Pakete"
       context={current ? `${current.title} · ${stateLabel[current.status] || 'Status prüfen'}` : 'Kostenloses Hauskonto'}
@@ -121,5 +122,6 @@ export default async function Plans({ searchParams }: { searchParams: Promise<Re
         <EHButton href="/preise" variant="secondary" arrow>Öffentliche Tarifübersicht</EHButton>
       </EHWorkSection>
     </>} />
-  </AppShell>;
+    </EHWorkflowStack>
+  </WerkbankRahmen>;
 }

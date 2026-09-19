@@ -1,8 +1,8 @@
 import { requireUser } from '@/lib/auth';
-import { AppShell } from '@/components/shell';
 import { loadOnboardingState, saveOnboardingContactAction, saveOnboardingInterestsAction, saveOnboardingProfileAction } from './actions';
 import { db } from '@/lib/db';
-import { EHPanel, EHField, EHInput, EHSelect, EHCheckbox, EHSubmitButton, EHButton, EHErrorState, EHMetricsBar, EHPageHeader, EHRecordList, EHText, EHWorkSection, EHWorkspaceGrid } from '@/design-system';
+import { EHPanel, EHField, EHInput, EHSelect, EHCheckbox, EHSubmitButton, EHButton, EHErrorState, EHMetricsBar, EHPageHeader, EHRecordList, EHText, EHWorkSection, EHWorkspaceGrid, EHWorkflowStack } from '@/design-system';
+import { WerkbankRahmen } from '@/components/werkbank-rahmen';
 
 /** Die drei Kanaele, die saveOnboardingContactAction zulaesst (CHANNELS). */
 const CHANNEL_LABEL: Record<string, string> = { email: 'E-Mail', phone: 'Telefon', whatsapp: 'WhatsApp' };
@@ -21,7 +21,8 @@ export default async function OnboardingPage({ searchParams }: { searchParams: P
   const categories = [...new Set((db.prepare('SELECT DISTINCT category FROM service_catalog WHERE active=1 ORDER BY category').all() as Array<{ category: string }>).map(r => r.category))];
 
   return (
-    <AppShell role="homeowner" active="/app" title="Einrichtung" subtitle={`Schritt ${state.stepIndex} von ${state.totalSteps}`}>
+    <WerkbankRahmen role="homeowner" active="/app">
+      <EHWorkflowStack>
       <EHPageHeader title="Einrichtung" context={`Schritt ${state.stepIndex} von ${state.totalSteps}`} />
       <progress value={state.stepIndex} max={state.totalSteps} aria-label={`Fortschritt: Schritt ${state.stepIndex} von ${state.totalSteps}`} />
       {error && <EHErrorState text={error} />}
@@ -81,6 +82,7 @@ export default async function OnboardingPage({ searchParams }: { searchParams: P
           <EHText muted>Adresse und Interessen steuern, welche Betriebe und Anliegen dir vorgeschlagen werden. Alles bleibt in deiner Hausakte und lässt sich später im Profil ändern.</EHText>
         </EHWorkSection>
       </>} />
-    </AppShell>
+      </EHWorkflowStack>
+    </WerkbankRahmen>
   );
 }

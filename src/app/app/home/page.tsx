@@ -1,5 +1,4 @@
 import { CalendarClock, CalendarDays, Wrench } from 'lucide-react';
-import { AppShell } from '@/components/shell';
 import {
   EHButton, EHEmptyState, EHText, EHPropertyOverview, EHDetailDisclosure,
   EHWorkspaceGrid, EHWorkSection, EHWorkflowStack,
@@ -12,6 +11,7 @@ import { addHouseAssetAction, completeMaintenanceTaskAction, saveHouseProfileAct
 import { dateLabel } from '@/lib/format';
 import { ownerMaintenanceState } from '@/lib/owner-format';
 import { primaryProperty } from '@/lib/properties';
+import { WerkbankRahmen } from '@/components/werkbank-rahmen';
 
 export default async function MyHome() {
   const u=await requireUser('homeowner'); const p=db.prepare('SELECT * FROM homeowner_profiles WHERE user_id=?').get(u.id) as any; const property=primaryProperty(u.id);
@@ -36,7 +36,7 @@ export default async function MyHome() {
     ...(p?.plot_area?[]:[{id:'plot_area',title:'Grundstück'}]),
   ];
   const surroundings=[p?.postcode, p?.house_type].filter(Boolean).join(' · ');
-  return <AppShell role="homeowner" active="/app/home" title="Hausakte">
+  return <WerkbankRahmen role="homeowner" active="/app/home">
     <EHWorkflowStack>
       <EHPageHeader title={p?.address || 'Hausdaten ergänzen'} context={surroundings || undefined}
         actions={<EHButton href="/app/year" variant="secondary">Jahresplan öffnen</EHButton>} />
@@ -94,5 +94,5 @@ export default async function MyHome() {
         <HouseProfileForm action={saveHouseProfileAction} profile={p} />
       </EHDetailDisclosure>
     </EHWorkflowStack>
-  </AppShell>;
+  </WerkbankRahmen>;
 }

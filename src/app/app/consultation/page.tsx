@@ -1,11 +1,11 @@
 import Link from 'next/link';
-import { AppShell } from '@/components/shell';
 import { HausmeisterAssistant } from '@/components/homeowner/hausmeister-assistant';
 import { createConsultationAction } from '@/app/actions';
 import { requireUser } from '@/lib/auth';
-import { EHButton, EHPageHeader, EHPanel, EHErrorState, EHField, EHTextarea, EHInput, EHSubmitButton, EHFormFeedback, EHMetricsBar, EHRecordList, EHStatus, EHText, EHWorkSection, EHWorkspaceGrid, type EHRecordEntry } from '@/design-system';
+import { EHButton, EHPageHeader, EHPanel, EHErrorState, EHField, EHTextarea, EHInput, EHSubmitButton, EHFormFeedback, EHMetricsBar, EHRecordList, EHStatus, EHText, EHWorkSection, EHWorkspaceGrid, EHWorkflowStack, type EHRecordEntry } from '@/design-system';
 import { db } from '@/lib/db';
 import { dateLabel, statusLabel } from '@/lib/format';
+import { WerkbankRahmen } from '@/components/werkbank-rahmen';
 
 type ContactRequest = { id: number; title: string; status: string; created_at: string; updated_at: string };
 
@@ -33,7 +33,8 @@ export default async function Consultation({ searchParams }: { searchParams: Pro
     href: `/app/jobs/${request.id}`,
   }));
 
-  return <AppShell role="homeowner" active="/app" title="Beratung">
+  return <WerkbankRahmen role="homeowner" active="/app">
+    <EHWorkflowStack>
     <EHPageHeader title="Beratung" context={lastRequest ? `Letzte Anfrage ${dateLabel(lastRequest.created_at)}` : 'Noch keine Anfrage'} />
     <EHMetricsBar label="Beratung" items={[
       { id: 'anfragen', label: 'Anfragen', value: String(requests.length), hint: 'seit Beginn' },
@@ -63,5 +64,6 @@ export default async function Consultation({ searchParams }: { searchParams: Pro
         <EHButton href="/app/hausmeister" variant="secondary" arrow>Auftrag organisieren</EHButton>
       </EHWorkSection>
     </>} />
-  </AppShell>;
+    </EHWorkflowStack>
+  </WerkbankRahmen>;
 }

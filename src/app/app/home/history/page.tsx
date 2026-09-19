@@ -1,10 +1,10 @@
 import { EHEmptyState, EHField, EHFieldGrid, EHFormFeedback, EHFormSection, EHInput, EHMetricsBar, EHPageHeader, EHRecordList, EHRecordViews, EHSelect, EHStatus, EHSubmitButton, EHText, EHTextarea, EHWorkSection, EHWorkspaceGrid, EHWorkflowForm, EHWorkflowStack, EHButton } from '@/design-system';
-import { AppShell } from '@/components/shell';
 import { requireUser } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { addHouseHistoryAction,createHouseTransferAction } from '@/app/actions';
 import { euroExact } from '@/lib/format';
 import { HOUSE_TRANSFER_TTL_DAYS,houseTransferExpiresAt,houseTransferLifecycleStatus,primaryProperty } from '@/lib/properties';
+import { WerkbankRahmen } from '@/components/werkbank-rahmen';
 
 // An e-mail address is one unbreakable token: at 390px a long one sets the
 // column's min-content width and pushes the whole page into horizontal
@@ -26,10 +26,12 @@ const berlinDay = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Berlin', 
 
 export default async function HouseHistory({searchParams}:{searchParams:Promise<Record<string,string>>}){
   const user=await requireUser('homeowner'); const sp=await searchParams; const property=primaryProperty(user.id);
-  if (!property) return <AppShell role="homeowner" active="/app/home/history" title="Haus-Historie">
+  if (!property) return <WerkbankRahmen role="homeowner" active="/app/home/history">
+    <EHWorkflowStack>
     <EHPageHeader title="Haus-Historie" />
     <EHEmptyState title="Keine aktive Hausakte" text="Lege zuerst dein Zuhause an. Danach kannst du frühere Arbeiten, Wartungen und Dokumente hier sammeln." action={<EHButton href="/app/home">Mein Haus einrichten</EHButton>} />
-  </AppShell>;
+    </EHWorkflowStack>
+  </WerkbankRahmen>;
   const entries=db.prepare(`SELECT h.*,p.business_name linked_business,(SELECT COUNT(*) FROM house_history_documents d WHERE d.entry_id=h.id) document_count FROM house_history_entries h LEFT JOIN provider_profiles p ON p.user_id=h.provider_id WHERE h.property_id=? ORDER BY h.performed_at DESC,h.id DESC`).all(property.id) as any[];
   const invites=db.prepare(`SELECT * FROM provider_invites WHERE property_id=? AND status='pending' ORDER BY created_at DESC`).all(property.id) as any[];
   const transfers=db.prepare(`SELECT * FROM house_transfers WHERE property_id=? ORDER BY created_at DESC LIMIT 5`).all(property.id) as any[];
@@ -58,7 +60,7 @@ export default async function HouseHistory({searchParams}:{searchParams:Promise<
   }));
   // Der erste Eintrag der Eigentuemerhistorie ist kein Wechsel.
   const ownerChanges=Math.max(0,ownerships.length-1);
-  return <AppShell role="homeowner" active="/app/home/history" title="Haus-Historie">
+  return <WerkbankRahmen role="homeowner" active="/app/home/history">
     <EHWorkflowStack>
     <EHPageHeader title="Haus-Historie" context={`${entries.length} ${entries.length === 1 ? 'dokumentierte Arbeit' : 'dokumentierte Arbeiten'}`} actions={<EHButton href="#historie-anlegen" arrow>Arbeit dokumentieren</EHButton>} />
     <EHMetricsBar label="Haus-Historie" items={[
@@ -129,5 +131,5 @@ export default async function HouseHistory({searchParams}:{searchParams:Promise<
     </>} />
     {transfers.length>0&&<EHWorkSection title="Übergabe-Verlauf"><EHRecordList label="Übergabe-Verlauf" items={transfers.map(t=>{const lifecycle=houseTransferLifecycleStatus(t);const expiresAt=houseTransferExpiresAt(t.created_at);const label=lifecycle==='accepted'?'Übergeben':lifecycle==='expired'?'Abgelaufen':lifecycle==='revoked'?'Widerrufen':'Bereit';return { id: String(t.id), title: breakableEmail(t.target_email), detail: lifecycle==='active'&&expiresAt?`gültig bis ${expiresAt.toLocaleDateString('de-DE')}`:undefined, date: String(t.created_at).slice(0, 10), status: <EHStatus tone={lifecycle==='accepted'?'success':lifecycle==='active'?'info':'neutral'}>{label}</EHStatus> };})} /></EHWorkSection>}
     </EHWorkflowStack>
-  </AppShell>;
+  </WerkbankRahmen>;
 }

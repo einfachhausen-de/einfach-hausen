@@ -1,9 +1,9 @@
-import { AppShell } from '@/components/shell';
 import { HausmeisterAssistant } from '@/components/homeowner/hausmeister-assistant';
 import { createInsuranceSupportAction } from '@/app/actions';
 import { requireUser } from '@/lib/auth';
-import { EHButton, EHEmptyState, EHErrorState, EHField, EHFormFeedback, EHMetricsBar, EHPageHeader, EHRecordList, EHRecordViews, EHStatus, EHSubmitButton, EHText, EHTextarea, EHWorkSection, EHWorkspaceGrid, type EHRecordEntry } from '@/design-system';
+import { EHButton, EHEmptyState, EHErrorState, EHField, EHFormFeedback, EHMetricsBar, EHPageHeader, EHRecordList, EHRecordViews, EHStatus, EHSubmitButton, EHText, EHTextarea, EHWorkSection, EHWorkspaceGrid, EHWorkflowStack, type EHRecordEntry } from '@/design-system';
 import { db } from '@/lib/db';
+import { WerkbankRahmen } from '@/components/werkbank-rahmen';
 
 type InsuranceJob = {
   id: number;
@@ -63,7 +63,8 @@ export default async function InsuranceSupport({ searchParams }: { searchParams:
         ),
       }));
 
-  return <AppShell role="homeowner" active="/app" title="Versicherung">
+  return <WerkbankRahmen role="homeowner" active="/app">
+    <EHWorkflowStack>
     <EHPageHeader title="Versicherung" context={`${jobs.length} beauftragte ${jobs.length === 1 ? 'Auftrag' : 'Aufträge'}`} />
     {sp.error && <EHErrorState text={sp.error} />}
     {submitted && <EHFormFeedback kind="success">Servicefall übernommen. Einfach Hausen und der zuständige Partner sehen den Vorgang jetzt im bestehenden Auftragskontext. Deine Versicherung wurde dadurch nicht automatisch kontaktiert.</EHFormFeedback>}
@@ -102,5 +103,6 @@ export default async function InsuranceSupport({ searchParams }: { searchParams:
     </>} />
 
     <HausmeisterAssistant/>
-  </AppShell>;
+    </EHWorkflowStack>
+  </WerkbankRahmen>;
 }

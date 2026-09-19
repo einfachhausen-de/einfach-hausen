@@ -1,5 +1,5 @@
 import { CalendarDays, FileText, MessageSquare } from 'lucide-react';
-import { AppShell } from '@/components/shell';
+import { WerkbankRahmen } from '@/components/werkbank-rahmen';
 import {
   EHFormFeedback,
   EHManagerAttention,
@@ -8,6 +8,7 @@ import {
   EHPageHeader,
   EHRecordList,
   EHWorkSection,
+  EHWorkflowStack,
   type EHRecordEntry,
 } from '@/design-system';
 import { requireUser } from '@/lib/auth';
@@ -87,11 +88,11 @@ export default async function Hausmanager({
   ];
 
   return (
-    <AppShell
+    <WerkbankRahmen
       role="homeowner"
       active="/app/hausmanager"
-      title="Hausmanager"
     >
+      <EHWorkflowStack>
       <EHPageHeader title="Hausmanager" context={houseLabel || undefined} />
 
       <EHManagerAttention items={attention} actionHref="/app/hausmeister" actionLabel="Ansehen" />
@@ -126,6 +127,7 @@ export default async function Hausmanager({
         action={updateAutomationPrefsAction}
         saved={false}
       />
-    </AppShell>
+      </EHWorkflowStack>
+    </WerkbankRahmen>
   );
 }

@@ -1,10 +1,10 @@
-import { AppShell } from '@/components/shell';
+import { WerkbankRahmen } from '@/components/werkbank-rahmen';
 import { HomeownerHausmeisterComposer } from '@/components/homeowner/homeowner-hausmeister-composer';
 import { HausmeisterQuotaStatus } from '@/components/homeowner/hausmeister-quota-status';
 import { startHausmeisterRouteAction } from '@/app/actions';
 import {
   EHActions, EHButton, EHConversation, EHErrorState, EHMetricsBar, EHPageHeader, EHRecordList,
-  EHStatus, EHText, EHWorkSection, EHWorkspaceGrid, type EHRecordEntry,
+  EHStatus, EHText, EHWorkSection, EHWorkspaceGrid, EHWorkflowStack, type EHRecordEntry,
 } from '@/design-system';
 import { requireUser } from '@/lib/auth';
 import { db } from '@/lib/db';
@@ -72,7 +72,8 @@ export default async function Hausmeister({searchParams}:{searchParams:Promise<R
     ...messages.map(message => ({id:String(message.id),mine:message.role==='user',author:speaker(message.role),body:message.body})),
   ];
 
-  return <AppShell role="homeowner" active="/app" title="Hausmeister">
+  return <WerkbankRahmen role="homeowner" active="/app">
+    <EHWorkflowStack>
     <EHPageHeader title="Hausmeister" context={thread ? `Letzte Nachricht ${dateLabel(thread.updated_at)}` : 'Noch kein Gespräch'} />
     <EHMetricsBar label="Hausmeister" items={[
       {id:'nachrichten',label:'Nachrichten',value:String(messageCount),hint:thread?'im laufenden Gespräch':'noch kein Gespräch begonnen'},
@@ -123,5 +124,6 @@ export default async function Hausmeister({searchParams}:{searchParams:Promise<R
         <HausmeisterQuotaStatus />
       </EHWorkSection>
     </>} />
-  </AppShell>;
+    </EHWorkflowStack>
+  </WerkbankRahmen>;
 }

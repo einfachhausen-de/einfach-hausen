@@ -1,9 +1,9 @@
 import { CheckCheck } from 'lucide-react';
-import { AppShell } from '@/components/shell';
 import { requireUser } from '@/lib/auth';
-import { EHPageHeader, EHList, EHEmptyState, EHButton, EHStatus, EHActions, EHText } from '@/design-system';
+import { EHPageHeader, EHList, EHEmptyState, EHButton, EHStatus, EHActions, EHText, EHWorkflowStack } from '@/design-system';
 import { db } from '@/lib/db';
 import { setNotificationReadStateAction, markAllNotificationsReadForCurrentUserAction } from './actions';
+import { WerkbankRahmen } from '@/components/werkbank-rahmen';
 
 const PAGE_SIZE = 25;
 
@@ -16,8 +16,9 @@ export default async function Notifications({ searchParams }: { searchParams: Pr
   const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const safePage = Math.min(page, pageCount);
   const rows = db.prepare('SELECT * FROM notifications WHERE user_id=? ORDER BY created_at DESC, id DESC LIMIT ? OFFSET ?').all(u.id, PAGE_SIZE, (safePage - 1) * PAGE_SIZE) as any[];
-  return <AppShell role={u.role} active="/notifications" title="Updates" subtitle={unreadTotal ? `${unreadTotal} ungelesen` : 'Alles gelesen'}>
-    <EHPageHeader title="Updates" context="Mitteilungen" actions={unreadTotal > 0 && <form action={markAllNotificationsReadForCurrentUserAction}><EHButton><CheckCheck size={15}/>Alle gelesen</EHButton></form>} />
+  return <WerkbankRahmen role="homeowner" active="/notifications">
+    <EHWorkflowStack>
+    <EHPageHeader title="Updates" context={unreadTotal ? `${unreadTotal} ungelesen` : 'Alles gelesen'} actions={unreadTotal > 0 && <form action={markAllNotificationsReadForCurrentUserAction}><EHButton><CheckCheck size={15}/>Alle gelesen</EHButton></form>} />
     <EHList label="Updates" items={rows.map(n => {
         const isUnread = !n.read_at;
         return {
@@ -40,5 +41,6 @@ export default async function Notifications({ searchParams }: { searchParams: Pr
         <EHText size="meta">Seite {safePage} von {pageCount}</EHText>
         {safePage < pageCount && <EHButton href={`/notifications?page=${safePage + 1}`} variant="secondary" size="small">Weiter</EHButton>}
       </EHActions>}
-  </AppShell>;
+    </EHWorkflowStack>
+  </WerkbankRahmen>;
 }

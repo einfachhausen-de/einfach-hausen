@@ -1,10 +1,10 @@
-import { AppShell } from '@/components/shell';
-import { EHActions, EHButton, EHEmptyState, EHMetricsBar, EHPageHeader, EHRecordList, EHRecordViews, EHRouteTabs, EHStatus, EHSubmitButton, EHText, EHWorkSection, EHWorkspaceGrid } from '@/design-system';
+import { EHActions, EHButton, EHEmptyState, EHMetricsBar, EHPageHeader, EHRecordList, EHRecordViews, EHRouteTabs, EHStatus, EHSubmitButton, EHText, EHWorkSection, EHWorkspaceGrid, EHWorkflowStack } from '@/design-system';
 import { completeMaintenanceTaskAction } from '@/app/actions';
 import { requireUser } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { dateLabel, euroExact } from '@/lib/format';
 import { primaryProperty } from '@/lib/properties';
+import { WerkbankRahmen } from '@/components/werkbank-rahmen';
 
 type Task = { id: number; title: string; category: string; due_date: string; status: string };
 type Job = { id: number; title: string; preferred_date: string; status: string };
@@ -78,7 +78,8 @@ export default async function YearPage({ searchParams }: {
     ) : undefined,
   }));
 
-  return <AppShell role="homeowner" active="/app/year" title="Mein Jahr" subtitle="Wartung, Termine und Hausaufgaben">
+  return <WerkbankRahmen role="homeowner" active="/app/year">
+    <EHWorkflowStack>
     <EHPageHeader title="Mein Jahr" context={`${view === 'plan' ? 'Plan' : 'Historie'} ${year}`} actions={<EHButton href="/app/hausmeister" arrow>Neue Aufgabe planen</EHButton>} />
     <EHMetricsBar label="Mein Jahr" items={[
       { id: 'wartungen', label: 'Wartungen', value: String(tasks.length), hint: view === 'history' ? 'nach Fälligkeit' : 'offen im gewählten Jahr' },
@@ -143,5 +144,6 @@ export default async function YearPage({ searchParams }: {
         <EHButton href="/app/home/history" variant="secondary" arrow>Zur Haus-Historie</EHButton>
       </EHWorkSection>
     </>} />
-  </AppShell>;
+    </EHWorkflowStack>
+  </WerkbankRahmen>;
 }
