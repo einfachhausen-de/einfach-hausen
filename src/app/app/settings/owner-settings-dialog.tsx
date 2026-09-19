@@ -29,7 +29,7 @@ import {
   SidebarMenuItem,
   SidebarProvider,
 } from "@/components/ui/sidebar";
-import { EHList } from "@/design-system";
+import { EHFormSection, EHList } from "@/design-system";
 import { InstallAppCard } from "@/components/install-app-card";
 import { AccountActions } from "./account-actions";
 import { AiSettings } from "./ai-settings";
@@ -145,42 +145,46 @@ export function OwnerSettingsDialog({
               </nav>
 
               <section hidden={active !== "account"} aria-label="Konto & Daten">
-                <p>Datenexport und Konto-Löschung nach DSGVO.</p>
-                <AccountActions />
+                <EHFormSection title="Konto & Daten" description="Datenexport und Konto-Löschung nach DSGVO.">
+                  <AccountActions />
+                </EHFormSection>
               </section>
 
               <section hidden={active !== "notifications"} aria-label="Benachrichtigungen">
-                <p>In-App-Updates sind aktiv; Browser-Push ist noch nicht freigeschaltet.</p>
-                <EHList label="Benachrichtigungen" items={[{ id: 'inapp', title: 'In-App-Benachrichtigungen öffnen', text: 'Auftragsstatus, Nachrichten und wichtige Plattform-Updates.', href: '/notifications' }]} />
+                <EHFormSection title="Benachrichtigungen" description="In-App-Updates sind aktiv; Browser-Push ist noch nicht freigeschaltet.">
+                  <EHList label="Benachrichtigungen" items={[{ id: 'inapp', title: 'In-App-Benachrichtigungen öffnen', text: 'Auftragsstatus, Nachrichten und wichtige Plattform-Updates.', href: '/notifications' }]} />
 
-                <div className={styles.disabledSetting} role="group" aria-labelledby="push-setting-title" aria-describedby="push-setting-help">
-                  <BellOff aria-hidden="true" />
-                  <span>
-                    <strong id="push-setting-title">Browser-Push</strong>
-                    <small id="push-setting-help">Noch nicht verfügbar. Wir fragen deshalb keine Benachrichtigungsberechtigung an und zeigen keinen wirkungslosen Einschalter.</small>
-                  </span>
-                  <input type="checkbox" disabled aria-label="Browser-Push noch nicht verfügbar" />
-                </div>
+                  <div className={styles.disabledSetting} role="group" aria-labelledby="push-setting-title" aria-describedby="push-setting-help">
+                    <BellOff aria-hidden="true" />
+                    <span>
+                      <strong id="push-setting-title">Browser-Push</strong>
+                      <small id="push-setting-help">Noch nicht verfügbar. Wir fragen deshalb keine Benachrichtigungsberechtigung an und zeigen keinen wirkungslosen Einschalter.</small>
+                    </span>
+                    <input type="checkbox" disabled aria-label="Browser-Push noch nicht verfügbar" />
+                  </div>
 
-                <div className={styles.disabledSetting} role="group" aria-labelledby="checklist-setting-title" aria-describedby="checklist-setting-help">
-                  <ShieldCheck aria-hidden="true" />
-                  <span>
-                    <strong id="checklist-setting-title">Checklisten-Erinnerungen per Push</strong>
-                    <small id="checklist-setting-help">Noch nicht verfügbar. Erinnerungen erscheinen erst als Push-Option, wenn eine echte Zustellung eingerichtet ist.</small>
-                  </span>
-                  <input type="checkbox" disabled aria-label="Checklisten-Erinnerungen per Push noch nicht verfügbar" />
-                </div>
+                  <div className={styles.disabledSetting} role="group" aria-labelledby="checklist-setting-title" aria-describedby="checklist-setting-help">
+                    <ShieldCheck aria-hidden="true" />
+                    <span>
+                      <strong id="checklist-setting-title">Checklisten-Erinnerungen per Push</strong>
+                      <small id="checklist-setting-help">Noch nicht verfügbar. Erinnerungen erscheinen erst als Push-Option, wenn eine echte Zustellung eingerichtet ist.</small>
+                    </span>
+                    <input type="checkbox" disabled aria-label="Checklisten-Erinnerungen per Push noch nicht verfügbar" />
+                  </div>
+                </EHFormSection>
               </section>
 
               <section hidden={active !== "ai"} aria-label="KI-Assistent">
-                <p>Kontingent, Bonus-Aktionen und eigener API-Key (BYOK).</p>
-                <AiSettings />
+                <EHFormSection title="KI-Assistent" description="Kontingent, Bonus-Aktionen und eigener API-Key (BYOK).">
+                  <AiSettings />
+                </EHFormSection>
               </section>
 
               <section hidden={active !== "app"} aria-label="Installation & Offline">
-                <p>Die App speichert keine privaten Seiten als Offline-Kopie.</p>
-                <InstallAppCard />
-                <PwaSettingsStatus />
+                <EHFormSection title="App & Offline" description="Die App speichert keine privaten Seiten als Offline-Kopie.">
+                  <InstallAppCard />
+                  <PwaSettingsStatus />
+                </EHFormSection>
               </section>
             </div>
           </main>
