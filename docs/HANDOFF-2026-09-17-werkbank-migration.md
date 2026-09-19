@@ -324,3 +324,58 @@ P0 ist vollständig. Weiter mit **P1** aus `docs/REPO_AUDIT_2026-09-18.md`:
 `/pro` Dashboard Empty State, `owner-menu.tsx` Focus-Trap/Escape, dann P2.
 Danach: visuelle Abnahme durch Jeremy anhand der Vorschau-Datei
 `docs/preview-werkbank-2026-09-18.html` (aktualisieren, wenn gewünscht).
+
+
+---
+
+## Kapitel 12 — P1-12/P1-15/P1-13: Storniert, Refresh, /app/more (35d0e09, main, gepusht)
+
+Alle drei Punkte live verifiziert (Playwright, Dev-DB mit gesetzten Testdaten).
+
+### P1-12 — stornierte Vorgänge zählen nicht mehr als „Erledigt"
+
+`/pro/orders` und `/pro/calendar` hatten `cancelled` in `DONE_STATUSES` und
+zeigten Stornierungen mit Erfolgston (`success`) in der „Abgeschlossen"-
+Sektion. Jetzt: `cancelled` aus der Menge raus, eigener `warning`-Ton, eigene
+Sektion (`#pro-orders-cancelled` / `#pro-cal-cancelled`) und eigene Metrik
+„Storniert". Die aktiven/filternden Sektionen (Aktiv, Heute, Anstehend,
+Überfällig, Undatiert) schließen Stornierungen aus.
+Owner-Seiten waren bereits korrekt (`jobs` zeigt `cancelled` separat mit
+`tone="line"`, `contracts` „Gekündigt" neutral) — nicht angetastet.
+
+### P1-15 — kein `window.location.reload()` mehr nach dem Senden
+
+`app/messages` + `pro/messages` `thread-client.tsx` haben nach erfolgreichem
+POST die ganze Seite neu geladen und damit offene Accordions, Scrollposition
+und Eingabe verworfen. Jetzt `router.refresh()`: Server-Komponenten werden neu
+vom Server geholt, Client-State bleibt erhalten.
+Live gemessen: `POST 201`, Status „Nachricht gesendet.", keine Navigation,
+Textarea geleert, neue Nachricht erscheint in der Liste.
+
+### P1-13 — Relikt-Route `/app/more` beseitigt
+
+`/app/more` war nur noch vom Drawer-Footer verlinkt und im Code selbst als
+Relikt markiert. Route gelöscht, `next.config.ts` leitet `/app/more` permanent
+auf `/app` (Bookmarks), der Footer-Link heißt jetzt „Startseite".
+`/app/hilfe` setzte `active="/app/more"` (Fantasiewert) → `active="/app/hilfe"`.
+`/notifications` active vereinheitlicht statt rollenabhängig leer.
+`/app/notifications` existierte ohnehin nicht mehr.
+
+### Nicht umgesetzt: Block 4 (native Inputs `/pro/profile`) — Designbedarf
+
+9 File-Inputs app-weit nutzen `<EHInput type="file">` und zeigen das native
+OS-Widget („Choose File · No file chosen"). `packages/eh-design` hat keine
+`EHFileInput`/`EHTimeInput`/`EHDisclosure`. Das Designpaket ist versiegelt —
+der Bedarf ist gemeldet, nicht selbst gestylt. Checkboxen auf `/pro/profile`
+sind bereits korrekt via `EHCheckbox` (accent-color).
+
+### Gates (alle auf 35d0e09)
+
+tsc 0 · eslint 0 errors / 28 warnings · design-check 0 neue Schulden ·
+next build rc=0 · GitNexus: 8 Dateien / 19 Symbole = high, keine
+Schnittstellenwechsel.
+
+### Nächste Aktion
+
+P2 aus `docs/REPO_AUDIT_2026-09-18.md`: 39 unerreichbare Dateien / dead CSS /
+ungenutzte Icons (Punkte 22-24) — reines Aufräumen, kein Funktionswechsel.
