@@ -1,17 +1,13 @@
+import '@/components/werkbank-layout.css';
+import { EHLoadingState } from '@/design-system';
+import { WerkbankRahmen } from '@/components/werkbank-rahmen';
+
+/** Ladezustand im Werkbank-Rahmen: Shell und Navigation bleiben sichtbar,
+ *  nur die Mitte zeigt den Lade-Hinweis. */
 export default function ProLoading() {
   return (
-    <main className="app-page app-shell-v3 pro-theme" aria-busy="true" aria-live="polite">
-      <div className="workspace-shell">
-        <div className="workspace-main">
-          <section className="screen-v3 provider-loading">
-            <span className="provider-loading-bar" />
-            <span className="provider-loading-row" />
-            <span className="provider-loading-row" />
-            <span className="provider-loading-row" />
-            <span className="sr-only">Partnerbereich wird geladen.</span>
-          </section>
-        </div>
-      </div>
-    </main>
+    <WerkbankRahmen role="provider" active="/pro">
+      <EHLoadingState label="Partnerbereich wird geladen." />
+    </WerkbankRahmen>
   );
 }

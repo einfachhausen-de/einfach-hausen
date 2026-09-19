@@ -1,6 +1,6 @@
 import { ClipboardList, UserRound } from 'lucide-react';
 import { EHButton, EHMetricsBar, EHPageHeader, EHRecordList, EHRecordViews, EHStatus, EHText, EHWorkSection, EHWorkspaceGrid, type EHRecordEntry } from '@/design-system';
-import { AppShell } from '@/components/shell';
+import { WerkbankRahmen } from '@/components/werkbank-rahmen';
 import { ProviderAccessBoundary, ProviderState } from '@/components/provider/workspace';
 import { requireUser } from '@/lib/auth';
 import { db } from '@/lib/db';
@@ -20,7 +20,7 @@ export default async function Orders() {
 
   if (!ctx) {
     return (
-      <AppShell role="provider" active="/pro/orders" title="Aufträge" subtitle="Zugang prüfen">
+      <WerkbankRahmen role="provider" active="/pro/orders">
         <ProviderState
           icon={<ClipboardList size={21} />}
           title="Keinem Unternehmen zugeordnet"
@@ -28,7 +28,7 @@ export default async function Orders() {
           action={{ href: '/pro/hilfe', label: 'Hilfe & Kontakt' }}
           tone="unavailable"
         />
-      </AppShell>
+      </WerkbankRahmen>
     );
   }
 
@@ -71,7 +71,7 @@ export default async function Orders() {
   const withoutQuote = activeJobs.filter((item) => item._amount === null);
 
   return (
-    <AppShell role="provider" active="/pro/orders" title="Aufträge" subtitle={ctx.canManageJobs ? 'Betrieb · Kontakte und laufende Arbeiten' : 'Deine zugewiesenen Themen'}>
+    <WerkbankRahmen role="provider" active="/pro/orders">
       <EHPageHeader title="Aufträge & Kontakte" context={`${items.length} Vorgänge im aktuellen Zugriff`} />
 
       <ProviderAccessBoundary canManageJobs={ctx.canManageJobs} />
@@ -149,6 +149,6 @@ export default async function Orders() {
         </EHWorkSection>
         <EHButton href="/pro/leads" variant="secondary" arrow>Offene Anfragen ansehen</EHButton>
       </>} />
-    </AppShell>
+    </WerkbankRahmen>
   );
 }

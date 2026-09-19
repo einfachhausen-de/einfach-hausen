@@ -1,11 +1,13 @@
+import '@/components/werkbank-layout.css';
+import { EHLoadingState } from '@/design-system';
+import { WerkbankRahmen } from '@/components/werkbank-rahmen';
+
+/** Ladezustand im Werkbank-Rahmen: Shell und Navigation bleiben sichtbar,
+ *  nur die Mitte zeigt den Lade-Hinweis. */
 export default function HomeownerLoading() {
   return (
-    <main className="owner-route-state owner-loading-state" aria-busy="true" aria-live="polite">
-      <span className="owner-state-kicker">Einfach Hausen</span>
-      <div className="owner-skeleton owner-skeleton-title" />
-      <div className="owner-skeleton owner-skeleton-copy" />
-      <div className="owner-skeleton owner-skeleton-composer" />
-      <span className="owner-visually-hidden">Inhalte werden geladen.</span>
-    </main>
+    <WerkbankRahmen role="homeowner" active="/app">
+      <EHLoadingState label="Dein Bereich wird geladen." />
+    </WerkbankRahmen>
   );
 }

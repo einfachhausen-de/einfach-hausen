@@ -1,5 +1,5 @@
 import { CalendarClock, Mail, MessageCircle, Phone, Settings, UserCheck } from 'lucide-react';
-import { AppShell } from '@/components/shell';
+import { WerkbankRahmen } from '@/components/werkbank-rahmen';
 import { getSupportContacts } from '@/config/contacts';
 import {
   EHButton, EHMetricsBar, EHPageHeader, EHRecordList, EHStatus, EHText, EHWorkSection,
@@ -54,7 +54,7 @@ export default async function ProHilfe() {
     : undefined;
   const target = contract?.response_target_minutes ?? null;
   return (
-    <AppShell role="provider" active="/pro/hilfe" title="Hilfe">
+    <WerkbankRahmen role="provider" active="/pro/hilfe">
       <EHPageHeader title="Hilfe" />
       <EHMetricsBar label="Hilfe" items={[
         { id: 'themen', label: 'Hilfethemen', value: TOPICS.length, hint: 'häufige Fragen dieser Seite' },
@@ -83,6 +83,6 @@ export default async function ProHilfe() {
           <EHButton href="/pro/profile" variant="secondary" arrow>Profil &amp; Einstellungen</EHButton>
         </EHWorkSection>
       </>} />
-    </AppShell>
+    </WerkbankRahmen>
   );
 }

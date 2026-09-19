@@ -1,4 +1,4 @@
-import {AppShell} from "@/components/shell";
+import {WerkbankRahmen} from "@/components/werkbank-rahmen";
 import {requireUser} from "@/lib/auth";
 import {db} from "@/lib/db";
 import {getProviderContext} from "@/lib/provider";
@@ -16,11 +16,11 @@ export default async function ProviderOnboardingWizard({searchParams}: {
 }) {
   const user=await requireUser("provider");
   const ctx=getProviderContext(user.id);
-  if(!ctx || !ctx.isOwner) return <AppShell role="provider" active="/pro" title="Einrichtung">
+  if(!ctx || !ctx.isOwner) return <WerkbankRahmen role="provider" active="/pro">
     <EHPageHeader title="Einrichtung"/>
     <EHEmptyState title="Für den Firmeninhaber" text="Die Einrichtung kann nur der Firmeninhaber bearbeiten. Ansprechpartner erhalten ihre zugewiesenen Aufgaben im Partnerbereich."/>
     <EHTextLink href="/pro">Zum Partnerbereich</EHTextLink>
-  </AppShell>;
+  </WerkbankRahmen>;
 
   const sp=await searchParams;
   const requested=(sp.step || "firmendaten") as typeof WIZARD_STEPS[number];
@@ -47,7 +47,7 @@ export default async function ProviderOnboardingWizard({searchParams}: {
   ];
   const nextOpen=openSteps.find(entry=>!entry.done);
 
-  return <AppShell role="provider" active="/pro" title="Einrichtung" subtitle={ctx.businessName}>
+  return <WerkbankRahmen role="provider" active="/pro">
     <EHWorkflowStack>
       <EHPageHeader title="Einrichtung" context={["Firmenkonto", ctx.businessName].join(" · ")}/>
       <EHMetricsBar label="Einrichtung" items={[
@@ -129,5 +129,5 @@ export default async function ProviderOnboardingWizard({searchParams}: {
         </EHWorkSection>
       </>} />
     </EHWorkflowStack>
-  </AppShell>;
+  </WerkbankRahmen>;
 }

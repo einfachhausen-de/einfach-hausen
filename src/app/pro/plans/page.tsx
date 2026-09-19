@@ -1,5 +1,5 @@
 import { BadgeCheck,CircleAlert } from 'lucide-react';
-import { AppShell } from '@/components/shell';
+import { WerkbankRahmen } from '@/components/werkbank-rahmen';
 import { ProviderState } from '@/components/provider/workspace';
 import { requireUser } from '@/lib/auth';
 import { EHButton, EHFormFeedback, EHErrorState, EHMetricsBar, EHPageHeader, EHRecordList, EHStatus, EHSubmitButton, EHText, EHWorkSection, EHWorkspaceGrid, type EHRecordEntry } from '@/design-system';
@@ -26,9 +26,9 @@ function day(value: string | null | undefined): string {
 
 export default async function PartnerPlans({searchParams}:{searchParams:Promise<Record<string,string>>}){
   const u=await requireUser('provider'); const ctx=getProviderContext(u.id);
-  if(!ctx)return <AppShell role="provider" active="/pro/plans" title="Partner-Tarife" subtitle="Zugang prüfen">
+  if(!ctx)return <WerkbankRahmen role="provider" active="/pro/plans">
     <ProviderState icon={<BadgeCheck size={21}/>} title="Keinem Unternehmen zugeordnet" description="Dein Zugang ist aktuell keinem aktiven Partnerunternehmen zugeordnet. Tarife und Abrechnung können deshalb nicht angezeigt werden." action={{href:'/pro/hilfe',label:'Hilfe & Kontakt'}} tone="unavailable"/>
-  </AppShell>;
+  </WerkbankRahmen>;
   const sp=await searchParams;
   const plans=db.prepare('SELECT * FROM partner_plans WHERE active=1 ORDER BY monthly_amount').all() as any[];
   // Der gebuchte Tarif traegt seinen Preis mit: die Kennzahl nennt denselben
@@ -46,7 +46,7 @@ export default async function PartnerPlans({searchParams}:{searchParams:Promise<
       : <EHText size="meta" muted>Nur das Firmenkonto kann den Tarif ändern.</EHText>,
   }));
   const periodEnd = current?.trial_end || current?.current_period_end;
-  return <AppShell role="provider" active="/pro/plans" title="Partner-Tarife">
+  return <WerkbankRahmen role="provider" active="/pro/plans">
     <EHPageHeader title="Partner-Tarife" context={current?.title?`Gebucht: ${current.title}`:undefined}/>
     {sp.error&&<EHErrorState text={sp.error} />}{sp.checkout==='success'&&<EHFormFeedback kind="success"><BadgeCheck/>Tarif wurde aktiviert.</EHFormFeedback>}{sp.checkout==='processing'&&<EHFormFeedback kind="success"><BadgeCheck/>Zahlung eingegangen. Tarifstatus folgt erst nach bestätigtem Stripe-Webhook.</EHFormFeedback>}{sp.checkout==='unavailable'&&<ProviderState icon={<CircleAlert size={21}/>} title="Tarifwechsel derzeit nicht verfügbar" description="Die Onlinezahlung ist aktuell nicht vollständig konfiguriert. Es wurde kein Tarifstatus geändert; dein bestehender Zugang bleibt unverändert." tone="unavailable"/>}
     <EHMetricsBar label="Partner-Tarife" items={[
@@ -92,5 +92,5 @@ export default async function PartnerPlans({searchParams}:{searchParams:Promise<
         <EHButton href="/pro/profile" variant="secondary" arrow>Profil &amp; Einstellungen</EHButton>
       </EHWorkSection>
     </>} />
-  </AppShell>;
+  </WerkbankRahmen>;
 }
