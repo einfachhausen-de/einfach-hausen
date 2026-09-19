@@ -66,7 +66,7 @@ export async function WerkbankRahmen({ role, active, children, rail, tabs, brand
         </nav>
         <div className={s['wb-tools']}>
           <WerkbankSuche pro={pro} label={searchLabel || 'Suchen'} />
-          <Link href={pro ? '/pro/notifications' : '/notifications'} className={s.toolIcon} aria-label={unread ? `${unread} ungelesene Benachrichtigungen` : 'Benachrichtigungen'}><Bell size={22} />{unread > 0 && <span className={s.toolBadge}>{unread > 99 ? '99+' : unread}</span>}</Link>
+          <Link href="/notifications" className={s.toolIcon} aria-label={unread ? `${unread} ungelesene Benachrichtigungen` : 'Benachrichtigungen'}><Bell size={22} />{unread > 0 && <span className={s.toolBadge}>{unread > 99 ? '99+' : unread}</span>}</Link>
           <Link href={profileHref} className={s.toolAvatar} aria-label="Profil" aria-current={active === profileHref ? 'page' : undefined}>{initials}</Link>
         </div>
       </div>

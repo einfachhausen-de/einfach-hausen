@@ -28,12 +28,18 @@ const AuthContext = createContext<Ctx>({
 // weitergeleiteten Routen (/ki-chat, /ansprechpartner, /anfragen-pro) sind
 // entfernt: ihre Redirects laufen serverseitig, und auf unknown paths muss
 // eine 404 gerendert werden, kein Client-Bounce.
-const PRIVATE_PREFIXES = [
-  "/mein-haus", "/notifications",
-];
-// Canonical app/pro pages resolve Supabase identity and application role on
-// the server. The browser guard must never replace that authority with metadata.
-const SERVER_AUTH_PREFIXES = ["/app", "/pro", "/admin"];
+// Keine privaten Client-Bounce-Praefixe mehr: /mein-haus ist ein server-
+// seitiger Redirect auf /app/home, /notifications wird serverseitig
+// autorisiert (siehe SERVER_AUTH_PREFIXES). Der Browser-Guard darf nie eine
+// serverseitig erlaubte Seite sperren.
+const PRIVATE_PREFIXES: string[] = [];
+// /notifications ist serverseitig per requireUser() autorisiert und gehoert
+// nicht zu den /app-// /pro-Praefixen: ohne diesen Eintrag hat der Browser-
+// Guard Nutzer ohne Supabase-Client-Session (Local-Dev-Modus, abgelaufene
+// Client-Session bei gueltiger Server-Session) auf /login geschickt, obwohl
+// der Server den Zugriff erlaubt hat. Genau das Client-vs-Server-Grenzen-
+// Verhalten, das T-0168 verbietet — der Bounce ist entfernt.
+const SERVER_AUTH_PREFIXES = ["/app", "/pro", "/admin", "/notifications"];
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
