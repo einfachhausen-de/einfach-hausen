@@ -1,7 +1,7 @@
 import { requireUser } from '@/lib/auth';
 import { loadOnboardingState, saveOnboardingContactAction, saveOnboardingInterestsAction, saveOnboardingProfileAction } from './actions';
 import { db } from '@/lib/db';
-import { EHPanel, EHField, EHInput, EHSelect, EHCheckbox, EHSubmitButton, EHButton, EHErrorState, EHMetricsBar, EHPageHeader, EHRecordList, EHText, EHWorkSection, EHWorkspaceGrid, EHWorkflowStack } from '@/design-system';
+import { EHPanel, EHField, EHInput, EHSelect, EHCheckbox, EHSubmitButton, EHButton, EHErrorState, EHMetricsBar, EHPageHeader, EHRecordList, EHStepProgress, EHText, EHWorkSection, EHWorkspaceGrid, EHWorkflowStack } from '@/design-system';
 import { WerkbankRahmen } from '@/components/werkbank-rahmen';
 
 /** Die drei Kanaele, die saveOnboardingContactAction zulaesst (CHANNELS). */
@@ -24,7 +24,7 @@ export default async function OnboardingPage({ searchParams }: { searchParams: P
     <WerkbankRahmen role="homeowner" active="/app">
       <EHWorkflowStack>
       <EHPageHeader title="Einrichtung" context={`Schritt ${state.stepIndex} von ${state.totalSteps}`} />
-      <progress value={state.stepIndex} max={state.totalSteps} aria-label={`Fortschritt: Schritt ${state.stepIndex} von ${state.totalSteps}`} />
+      <EHStepProgress current={state.step} steps={[{ id: 'profile', label: 'Adresse' }, { id: 'interests', label: 'Interessen' }, { id: 'contact', label: 'Kontaktweg' }]} />
       {error && <EHErrorState text={error} />}
       <EHMetricsBar label="Einrichtung" items={[
         { id: 'fortschritt', label: 'Fortschritt', value: `${state.stepIndex} / ${state.totalSteps}`, hint: 'Schritte der Einrichtung' },

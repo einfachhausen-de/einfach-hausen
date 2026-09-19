@@ -26,7 +26,7 @@ export default async function Consultation({ searchParams }: { searchParams: Pro
   const requestItems: EHRecordEntry[] = requests.slice(0, 5).map(request => ({
     id: String(request.id),
     title: request.title,
-    detail: 'Kontaktanfrage · kein Auftrag, kein Preis',
+    detail: 'Kontaktauftrag · kein Auftrag, kein Preis',
     date: String(request.created_at).slice(0, 10),
     dateLabel: dateLabel(request.created_at),
     status: <EHStatus tone={request.status === 'open' ? 'info' : request.status === 'cancelled' ? 'neutral' : 'success'}>{statusLabel(request.status)}</EHStatus>,
@@ -35,17 +35,17 @@ export default async function Consultation({ searchParams }: { searchParams: Pro
 
   return <WerkbankRahmen role="homeowner" active="/app">
     <EHWorkflowStack>
-    <EHPageHeader title="Beratung" context={lastRequest ? `Letzte Anfrage ${dateLabel(lastRequest.created_at)}` : 'Noch keine Anfrage'} />
+    <EHPageHeader title="Beratung" context={lastRequest ? `Letzter Auftrag ${dateLabel(lastRequest.created_at)}` : 'Noch kein Auftrag'} />
     <EHMetricsBar label="Beratung" items={[
-      { id: 'anfragen', label: 'Anfragen', value: String(requests.length), hint: 'seit Beginn' },
+      { id: 'anfragen', label: 'Aufträge', value: String(requests.length), hint: 'seit Beginn' },
       { id: 'offen', label: 'Offen', value: String(openCount), hint: openCount > 0 ? 'warten auf Antwort' : 'nichts offen' },
       { id: 'kontakt', label: 'In Absprache', value: String(inContactCount), hint: 'mit einem Ansprechpartner' },
-      { id: 'letzte', label: 'Letzte Anfrage', value: lastRequest ? dateLabel(lastRequest.created_at) : '–', hint: lastRequest ? statusLabel(lastRequest.status) : 'noch keine' },
+      { id: 'letzte', label: 'Letzter Auftrag', value: lastRequest ? dateLabel(lastRequest.created_at) : '–', hint: lastRequest ? statusLabel(lastRequest.status) : 'noch keine' },
     ]} />
     <EHWorkspaceGrid main={<>
       {sp.error && <EHErrorState text={sp.error} />}
-      {created && <EHFormFeedback kind="success">Kontaktanfrage angelegt. Es wurde kein Auftrag und kein Preis erstellt. <Link href={`/app/jobs/${created.id}`}>Anfrage ansehen</Link></EHFormFeedback>}
-      <EHPanel title="Beratungs-Anfrage">
+      {created && <EHFormFeedback kind="success">Kontaktauftrag angelegt. Es wurde kein Auftrag und kein Preis erstellt. <Link href={`/app/jobs/${created.id}`}>Auftrag ansehen</Link></EHFormFeedback>}
+      <EHPanel title="Beratungs-Auftrag">
       <form action={createConsultationAction}>
         <EHField id="con-desc" label="Wobei brauchst du Rat?"><EHTextarea id="con-desc" name="description" rows={6} minLength={4} maxLength={8000} required placeholder="Zum Beispiel: Mein Dach ist an einer Stelle feucht. Was könnte die Ursache sein?"/></EHField>
         <EHField id="con-photo" label="Foto oder Video (optional)" hint="JPEG, PNG, WebP oder HEIC bis 8 MB; MP4, WebM, MOV oder M4V bis 25 MB."><EHInput id="con-photo" type="file" name="photo" accept="image/jpeg,image/png,image/webp,image/heic,video/mp4,video/webm,video/quicktime,video/x-m4v"/></EHField>
@@ -54,13 +54,13 @@ export default async function Consultation({ searchParams }: { searchParams: Pro
       </EHPanel>
       <HausmeisterAssistant showConsultationLink={false}/>
     </>} aside={<>
-      <EHWorkSection title="Deine letzten Anfragen">
-        <EHRecordList label="Deine letzten Anfragen" items={requestItems} empty="Noch keine Beratungsanfrage. Beschreibe links dein Thema – daraus entsteht kein Auftrag und kein Preis." />
+      <EHWorkSection title="Deine letzten Aufträge">
+        <EHRecordList label="Deine letzten Aufträge" items={requestItems} empty="Noch kein Beratungsauftrag. Beschreibe links dein Thema – daraus entsteht kein Auftrag und kein Preis." />
         <EHButton href="/app/jobs" variant="secondary" arrow>Alle Vorgänge ansehen</EHButton>
       </EHWorkSection>
       <EHWorkSection title="So geht es weiter">
         <EHText muted>Wir suchen einen passenden Ansprechpartner. Erst wenn du danach ausdrücklich einen Auftrag möchtest, entstehen Termin und Preis.</EHText>
-        <EHText muted>Deine Beschreibung bleibt als Anfrage erhalten und ist jederzeit auffindbar.</EHText>
+        <EHText muted>Deine Beschreibung bleibt als Auftrag erhalten und ist jederzeit auffindbar.</EHText>
         <EHButton href="/app/hausmeister" variant="secondary" arrow>Auftrag organisieren</EHButton>
       </EHWorkSection>
     </>} />

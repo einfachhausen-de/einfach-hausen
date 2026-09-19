@@ -104,7 +104,7 @@ export default async function Sale() {
       <EHWorkflowForm action={requestPropertyValuationAction}>
         <EHField id="sale-type" label="Gewünschte Art"><EHSelect id="sale-type" name="valuationType" defaultValue="orientation"><option value="orientation">Orientierungswert</option><option value="expert">Sachverständigenbewertung</option><option value="market">Makler-Marktwert</option></EHSelect></EHField>
         <EHField id="sale-notes" label="Hinweis"><EHTextarea id="sale-notes" name="notes" rows={3} placeholder="Optional: Besonderheiten oder Modernisierungen" /></EHField>
-        <EHSubmitButton>Bewertung anfragen</EHSubmitButton>
+        <EHSubmitButton>Bewertung beauftragen</EHSubmitButton>
       </EHWorkflowForm>
     </EHFormSection>
     <EHFormSection title="Vorhandene Einschätzung">
@@ -121,14 +121,14 @@ export default async function Sale() {
       const completed = valuation.status === 'completed' && valuation.estimated_min != null && valuation.estimated_max != null;
       return {
         id: String(valuation.id),
-        title: completed ? `${euro(valuation.estimated_min)} – ${euro(valuation.estimated_max)}` : valuation.status === 'cancelled' ? 'Bewertung abgebrochen' : 'Bewertung angefragt',
+        title: completed ? `${euro(valuation.estimated_min)} – ${euro(valuation.estimated_max)}` : valuation.status === 'cancelled' ? 'Bewertung abgebrochen' : 'Bewertung beauftragt',
         detail: [valuationTypeLabels[valuation.valuation_type] || valuation.valuation_type, valuation.notes].filter(Boolean).join(' · '),
         date: String(valuation.created_at).slice(0, 10),
         dateLabel: formatDate(valuation.created_at),
-        status: <EHStatus tone={completed ? 'success' : valuation.status === 'cancelled' ? 'neutral' : 'info'}>{completed ? 'Gespeichert' : valuation.status === 'cancelled' ? 'Abgebrochen' : 'Anfrage offen'}</EHStatus>,
+        status: <EHStatus tone={completed ? 'success' : valuation.status === 'cancelled' ? 'neutral' : 'info'}>{completed ? 'Gespeichert' : valuation.status === 'cancelled' ? 'Abgebrochen' : 'Auftrag offen'}</EHStatus>,
       };
     })} />}
-    {valuations.length === 0 && <EHEmptyState title="Noch keine Bewertung" text="Eine Anfrage und eine bereits vorhandene Einschätzung werden getrennt im Verlauf dokumentiert." />}
+    {valuations.length === 0 && <EHEmptyState title="Noch keine Bewertung" text="Ein Auftrag und eine bereits vorhandene Einschätzung werden getrennt im Verlauf dokumentiert." />}
     </EHWorkSection>
 
     <EHWorkSection title="Ich möchte verkaufen">
@@ -174,10 +174,10 @@ export default async function Sale() {
             ? `${euro(lastValuation.estimated_min)} – ${euro(lastValuation.estimated_max)}`
             : valuationTypeLabels[lastValuation.valuation_type] || 'Bewertung'}</EHText>
           <EHStatus tone={lastValuation.status === 'completed' ? 'success' : lastValuation.status === 'cancelled' ? 'neutral' : 'info'}>
-            {lastValuation.status === 'completed' ? 'Gespeichert' : lastValuation.status === 'cancelled' ? 'Abgebrochen' : 'Anfrage offen'}
+            {lastValuation.status === 'completed' ? 'Gespeichert' : lastValuation.status === 'cancelled' ? 'Abgebrochen' : 'Auftrag offen'}
           </EHStatus>
           <EHText muted>{valuationTypeLabels[lastValuation.valuation_type] || lastValuation.valuation_type} · {formatDate(lastValuation.created_at)}</EHText>
-        </> : <EHText muted>Noch keine Bewertung. Eine Anfrage oder eine vorhandene Einschätzung erscheint hier mit Datum und Art.</EHText>}
+        </> : <EHText muted>Noch keine Bewertung. Ein Auftrag oder eine vorhandene Einschätzung erscheint hier mit Datum und Art.</EHText>}
       </EHWorkSection>
       <EHWorkSection title="Freigegebene Makler">
         <EHRecordList label="Freigegebene Makler" items={shareItems} empty="Noch keine Kontaktdaten freigegeben. Vorschläge bleiben ohne Freigabe für den Betrieb gesperrt." />

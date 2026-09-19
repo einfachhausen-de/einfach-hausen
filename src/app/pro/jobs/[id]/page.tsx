@@ -143,7 +143,7 @@ export default async function ProJob({
 
         <EHMetricsBar label="Stand des Vorgangs" items={[
           { id: 'status', label: 'Status', value: statusText, hint: [access.category, Number.isFinite(access.distance_km) ? `${access.distance_km.toFixed(1)} km entfernt` : null].filter(Boolean).join(' · ') },
-          { id: 'angebot', label: 'Eigenes Angebot', value: isContact ? 'Ohne Preis' : quote ? euro(quote.amount) : 'offen', hint: isContact ? 'Kontaktanfrage ohne Auftragswert' : quote ? (quote.available_at ? `Verfügbar ${dateLabel(quote.available_at)}` : 'Termin nach Abstimmung') : 'Preis und Termin noch offen' },
+          { id: 'angebot', label: 'Eigenes Angebot', value: isContact ? 'Ohne Preis' : quote ? euro(quote.amount) : 'offen', hint: isContact ? 'Kontaktauftrag ohne Auftragswert' : quote ? (quote.available_at ? `Verfügbar ${dateLabel(quote.available_at)}` : 'Termin nach Abstimmung') : 'Preis und Termin noch offen' },
           { id: 'nachrichten', label: 'Nachrichten', value: messages.length, hint: mine ? `mit ${access.homeowner_first}` : assignment ? 'bei einem anderen Ansprechpartner' : 'noch kein Kundenkontakt' },
           { id: 'unterlagen', label: 'Unterlagen', value: docs.length + invoices.length, hint: isAccepted ? `${invoices.length} Rechnungen · ${docs.length} Nachweise` : 'erst nach Annahme' },
         ]} />
@@ -176,7 +176,7 @@ export default async function ProJob({
                 />
               </EHWorkSection>
               <EHWorkflowForm action={declineDispatchAction.bind(null, access.id)}>
-                <EHSubmitButton pendingLabel="Wird abgelehnt…"><XCircle size={16} />Kontaktanfrage ablehnen</EHSubmitButton>
+                <EHSubmitButton pendingLabel="Wird abgelehnt…"><XCircle size={16} />Kontaktauftrag ablehnen</EHSubmitButton>
               </EHWorkflowForm>
             </>
           )}
@@ -184,7 +184,7 @@ export default async function ProJob({
           {!isAccepted && ctx.canManageJobs && access.status !== 'completed' && !isContact && (
             <>
               {access.urgency === 'emergency' && (
-                <EHCallout title="Notfallanfrage">
+                <EHCallout title="Notfallauftrag">
                   <EHText>
                     {[
                       Number.isFinite(access.distance_km) ? `${access.distance_km.toFixed(1)} km entfernt` : null,
@@ -208,7 +208,7 @@ export default async function ProJob({
               </EHWorkSection>
               {!quote && (
                 <EHWorkflowForm action={declineDispatchAction.bind(null, access.id)}>
-                  <EHSubmitButton pendingLabel="Wird abgelehnt…"><XCircle size={16} />Anfrage ablehnen</EHSubmitButton>
+                  <EHSubmitButton pendingLabel="Wird abgelehnt…"><XCircle size={16} />Auftrag ablehnen</EHSubmitButton>
                 </EHWorkflowForm>
               )}
             </>
@@ -314,7 +314,7 @@ export default async function ProJob({
                   <EHConversation
                     role="provider"
                     name={`${access.homeowner_first} ${access.homeowner_last}`.trim() || 'Eigentümer'}
-                    detail={[access.category, isContact ? 'Kontaktanfrage' : 'Auftrag'].filter(Boolean).join(' · ')}
+                    detail={[access.category, isContact ? 'Kontaktauftrag' : 'Auftrag'].filter(Boolean).join(' · ')}
                     phone={access.homeowner_phone || undefined}
                     messages={messages.map((message: any) => ({
                       id: String(message.id),
@@ -386,7 +386,7 @@ export default async function ProJob({
             <EHStatus tone={ctx.canManageJobs ? 'success' : 'neutral'}>Aufträge verwalten {ctx.canManageJobs ? 'AN' : 'AUS'}</EHStatus>
             <EHText muted>
               {ctx.canManageJobs
-                ? 'Du siehst betriebliche Anfragen, kannst Angebote abgeben und gebuchte Vorgänge zuweisen.'
+                ? 'Du siehst betriebliche Aufträge, kannst Angebote abgeben und gebuchte Vorgänge zuweisen.'
                 : 'Du siehst nur dir zugewiesene Aufträge und Kontakte und bearbeitest dort Ausführung, Kundenkontakt, Dokumente und Rechnungen.'}
             </EHText>
           </EHWorkSection>
