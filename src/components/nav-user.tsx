@@ -17,8 +17,9 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from '@/components/ui/sidebar';
-import { Bell, ChevronsUpDown, CircleHelp, LogOut, UserRound } from 'lucide-react';
+import { Bell, ChevronsUpDown, CircleHelp, LogOut, Settings, UserRound } from 'lucide-react';
 import { logoutAction } from '@/app/actions';
+import { openSettingsDialog } from './settings-dialog-host';
 import s from './shell.module.css';
 
 /**
@@ -80,6 +81,10 @@ export function NavUser({
                   <UserRound />
                   <span>Profil und Einstellungen</span>
                 </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => openSettingsDialog('account')}>
+                <Settings />
+                <span>Einstellungen</span>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link href={notificationsHref}>

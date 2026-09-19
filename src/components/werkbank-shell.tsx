@@ -19,6 +19,7 @@ import {
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 import { AppSidebar } from './app-sidebar';
+import { SettingsDialogHost } from './settings-dialog-host';
 import { WerkbankSuche } from './werkbank-suche';
 import { BottomNav } from './bottom-nav';
 import s from './shell.module.css';
@@ -124,10 +125,10 @@ export function WerkbankShell({
               </Link>
             </div>
           </div>
-          <div className="flex min-w-0 flex-1 items-stretch">
-            <main className={`${s['wb-main']} min-w-0 flex-1`}>{main}</main>
+          <div className={s['wb-content']}>
+            <main className={s['wb-main']}>{main}</main>
             {rail && (
-              <aside aria-label="Kontext dieser Seite" className={`${s['wb-rail']} hidden lg:flex`}>
+              <aside aria-label="Kontext dieser Seite" className={s['wb-rail']}>
                 {rail}
               </aside>
             )}
@@ -136,6 +137,7 @@ export function WerkbankShell({
             <BottomNav role={role} active={active} />
           </div>
         </SidebarInset>
+        <SettingsDialogHost />
       </SidebarProvider>
     </TooltipProvider>
   );

@@ -78,6 +78,9 @@ export function AppSidebar({
       label: item.label,
       icon: <Icon />,
       isActive: item.href === active,
+      // "Profil & Einstellungen" öffnet den Einstellungs-Dialog als Overlay über
+      // der aktuellen Seite (Default-Bereich Konto & Daten), statt zu navigieren.
+      dialogSection: item.href === '/app/profile' ? 'account' : undefined,
     };
   });
 

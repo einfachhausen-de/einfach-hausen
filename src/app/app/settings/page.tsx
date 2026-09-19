@@ -8,6 +8,7 @@ import { aiQuotaSnapshot } from '@/lib/ai-engine';
 import { dateLabel } from '@/lib/format';
 import { PwaSettingsStatus } from './pwa-settings-status';
 import { AccountActions } from './account-actions';
+import { OwnerSettingsDialog } from './owner-settings-dialog';
 import styles from './settings.module.css';
 import { AiSettings } from './ai-settings';
 
@@ -51,7 +52,7 @@ export default async function AppSettingsPage() {
   return (
     <WerkbankRahmen role="homeowner" active="/app/settings"
 >
-      <EHPageHeader title="App-Einstellungen" actions={<EHButton href="/app/profile" variant="secondary">Profil</EHButton>} />
+      <EHPageHeader title="App-Einstellungen" actions={<><OwnerSettingsDialog /><EHButton href="/app/profile" variant="secondary">Profil</EHButton></>} />
 
       <EHMetricsBar label="App-Einstellungen" items={[
         { id: 'mitteilungen', label: 'Ungelesen', value: String(unread), hint: noticeTotal > 0 ? `${noticeTotal} Mitteilungen gesamt` : 'noch keine Mitteilung' },
