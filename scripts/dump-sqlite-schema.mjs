@@ -7,10 +7,41 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const src = fs.readFileSync(path.join(root, 'src/lib/db.ts'), 'utf8');
+// db.ts deklariert das Schema zusaetzlich in db.exec()- und execWithRetry-
+// Strings. Die JS-Huelle (Backticks, Klammern des Aufrufs) darf nicht in den
+// Dump gelangen. Deshalb wird der String-Inhalt der Aufrufe direkt
+// extrahiert: alles zwischen dem eroeffnenden Begrenzer und dem schliessenden
+// Begrenzer vor der schliessenden JS-Klammer.
+const raw = fs.readFileSync(path.join(root, 'src/lib/db.ts'), 'utf8');
+// db.ts deklariert das Schema zusaetzlich in db.exec(`...`)-Strings: nach dem
+// SQL schliesst erst der Backtick, dann die Klammer des JS-Aufrufs. Beide
+// JS-Huellen werden entfernt, damit nur reines SQL uebrig bleibt.
+// db.ts deklariert das Schema zusaetzlich in db.exec(`...`)- und
+// execWithRetry('...')-Strings: nach dem SQL schliesst erst der Begrenzer
+// (Backtick oder Anfuehrungszeichen), dann die Klammer des JS-Aufrufs.
+// Beide JS-Huellen werden entfernt, damit nur reines SQL uebrig bleibt.
+// db.ts deklariert das Schema in db.exec(`...`)-, db.exec('...')- und
+// execWithRetry(() => db.exec('...'))-Strings. Um die JS-Huellen (Begrenzer
+// + beliebig viele schliessende Klammern der Aufrufverschachtelung) sauber
+// abzuziehen, wird pro Statement nur der Inhalt zwischen dem ersten und dem
+// letzten String-Begrenzer der Anweisung verwendet.
+// db.ts deklariert das Schema in db.exec(`...`)-Template-Literalen (ein
+// Literal kann viele Anweisungen enthalten) und in execWithRetry('...')-
+// einfach-quoted Strings. Nur die String-Inhalte sind SQL; die JS-Huelle
+// (Begrenzer + Aufrufklammern) liegt ausserhalb und wird nicht uebernommen.
+const backtick = [...raw.matchAll(/`([^`]*)`/g)].map((m) => m[1]);
+const single = [...raw.matchAll(/'([^']*)'/g)].map((m) => m[1]);
+const src = [...backtick, ...single]
+  .filter((s) => /CREATE/i.test(s))
+  // Innerhalb der Template-Literale stehen die Anweisungen direkt hintereinander;
+  // das trennende ';' steht in db.ts ausserhalb des Literals. Jede Anweisung
+  // bekommt hier ihr Semikolon, damit die Baseline fuer sich lauffaehig ist.
+  .join('\n')
+  .replace(/\n+/g, '\n')
+  .replace(/(?<!;)(\s*)\n(CREATE|\s*$)/g, '$1;\n$2');
 
 const tables = [];
-for (const m of src.matchAll(/CREATE\s+TABLE\s+IF\s+NOT\s+EXISTS\s+(\w[\w]*)\s*\(([\s\S]*?)\);/g)) {
+for (const m of src.matchAll(/CREATE\s+TABLE\s+IF\s+NOT\s+EXISTS\s+(\w[\w]*)\s*\(([\s\S]*?)\)\s*;/g)) {
   tables.push({ name: m[1], body: m[2].trim() });
 }
 const indexes = [];

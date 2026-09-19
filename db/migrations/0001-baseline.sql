@@ -1,6 +1,6 @@
--- Einfach Hausen SQLite-Baseline (generiert aus src/lib/db.ts, 2026-09-03).
+-- Einfach Hausen SQLite-Baseline (generiert aus src/lib/db.ts, 2026-09-19).
 -- Quelle bleibt src/lib/db.ts; diese Datei ist Review-/Diff-Material (siehe docs/DB_MIGRATIONS.md).
--- Tabellen: 68, Indizes: 42, addColumnIfMissing: 42
+-- Tabellen: 75, Indizes: 47, addColumnIfMissing: 42
 
 CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT,email TEXT NOT NULL UNIQUE COLLATE NOCASE,password_hash TEXT NOT NULL,role TEXT NOT NULL CHECK(role IN ('homeowner','provider')),first_name TEXT NOT NULL,last_name TEXT NOT NULL,phone TEXT,created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,auth_subject TEXT UNIQUE);
 
@@ -94,6 +94,8 @@ CREATE TABLE IF NOT EXISTS house_history_entries (id INTEGER PRIMARY KEY AUTOINC
 
 CREATE TABLE IF NOT EXISTS house_history_documents (id INTEGER PRIMARY KEY AUTOINCREMENT,entry_id INTEGER NOT NULL REFERENCES house_history_entries(id) ON DELETE CASCADE,title TEXT NOT NULL,path TEXT NOT NULL,created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP);
 
+CREATE TABLE IF NOT EXISTS house_contracts (id INTEGER PRIMARY KEY AUTOINCREMENT,homeowner_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,property_id INTEGER REFERENCES properties(id) ON DELETE CASCADE,kind TEXT NOT NULL DEFAULT 'sonstiges',provider TEXT NOT NULL,tariff TEXT NOT NULL DEFAULT '',contract_number TEXT NOT NULL DEFAULT '',cost_amount INTEGER,cost_interval TEXT NOT NULL DEFAULT 'month' CHECK(cost_interval IN ('month','quarter','halfyear','year')),started_at TEXT,term_months INTEGER,renewal_months INTEGER NOT NULL DEFAULT 12,cancellation_days INTEGER NOT NULL DEFAULT 30,cancellation_deadline TEXT,notice TEXT NOT NULL DEFAULT '',document_title TEXT NOT NULL DEFAULT '',document_path TEXT,status TEXT NOT NULL DEFAULT 'active' CHECK(status IN ('active','cancelled','expired')),created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP);
+
 CREATE TABLE IF NOT EXISTS provider_invites (id INTEGER PRIMARY KEY AUTOINCREMENT,homeowner_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,email TEXT NOT NULL COLLATE NOCASE,company_name TEXT NOT NULL DEFAULT '',category TEXT NOT NULL DEFAULT '',token TEXT NOT NULL UNIQUE,status TEXT NOT NULL DEFAULT 'pending' CHECK(status IN ('pending','linked','cancelled')),linked_provider_id INTEGER REFERENCES users(id) ON DELETE SET NULL,created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,linked_at TEXT);
 
 CREATE TABLE IF NOT EXISTS house_transfers (id INTEGER PRIMARY KEY AUTOINCREMENT,homeowner_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,target_email TEXT NOT NULL COLLATE NOCASE,token TEXT NOT NULL UNIQUE,status TEXT NOT NULL DEFAULT 'active' CHECK(status IN ('active','accepted','revoked')),accepted_by_user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,accepted_at TEXT);
@@ -126,17 +128,17 @@ CREATE TABLE IF NOT EXISTS security_events (id INTEGER PRIMARY KEY AUTOINCREMENT
 
 CREATE TABLE IF NOT EXISTS webhook_events (source TEXT NOT NULL CHECK(source IN ('whatsapp','stripe')),event_id TEXT NOT NULL,status TEXT NOT NULL CHECK(status IN ('processing','processed')),created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,processed_at TEXT,PRIMARY KEY(source,event_id));
 
-CREATE TABLE IF NOT EXISTS match_decision_trace (id INTEGER PRIMARY KEY AUTOINCREMENT,job_id INTEGER NOT NULL REFERENCES jobs(id) ON DELETE CASCADE,provider_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,decision TEXT NOT NULL CHECK(decision IN ('dispatched','excluded')),reason_key TEXT NOT NULL,detail TEXT NOT NULL DEFAULT '',created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)`);
+CREATE TABLE IF NOT EXISTS match_decision_trace (id INTEGER PRIMARY KEY AUTOINCREMENT,job_id INTEGER NOT NULL REFERENCES jobs(id) ON DELETE CASCADE,provider_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,decision TEXT NOT NULL CHECK(decision IN ('dispatched','excluded')),reason_key TEXT NOT NULL,detail TEXT NOT NULL DEFAULT '',created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP);
 
-CREATE TABLE IF NOT EXISTS notification_events (id INTEGER PRIMARY KEY AUTOINCREMENT,event_type TEXT NOT NULL,payload_json TEXT NOT NULL DEFAULT '{}',created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,processed_at TEXT)`);
+CREATE TABLE IF NOT EXISTS notification_events (id INTEGER PRIMARY KEY AUTOINCREMENT,event_type TEXT NOT NULL,payload_json TEXT NOT NULL DEFAULT '{}',created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,processed_at TEXT);
 
-CREATE TABLE IF NOT EXISTS notification_receipts (id INTEGER PRIMARY KEY AUTOINCREMENT,notification_id INTEGER NOT NULL REFERENCES notifications(id) ON DELETE CASCADE,channel TEXT NOT NULL,state TEXT NOT NULL CHECK(state IN ('sent','failed','dead')),detail TEXT NOT NULL DEFAULT '',created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)`);
+CREATE TABLE IF NOT EXISTS notification_receipts (id INTEGER PRIMARY KEY AUTOINCREMENT,notification_id INTEGER NOT NULL REFERENCES notifications(id) ON DELETE CASCADE,channel TEXT NOT NULL,state TEXT NOT NULL CHECK(state IN ('sent','failed','dead')),detail TEXT NOT NULL DEFAULT '',created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP);
 
-CREATE TABLE IF NOT EXISTS user_settings (user_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,ai_byok_enabled INTEGER NOT NULL DEFAULT 0,ai_byok_provider TEXT NOT NULL DEFAULT '',updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)`);
+CREATE TABLE IF NOT EXISTS user_settings (user_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,ai_byok_enabled INTEGER NOT NULL DEFAULT 0,ai_byok_provider TEXT NOT NULL DEFAULT '',updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP);
 
-CREATE TABLE IF NOT EXISTS ai_usage (id INTEGER PRIMARY KEY AUTOINCREMENT,user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,period TEXT NOT NULL,action TEXT NOT NULL DEFAULT 'chat',created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)`);
+CREATE TABLE IF NOT EXISTS ai_usage (id INTEGER PRIMARY KEY AUTOINCREMENT,user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,period TEXT NOT NULL,action TEXT NOT NULL DEFAULT 'chat',created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP);
 
-CREATE TABLE IF NOT EXISTS ai_credits (id INTEGER PRIMARY KEY AUTOINCREMENT,user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,granted INTEGER NOT NULL,mode TEXT NOT NULL CHECK(mode IN ('ad','purchase','manual')),source TEXT NOT NULL DEFAULT '',created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)`);
+CREATE TABLE IF NOT EXISTS ai_credits (id INTEGER PRIMARY KEY AUTOINCREMENT,user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,granted INTEGER NOT NULL,mode TEXT NOT NULL CHECK(mode IN ('ad','purchase','manual')),source TEXT NOT NULL DEFAULT '',created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP);
 
 CREATE INDEX IF NOT EXISTS idx_sessions_user ON sessions(user_id);
 
@@ -182,6 +184,8 @@ CREATE INDEX IF NOT EXISTS idx_invoice_items_invoice ON invoice_items(invoice_id
 
 CREATE INDEX IF NOT EXISTS idx_house_history_owner_date ON house_history_entries(homeowner_id,performed_at DESC);
 
+CREATE INDEX IF NOT EXISTS idx_house_contracts_owner ON house_contracts(homeowner_id,status,created_at DESC);
+
 CREATE INDEX IF NOT EXISTS idx_provider_invites_email ON provider_invites(email,status);
 
 CREATE INDEX IF NOT EXISTS idx_property_ownerships_owner ON property_ownerships(homeowner_id,active,started_at DESC);
@@ -204,64 +208,53 @@ CREATE INDEX IF NOT EXISTS idx_security_events_created ON security_events(create
 
 CREATE INDEX IF NOT EXISTS idx_webhook_events_created ON webhook_events(created_at DESC);
 
-CREATE UNIQUE INDEX IF NOT EXISTS idx_users_auth_subject ON users(auth_subject) WHERE auth_subject IS NOT NULL'));
+CREATE INDEX IF NOT EXISTS idx_match_trace_job ON match_decision_trace(job_id,created_at DESC);
 
-CREATE INDEX IF NOT EXISTS idx_match_trace_job ON match_decision_trace(job_id,created_at DESC)`);
-
-CREATE INDEX IF NOT EXISTS idx_notification_receipts_msg ON notification_receipts(notification_id,created_at DESC)`);
-
-CREATE UNIQUE INDEX IF NOT EXISTS idx_sessions_user_live ON sessions(user_id)').run();
-
-CREATE UNIQUE INDEX IF NOT EXISTS idx_admin_sessions_single ON admin_sessions((1))').run();
+CREATE INDEX IF NOT EXISTS idx_notification_receipts_msg ON notification_receipts(notification_id,created_at DESC);
 
 CREATE INDEX IF NOT EXISTS idx_sessions_expiry ON sessions(expires_at);
 
 CREATE INDEX IF NOT EXISTS idx_admin_sessions_expiry ON admin_sessions(expires_at);
 
-CREATE INDEX IF NOT EXISTS idx_ai_usage_user_period ON ai_usage(user_id,period,created_at DESC)`);
+CREATE INDEX IF NOT EXISTS idx_ai_usage_user_period ON ai_usage(user_id,period,created_at DESC);
 
-CREATE INDEX IF NOT EXISTS idx_ai_credits_user ON ai_credits(user_id,created_at DESC)`);
+CREATE INDEX IF NOT EXISTS idx_ai_credits_user ON ai_credits(user_id,created_at DESC);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_users_auth_subject ON users(auth_subject) WHERE auth_subject IS NOT NULL;
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_sessions_user_live ON sessions(user_id);
 
 -- Später per addColumnIfMissing ergänzte Spalten:
--- provider_profiles.stripe_account_id: stripe_account_id TEXT
--- feature_flags.rollout_percent: rollout_percent INTEGER
--- reviews.hidden: hidden INTEGER NOT NULL DEFAULT 0
--- provider_profiles.stripe_onboarded: stripe_onboarded INTEGER NOT NULL DEFAULT 0
--- homeowner_profiles.lat: lat REAL
--- homeowner_profiles.lon: lon REAL
--- provider_profiles.lat: lat REAL
--- provider_profiles.lon: lon REAL
--- jobs.lat: lat REAL
--- jobs.lon: lon REAL
--- jobs.service_slug: service_slug TEXT
--- quotes.submitted_by_user_id: submitted_by_user_id INTEGER REFERENCES users(id)
--- appointments.contact_user_id: contact_user_id INTEGER REFERENCES users(id)
--- homeowner_profiles.build_year: build_year INTEGER
--- homeowner_profiles.living_area: living_area REAL
--- homeowner_profiles.plot_area: plot_area REAL
--- provider_profiles.logo_path: logo_path TEXT
--- provider_profiles.founded_year: founded_year INTEGER
--- provider_profiles.master_company: master_company INTEGER NOT NULL DEFAULT 0
--- provider_preferences.weekly_capacity: weekly_capacity INTEGER
--- jobs.emergency_type: emergency_type TEXT
--- payments.invoice_id: invoice_id INTEGER REFERENCES invoices(id)
--- jobs.property_id: property_id INTEGER REFERENCES properties(id)
--- house_assets.property_id: property_id INTEGER REFERENCES properties(id)
--- maintenance_tasks.property_id: property_id INTEGER REFERENCES properties(id)
--- house_history_entries.property_id: property_id INTEGER REFERENCES properties(id)
--- house_history_entries.job_id: job_id INTEGER REFERENCES jobs(id)
--- homeowner_contacts.property_id: property_id INTEGER REFERENCES properties(id)
--- provider_invites.property_id: property_id INTEGER REFERENCES properties(id)
--- house_transfers.property_id: property_id INTEGER REFERENCES properties(id)
--- users.auth_subject: auth_subject TEXT
--- sessions.issued_at: issued_at TEXT
--- admin_sessions.issued_at: issued_at TEXT
--- reviews.verified: verified INTEGER NOT NULL DEFAULT 1
--- reviews.eligibility_reason: eligibility_reason TEXT
--- job_dispatches.reasons_json: reasons_json TEXT
--- notifications.priority: priority INTEGER NOT NULL DEFAULT 5
--- notifications.retry_count: retry_count INTEGER NOT NULL DEFAULT 0
--- notifications.next_retry_at: next_retry_at TEXT
--- notifications.event_id: event_id INTEGER REFERENCES notification_events(id)
--- ai_usage.credit_id: credit_id INTEGER REFERENCES ai_credits(id)
--- user_settings.ai_byok_key_enc: ai_byok_key_enc TEXT
+
+-- === Ergaenzt 2026-09-18: diese 6 Tabellen + 2 Spiegel-Trigger wurden von der
+-- Schema-Dump-Erzeugung (scripts/dump-sqlite-schema.mjs) nicht erfasst:
+-- house_contracts steht nicht als CREATE TABLE in src/lib/db.ts, und die 5
+-- contact_directory_*/homeowner_contact_* Tabellen werden zur Laufzeit von
+-- initializeContactDirectory() (src/lib/contact-directory-schema.ts) aus
+-- konstanten Arrays aufgebaut. Der dev-Datenbankstand ist hier 1:1
+-- nachgezogen, damit eine frische Datenbank das gleiche Layout hat.
+
+CREATE TABLE IF NOT EXISTS house_contracts (id INTEGER PRIMARY KEY AUTOINCREMENT,homeowner_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,property_id INTEGER REFERENCES properties(id) ON DELETE CASCADE,kind TEXT NOT NULL DEFAULT 'sonstiges',provider TEXT NOT NULL,tariff TEXT NOT NULL DEFAULT '',contract_number TEXT NOT NULL DEFAULT '',cost_amount INTEGER,cost_interval TEXT NOT NULL DEFAULT 'month' CHECK(cost_interval IN ('month','quarter','halfyear','year')),started_at TEXT,term_months INTEGER,renewal_months INTEGER NOT NULL DEFAULT 12,cancellation_days INTEGER NOT NULL DEFAULT 30,cancellation_deadline TEXT,notice TEXT NOT NULL DEFAULT '',document_title TEXT NOT NULL DEFAULT '',document_path TEXT,status TEXT NOT NULL DEFAULT 'active' CHECK(status IN ('active','cancelled','expired')),created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP);
+CREATE INDEX IF NOT EXISTS idx_house_contracts_owner ON house_contracts(homeowner_id,status,created_at DESC);
+CREATE TABLE IF NOT EXISTS contact_directory_mains (slug TEXT PRIMARY KEY,title TEXT NOT NULL,sort INTEGER NOT NULL DEFAULT 0,active INTEGER NOT NULL DEFAULT 1);
+CREATE TABLE IF NOT EXISTS contact_directory_subcategories (slug TEXT PRIMARY KEY,main_slug TEXT NOT NULL REFERENCES contact_directory_mains(slug) ON DELETE RESTRICT,title TEXT NOT NULL,sort INTEGER NOT NULL DEFAULT 0,active INTEGER NOT NULL DEFAULT 1);
+CREATE INDEX IF NOT EXISTS idx_contact_subs_main ON contact_directory_subcategories(main_slug,sort);
+CREATE TABLE IF NOT EXISTS homeowner_contact_entries (id INTEGER PRIMARY KEY AUTOINCREMENT,homeowner_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,contact_user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,display_name TEXT NOT NULL DEFAULT '',company TEXT NOT NULL DEFAULT '',phone TEXT NOT NULL DEFAULT '',email TEXT NOT NULL DEFAULT '',legacy_category TEXT NOT NULL DEFAULT '',revision INTEGER NOT NULL DEFAULT 0,created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,is_pinned INTEGER NOT NULL DEFAULT 0,is_emergency INTEGER NOT NULL DEFAULT 0,UNIQUE(homeowner_id,contact_user_id),UNIQUE(homeowner_id,id));
+CREATE INDEX IF NOT EXISTS idx_contact_entries_owner ON homeowner_contact_entries(homeowner_id,updated_at DESC);
+CREATE INDEX IF NOT EXISTS idx_contact_entries_platform ON homeowner_contact_entries(homeowner_id,contact_user_id);
+CREATE TABLE IF NOT EXISTS homeowner_contact_subcategories (homeowner_id INTEGER NOT NULL,entry_id INTEGER NOT NULL,subcategory_id TEXT NOT NULL REFERENCES contact_directory_subcategories(slug) ON DELETE RESTRICT,created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,PRIMARY KEY(homeowner_id,entry_id,subcategory_id),FOREIGN KEY(homeowner_id,entry_id) REFERENCES homeowner_contact_entries(homeowner_id,id) ON DELETE CASCADE);
+CREATE INDEX IF NOT EXISTS idx_contact_subs_entry ON homeowner_contact_subcategories(entry_id,subcategory_id);
+CREATE TABLE IF NOT EXISTS contact_directory_receipts (homeowner_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,request_id TEXT NOT NULL,payload_hash TEXT NOT NULL,entry_id INTEGER NOT NULL REFERENCES homeowner_contact_entries(id) ON DELETE CASCADE,created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,PRIMARY KEY(homeowner_id,request_id),FOREIGN KEY(homeowner_id,entry_id) REFERENCES homeowner_contact_entries(homeowner_id,id) ON DELETE CASCADE);
+
+-- Taxonomie-Saatgut (17 Hauptkategorien, 110 Unterkategorien), inhaltsgleich
+-- mit CONTACT_DIRECTORY_CATEGORIES in src/lib/contact-directory-schema.ts.
+
+INSERT INTO contact_directory_mains (slug,title,sort,active) VALUES ('garten','Garten',0,1), ('elektro','Elektro',1,1), ('heizung','Heizung',2,1), ('wasser-sanitaer','Wasser & Sanitär',3,1), ('dach','Dach',4,1), ('fenster-tueren','Fenster & Türen',5,1), ('renovieren','Renovieren',6,1), ('bauen-sanieren','Bauen & Sanieren',7,1), ('reinigung','Reinigung',8,1), ('reparaturen-montage','Reparaturen & Montage',9,1), ('klima-lueftung','Klima & Lüftung',10,1), ('sicherheit','Sicherheit',11,1), ('entruempeln-umzug','Entrümpeln & Umzug',12,1), ('aussenanlagen','Außenanlagen',13,1), ('pool-garten','Pool & Garten',14,1), ('gutachter-planung','Gutachter & Planung',15,1), ('immobilien','Immobilien',16,1);
+INSERT INTO contact_directory_subcategories (slug,main_slug,title,sort,active) VALUES ('aussenanlagen-pflasterbau-und-wegebau','aussenanlagen','Pflasterbau & Wegebau',0,1), ('aussenanlagen-terrassenbau','aussenanlagen','Terrassenbau',1,1), ('aussenanlagen-zaun-und-torbau','aussenanlagen','Zaun- & Torbau',2,1), ('aussenanlagen-garagen-und-carports','aussenanlagen','Garagen & Carports',3,1), ('aussenanlagen-erdarbeiten-und-entwaesserung','aussenanlagen','Erdarbeiten & Entwässerung',4,1), ('aussenanlagen-aussentreppen-und-stuetzmauern','aussenanlagen','Außentreppen & Stützmauern',5,1), ('aussenanlagen-markisen-und-pergolen','aussenanlagen','Markisen & Pergolen',6,1), ('bauen-sanieren-bauunternehmen-und-maurer','bauen-sanieren','Bauunternehmen & Maurer',0,1), ('bauen-sanieren-altbausanierung','bauen-sanieren','Altbausanierung',1,1), ('bauen-sanieren-fassadenbau-und-sanierung','bauen-sanieren','Fassadenbau & -sanierung',2,1), ('bauen-sanieren-daemmung-und-energetische-sanierung','bauen-sanieren','Dämmung & energetische Sanierung',3,1), ('bauen-sanieren-beton-und-bautenschutz','bauen-sanieren','Beton & Bautenschutz',4,1), ('bauen-sanieren-abdichtung-und-feuchtesanierung','bauen-sanieren','Abdichtung & Feuchtesanierung',5,1), ('bauen-sanieren-abbrucharbeiten','bauen-sanieren','Abbrucharbeiten',6,1), ('dach-dachdecker','dach','Dachdecker',0,1), ('dach-dachabdichtung-und-flachdach','dach','Dachabdichtung & Flachdach',1,1), ('dach-dachrinnen-und-klempnerarbeiten','dach','Dachrinnen & Klempnerarbeiten',2,1), ('dach-dachfenster','dach','Dachfenster',3,1), ('dach-dachdaemmung','dach','Dachdämmung',4,1), ('dach-zimmerer','dach','Zimmerer',5,1), ('elektro-elektriker','elektro','Elektriker',0,1), ('elektro-hausautomation','elektro','Hausautomation',1,1), ('elektro-energie-und-strom','elektro','Energie & Strom',2,1), ('elektro-notfall','elektro','Notfall',3,1), ('elektro-photovoltaik-und-speicher','elektro','Photovoltaik & Speicher',4,1), ('elektro-wallbox-und-ladeinfrastruktur','elektro','Wallbox & Ladeinfrastruktur',5,1), ('elektro-e-check-und-pruefung','elektro','E-Check & Prüfung',6,1), ('elektro-beleuchtung','elektro','Beleuchtung',7,1), ('entruempeln-umzug-entruempelung','entruempeln-umzug','Entrümpelung',0,1), ('entruempeln-umzug-haushaltsaufloesung','entruempeln-umzug','Haushaltsauflösung',1,1), ('entruempeln-umzug-umzugsunternehmen','entruempeln-umzug','Umzugsunternehmen',2,1), ('entruempeln-umzug-moebeltransport','entruempeln-umzug','Möbeltransport',3,1), ('entruempeln-umzug-entsorgung-und-recycling','entruempeln-umzug','Entsorgung & Recycling',4,1), ('entruempeln-umzug-einlagerung','entruempeln-umzug','Einlagerung',5,1), ('fenster-tueren-fensterbauer','fenster-tueren','Fensterbauer',0,1), ('fenster-tueren-tuerenbauer','fenster-tueren','Türenbauer',1,1), ('fenster-tueren-rolllaeden-und-sonnenschutz','fenster-tueren','Rollläden & Sonnenschutz',2,1), ('fenster-tueren-verglasung-und-glasreparatur','fenster-tueren','Verglasung & Glasreparatur',3,1), ('fenster-tueren-insektenschutz','fenster-tueren','Insektenschutz',4,1), ('fenster-tueren-reparatur-und-wartung','fenster-tueren','Reparatur & Wartung',5,1), ('garten-garten-und-landschaftsbauer','garten','Garten- & Landschaftsbauer',0,1), ('garten-gaertner-gartenpflege','garten','Gärtner / Gartenpflege',1,1), ('garten-baumpfleger-baumfaeller','garten','Baumpfleger / Baumfäller',2,1), ('garten-bewaesserung','garten','Bewässerung',3,1), ('garten-brunnenbauer','garten','Brunnenbauer',4,1), ('gutachter-planung-bausachverstaendige','gutachter-planung','Bausachverständige',0,1), ('gutachter-planung-architekten','gutachter-planung','Architekten',1,1), ('gutachter-planung-bauingenieure-und-statiker','gutachter-planung','Bauingenieure & Statiker',2,1), ('gutachter-planung-energieberater','gutachter-planung','Energieberater',3,1), ('gutachter-planung-vermessung','gutachter-planung','Vermessung',4,1), ('gutachter-planung-schadengutachter','gutachter-planung','Schadengutachter',5,1), ('gutachter-planung-baubegleitung-und-bauabnahme','gutachter-planung','Baubegleitung & Bauabnahme',6,1), ('gutachter-planung-schadstoff-und-schimmelgutachten','gutachter-planung','Schadstoff- & Schimmelgutachten',7,1), ('heizung-heizungsbauer','heizung','Heizungsbauer',0,1), ('heizung-waermepumpen','heizung','Wärmepumpen',1,1), ('heizung-heizungswartung','heizung','Heizungswartung',2,1), ('heizung-heizkoerper-und-fussbodenheizung','heizung','Heizkörper & Fußbodenheizung',3,1), ('heizung-schornsteinfeger','heizung','Schornsteinfeger',4,1), ('heizung-solarthermie','heizung','Solarthermie',5,1), ('heizung-heizungsnotdienst','heizung','Heizungsnotdienst',6,1), ('immobilien-immobilienmakler','immobilien','Immobilienmakler',0,1), ('immobilien-immobilienbewertung','immobilien','Immobilienbewertung',1,1), ('immobilien-haus-und-weg-verwaltung','immobilien','Haus- & WEG-Verwaltung',2,1), ('immobilien-vermietungsservice','immobilien','Vermietungsservice',3,1), ('immobilien-finanzierungsberatung','immobilien','Finanzierungsberatung',4,1), ('immobilien-notar','immobilien','Notar',5,1), ('immobilien-immobilienkaufberatung','immobilien','Immobilienkaufberatung',6,1), ('klima-lueftung-klimaanlagen','klima-lueftung','Klimaanlagen',0,1), ('klima-lueftung-lueftungsanlagen','klima-lueftung','Lüftungsanlagen',1,1), ('klima-lueftung-klima-und-lueftungswartung','klima-lueftung','Klima- & Lüftungswartung',2,1), ('klima-lueftung-luftqualitaet-und-entfeuchtung','klima-lueftung','Luftqualität & Entfeuchtung',3,1), ('klima-lueftung-kaelteanlagen','klima-lueftung','Kälteanlagen',4,1), ('klima-lueftung-lueftungsreinigung','klima-lueftung','Lüftungsreinigung',5,1), ('pool-garten-poolbau','pool-garten','Poolbau',0,1), ('pool-garten-poolpflege-und-wartung','pool-garten','Poolpflege & -wartung',1,1), ('pool-garten-pooltechnik-und-wasseraufbereitung','pool-garten','Pooltechnik & Wasseraufbereitung',2,1), ('pool-garten-whirlpool-und-swimspa','pool-garten','Whirlpool & Swimspa',3,1), ('pool-garten-gartenteiche-und-naturpools','pool-garten','Gartenteiche & Naturpools',4,1), ('pool-garten-gartenhaeuser-und-saunen','pool-garten','Gartenhäuser & Saunen',5,1), ('reinigung-gebaeudereinigung','reinigung','Gebäudereinigung',0,1), ('reinigung-fenster-und-glasreinigung','reinigung','Fenster- & Glasreinigung',1,1), ('reinigung-grund-und-bauendreinigung','reinigung','Grund- & Bauendreinigung',2,1), ('reinigung-dach-und-fassadenreinigung','reinigung','Dach- & Fassadenreinigung',3,1), ('reinigung-teppich-und-polsterreinigung','reinigung','Teppich- & Polsterreinigung',4,1), ('reinigung-terrassen-und-steinreinigung','reinigung','Terrassen- & Steinreinigung',5,1), ('reinigung-spezialreinigung','reinigung','Spezialreinigung',6,1), ('renovieren-maler-und-tapezierer','renovieren','Maler & Tapezierer',0,1), ('renovieren-bodenleger','renovieren','Bodenleger',1,1), ('renovieren-fliesenleger','renovieren','Fliesenleger',2,1), ('renovieren-trockenbauer','renovieren','Trockenbauer',3,1), ('renovieren-stuckateur-und-verputzer','renovieren','Stuckateur & Verputzer',4,1), ('renovieren-schreiner-und-tischler','renovieren','Schreiner & Tischler',5,1), ('reparaturen-montage-hausmeister-und-allrounder','reparaturen-montage','Hausmeister & Allrounder',0,1), ('reparaturen-montage-moebelmontage','reparaturen-montage','Möbelmontage',1,1), ('reparaturen-montage-kuechenmontage','reparaturen-montage','Küchenmontage',2,1), ('reparaturen-montage-haushaltsgeraete-reparatur','reparaturen-montage','Haushaltsgeräte-Reparatur',3,1), ('reparaturen-montage-tueren-und-fenster-reparatur','reparaturen-montage','Türen- & Fenster-Reparatur',4,1), ('reparaturen-montage-montage-und-kleinreparaturen','reparaturen-montage','Montage & Kleinreparaturen',5,1), ('sicherheit-schluesseldienst','sicherheit','Schlüsseldienst',0,1), ('sicherheit-schliessanlagen','sicherheit','Schließanlagen',1,1), ('sicherheit-alarm-und-videoueberwachung','sicherheit','Alarm- & Videoüberwachung',2,1), ('sicherheit-einbruchschutz','sicherheit','Einbruchschutz',3,1), ('sicherheit-brandschutz-und-rauchmelder','sicherheit','Brandschutz & Rauchmelder',4,1), ('sicherheit-sicherheitsberatung','sicherheit','Sicherheitsberatung',5,1), ('wasser-sanitaer-sanitaerinstallateur','wasser-sanitaer','Sanitärinstallateur',0,1), ('wasser-sanitaer-badbau-und-badsanierung','wasser-sanitaer','Badbau & Badsanierung',1,1), ('wasser-sanitaer-rohrreinigung-und-kanalservice','wasser-sanitaer','Rohrreinigung & Kanalservice',2,1), ('wasser-sanitaer-leckortung','wasser-sanitaer','Leckortung',3,1), ('wasser-sanitaer-wasseraufbereitung','wasser-sanitaer','Wasseraufbereitung',4,1), ('wasser-sanitaer-rohrbruch-und-notdienst','wasser-sanitaer','Rohrbruch & Notdienst',5,1);
+
+-- Spiegel-Trigger: homeowner_contacts bleibt die Legacy-Tabelle; Einfuegen/
+-- Aendern fuehrt die neue Kontaktdatei (homeowner_contact_entries) mit.
+-- Bewusst KEIN Loesch-Trigger: die Kontakte werden ueber die FK-Kaskade
+-- beim Loeschen des Nutzers entfernd, nicht ueber einen Legacy-Loeschpfad.
+CREATE TRIGGER IF NOT EXISTS trg_hc_entry_mirror_insert AFTER INSERT ON homeowner_contacts BEGIN INSERT INTO homeowner_contact_entries(homeowner_id,contact_user_id,display_name,company,phone,email,legacy_category) SELECT NEW.homeowner_id,NEW.contact_user_id,trim(COALESCE((SELECT u.first_name || ' ' || u.last_name FROM users u WHERE u.id=NEW.contact_user_id),'')),COALESCE((SELECT p.business_name FROM provider_profiles p WHERE p.user_id=NEW.provider_id),''),COALESCE((SELECT u.phone FROM users u WHERE u.id=NEW.contact_user_id),''),COALESCE((SELECT u.email FROM users u WHERE u.id=NEW.contact_user_id),''),NEW.category ON CONFLICT(homeowner_id,contact_user_id) DO UPDATE SET display_name=excluded.display_name,company=excluded.company,phone=excluded.phone,email=excluded.email,legacy_category=excluded.legacy_category,updated_at=CURRENT_TIMESTAMP; END;
+CREATE TRIGGER IF NOT EXISTS trg_hc_entry_mirror_update AFTER UPDATE ON homeowner_contacts BEGIN UPDATE homeowner_contact_entries SET display_name=trim(COALESCE((SELECT u.first_name || ' ' || u.last_name FROM users u WHERE u.id=NEW.contact_user_id),'')),company=COALESCE((SELECT p.business_name FROM provider_profiles p WHERE p.user_id=NEW.provider_id),''),phone=COALESCE((SELECT u.phone FROM users u WHERE u.id=NEW.contact_user_id),''),email=COALESCE((SELECT u.email FROM users u WHERE u.id=NEW.contact_user_id),''),legacy_category=NEW.category,updated_at=CURRENT_TIMESTAMP WHERE homeowner_id=NEW.homeowner_id AND contact_user_id=NEW.contact_user_id; END;
