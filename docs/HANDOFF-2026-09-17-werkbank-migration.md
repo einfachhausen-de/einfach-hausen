@@ -379,3 +379,52 @@ Schnittstellenwechsel.
 
 P2 aus `docs/REPO_AUDIT_2026-09-18.md`: 39 unerreichbare Dateien / dead CSS /
 ungenutzte Icons (Punkte 22-24) — reines Aufräumen, kein Funktionswechsel.
+
+
+---
+
+## Kapitel 13 — P2-22: 29 ungenutzte Komponenten entfernt (7d2b8b1, main, gepusht)
+
+Jede Loeschung doppelt verifiziert: Export-Name **und** Datei-Basename in
+`src/`, plus Kreuzpruefung gegen `packages/`, `scripts/`, `docs/`.
+
+**Entfernt (29 Dateien):**
+- `src/components/ui/*` (10 Dateien): accordion, hover-card, tooltip,
+  submit-button, tabs, button, card, badge, avatar, separator — kein
+  Live-Importer, Referenzen nur von ebenfalls geloeschten Dateien.
+- `src/components/visuals/*` (4): CardVisual, card-visuals-Registry, Barrel —
+  Konsumenten waren nur geloeschte Marketing-Komponenten.
+- Marketing-Tote: FeatureVisualGrid/-Card, security-section, trust-section,
+  gateway-section, hero-orchestration, lazy-image, auth-convergence.module.
+- `shadcn-studio/features-section-01` — letzter Importer von ui/button.
+
+**Mit zurueckgezogen:** `test:card-visuals` (behauptete nur die Existenz der
+ungenutzten Bibliothek; in keiner Release-Kette referenziert).
+
+**Korrektur des Audit-Werts:** „39 unerreichbare Dateien" liessen sich nicht
+reproduzieren; nach eigener Verifikation waren es 29.
+
+**Qwen-Fehlalarme (4 von 5 Vorschlaegen waren falsch):** `ui/separator`
+(live via trust-section), `marketing/tokens.css` (live via app/layout.tsx),
+`visuals/index.ts` (Substring-Treffer ohne echte Nutzung — dennoch korrekt
+geloescht), `home-hero` (**LIVE**, wird auf `/` gerendert; nach tsc-Fehler
+wiederhergestellt). Grundlage war Qwens Ausschluss des eigenen Ordners beim
+Referenz-Scan, was Dateien in `src/components/` systematisch als tot
+kennzeichnet.
+
+**Vorher/Nachher:** tsc 0, eslint 0 errors, design-check 0 neue Schulden,
+next build rc=0, Homepage `/`, `/partner`, `/ueber-uns`, `/leistungen`
+ohne Page-Errors, api-contract 17/17, crm 20/20. GitNexus: „No changes
+detected" — die geloeschten Symbole hatten keine Caller.
+
+**Bekannt (pre-existing, nicht von dieser Welle):**
+`scripts/homepage-services-grid-contract.mjs` schlaegt vor und nach diesem
+Commit fehl (rc=1): fordert HomeServicesGrid + CardVisual in einer
+Mosaik-Komponente, die so nicht existiert. Kein Gate in der Release-Kette.
+
+### Nächste Aktion
+
+P2-23/24 (dead CSS in `globals.css`/`design-system.css`, ungenutzte
+`icons.tsx`-Exporte): beide CSS-Dateien sind versiegelt und werden an die
+Designautorität gemeldet. `icons.tsx`-Exporte koennen nach demselben
+Verifikationsmuster geprueft und dann ausgeraeumt werden.
