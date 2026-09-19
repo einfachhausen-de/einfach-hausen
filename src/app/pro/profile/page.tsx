@@ -12,7 +12,7 @@ import { getPartnerActivationCheck } from '@/lib/partner-config';
 import { InstallAppCard } from '@/components/install-app-card';
 import {
   EHPanel, EHList, EHErrorState, EHStatus, EHText, EHActions, EHFormFeedback, EHPageHeader,
-  EHWorkflowForm, EHFormSection, EHFieldGrid, EHField, EHInput, EHTextarea, EHSelect, EHCheckbox, EHSubmitButton,
+  EHWorkflowForm, EHFormSection, EHFieldGrid, EHField, EHFileInput, EHInput, EHTextarea, EHSelect, EHCheckbox, EHSubmitButton,
   EHButton, EHMetricsBar, EHRecordList, EHWorkSection, EHWorkspaceGrid,
 } from '@/design-system';
 
@@ -80,7 +80,7 @@ export default async function ProProfile({ searchParams }: { searchParams: Promi
     {ctx.isOwner && !p?.verified && <EHPanel title="Nachweise einreichen">
       <EHWorkflowForm action={submitProviderVerificationAction}>
         <EHField id="prov-doc" label="Nachweis" hint="PDF, JPG, PNG oder WebP bis 12 MB." required>
-          <EHInput id="prov-doc" type="file" name="document" accept="application/pdf,image/jpeg,image/png,image/webp" required />
+          <EHFileInput id="prov-doc" name="document" accept="application/pdf,image/jpeg,image/png,image/webp" required />
         </EHField>
         <EHField id="prov-note" label="Hinweis">
           <EHTextarea id="prov-note" name="note" rows={3} placeholder="Gewerbeanmeldung, Meister-/Qualifikationsnachweis, Versicherung …" />
@@ -126,7 +126,7 @@ export default async function ProProfile({ searchParams }: { searchParams: Promi
       {ctx.canManageJobs && <>
         <EHFormSection title="Unternehmen" description="Firmendaten und Kontakt für Rechnungen und Kundenauftritte.">
           <EHField id="prof-business" label="Firmenname"><EHInput id="prof-business" name="businessName" defaultValue={p?.business_name || ''} /></EHField>
-          <EHField id="prof-logo" label="Firmenlogo" hint="Optional."><EHInput id="prof-logo" name="logo" type="file" accept="image/*" /></EHField>
+          <EHField id="prof-logo" label="Firmenlogo" hint="Optional."><EHFileInput id="prof-logo" name="logo" accept="image/*" /></EHField>
           <EHField id="prof-trades" label="Gewerke / Leistungen"><EHInput id="prof-trades" name="trades" defaultValue={p?.trades || ''} placeholder="z. B. Garten, Elektro, SHK" /></EHField>
           <EHField id="prof-address" label="Firmenanschrift" hint="Wird auf Rechnungen verwendet."><EHInput id="prof-address" name="streetAddress" defaultValue={p?.street_address || ''} placeholder="Straße Hausnr., PLZ Ort" /></EHField>
           <EHFieldGrid>

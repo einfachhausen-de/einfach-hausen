@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { FileSignature } from 'lucide-react';
 import {
   EHButton, EHCallout, EHEmptyState, EHField, EHFieldGrid, EHFormFeedback,
-  EHFormSection, EHInput, EHList, EHMetricsBar, EHRecordList, EHRecordViews,
+  EHFormSection, EHFileInput, EHInput, EHList, EHMetricsBar, EHRecordList, EHRecordViews,
   EHOwnerSection, EHSelect, EHStatus, EHSubmitButton, EHText,
   EHTextarea, EHWorkSection, EHWorkflowForm, EHDetailDisclosure,
 } from '@/design-system';
@@ -230,7 +230,7 @@ export default async function Contracts({ searchParams }: { searchParams: Promis
             </EHFieldGrid></EHFormSection>
             <EHFormSection title="Dokument & Notiz">
               <EHFieldGrid>
-                <EHField id="new-doc" label="Vertragsdokument"><EHInput id="new-doc" name="document" type="file" accept="application/pdf,image/*" /></EHField>
+                <EHField id="new-doc" label="Vertragsdokument"><EHFileInput id="new-doc" name="document" accept="application/pdf,image/*" /></EHField>
                 <EHField id="new-doctitle" label="Dokumenttitel"><EHInput id="new-doctitle" name="documentTitle" placeholder="z. B. Stromvertrag 2024" /></EHField>
               </EHFieldGrid>
               <EHField id="new-notice" label="Notiz"><EHTextarea id="new-notice" name="notice" rows={3} maxLength={2000} /></EHField>
@@ -267,14 +267,12 @@ export default async function Contracts({ searchParams }: { searchParams: Promis
                 <EHOwnerSection title={`Spar-Check · ${contractKindLabel(selected.kind)} · ${selected.provider}`}>
                   {!estimate && <EHFormFeedback kind="info">Für diese Sparte gibt es noch keine Vergleichsstrecke. Ein Spar-Check ist für Strom, Gas, DSL und Versicherungen möglich.</EHFormFeedback>}
                   {estimate && <>
-                    <div className="eh-werkbank-kennzahlen">
                       <EHMetricsBar label="Spar-Check" items={[
                         { id: 'ersparnis', label: 'Ersparnis pro Jahr', value: `${euroExact(estimate.lowCents)} – ${euroExact(estimate.highCents)}` },
                         { id: 'ansatz', label: 'Ansatz Jahreskosten', value: `${Math.round(estimate.rateBps / 100)} %` },
                         { id: 'belastbarkeit', label: 'Belastbarkeit', value: estimate.confidence },
                         { id: 'basis', label: 'Jahreskosten', value: euroExact(yearlyCents(selected.cost_amount, selected.cost_interval)), hint: 'aus dem erfassten Vertrag' },
                       ]} />
-                    </div>
                     <EHText>Diese Spanne beruht auf folgenden Annahmen:</EHText>
                     <EHList label="Annahmen der Einschätzung" items={estimate.reasons.map((reason, index) => ({ id: `grund-${index}`, title: reason }))} />
                   </>}

@@ -1,4 +1,4 @@
-import { EHEmptyState, EHField, EHFieldGrid, EHFormFeedback, EHFormSection, EHInput, EHMetricsBar, EHPageHeader, EHRecordList, EHRecordViews, EHSelect, EHStatus, EHSubmitButton, EHText, EHTextarea, EHWorkSection, EHWorkspaceGrid, EHWorkflowForm, EHWorkflowStack, EHButton } from '@/design-system';
+import { EHEmptyState, EHField, EHFieldGrid, EHFormFeedback, EHFormSection, EHFileInput, EHInput, EHMetricsBar, EHPageHeader, EHRecordList, EHRecordViews, EHSelect, EHStatus, EHSubmitButton, EHText, EHTextarea, EHWorkSection, EHWorkspaceGrid, EHWorkflowForm, EHWorkflowStack, EHButton } from '@/design-system';
 import { requireUser } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { addHouseHistoryAction,createHouseTransferAction } from '@/app/actions';
@@ -99,9 +99,9 @@ export default async function HouseHistory({searchParams}:{searchParams:Promise<
       <EHFormSection title="Notizen & Nachweise" description="Ergänze Fotos und Unterlagen zu dieser Arbeit.">
         <EHField id="hist-notes" label="Notizen"><EHTextarea id="hist-notes" name="notes" rows={4} maxLength={3000}/></EHField>
       <EHFieldGrid>
-        <EHField id="hist-before" label="Foto vorher"><EHInput id="hist-before" name="beforePhoto" type="file" accept="image/*"/></EHField>
-        <EHField id="hist-after" label="Foto nachher"><EHInput id="hist-after" name="afterPhoto" type="file" accept="image/*"/></EHField>
-        <EHField id="hist-doc" label="Rechnung / Dokument"><EHInput id="hist-doc" name="document" type="file" accept="application/pdf,image/*"/></EHField>
+        <EHField id="hist-before" label="Foto vorher"><EHFileInput id="hist-before" name="beforePhoto" accept="image/*"/></EHField>
+        <EHField id="hist-after" label="Foto nachher"><EHFileInput id="hist-after" name="afterPhoto" accept="image/*"/></EHField>
+        <EHField id="hist-doc" label="Rechnung / Dokument"><EHFileInput id="hist-doc" name="document" accept="application/pdf,image/*"/></EHField>
         <EHField id="hist-doctitle" label="Dokumenttitel"><EHInput id="hist-doctitle" name="documentTitle" placeholder="z. B. Rechnung Dachsanierung 2025"/></EHField>
       </EHFieldGrid>
       <EHSubmitButton pendingLabel="Arbeit wird gespeichert …">In Hausakte speichern</EHSubmitButton>

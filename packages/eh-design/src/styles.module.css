@@ -525,6 +525,13 @@
 .attachmentDrop svg { width:32px;height:32px;color:var(--eh-color-petrol); }
 .attachmentDrop > span { color:var(--eh-color-secondary);font-size:var(--eh-font-label); }
 .attachmentDrop input { max-width:100%;font-size:var(--eh-font-input); }
+.fileInput { position:relative;display:flex;align-items:center;gap:var(--eh-space-xs);min-height:48px;padding:0 var(--eh-space-xs);border:1px solid var(--eh-color-secondary);border-radius:var(--eh-radius-control);background:var(--eh-color-white); }
+.fileInputNative { position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;margin:0;padding:0;border:0; }
+.fileInputNative:focus-visible { outline:3px solid var(--eh-color-focus);outline-offset:2px; }
+.fileInputNative:disabled { cursor:not-allowed; }
+.fileInputButton { display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:12px 16px;border-radius:var(--eh-radius-control);background:var(--eh-color-petrol);color:var(--eh-color-white);font:var(--eh-weight-medium) var(--eh-font-input)/1.5 var(--eh-font-family);white-space:nowrap;pointer-events:none; }
+.fileInputNative:disabled ~ .fileInputButton { background:var(--eh-color-paper);color:var(--eh-color-secondary); }
+.fileInputMeta { min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--eh-color-secondary);font:var(--eh-weight-regular) var(--eh-font-input)/1.5 var(--eh-font-family); }
 .attachmentList { list-style:none;display:grid;gap:12px;padding:0; }
 .attachmentList li { display:flex;align-items:center;gap:16px;padding:20px;background:var(--eh-color-white);border-radius:var(--eh-radius-panel); }
 .attachmentKind { display:flex;align-items:center;justify-content:center;min-width:48px;height:52px;background:var(--eh-color-sand);color:var(--eh-color-petrol);font-size:var(--eh-font-meta);font-weight:var(--eh-weight-semibold); }

@@ -10,6 +10,22 @@ export function EHField({id, label, hint, error, required, children}: {id: strin
   return <div className={s.field}><label htmlFor={id}>{label}{required && <span> (erforderlich)</span>}</label>{hint && <p id={id+"-hint"} className={s.fieldHint}>{hint}</p>}{children}{error && <p id={id+"-error"} className={s.fieldError} role="alert">{error}</p>}</div>;
 }
 export function EHInput(props: Native<InputHTMLAttributes<HTMLInputElement>>) {return <input {...props} className={s.input}/>;}
+// Datei-Auswahl: native file-Inputs ignorieren padding/color und zeigen rohen
+// Browser-Text ("Choose File - No file chosen"). EHFileInput umhuellt das
+// native Input mit einem sichtbaren Button und zeigt den gewaehlten Dateinamen
+// rein kosmetisch an. Die Feldbeschriftung liefert EHField (htmlFor); hier wird
+// bewusst kein weiteres <label> erzeugt. FormData und Validierung bleiben beim
+// nativen Control, Tastatur und Screenreader bleiben auf ihm.
+export function EHFileInput({label = "Datei auswählen …", placeholder = "Keine Datei ausgewählt", ...props}: Native<InputHTMLAttributes<HTMLInputElement>> & {label?: string; placeholder?: string}) {
+  const generated = useId();
+  const inputId = props.id ?? generated;
+  const [fileName, setFileName] = useState<string | null>(null);
+  return <span className={s.fileInput}>
+    <input {...props} id={inputId} type="file" className={s.fileInputNative} onChange={event=>{setFileName(event.target.files?.[0]?.name ?? null);}}/>
+    <span className={s.fileInputButton} aria-hidden="true">{label}</span>
+    <span className={s.fileInputMeta} aria-hidden="true">{fileName ?? placeholder}</span>
+  </span>;
+}
 export function EHTextarea(props: Native<TextareaHTMLAttributes<HTMLTextAreaElement>>) {return <textarea rows={5} {...props} className={s.textarea}/>;}
 export function EHSelect(props: Native<SelectHTMLAttributes<HTMLSelectElement>>) {return <select {...props} className={s.select}/>;}
 export function EHCheckbox({label, ...props}: Native<InputHTMLAttributes<HTMLInputElement>> & {label: ReactNode}) {

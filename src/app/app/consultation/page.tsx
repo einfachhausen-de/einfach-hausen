@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { HausmeisterAssistant } from '@/components/homeowner/hausmeister-assistant';
 import { createConsultationAction } from '@/app/actions';
 import { requireUser } from '@/lib/auth';
-import { EHButton, EHPageHeader, EHPanel, EHErrorState, EHField, EHTextarea, EHInput, EHSubmitButton, EHFormFeedback, EHMetricsBar, EHRecordList, EHStatus, EHText, EHWorkSection, EHWorkspaceGrid, EHWorkflowStack, type EHRecordEntry } from '@/design-system';
+import { EHButton, EHPageHeader, EHPanel, EHErrorState, EHField, EHTextarea, EHFileInput, EHSubmitButton, EHFormFeedback, EHMetricsBar, EHRecordList, EHStatus, EHText, EHWorkSection, EHWorkspaceGrid, EHWorkflowStack, type EHRecordEntry } from '@/design-system';
 import { db } from '@/lib/db';
 import { dateLabel, statusLabel } from '@/lib/format';
 import { WerkbankRahmen } from '@/components/werkbank-rahmen';
@@ -48,7 +48,7 @@ export default async function Consultation({ searchParams }: { searchParams: Pro
       <EHPanel title="Beratungs-Auftrag">
       <form action={createConsultationAction}>
         <EHField id="con-desc" label="Wobei brauchst du Rat?"><EHTextarea id="con-desc" name="description" rows={6} minLength={4} maxLength={8000} required placeholder="Zum Beispiel: Mein Dach ist an einer Stelle feucht. Was könnte die Ursache sein?"/></EHField>
-        <EHField id="con-photo" label="Foto oder Video (optional)" hint="JPEG, PNG, WebP oder HEIC bis 8 MB; MP4, WebM, MOV oder M4V bis 25 MB."><EHInput id="con-photo" type="file" name="photo" accept="image/jpeg,image/png,image/webp,image/heic,video/mp4,video/webm,video/quicktime,video/x-m4v"/></EHField>
+        <EHField id="con-photo" label="Foto oder Video (optional)" hint="JPEG, PNG, WebP oder HEIC bis 8 MB; MP4, WebM, MOV oder M4V bis 25 MB."><EHFileInput id="con-photo" name="photo" accept="image/jpeg,image/png,image/webp,image/heic,video/mp4,video/webm,video/quicktime,video/x-m4v"/></EHField>
         <EHSubmitButton>Ansprechpartner finden</EHSubmitButton>
       </form>
       </EHPanel>
