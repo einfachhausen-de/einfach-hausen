@@ -1,0 +1,14 @@
+.composer{display:grid;grid-template-columns:minmax(0,1fr) 48px;gap:8px;margin-top:6px;align-items:end;min-width:0;max-width:100%}
+.composer textarea{width:100%;min-width:0;max-width:100%;min-height:52px;max-height:min(180px,35dvh);resize:vertical;padding:12px 13px;border:1px solid var(--eh-color-line);border-radius:var(--eh-radius-control);background:var(--eh-color-white);color:var(--eh-color-ink);font:inherit;line-height:var(--eh-leading-normal);overflow-wrap:anywhere}
+.composer textarea:focus{outline:2px solid var(--eh-color-petrol);outline-offset:2px;border-color:var(--eh-color-petrol)}
+.composer button{width:48px;height:48px;border:0;border-radius:var(--eh-radius-control);background:var(--eh-color-petrol);color:var(--eh-color-white);font-size:var(--eh-font-input);font-weight:var(--eh-weight-heavy)}
+.composer button:disabled{cursor:not-allowed;opacity:.48}
+.hint{grid-column:1/-1;color:var(--eh-color-secondary);font-size:var(--eh-font-meta);overflow-wrap:anywhere}
+.offline,.error,.status{margin:8px 0;padding:10px 12px;border-radius:var(--eh-radius-control);font-size:var(--eh-font-label);line-height:var(--eh-leading-normal);overflow-wrap:anywhere}
+.offline,.error{background:var(--eh-color-paper);color:var(--eh-color-terra)}
+.status{background:var(--eh-color-paper);color:var(--eh-color-success)}
+.srOnly{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+@media(max-width:390px){
+  .composer{grid-template-columns:minmax(0,1fr) 48px}
+  .composer textarea{font-size:var(--eh-font-body)}
+}

@@ -28,7 +28,10 @@ const saleStatusLabels = Object.fromEntries(saleStages) as Record<string, string
 
 function formatDate(value: string | null | undefined) {
   if (!value) return '';
-  return new Date(value).toLocaleDateString('de-DE');
+  const raw = String(value);
+  // Reine Datumswerte bekommen einen festen Mittag, damit sie nicht um
+  // Mitternacht in eine andere Zeitzone rutschen (wie documents/page.tsx).
+  return new Date(raw.length === 10 ? raw + 'T12:00:00' : raw).toLocaleDateString('de-DE');
 }
 
 function permissionLabels(value: string | null | undefined) {

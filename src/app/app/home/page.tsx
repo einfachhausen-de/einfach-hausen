@@ -17,8 +17,8 @@ export default async function MyHome() {
   const u=await requireUser('homeowner'); const p=db.prepare('SELECT * FROM homeowner_profiles WHERE user_id=?').get(u.id) as any; const property=primaryProperty(u.id);
   const assets=property?db.prepare('SELECT * FROM house_assets WHERE property_id=? ORDER BY created_at DESC').all(property.id) as any[]:[];
   const tasks=property?db.prepare("SELECT * FROM maintenance_tasks WHERE property_id=? AND status='open' ORDER BY due_date LIMIT 8").all(property.id) as any[]:[];
-  const appointments=db.prepare(`SELECT a.*,j.title,p.business_name FROM appointments a JOIN jobs j ON j.id=a.job_id JOIN provider_profiles p ON p.user_id=a.provider_id WHERE a.homeowner_id=? AND a.status='confirmed' ORDER BY a.start_at LIMIT 3`).all(u.id) as any[];
-  const docs=db.prepare(`SELECT COUNT(*) c FROM documents d JOIN jobs j ON j.id=d.job_id WHERE j.homeowner_id=?`).get(u.id) as any;
+  const appointments=db.prepare(`SELECT a.*,j.title,p.business_name FROM appointments a JOIN jobs j ON j.id=a.job_id LEFT JOIN provider_profiles p ON p.user_id=a.provider_id WHERE a.homeowner_id=? AND a.status='confirmed' ORDER BY a.start_at LIMIT 3`).all(u.id) as any[];
+  const docs=db.prepare(`SELECT COUNT(*) c FROM documents d JOIN jobs j ON j.id=d.job_id WHERE j.homeowner_id=? AND d.kind!='invoice'`).get(u.id) as any;
   const invoiceCount=(db.prepare(`SELECT COUNT(*) c FROM invoices WHERE homeowner_id=?`).get(u.id) as {c:number}).c;
   const historyCount=property?(db.prepare(`SELECT COUNT(*) c FROM house_history_entries WHERE property_id=?`).get(property.id) as {c:number}).c:0;
   // Kennzahlen und rechte Spalte lesen denselben Bestand wie die Listen in der
@@ -78,7 +78,7 @@ export default async function MyHome() {
         </>} aside={<>
           <EHWorkSection title="Termine" link={{ href: '/app/year', label: 'Jahresplan' }}>
           {appointments.length ? <EHRecordViews label="Bestätigte Termine" storageKey="hausakte" items={appointments.map(a => ({
-            id: String(a.id), title: a.title, detail: a.business_name, dateLabel: dateLabel(a.start_at), href: '/app/jobs/' + a.job_id, icon: <CalendarDays size={20} />,
+            id: String(a.id), title: a.title, detail: a.business_name || '', dateLabel: dateLabel(a.start_at), href: '/app/jobs/' + a.job_id, icon: <CalendarDays size={20} />,
           }))} /> : <EHText muted>Keine bestätigten Termine hinterlegt.</EHText>}
           <EHDetailDisclosure id="technik-anlegen" title="Technik hinzufügen" description="Gerät, Anlage oder Ausstattung erfassen">
             <HouseAssetForm action={addHouseAssetAction} />

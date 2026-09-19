@@ -33,7 +33,7 @@ export default async function PartnerProfile({params,searchParams}:{params:Promi
       <EHRecordList label="Profildaten" items={[
         { id: 'leistungen', title: trades.length ? trades.join(' · ') : 'Kein Bereich hinterlegt', detail: 'Leistungen' },
         { id: 'standards', title: 'Vertraglich geprüft', detail: 'Standards' },
-        { id: 'beschreibung', title: provider.description || 'Zuverlässiger regionaler Vertragspartner für Arbeiten rund ums Eigenheim.', detail: 'Beschreibung' },
+        { id: 'beschreibung', title: provider.description || 'Keine Beschreibung hinterlegt.', detail: 'Beschreibung' },
       ]} />
     </EHWorkSection>
     <EHWorkSection title={`Bewertungen · ${ratingCount} insgesamt`}>
@@ -42,7 +42,7 @@ export default async function PartnerProfile({params,searchParams}:{params:Promi
       : <EHRecordList label={`Bewertungen · ${ratingCount} insgesamt`} items={reviews.map((r:any,i:number)=>({
           id: `review-${r.id}-${i}`,
           title: r.first_name||'Kunde',
-          detail: r.comment||'Zuverlässig ausgeführt.',
+          detail: r.comment||'Kein Kommentar hinterlegt.',
           value: `★ ${r.rating}/5`,
           action: <details><summary>Melden</summary><form action={reportReviewAction.bind(null,r.id)}><EHField id={`report-${r.id}`} label="Grund der Meldung"><EHInput id={`report-${r.id}`} name="reason" maxLength={500} placeholder="Was stimmt an dieser Bewertung nicht?" aria-label="Grund der Meldung" required/></EHField><EHSubmitButton pendingLabel="Meldung wird gesendet …">Bewertung melden</EHSubmitButton></form></details>,
         }))} />}

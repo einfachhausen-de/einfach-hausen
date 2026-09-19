@@ -2,7 +2,7 @@
 
 import { FormEvent, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import styles from './messages.module.css';
+import styles from '@/components/messages-thread.module.css';
 
 export function ProviderMessageComposer({ homeownerId, peerName, unreadCount }: { homeownerId: number; peerName: string; unreadCount: number }) {
   const endpoint = `/api/support/messages/${homeownerId}`;

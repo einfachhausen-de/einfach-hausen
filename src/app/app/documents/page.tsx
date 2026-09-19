@@ -29,14 +29,26 @@ function isoDay(value: string | null | undefined): string {
  * die private Ablage, und ein literaler Pfad wird von Turbopack als
  * Verzeichnis-Asset aufgeloest. Fehlt die Datei, zaehlt sie mit null Byte.
  */
-function storedBytes(path: string | null | undefined): number {
-  if (!path) return 0;
-  try {
-    const absolute = resolvePrivatePath(path);
-    return absolute ? fs.statSync(absolute).size : 0;
-  } catch {
-    return 0;
+// Eine einzelne Verzeichnisliste statt eines statSync pro Dokument (kein N+1
+// beim Wachstum der Akte). Fehlt eine Datei, traegt sie null Byte.
+function storedSizes(paths: Array<string | null | undefined>): Map<string, number> {
+  const sizes = new Map<string, number>();
+  const roots = new Set<string>();
+  for (const p of paths) {
+    if (!p) continue;
+    const absolute = resolvePrivatePath(p);
+    if (absolute) roots.add(absolute);
   }
+  for (const root of roots) {
+    try {
+      const entries = fs.readdirSync(root, { withFileTypes: true });
+      for (const entry of entries) {
+        if (!entry.isFile()) continue;
+        try { sizes.set(`${root}/${entry.name}`, fs.statSync(`${root}/${entry.name}`).size); } catch {}
+      }
+    } catch {}
+  }
+  return sizes;
 }
 
 function sizeLabel(bytes: number): string {
@@ -55,7 +67,8 @@ export default async function Documents(){
   const openTotal = openInvoices.reduce((s:number,i:any)=>s+(typeof i.total_gross==='number'?i.total_gross:0),0);
   // Die Groesse kommt aus der privaten Ablage selbst, nicht aus einer Schaetzung:
   // fehlt eine Datei, traegt sie null Byte bei.
-  const uploads = uploaded.map(d=>({...d,bytes:storedBytes(d.path)}));
+  const byteSizes = storedSizes(uploaded.map(d=>d.path));
+  const uploads = uploaded.map(d=>({...d,bytes:byteSizes.get(resolvePrivatePath(d.path) ?? '') ?? 0}));
   const storedTotal = uploads.reduce((sum:number,d:any)=>sum+d.bytes,0);
   const byKind = new Map<string,{count:number;bytes:number}>();
   for (const d of uploads) {
