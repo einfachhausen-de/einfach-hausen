@@ -528,3 +528,23 @@ duerfen von niemandem ausserhalb jener Welle committed werden.
 - **Preview-HTML:** `docs/preview-werkbank-2026-09-18.html` ist noch auf dem Stand
   vor den Kapiteln 14/15 — erst nach dem Sidebar-Umbau neu generieren, sonst ist
   es sofort wieder veraltet.
+
+## Kapitel 17 — Neue Ausgangslage: sidebar-07 Hauptnavigation (d8ebb11, main)
+
+**Operator-Richtungswechsel ist gemerged.** Die linke Seitenleiste ist ab sofort die
+aufklappbare HAUPTNAVIGATION (shadcn `sidebar-07`); der Header fuehrt nur noch
+Suche/Notifications/Tools. Das Demo-Dashboard ist wieder geloescht.
+
+**Shell-Sperre bleibt fuer alle ausser der Sidebar-Welle** (bis auf weiteres, nur nach
+ausdruecklichem Koordinator-Go): `shell.module.css`, `nav-config.ts`,
+`werkbank-rahmen.tsx`, `owner-menu`, `bottom-nav`, `src/components/ui/*`,
+`app-sidebar.tsx`, `nav-main/nav-projects/nav-user/team-switcher`.
+
+**Verifiziert auf dem neuen Rahmen** (dieser Agent, 1536px, beide Demo-Logins):
+28 Routen geprueft — 25 liefern direkt 200 mit Hauptinhalt >100 px;
+die 3 "Abweichungen" sind gewollte Redirects: `/app/onboarding` -> `/app`
+(Einrichtung abgeschlossen) und `/app/partners` -> `/app/messages`
+(kanonischer Ansprechpartner-Einstieg).
+
+Die Kapitel 14-16 dieser Uebergabe (Kontrast-Fix, P0-7, P2-26, Profilbalken)
+gelten unveraendert weiter — sie aendern keine Shell-Dateien.
