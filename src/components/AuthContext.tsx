@@ -97,10 +97,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const isPrivate = PRIVATE_PREFIXES.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
     if (!session && isPrivate) {
       router.replace("/login");
-    } else if (session && (pathname === "/welcome" || pathname === "/role")) {
-      // Enter through the canonical server-authorized owner route. A provider
-      // is redirected to /pro by requireUser using the application DB role.
-      router.replace("/app");
     }
   }, [session, loading, pathname, router]);
 
