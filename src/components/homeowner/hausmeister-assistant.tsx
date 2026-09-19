@@ -1,5 +1,5 @@
-import Link from 'next/link';
 import { Mail, MessageCircle, Phone, UserRound } from 'lucide-react';
+import { EHButton } from '@/design-system';
 import { getSupportContacts } from '@/config/contacts';
 
 export function HausmeisterAssistant({
@@ -19,9 +19,9 @@ export function HausmeisterAssistant({
         </p>
       </div>
       {showConsultationLink && (
-        <Link className="btn primary" href="/app/consultation">
+        <EHButton href="/app/consultation">
           <UserRound size={16} aria-hidden="true" /> Ansprechpartner finden
-        </Link>
+        </EHButton>
       )}
       {hasDirectChannel ? (
         <div className="direct-contact-actions" aria-label="Direkte Support-Kanäle">
