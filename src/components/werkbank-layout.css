@@ -11,7 +11,11 @@
 .eh-werkbank-ic { width:24px; height:24px; display:grid; place-items:center; color:var(--eh-muted); flex:0 0 auto; font-size:var(--eh-font-meta); }
 .eh-werkbank-go { display:block; text-align:center; background:var(--eh-color-petrol); color:var(--eh-color-white); border-radius:var(--eh-radius-control); padding:8px; font-weight:var(--eh-weight-semibold); margin-top:10px; text-decoration:none; font-size:var(--eh-font-label); }
 .eh-werkbank-bar { height:7px; border-radius:var(--eh-radius-pill); background:var(--eh-color-paper); overflow:hidden; margin:8px 0 6px; }
-.eh-werkbank-bar i { display:block; height:100%; background:var(--eh-color-petrol); }
+.eh-werkbank-bar i { display:block; height:100%; width:0; background:var(--eh-color-petrol); }
+.eh-werkbank-bar i[data-fill="full"] { width:100%; }
+.eh-werkbank-bar i[data-fill="three-quarter"] { width:75%; }
+.eh-werkbank-bar i[data-fill="half"] { width:50%; }
+.eh-werkbank-bar i[data-fill="quarter"] { width:25%; }
 .eh-werkbank-row { display:flex; padding:4px 0; font-size:var(--eh-font-meta); }
 .eh-werkbank-row > :last-child { margin-left:auto; color:var(--eh-muted); text-align:right; }
 .eh-werkbank-kopf { display:flex; align-items:center; gap:12px; padding-bottom:16px; border-bottom:1px solid var(--eh-rule); }

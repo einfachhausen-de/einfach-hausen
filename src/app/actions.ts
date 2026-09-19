@@ -5,7 +5,7 @@ import { randomUUID } from 'node:crypto';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import Stripe from 'stripe';
-import { redirect } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { db } from '@/lib/db';
 import { authMode, createSession, destroySession, requireUser, supabaseAdmin, establishSupabaseSession } from '@/lib/auth';
@@ -583,13 +583,15 @@ export async function toggleFeatureFlagAction(key:string){
 export async function reportReviewAction(reviewId:number, fd:FormData){
   const user=await requireUser();
   const reason=String(fd.get('reason')??'').slice(0,500);
-  const review=db.prepare('SELECT id,provider_id FROM reviews WHERE id=? AND hidden=0').get(reviewId) as {id:number}|undefined;
-  if(!review) redirect('/app/partners?error=Bewertung%20nicht%20mehr%20vorhanden');
+  const review=db.prepare('SELECT id,provider_id FROM reviews WHERE id=? AND hidden=0').get(reviewId) as {id:number,provider_id:number}|undefined;
+  // Die Meldung kommt vom Partnerdetail: zurueck dorthin, damit die Query
+  // (Erfolg/Hinweis) nicht im /app/partners-Redirect verloren geht.
+  if(!review) notFound();
   db.prepare(`INSERT INTO review_reports(review_id,reported_by,reason) VALUES(?,?,?)
     ON CONFLICT(review_id) DO UPDATE SET reason=excluded.reason`).run(reviewId,user.id,reason);
   logSecurityEvent('review_reported','trust',`review=${reviewId} by=${user.id}`);
   revalidatePath('/app/partners'); revalidatePath('/admin');
-  redirect(`/app/partners?message=Danke.%20Die%20Bewertung%20wurde%20gemeldet%20und%20wird%20geprueft.`);
+  redirect(`/app/partners/${review.provider_id}?message=Danke.%20Die%20Bewertung%20wurde%20gemeldet%20und%20wird%20geprueft.`);
 }
 
 export async function requeueDeadNotificationAction(notificationId:number){

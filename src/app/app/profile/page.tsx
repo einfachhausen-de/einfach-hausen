@@ -17,6 +17,16 @@ type ProfileField = { id: string; label: string; value: string; filled: boolean 
  * den Anteil der hinterlegten Angaben, kein Layout.
  */
 
+// Prozent -> fuenf Stufen. Die Breite liegt in der shared CSS, nicht inline
+// (design-check: keine unowned inline styles).
+function fillStep(pct: number): 'full' | 'three-quarter' | 'half' | 'quarter' | undefined {
+  if (pct >= 100) return 'full';
+  if (pct >= 75) return 'three-quarter';
+  if (pct >= 50) return 'half';
+  if (pct >= 25) return 'quarter';
+  return undefined;
+}
+
 export default async function Profile(){
   const u=await requireUser('homeowner'); const p=db.prepare('SELECT * FROM homeowner_profiles WHERE user_id=?').get(u.id) as any;
   const property=primaryProperty(u.id);
@@ -52,7 +62,7 @@ export default async function Profile(){
       <p className="eh-werkbank-rail-h">Kontext dieser Seite</p>
       <div className="eh-werkbank-karte">
         <h4>Profilvollständigkeit{!complete && <span className="eh-werkbank-badge">unvollständig</span>}</h4>
-        <div className="eh-werkbank-bar"><i data-fill={profilePct} /></div>
+        <div className="eh-werkbank-bar"><i data-fill={fillStep(profilePct)} /></div>
         <div className="eh-werkbank-row"><span>Angaben</span><span>{filled} von {fields.length}</span></div>
         <div className="eh-werkbank-row"><span>Status</span><span>{complete ? 'Alle hinterlegt' : 'Noch Lücken'}</span></div>
         {complete && <Link href="/app/home" className="eh-werkbank-go">Mein Haus öffnen →</Link>}
