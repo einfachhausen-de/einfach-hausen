@@ -7,9 +7,12 @@ import { db } from '@/lib/db';
 import { euroExact, statusLabel } from '@/lib/format';
 import { getProviderContext } from '@/lib/provider';
 
-const DONE_STATUSES = new Set(['completed', 'cancelled', 'closed']);
+const DONE_STATUSES = new Set(['completed', 'closed']);
+// Stornierte Vorgaenge sind kein Erfolg: sie zaehlen nicht zu Abgeschlossen und
+// bekommen ihren eigenen Status-Ton und ihre eigene Sektion.
+const CANCELLED_STATUS = 'cancelled';
 
-type OrderItem = EHRecordEntry & { _done: boolean; _contact: boolean; _amount: number | null };
+type OrderItem = EHRecordEntry & { _done: boolean; _contact: boolean; _cancelled: boolean; _amount: number | null };
 
 export default async function Orders() {
   const u = await requireUser('provider');
@@ -48,18 +51,20 @@ export default async function Orders() {
       title: String(row.title ?? '').replace(/^Ansprechpartner:\s*/, ''),
       detail: [isContact ? 'Persönlicher Ansprechpartner' : `Angebot ${statusLabel(row.quote_status)}`, row.contact_first ? `${row.contact_first} ${row.contact_last}` : 'Noch nicht zugewiesen'].filter(Boolean).join(' · '),
       value: isContact ? 'Ohne Preis' : euroExact(row.amount),
-      status: <EHStatus tone={DONE_STATUSES.has(String(row.status ?? '')) ? 'success' : 'neutral'}>{isContact ? 'Kontakt' : statusLabel(row.status)}</EHStatus>,
+      status: <EHStatus tone={DONE_STATUSES.has(String(row.status ?? '')) ? 'success' : String(row.status) === CANCELLED_STATUS ? 'warning' : 'neutral'}>{isContact ? 'Kontakt' : statusLabel(row.status)}</EHStatus>,
       icon: isContact ? <UserRound size={20} /> : <ClipboardList size={20} />,
       href: `/pro/jobs/${row.id}`,
       _done: !isContact && DONE_STATUSES.has(String(row.status ?? '')),
+      _cancelled: !isContact && String(row.status) === CANCELLED_STATUS,
       _contact: isContact,
       _amount: typeof row.amount === 'number' ? row.amount : null,
     };
   };
   const items: OrderItem[] = rows.map(toItem);
-  const activeJobs = items.filter((i) => !i._contact && !i._done);
+  const activeJobs = items.filter((i) => !i._contact && !i._done && !i._cancelled);
   const contacts = items.filter((i) => i._contact);
   const done = items.filter((i) => i._done);
+  const cancelled = items.filter((i) => i._cancelled);
   // Das offene Volumen summiert nur die Angebotsbetraege der aktiven Auftraege;
   // Kontakte tragen bewusst keinen Preis und bleiben deshalb aussen vor.
   const openVolume = activeJobs.reduce((sum, item) => sum + (item._amount ?? 0), 0);
@@ -75,7 +80,8 @@ export default async function Orders() {
         <EHMetricsBar label="Vorgänge" items={[
           { id: 'aktiv', label: 'Aktive Aufträge', value: activeJobs.length, hint: 'Vorbereiten oder fortführen' },
           { id: 'kontakte', label: 'Kontakte', value: contacts.length, hint: 'Persönliche Ansprechpartner' },
-          { id: 'abgeschlossen', label: 'Abgeschlossen', value: done.length, hint: 'Erledigt oder storniert' },
+          { id: 'abgeschlossen', label: 'Abgeschlossen', value: done.length, hint: 'Erfolgreich beendet' },
+          { id: 'storniert', label: 'Storniert', value: cancelled.length, hint: 'Abgebrochen' },
           { id: 'volumen', label: 'Offenes Volumen', value: euroExact(openVolume), hint: 'Angebotssumme aktiver Aufträge' },
         ]} />
       )}
@@ -117,6 +123,15 @@ export default async function Orders() {
             <EHWorkSection title={`Abgeschlossen · ${done.length}`}>
               {done.length > 0 ? <EHRecordList label="Erledigte Vorgänge" items={done} /> : (
                 <ProviderState compact icon={<ClipboardList size={21} />} title="Noch nichts abgeschlossen" description="Erledigte Vorgänge bleiben hier zur Nachvollziehbarkeit erhalten." />
+              )}
+            </EHWorkSection>
+          </div>
+        )}
+        {items.length > 0 && (
+          <div id="pro-orders-cancelled">
+            <EHWorkSection title={`Storniert · ${cancelled.length}`}>
+              {cancelled.length > 0 ? <EHRecordList label="Stornierte Vorgänge" items={cancelled} /> : (
+                <ProviderState compact icon={<ClipboardList size={21} />} title="Nichts storniert" description="Abgebrochene Vorgänge bleiben hier getrennt von den erfolgreichen sichtbar." />
               )}
             </EHWorkSection>
           </div>

@@ -49,6 +49,13 @@ const nextConfig: NextConfig = {
     serverActions: { bodySizeLimit: '14mb' },
   },
   turbopack: { root: process.cwd() },
+  // /app/more war ein Relikt-Navigationspunkt; alle Bereiche haben heute einen
+  // eigenen Platz. Alte Bookmarks/Links gehen auf den Ausgangspunkt zurueck.
+  async redirects() {
+    return [
+      { source: '/app/more', destination: '/app', permanent: true },
+    ];
+  },
   async headers(){
     return [
       {source:'/(.*)',headers:securityHeaders},

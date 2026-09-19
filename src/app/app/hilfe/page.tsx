@@ -37,7 +37,7 @@ export default async function HilfePage() {
   }));
 
   return (
-    <WerkbankRahmen role="homeowner" active="/app/more">
+    <WerkbankRahmen role="homeowner" active="/app/hilfe">
       <EHWorkflowStack>
       <EHPageHeader title="Hilfe & Kontakt" context={openJobs.length > 0 ? `${openJobs.length} ${openJobs.length === 1 ? 'Vorgang' : 'Vorgänge'} in Bearbeitung` : 'Alles abgeschlossen'} />
       <EHMetricsBar label="Dein Stand" items={[

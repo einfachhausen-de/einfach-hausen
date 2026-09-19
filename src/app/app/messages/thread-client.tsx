@@ -1,10 +1,12 @@
 'use client';
 
 import { FormEvent, useEffect, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import styles from './messages.module.css';
 
 export function OwnerMessageComposer({ contactUserId, peerName, unreadCount }: { contactUserId: number; peerName: string; unreadCount: number }) {
   const endpoint = `/api/owner/messages/${contactUserId}`;
+  const router = useRouter();
   const [online, setOnline] = useState(true);
   const [body, setBody] = useState('');
   const [sending, setSending] = useState(false);
@@ -79,7 +81,9 @@ export function OwnerMessageComposer({ contactUserId, peerName, unreadCount }: {
       pendingRequestId.current = null;
       setBody('');
       setStatus('Nachricht gesendet.');
-      window.location.reload();
+      // Server-Komponenten neu abrufen statt die ganze Seite neu laden:
+      // Offene Accordeons, Scrollposition und Eingabe bleiben erhalten.
+      router.refresh();
     } catch {
       setError('Verbindung unterbrochen. Die Nachricht ist nicht verloren; versuche es erneut.');
     } finally {

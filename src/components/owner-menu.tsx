@@ -205,7 +205,7 @@ export function OwnerMobileMenu({ active }: { active: string }) {
         <form action={logoutAction}>
           <button type="submit" className="sm-logout" data-testid="owner-logout-drawer" aria-label="Abmelden"> <LogOut size={18} /> Abmelden</button>
         </form>
-        <div className="sm-footer">Version 1.0.0 &nbsp;•&nbsp; <Link href="/app/more">Alle Bereiche</Link> &nbsp;•&nbsp; <Link href="/datenschutz">Datenschutz</Link> &nbsp;•&nbsp; <Link href="/impressum">Impressum</Link></div>
+        <div className="sm-footer">Version 1.0.0 &nbsp;•&nbsp; <Link href="/app">Startseite</Link> &nbsp;•&nbsp; <Link href="/datenschutz">Datenschutz</Link> &nbsp;•&nbsp; <Link href="/impressum">Impressum</Link></div>
       </aside>
     </details>
   );

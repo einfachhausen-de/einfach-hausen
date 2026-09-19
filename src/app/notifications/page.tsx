@@ -16,7 +16,7 @@ export default async function Notifications({ searchParams }: { searchParams: Pr
   const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const safePage = Math.min(page, pageCount);
   const rows = db.prepare('SELECT * FROM notifications WHERE user_id=? ORDER BY created_at DESC, id DESC LIMIT ? OFFSET ?').all(u.id, PAGE_SIZE, (safePage - 1) * PAGE_SIZE) as any[];
-  return <AppShell role={u.role} active={u.role === 'provider' ? '/notifications' : ''} title="Updates" subtitle={unreadTotal ? `${unreadTotal} ungelesen` : 'Alles gelesen'}>
+  return <AppShell role={u.role} active="/notifications" title="Updates" subtitle={unreadTotal ? `${unreadTotal} ungelesen` : 'Alles gelesen'}>
     <EHPageHeader title="Updates" context="Mitteilungen" actions={unreadTotal > 0 && <form action={markAllNotificationsReadForCurrentUserAction}><EHButton><CheckCheck size={15}/>Alle gelesen</EHButton></form>} />
     <EHList label="Updates" items={rows.map(n => {
         const isUnread = !n.read_at;

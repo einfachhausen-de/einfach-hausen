@@ -7,9 +7,11 @@ import { db } from '@/lib/db';
 import { statusLabel } from '@/lib/format';
 import { getProviderContext } from '@/lib/provider';
 
-const DONE_STATUSES = new Set(['completed', 'cancelled', 'closed', 'paid']);
+const DONE_STATUSES = new Set(['completed', 'closed', 'paid']);
+// Stornierte Termine sind kein Erfolg: eigener Ton, eigene Sektion.
+const CANCELLED_STATUS = 'cancelled';
 
-type AppointmentItem = EHRecordEntry & { _time: number; _done: boolean };
+type AppointmentItem = EHRecordEntry & { _time: number; _done: boolean; _cancelled: boolean };
 
 function berlinDayKey(d: Date) {
   return new Intl.DateTimeFormat('de-DE', { timeZone: 'Europe/Berlin', year: 'numeric', month: '2-digit', day: '2-digit' }).format(d);
@@ -24,11 +26,12 @@ function toItem(row: any) {
     detail: `${row.first_name} ${row.last_name}${row.contact_first ? ` · Ansprechpartner: ${row.contact_first} ${row.contact_last}` : ''}`,
     dateLabel: new Intl.DateTimeFormat('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Berlin', timeZoneName: 'short' }).format(start),
     date: Number.isFinite(time) ? berlinDayKey(start) : undefined,
-    status: <EHStatus tone={DONE_STATUSES.has(String(row.status ?? '')) ? 'success' : 'neutral'}>{statusLabel(row.status)}</EHStatus>,
+    status: <EHStatus tone={DONE_STATUSES.has(String(row.status ?? '')) ? 'success' : String(row.status) === CANCELLED_STATUS ? 'warning' : 'neutral'}>{statusLabel(row.status)}</EHStatus>,
     icon: <CalendarDays size={20} />,
     href: `/pro/jobs/${row.job_id}`,
     _time: time,
     _done: DONE_STATUSES.has(String(row.status ?? '')),
+    _cancelled: String(row.status) === CANCELLED_STATUS,
   };
 }
 
@@ -54,11 +57,12 @@ export default async function ProCalendar() {
   const items: AppointmentItem[] = rows.map(toItem);
   const now = new Date();
   const todayKey = berlinDayKey(now);
-  const today = items.filter((i) => !i._done && Number.isFinite(i._time) && berlinDayKey(new Date(i._time)) === todayKey);
-  const upcoming = items.filter((i) => !i._done && Number.isFinite(i._time) && new Date(i._time).getTime() > now.getTime() && berlinDayKey(new Date(i._time)) !== todayKey);
-  const overdue = items.filter((i) => !i._done && Number.isFinite(i._time) && new Date(i._time).getTime() <= now.getTime() && berlinDayKey(new Date(i._time)) !== todayKey);
-  const undated = items.filter((i) => !i._done && !Number.isFinite(i._time));
+  const today = items.filter((i) => !i._done && !i._cancelled && Number.isFinite(i._time) && berlinDayKey(new Date(i._time)) === todayKey);
+  const upcoming = items.filter((i) => !i._done && !i._cancelled && Number.isFinite(i._time) && new Date(i._time).getTime() > now.getTime() && berlinDayKey(new Date(i._time)) !== todayKey);
+  const overdue = items.filter((i) => !i._done && !i._cancelled && Number.isFinite(i._time) && new Date(i._time).getTime() <= now.getTime() && berlinDayKey(new Date(i._time)) !== todayKey);
+  const undated = items.filter((i) => !i._done && !i._cancelled && !Number.isFinite(i._time));
   const done = items.filter((i) => i._done);
+  const cancelled = items.filter((i) => i._cancelled);
   // Der naechste Termin ist der erste, der noch aussteht: heute vor spaeter.
   // Undatierte Termine bleiben aussen vor, weil sie kein belastbares Datum tragen.
   const next = today[0] ?? upcoming[0];
@@ -74,6 +78,7 @@ export default async function ProCalendar() {
           { id: 'anstehend', label: 'Anstehend', value: upcoming.length + undated.length, hint: 'Geplante Folgetermine' },
           { id: 'ueberfaellig', label: 'Überfällig', value: overdue.length, hint: 'Nacharbeiten oder neu planen' },
           { id: 'erledigt', label: 'Erledigt', value: done.length, hint: 'Abgeschlossene Termine' },
+          { id: 'storniert', label: 'Storniert', value: cancelled.length, hint: 'Abgesagte Termine' },
         ]} />
       )}
 
@@ -124,6 +129,15 @@ export default async function ProCalendar() {
             <EHWorkSection title={`Erledigt · ${done.length}`}>
               {done.length > 0 ? <EHRecordViews label="Erledigte Termine" items={done} storageKey="pro-cal-erledigt" switcherLabel="Erledigte Termine: Ansicht wechseln" /> : (
                 <ProviderState compact icon={<CalendarDays size={21} />} title="Noch nichts erledigt" description="Abgeschlossene Termine bleiben hier nachvollziehbar." />
+              )}
+            </EHWorkSection>
+          </div>
+        )}
+        {items.length > 0 && (
+          <div id="pro-cal-cancelled">
+            <EHWorkSection title={`Storniert · ${cancelled.length}`}>
+              {cancelled.length > 0 ? <EHRecordViews label="Stornierte Termine" items={cancelled} storageKey="pro-cal-storniert" switcherLabel="Stornierte Termine: Ansicht wechseln" /> : (
+                <ProviderState compact icon={<CalendarDays size={21} />} title="Nichts storniert" description="Abgesagte Termine bleiben hier getrennt von den erfolgreichen sichtbar." />
               )}
             </EHWorkSection>
           </div>
