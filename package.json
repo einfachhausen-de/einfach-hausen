@@ -37,7 +37,6 @@
     "test:a11y": "node scripts/release-gate.mjs --only=static,build,a11y",
     "test:visual": "node scripts/visual-regression.mjs",
     "test:visual:update": "GATE_UPDATE_BASELINES=1 node scripts/visual-regression.mjs --update-baselines",
-    "test:card-visuals": "node scripts/card-visuals-contract.mjs",
     "test:perf": "node scripts/release-gate.mjs --only=build,perf",
     "test:website-matrix": "node scripts/website-acceptance-matrix.mjs",
     "test:visual:apps": "node scripts/app-visual-regression.mjs",
