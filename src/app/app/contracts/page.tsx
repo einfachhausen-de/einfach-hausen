@@ -272,6 +272,7 @@ export default async function Contracts({ searchParams }: { searchParams: Promis
                         { id: 'ersparnis', label: 'Ersparnis pro Jahr', value: `${euroExact(estimate.lowCents)} – ${euroExact(estimate.highCents)}` },
                         { id: 'ansatz', label: 'Ansatz Jahreskosten', value: `${Math.round(estimate.rateBps / 100)} %` },
                         { id: 'belastbarkeit', label: 'Belastbarkeit', value: estimate.confidence },
+                        { id: 'basis', label: 'Jahreskosten', value: euroExact(yearlyCents(selected.cost_amount, selected.cost_interval)), hint: 'aus dem erfassten Vertrag' },
                       ]} />
                     </div>
                     <EHText>Diese Spanne beruht auf folgenden Annahmen:</EHText>
