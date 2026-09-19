@@ -103,6 +103,50 @@ test("maintenance labels stay correct across the DST switch", () => {
   assert.equal(ownerMaintenanceState("2026-03-29", after), "Wartung überfällig");
 });
 
+// --- both DST transitions, deterministic (no datetime('now') race) -----------
+test("ownerDate renders the spring-ahead night without inventing 02:00", () => {
+  // 2026-03-29 01:00Z and 01:30Z both fall in the lost CET hour window:
+  // 01:00Z = 02:00 CET then clocks jump to 03:00 CEST. Berlin never sees 02:xx.
+  assert.equal(ownerDate("2026-03-29 00:30:00"), "So., 29.03.2026, 01:30");
+  assert.equal(ownerDate("2026-03-29 01:00:00"), "So., 29.03.2026, 03:00");
+  assert.equal(ownerDate("2026-03-29 01:30:00"), "So., 29.03.2026, 03:30");
+  assert.doesNotMatch(ownerDate("2026-03-29 01:15:00"), /02:15/);
+});
+
+test("ownerDate renders the fall-back hour without skipping the repeated hour", () => {
+  // 2026-10-25 00:30Z = 02:30 CEST; 01:00Z = 02:00 CET (the repeated 02:xx hour).
+  // Both are valid Berlin wall times and both must render.
+  assert.equal(ownerDate("2026-10-25 00:30:00"), "So., 25.10.2026, 02:30");
+  assert.equal(ownerDate("2026-10-25 01:00:00"), "So., 25.10.2026, 02:00");
+  assert.equal(ownerDate("2026-10-25 02:30:00"), "So., 25.10.2026, 03:30");
+});
+
+test("ownerDate keeps the calendar day across a zone date rollover", () => {
+  // Two UTC instants two minutes apart land on different Berlin calendar days:
+  // 21:59Z is still 2026-06-15 (23:59 CEST), 22:01Z is already 2026-06-16.
+  assert.match(ownerDate("2026-06-15 21:59:00"), /15\.06\.2026/);
+  assert.match(ownerDate("2026-06-15 22:01:00"), /16\.06\.2026/);
+  assert.match(ownerDate("2026-06-16 00:01:00"), /16\.06\.2026/);
+  // Date-only input never picks up a clock time, so it cannot shift a day.
+  assert.equal(ownerDate("2026-06-15"), "Mo., 15.06.2026");
+});
+
+test("maintenance labels stay correct on the fall-back day too", () => {
+  // 2026-10-25 is the CET switch day: 00:30Z is still that Berlin day, 23:30Z
+  // is already 2026-10-26 in Berlin, so 10-25 flips to overdue.
+  const early = new Date("2026-10-25T00:30:00Z");
+  assert.equal(ownerMaintenanceState("2026-10-25", early), "Wartung heute fällig");
+  const late = new Date("2026-10-25T23:30:00Z");
+  assert.equal(ownerMaintenanceState("2026-10-25", late), "Wartung überfällig");
+});
+
+test("maintenance state is stable for a fixed clock across a year boundary", () => {
+  const now = new Date("2026-12-31T22:00:00Z"); // 2026-12-31 23:00 CET
+  assert.equal(ownerMaintenanceState("2026-12-30", now), "Wartung überfällig");
+  assert.equal(ownerMaintenanceState("2026-12-31", now), "Wartung heute fällig");
+  assert.equal(ownerMaintenanceState("2027-01-01", now), "Wartung geplant");
+});
+
 // --- SQL idioms on an isolated in-memory DB ----------------------------------
 function tinyDb() {
   const db = new Database(":memory:");
@@ -153,6 +197,23 @@ test("current vs past appointments never overlap (no -1day window)", () => {
   db.close();
 });
 
+test("the appointment boundary is inclusive at the split instant", () => {
+  // Deterministic fixed boundary instead of datetime('now'): the exact split
+  // second must land in "current" (>=), never in both buckets.
+  const db = tinyDb();
+  const now = "2026-06-15 10:00:00";
+  const insert = db.prepare(`INSERT INTO appointments (job_id, start_at) VALUES (1, ?)`);
+  insert.run("2026-06-15 09:59:59"); // past
+  insert.run("2026-06-15 10:00:00"); // boundary, current
+  insert.run("2026-06-15 10:00:01"); // current
+  const current = db.prepare(`SELECT id FROM appointments WHERE datetime(start_at) >= ?`).all(now).map((r) => r.id);
+  const past = db.prepare(`SELECT id FROM appointments WHERE datetime(start_at) < ?`).all(now).map((r) => r.id);
+  assert.deepEqual(current, [2, 3]);
+  assert.deepEqual(past, [1]);
+  assert.equal(current.length + past.length, 3);
+  db.close();
+});
+
 test("past pagination slices with LIMIT/OFFSET and a clamped page", () => {
   const db = tinyDb();
   const insert = db.prepare(`INSERT INTO appointments (job_id, start_at) VALUES (1, ?)`);
@@ -187,12 +248,19 @@ test("jobs page omits the view param for the default view", () => {
 
 test("jobs filters group exactly open/quoted/accepted, in_progress, completed", () => {
   const src = read("src/app/app/jobs/page.tsx");
+  // Status grouping semantics (unchanged): the open filter unions the three
+  // pre-acceptance states; In Arbeit and Abgeschlossen stay separate.
   assert.match(src, /\['open', 'quoted', 'accepted'\]\.includes\(job\.status\)/);
   assert.match(src, /job\.status === 'in_progress'/);
   assert.match(src, /job\.status === 'completed'/);
-  assert.match(src, /label:'Offen',count:openJobs\.length/);
-  assert.match(src, /label:'In Arbeit',count:inProgressJobs\.length/);
-  assert.match(src, /label:'Abgeschlossen',count:completedJobs\.length/);
+  // Filter chips are link objects whose counts come from those exact sets.
+  const filters = src.match(/const filters = \[[\s\S]*?\n  \];/);
+  assert.ok(filters, "jobs page must define one filters array");
+  assert.match(filters[0], /href: filterHref\('open'\), label: 'Offen', count: openJobs\.length/);
+  assert.match(filters[0], /href: filterHref\('in_progress'\), label: 'In Arbeit', count: inProgressJobs\.length/);
+  assert.match(filters[0], /href: filterHref\('completed'\), label: 'Abgeschlossen', count: completedJobs\.length/);
+  // The grouped sets must back the visible lists, not just the chip counts.
+  assert.match(src, /view === 'completed' \? completedJobs\n *: view === 'in_progress' \? inProgressJobs\n *: view === 'open' \? openJobs/);
 });
 
 test("jobs search covers title, category, description, business and status", () => {
@@ -204,10 +272,18 @@ test("jobs search covers title, category, description, business and status", () 
   assert.match(src, /statusLabel\(job\.status\)/);
 });
 
-test("jobs quoted actions distinguish offer review from opening", () => {
+test("quoted jobs route offer review to the detail page, not inline actions", () => {
   const src = read("src/app/app/jobs/page.tsx");
-  assert.match(src, /Angebot prüfen/);
-  assert.match(src, /Auftrag öffnen/);
+  const detail = read("src/app/app/jobs/[id]/page.tsx");
+  // The list row's status copy is the quoted-state signal: it names the offer
+  // when one exists and asks for a status check when none has arrived yet.
+  assert.match(src, /if \(job\.status === 'quoted'\)/);
+  assert.match(src, /'Angebot liegt vor'/);
+  assert.match(src, /'Angebotsstatus prüfen'/);
+  // Opening the job (the row's only action) goes to the detail page, where the
+  // offers are compared — offer review and opening are separate steps there.
+  assert.match(src, /href: `\/app\/jobs\/\$\{job\.id\}`/);
+  assert.match(detail, /Angebote im Vergleich/);
 });
 
 // --- calendar: no overlap, real links ----------------------------------------
@@ -242,39 +318,88 @@ test("contact categories come from stored values including custom ones", () => {
 });
 
 test("messages directory preserves query and area in navigation", () => {
-  const src = read("src/app/app/messages/page.tsx");
-  assert.match(src, /returnParams\.set\('q', rawQuery\)/);
-  assert.match(src, /returnParams\.set\('bereich', activeArea\)/);
-  assert.match(src, /params\.set\('contact', String\(id\)\)/);
-  assert.match(src, /href:contactHref\(contact\.contact_user_id\)/);
-  assert.match(src, /href=\{directoryHref\}/);
+  const page = read("src/app/app/messages/page.tsx");
+  const directory = read("packages/eh-design/src/workspace-contact-directory.tsx");
+  // The page still reads the query and resolves area params (main/sub) from the
+  // stored taxonomy — not from a hardcoded area list.
+  assert.match(page, /query=\{text\('q'\)\.slice\(0, 200\)\}/);
+  assert.match(page, /contactDirectoryCategory\(rawMain \|\| sub\?\.mainId\)/);
+  assert.match(page, /contactDirectorySubcategory\(rawSub\)/);
+  // Every navigation link inside the directory is built by one helper that
+  // carries the active query and the main/sub area forward.
+  assert.match(directory, /function directoryHref\(values: \{ main\?: string; sub\?: string; entry\?: number; mode\?: string; q\?: string \}\)/);
+  assert.match(directory, /directoryHref\(\{ entry: contact\.id, main: main\?\.id, sub: sub\?\.id, q: query \}\)/);
+  assert.match(directory, /mode: "edit", q: query/);
+  // Server-action round trips keep the same context: the redirect rebuilds
+  // entry + saved + main + sub, and shortcut forms return to where they came.
+  assert.match(read("src/app/app/messages/directory-actions.ts"), /new URLSearchParams\(\{ entry: String\(result\.value\.id\), saved: '1' \}\)/);
+  assert.match(read("src/app/app/messages/directory-actions.ts"), /params\.set\('main', main\.id\)/);
+  assert.match(read("src/app/app/messages/directory-actions.ts"), /from\.startsWith\('\/app\/messages'\) \? from : '\/app\/messages'/);
 });
 
-test("messages thread query runs only for an explicit contact", () => {
-  const src = read("src/app/app/messages/page.tsx");
-  assert.match(src, /const messages = hasRequestedContact && selected/);
+test("messages thread query runs only for an explicit, linked contact", () => {
+  const page = read("src/app/app/messages/page.tsx");
+  // The thread SELECT runs only when a concrete contact detail was requested
+  // AND that contact resolved to a live platform link. Without both, the page
+  // renders the directory instead of touching contact_messages/messages.
+  assert.match(page, /const messages = mode === 'detail' && active/);
+  assert.match(page, /const active = entry\?\.platformUserId \? activeById\.get\(entry\.platformUserId\) : undefined/);
+  // The messages are only handed to the conversation when that guard holds.
+  assert.match(page, /mode === 'detail' \? conversation : undefined/);
+  // A bare entry id without a platform link cannot open a thread.
+  assert.match(page, /requestedMode === 'edit' && entry\?\.platformUserId !== null/);
 });
 
-test("messages thread send, receipts and category save are unchanged", () => {
-  const src = read("src/app/app/messages/page.tsx");
-  assert.match(src, /OwnerMessageComposer/);
-  assert.match(src, /read_at/);
-  assert.match(src, /updateContactCategoryAction/);
-  assert.match(src, /Bereich speichern/);
-  assert.match(src, /Bestehende Kundenbeziehung/);
+test("messages thread send, receipts and category save stay on the real paths", () => {
+  const page = read("src/app/app/messages/page.tsx");
+  const client = read("src/app/app/messages/thread-client.tsx");
+  const actions = read("src/app/app/messages/directory-actions.ts");
+  const route = read("src/app/api/owner/messages/[contactUserId]/route.ts");
+  // Thread: messages come from the union of direct and job-scoped rows, and the
+  // composer is bound to the resolved platform contact.
+  assert.match(page, /SELECT 'direct' source,cm\.id,cm\.sender_id,cm\.body,cm\.read_at/);
+  assert.match(page, /<OwnerMessageComposer contactUserId=\{active\.contact_user_id\}/);
+  // Send: the composer POSTs to the owner message endpoint and PATCHes to clear
+  // the unread receipt — no second, bespoke transport.
+  assert.match(client, /`\/api\/owner\/messages\/\$\{contactUserId\}`/);
+  assert.match(client, /method: 'POST'/);
+  assert.match(client, /method: 'PATCH'/);
+  assert.match(route, /export async function POST/);
+  assert.match(route, /export async function PATCH/);
+  // Category (area) assignment is persisted through the directory store, which
+  // writes the subcategory link rows and the idempotency receipt.
+  assert.match(actions, /createContactDirectoryStore\(db\)/);
+  assert.match(actions, /store\.(?:replaceAssignments|addExisting|updateManual)\(/);
 });
 
 // --- four-page structure: one H1, shared toolbar, touch targets --------------
-test("each owner page renders exactly one shared page header", () => {
+test("each owner page mounts the shared frame exactly once", () => {
+  // Structural contract: every owner page is wrapped by exactly one
+  // WerkbankRahmen (the frame that owns the sidebar/topbar/breadcrumb). The
+  // rendered H1 count itself is asserted at runtime in the browser suite
+  // (scripts/lib/owner-coherence-browser.mjs), not from source text.
   for (const page of [
     "src/app/app/page.tsx",
     "src/app/app/jobs/page.tsx",
     "src/app/app/calendar/page.tsx",
     "src/app/app/messages/page.tsx",
   ]) {
-    const matches = read(page).match(/<EHOwnerPageHeader/g) || [];
-    assert.equal(matches.length, 1, `${page} must render one EHOwnerPageHeader`);
+    const matches = read(page).match(/<WerkbankRahmen/g) || [];
+    assert.equal(matches.length, 1, `${page} must mount WerkbankRahmen exactly once`);
   }
+  // Three pages carry their H1 directly; /app/messages renders it inside the
+  // sealed contact-directory component, which owns exactly one heading level 1.
+  for (const page of [
+    "src/app/app/page.tsx",
+    "src/app/app/jobs/page.tsx",
+    "src/app/app/calendar/page.tsx",
+  ]) {
+    const h1 = (read(page).match(/<h1>/g) || []).length;
+    assert.equal(h1, 1, `${page} must declare one H1`);
+  }
+  const directory = read("packages/eh-design/src/workspace-contact-directory.tsx");
+  const directoryH1 = (directory.match(/<h1>/g) || []).length;
+  assert.equal(directoryH1, 1, "contact directory must render exactly one H1");
 });
 
 test("shared header renders a single H1 with action support", () => {
