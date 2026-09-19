@@ -548,3 +548,69 @@ die 3 "Abweichungen" sind gewollte Redirects: `/app/onboarding` -> `/app`
 
 Die Kapitel 14-16 dieser Uebergabe (Kontrast-Fix, P0-7, P2-26, Profilbalken)
 gelten unveraendert weiter — sie aendern keine Shell-Dateien.
+
+## Kapitel 18 — Folge-Commits der Sidebar-Welle (08d57ef / 34c7d4b / 18c7323, main, gepusht)
+
+Diese drei Commits stammen aus der sidebar-07-Welle des Koordinators
+(opencode `ses_f4f5`), nicht aus der P0/P1/P2-Absorptionswelle. Sie stehen
+auf Kapitel 17 auf und sind von diesem Agenten (Prime `01a0ba74`) nur
+verifiziert, nicht authored.
+
+**`08d57ef` — fix(p0-6/p2-25/p2-28):** Pro-Start Kopf+Kennzahlen, Terminologie
+"Anfrage"->"Auftrag" konsolidiert, Onboarding-Stepper (`EHStepProgress`).
+Beruehrt KEINE Shell-Datei der Sperre.
+
+**`34c7d4b` — feat(settings):** Globaler Einstellungs-Dialog mit Sidebar-Navi
+(`settings-dialog.tsx` + `settings-dialog-host.tsx` + `owner-settings-dialog.tsx`
++ neues `src/components/ui/dialog.tsx`). Der Dialog oeffnet sich als Overlay
+ueber der aktuellen Seite — entweder ueber `?einstellungen=<section>` URL-Param
+oder `openSettingsDialog(section)` (CustomEvent `eh:open-settings`) aus
+`nav-user.tsx`/`nav-projects.tsx`. `/app/settings` bleibt als Fallback-Seite
+erhalten und rendert denselben Inhalt. Rail-Overlap-Fix: Rail hatte keine feste
+Gridspur mehr, blähte auf 763px und überlagerte den Content — jetzt alle 4
+Rail-Seiten `main 1040 / rail 240`, Overlap 0.
+
+**`18c7323` — style(settings):** Dialog-Inhalt als ruhige Karten mit EH-Typo,
+Logik unveraendert. Operator-Go erteilt.
+
+**Gates vom Koordinator selbst geprueft:** eslint 0, tsc 0, diff-check sauber.
+
+**Zusaetzlich durch diesen Agenten (Prime) erledigt:**
+- `design/design-debt.json` neu synchronisiert (`eh-design-debt-sync.mjs`):
+  380 veraltete Schuldenpunkte entfernt. WICHTIG: Die `src/components/ui/*`-
+  Einträge sind NICHT stale — `7d2b8b1` loeschte die alten shadcn-Dateien,
+  `d8ebb11`/`34c7d4b` legten sie fuer sidebar-07 NEU an. Die Einträge sind
+  wieder gueltig.
+- `design/design-lock.json` neu versiegelt (`eh-design-seal.mjs`):
+  `homeowner.module.css` + `provider-workspace.module.css` waren seit
+  `27f1c47` (P1-17, 310 tote CSS-Regeln, rein deletiv) nicht mehr versiegelt.
+  Aenderung verifiziert als rein deletiv (1102/51 und 797/3 Zeilen), 0 Mismatches
+  nach Reseeal bei 53 geschuetzten Dateien.
+- Visual-Baselines (`tests/visual-baselines/`, 22 Dateien) erneuert nach
+  nachgewiesenem Baseline-Drift (keine Regression): `7d2b8b1` loeschte 29
+  Marketing-Komponenten (-> `/partner`, `/ueber-uns`), `74a3406` machte
+  `/welcome` zum Redirect. `test:visual` wieder 72/72 pass.
+
+**Offen nach dieser Welle (nicht blockierend):**
+- **P2-28** — 8 native `<input type="file">` ueber `EHInput`; `EHFileInput` fehlt
+  im versiegelten `packages/eh-design` → Designautoritaet. Vollstaendige
+  Spezifikation mit allen 8 Stellen + accept-Attributen:
+  `/tmp/eh-coord/P2-28-ehfileinput-spec.md` (noch nicht ins repo verschoben).
+- **P2-23** — dead CSS in `globals.css`/`design-system.css` → versiegelt →
+  Designautoritaet.
+- **404-Konsistenz** — `/pro/jobs/999`, `/app/jobs/999`, `/app/invoices/1`,
+  `/pro/invoices/1` zeigen einen dunklen Fallback / "Seite wird geladen" statt
+  der kanonischen `not-found.tsx`. Ursache je Route legitim
+  (`job_dispatches`/`invoices` leer → fail-closed), aber die Ladeanzeige
+  verschleiert das 404. Niedrige Prio, vom Koordinator notiert.
+- **Prod-Deploy** — blockiert, aber die "Tailscale braucht Browser-Login"-
+  Begruendung ist veraltet: `docs/OPERATIONS.md` dokumentiert Tailscale-SSH als
+  DEAKTIVIERT auf sin-supabase, Port 22/2222 nutzen OpenSSH+Key. Realitaet:
+  Port 2222 nimmt die Verbindung an, weist aber den Fleet-Key
+  (`sin-vm2-fleet`) mit `Permission denied (publickey)` ab. Loesung: pubkey
+  auf sin-supabase hinterlegen. Kein Deploy ohne ausdrueckliches Go.
+- **`src/hooks/use-mobile.ts`** — eslint error `react-hooks/set-state-in-effect`
+  (aus `d8ebb11`). Shell-Sperre → nicht selbst gefixt. Koordinator weiss.
+- **Preview-HTML** — `docs/preview-werkbank-2026-09-18.html` noch auf
+  Vor-Sidebar-Stand. Erst nach visueller Abnahme der neuen Navigation
+  neu generieren.
