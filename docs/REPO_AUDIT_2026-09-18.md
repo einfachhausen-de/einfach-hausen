@@ -45,8 +45,12 @@ fast jeder zweiten Seite eine leere 240-px-Spalte stehen laesst.
 6. **`/pro` (Startseite des Partner-Portals):** im Sperrzustand nur eine Hinweisbox,
    darunter grosse weisse Flaeche — kein Kopf, keine Kennzahlen, kein Leerzustand.
    Im Normalpfad fehlen Kopf-Kontextzeile und Rail; `location` als roher `<p>`.
+   **[ERLEDIGT via `08d57ef`** — Pro-Start hat Kopf, Kennzahlen und
+   Leerzustand (`src/app/pro/page.tsx`).]
 7. **`/app/partners` Redirect verschluckt Query** → Erfolgsmeldung nach
    „Bewertung melden" (`actions.ts:592`) geht verloren.
+   **[ERLEDIGT via `0560ffb`** — `reportReviewAction` leitet zurück auf
+   `/app/partners/[id]` und gibt Query (`message`/`error`) dorthin weiter.]
 
 ## P1 — wichtig
 
@@ -69,10 +73,15 @@ fast jeder zweiten Seite eine leere 240-px-Spalte stehen laesst.
     verlinkt, und `/hilfe` setzt `active="/app/more"` (falsch). Loeschen + Link umleiten.
 14. **Werkbank-Such-Pille ist ein zweiter Notifications-Link** (gleicher Link wie die
     Glocke) — keine echte Suche.
+    **[ERLEDIGT via `41d48bf`** (`git log -S WerkbankSuche`: `41d48bf`,
+    `d8ebb11`) — die Pille ist eine echte Cmd+K-Palette (`WerkbankSuche`,
+    Vorschläge aus `nav-config`); der Pillen-Notifications-Link ist entfallen.]
 15. **`thread-client.tsx`: `window.location.reload()`** nach Nachrichtensenden —
     verwirft allen UI-Zustand.
 16. **`/app/home`: `appointments` mit `JOIN provider_profiles`** (inner) — Termine ohne
     Profil fallen weg; andere Seiten nutzen `LEFT JOIN`.
+    **[ERLEDIGT via `7b839f0`** — jetzt `LEFT JOIN` + Nullwache auf
+    `business_name`.]
 17. **Zwei Alt-CSS-Leichen:** `homeowner.module.css` (1847 Z.) + `provider-workspace.module.css`
     (1958 Z.) stylen `app-shell-v3`-Markup, das nur noch von `pro/loading.tsx` erzeugt
     wird. `provider-workspace.module.css` enthaelt `.metrics{display:none}` (Falle:
@@ -84,30 +93,52 @@ fast jeder zweiten Seite eine leere 240-px-Spalte stehen laesst.
     `house_contracts`) existieren nur in der Dev-DB, nicht in
     `db/migrations/0001-baseline.sql` — frische Instanzen aus reiner Migration waeren
     unvollständig.
+    **[ERLEDIGT via `14ae28c`** — Baseline von JS-Resten befreit, 6 Tabellen
+    mit DDL/Indizes/Saatgut/Triggern ergänzt; frische DB = Dev-Stand
+    (75 Tabellen, validiert).]
 20. **`account-actions.tsx`: zwei Sign-Out-Pfade** (Client `signOut()` + Server
     `logoutAction`).
+    **[WIDERLEGT — kein offener Befund:** `account-actions.tsx` enthält weder
+    `logoutAction` noch einen zweiten Sign-Out-Pfad, nur Export/Löschen;
+    `signOut()` läuft dort nur als Cleanup nach server-seitiger
+    Kontolöschung. Einziger Abmeldepfad bleibt Server-`logoutAction`.]
 21. **`messages.module.css` (app + pro) fast byte-identisch** (diff = 2 Werte) —
     zusammenfuehren.
+    **[ERLEDIGT via `7b839f0`** — gemeinsame
+    `src/components/messages-thread.module.css` (token-only), beide
+    `thread-client.tsx` importieren sie.]
 
 ## P2 — Aufraeumen / Konsistenz
 
-22. **39 unerreichbare Quell-Dateien:** komplette shadcn-Familie (`components/ui/*`,
-    `shadcn-studio/*`), `visuals/*`, `marketing/{gateway,security,trust,lazy-image,
+22. **39 unerreichbare Quell-Dateien:** [KORREKTUR: `src/components/ui/*`
+    (avatar, breadcrumb, button, collapsible, dialog, dropdown-menu, input,
+    separator, sheet, sidebar, skeleton, tooltip — per `ls` verifiziert) ist
+    seit `d8ebb11` wieder Sidebar-07-Basis (`werkbank-shell.tsx` importiert
+    daraus Sidebar/Provider/Breadcrumb/Separator) und damit erreichbar, nicht
+    tot.] Weiter als unerreichbar geführt: `shadcn-studio/*`, `visuals/*`, `marketing/{gateway,security,trust,lazy-image,
     hero-orchestration,FeatureVisual*}`, `Stepper`, `count-up`, `pw-field`, `KiCard`,
     `hausmeister-composer` (alt), `preise/price-ledger`; Libs `utils.ts`,
     `config/design-tokens.ts`, `crm-sync.ts`, `i18n.ts`, `anfragen.ts`,
     `mailer.mailTemplates`.
 23. **`globals.css`: 355/700 Klassen ohne Referenz**; `design-system.css`: 70/558 live.
 24. **`icons.tsx`: 49/87 Exporte ungenutzt**, zwei Icon-Familien neben `lucide-react`.
+    **[ERLEDIGT via `14ae28c`** — 87 → 34 Exporte, 53 ungenutzte entfernt
+    (Referenzprüfung über alle `src/`-Dateien).]
 25. **Terminologie „Anfrage" vs „Auftrag"** in `pro/page.tsx`, `pro/jobs/[id]`,
     `app/consultation` Metriken, `app/home/sale`.
+    **[ERLEDIGT via `08d57ef`** — „Auftrag" in Beratung, Verkauf, Pro-Job
+    und Pro-Start (`consultation`, `home/sale`, `pro/jobs/[id]`,
+    `pro/page.tsx`).]
 26. **Verwaiste Auth-Kette** `/welcome`, `/role`, `/register-owner`, `/register-pro`,
     `/check-email` → Redirects.
 27. Kleine Daten-Echtheitsluecken: `partners/[id]` erfindener Beschreibungs-Fallback;
     `/app/home` „Dokumente"-Kennzahl mischt Dokumente + Rechnungen; `home/sale`
     `formatDate` zeitzonensicher machen; `documents/page.tsx` N+1 `fs.statSync`.
 28. **Native Inputs auf `/app/home/history`** (3x File-Input, US-Datums-Placeholder),
-    schwache rechte Leerzustaende; `<progress>` ohne Stil auf `/app/onboarding`.
+    schwache rechte Leerzustaende [OFFEN — kein `EHFileInput` im Code
+    (`grep EHFileInput` leer); History nutzt `EHInput type="file"`];
+    `<progress>`-Teil **[ERLEDIGT via `08d57ef`** — `EHStepProgress` auf
+    `/app/onboarding`].
 29. `consultation` vs. `hausmeister` Beratungsdopplung; `error.tsx`/`loading.tsx`
     rendern außerhalb des Werkbank-Gerüsts.
 

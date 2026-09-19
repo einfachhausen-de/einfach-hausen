@@ -1048,4 +1048,4 @@ Auftragsbilder bleiben privat. Die Liste greift nie direkt auf Dateipfade zu, so
 
 Die fachliche Route hält Datenbeschaffung und Filterung. Die gemeinsamen Designkomponenten befinden sich in `packages/eh-design/src/workspace-records.tsx`.
 
-Die globale AppShell bleibt unabhängig von dieser Seitenkomposition.
+Rahmen ist die WerkbankShell auf Sidebar-07-Stand (`SidebarProvider` + `AppSidebar` + `SidebarInset`, Kopfzeile nur Werkzeuge: Trigger, Breadcrumb, Suche, Glocke, Avatar — `src/components/werkbank-shell.tsx`) und bleibt unabhängig von dieser Seitenkomposition.

@@ -23,7 +23,7 @@ Verbindliche Rollenquelle: [`docs/COMPANY_IDENTITY.md`](docs/COMPANY_IDENTITY.md
 
 Alle Agents arbeiten in diesem Repository **am selben Ziel**. Es gibt keinen zweiten Engineering-Taskplan in README, Issues oder Worker-Reports. Der verbindliche Einstieg ist [`docs/NEXT_AGENT.md`](docs/NEXT_AGENT.md); der transaktionale Taskstatus liegt in `.sin-gpt-web/taskplan.sqlite3` und wird nach `.sin-gpt-web/TASKPLAN.md` gerendert.
 
-Aktueller Stand (verifiziert 2026-09-10): **Repo-HEAD `0503da3` („docs(handoff): Finisher-2 Integration 2026-09-10, main=`a25ae3f` deployed“), Vorgänger `a25ae3f` („integ(auth+assistant)“). Historisch: T-0131 Convergence (2026-09-03, `3fbe3c9`) → `13496d7`; UI-Wellen A-E, Supabase-App-Schema + RLS, Demo-Logins, GSC-Verifikation sowie Blog/Lexikon-Cluster waren deren Stichtagswerte. Bereits erledigte oder abgelöste Wellen werden nicht erneut begonnen. Neue Implementierungsarbeit entsteht nur aus einem reproduzierbaren Acceptance-Fehler und wird als kanonischer Remediation-Task erfasst.
+Aktueller Stand (verifiziert 2026-09-19): **Repo-HEAD `cd0be2c` (main)** — Sidebar-07 als Hauptnavigation, Header nur Tools, globaler Einstellungs-Dialog. Details: Abschnitt `App-Rahmen` unten; Belege: `git log` (`d8ebb11`, `34c7d4b`, `18c7323`, `08d57ef`, `0560ffb`). Historisch: T-0131 Convergence (2026-09-03, `3fbe3c9`) → `13496d7`; UI-Wellen A-E, Supabase-App-Schema + RLS, Demo-Logins, GSC-Verifikation sowie Blog/Lexikon-Cluster waren deren Stichtagswerte. Bereits erledigte oder abgelöste Wellen werden nicht erneut begonnen. Neue Implementierungsarbeit entsteht nur aus einem reproduzierbaren Acceptance-Fehler und wird als kanonischer Remediation-Task erfasst.
 
 ### Public Website Finish — Stand 2026-09-05
 
@@ -53,12 +53,12 @@ Implementierungs- und Designentscheidungen: `docs/superpowers/specs/2026-09-05-p
 - Process supervisor: systemd (`einfach-hausen.service`)
 - **App-Datenbank: SQLite** (`better-sqlite3`, `DATABASE_PATH`) — bewährter Single-Node-Betrieb mit Backup-Pflicht
 - **Auth: SIN Supabase OSS (self-hosted, `https://supabase.delqhi.com`)** — serverseitig autoritative Identität (`auth_subject`); Supabase ist **nicht** die App-Datenbank
-- **Primärer Storage: Supabase Storage** für `private/` und `uploads/` (Fotos, Dokumente, Rechnungen, Haus-Historie) — `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` / `SUPABASE_STORAGE_BUCKET`
+- **Ziel-Storage: Supabase Storage** für `private/` und `uploads/` (Fotos, Dokumente, Rechnungen, Haus-Historie) — `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` / `SUPABASE_STORAGE_BUCKET` (Adapter **nicht implementiert**, siehe `docs/OPERATIONS.md` Z.23)
 - **Fallback/Local Dev: SQLite + WAL via `better-sqlite3`** (`DATABASE_PATH=./data/einfach-hausen.db`) nur für lokale Entwicklung und als Offline-Fallback, nicht mehr als Produktions-Primary
 - **Mobile HA: Capacitor 6** — Next.js App wird als native iOS/Android Hülle ausgeliefert (siehe `Mobile App / Capacitor`)
 - Scheduled health checks: Kestra
 
-Produktion ist ein **Multi-User-Betrieb** auf Single-Node-Basis: App-Daten in SQLite (persistenter Pfad + Backup), Auth gegen den self-hosted SIN-Supabase-Stack (Autorität serverseitig verifiziert). Ein Supabase-Storage-Adapter ist **nicht implementiert**; `private/`/`uploads/` laufen über persistente lokale Verzeichnisse. Historische HA-/Postgres-Migrationsplanung (T-0166) wurde nie ausgeführt und ist nicht Teil des aktuellen Taskplans. Siehe `docs/OPERATIONS.md` und `docs/ARCHITECTURE.md`.
+Produktion ist ein **Multi-User-Betrieb** auf Single-Node-Basis: App-Daten in SQLite (persistenter Pfad + Backup), Auth gegen den self-hosted SIN-Supabase-Stack (Autorität serverseitig verifiziert). **Ist-Storage: persistente lokale Verzeichnisse** `private/`/`uploads/` (Supabase-Storage-Adapter nicht implementiert). Historische HA-/Postgres-Migrationsplanung (T-0166) wurde nie ausgeführt und ist nicht Teil des aktuellen Taskplans. Siehe `docs/OPERATIONS.md` und `docs/ARCHITECTURE.md`.
 
 ## Kernablauf
 
@@ -117,6 +117,14 @@ Für T-0165 gilt zusätzlich die Präsentations-Source-of-Truth-Kette: **Notion 
 - WhatsApp Cloud API mit demselben Modell: KI zuerst, danach `ANSPRECHPARTNER` oder `AUFTRAG`
 - PWA-Manifest
 
+## App-Rahmen · Stand main `cd0be2c` (2026-09-19)
+
+- Hauptnavigation: shadcn `sidebar-07` als aufklappbare linke Seitenleiste (`src/components/app-sidebar.tsx`, `nav-main.tsx`, `nav-projects.tsx`, `nav-user.tsx`, `team-switcher.tsx`; `d8ebb11`).
+- Header nur Tools: Trigger, Breadcrumb, Suche, Glocke, Avatar (`src/components/werkbank-shell.tsx`: `SidebarTrigger`, `Breadcrumb`, `WerkbankSuche`, `/notifications`, Profil-Avatar).
+- Globaler Einstellungs-Dialog als Overlay über der aktuellen Seite (`src/components/settings-dialog-host.tsx`, `src/app/app/settings/owner-settings-dialog.tsx`; `34c7d4b`, Stil `18c7323`). Bereiche: Konto & Daten, Benachrichtigungen, KI-Assistent, App & Offline. Fallback-Route `/app/settings` bleibt bestehen.
+- Erledigt: P0-6 Pro-Start Kopf + Kennzahlen + Leerzustand (`src/app/pro/page.tsx`, `08d57ef`); P0-7 Bewertungs-Meldung zurück auf `/app/partners/[id]` (`0560ffb`); P2-25 Terminologie Auftrag statt Anfrage (Beratung, Verkauf, Pro-Job, `08d57ef`); P2-28 `EHStepProgress` statt nativem `<progress>` (`src/app/app/onboarding/page.tsx`, `08d57ef`).
+- Erledigt: P1-14 Suche als Cmd+K-Palette (`WerkbankSuche`, `41d48bf`); P1-16 Termine mit `LEFT JOIN` (`7b839f0`); P1-19 Schema-Baseline repariert (`14ae28c`); P1-20 kein `logoutAction`-Zweitpfad in `account-actions.tsx` (nur Export/Löschen); P1-21 gemeinsame `messages-thread.module.css` (`7b839f0`); P2-22 Cleanup (29 Dateien `7d2b8b1` + 8 Dateien `d3e947b`); P2-24 53 ungenutzte Icon-Exporte entfernt (`14ae28c`).
+
 ## Mobile App / Capacitor (iOS + Android) + PWA
 
 Die Next.js-Anwendung ist die **Produktions-App für Web + iOS + Android**. Auslieferung erfolgt als:
@@ -131,7 +139,7 @@ Enthalten (Web + nativ identisch):
 - Service Worker für Installierbarkeit und sichere Offline-Hinweise
 - **keine privaten Auftrags-, Nachrichten- oder Hausdaten im Service-Worker-Cache**
 - Safe-Area-Unterstützung für iPhone-Notch/Home-Indikator
-- mobile Bottom-Navigation: Home, Aufträge, Termine, Ansprechpartner, Mehr
+- mobile Bottom-Navigation rendert aus `nav-config` (`src/components/bottom-nav.tsx`); `/app/more` existiert nicht mehr (Redirect `/app/more` → `/app` per `next.config.ts`, P1-13)
 - 44px+-Touch-Ziele und 16px-Formfelder gegen iOS-Auto-Zoom
 - `capacitor.config.ts` mit AppId `de.einfachhausen.app`, native Push (`@capacitor/push-notifications`), Camera/Filesystem via Supabase Storage
 - App-Store Verteilung: App Store + Play Store sind **ab sofort aktiver Produktionspfad** (kein externer Blocker mehr), siehe `docs/ARCHITECTURE.md`
