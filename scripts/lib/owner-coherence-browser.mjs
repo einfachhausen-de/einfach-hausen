@@ -144,6 +144,19 @@ async function appointmentLinks(page) {
   });
 }
 
+async function appointmentRows(page, label) {
+  // Row identity = job link plus the rendered appointment date, so a job with a
+  // past and a future appointment is not mistaken for a duplicated appointment.
+  return await page.evaluate((label) => {
+    const lists = [...document.querySelectorAll("ul")];
+    return lists.flatMap((list) => [...list.querySelectorAll("li")].map((item) => {
+      const link = item.querySelector("a[href^='/app/jobs/']");
+      const date = item.innerText.replace(/\s+/g, " ").trim().slice(0, 80);
+      return link ? `${link.getAttribute("href")} · ${date}` : null;
+    }).filter(Boolean));
+  }, label);
+}
+
 export async function runOwnerCoherenceBrowser({ report = console.log } = {}) {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "eh-owner-coherence-"));
   const dbPath = path.join(tempDir, "app.sqlite3");
@@ -265,6 +278,7 @@ export async function runOwnerCoherenceBrowser({ report = console.log } = {}) {
     await settle(page);
     await page.locator("ul").first().waitFor({ timeout: 20000 }).catch(() => {});
     const upcoming = await appointmentLinks(page);
+    const upcomingRows = await appointmentRows(page, "calendar");
     if (!upcoming.some((href) => /^\/app\/jobs\/\d+$/.test(href))) {
       failures.push(`calendar: appointment rows do not link to a job (found ${JSON.stringify(upcoming.slice(0, 4))})`);
     }
@@ -274,8 +288,12 @@ export async function runOwnerCoherenceBrowser({ report = console.log } = {}) {
     if (!past.some((href) => /^\/app\/jobs\/\d+$/.test(href))) {
       failures.push(`calendar-past: appointment rows do not link to a job (found ${JSON.stringify(past.slice(0, 4))})`);
     }
-    const overlap = past.filter((href) => upcoming.includes(href));
-    if (overlap.length) failures.push(`calendar: same job link in both current and past views ${JSON.stringify(overlap)}`);
+    // A job legitimately appears in both views when it has a past and a future
+    // appointment. The product contract is that no single APPOINTMENT is shown
+    // twice, so compare the row identity (job link + rendered date), not the job.
+    const pastRows = await appointmentRows(page, "calendar-past");
+    const overlap = pastRows.filter((row) => upcomingRows.includes(row));
+    if (overlap.length) failures.push(`calendar: same appointment row in both current and past views ${JSON.stringify(overlap)}`);
   } finally {
     if (browser) await browser.close().catch(() => {});
     if (server.exitCode === null) {
