@@ -614,3 +614,61 @@ Logik unveraendert. Operator-Go erteilt.
 - **Preview-HTML** — `docs/preview-werkbank-2026-09-18.html` noch auf
   Vor-Sidebar-Stand. Erst nach visueller Abnahme der neuen Navigation
   neu generieren.
+
+## Kapitel 19 — Visuelle Abnahme sidebar-07 abgeschlossen + use-mobile.ts repariert
+
+**Abnahmeumfang:** 5 parallele Subagents (3x Owner, 2x Provider) plus eigene
+unabhaengige Nachmessung (DOM-Geometrie, Overflow-Audit, WCAG-Kontrastrechnung
+aus Pixelwerten). 28 Routen, Desktop 1536px + Mobile 390px, authentifizierte
+Demo-Logins (kunde@/handwerker@demo.einfachhausen.de).
+
+**ERGEBNIS: Layout ist sauber und produktionsreif.**
+- Sidebar Owner 255px / Provider 256px, konstant, sichtbar auf allen Shell-Routen
+- 11 Owner- + 13-16 Provider-Menuepunkte, 3 aufklappbare Untermenues, funktionieren
+- KEIN Text abgeschnitten (scrollWidth <= clientWidth auf allen Labels)
+- KEIN Rail-Ueberlapp auf irgendeiner Route (Main endet x=1040, Rail beginnt x=1059;
+  alle Rails sind kuerzer als der Main-Inhalt)
+- KEIN horizontaler/vertikaler Ueberlauf (0 ueberlaufende Elemente, Desktop + Mobile)
+- Mobile: Sidebar ausgeblendet, bottom-nav 390x72px, 5 Items exakt 390px
+- Einklappen funktioniert (255px -> 47px, Icons bleiben sichtbar)
+- Menuepunkt-Kontrast 7.6-19:1 (AA bestanden)
+- `beyondRight=[]` auf allen Provider-Routen
+
+**2 offene Restpunkte (nur noch dokumentiert, NICHT gebaut):**
+
+1. **KONTRAST der Gruppenueberschriften "Navigation"/"Konto" — 3.63:1** (WCAG AA
+   fordert 4.5:1 fuer 12px Text). Subagent mass 2.8:1, meine exakte
+   Pixelnachmessung 3.63:1 -> beide unter AA, Befund echt.
+   Ursache: `src/components/ui/sidebar.tsx:404` `text-sidebar-foreground/70`
+   (alpha 0.7 von oklch(0.145) auf oklch(0.985) blaeht zu mittelgrau auf).
+   **GESPERRT (src/components/ui/*)** -> Designautoritaet oder
+   explizites Koordinator-Go. Fix-Option ohne seal-Bruch: Override fuer
+   SidebarGroupLabel im nicht-versiegelten `shell.module.css`.
+
+2. **RAIL-WEISSFLAECHE auf langen Seiten.** Rail endet deutlich vor dem
+   Hauptinhalt. Staerkste Auspraegungen: `/app/settings` Rail y=979 vs Content
+   y=2247 (43% Abdeckung, ~1270px weiss), `/pro/calendar` -635px,
+   `/pro/orders` -308px. Kein Layoutfehler, aber sichtbare Unausgewogenheit.
+
+**Zusaetzlich repariert: `src/hooks/use-mobile.ts`** (eslint error
+`react-hooks/set-state-in-effect`, aus d8ebb11). Auf
+`useSyncExternalStore` umgestellt — Verhalten identisch (768px Breakpoint,
+gleiche return-Werte), aber ohne setState-in-Effect. tsc 0, eslint 0 errors
+(28 unveraenderte Warnungen). Befreit den Koordinator-Commit-Pfad.
+
+**Verifiziert KEINE Fehler (nicht wieder untersuchen):**
+- "Seite wird geladen" im rohen HTML ist der Next.js-Streaming-Platzhalter;
+  der Inhalt folgt im selben Dokument. Verifiziert an /, /partner, /app/settings.
+- `/app/invoices/1` + `/pro/invoices/1`: legitime fail-closed-404
+  (invoices-Tabelle leer). Die 404 erscheint ohne App-Shell (korrekt).
+- `/app/partners` -> `/app/messages` und `/pro/jobs` -> `/pro/orders`:
+  gewollte Legacy-Aliase.
+- "Truncation" im TeamSwitcher: Messartefakt (title+sub konkateniert;
+  separater span mit `truncate`).
+- `/app/hausmanager`: bewusst kein Rail (Einspalter).
+- Aktiver Sidemenuepunkt nicht sektionsgenau auf 6 Routen ohne eigenen
+  Menuepunkt (bleibt "Start") — kein Fehler.
+
+**Befunddateien:** /tmp/visual-acceptance/FINAL-owner.md, FINAL-pro.md,
+owner-c.md, report-b.md + 56 Screenshots (desktop/, desktop-full/, mobile/,
+pro-shots/).
