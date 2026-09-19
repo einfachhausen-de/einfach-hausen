@@ -428,3 +428,103 @@ P2-23/24 (dead CSS in `globals.css`/`design-system.css`, ungenutzte
 `icons.tsx`-Exporte): beide CSS-Dateien sind versiegelt und werden an die
 Designautorität gemeldet. `icons.tsx`-Exporte koennen nach demselben
 Verifikationsmuster geprueft und dann ausgeraeumt werden.
+
+## Kapitel 14 — 1ee771d / d3e947b / 34f69bd: Werkbank-Spaltung zu Ende + T-0168-Bounce (main, gepusht)
+
+**P1-8 vollstaendig.** Nach den 4 Provider-Seiten (d1d2a14) wurden die letzten 10
+Owner-Seiten von AppShell auf WerkbankRahmen umgestellt: `/app/consultation`,
+`/app/hausmanager`, `/app/hausmeister`, `/app/home/history`, `/app/home`,
+`/app/insurance`, `/app/onboarding`, `/app/plans`, `/app/year`, `/notifications`
+(1ee771d). Keine AppShell-Verwendung mehr unter `src/app/`.
+
+Drei echte Fehler aus dieser Welle, alle behoben und live verifiziert:
+1. `notifications/page.tsx` hatte `role="homeowner"` fest drin — Provider sahen
+   die Owner-Navigation. Rolle jetzt dynamisch aus der Sitzung.
+2. Die Provider-Glocke zeigte auf `/pro/notifications` — diese Route existiert
+   nicht. Beide Glocken zeigen jetzt auf `/notifications` (nutzerscharf).
+3. **T-0168-Verletzung (subtil):** `/notifications` stand in `PRIVATE_PREFIXES`,
+   aber nicht in `SERVER_AUTH_PREFIXES`. Der Client-Guard hat jeden Nutzer auf
+   `/login` geschickt, sobald die Supabase-*Client*-Sitzung fehlte (Local-Dev oder
+   abgelaufene Client-Sitzung bei gueltiger Server-Sitzung) — selbst nach
+   erfolgreicher `requireUser()`-Autorisierung. Server-Rendert kam (curl: 200),
+   dann flog der Client raus. `/notifications` in `SERVER_AUTH_PREFIXES`
+   aufgenommen, `PRIVATE_PREFIXES` geleert (`/mein-haus` ist serverseitig ein
+   Redirect nach `/app/home`).
+
+**P1-18 (34f69bd):** `/onboarding/pro/page.tsx` — die letzte Seite, die noch nach
+Supabase `user_metadata` schrieb (T-0168) und keinen einzigen Inbound-Link hatte —
+ist jetzt ein Redirect auf `/pro/onboarding`. Die Kindrouten `/gebiet` und
+`/[schritt]` waren schon Redirects und bleiben als Lesezeichen-Schutz.
+
+**P2-22 (d3e947b):** letzte 8 verifiziert-tote Dateien geloescht:
+`src/lib/{utils,crm-sync,i18n,anfragen}.ts`,
+`src/components/{Stepper,count-up,pw-field,KiCard}.tsx`. Jede einzeln per
+Symbolgrenzen- und Import-Grep geprueft.
+
+## Kapitel 15 — 853cdc1 / 0560ffb / 74a3406: Kontrast, Bewertungs-Feedback, Auth-Relikte (main, gepusht)
+
+**Visueller Bug, echt (853cdc1):** Der „Ansprechpartner finden"-CTA in
+`hausmeister-assistant.tsx` nutzte die Legacy-Klasse `.btn.primary`. Im
+Werkbank-Scope gewinnt `design-system.css` `.btn.primary{background:var(--eh-dark)}`
+ueber `globals.css` (Quellreihenfolge) — der CTA wurde fast schwarz (#111512) mit
+dunklem Text, Kontrast ~1:1, also unlesbar. Ersetzt durch den versiegelten
+`EHButton` (Petrol/Weiss). Gemessen: 0 Bedienelemente unter 4.5:1 auf
+`/app/insurance` und `/app/consultation` (zuvor 2). Der Muse-Fund
+„Eigenheim-Konto abgeschnitten" war veraltet — auf 6 Viewport-Breiten kein
+Abschneiden mehr messbar.
+
+**P0-7, echt (0560ffb):** `reportReviewAction` leitete nach dem Melden einer
+Bewertung auf `/app/partners` weiter — eine reine Redirect-Route nach
+`/app/messages`. Erfolgsmeldung UND Fehlerhinweis fielen unter den Tisch; der
+Nutzer bekam nie eine Rueckmeldung. Jetzt leitet die Aktion zurueck auf die
+Partnerdetailseite `/app/partners/[id]`, wo `sp.message` / `sp.error` ausgelesen
+und gerendert werden (live verifiziert). Fehlt die Bewertung zwischenzeitlich,
+greift `notFound()` statt einer Fake-Query.
+
+**Regression aus 09331ec, echt (0560ffb):** Die Profilvollstaendigkeit in
+`profile/page.tsx` nutzte `data-fill`, aber `werkbank-layout.css` hatte keine
+Regel dafuer — der Balken war immer 0 px breit (funktionslos).Jetzt fuenf Stufen
+in der geteilten CSS (`0/25/50/75/100 %`, `data-fill="quarter"|"half"|...`), keine
+inline Styles.
+
+**P0-6 KEIN Bug (verifiziert):** `/pro` zeigt fuer nicht verifizierte Provider
+einen korrekten `ProviderState`-Sperrbildschirm, fuer verifizierte das volle
+Dashboard — beides live durchgemessen. Die Demo-DB hat bewusst `verified=0`.
+
+**P2-26 (74a3406):** `/welcome` und `/role` waren `'use client'`-Flows mit eigener
+Rollenlogik (Supabase `user_metadata`) — genau das, was T-0168 verbietet. Kanonisch
+tot: `/register-owner` / `/register-pro` (auth-v2) uebernehmen die Registrierung.
+Beide sind jetzt serverseitige Redirects (`requireUser()` loest die Rolle aus der
+Anwendungs-DB: Provider -> `/pro`, Eigentuemer -> `/app`). Der entsprechende
+Client-Zweig in `AuthContext` ist entfernt. Live: anonym -> `/login`,
+`kunde@demo` -> `/app` fuer beide Routen.
+
+**P2-25 KEIN Bug:** „Anfrage" (Kontaktanfrage, Vor Verkauf/Auftrag) und
+„Auftrag" (beauftragter Vorgang) sind begrifflich korrekt unterschieden — keine
+Aenderung.
+
+**Reste, die NICHT von mir sind:** `src/app/dashboard/`, `src/components/app-sidebar.tsx`,
+`nav-main/nav-projects/nav-user/team-switcher`, `src/components/ui/*` (shadcn),
+`.orca/drops/` sowie `package.json`/`package-lock.json`-Aenderungen sind eine
+**parallel laufende Sidebar-Richtungsarbeit des Koordinators** (Operator-Wechsel:
+aufklappbare linke Seitenleiste als Hauptnavigation). Sie sind UNTRACKED und
+duerfen von niemandem ausserhalb jener Welle committed werden.
+
+## Kapitel 16 — Offen nach dieser Welle
+
+- **P2-28 native Inputs:** 8 `<input type="file">` ueber `EHInput` (contracts,
+  home/history 3x, consultation, pro/profile 2x, pro/jobs/[id]/document-form)
+  zeigen rohen Browser-Text („Choose File · No file chosen", englisch).
+  `EHFileInput` fehlt im **versiegelten** `packages/eh-design` → gemeldet an die
+  Designautoritaet, NICHT selbst gestylt (AGENTS.md).
+- **P2-23 dead CSS in `globals.css`/`design-system.css`:** versiegelt → Designautoritaet.
+  Bekannte Landminen fuer spaeter: `.providerScope :global(.metrics){display:none}`
+  und ein nacktes `:global(label)` in alt-CSS-Modulen.
+- **Layout-Richtungswechsel (Operator, 2026-09-19):** Linke Seitenleiste wird
+  Hauptnavigation (aufklappbar, shadcn sidebar-07), Header nur
+  Suche/Notifications/Tools. `shell.module.css`, `nav-config.ts`,
+  `werkbank-rahmen.tsx`, `owner-menu`, `bottom-nav` sind ab sofort FROZEN fuer
+  alle ausser der Sidebar-Welle.
+- **Preview-HTML:** `docs/preview-werkbank-2026-09-18.html` ist noch auf dem Stand
+  vor den Kapiteln 14/15 — erst nach dem Sidebar-Umbau neu generieren, sonst ist
+  es sofort wieder veraltet.
