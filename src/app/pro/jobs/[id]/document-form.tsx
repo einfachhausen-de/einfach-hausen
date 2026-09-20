@@ -9,7 +9,7 @@ export function DocumentForm({ jobId }: { jobId: number }) {
         <option value="invoice">Rechnung</option><option value="report">Leistungsnachweis</option><option value="warranty">Garantie</option><option value="other">Sonstiges</option>
       </EHSelect></EHField>
       <EHField id="document-title" label="Titel"><EHInput id="document-title" name="title" maxLength={160} placeholder="z. B. Wartungsnachweis" required /></EHField>
-      <EHField id="document-file" label="Datei"><EHFileInput id="document-file" name="document" accept="application/pdf,image/*" required /></EHField>
+      <div className="eh-werkbank-filefield"><EHField id="document-file" label="Datei"><EHFileInput id="document-file" name="document" accept="application/pdf,image/*" required /></EHField></div>
       <EHSubmitButton pendingLabel="Wird hochgeladen …">Dokument hochladen</EHSubmitButton>
     </EHWorkSection>
   </form>;

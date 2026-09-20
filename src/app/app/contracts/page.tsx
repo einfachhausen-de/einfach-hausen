@@ -230,7 +230,7 @@ export default async function Contracts({ searchParams }: { searchParams: Promis
             </EHFieldGrid></EHFormSection>
             <EHFormSection title="Dokument & Notiz">
               <EHFieldGrid>
-                <EHField id="new-doc" label="Vertragsdokument"><EHFileInput id="new-doc" name="document" accept="application/pdf,image/*" /></EHField>
+                <div className="eh-werkbank-filefield"><EHField id="new-doc" label="Vertragsdokument"><EHFileInput id="new-doc" name="document" accept="application/pdf,image/*" /></EHField></div>
                 <EHField id="new-doctitle" label="Dokumenttitel"><EHInput id="new-doctitle" name="documentTitle" placeholder="z. B. Stromvertrag 2024" /></EHField>
               </EHFieldGrid>
               <EHField id="new-notice" label="Notiz"><EHTextarea id="new-notice" name="notice" rows={3} maxLength={2000} /></EHField>

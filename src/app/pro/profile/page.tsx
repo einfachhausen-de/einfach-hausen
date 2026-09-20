@@ -79,9 +79,9 @@ export default async function ProProfile({ searchParams }: { searchParams: Promi
     </EHPanel>
     {ctx.isOwner && !p?.verified && <EHPanel title="Nachweise einreichen">
       <EHWorkflowForm action={submitProviderVerificationAction}>
-        <EHField id="prov-doc" label="Nachweis" hint="PDF, JPG, PNG oder WebP bis 12 MB." required>
+        <div className="eh-werkbank-filefield"><EHField id="prov-doc" label="Nachweis" hint="PDF, JPG, PNG oder WebP bis 12 MB." required>
           <EHFileInput id="prov-doc" name="document" accept="application/pdf,image/jpeg,image/png,image/webp" required />
-        </EHField>
+        </EHField></div>
         <EHField id="prov-note" label="Hinweis">
           <EHTextarea id="prov-note" name="note" rows={3} placeholder="Gewerbeanmeldung, Meister-/Qualifikationsnachweis, Versicherung …" />
         </EHField>
@@ -126,7 +126,7 @@ export default async function ProProfile({ searchParams }: { searchParams: Promi
       {ctx.canManageJobs && <>
         <EHFormSection title="Unternehmen" description="Firmendaten und Kontakt für Rechnungen und Kundenauftritte.">
           <EHField id="prof-business" label="Firmenname"><EHInput id="prof-business" name="businessName" defaultValue={p?.business_name || ''} /></EHField>
-          <EHField id="prof-logo" label="Firmenlogo" hint="Optional."><EHFileInput id="prof-logo" name="logo" accept="image/*" /></EHField>
+          <div className="eh-werkbank-filefield"><EHField id="prof-logo" label="Firmenlogo" hint="Optional."><EHFileInput id="prof-logo" name="logo" accept="image/*" /></EHField></div>
           <EHField id="prof-trades" label="Gewerke / Leistungen"><EHInput id="prof-trades" name="trades" defaultValue={p?.trades || ''} placeholder="z. B. Garten, Elektro, SHK" /></EHField>
           <EHField id="prof-address" label="Firmenanschrift" hint="Wird auf Rechnungen verwendet."><EHInput id="prof-address" name="streetAddress" defaultValue={p?.street_address || ''} placeholder="Straße Hausnr., PLZ Ort" /></EHField>
           <EHFieldGrid>

@@ -99,9 +99,9 @@ export default async function HouseHistory({searchParams}:{searchParams:Promise<
       <EHFormSection title="Notizen & Nachweise" description="Ergänze Fotos und Unterlagen zu dieser Arbeit.">
         <EHField id="hist-notes" label="Notizen"><EHTextarea id="hist-notes" name="notes" rows={4} maxLength={3000}/></EHField>
       <EHFieldGrid>
-        <EHField id="hist-before" label="Foto vorher"><EHFileInput id="hist-before" name="beforePhoto" accept="image/*"/></EHField>
-        <EHField id="hist-after" label="Foto nachher"><EHFileInput id="hist-after" name="afterPhoto" accept="image/*"/></EHField>
-        <EHField id="hist-doc" label="Rechnung / Dokument"><EHFileInput id="hist-doc" name="document" accept="application/pdf,image/*"/></EHField>
+        <div className="eh-werkbank-filefield"><EHField id="hist-before" label="Foto vorher"><EHFileInput id="hist-before" name="beforePhoto" accept="image/*"/></EHField></div>
+        <div className="eh-werkbank-filefield"><EHField id="hist-after" label="Foto nachher"><EHFileInput id="hist-after" name="afterPhoto" accept="image/*"/></EHField></div>
+        <div className="eh-werkbank-filefield"><EHField id="hist-doc" label="Rechnung / Dokument"><EHFileInput id="hist-doc" name="document" accept="application/pdf,image/*"/></EHField></div>
         <EHField id="hist-doctitle" label="Dokumenttitel"><EHInput id="hist-doctitle" name="documentTitle" placeholder="z. B. Rechnung Dachsanierung 2025"/></EHField>
       </EHFieldGrid>
       <EHSubmitButton pendingLabel="Arbeit wird gespeichert …">In Hausakte speichern</EHSubmitButton>

@@ -48,7 +48,7 @@ export default async function Consultation({ searchParams }: { searchParams: Pro
       <EHPanel title="Beratungs-Auftrag">
       <form action={createConsultationAction}>
         <EHField id="con-desc" label="Wobei brauchst du Rat?"><EHTextarea id="con-desc" name="description" rows={6} minLength={4} maxLength={8000} required placeholder="Zum Beispiel: Mein Dach ist an einer Stelle feucht. Was könnte die Ursache sein?"/></EHField>
-        <EHField id="con-photo" label="Foto oder Video (optional)" hint="JPEG, PNG, WebP oder HEIC bis 8 MB; MP4, WebM, MOV oder M4V bis 25 MB."><EHFileInput id="con-photo" name="photo" accept="image/jpeg,image/png,image/webp,image/heic,video/mp4,video/webm,video/quicktime,video/x-m4v"/></EHField>
+        <div className="eh-werkbank-filefield"><EHField id="con-photo" label="Foto oder Video (optional)" hint="JPEG, PNG, WebP oder HEIC bis 8 MB; MP4, WebM, MOV oder M4V bis 25 MB."><EHFileInput id="con-photo" name="photo" accept="image/jpeg,image/png,image/webp,image/heic,video/mp4,video/webm,video/quicktime,video/x-m4v"/></EHField></div>
         <EHSubmitButton>Ansprechpartner finden</EHSubmitButton>
       </form>
       </EHPanel>
