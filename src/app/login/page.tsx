@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { AuthShell } from "@/components/auth-v2/AuthShell";
+import { DEMO_LOGIN_ENABLED } from "@/lib/demo-accounts";
 
 export const metadata: Metadata = {
   title: "Anmelden",
@@ -18,5 +19,6 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
     // discarded, so a failed attempt looked like a page that simply did nothing.
     notice={sp.notice}
     error={sp.error}
+    demoEnabled={DEMO_LOGIN_ENABLED}
   />;
 }

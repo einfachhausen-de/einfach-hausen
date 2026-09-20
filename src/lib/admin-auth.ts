@@ -1,5 +1,6 @@
 import { randomBytes, createHash, timingSafeEqual } from 'node:crypto';
 import { db } from './db';
+import { DEMO_LOGIN_ENABLED, DEMO_PASSWORD } from './demo-accounts';
 
 const DEV_COOKIE = 'mh_admin_session';
 const PROD_COOKIE = '__Host-mh_admin_session';
@@ -27,9 +28,9 @@ function sha256(value: string): Buffer {
 // Constant-shape comparison: both sides are hashed to fixed 32-byte digests
 // before timingSafeEqual, so timing never leaks input or secret length.
 export function adminPasswordMatches(input: string): boolean {
-  // Demo-Phase (befristet): CRM-Login mit dem Demo-Passwort. Kill-Switch
-  // DEMO_LOGIN_ENABLED=0. Nach der Demo-Phase diesen Block loeschen.
-  if (process.env.DEMO_LOGIN_ENABLED !== '0' && input === 'admin') return true;
+  // Demo-Phase (befristet): CRM-Login mit dem Demo-Passwort nur bei explizitem
+  // Opt-in (DEMO_LOGIN_ENABLED=1 + DEMO_PASSWORD gesetzt). Ohne Flag fail-closed.
+  if (DEMO_LOGIN_ENABLED && DEMO_PASSWORD.length > 0 && input === DEMO_PASSWORD) return true;
   const expected = process.env.ADMIN_PASSWORD || '';
   const match = timingSafeEqual(sha256(input), sha256(expected));
   return expected.length >= 12 && match;

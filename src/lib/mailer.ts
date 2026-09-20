@@ -76,7 +76,7 @@ export const mailTemplates = {
       <blockquote style="border-left:4px solid #105258;padding-left:14px;color:#33484f">
         <strong>${titel}</strong><br/>📍 ${plz} ${ort}
       </blockquote>
-      <a href="${APP_URL()}/anfrage/${anfrageId}" style="display:inline-block;background:#105258;color:#fff;padding:14px 28px;border-radius:14px;text-decoration:none;font-weight:800;margin-top:16px">Anfrage ansehen & Angebot senden</a>
+      <a href="${APP_URL()}/pro/jobs/${anfrageId}" style="display:inline-block;background:#105258;color:#fff;padding:14px 28px;border-radius:14px;text-decoration:none;font-weight:800;margin-top:16px">Anfrage ansehen & Angebot senden</a>
       <p style="color:#9aa9ad;font-size:12px;margin-top:28px">Deine Gebiets-Benachrichtigung von einfachhausen.</p>
     </div>`,
 };

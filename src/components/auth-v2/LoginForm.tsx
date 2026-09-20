@@ -25,6 +25,8 @@ interface LoginFormProps {
   error?: string;
   onRoleChange?: (role: Role) => void;
   onAuthModeChange?: (mode: AuthMode) => void;
+  /** Explicit opt-in: demo box + auto-login render only when true. Default off (fail-closed). */
+  demoEnabled?: boolean;
 }
 
 type LegalType = "agb" | "datenschutz" | "impressum" | "sicherheit" | "partnerkriterien";
@@ -53,6 +55,7 @@ export function LoginForm({
   error,
   onRoleChange,
   onAuthModeChange,
+  demoEnabled = false,
 }: LoginFormProps = {}) {
   const [internalRole, setInternalRole] = useState<Role>(initialRole);
   const role = propRole ?? internalRole;
@@ -114,7 +117,7 @@ export function LoginForm({
   // Fill-only: inserts demo credentials into the fields, never signs in.
   // The user reviews and submits explicitly via "Anmelden".
   const handleFillDemo = (targetRole: Role) => {
-    if (isLoading) return;
+    if (isLoading || !demoEnabled) return;
     const demo = targetRole === "kunde" ? DEMO_USERS.kunde : DEMO_USERS.handwerker;
     setRole(targetRole);
     setAuthMode("login");
@@ -126,7 +129,7 @@ export function LoginForm({
   // Explicit demo start: fills AND signs in. Only these clearly labelled
   // buttons may trigger a sign-in without an explicit form submit.
   const handleStartDemo = async (targetRole: Role) => {
-    if (isLoading) return;
+    if (isLoading || !demoEnabled) return;
     const demo = targetRole === "kunde" ? DEMO_USERS.kunde : DEMO_USERS.handwerker;
     setRole(targetRole);
     setAuthMode("login");
@@ -226,9 +229,11 @@ export function LoginForm({
 
       {authMode === "login" ? (
         <form className="arena-stack" action={loginFormAction} aria-busy={isLoading}>
-          <button id="btn-demo-kunde" type="submit" className="arena-social" disabled={isLoading} formNoValidate formAction={() => handleStartDemo("kunde")}>
-            Eigentümer-Demo starten
-          </button>
+          {demoEnabled && (
+            <button id="btn-demo-kunde" type="submit" className="arena-social" disabled={isLoading} formNoValidate formAction={() => handleStartDemo("kunde")}>
+              Eigentümer-Demo starten
+            </button>
+          )}
           <div className="arena-field">
             <label className="arena-label" htmlFor="login-identifier">E-Mail</label>
             <input
@@ -397,7 +402,8 @@ export function LoginForm({
         </form>
       )}
 
-      <div className="arena-demo" aria-label="Demo-Zugang">
+      {demoEnabled && (
+        <div className="arena-demo" aria-label="Demo-Zugang">
         <div className="arena-demo-top">
           <span>DEMO-ZUGANG</span>
           <button type="button" id="btn-demo-fill" className="arena-mini-link" disabled={isLoading} onClick={() => handleFillDemo(role)}>
@@ -419,7 +425,8 @@ export function LoginForm({
             </button>
           </form>
         </div>
-      </div>
+        </div>
+      )}
 
       <p className="arena-ssl">
         <Lock size={14} aria-hidden="true" /> SSL-verschlüsselt · Serverstandort Deutschland

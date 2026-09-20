@@ -10,7 +10,7 @@ let seeded = false;
  * against the dummy hash and locks the account out.
  */
 export function ensureLocalDemoAccounts(): void {
-  if (!DEMO_LOGIN_ENABLED || seeded) return;
+  if (!DEMO_LOGIN_ENABLED || DEMO_PASSWORD.length === 0 || seeded) return;
   const hash = bcrypt.hashSync(DEMO_PASSWORD, 12);
 
   for (const demo of Object.values(DEMO_USERS)) {

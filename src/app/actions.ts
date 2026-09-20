@@ -196,7 +196,7 @@ export async function registerAction(fd: FormData): Promise<{ error: string } | 
 
 export async function loginAction(fd: FormData): Promise<{ error: string } | { redirectTo: string }> {
   const parsed = loginSchema.safeParse({ email: demoEmailFor(text(fd,'email')), password: String(fd.get('password') ?? '').trim() });
-  if (parsed.success && DEMO_LOGIN_ENABLED && isDemoEmail(parsed.data.email) && parsed.data.password === DEMO_PASSWORD) {
+  if (parsed.success && DEMO_LOGIN_ENABLED && DEMO_PASSWORD.length > 0 && isDemoEmail(parsed.data.email) && parsed.data.password === DEMO_PASSWORD) {
     ensureLocalDemoAccounts();
     recordRateLimitSuccess('login', parsed.data.email);
   }

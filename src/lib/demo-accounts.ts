@@ -1,19 +1,22 @@
 /**
  * Demo-Logins fuer die Demo-Phase (befristet!).
  *
- *   Kunden-App:  Benutzername "kunde"      / Passwort "admin"
- *   Handwerker:   Benutzername "handwerker" / Passwort "admin"
- *   CRM (/admin): Passwort "admin" (kein Benutzername noetig)
+ *   Kunden-App:  Benutzername "kunde"      / Passwort aus DEMO_PASSWORD (ENV)
+ *   Handwerker:   Benutzername "handwerker" / Passwort aus DEMO_PASSWORD (ENV)
+ *   CRM (/admin): Passwort aus DEMO_PASSWORD (ENV, kein Benutzername noetig)
  *
- * Kill-Switch: DEMO_LOGIN_ENABLED=0  -> Box versteckt, Mappings + Exception aus.
+ * Kill-Switch (opt-in, fail-closed): DEMO_LOGIN_ENABLED=1 UND DEMO_PASSWORD
+ * gesetzt -> Demo an. Jeder andere Zustand (Flag fehlt, != '1', oder kein
+ * Passwort) -> Box versteckt, Mappings + Exception aus.
  * Nach der Demo-Phase: diese Datei + Login-Box + Seed-Script + Doku loeschen
  * (siehe docs/DEMO_ACCOUNTS.md) und die Supabase-Demo-User deaktivieren.
  *
  * WARNUNG: Oeffentliche Demo-Zugangsdaten — jeder kann sich als diese User
  * einloggen. Keine echten Daten mit Demo-Accounts verknuepfen.
  */
-export const DEMO_LOGIN_ENABLED = process.env.DEMO_LOGIN_ENABLED !== '0';
-export const DEMO_PASSWORD = 'admin';
+export const DEMO_LOGIN_ENABLED =
+  process.env.DEMO_LOGIN_ENABLED === '1' && (process.env.DEMO_PASSWORD ?? '').length > 0;
+export const DEMO_PASSWORD = process.env.DEMO_PASSWORD ?? '';
 
 export const DEMO_USERS = {
   kunde: {

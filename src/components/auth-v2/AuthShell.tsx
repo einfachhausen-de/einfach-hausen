@@ -15,6 +15,7 @@ export function AuthShell({
   initialRequest,
   notice,
   error,
+  demoEnabled,
 }: {
   initialAuthMode?: AuthMode;
   initialRole?: Role;
@@ -25,6 +26,8 @@ export function AuthShell({
   notice?: string;
   /** Server message from a redirect (?error=…), shown as an alert. */
   error?: string;
+  /** Explicit opt-in from the server page: demo UI renders only when true. */
+  demoEnabled?: boolean;
 }) {
   const [role, setRole] = useState<Role>(initialRole);
   const [authMode, setAuthMode] = useState<AuthMode>(initialAuthMode);
@@ -58,6 +61,7 @@ export function AuthShell({
               initialRequest={initialRequest}
               notice={notice}
               error={error}
+              demoEnabled={demoEnabled}
               onRoleChange={setRole}
               onAuthModeChange={setAuthMode}
             />

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { AuthShell } from "@/components/auth-v2/AuthShell";
+import { DEMO_LOGIN_ENABLED } from "@/lib/demo-accounts";
 
 export const metadata: Metadata = {
   title: "Registrieren",
@@ -20,5 +21,6 @@ export default async function RegisterPage({ searchParams }: { searchParams: Pro
     initialRequest={sp.request}
     notice={sp.notice}
     error={sp.error}
+    demoEnabled={DEMO_LOGIN_ENABLED}
   />;
 }
