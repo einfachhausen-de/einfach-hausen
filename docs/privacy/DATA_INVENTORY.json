@@ -380,6 +380,11 @@
       "purpose": "Stripe-/Externe-Webhook-Verarbeitung (Ids, Status)",
       "retention": "short"
     },
+    "affiliate_clicks": {
+      "personal": false,
+      "purpose": "Vergleichs-Klickmessung: Kategorie, Partner, feste Quelle, zufaellige Referenz, Zeitpunkt. Bewusst ohne Nutzer-, Haus-, Vertrags- oder Kontaktbezug (Issue #128)",
+      "retention": "short"
+    },
     "homeowner_contact_entries": {
       "personal": true,
       "purpose": "Persönliches Adressbuch: manuelle und verknüpfte Partnerkontakte",

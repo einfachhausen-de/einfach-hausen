@@ -104,6 +104,8 @@ CREATE TABLE IF NOT EXISTS auth_rate_limits (kind TEXT NOT NULL,identifier TEXT 
 CREATE TABLE IF NOT EXISTS admin_audit_log (id INTEGER PRIMARY KEY AUTOINCREMENT,actor TEXT NOT NULL,action TEXT NOT NULL,target TEXT NOT NULL DEFAULT '',detail TEXT NOT NULL DEFAULT '',created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP); CREATE INDEX IF NOT EXISTS idx_admin_audit_created ON admin_audit_log(created_at DESC);
 CREATE TABLE IF NOT EXISTS security_events (id INTEGER PRIMARY KEY AUTOINCREMENT,kind TEXT NOT NULL,identifier TEXT NOT NULL DEFAULT '',detail TEXT NOT NULL DEFAULT '',created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP); CREATE INDEX IF NOT EXISTS idx_security_events_created ON security_events(created_at DESC);
 CREATE TABLE IF NOT EXISTS webhook_events (source TEXT NOT NULL CHECK(source IN ('whatsapp','stripe')),event_id TEXT NOT NULL,status TEXT NOT NULL CHECK(status IN ('processing','processed')),created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,processed_at TEXT,PRIMARY KEY(source,event_id)); CREATE INDEX IF NOT EXISTS idx_webhook_events_created ON webhook_events(created_at DESC);
+CREATE TABLE IF NOT EXISTS affiliate_clicks (id INTEGER PRIMARY KEY AUTOINCREMENT,category TEXT NOT NULL,partner_id TEXT NOT NULL,source TEXT NOT NULL,click_ref TEXT NOT NULL,created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,UNIQUE(partner_id,click_ref));
+CREATE INDEX IF NOT EXISTS idx_affiliate_clicks_created ON affiliate_clicks(created_at DESC);
 `));
 
 const seed=db.transaction(()=>{

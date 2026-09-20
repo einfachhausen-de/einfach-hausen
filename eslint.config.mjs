@@ -21,6 +21,9 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
     ".gitnexus/**",
+    // local build leftovers/backups (.next.bak-*, .next-OLD-*, .next-TANGLED-*):
+    // untracked copies of a Next build. Not source, must never gate lint.
+    ".next*/**",
     // nested full app repo (own GitHub history); must not gate this repo's lint
     "einfach-hausen/**",
     // stale agent worktrees/drops with repo copies: never lint-gate this repo
