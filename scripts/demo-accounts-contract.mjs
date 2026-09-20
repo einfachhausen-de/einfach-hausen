@@ -10,9 +10,14 @@ const auth = fs.readFileSync(path.join(root, 'src/lib/auth.ts'), 'utf8');
 const form = fs.readFileSync(path.join(root, 'src/components/auth-v2/LoginForm.tsx'), 'utf8');
 const loginRoute = fs.readFileSync(path.join(root, 'src/app/login/page.tsx'), 'utf8');
 
-for (const token of ['kunde@demo.einfachhausen.de', 'handwerker@demo.einfachhausen.de', "DEMO_PASSWORD = 'admin'"]) {
+for (const token of ['kunde@demo.einfachhausen.de', 'handwerker@demo.einfachhausen.de']) {
   if (!accounts.includes(token)) failures.push(`demo account contract missing ${token}`);
 }
+// Opt-in fail-closed (88431f0): kein Klartext-Passwort mehr im Code, ENV-only.
+for (const token of ["process.env.DEMO_LOGIN_ENABLED === '1'", 'process.env.DEMO_PASSWORD']) {
+  if (!accounts.includes(token)) failures.push(`demo opt-in contract missing ${token}`);
+}
+if (accounts.includes("= 'admin'")) failures.push('demo password must not be hardcoded');
 for (const token of ['DEMO_LOGIN_ENABLED', 'ensureDemoAppRow', 'isDemoEmail']) {
   if (!auth.includes(token)) failures.push(`server demo binding missing ${token}`);
 }

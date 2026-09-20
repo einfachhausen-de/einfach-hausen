@@ -35,8 +35,9 @@ siehe `NEXT_PUBLIC_APP_URL` in `.env.example`).
   `AI_MODEL` (Standard `auto/best-fast`), `AI_API_KEY` oder
   `OMNIROUTE_MASTER_KEY`. Ohne Schlüssel antwortet der KI-Chat mit einer
   ehrlichen Kontingent-Meldung (siehe `docs/QUOTA_MODEL.md`).
-- Demo-Phase (befristet): `DEMO_LOGIN_ENABLED=0` schaltet Demo-Box,
-  Demo-Mapping und Admin-Ausnahme ab (siehe `docs/DEMO_ACCOUNTS.md`).
+- Demo-Phase (befristet, opt-in fail-closed): Nur `DEMO_LOGIN_ENABLED=1` plus
+  gesetztes `DEMO_PASSWORD` schalten Demo-Box, Demo-Mapping und Admin-Ausnahme
+  an; Default ist aus (siehe `docs/DEMO_ACCOUNTS.md`).
 
 ## Nützliche Befehle
 

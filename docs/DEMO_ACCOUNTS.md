@@ -2,14 +2,14 @@
 
 | Zugang | Benutzername | Passwort | Wohin |
 | --- | --- | --- | --- |
-| Kunden-App | `kunde` | `admin` | `/login` → `/app` |
-| Handwerker-App | `handwerker` | `admin` | `/login` → `/pro` |
-| CRM/Admin | — (nur Passwortfeld) | `admin` | `/admin/login` |
+| Kunden-App | `kunde` | `DEMO_PASSWORD` (ENV) | `/login` → `/app` |
+| Handwerker-App | `handwerker` | `DEMO_PASSWORD` (ENV) | `/login` → `/pro` |
+| CRM/Admin | — (nur Passwortfeld) | `DEMO_PASSWORD` (ENV) | `/admin/login` |
 
-Die Login-Seite zeigt die Demo-Box mit Ein-Klick-Buttons; Benutzernamen gehen auch per Hand (ohne `@` → Demo-Mapping).
+Die Login-Seite zeigt die Demo-Box mit Ein-Klick-Buttons nur wenn Demo explizit an ist; Benutzernamen gehen auch per Hand (ohne `@` → Demo-Mapping).
 
 ## Technik
-- Supabase-User `kunde@demo.einfachhausen.de` + `handwerker@demo.einfachhausen.de` (Passwort `admin`, confirmed). Anlegen: `node scripts/seed-demo-users.mjs` (braucht Service-Key).
+- Supabase-User `kunde@demo.einfachhausen.de` + `handwerker@demo.einfachhausen.de` (Passwort aus `DEMO_PASSWORD`, confirmed). Anlegen: `node scripts/seed-demo-users.mjs` (braucht Service-Key).
 - App-Zeilen entstehen beim ersten Login automatisch (`ensureDemoAppRow`, feste Rollen).
 - CRM: Ausnahme in `adminPasswordMatches` (nur wenn Demo an).
 
@@ -19,10 +19,10 @@ Gesetzt per `/tmp/demo-seed.sql`-Muster direkt in `/var/lib/einfach-hausen/einfa
 - Handwerker (id 8): Demo-Betrieb (verifiziert, aktiver Vertrag); Dispatches auf 9001-9003.
 Ids 9001+ sind Demo-reserviert (INSERT OR IGNORE, Re-Run sicher).
 
-## Kill-Switch
-`DEMO_LOGIN_ENABLED=0` → Box/Mapping/Admin-Ausnahme aus. Für Produktion in der Build-Env setzen.
+## Kill-Switch (opt-in, fail-closed seit 88431f0)
+Nur `DEMO_LOGIN_ENABLED=1` UND gesetztes `DEMO_PASSWORD` schalten Box/Mapping/Admin-Ausnahme an. Jeder andere Zustand (Default) → aus. Für Produktion nichts setzen.
 
 ## Entfernung nach der Demo-Phase
-1. `DEMO_LOGIN_ENABLED=0` setzen (sofort wirksam nach Deploy).
+1. `DEMO_LOGIN_ENABLED` unset/`0` lassen bzw. entfernen (sofort wirksam nach Deploy, Default ist aus).
 2. Supabase-Demo-User deaktivieren/löschen.
 3. Löschen: `src/lib/demo-accounts.ts`, Login-Box in `src/app/login/page.tsx`, Ausnahme in `src/lib/admin-auth.ts`, `scripts/seed-demo-users.mjs`, diese Datei.
