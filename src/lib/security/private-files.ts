@@ -64,8 +64,8 @@ export async function resolvePrivateFile(storedPath:string|null|undefined){
 
   try{
     const [realRoot,realPublic,realFile]=await Promise.all([
-      fs.realpath(privateRoot()),
-      fs.realpath(publicRoot()),
+      fs.realpath(/* turbopackIgnore: true */ privateRoot()),
+      fs.realpath(/* turbopackIgnore: true */ publicRoot()),
       fs.realpath(/* turbopackIgnore: true */ lexical),
     ]);
 
