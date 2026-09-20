@@ -91,10 +91,11 @@ export const ownerAreas: readonly NavArea[] = [
  * describe the person, not the house. They live in the account menu instead.
  */
 export const ownerAccountItems: readonly NavChild[] = [
-  { href: '/app/profile', label: 'Profil & Einstellungen' },
+  { href: '/app/profile', label: 'Profil' },
   { href: '/notifications', label: 'Benachrichtigungen' },
   { href: '/app/plans', label: 'Mitgliedschaft & Pakete' },
   { href: '/app/hilfe', label: 'Hilfe & Kontakt' },
+  { href: '/app/settings', label: 'Einstellungen' },
 ];
 
 /**
@@ -154,6 +155,7 @@ export const providerAccountItems: readonly NavChild[] = [
   { href: '/pro/profile', label: 'Profil & Vertrauen' },
   { href: '/pro/plans', label: 'Partner-Tarife' },
   { href: '/pro/hilfe', label: 'Hilfe & Kontakt' },
+  { href: '/app/settings', label: 'Einstellungen' },
 ];
 
 export type CrumbTrail = readonly { href?: string; label: string }[];

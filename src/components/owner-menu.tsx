@@ -4,12 +4,12 @@ import { EHLogo } from "@/design-system";
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Bell, CircleHelp, LogOut, UserRound, WalletCards } from "lucide-react";
+import { Bell, CircleHelp, LogOut, Settings, UserRound, WalletCards } from "lucide-react";
 import { CloseIcon, CrownIcon, HamburgerIcon, ArrowRightThin } from "@/components/icons";
 import { logoutAction } from "@/app/actions";
 import { matchesArea, ownerAccountItems, ownerAreas } from "./nav-config";
 
-const ACCOUNT_ICONS = [UserRound, Bell, WalletCards, CircleHelp] as const;
+const ACCOUNT_ICONS = [UserRound, Bell, WalletCards, CircleHelp, Settings] as const;
 
 function childActive(active: string, href: string): boolean {
   // Children that only differ by query string are marked by the page's own
