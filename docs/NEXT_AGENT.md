@@ -941,3 +941,15 @@ Hinweis zum Deploy-Gate:
 Der Security-Fuzz benötigt `WEBHOOK_SECRET` als temporären Gate-Fixture-Wert, obwohl die Produktion bewusst ohne diesen Legacy-Secret fail-closed läuft. Der erste Beobachtungslauf war deshalb 14/15; der maßgebliche Lauf mit ausschließlich prozesslokalem Fixture-Secret war 15/15. Die Produktions-Environment wurde dafür nicht verändert.
 
 > **EH-OWNER-COHERENCE 2026-09-13 doc-finalized (no deploy):** AMEND02 root approval reconciled — six `.scope :global` fixes + one sidebar `box-shadow:none` line are approved design corrections (sidebar: no lock entry changed, per conditions); AMEND03 append applied once. Final gates green (tsc 0 / eslint 0 errors / owner 30/30 / webpack 0 / e2e ok 15/15 / design-check CONSISTENT, logs /tmp/eh-final-*). Code implemented, root image direction accepted, independent release-acceptor PENDING, deploy PENDING. Taskplan absent + @example.test cleanup-500 limits preserved. Next: acceptor verdict, then ROOT-only release commands (/tmp/eh-coherence-release-commands.md).
+
+## App-IA: Ein Thema, ein Owner (2026-09-21)
+Jedes Thema hat genau eine Owner-Flaeche (einzige Stelle mit Inhalt/Logik). Alle anderen Flaechen sind reine Einstiegspunkte mit identischem Label und identischem Ziel.
+| Thema | Owner | Einstiege (Deep-Links) |
+|---|---|---|
+| Identitaet & Session | Popover unten links (nav-user.tsx) | – |
+| Profil | Route /app/profile (Sidebar "Konto") | – |
+| Inbox + Badge | Route /notifications | Glocke Header, Sidebar "Konto" |
+| Mitgliedschaft & Pakete | Route /app/plans (Sidebar "Konto") | – |
+| Hilfe & Kontakt | Route /app/hilfe (Sidebar "Konto") | – |
+| Einstellungen (Konto & Daten, Benachrichtigungen, KI, App/Offline) | Einstellungs-Dialog | Sidebar "Einstellungen" (/app/settings), Popover "Einstellungen", ?einstellungen=<section> |
+Regeln: Dialog enthaelt keine Link-Hubs zu Routen. Sidebar enthaelt keine Einstellungen-Inhalte. Badge nur an Glocke + Sidebar-Eintrag "Benachrichtigungen". Neues Thema: erst Owner bestimmen, dann Einstiege – nie Inhalt duplizieren.

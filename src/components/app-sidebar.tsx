@@ -1,4 +1,4 @@
-import { Bell, CircleHelp, UserRound, WalletCards } from 'lucide-react';
+import { Bell, CircleHelp, Settings, UserRound, WalletCards } from 'lucide-react';
 import { NavMain } from '@/components/nav-main';
 import { NavProjects } from '@/components/nav-projects';
 import { NavUser } from '@/components/nav-user';
@@ -17,13 +17,14 @@ import {
   providerAccountItems,
   providerAreas,
 } from './nav-config';
-
-const OWNER_ACCOUNT_ICONS = [UserRound, Bell, WalletCards, CircleHelp] as const;
-const PROVIDER_ACCOUNT_ICONS = [UserRound, WalletCards, CircleHelp] as const;
-
+const OWNER_ACCOUNT_ICONS = [UserRound, Bell, WalletCards, CircleHelp, Settings] as const;
+const PROVIDER_ACCOUNT_ICONS = [UserRound, WalletCards, CircleHelp, Settings] as const;
 /**
  * App-Navigation aus nav-config: Hauptbereiche je Rolle plus Konto-Gruppe,
  * echter Nutzer im Footer, Marke im Kopf. Keine Demo-Daten, keine Mock-Badges.
+ * IA-Regel ein Thema/ein Owner: Die Konto-Gruppe enthaelt reine Deep-Links mit
+ * identischem Label und Ziel wie die Owner-Flaeche. /app/settings wird global
+ * von settings-dialog-host.tsx als Overlay abgefangen (bestehender Vertrag).
  */
 export function AppSidebar({
   role,
@@ -35,8 +36,6 @@ export function AppSidebar({
   userSub,
   userInitials,
   unread,
-  profileHref,
-  hilfeHref,
 }: {
   role: 'homeowner' | 'provider';
   active: string;
@@ -68,7 +67,6 @@ export function AppSidebar({
       items,
     };
   });
-
   const accountItems = pro ? providerAccountItems : ownerAccountItems;
   const accountIcons = pro ? PROVIDER_ACCOUNT_ICONS : OWNER_ACCOUNT_ICONS;
   const accountEntries = accountItems.map((item, index) => {
@@ -78,12 +76,8 @@ export function AppSidebar({
       label: item.label,
       icon: <Icon />,
       isActive: item.href === active,
-      // "Profil & Einstellungen" öffnet den Einstellungs-Dialog als Overlay über
-      // der aktuellen Seite (Default-Bereich Konto & Daten), statt zu navigieren.
-      dialogSection: item.href === '/app/profile' ? 'account' : undefined,
     };
   });
-
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader>
@@ -98,10 +92,6 @@ export function AppSidebar({
           name={userName}
           sub={userSub}
           initials={userInitials}
-          profileHref={profileHref}
-          hilfeHref={hilfeHref}
-          notificationsHref="/notifications"
-          unread={unread}
         />
       </SidebarFooter>
       <SidebarRail />
