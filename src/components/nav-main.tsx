@@ -52,37 +52,58 @@ export function NavMain({ entries, label }: { entries: readonly MainNavEntry[]; 
               </SidebarMenuButton>
             </SidebarMenuItem>
           ) : (
-            <Collapsible key={entry.href} asChild defaultOpen={entry.isActive}>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={entry.isActive} tooltip={entry.label}>
-                  <Link href={entry.href} aria-current={entry.exact ? 'page' : undefined}>
-                    {entry.icon}
-                    <span>{entry.label}</span>
-                  </Link>
-                </SidebarMenuButton>
-                <CollapsibleTrigger asChild>
-                  <SidebarMenuAction aria-label={`Untermenue ${entry.label} umschalten`}>
-                    <ChevronRightIcon />
-                  </SidebarMenuAction>
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                  <SidebarMenuSub>
-                    {entry.items.map((child) => (
-                      <SidebarMenuSubItem key={child.href}>
-                        <SidebarMenuSubButton asChild isActive={child.isActive}>
-                          <Link href={child.href} aria-current={child.isActive ? 'page' : undefined}>
-                            <span>{child.label}</span>
-                          </Link>
-                        </SidebarMenuSubButton>
-                      </SidebarMenuSubItem>
-                    ))}
-                  </SidebarMenuSub>
-                </CollapsibleContent>
-              </SidebarMenuItem>
-            </Collapsible>
+            <NavCollapsibleEntry key={entry.href} entry={entry} />
           ),
         )}
       </SidebarMenu>
     </SidebarGroup>
+  );
+}
+
+/**
+ * Unkontrollierter Collapsible-State (`defaultOpen`) greift nur beim ersten
+ * Mount: Bei Client-Navigation (kein Full-Reload, kein Remount des
+ * Sidebar-Baums) blieb ein per Route aktiv gewordener Abschnitt geschlossen
+ * bzw. ein ehemals aktiver offen — die Seitenleiste „klappte“ scheinbar zu.
+ * Der aktive-sensitive `key` mountet den Abschnitt genau beim Wechsel des
+ * Aktiv-Zustands neu, sodass `defaultOpen` wieder aus der aktiven Route
+ * abgeleitet wird; manuelles Umschalten bleibt dazwischen erhalten.
+ * Das mobile Sheet-Schließen bei Navigation ist korrektes Verhalten und
+ * bleibt unverändert.
+ */
+function NavCollapsibleEntry({ entry }: { entry: MainNavEntry }) {
+  return (
+    <Collapsible
+      key={entry.isActive ? `${entry.href}:active` : entry.href}
+      asChild
+      defaultOpen={entry.isActive}
+    >
+      <SidebarMenuItem>
+        <SidebarMenuButton asChild isActive={entry.isActive} tooltip={entry.label}>
+          <Link href={entry.href} aria-current={entry.exact ? 'page' : undefined}>
+            {entry.icon}
+            <span>{entry.label}</span>
+          </Link>
+        </SidebarMenuButton>
+        <CollapsibleTrigger asChild>
+          <SidebarMenuAction aria-label={`Untermenue ${entry.label} umschalten`}>
+            <ChevronRightIcon />
+          </SidebarMenuAction>
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <SidebarMenuSub>
+            {entry.items.map((child) => (
+              <SidebarMenuSubItem key={child.href}>
+                <SidebarMenuSubButton asChild isActive={child.isActive}>
+                  <Link href={child.href} aria-current={child.isActive ? 'page' : undefined}>
+                    <span>{child.label}</span>
+                  </Link>
+                </SidebarMenuSubButton>
+              </SidebarMenuSubItem>
+            ))}
+          </SidebarMenuSub>
+        </CollapsibleContent>
+      </SidebarMenuItem>
+    </Collapsible>
   );
 }
