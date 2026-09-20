@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Bell, BellOff, ShieldCheck, Smartphone, Sparkles, UserRound } from "lucide-react";
+import { Bell, BellOff, CircleHelp, ShieldCheck, Smartphone, Sparkles, UserRound, WalletCards } from "lucide-react";
 
 import {
   Breadcrumb,
@@ -29,18 +29,20 @@ import {
   SidebarMenuItem,
   SidebarProvider,
 } from "@/components/ui/sidebar";
-import { EHFormSection, EHList } from "@/design-system";
+import { EHActions, EHButton, EHFormSection, EHList, EHText } from "@/design-system";
 import { InstallAppCard } from "@/components/install-app-card";
 import { AccountActions } from "./account-actions";
 import { AiSettings } from "./ai-settings";
 import { PwaSettingsStatus } from "./pwa-settings-status";
 import styles from "./settings.module.css";
 
-type SectionId = "account" | "notifications" | "ai" | "app";
+type SectionId = "account" | "notifications" | "plans" | "help" | "ai" | "app";
 
 const NAV: { id: SectionId; name: string; icon: React.ReactNode }[] = [
-  { id: "account", name: "Konto & Daten", icon: <UserRound /> },
+  { id: "account", name: "Profil & Einstellungen", icon: <UserRound /> },
   { id: "notifications", name: "Benachrichtigungen", icon: <Bell /> },
+  { id: "plans", name: "Mitgliedschaft & Pakete", icon: <WalletCards /> },
+  { id: "help", name: "Hilfe & Kontakt", icon: <CircleHelp /> },
   { id: "ai", name: "KI-Assistent", icon: <Sparkles /> },
   { id: "app", name: "App & Offline", icon: <Smartphone /> },
 ];
@@ -48,15 +50,18 @@ const NAV: { id: SectionId; name: string; icon: React.ReactNode }[] = [
 export type SettingsSectionId = SectionId;
 
 /** Gueltige Dialog-Bereiche; erster Eintrag ("account") ist der Default. */
-export const SETTINGS_SECTION_IDS: readonly SectionId[] = ["account", "notifications", "ai", "app"];
+export const SETTINGS_SECTION_IDS: readonly SectionId[] = ["account", "notifications", "plans", "help", "ai", "app"];
 
 /** Unbekannte/leere Herkunft -> erster Bereich ("account"). */
 export function parseSettingsSection(value: string | null | undefined): SectionId {
-  return value === "notifications" || value === "ai" || value === "app" ? value : "account";
+  return value === "notifications" || value === "plans" || value === "help" || value === "ai" || value === "app" ? value : "account";
 }
 
 // Owner-Einstellungen im Sidebar-Dialog-Muster (vgl. settings-dialog-Vorlage).
-// Alle Inhalte/Texte sind 1:1 aus page.tsx übernommen; keine eigene Logik.
+// Konto/Benachrichtigungen/KI/App-Texte sind 1:1 aus page.tsx übernommen;
+// Mitgliedschaft & Pakete verlinkt die echten /app/plans- (und /preise-)Routen,
+// Hilfe & Kontakt die echten /app/messages-, /app/hilfe- und /app/emergency-Routen.
+// Keine eigene Logik, keine Mockdaten.
 // Gesteuert (open/onOpenChange/showTrigger=false) als globales Overlay aus dem
 // Rahmen; ungesteuert (Standard) mit eigenem Trigger, z.B. im Header von /app/settings.
 export function OwnerSettingsDialog({
@@ -83,13 +88,13 @@ export function OwnerSettingsDialog({
           <Button size="sm" variant="secondary">Einstellungen öffnen</Button>
         </DialogTrigger>
       )}
-      <DialogContent className="overflow-hidden p-0 md:max-h-[500px] md:max-w-[700px] lg:max-w-[800px]">
+      <DialogContent className="overflow-hidden p-0 md:max-h-[85vh] lg:max-w-[1024px] xl:max-w-[1100px]">
         <DialogTitle className="sr-only">App-Einstellungen</DialogTitle>
         <DialogDescription className="sr-only">
-          Konto und Daten, Benachrichtigungen, KI-Assistent sowie App-Installation und Offline-Status.
+          Profil und Einstellungen, Benachrichtigungen, Mitgliedschaft und Pakete, Hilfe und Kontakt, KI-Assistent sowie App-Installation und Offline-Status.
         </DialogDescription>
         <SidebarProvider className="items-start">
-          <Sidebar collapsible="none" className="hidden md:flex">
+          <Sidebar collapsible="none" className="hidden md:flex md:min-w-[240px]">
             <SidebarContent>
               <SidebarGroup>
                 <SidebarGroupContent>
@@ -112,7 +117,7 @@ export function OwnerSettingsDialog({
               </SidebarGroup>
             </SidebarContent>
           </Sidebar>
-          <main className="flex h-[480px] flex-1 flex-col overflow-hidden">
+          <main className="flex h-[70vh] flex-1 flex-col overflow-hidden">
             <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
               <div className="flex items-center gap-2 px-4">
                 <Breadcrumb>
@@ -144,8 +149,8 @@ export function OwnerSettingsDialog({
                 ))}
               </nav>
 
-              <section hidden={active !== "account"} aria-label="Konto & Daten">
-                <EHFormSection title="Konto & Daten" description="Datenexport und Konto-Löschung nach DSGVO.">
+              <section hidden={active !== "account"} aria-label="Profil & Einstellungen">
+                <EHFormSection title="Profil & Einstellungen" description="Datenexport und Konto-Löschung nach DSGVO.">
                   <AccountActions />
                 </EHFormSection>
               </section>
@@ -171,6 +176,32 @@ export function OwnerSettingsDialog({
                     </span>
                     <input type="checkbox" disabled aria-label="Checklisten-Erinnerungen per Push noch nicht verfügbar" />
                   </div>
+                </EHFormSection>
+              </section>
+
+              <section hidden={active !== "plans"} aria-label="Mitgliedschaft & Pakete">
+                <EHFormSection title="Mitgliedschaft & Pakete" description="Aktueller Tarif und Pakete – Verwaltung auf der Tarif-Seite.">
+                  <EHText muted>Du brauchst kein kostenpflichtiges Abo, um mit deinem Hauskonto zu beginnen. Dein aktueller Tarif und deine Paketbuchungen stehen auf der Tarif-Seite.</EHText>
+                  <EHList label="Mitgliedschaft & Pakete" items={[{ id: 'plans', title: 'Tarif & Pakete öffnen', text: 'Aktueller Tarif, Mitgliedschaften und Einzelpakete.', href: '/app/plans' }]} />
+                  <EHActions>
+                    <EHButton href="/app/plans">Pakete verwalten</EHButton>
+                    <EHButton href="/preise" variant="secondary">Öffentliche Tarifübersicht</EHButton>
+                  </EHActions>
+                </EHFormSection>
+              </section>
+
+              <section hidden={active !== "help"} aria-label="Hilfe & Kontakt">
+                <EHFormSection title="Hilfe & Kontakt" description="Ansprechpartner, Hilfeseite und Notfallmeldung.">
+                  <EHList label="Hilfe & Kontakt" items={[
+                    { id: 'messages', title: 'Absprachen & Kontakt', text: 'Nachrichten an deine Ansprechpartner.', href: '/app/messages' },
+                    { id: 'hilfe', title: 'Hilfeseite öffnen', text: 'Offene Vorgänge, Rechnungen und nächste Schritte.', href: '/app/hilfe' },
+                    { id: 'emergency', title: 'Notfall melden', text: 'Dringende Schäden in der App melden – bei Lebensgefahr 112.', href: '/app/emergency' },
+                  ]} />
+                  <EHActions>
+                    <EHButton href="/app/messages">Ansprechpartner öffnen</EHButton>
+                    <EHButton href="/app/hilfe" variant="secondary">Hilfeseite öffnen</EHButton>
+                  </EHActions>
+                  <EHText muted>Bei Lebensgefahr, Brand oder Gasgeruch gilt allein der öffentliche Notruf 112.</EHText>
                 </EHFormSection>
               </section>
 
