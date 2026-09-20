@@ -97,7 +97,7 @@ try{
   check('WhatsApp verifies signature before message iteration',wa.indexOf('verifyMetaSignature')<wa.indexOf('for(const entry'));
   const stripeRoute=fs.readFileSync(path.join(root,'src/app/api/stripe/webhook/route.ts'),'utf8');
   check('Stripe event is claimed before payment mutation branch',stripeRoute.indexOf("claimWebhookEvent('stripe',event.id)")<stripeRoute.indexOf("if(event.type==='checkout.session.completed'"));
-  for(const rel of ['src/app/api/packages/success/route.ts','src/app/api/payments/success/route.ts','src/app/api/memberships/success/route.ts','src/app/api/partner-memberships/success/route.ts']){
+  for(const rel of ['src/app/api/payments/success/route.ts','src/app/api/partner-memberships/success/route.ts']){
     const source=fs.readFileSync(path.join(root,rel),'utf8');
     check(`${rel} has no authoritative payment mutation`,!/(markPaymentPaid|activatePackageOrder|INSERT INTO subscriptions|UPDATE subscriptions|INSERT INTO partner_subscriptions|UPDATE partner_subscriptions)/.test(source));
     check(`${rel} exposes configured/unconfigured outcome`,source.includes('configured')&&source.includes('unavailable'));

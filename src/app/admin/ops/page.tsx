@@ -7,7 +7,7 @@ import s from '@/components/shell.module.css';
 import { EHButton, EHField, EHInput, EHMetricsBar, EHPageHeader, EHRecordList, EHScope, EHSection, EHStatus, EHText, EHWorkSection, EHWorkspaceGrid, EHWorkflowStack, type EHRecordEntry } from '@/design-system';
 
 /** Die Flags, die diese Seite schaltet; die Kennzahl oben zaehlt genau diese Liste. */
-const FLAGS=['ki_chat','pilot_cohort_open'];
+const FLAGS=['ki_chat'];
 
 export default async function AdminOps({searchParams}:{searchParams:Promise<Record<string,string|undefined>>}){
   await requireAdmin();

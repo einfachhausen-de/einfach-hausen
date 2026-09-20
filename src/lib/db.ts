@@ -125,22 +125,19 @@ const seed=db.transaction(()=>{
     ['energie','Energie & Smart Home','Energie & Smart Home','pv,photovoltaik,speicher,wallbox,smart home,energie',12000,30000,1],
     ['sonstiges','Hausservice','Hausmeister & Sonstiges','haus,hilfe,sonstiges',8000,22000,0]
   ].forEach((x:any)=>service.run(...x));
-  const plan=db.prepare(`INSERT INTO membership_plans(slug,title,monthly_amount,description,priority_level,annual_house_check,partner_discount_bps,active) VALUES(?,?,?,?,?,?,?,?)
-    ON CONFLICT(slug) DO UPDATE SET title=excluded.title,monthly_amount=excluded.monthly_amount,description=excluded.description,priority_level=excluded.priority_level,annual_house_check=excluded.annual_house_check,partner_discount_bps=excluded.partner_discount_bps,active=excluded.active`);
-  plan.run('free','Free',0,'Hausmeisterservice, Aufträge, Angebote, persönliche Ansprechpartner und digitale Hausakte.',0,0,0,1);
-  plan.run('plus','Plus',1990,'Automatische Wartungsplanung, Hausjahresplan, Erinnerungen, Dokumentenverwaltung, bevorzugte Vermittlung und Prioritätsservice.',2,0,0,1);
-  plan.run('premium','Premium',3990,'Persönliche Betreuung, höchste Priorität, jährlicher Hauscheck, automatische Wartungsorganisation, Premium-Partner und erweiterte Hausverwaltung.',3,1,0,1);
-  db.prepare("UPDATE membership_plans SET active=0 WHERE slug='basic'").run();
+  // Hauseigentuemer nutzen einfachhausen kostenlos: es gibt keine
+  // Eigentuemer-Tarife und keine kostenpflichtigen Servicepakete mehr
+  // (Issue #132). Die Tabellen membership_plans, service_packages und
+  // package_orders bleiben als Struktur bestehen, weil subscriptions per
+  // Fremdschluessel auf membership_plans verweist und historische
+  // Zahlungsdaten erhalten bleiben muessen. Es werden keine Tarife und keine
+  // Pakete mehr angelegt oder gelesen.
   const partnerPlan=db.prepare(`INSERT INTO partner_plans(slug,title,monthly_amount,description,monthly_lead_limit,priority_level,trial_days,active) VALUES(?,?,?,?,?,?,?,1)
     ON CONFLICT(slug) DO UPDATE SET title=excluded.title,monthly_amount=excluded.monthly_amount,description=excluded.description,monthly_lead_limit=excluded.monthly_lead_limit,priority_level=excluded.priority_level,trial_days=excluded.trial_days,active=excluded.active`);
   partnerPlan.run('free','Free',0,'Kostenlos starten, 0 % Provision und eine begrenzte Zahl neuer Anfragen.',5,0,0);
   partnerPlan.run('start','Start',2900,'Mehr Anfragevolumen und einfache Partnerfunktionen für kleine Betriebe. 0 % Provision und keine Gebühr pro Auftrag.',50,0,60);
   partnerPlan.run('pro','Pro',7900,'Für aktive Partner mit höherem Anfragevolumen, erweiterten Betriebsfunktionen und 0 % Provision. Das Qualitätsmatching bleibt tarifneutral.',null,0,60);
   partnerPlan.run('premium','Premium',19900,'Für stark ausgelastete Partner mit erweitertem Support und Auswertungen bei 0 % Provision. Das Qualitätsmatching bleibt tarifneutral.',null,0,60);
-  const pkg=db.prepare('INSERT OR IGNORE INTO service_packages(slug,title,price_amount,description,services_json) VALUES(?,?,?,?,?)');
-  pkg.run('haus-jahrespflege','Haus Jahrespflege',29900,'Ein strukturierter jährlicher Haus-Check mit Planung typischer Wartungs- und Werterhaltsthemen.',JSON.stringify(['Haus-Check','Dachrinne','Fenster/Türen','Haustechnik','Wartungsplan']));
-  pkg.run('garten-premium','Garten Premium Jahr',49900,'Saisonale Gartenplanung mit wiederkehrenden Pflegepunkten und priorisierter Partnerorganisation.',JSON.stringify(['Frühjahrscheck','Rasenpflege','Heckenplanung','Herbstcheck','Saisonplan']));
-  pkg.run('energie-technik','Energie & Technik Check',24900,'Jährlicher Organisations-Check für PV, Speicher, Wallbox, Heizung/Wärmepumpe und relevante Haustechnik.',JSON.stringify(['PV','Speicher','Wallbox','Heizung/Wärmepumpe','Smart Home']));
   const providerCategory=db.prepare(`INSERT INTO provider_categories(slug,title,description,active) VALUES(?,?,?,1)
     ON CONFLICT(slug) DO UPDATE SET title=excluded.title,description=excluded.description,active=excluded.active`);
   providerCategory.run('handwerk','Handwerker','Handwerkliche Leistungen rund um Gebäude, Technik und Außenbereich.');

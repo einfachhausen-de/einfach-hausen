@@ -4,7 +4,6 @@ import { db } from '@/lib/db';
 import { markPaymentFailed, markPaymentPaid, stripePaymentsConfigured } from '@/lib/payments';
 import { structuredLog } from '@/lib/observability';
 import { createNotification } from '@/lib/notifications';
-import { activatePackageOrder } from '@/lib/packages';
 import { claimWebhookEvent,completeWebhookEvent,releaseWebhookEvent } from '@/lib/security/webhooks';
 
 function subscriptionId(value:Stripe.Checkout.Session['subscription']){
@@ -15,32 +14,6 @@ function subscriptionId(value:Stripe.Checkout.Session['subscription']){
 function subscriptionPeriodEnd(subscription:Stripe.Subscription){
   const values=subscription.items.data.map(item=>item.current_period_end).filter(value=>Number.isFinite(value)&&value>0);
   return values.length?new Date(Math.max(...values)*1000).toISOString():null;
-}
-
-async function reconcileHomeownerMembership(stripe:Stripe,session:Stripe.Checkout.Session){
-  const id=subscriptionId(session.subscription);
-  const homeownerId=Number(session.metadata?.homeownerId);
-  const planSlug=session.metadata?.planSlug?.trim();
-  if(!id||!Number.isSafeInteger(homeownerId)||homeownerId<=0||!planSlug)return;
-
-  const subscription=await stripe.subscriptions.retrieve(id);
-  const periodEnd=subscriptionPeriodEnd(subscription);
-  const current=db.prepare('SELECT plan_slug,status,stripe_subscription_id FROM subscriptions WHERE homeowner_id=?').get(homeownerId) as {
-    plan_slug:string; status:string; stripe_subscription_id:string|null;
-  }|undefined;
-  const changed=!current||current.plan_slug!==planSlug||current.status!=='active'||current.stripe_subscription_id!==subscription.id;
-
-  db.prepare(`INSERT INTO subscriptions(homeowner_id,plan_slug,status,stripe_subscription_id,current_period_end,updated_at)
-    VALUES(?,?,'active',?,?,CURRENT_TIMESTAMP)
-    ON CONFLICT(homeowner_id) DO UPDATE SET
-      plan_slug=excluded.plan_slug,status='active',stripe_subscription_id=excluded.stripe_subscription_id,
-      current_period_end=excluded.current_period_end,updated_at=CURRENT_TIMESTAMP`).run(homeownerId,planSlug,subscription.id,periodEnd);
-
-  const previous=session.metadata?.previousSubscriptionId?.trim();
-  if(previous&&previous!==subscription.id&&previous===current?.stripe_subscription_id){
-    try{await stripe.subscriptions.cancel(previous);}catch{}
-  }
-  if(changed)createNotification(homeownerId,'Mitgliedschaft aktiv',`Deine Einfach-Hausen-Mitgliedschaft ${planSlug} ist aktiv.`,'/app/plans','membership');
 }
 
 async function reconcilePartnerMembership(stripe:Stripe,session:Stripe.Checkout.Session){
@@ -73,25 +46,12 @@ async function reconcilePartnerMembership(stripe:Stripe,session:Stripe.Checkout.
   }
 }
 
-function reconcilePackage(session:Stripe.Checkout.Session){
-  if(session.payment_status!=='paid')return;
-  const orderId=Number(session.metadata?.packageOrderId);
-  const homeownerId=Number(session.metadata?.homeownerId);
-  if(!Number.isSafeInteger(orderId)||orderId<=0||!Number.isSafeInteger(homeownerId)||homeownerId<=0)return;
-  const order=activatePackageOrder(orderId,homeownerId);
-  if(order&&!['paid','scheduled','completed'].includes(order.status)){
-    createNotification(homeownerId,'Jahrespaket bezahlt','Dein Hausmeisterservice hat die Leistungen in deinen Jahresplan übernommen.','/app/plans','package');
-  }
-}
-
 function reconcileSubscriptionState(event:Stripe.Event){
   const subscription=event.data.object as Stripe.Subscription;
   const periodEnd=subscriptionPeriodEnd(subscription);
-  const ownerStatus=event.type==='customer.subscription.deleted'
-    ?'cancelled'
-    :(subscription.status==='active'||subscription.status==='trialing'?'active':subscription.status==='past_due'?'past_due':'cancelled');
-  db.prepare('UPDATE subscriptions SET status=?,current_period_end=?,updated_at=CURRENT_TIMESTAMP WHERE stripe_subscription_id=?').run(ownerStatus,periodEnd,subscription.id);
-
+  // Hauseigentuemer haben keine Mitgliedschaft mehr, deshalb wird hier keine
+  // Owner-Subscription mehr fortgeschrieben. Bestandsdaten in `subscriptions`
+  // bleiben unangetastet.
   const partnerStatus=event.type==='customer.subscription.deleted'
     ?'cancelled'
     :(subscription.status==='trialing'?'trialing':subscription.status==='active'?'active':subscription.status==='past_due'?'past_due':'cancelled');
@@ -127,9 +87,9 @@ export async function POST(req:NextRequest){
     if(event.type==='checkout.session.completed'||event.type==='checkout.session.async_payment_succeeded'){
       const session=event.data.object as Stripe.Checkout.Session;
       const kind=session.metadata?.kind;
-      if(kind==='membership')await reconcileHomeownerMembership(stripe,session);
-      else if(kind==='partner_membership')await reconcilePartnerMembership(stripe,session);
-      else if(kind==='package')reconcilePackage(session);
+      // 'membership' (Eigentuemer) und 'package' entfallen: Eigentuemer nutzen
+      // einfachhausen kostenlos. 'partner_membership' bleibt der einzige Abo-Typ.
+      if(kind==='partner_membership')await reconcilePartnerMembership(stripe,session);
 
       // Payment attempts (including invoice_payment) reconcile independently of
       // metadata kind. Non-payment Checkout sessions simply have no matching row.

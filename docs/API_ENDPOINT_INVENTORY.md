@@ -1,6 +1,6 @@
 # API-Endpunkte und Server-Actions — EH-02
 
-Stand: 2026-09-05. Kanonisches Inventar aus src/app.
+Stand: 2026-09-20. Kanonisches Inventar aus src/app.
 
 ## Client → Server-Verträge
 
@@ -20,6 +20,7 @@ Stand: 2026-09-05. Kanonisches Inventar aus src/app.
 
 - GET `/api/account/export` — `src/app/api/account/export/route.ts`
 - GET `/api/admin/verification-file/[id]` — `src/app/api/admin/verification-file/[id]/route.ts`
+- GET `/api/affiliate/[category]` — `src/app/api/affiliate/[category]/route.ts`
 - POST/GET `/api/ai/byok` — `src/app/api/ai/byok/route.ts`
 - POST `/api/ai/credits` — `src/app/api/ai/credits/route.ts`
 - POST `/api/auth/local-login` — `src/app/api/auth/local-login/route.ts`
@@ -28,15 +29,14 @@ Stand: 2026-09-05. Kanonisches Inventar aus src/app.
 - GET `/api/health` — `src/app/api/health/route.ts`
 - POST `/api/hooks/neue-anfrage` — `src/app/api/hooks/neue-anfrage/route.ts`
 - POST `/api/hooks/neues-angebot` — `src/app/api/hooks/neues-angebot/route.ts`
+- GET `/api/house-contracts/[id]/document` — `src/app/api/house-contracts/[id]/document/route.ts`
 - GET `/api/house-history-documents/[id]` — `src/app/api/house-history-documents/[id]/route.ts`
 - GET `/api/house-history-files/[id]/[kind]` — `src/app/api/house-history-files/[id]/[kind]/route.ts`
 - GET `/api/job-media/[id]` — `src/app/api/job-media/[id]/route.ts`
 - POST/GET/PUT `/api/ki` — `src/app/api/ki/route.ts`
 - POST `/api/konto-loeschen` — `src/app/api/konto-loeschen/route.ts`
 - GET `/api/live` — `src/app/api/live/route.ts`
-- GET `/api/memberships/success` — `src/app/api/memberships/success/route.ts`
 - POST/PATCH `/api/owner/messages/[contactUserId]` — `src/app/api/owner/messages/[contactUserId]/route.ts`
-- GET `/api/packages/success` — `src/app/api/packages/success/route.ts`
 - GET `/api/partner-memberships/success` — `src/app/api/partner-memberships/success/route.ts`
 - GET `/api/payments/success` — `src/app/api/payments/success/route.ts`
 - GET `/api/stripe/connect/refresh` — `src/app/api/stripe/connect/refresh/route.ts`
@@ -46,7 +46,7 @@ Stand: 2026-09-05. Kanonisches Inventar aus src/app.
 - POST `/api/telemetry` — `src/app/api/telemetry/route.ts`
 - GET/POST `/api/whatsapp/webhook` — `src/app/api/whatsapp/webhook/route.ts`
 
-## Server Actions (75)
+## Server Actions (79)
 
 - `registerAction` — `src/app/actions.ts`
 - `loginAction` — `src/app/actions.ts`
@@ -97,14 +97,16 @@ Stand: 2026-09-05. Kanonisches Inventar aus src/app.
 - `addProviderMemberAction` — `src/app/actions.ts`
 - `updateProviderMemberAction` — `src/app/actions.ts`
 - `assignJobContactAction` — `src/app/actions.ts`
+- `updateAutomationPrefsAction` — `src/app/actions.ts`
 - `updateContactCategoryAction` — `src/app/actions.ts`
 - `sendSavedContactMessageAction` — `src/app/actions.ts`
 - `startPartnerPlanCheckoutAction` — `src/app/actions.ts`
 - `saveHouseProfileAction` — `src/app/actions.ts`
 - `addHouseAssetAction` — `src/app/actions.ts`
 - `completeMaintenanceTaskAction` — `src/app/actions.ts`
-- `startMembershipCheckoutAction` — `src/app/actions.ts`
-- `purchasePackageAction` — `src/app/actions.ts`
+- `addHouseContractAction` — `src/app/actions.ts`
+- `updateHouseContractAction` — `src/app/actions.ts`
+- `setHouseContractStatusAction` — `src/app/actions.ts`
 - `adminReviewVerificationLifecycleAction` — `src/app/admin/actions.ts`
 - `adminUpdatePartnerContractLifecycleAction` — `src/app/admin/actions.ts`
 - `addCrmLeadAction` — `src/app/admin/crm/actions.ts`
@@ -114,6 +116,8 @@ Stand: 2026-09-05. Kanonisches Inventar aus src/app.
 - `storeExistingValuationAction` — `src/app/app/home/sale/actions.ts`
 - `approveBrokerShareAction` — `src/app/app/home/sale/actions.ts`
 - `revokeBrokerShareAction` — `src/app/app/home/sale/actions.ts`
+- `submitDirectoryAction` — `src/app/app/messages/directory-actions.ts`
+- `submitDirectoryShortcut` — `src/app/app/messages/directory-actions.ts`
 - `loadOnboardingState` — `src/app/app/onboarding/actions.ts`
 - `saveOnboardingProfileAction` — `src/app/app/onboarding/actions.ts`
 - `saveOnboardingInterestsAction` — `src/app/app/onboarding/actions.ts`
@@ -129,8 +133,3 @@ Stand: 2026-09-05. Kanonisches Inventar aus src/app.
 - Client-Verträge werden durch `scripts/eh02-api-contract-regression.mjs` geprüft.
 - TODO/FIXME/STUB-Kommentare bzw. echte not-implemented-Throws im TypeScript-Quellbaum sind im Gate verboten.
 - Build muss grün sein.
-
-## Verifikation 2026-09-10
-
-`find src/app/api -name route.ts | wc -l` → **27**. Alle 27 Handler sind oben
-gelistet; keine Lücke zwischen Dateisystem und Inventar.

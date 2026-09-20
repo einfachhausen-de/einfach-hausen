@@ -109,7 +109,6 @@ export default async function AppSettingsPage() {
           <EHText>{quota.freemiumRemaining} von {quota.freemiumAllowed} freien Aktionen übrig, dazu {quota.credits} Bonus-Aktionen.</EHText>
           <EHStatus tone={quota.byok ? 'success' : 'neutral'}>{quota.byok ? 'Eigener Schlüssel aktiv' : 'Plattform-Kontingent'}</EHStatus>
           <EHText muted>Der eigene API-Key läuft über dein Anbieter-Konto — dessen Limits und Kosten gelten.</EHText>
-          <EHButton href="/app/plans" variant="secondary" arrow>Mitgliedschaft & Pakete</EHButton>
         </EHWorkSection>
         <EHWorkSection title="Daten & Konto">
           {lastRequest ? <>

@@ -75,7 +75,6 @@ export default async function Profile(){
       </div>
       <div className="eh-werkbank-karte">
         <h4>Konto &amp; App</h4>
-        <div className="eh-werkbank-item"><span><b>Zahlungen &amp; Mitgliedschaft</b><small>aktueller Tarif</small></span><span><Link href="/app/plans">öffnen</Link></span></div>
         <div className="eh-werkbank-item"><span><b>Benachrichtigungen</b><small>Benachrichtigungen verwalten</small></span><span><Link href="/notifications">öffnen</Link></span></div>
         <div className="eh-werkbank-item"><span><b>Hilfe &amp; Support</b><small>direkte Unterstützung</small></span><span><Link href="/app/hilfe">öffnen</Link></span></div>
       </div>
@@ -130,7 +129,6 @@ export default async function Profile(){
 
     <EHWorkSection title="Konto & App">
     <EHList label="Profilbereiche" items={[
-      { id: 'plans', title: 'Zahlungen & Mitgliedschaft', href: '/app/plans' },
       { id: 'notifications', title: 'Benachrichtigungen', href: '/notifications' },
       { id: 'help', title: 'Hilfe & Support', text: 'Direkte Unterstützung', href: '/app/hilfe' },
     ]} />

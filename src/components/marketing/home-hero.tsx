@@ -12,6 +12,6 @@ export function HomeHero() {
     />
     <EHSection compact><EHPromiseRow items={[{title:"Alles wissen.",text:"Dokumente und die Geschichte deines Hauses."},{title:"Nichts vergessen.",text:"Anstehende Wartungen und wichtige Termine."},{title:"Nicht alles selbst machen.",text:"Passende Ansprechpartner, wenn es Hilfe braucht."}]}/></EHSection>
     <EHSection id="anliegen" tone="white"><EHSplitStory eyebrow="Ein klarer nächster Schritt" title="Ein Satz. Ein nächster Schritt." text="Heizung, Dach, Garten oder Unterlagen: Beschreibe dein Anliegen in deinen Worten. Du entscheidest, wie es weitergeht." media={<EHPanel><IntakeForm variant="hero"/></EHPanel>}/></EHSection>
-    <EHSection compact><EHFacts items={[{value:"12",label:"Leistungsbereiche mit geprüften Betrieben"},{value:"1",label:"Ansprechpartner mit Name, Betrieb und Nummer"},{value:"0 %",label:"Provision pro Auftrag – Partner bleiben Rechnungssteller"},{value:"15 %",label:"Dauer-Vorteil für die ersten 1.000 Pilot-Haushalte"}]}/></EHSection>
+    <EHSection compact><EHFacts items={[{value:"12",label:"Leistungsbereiche mit geprüften Betrieben"},{value:"1",label:"Ansprechpartner mit Name, Betrieb und Nummer"},{value:"0 %",label:"Provision pro Auftrag – Partner bleiben Rechnungssteller"},{value:"0 €",label:"Hauskonto für Eigentümer – dauerhaft kostenlos"}]}/></EHSection>
   </>;
 }

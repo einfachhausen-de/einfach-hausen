@@ -51,7 +51,7 @@ export default function Page() {
         <EHList label="Kundenverhältnis" items={[
           'Rolle von Einfach Hausen als vermittelnde und organisierende Software-Plattform.',
           'Klarer Zeitpunkt des Vertragsschlusses bei Anfragen, Angeboten und Terminvereinbarungen.',
-          'Kostenloses Basiskonto (FREE) sowie optionale Premium-Pakete ohne versteckte Bindungen.',
+          'Kostenlose Nutzung für Eigentümer: keine Mitgliedschaft, kein Abo, keine kostenpflichtigen Pakete.',
           'Fristen für Kündigung, Stornierung und gesetzliche Widerrufsrechte.',
           'Haftungs- und Gewährleistungsabgrenzung zwischen Plattform und ausführendem Partnerbetrieb.',
         ].map((b, k) => ({ id: "agb-1-" + k, title: b }))} />

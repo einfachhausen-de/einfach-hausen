@@ -93,7 +93,6 @@ export const ownerAreas: readonly NavArea[] = [
 export const ownerAccountItems: readonly NavChild[] = [
   { href: '/app/profile', label: 'Profil' },
   { href: '/notifications', label: 'Benachrichtigungen' },
-  { href: '/app/plans', label: 'Mitgliedschaft & Pakete' },
   { href: '/app/hilfe', label: 'Hilfe & Kontakt' },
   { href: '/app/settings', label: 'Einstellungen' },
 ];

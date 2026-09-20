@@ -5,7 +5,7 @@ await ctx.addCookies([{ name: 'mh_session', value: '663ef280760ff84757bfa0585f04
 const page = await ctx.newPage();
 import fs from 'node:fs';
 fs.mkdirSync('/tmp/app-audit', { recursive: true });
-for (const [name, path] of [['app-home','/app'],['app-hausmeister','/app/hausmeister'],['app-mein-haus','/app/home'],['app-jobs','/app/jobs'],['app-plans','/app/plans'],['app-profile','/app/profile'],['app-more','/app/more'],['app-calendar','/app/calendar'],['app-messages','/app/messages'],['pro-home','/pro'],['pro-jobs','/pro/jobs']]) {
+for (const [name, path] of [['app-home','/app'],['app-hausmeister','/app/hausmeister'],['app-mein-haus','/app/home'],['app-jobs','/app/jobs'],['app-profile','/app/profile'],['app-more','/app/more'],['app-calendar','/app/calendar'],['app-messages','/app/messages'],['pro-home','/pro'],['pro-jobs','/pro/jobs']]) {
   try {
     await page.goto('http://localhost:3110' + path, { waitUntil: 'networkidle' });
     await page.waitForTimeout(900);

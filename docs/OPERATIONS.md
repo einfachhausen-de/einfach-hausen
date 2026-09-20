@@ -242,7 +242,7 @@ Einfache, transparente monatliche Kostenbasis ohne FinOps-Overhead (Stand: Septe
 **Forecast & Skalierungspfad:**
 - Bis 1.000 aktive Nutzer/Monat verbleiben die Infrastrukturkosten stabil unter 10,00 €/Monat.
 - Bei Überschreiten der OCI Free-Tier-Grenzen (z. B. Backup-Speicher > 100 GB) skaliert Block-Storage mit ~0,025 €/GB/Monat.
-- Transaktionskosten tragen sich über die gebuchten Partner-Tarife und Mitgliedschaften selbst.
+- Transaktionskosten tragen sich über die gebuchten Partner-Tarife und Vergütungen aus dem freiwilligen Vergleichsbereich selbst. Eigentümer zahlen nichts: es gibt keine Mitgliedschaft und keine kostenpflichtigen Pakete für Eigentümer (Issue #132).
 
 ## Feature-Flag lifecycle (T-0139)
 
