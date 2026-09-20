@@ -64,6 +64,15 @@ T-0100 Homeowner onboarding: first-session to first useful outcome (höchster el
 - Gate 11/11 (`scripts/release-gate.mjs`), Visual 66 Baseline-Shots (`tests/visual-baselines`), E2E 15 Checks (`scripts/e2e.mjs`-Summary), Smoke 18 Routen (`scripts/production-smoke.mjs`).
 - Obige SHAs/Gate-Zahlen bleiben Stichtag 2026-08-30/31 und werden nicht überschrieben.
 
+## Fortschreibung 2026-09-20 (ses_f40d79-Welle, abgeschlossen + live)
+
+- main-HEAD: `3e8ecd9` (Octopus-Merge; SHA-Gleichheit local==origin==/srv/einfach-hausen bewiesen). Vorher `0d68a74` live, dann `3e8ecd9` deployt. Doku-Follow-up `f31f812`.
+- Inhalt: Session-Popover nur Identitaet+Einstellungen+Abmelden (`nav-user.tsx`); ein Label = ein Ziel (`nav-config.ts`); Settings-Dialog 4 Sektionen `account|notifications|ai|app` / "Konto & Daten"; Kontrast A `--eh-color-secondary` (#4b5b60) fuer `SidebarGroupLabel`; DeadCSS 479/479 Spec-Selektoren entfernt (`globals.css`, `design-system.css`).
+- Gates (frisch, 2026-09-20, main-HEAD): tsc 0, lint 0 errors / 28 warnings (vorbestehend), `design:check` exit 0, `eh-design-deadcss` exit 0.
+- Production verifiziert: `/srv/einfach-hausen` main=`3e8ecd9`, `einfach-hausen.service` aktiv, `/api/health` 200 `state:ready` (database ready, auth_authority reachable, smtp configured), `/login` 200, `/app` -> 307 Login-Redirect.
+- Cleanup: Worktrees `eh-d`/`eh-ia`/`eh-k` entfernt; Feature-Branches `feat/ses-f40d79-*` lokal+remote geloescht; Issues #124/#125/#126 closed.
+- Naechster Schritt: hoechste priorisierte eligible Aufgabe aus `.sin-gpt-web/taskplan.sqlite3` (NEXT_ACTION siehe `docs/NEXT_AGENT.md`).
+
 ## Fortschreibung 2026-09-09 (T-0172 Premium Card Visual System + Deploy)
 - Taskplan: done=17, backlog=0, valid. T-0172 complete (contract PASS, lint 0 errors, tsc/build grün).
 - main-HEAD: `f554939` (SHA-Gleichheit local==remote bewiesen, ff-only, kein Force).
