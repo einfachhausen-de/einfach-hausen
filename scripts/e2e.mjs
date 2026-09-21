@@ -700,7 +700,13 @@ await manager.screenshot({path:path.join(artifactsDir,'provider-dispatch-offer.p
 
 // 5) Kunde vergleicht und bucht. Danach existiert ein echter Ansprechpartner.
 await nav(owner, base+`/app/jobs/${jobId}`); await waitText(owner,'Gartenbau Müller'); await waitText(owner,'EMPFEHLUNG'); await waitText(owner,'GÜNSTIGST');
-await clickAndWaitUrl(owner,owner.getByRole('link',{name:/Gartenbau Müller/}).first(),/\/app\/partners\//); await waitText(owner,'Geprüfter Partner'); await waitText(owner,'Gartenbau Müller'); await assertNoOverflow(owner,'Mobile partner profile'); await clickAndWaitUrl(owner,owner.getByRole('link',{name:/Zum Angebot zurück/}),new RegExp(`/app/jobs/${jobId}`));
+await clickAndWaitUrl(owner,owner.getByRole('link',{name:/Gartenbau Müller/}).first(),/\/app\/partners\//); await waitText(owner,'Geprüfter Partner'); await waitText(owner,'Gartenbau Müller'); await assertNoOverflow(owner,'Mobile partner profile'); // Der Rueckweg steht bewusst zweimal auf der Partnerseite (Hauptaktion und
+// Hinweis im Angebots-Callout, src/app/app/partners/[id]/page.tsx:50,54).
+// Beide muessen auf dasselbe Angebot zeigen; erst dann wird geklickt.
+const backToJob=owner.getByRole('link',{name:/Zum Angebot zurück/});
+const backHrefs=[...new Set(await backToJob.evaluateAll(nodes=>nodes.map(node=>node.getAttribute('href'))))];
+if(backHrefs.length!==1||backHrefs[0]!==`/app/jobs/${jobId}`)throw new Error(`"Zum Angebot zurück" must point at the offer and nowhere else, got ${JSON.stringify(backHrefs)}`);
+await clickAndWaitUrl(owner,backToJob.first(),new RegExp(`/app/jobs/${jobId}`));
 await clickServerAction(owner,owner.getByRole('button',{name:'Diesen Partner buchen'})); await waitText(owner,'Gebucht');
 await waitText(owner,'Dein persönlicher Ansprechpartner');
 

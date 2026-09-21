@@ -88,6 +88,23 @@ async function waitForServer(url,timeoutMs=90000){
 
 const waitText=async(page,text)=>{try{await page.waitForFunction(value=>document.body.innerText.includes(value),text,{timeout:15000});}catch(error){const body=(await page.locator('body').innerText()).slice(-4000);throw new Error(`Expected text not found: ${text} | url=${page.url()} | body-tail=${body}`,{cause:error});}};
 const assertNoOverflow=async(page,label)=>{const x=await page.evaluate(()=>document.documentElement.scrollWidth>document.documentElement.clientWidth);if(x)throw new Error(`${label} has horizontal overflow`);};
+// Next.js haelt die serverseitig gerenderte Fassung waehrend der Hydration
+// kurzzeitig zusaetzlich im DOM: sechs Kaestchen liegen dann zweimal vor, die
+// Serverkopie mit 0x0 Groesse (unsichtbar, nach der Hydration entfernt). Der
+// strict-Modus von Playwright sieht in diesem Fenster zwei Treffer und bricht
+// ab, obwohl der Nutzer nie eine Dublette sieht. Diese Zusicherung wartet
+// deshalb auf den eingeschwungenen Baum UND prueft dabei, dass genau ein
+// sichtbarer Treffer uebrig bleibt - statt die Mehrdeutigkeit mit .first() zu
+// verdecken.
+const settle=async(locator,label)=>{
+  const page=locator.page();
+  for(let attempt=0;attempt<60;attempt++){
+    const matches=await locator.evaluateAll(nodes=>nodes.map(node=>{const r=node.getBoundingClientRect();return r.width>0&&r.height>0;}));
+    if(matches.length===1&&matches[0])return;
+    if(attempt===59)throw new Error(`${label}: expected exactly one visible match, got ${matches.length} (visible: ${matches.filter(Boolean).length})`);
+    await page.waitForTimeout(250);
+  }
+};
 const clickAndWaitUrl=async(page,pattern,button,label)=>{try{await Promise.all([page.waitForURL(pattern,{timeout:45000}),button.click()]);}catch(error){const body=(await page.locator('body').innerText()).slice(-3500);const logs=serverLog.slice(-40).join('');throw new Error(`${label} navigation failed | url=${page.url()} | body-tail=${body} | server-tail=${logs}`,{cause:error});}};
 
 try{
@@ -150,7 +167,7 @@ try{
   // adressiert, nicht über das Label – die Beschreibung hinter dem Titel kann
   // sich ändern, der Slug ist die Datenidentität.
   const categoryBox=slug=>broker.locator(`input[name="providerCategory"][value="${slug}"]`);
-  for(const slug of ['handwerk','makler'])await categoryBox(slug).check();
+  for(const slug of ['handwerk','makler']){await settle(categoryBox(slug),`provider category ${slug}`);await categoryBox(slug).check();}
   // Saving changed company or service data does not confirm with "saved": the
   // action sends the profile back into review whenever business name, trades,
   // categories or services differ (src/app/pro/profile/actions.ts:76-104). That
@@ -160,6 +177,7 @@ try{
   await Promise.all([broker.waitForURL(/profile=review/),broker.getByRole('button',{name:'Profil speichern'}).click()]);
   await waitText(broker,'Die Partnerfreigabe ist pausiert');
   await broker.goto(base+'/pro/profile'); await waitText(broker,'Ein Konto, beliebig erweiterbar');
+  for(const slug of ['handwerk','makler'])await settle(categoryBox(slug),`persisted provider category ${slug}`);
   if(!(await categoryBox('handwerk').isChecked())||!(await categoryBox('makler').isChecked()))throw new Error('Professional account must support multiple provider categories');
   await broker.getByLabel('Regionen / PLZ').fill('463, Borken'); await broker.getByLabel('Immobilientypen').fill('Einfamilienhaus, Doppelhaushälfte'); await broker.getByLabel('Kaufpreis ab €').fill('250000'); await broker.getByLabel('Kaufpreis bis €').fill('1200000'); await broker.getByLabel('Wohnfläche ab m²').fill('80'); await broker.getByLabel('Wohnfläche bis m²').fill('300'); await broker.getByLabel('Spezialisierungen').fill('Eigenheime, modernisierte Bestandsimmobilien');
   // Only the broker search fields change here, none of the fields the lifecycle
