@@ -1,19 +1,13 @@
 import '@/components/werkbank-layout.css';
 import Link from 'next/link';
-import { BarChart3, ChevronRight, Clock, MessageCircle, Plus, Wrench } from 'lucide-react';
+import { BarChart3, ChevronRight, FileText, MessageCircle, Plus, Users, Wrench } from 'lucide-react';
 import { WerkbankRahmen } from '@/components/werkbank-rahmen';
 import styles from '../homeowner.module.css';
 
-// Public preview – no auth, mock data, for screenshot – matches new reduced layout
+// Public preview – no auth, mock data – matches v3 layout
 export default function Preview() {
   const address = 'Fixturestraße 1, 46325 Borken';
   const firstName = 'Gina';
-  const recentJobs = [
-    { id: 9004, title: 'Heizkörper entlüften', status: 'In Arbeit', date: '16.09.' },
-    { id: 9003, title: 'Badarmatur tropft', status: 'Angebote da', date: '14.09.' },
-    { id: 9005, title: 'Thermostate tauschen', status: 'Erledigt', date: '12.09.' },
-    { id: 9006, title: 'Dachrinne reinigen', status: 'Offen', date: '10.09.' },
-  ];
 
   return (
     <WerkbankRahmen
@@ -59,7 +53,7 @@ export default function Preview() {
           <div className={styles.dashHeaderCopy}>
             <p className={styles.dashEyebrow}>{address} · Eigentümer-App</p>
             <h1 className={styles.dashTitle}>Hallo {firstName}, dein Zuhause im Überblick</h1>
-            <p className={styles.dashSub}>Was gerade läuft und womit du direkt weiterkommst – ohne Suchen.</p>
+            <p className={styles.dashSub}>Womit du direkt weiterkommst – ohne Suchen.</p>
           </div>
           <div className={styles.dashHeaderActions}>
             <Link className={styles.dashPrimaryAction} href="#">
@@ -68,38 +62,7 @@ export default function Preview() {
           </div>
         </header>
 
-        {/* 1) Aktuelle Vorgänge ganz oben */}
-        <section className={styles.sectionCard}>
-          <header className={styles.sectionCardHeader}>
-            <h2>Aktuelle Vorgänge</h2>
-            <Link href="#">Alle Aufträge →</Link>
-          </header>
-          <ul className={styles.sectionList}>
-            {recentJobs.map((job) => (
-              <li key={job.id}>
-                <Link href="#" className={styles.contentsLink}>
-                  <span className={styles.itemIcon}>
-                    <Clock size={18} />
-                  </span>
-                  <span className={styles.itemMain}>
-                    <b>{job.title}</b>
-                    <small>
-                      {job.date} · Nr. {job.id}
-                    </small>
-                  </span>
-                  <span className={styles.itemMeta}>
-                    <span className={`${styles.pill} ${job.status === 'Angebote da' ? styles.pillWarn : styles.pillInfo}`}>
-                      {job.status}
-                    </span>
-                    <ChevronRight size={16} />
-                  </span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </section>
-
-        {/* 2) Schnellaktionen – nur 3 Cards */}
+        {/* 1) Schnellaktionen ganz oben */}
         <section className={styles.quickSection}>
           <p className={styles.quickLabel}>Schnellaktionen</p>
           <div className={`${styles.quickGrid} ${styles.quickGridThree}`}>
@@ -131,6 +94,60 @@ export default function Preview() {
               <small>Versicherung, Energie oder Verträge prüfen – Tarife vergleichen und sparen.</small>
               <span className={styles.quickCardArrow}>
                 Tarife vergleichen <ChevronRight size={16} />
+              </span>
+            </Link>
+          </div>
+        </section>
+
+        {/* 2) Mein Zuhause im Überblick */}
+        <section className={styles.overviewSection}>
+          <p className={styles.quickLabel}>Mein Zuhause im Überblick</p>
+          <div className={`${styles.quickGrid} ${styles.quickGridThree}`}>
+            <Link href="#" className={styles.overviewCard}>
+              <div className={styles.overviewCardTop}>
+                <span className={styles.quickIcon}>
+                  <Wrench size={20} />
+                </span>
+                <span className={styles.overviewCount}>5</span>
+              </div>
+              <div className={styles.overviewMeta}>
+                <strong>Aktuelle Aufträge</strong>
+                <small>5 Aufträge in Bearbeitung – Status und nächste Schritte.</small>
+              </div>
+              <span className={styles.quickCardArrow}>
+                Aufträge ansehen <ChevronRight size={16} />
+              </span>
+            </Link>
+            <Link href="#" className={styles.overviewCard}>
+              <div className={styles.overviewCardTop}>
+                <span className={styles.quickIcon}>
+                  <FileText size={20} />
+                </span>
+                <span className={styles.overviewCount} data-tone="terra">
+                  2
+                </span>
+              </div>
+              <div className={styles.overviewMeta}>
+                <strong>Angebote</strong>
+                <small>2 offene Angebote warten auf Entscheidung.</small>
+              </div>
+              <span className={styles.quickCardArrow}>
+                Angebote prüfen <ChevronRight size={16} />
+              </span>
+            </Link>
+            <Link href="#" className={styles.overviewCard}>
+              <div className={styles.overviewCardTop}>
+                <span className={styles.quickIcon}>
+                  <Users size={20} />
+                </span>
+                <span className={styles.overviewCount}>3</span>
+              </div>
+              <div className={styles.overviewMeta}>
+                <strong>Ansprechpartner</strong>
+                <small>3 Partner haben für dich gearbeitet – Kontakt und Historie.</small>
+              </div>
+              <span className={styles.quickCardArrow}>
+                Partner ansehen <ChevronRight size={16} />
               </span>
             </Link>
           </div>

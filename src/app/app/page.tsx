@@ -1,46 +1,19 @@
 import '@/components/werkbank-layout.css';
 import Link from 'next/link';
-import { BarChart3, ChevronRight, Clock, MessageCircle, Plus, Wrench } from 'lucide-react';
+import { BarChart3, ChevronRight, FileText, MessageCircle, Plus, Users, Wrench } from 'lucide-react';
 import { WerkbankRahmen } from '@/components/werkbank-rahmen';
 import { EHButton, EHCallout } from '@/design-system';
 import { requireUser } from '@/lib/auth';
 import { db } from '@/lib/db';
-import { ownerInstant } from '@/lib/owner-format';
 import { primaryProperty } from '@/lib/properties';
 import styles from './homeowner.module.css';
 
 /**
- * Startseite 2026-09-22 – reduziert auf Wunsch:
- * - Wartet-auf-dich komplett raus (ausser Button Neues Anliegen)
- * - Ganz oben: Aktuelle Vorgänge
- * - Darunter: Schnellaktionen mit nur 3 Cards
- *   Auftrag starten / Beratung starten / Tarife vergleichen
+ * Startseite 2026-09-22 v3:
+ * - Schnellaktionen ganz oben (3 Cards: Auftrag starten / Beratung starten / Tarife vergleichen)
+ * - Darunter: Mein Zuhause im Überblick mit 3 Cards: Aktuelle Aufträge / Angebote / Ansprechpartner
+ * - Wartet-auf-dich komplett raus, nur Button Neues Anliegen bleibt
  */
-
-function shortDay(value: string): string {
-  const raw = String(value);
-  const isDay = /^\d{4}-\d{2}-\d{2}$/.test(raw);
-  const instant = isDay ? new Date(`${raw}T12:00:00Z`) : ownerInstant(raw);
-  if (!instant) return raw.slice(0, 10);
-  return new Intl.DateTimeFormat('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit' }).format(instant);
-}
-
-function statusLabel(status: string): { label: string; tone: 'warn' | 'info' | 'ok' | 'neutral' } {
-  switch (status) {
-    case 'open':
-      return { label: 'Offen', tone: 'neutral' };
-    case 'quoted':
-      return { label: 'Angebote da', tone: 'warn' };
-    case 'accepted':
-      return { label: 'Beauftragt', tone: 'info' };
-    case 'in_progress':
-      return { label: 'In Arbeit', tone: 'info' };
-    case 'done':
-      return { label: 'Erledigt', tone: 'ok' };
-    default:
-      return { label: status, tone: 'neutral' };
-  }
-}
 
 export default async function Dashboard() {
   const user = await requireUser('homeowner');
@@ -54,16 +27,26 @@ export default async function Dashboard() {
   const jobsCount = (
     db
       .prepare(
-        `SELECT COUNT(*) c FROM jobs WHERE homeowner_id=? AND request_kind='service' AND status IN ('open','quoted','accepted','in_progress')`
+        `SELECT COUNT(*) c FROM jobs WHERE homeowner_id=? AND status IN ('open','quoted','accepted','in_progress')`
       )
       .get(user.id) as { c: number }
   ).c;
 
-  const recentJobs = db
-    .prepare(
-      `SELECT id,title,status,updated_at FROM jobs WHERE homeowner_id=? AND request_kind='service' ORDER BY datetime(updated_at) DESC LIMIT 6`
-    )
-    .all(user.id) as { id: number; title: string; status: string; updated_at: string }[];
+  const offersCount = (
+    db
+      .prepare(
+        `SELECT COUNT(*) c FROM quotes q JOIN jobs j ON j.id=q.job_id WHERE j.homeowner_id=? AND q.status='pending' AND j.status='quoted'`
+      )
+      .get(user.id) as { c: number }
+  ).c;
+
+  const contactsCount = (
+    db
+      .prepare(
+        `SELECT COUNT(DISTINCT q.provider_id) c FROM quotes q JOIN jobs j ON j.id=q.job_id WHERE j.homeowner_id=?`
+      )
+      .get(user.id) as { c: number }
+  ).c;
 
   const documentCount = (
     db.prepare(`SELECT COUNT(*) c FROM documents d JOIN jobs j ON j.id=d.job_id WHERE j.homeowner_id=?`).get(user.id) as {
@@ -137,9 +120,7 @@ export default async function Dashboard() {
           <div className={styles.dashHeaderCopy}>
             <p className={styles.dashEyebrow}>{address ? address : 'Dein Zuhause'} · Eigentümer-App</p>
             <h1 className={styles.dashTitle}>Hallo {firstName}, dein Zuhause im Überblick</h1>
-            <p className={styles.dashSub}>
-              Was gerade läuft und womit du direkt weiterkommst – ohne Suchen.
-            </p>
+            <p className={styles.dashSub}>Womit du direkt weiterkommst – ohne Suchen.</p>
           </div>
           <div className={styles.dashHeaderActions}>
             <Link className={styles.dashPrimaryAction} href="/app/hausmeister">
@@ -157,53 +138,7 @@ export default async function Dashboard() {
           </EHCallout>
         )}
 
-        {/* 1) Ganz oben: Aktuelle Vorgänge */}
-        <section className={styles.sectionCard} aria-labelledby="jobs-title">
-          <header className={styles.sectionCardHeader}>
-            <h2 id="jobs-title">Aktuelle Vorgänge</h2>
-            <Link href="/app/jobs">Alle Aufträge →</Link>
-          </header>
-          {recentJobs.length > 0 ? (
-            <ul className={styles.sectionList} aria-label="Aktuelle Vorgänge">
-              {recentJobs.map((job) => {
-                const meta = statusLabel(job.status);
-                return (
-                  <li key={job.id}>
-                    <Link href={`/app/jobs/${job.id}`} className={styles.contentsLink}>
-                      <span className={styles.itemIcon}>
-                        <Clock size={18} />
-                      </span>
-                      <span className={styles.itemMain}>
-                        <b>{job.title}</b>
-                        <small>
-                          {shortDay(job.updated_at)} · Nr. {job.id}
-                        </small>
-                      </span>
-                      <span className={styles.itemMeta}>
-                        <span
-                          className={`${styles.pill} ${meta.tone === 'warn' ? styles.pillWarn : meta.tone === 'info' ? styles.pillInfo : styles.pill}`}
-                        >
-                          {meta.label}
-                        </span>
-                        <ChevronRight size={16} />
-                      </span>
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
-          ) : (
-            <div className={styles.emptyState}>
-              <span className={styles.emptyIcon}>
-                <Wrench size={22} />
-              </span>
-              <p>Noch keine Vorgänge. Starte mit deinem ersten Anliegen.</p>
-              <Link href="/app/hausmeister">Anliegen erstellen</Link>
-            </div>
-          )}
-        </section>
-
-        {/* 2) Darunter: Schnellaktionen – nur 3 Cards */}
+        {/* 1) Schnellaktionen ganz oben */}
         <section className={styles.quickSection} aria-labelledby="quick-title">
           <p id="quick-title" className={styles.quickLabel}>
             Schnellaktionen
@@ -237,6 +172,76 @@ export default async function Dashboard() {
               <small>Versicherung, Energie oder Verträge prüfen – Tarife vergleichen und sparen.</small>
               <span className={styles.quickCardArrow}>
                 Tarife vergleichen <ChevronRight size={16} />
+              </span>
+            </Link>
+          </div>
+        </section>
+
+        {/* 2) Mein Zuhause im Überblick */}
+        <section className={styles.overviewSection} aria-labelledby="overview-title">
+          <p id="overview-title" className={styles.quickLabel}>
+            Mein Zuhause im Überblick
+          </p>
+          <div className={`${styles.quickGrid} ${styles.quickGridThree}`}>
+            <Link href="/app/jobs" className={styles.overviewCard}>
+              <div className={styles.overviewCardTop}>
+                <span className={styles.quickIcon} aria-hidden="true">
+                  <Wrench size={20} />
+                </span>
+                <span className={styles.overviewCount}>{jobsCount}</span>
+              </div>
+              <div className={styles.overviewMeta}>
+                <strong>Aktuelle Aufträge</strong>
+                <small>
+                  {jobsCount === 0
+                    ? 'Keine aktiven Aufträge – starte dein erstes Anliegen.'
+                    : `${jobsCount} ${jobsCount === 1 ? 'Auftrag läuft gerade' : 'Aufträge in Bearbeitung'} – Status und nächste Schritte.`}
+                </small>
+              </div>
+              <span className={styles.quickCardArrow}>
+                Aufträge ansehen <ChevronRight size={16} />
+              </span>
+            </Link>
+
+            <Link href="/app/jobs" className={styles.overviewCard}>
+              <div className={styles.overviewCardTop}>
+                <span className={styles.quickIcon} aria-hidden="true">
+                  <FileText size={20} />
+                </span>
+                <span className={styles.overviewCount} data-tone={offersCount > 0 ? 'terra' : undefined}>
+                  {offersCount}
+                </span>
+              </div>
+              <div className={styles.overviewMeta}>
+                <strong>Angebote</strong>
+                <small>
+                  {offersCount === 0
+                    ? 'Keine offenen Angebote – neue Angebote erscheinen hier sofort.'
+                    : `${offersCount} ${offersCount === 1 ? 'offenes Angebot wartet auf Freigabe' : 'offene Angebote warten auf Entscheidung'}.`}
+                </small>
+              </div>
+              <span className={styles.quickCardArrow}>
+                Angebote prüfen <ChevronRight size={16} />
+              </span>
+            </Link>
+
+            <Link href="/app/partners" className={styles.overviewCard}>
+              <div className={styles.overviewCardTop}>
+                <span className={styles.quickIcon} aria-hidden="true">
+                  <Users size={20} />
+                </span>
+                <span className={styles.overviewCount}>{contactsCount}</span>
+              </div>
+              <div className={styles.overviewMeta}>
+                <strong>Ansprechpartner</strong>
+                <small>
+                  {contactsCount === 0
+                    ? 'Noch keine Partner – nach dem ersten Auftrag erscheinen sie hier.'
+                    : `${contactsCount} ${contactsCount === 1 ? 'Partner hat für dich gearbeitet' : 'Partner haben für dich gearbeitet'} – Kontakt und Historie.`}
+                </small>
+              </div>
+              <span className={styles.quickCardArrow}>
+                Partner ansehen <ChevronRight size={16} />
               </span>
             </Link>
           </div>
