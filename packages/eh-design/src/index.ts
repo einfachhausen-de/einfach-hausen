@@ -16,6 +16,8 @@ export * from "./workspace-views";
 export * from "./workspace-conversation";
 export * from "./workspace-detail";
 export * from "./documents";
+export * from "./document-browser";
+export * from "./document-browser-model";
 export * from "./assistant";
 
 export * from "./property-overview";

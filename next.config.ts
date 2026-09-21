@@ -59,6 +59,15 @@ const nextConfig: NextConfig = {
   async headers(){
     return [
       {source:'/(.*)',headers:securityHeaders},
+      // Private raster/PDF endpoints retain their own authorization and no-store
+      // policy. Only these can be framed by our document browser; all pages keep DENY.
+      ...['/api/documents/:id', '/api/house-history-documents/:id'].map(source => ({
+        source,
+        headers: [
+          {key:'X-Frame-Options',value:'SAMEORIGIN'},
+          {key:'Content-Security-Policy',value:cspDirectives.map(directive => directive === "frame-ancestors 'none'" ? "frame-ancestors 'self'" : directive).join('; ')},
+        ],
+      })),
       {source:'/sw.js',headers:[{key:'Cache-Control',value:'no-cache, no-store, must-revalidate'}]},
       {source:'/manifest.webmanifest',headers:[{key:'Cache-Control',value:'no-cache, max-age=0, must-revalidate'}]},
     ];
