@@ -133,5 +133,33 @@ try {
 }
 check('a missing backup root fails loudly instead of passing', missing);
 
+// --- single owner: retention must not be reimplemented next to the prune script -
+// The nightly path used to prune with `find -mtime +7` in addition to the prune
+// script. Two mechanisms with different policies cannot coexist: the age cutoff
+// deleted the daily/weekly backups the consolidation keeps. Guard the ownership.
+const nightly = fs.readFileSync(path.join(root, 'deploy', 'backup-to-supabase.sh'), 'utf8');
+// Comments are stripped first: the file explains the removed age cutoff by name,
+// so only executable lines may be judged.
+const nightlyCode = nightly
+  .split('\n')
+  .filter((line) => !line.trimStart().startsWith('#'))
+  .join('\n');
+check(
+  'the nightly upload script does not prune on its own',
+  !/-mtime/.test(nightlyCode) && !/-delete/.test(nightlyCode) && !/rm -rf/.test(nightlyCode),
+);
+
+const backupScript = fs.readFileSync(path.join(root, 'scripts', 'backup-einfach-hausen.sh'), 'utf8');
+check(
+  'the backup script runs the retention step',
+  backupScript.includes('prune-einfach-hausen-backups.sh'),
+);
+
+const deployScript = fs.readFileSync(path.join(root, 'deploy', 'update-on-oci.sh'), 'utf8');
+check(
+  'the deploy path reaches retention through the backup script',
+  deployScript.includes('backup-einfach-hausen.sh'),
+);
+
 fs.rmSync(workdir, { recursive: true, force: true });
 console.log(`\nBackup retention regression passed: ${checks} checks`);

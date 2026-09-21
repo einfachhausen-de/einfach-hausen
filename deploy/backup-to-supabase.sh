@@ -8,7 +8,6 @@ UPLOAD_ROOT="${UPLOAD_ROOT:-/var/lib/einfach-hausen/uploads}"
 SUPABASE_ENV="${SUPABASE_ENV:-/opt/sin-supabase/.env}"
 SUPABASE_URL="${SUPABASE_URL:-http://127.0.0.1:8006}"
 BUCKET="${BACKUP_BUCKET:-einfach-hausen-backups}"
-KEEP_LOCAL_DAYS="${KEEP_LOCAL_DAYS:-7}"
 LOCAL_DIR="${LOCAL_BACKUP_DIR:-/var/backups/einfach-hausen}"
 
 [[ -x "$APP_DIR/scripts/backup-einfach-hausen.sh" ]] || { echo 'Canonical backup script is missing or not executable.' >&2; exit 1; }
@@ -31,6 +30,16 @@ curl -fsS -X POST "$SUPABASE_URL/storage/v1/object/$BUCKET/$(basename "$bundle")
   -H "Content-Type: application/gzip" \
   --data-binary "@$bundle" >/dev/null
 
-find "$LOCAL_DIR" -mindepth 1 -maxdepth 1 -type d -name 'einfach-hausen-*' -mtime "+$KEEP_LOCAL_DAYS" -exec rm -rf -- {} +
-find "$LOCAL_DIR" -maxdepth 1 -type f -name 'einfach-hausen-*.tar.gz' -mtime "+$KEEP_LOCAL_DAYS" -delete
+# Local retention is owned by exactly one place: scripts/prune-einfach-hausen-
+# backups.sh, which scripts/backup-einfach-hausen.sh runs as its last step (so it
+# applies to both this nightly path and the pre-deploy path).
+#
+# This script used to prune here as well, with `find -mtime +KEEP_LOCAL_DAYS`.
+# That was a pure age cutoff with no consolidation: it kept roughly eight days of
+# *every* backup, i.e. one full set per deploy plus the nightly one. On 2026-09-21
+# that had grown to 79 backups / 13.7 GB with ~26 GB free on the VM, so the disk
+# would have filled in about 18 days. It would also have deleted the daily and
+# weekly backups the consolidation is supposed to keep, so the two mechanisms
+# could not coexist. Do not reintroduce a second pruning step here; change the
+# retention windows in the prune script instead, where they are regression-tested.
 printf 'Backup uploaded: %s\n' "$(basename "$bundle")"
