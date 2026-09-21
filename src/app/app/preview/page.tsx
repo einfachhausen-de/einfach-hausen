@@ -99,26 +99,24 @@ export default function Preview() {
           </div>
         </section>
 
-        {/* 2) Mein Zuhause im Überblick */}
+        {/* 2) Mein Zuhause im Überblick – gleiche Karten wie darüber */}
         <section className={styles.overviewSection}>
           <p className={styles.quickLabel}>Mein Zuhause im Überblick</p>
           <div className={`${styles.quickGrid} ${styles.quickGridThree}`}>
-            <Link href="#" className={styles.overviewCard}>
+            <Link href="#" className={styles.quickCard}>
               <div className={styles.overviewCardTop}>
                 <span className={styles.quickIcon}>
                   <Wrench size={20} />
                 </span>
                 <span className={styles.overviewCount}>5</span>
               </div>
-              <div className={styles.overviewMeta}>
-                <strong>Aktuelle Aufträge</strong>
-                <small>5 Aufträge in Bearbeitung – Status und nächste Schritte.</small>
-              </div>
+              <strong>Aktuelle Aufträge</strong>
+              <small>5 Aufträge in Bearbeitung – Status und nächste Schritte.</small>
               <span className={styles.quickCardArrow}>
                 Aufträge ansehen <ChevronRight size={16} />
               </span>
             </Link>
-            <Link href="#" className={styles.overviewCard}>
+            <Link href="#" className={styles.quickCard}>
               <div className={styles.overviewCardTop}>
                 <span className={styles.quickIcon}>
                   <FileText size={20} />
@@ -127,25 +125,21 @@ export default function Preview() {
                   2
                 </span>
               </div>
-              <div className={styles.overviewMeta}>
-                <strong>Angebote</strong>
-                <small>2 offene Angebote warten auf Entscheidung.</small>
-              </div>
+              <strong>Angebote</strong>
+              <small>2 offene Angebote warten auf Entscheidung.</small>
               <span className={styles.quickCardArrow}>
                 Angebote prüfen <ChevronRight size={16} />
               </span>
             </Link>
-            <Link href="#" className={styles.overviewCard}>
+            <Link href="#" className={styles.quickCard}>
               <div className={styles.overviewCardTop}>
                 <span className={styles.quickIcon}>
                   <Users size={20} />
                 </span>
                 <span className={styles.overviewCount}>3</span>
               </div>
-              <div className={styles.overviewMeta}>
-                <strong>Ansprechpartner</strong>
-                <small>3 Partner haben für dich gearbeitet – Kontakt und Historie.</small>
-              </div>
+              <strong>Ansprechpartner</strong>
+              <small>3 Partner haben für dich gearbeitet – Kontakt und Historie.</small>
               <span className={styles.quickCardArrow}>
                 Partner ansehen <ChevronRight size={16} />
               </span>

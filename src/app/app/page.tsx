@@ -177,33 +177,31 @@ export default async function Dashboard() {
           </div>
         </section>
 
-        {/* 2) Mein Zuhause im Überblick */}
+        {/* 2) Mein Zuhause im Überblick – gleiche Karten wie darüber */}
         <section className={styles.overviewSection} aria-labelledby="overview-title">
           <p id="overview-title" className={styles.quickLabel}>
             Mein Zuhause im Überblick
           </p>
           <div className={`${styles.quickGrid} ${styles.quickGridThree}`}>
-            <Link href="/app/jobs" className={styles.overviewCard}>
+            <Link href="/app/jobs" className={styles.quickCard}>
               <div className={styles.overviewCardTop}>
                 <span className={styles.quickIcon} aria-hidden="true">
                   <Wrench size={20} />
                 </span>
                 <span className={styles.overviewCount}>{jobsCount}</span>
               </div>
-              <div className={styles.overviewMeta}>
-                <strong>Aktuelle Aufträge</strong>
-                <small>
-                  {jobsCount === 0
-                    ? 'Keine aktiven Aufträge – starte dein erstes Anliegen.'
-                    : `${jobsCount} ${jobsCount === 1 ? 'Auftrag läuft gerade' : 'Aufträge in Bearbeitung'} – Status und nächste Schritte.`}
-                </small>
-              </div>
+              <strong>Aktuelle Aufträge</strong>
+              <small>
+                {jobsCount === 0
+                  ? 'Keine aktiven Aufträge – starte dein erstes Anliegen.'
+                  : `${jobsCount} ${jobsCount === 1 ? 'Auftrag läuft gerade' : 'Aufträge in Bearbeitung'} – Status und nächste Schritte.`}
+              </small>
               <span className={styles.quickCardArrow}>
                 Aufträge ansehen <ChevronRight size={16} />
               </span>
             </Link>
 
-            <Link href="/app/jobs" className={styles.overviewCard}>
+            <Link href="/app/jobs" className={styles.quickCard}>
               <div className={styles.overviewCardTop}>
                 <span className={styles.quickIcon} aria-hidden="true">
                   <FileText size={20} />
@@ -212,34 +210,30 @@ export default async function Dashboard() {
                   {offersCount}
                 </span>
               </div>
-              <div className={styles.overviewMeta}>
-                <strong>Angebote</strong>
-                <small>
-                  {offersCount === 0
-                    ? 'Keine offenen Angebote – neue Angebote erscheinen hier sofort.'
-                    : `${offersCount} ${offersCount === 1 ? 'offenes Angebot wartet auf Freigabe' : 'offene Angebote warten auf Entscheidung'}.`}
-                </small>
-              </div>
+              <strong>Angebote</strong>
+              <small>
+                {offersCount === 0
+                  ? 'Keine offenen Angebote – neue Angebote erscheinen hier sofort.'
+                  : `${offersCount} ${offersCount === 1 ? 'offenes Angebot wartet auf Freigabe' : 'offene Angebote warten auf Entscheidung'}.`}
+              </small>
               <span className={styles.quickCardArrow}>
                 Angebote prüfen <ChevronRight size={16} />
               </span>
             </Link>
 
-            <Link href="/app/partners" className={styles.overviewCard}>
+            <Link href="/app/partners" className={styles.quickCard}>
               <div className={styles.overviewCardTop}>
                 <span className={styles.quickIcon} aria-hidden="true">
                   <Users size={20} />
                 </span>
                 <span className={styles.overviewCount}>{contactsCount}</span>
               </div>
-              <div className={styles.overviewMeta}>
-                <strong>Ansprechpartner</strong>
-                <small>
-                  {contactsCount === 0
-                    ? 'Noch keine Partner – nach dem ersten Auftrag erscheinen sie hier.'
-                    : `${contactsCount} ${contactsCount === 1 ? 'Partner hat für dich gearbeitet' : 'Partner haben für dich gearbeitet'} – Kontakt und Historie.`}
-                </small>
-              </div>
+              <strong>Ansprechpartner</strong>
+              <small>
+                {contactsCount === 0
+                  ? 'Noch keine Partner – nach dem ersten Auftrag erscheinen sie hier.'
+                  : `${contactsCount} ${contactsCount === 1 ? 'Partner hat für dich gearbeitet' : 'Partner haben für dich gearbeitet'} – Kontakt und Historie.`}
+              </small>
               <span className={styles.quickCardArrow}>
                 Partner ansehen <ChevronRight size={16} />
               </span>
