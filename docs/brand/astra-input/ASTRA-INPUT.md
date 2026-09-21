@@ -1,5 +1,18 @@
 # ASTRA-INPUT — Soll-Umbau Verträge / Termine / Profil (Einfach Hausen)
 
+> **Veraltet ab 2026-09-21 — vor Weitergabe neu erheben.** Die hier eingebetteten
+> „Ist“-Dateien (Datei D `/app/contracts`, Datei E `/app/profile`) entsprechen nicht
+> mehr dem `main`-Stand:
+> - `/app/contracts` hat seit der Affiliate-Welle (#127–#130, `45a6af3`) einen
+>   zusätzlichen Bereich „Vergleichen & Wechseln“ (`?tab=vergleichen`) und eine
+>   Ausleitungs-API `/api/affiliate/[category]`.
+> - `/app/profile` und `/app/settings` wurden in `5289d1e` (Issue #132) auf das
+>   kostenlose Eigentümer-Modell angepasst.
+>
+> Der Auftrag, die harten Regeln und das `#start`-Muster unten bleiben gültig; die
+> eingebetteten Ist-Dateien müssen vor einem neuen Lauf gegen `main` neu gezogen
+> werden. Verbindlich bleiben `DESIGN.md` und `docs/PRODUCT_VISION.md`.
+
 Stand: 2026-09-18, `main`. Diese Datei ist die komplette Arbeitsgrundlage für einen
 isolierten Agenten ohne Repo-Zugriff. Alles Nötige steht inline unten.
 

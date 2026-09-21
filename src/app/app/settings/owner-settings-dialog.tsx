@@ -60,7 +60,7 @@ export function parseSettingsSection(value: string | null | undefined): SectionI
 // Hilfe & Kontakt lebt auf einer eigenen Route (/app/hilfe) und ist bewusst
 // keine Dialog-Sektion (IA-Block 3: 4 Sektionen). Eine Mitgliedschafts- oder
 // Paket-Sektion gibt es nicht mehr: Eigentümer nutzen einfachhausen kostenlos
-// (Issue #132).
+// (Produktentscheidung: Eigentuemer kostenlos).
 // Keine eigene Logik, keine Mockdaten.
 // Gesteuert (open/onOpenChange/showTrigger=false) als globales Overlay aus dem
 // Rahmen; ungesteuert (Standard) mit eigenem Trigger, z.B. im Header von /app/settings.

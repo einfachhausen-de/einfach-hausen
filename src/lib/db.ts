@@ -127,7 +127,8 @@ const seed=db.transaction(()=>{
   ].forEach((x:any)=>service.run(...x));
   // Hauseigentuemer nutzen einfachhausen kostenlos: es gibt keine
   // Eigentuemer-Tarife und keine kostenpflichtigen Servicepakete mehr
-  // (Issue #132). Die Tabellen membership_plans, service_packages und
+  // (Produktentscheidung: Eigentuemer kostenlos). Die Tabellen
+  // membership_plans, service_packages und
   // package_orders bleiben als Struktur bestehen, weil subscriptions per
   // Fremdschluessel auf membership_plans verweist und historische
   // Zahlungsdaten erhalten bleiben muessen. Es werden keine Tarife und keine
