@@ -368,30 +368,37 @@ await publicPage.getByRole('heading',{name:'Das gibt es hier nicht.'}).waitFor()
 if(!(await publicPage.locator('a[href="/"]').count()))throw new Error('404 page has no way back to the start page');
 await assertNoOverflow(publicPage,'Mobile 404 state');
 await assertKeyboardFocus(publicPage,'Mobile 404 state');
-// App entry stays canonical at /welcome: login/account cards and role selection for app users.
-await nav(publicPage, base+'/welcome')
-await publicPage.getByRole('heading',{name:/Willkommen bei einfachhausen/i}).waitFor();
-await waitText(publicPage,'Dein Zuhause. Alles geregelt.');
-if(!(await publicPage.getByRole('link',{name:'Log in'}).count()))throw new Error('Welcome login card missing');
-if(!(await publicPage.getByRole('link',{name:'Neues Konto'}).count()))throw new Error('Welcome new-account card missing');
+// Legacy auth routes resolve on the server (T-0168): /welcome and /role have been
+// server redirects since 74a3406, not self-service pages. The role is read from the
+// application DB, never chosen in the client. Asserting the redirect is strictly
+// stronger than the page-copy assertions it replaces: it proves the deleted client
+// flow is gone AND that an anonymous visitor is sent to login.
+for(const legacyAuthRoute of ['/welcome','/role']){
+  await nav(publicPage, base+legacyAuthRoute);
+  try{ await publicPage.waitForURL(/\/login/,{timeout:30000}); }
+  catch{ throw new Error(`Legacy auth route ${legacyAuthRoute} did not resolve an anonymous visitor to /login (landed on ${publicPage.url()})`); }
+  if(await publicPage.getByRole('heading',{name:/Willkommen bei einfachhausen/i}).count())throw new Error(`Legacy welcome page still rendered at ${legacyAuthRoute}`);
+}
 // Intake entry moved into the product: /kontakt serves 'Anliegen starten' -> /register?role=homeowner.
 const kontaktResponse=await publicPage.request.get(base+'/kontakt'); if(!kontaktResponse.ok())throw new Error('Kontakt route failed');
 const kontaktHtml=await kontaktResponse.text();
 if(!kontaktHtml.includes('Anliegen starten')||!kontaktHtml.includes('/register?role=homeowner'))throw new Error('Kontakt intake entry missing');
-// Real logged-out new-owner entry: welcome card -> role selection.
-await nav(publicPage, base+'/welcome')
-await clickAndWaitUrl(publicPage,publicPage.locator('a[href="/role"]').first(),/\/role/);
-await waitText(publicPage,'dass du da bist!'); await waitText(publicPage,'Als Eigentümer starten'); await waitText(publicPage,'Ich bin Dienstleister');
+// The former logged-out new-owner entry (welcome card -> /role role selection) no
+// longer exists: /role is one of the server redirects asserted above, and the owner
+// entry is the registration form itself, checked next.
 // Owner registration (server action flow) stays the canonical owner onboarding entry.
+// /register (auth-v2) opens directly in register mode and exposes a stable submit id.
 await nav(publicPage, base+'/register?role=homeowner')
-await publicPage.getByRole('button',{name:'Kostenlos registrieren'}).first().waitFor();
-await publicPage.getByRole('button',{name:'Kostenlos registrieren'}).first().click();
+const ownerRegisterSubmit=publicPage.locator('#btn-submit-register');
+await ownerRegisterSubmit.waitFor();
 if(!(await publicPage.getByLabel(/Vorname/).count()))throw new Error('Owner registration missing Vorname field');
 if(!(await publicPage.getByLabel(/Nachname/).count()))throw new Error('Owner registration missing Nachname field');
 if(!(await publicPage.locator('input[name="password"]').count()))throw new Error('Owner registration missing Passwort field');
 if(!(await publicPage.getByLabel(/Postleitzahl/).count()))throw new Error('Owner registration missing PLZ field');
-if(!(await publicPage.getByRole('button',{name:'Kostenlos registrieren'}).last().count()))throw new Error('Owner registration missing submit action');
-if(!(await publicPage.locator('#btn-demo-kunde').count()))throw new Error('Owner registration missing demo fill');
+if(!(await ownerRegisterSubmit.isEnabled()))throw new Error('Owner registration submit action is not usable');
+// The P0 demo backdoors are fail-closed (88431f0): unless demo login is explicitly
+// switched on, the registration form must not offer the public demo fill.
+if(process.env.DEMO_LOGIN_ENABLED!=='1'&&await publicPage.locator('#btn-demo-kunde').count())throw new Error('Demo backdoor is visible although demo login is disabled');
 await nav(publicPage, base+'/')
 const manifestResponse=await publicPage.request.get(base+'/manifest.webmanifest'); if(!manifestResponse.ok())throw new Error('PWA manifest unavailable');
 const manifest=await manifestResponse.json(); if(manifest.display!=='standalone'||!Array.isArray(manifest.icons)||manifest.icons.length<3)throw new Error('PWA manifest incomplete');
@@ -418,12 +425,12 @@ const pageErrors=[];
 manager.on('console',(m)=>{if(m.type()==='error')pageErrors.push(m.text());});
 manager.on('pageerror',(e)=>pageErrors.push('pageerror: '+e.message));
 await nav(manager, base+'/register?role=provider')
-await manager.getByRole('button',{name:'Kostenlos registrieren'}).first().click();
+await manager.locator('#btn-submit-register').waitFor();
 await fillRegisterField(manager,'businessName','Gartenbau Müller'); await fillRegisterField(manager,'firstName','Daniel'); await fillRegisterField(manager,'lastName','Müller');
 await fillRegisterField(manager,'email',providerEmail); await fillRegisterField(manager,'password',password);
 await fillRegisterField(manager,'postcode','46325');
 await fillRegisterField(manager,'trades','Garten- und Landschaftsbau, Heckenschnitt, Hausmeisterservice');
-try{await Promise.all([manager.waitForURL('**/pro'),manager.getByRole('button',{name:'Kostenlos registrieren'}).last().click()]);}catch(navError){console.error('E2EDIAG register url=',manager.url());console.error('E2EDIAG register body=',(await manager.locator('body').innerText()).slice(0,500).replace(/\n+/g,' | '));throw navError;}
+try{await Promise.all([manager.waitForURL('**/pro'),manager.locator('#btn-submit-register').click()]);}catch(navError){console.error('E2EDIAG register url=',manager.url());console.error('E2EDIAG register body=',(await manager.locator('body').innerText()).slice(0,500).replace(/\n+/g,' | '));throw navError;}
 await nav(manager, base+'/pro/profile')
 await manager.waitForLoadState('networkidle').catch(()=>{});
 await waitForDomStable(manager,'input[name="document"]',1);
@@ -532,9 +539,9 @@ await thomasCard.getByLabel('Aufträge verwalten').uncheck(); await clickServerA
 // 3) Kunde startet beim Hausmeisterservice und entscheidet danach bewusst: Mensch oder Auftrag.
 const ownerCtx=await newE2EContext({viewport:{width:390,height:844}}); const owner=await ownerCtx.newPage(); trackPage(owner,'homeowner');
 await nav(owner, base+'/register?role=homeowner')
-await owner.getByRole('button',{name:'Kostenlos registrieren'}).first().click();
+await owner.locator('#btn-submit-register').waitFor();
 await fillRegisterField(owner,'firstName','Maria'); await fillRegisterField(owner,'lastName','Test'); await fillRegisterField(owner,'email',ownerEmail); await fillRegisterField(owner,'password',password); await fillRegisterField(owner,'postcode','46325');
-await Promise.all([owner.waitForURL('**/app/onboarding'),owner.getByRole('button',{name:'Kostenlos registrieren'}).last().click()]);
+await Promise.all([owner.waitForURL('**/app/onboarding'),owner.locator('#btn-submit-register').click()]);
 await waitText(owner,'Damit Partner in deiner Region arbeiten können');
 // Resume works: leaving mid-onboarding and returning keeps the saved step.
 await nav(owner, base+'/app'); await waitText(owner,'Einrichtung unvollständig');
@@ -735,7 +742,7 @@ await nav(admin, base+`/admin/crm?q=${encodeURIComponent('Gartenbau Müller')}`)
 
 const buyerCtx=await newE2EContext({viewport:{width:390,height:844}}); const buyer=await buyerCtx.newPage(); trackPage(buyer,'homeowner-buyer');
 // 12a) First-run onboarding: guided steps, skippable optionals, resumable progress.
-await nav(buyer, base+'/register?role=homeowner'); await buyer.getByRole('button',{name:'Kostenlos registrieren'}).first().click(); await fillRegisterField(buyer,'firstName','Ben'); await fillRegisterField(buyer,'lastName','Käufer'); await fillRegisterField(buyer,'email',buyerEmail); await fillRegisterField(buyer,'password',password); await fillRegisterField(buyer,'postcode','46325'); await Promise.all([buyer.waitForURL('**/app/onboarding'),buyer.getByRole('button',{name:'Kostenlos registrieren'}).last().click()]);
+await nav(buyer, base+'/register?role=homeowner'); await buyer.locator('#btn-submit-register').waitFor(); await fillRegisterField(buyer,'firstName','Ben'); await fillRegisterField(buyer,'lastName','Käufer'); await fillRegisterField(buyer,'email',buyerEmail); await fillRegisterField(buyer,'password',password); await fillRegisterField(buyer,'postcode','46325'); await Promise.all([buyer.waitForURL('**/app/onboarding'),buyer.locator('#btn-submit-register').click()]);
 await waitText(buyer,'Damit Partner in deiner Region arbeiten können');
 await buyer.getByLabel('Straße und Hausnummer').fill('Kaistraße 7');
 await clickAndWaitUrl(buyer,buyer.getByRole('button',{name:'Weiter'}),/\/app\/onboarding$/);
