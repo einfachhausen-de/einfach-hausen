@@ -1,3 +1,5 @@
+> **Produktkontext aktualisiert · 21.09.2026:** Maßgeblich sind [Produktvision](PRODUCT_VISION.md) und [Positionierung](PRODUCT_POSITIONING.md): Handwerkervermittlung und Affiliate-Tarife zuerst, Eigentümer kostenlos, Partnerabo, Hausakte ergänzend. Frühere Prioritäten und „nächste Aktionen“ dieser Lieferung gelten nur für ihren datierten Umfang; aktuelle Fortsetzung unter [NEXT_AGENT](NEXT_AGENT.md). Technische und gestalterische Nachweise bleiben historische Belege. Ein damaliger DONE-/100%-Status ist keine Abnahme des am 21.09.2026 korrigierten Produktziels.
+
 # Einfach Hausen — Final Acceptance — historisch, Stand 2026-08-25 (T-0042, Release `dcd53ca1`)
 
 > **Einordnung 2026-09-10 (Repo-HEAD `0503da3`):** Historische Momentaufnahme der T-0042-Abnahme vom 2026-08-25. Kernaussagen bleiben; SHAs und Taskstände sind Stichtagswerte, keine aktuellen Behauptungen.

@@ -1,3 +1,5 @@
+> **Produktkontext aktualisiert · 21.09.2026:** Maßgeblich sind [Produktvision](../../PRODUCT_VISION.md) und [Positionierung](../../PRODUCT_POSITIONING.md): Handwerkervermittlung und Affiliate-Tarife zuerst, Eigentümer kostenlos, Partnerabo, Hausakte ergänzend. Frühere Prioritäten und „nächste Aktionen“ dieser Lieferung gelten nur für ihren datierten Umfang; aktuelle Fortsetzung unter [NEXT_AGENT](../../NEXT_AGENT.md). Technische und gestalterische Nachweise bleiben historische Belege. Die damaligen PLUS/PREMIUM-Eigentümertarife und Paid-CTAs sind fachlich abgelöst; die aufgeführten Preisprüfungen sind historische Liefernachweise und kein Wiederaufnahmeauftrag.
+
 # Preisübersicht – Frontend und Angebotsklarheit
 Host OCI sin-supabase; Branch fix/eh-pricing-clarity-20260910.
 Basis 1005fb5. Worktree /home/ubuntu/orca/workspaces/eh-pricing-clarity-20260910.

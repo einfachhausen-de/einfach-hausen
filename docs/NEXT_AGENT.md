@@ -1,3 +1,19 @@
+# Nächster Agent · aktueller Produktauftrag 21.09.2026
+
+**Kern:** Handwerkervermittlung und Affiliate-Tarifwechsel. Eigentümer kostenlos; Handwerkerabo für Listung, passende Vorschläge und Angebot-/Rechnungswerkzeuge. Hausakte und KI sind ergänzend.
+
+**Zuerst lesen:** [PRODUCT_VISION.md](PRODUCT_VISION.md), [PRODUCT_POSITIONING.md](PRODUCT_POSITIONING.md) und [PRODUCT_CONTEXT_SYNC.md](PRODUCT_CONTEXT_SYNC.md). Dann den bestehenden kanonischen Taskrecord mit diesem Betreiberauftrag abgleichen. Frühere Prioritäten in Brain/Memory, Mockups und dem Verlauf unten nicht ungeprüft wiederaufnehmen.
+
+**Genau nächste Frontend-Aktion:** Eigentümer-Einstieg mit vorhandenen Designbausteinen auf „Auftrag einstellen“, „Tarife vergleichen“ und aktuelle Angebote/Vorgänge ausrichten. Danach Partnerablauf Anfrage → Angebot/Kostenvoranschlag → Beauftragung → Rechnung vereinfachen. Wenige nötige Schritte, kein Pflicht-Chat und keine vollständige Hausaktenpflege vor dem ersten Nutzen.
+
+**Geliefert:** PR #168 enthält Such-/Uploadbedienung sowie korrigierte Repo-Anweisungen und Übergaben. **Offen:** neue Gesamtpriorisierung in den Screens, externer Brain-/Memory-/SQLite-Abgleich (Hosts offline). Kein Merge/Deploy oder externer Sync behauptet. [Arbeitsnachweis](TASKPLAN_FRONTEND_20260921.md), [Frontend-Handoff](brand/workspace/FRONTEND-HANDOFF-20260921.md).
+
+**Arbeitsgrenzen:** Frontend-Agent konzentriert sich auf Oberfläche und Bedienung; Tests, Backend und Release bleiben wie beauftragt beim lokalen Agenten. Designsystem, Berechtigungen, Abrechnung und fremde Arbeit erhalten.
+
+## Datierter Verlauf und frühere Übergaben
+
+Der folgende Verlauf bleibt als Evidenz erhalten. „Aktuell“, „nächste Aktion“, „DONE“ und Prüf-/Deploy-Aussagen gelten jeweils für den genannten Zeitpunkt und Umfang. Sie überschreiben den aktuellen Produktauftrag oben nicht. Technische Betriebsfragen weiterhin anhand OPERATIONS.md / PRODUCTION_HANDOVER.md und echtem Hostzustand klären.
+
 > **Betreiberkorrektur 21.09.2026 — Geschäftsmodell und Frontend-Priorität:** Die bisherige Hausakte-/„Homeowner Operating System“-Priorisierung ist ausdrücklich korrigiert. Kerngeschäft: kostenlose Eigentümer stellen Aufträge ein und wechseln Tarife; Handwerker buchen Abos und senden Angebote/Kostenvoranschläge sowie Rechnungen am Vorgang. Hausakte unterstützt Wiederkehr und Folgeaufträge. Verbindlich: [PRODUCT_VISION.md](PRODUCT_VISION.md) und [PRODUCT_POSITIONING.md](PRODUCT_POSITIONING.md). **Nächste Frontend-Aktion:** Eigentümer-Einstieg auf „Auftrag einstellen“, „Tarife vergleichen“ und aktuelle Angebote ausrichten; vorhandene Abläufe und Designbausteine verwenden. Danach Partner-Ablauf Anfrage → Angebot → Beauftragung → Rechnung vereinfachen. Keine neue Nebenfeature-Welle. Die Such-/Uploadkorrekturen unten sind geliefert, die neue Produktpriorisierung ist noch nicht in der gesamten UI umgesetzt. Tests/Backend/Release bleiben beim lokalen Agenten.
 
 > **Frontend-Fortsetzung · 21.09.2026 · `04348fb`:** Branch `feat/app-frontend-completion-20260921` ergänzt Suche in Owner-/Partner-Bestandslisten, zeigt alle bereits geladenen Kundenanfragen, repariert Anfragen-Links und vervollständigt Datei-/Angebotsbedienung. [Taskplan](TASKPLAN_FRONTEND_20260921.md) · [vollständige Quellübergabe](brand/workspace/FRONTEND-HANDOFF-20260921.md). Auf ausdrücklichen Operator-Auftrag keine Tests/Builds; kein Merge oder Deployment. **Nächste Aktion für diese Lieferung:** lokalen Agenten den Branch in den aktuellen Stand integrieren lassen. PR #166 bleibt separat offen. Bestehende Host-/Release-Befunde darunter bleiben erhalten.

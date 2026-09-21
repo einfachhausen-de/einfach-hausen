@@ -1,3 +1,5 @@
+> **Koordinationsnachtrag 21.09.2026:** Repo-Einstiegspunkte und historische Handoffs sind fachlich abgeglichen. Aktueller Fortsetzungspunkt: [NEXT_AGENT](../../NEXT_AGENT.md). Externer Brain-/Memory-/Taskplan-Status: [PRODUCT_CONTEXT_SYNC](../../PRODUCT_CONTEXT_SYNC.md), ausdrücklich noch ausstehend. Die nachstehende Implementierung bleibt ein Teilnachweis; der Gesamtumbau der Kernabläufe ist offen.
+
 > **Betreiberkorrektur 21.09.2026 — Geschäftsmodell und Frontend-Priorität:** [PRODUCT_VISION.md](../../PRODUCT_VISION.md) und [PRODUCT_POSITIONING.md](../../PRODUCT_POSITIONING.md) korrigieren den Schwerpunkt auf Handwerkervermittlung und Affiliate-Tarife. Diese Übergabe dokumentiert bereits gelieferte Bedienkorrekturen; sie ist keine Gesamtabnahme der neuen Produktpriorität.
 
 # App-Frontend · Handoff 21.09.2026

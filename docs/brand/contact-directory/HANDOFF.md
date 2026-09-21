@@ -1,3 +1,5 @@
+> **Produktkontext aktualisiert · 21.09.2026:** Maßgeblich sind [Produktvision](../../PRODUCT_VISION.md) und [Positionierung](../../PRODUCT_POSITIONING.md): Handwerkervermittlung und Affiliate-Tarife zuerst, Eigentümer kostenlos, Partnerabo, Hausakte ergänzend. Frühere Prioritäten und „nächste Aktionen“ dieser Lieferung gelten nur für ihren datierten Umfang; aktuelle Fortsetzung unter [NEXT_AGENT](../../NEXT_AGENT.md). Technische und gestalterische Nachweise bleiben historische Belege. 
+
 # EH Gina Addressbook 2026-09-13 — Implementierungs-Handoff (kein Deploy, keine Gina-Abnahme)
 
 Branch: `feat/eh-gina-addressbook-20260913` · Basis `59789ff1b570ec0350b3eb24e9b59e140139c44c`

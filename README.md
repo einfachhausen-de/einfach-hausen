@@ -4,13 +4,13 @@
 
 <p align="left"><img src="public/brand/logo-full.png" alt="einfachhausen Logo" width="220" /></p>
 
-> **Ein Ansprechpartner für alles rund ums Eigenheim.**
->
-> **Du sagst, was dein Haus braucht. Wir kümmern uns um den Rest.**
+> **Handwerker finden. Angebote vergleichen. Tarife wechseln.**
 
-Einfach Hausen ist die zentrale Anlaufstelle für Eigenheimbesitzer. Der Kunde beschreibt ein Problem und entscheidet selbst: **nur einen konkreten menschlichen Ansprechpartner sprechen** oder **einen echten Auftrag organisieren lassen**. Kontakte, Hausdaten, Termine und Dokumente bleiben dauerhaft beim Haus. Die KI arbeitet im Hintergrund als Assistenz- und Organisationsschicht, ist aber nicht das eigentliche Kundenversprechen.
+Einfach Hausen vermittelt Handwerkeraufträge und ermöglicht Affiliate-Tarifvergleiche für Strom, Gas, DSL/Internet, Versicherungen und weitere freigegebene Kategorien. Eigentümer nutzen den Kern kostenlos: Sie stellen Anliegen ein, erhalten Angebote/Kostenvoranschläge und wählen ihren Handwerker selbst. Handwerker buchen ein Abo für Listung, passende Kundenvorschläge und Auftragswerkzeuge bis zur Rechnung.
 
-Die verbindliche Produktdefinition steht in [`docs/PRODUCT_VISION.md`](docs/PRODUCT_VISION.md). Die strategische Positionierung als **persönlicher Hausmanager / Betriebszentrale für das eigene Zuhause** steht in [`docs/PRODUCT_POSITIONING.md`](docs/PRODUCT_POSITIONING.md). Das langlebige Daten- und Berechtigungsmodell steht in [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
+Die Hausakte ist ein Zusatznutzen: Unterlagen, Kontakte und Hauswissen erleichtern Folgeaufträge und wiederkehrende Nutzung. KI unterstützt bei Bedarf. Weder Hausaktenpflege noch ein KI-Gespräch sind Voraussetzung für den Einstieg.
+
+Verbindlich sind [PRODUCT_VISION.md](docs/PRODUCT_VISION.md) und [PRODUCT_POSITIONING.md](docs/PRODUCT_POSITIONING.md), korrigiert durch Jerry am 21.09.2026. Der [Kontextabgleich für Agenten und Brain/Memory](docs/PRODUCT_CONTEXT_SYNC.md) trennt Ziel, gelieferten Stand und ausstehende Synchronisierung. Das Datenmodell bleibt in [ARCHITECTURE.md](docs/ARCHITECTURE.md) dokumentiert.
 
 ## Unternehmensrollen (kanonisch)
 
@@ -23,7 +23,7 @@ Verbindliche Rollenquelle: [`docs/COMPANY_IDENTITY.md`](docs/COMPANY_IDENTITY.md
 
 Alle Agents arbeiten in diesem Repository **am selben Ziel**. Es gibt keinen zweiten Engineering-Taskplan in README, Issues oder Worker-Reports. Der verbindliche Einstieg ist [`docs/NEXT_AGENT.md`](docs/NEXT_AGENT.md); der transaktionale Taskstatus liegt in `.sin-gpt-web/taskplan.sqlite3` und wird nach `.sin-gpt-web/TASKPLAN.md` gerendert.
 
-Aktueller Stand (verifiziert 2026-09-20): **Repo-HEAD `3e8ecd9` (main)** — ses_f40d79-Welle abgeschlossen: Sidebar-07-Hauptnavigation, Session-Popover nur Identität+Einstellungen+Abmelden, ein Label = ein Ziel, Settings-Dialog 4 Sektionen, Kontrast A + DeadCSS (479/479 Spec-Selektoren entfernt). Details: Abschnitt `App-Rahmen` unten; Belege: `git log` (`3e8ecd9`, `929bc91`, `234aec3`, `ee7dcb9`, `5e492f6`). Historisch: T-0131 Convergence (2026-09-03, `3fbe3c9`) → `13496d7`; UI-Wellen A-E, Supabase-App-Schema + RLS, Demo-Logins, GSC-Verifikation sowie Blog/Lexikon-Cluster waren deren Stichtagswerte. Bereits erledigte oder abgelöste Wellen werden nicht erneut begonnen. Neue Implementierungsarbeit entsteht nur aus einem reproduzierbaren Acceptance-Fehler und wird als kanonischer Remediation-Task erfasst.
+Historischer Release-Nachweis (verifiziert 2026-09-20, kein aktueller Gesamtabschluss): **Repo-HEAD `3e8ecd9` (main)** — ses_f40d79-Welle abgeschlossen: Sidebar-07-Hauptnavigation, Session-Popover nur Identität+Einstellungen+Abmelden, ein Label = ein Ziel, Settings-Dialog 4 Sektionen, Kontrast A + DeadCSS (479/479 Spec-Selektoren entfernt). Details: Abschnitt `App-Rahmen` unten; Belege: `git log` (`3e8ecd9`, `929bc91`, `234aec3`, `ee7dcb9`, `5e492f6`). Historisch: T-0131 Convergence (2026-09-03, `3fbe3c9`) → `13496d7`; UI-Wellen A-E, Supabase-App-Schema + RLS, Demo-Logins, GSC-Verifikation sowie Blog/Lexikon-Cluster waren deren Stichtagswerte. Bereits erledigte oder abgelöste Wellen werden nicht erneut begonnen. Neue Implementierungsarbeit folgt aktuellen Betreiberaufträgen oder belegten Acceptance-Fehlern und wird im bestehenden kanonischen Taskplan erfasst. Die Betreiberkorrektur vom 21.09.2026 ist ein solcher Auftrag; frühere Abschlussmeldungen nehmen ihre Umsetzung nicht vorweg.
 
 ### Public Website Finish — Stand 2026-09-05
 
@@ -60,24 +60,18 @@ Implementierungs- und Designentscheidungen: `docs/superpowers/specs/2026-09-05-p
 
 Produktion ist ein **Multi-User-Betrieb** auf Single-Node-Basis: App-Daten in SQLite (persistenter Pfad + Backup), Auth gegen den self-hosted SIN-Supabase-Stack (Autorität serverseitig verifiziert). **Ist-Storage: persistente lokale Verzeichnisse** `private/`/`uploads/` (Supabase-Storage-Adapter nicht implementiert). Historische HA-/Postgres-Migrationsplanung (T-0166) wurde nie ausgeführt und ist nicht Teil des aktuellen Taskplans. Siehe `docs/OPERATIONS.md` und `docs/ARCHITECTURE.md`.
 
-## Kernablauf
+## Kernabläufe
 
-1. Kunde schreibt, spricht oder lädt ein Foto hoch.
-2. Der KI-Hausmeister beantwortet und ordnet das Thema ein; **noch entsteht weder Vermittlung noch Auftrag**.
-3. Der Kunde entscheidet: **Ansprechpartner finden** oder **Auftrag organisieren**.
-4. Beim Ansprechpartner-Weg wird ein passender geprüfter Betrieb angefragt. Ein konkreter Mensch kann übernehmen, ohne Angebot und ohne Buchung.
-5. Beim Auftrags-Weg fragt die KI nur fehlende Auftragsdaten ab, ermittelt eine Preisorientierung und disponiert passende Partner.
-6. Angebote werden nach Preis, Termin, Entfernung und Qualität verglichen.
-7. Der Kunde bucht bewusst.
-8. Ein konkreter Ansprechpartner des Partnerbetriebs wird spätestens jetzt zugewiesen.
-9. Kunde und Ansprechpartner können direkt schreiben, anrufen und Termine abstimmen.
-10. Der KI-Hausmeister bleibt parallel für Fragen, Hausakte, Organisation, Erinnerungen und Servicefälle verfügbar.
-11. Ein bereits verbundener Ansprechpartner bleibt in der Hausakte und kann später ohne neue Suche kontaktiert werden.
-12. Aus einer reinen Kontaktanfrage kann der Kunde später separat einen Auftrag machen.
+- **Eigentümer:** Anliegen einstellen → passende Angebote/Kostenvoranschläge erhalten → vergleichen → bewusst beauftragen → Arbeit und Rechnung im selben Vorgang verfolgen.
+- **Handwerker:** Betrieb einrichten und Abo buchen → nach fachlicher Freigabe passende Anfragen erhalten → Angebot senden → Auftrag bearbeiten → Rechnung senden.
+- **Tarife:** Kategorie wählen → nötige Angaben ergänzen → freigegebenen Vergleich öffnen → beim Partner abschließen.
+- **Ergänzend:** Dokumente, Kontakte und Hausdaten für die nächste Nutzung erhalten.
+
+Beratung und Assistenz bleiben erreichbar. Allgemeine Fragen veröffentlichen kein Inserat und lösen keine Beauftragung aus. Die Umsetzung der neuen Einstiegspriorität ist noch offen; dieser Abschnitt ist kein Nachweis eines bereits umgebauten Frontends.
 
 ## Visuelles Produktdesign
 
-Die verbindliche UI-Richtung steht in [`docs/DESIGN_SYSTEM.md`](docs/DESIGN_SYSTEM.md). Die Kunden-App ist mobile-first und folgt der Referenz: Startseite, Hausservice, Angebotsvergleich, Auftragsdetail, Mein Haus, Mein Jahr, Pakete, Aufträge, Partnerprofil und Einstellungen.
+Die verbindliche UI-Richtung steht in [`docs/DESIGN_SYSTEM.md`](docs/DESIGN_SYSTEM.md). Die Kunden-App ist mobile-first und folgt der Referenz: Auftragseinstieg, Angebotsvergleich, Auftragsdetail und Tarifvergleich; Hausakte, Hausservice und Jahresplan ergänzen diese Kernwege. Gestaltung folgt DESIGN.md und packages/eh-design.
 
 Für T-0165 gilt zusätzlich die Präsentations-Source-of-Truth-Kette: **Notion App Design → `DESIGN.md` → [`docs/PRESENTATION_BRAND.md`](docs/PRESENTATION_BRAND.md) → `presentation/premium/brand.config.json` → `presentation/premium/deck.html`**. Notion liefert visuelle Evidence, nicht automatisch fachliche Produktspezifikation. Änderungen am App-Design müssen deshalb immer auch auf Presentation Brand und Deck geprüft werden.
 
@@ -150,7 +144,7 @@ Enthalten (Web + nativ identisch):
 
 | Tarif | Preis | Kernnutzen |
 |---|---:|---|
-| Hauskonto | 0 €/Monat, dauerhaft | Hausmeisterservice, Aufträge, Angebote, Ansprechpartner, Hausakte |
+| Eigentümerzugang | 0 €/Monat, dauerhaft | Aufträge einstellen, Angebote vergleichen und beauftragen, Tarife vergleichen; Hausakte ergänzend |
 
 Eigentümer nutzen einfachhausen kostenlos: keine Mitgliedschaft, kein Abo, keine
 kostenpflichtigen Einzelpakete und keine Vermittlungs-/Servicegebühr auf

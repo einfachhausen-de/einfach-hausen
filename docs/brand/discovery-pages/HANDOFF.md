@@ -1,3 +1,5 @@
+> **Produktkontext aktualisiert · 21.09.2026:** Maßgeblich sind [Produktvision](../../PRODUCT_VISION.md) und [Positionierung](../../PRODUCT_POSITIONING.md): Handwerkervermittlung und Affiliate-Tarife zuerst, Eigentümer kostenlos, Partnerabo, Hausakte ergänzend. Frühere Prioritäten und „nächste Aktionen“ dieser Lieferung gelten nur für ihren datierten Umfang; aktuelle Fortsetzung unter [NEXT_AGENT](../../NEXT_AGENT.md). Technische und gestalterische Nachweise bleiben historische Belege. 
+
 # Besucherführung: Leistungen und Ablauf
 Host OCI sin-supabase; Branch fix/eh-discovery-pages-20260910; Basis 4638ee2.
 Worktree /home/ubuntu/orca/workspaces/eh-discovery-pages-20260910.

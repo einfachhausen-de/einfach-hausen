@@ -1,3 +1,5 @@
+> **Produktkontext aktualisiert · 21.09.2026:** Maßgeblich sind [Produktvision](../../PRODUCT_VISION.md) und [Positionierung](../../PRODUCT_POSITIONING.md): Handwerkervermittlung und Affiliate-Tarife zuerst, Eigentümer kostenlos, Partnerabo, Hausakte ergänzend. Frühere Prioritäten und „nächste Aktionen“ dieser Lieferung gelten nur für ihren datierten Umfang; aktuelle Fortsetzung unter [NEXT_AGENT](../../NEXT_AGENT.md). Technische und gestalterische Nachweise bleiben historische Belege. 
+
 # EH-BRAND-04-R2 · Lokaler Übernahmeauftrag
 
 Autorität: Jerry fordert fachliche Vorlagen, damit Folgeagenten nicht selbst gestalten. Codex hat die acht neuen Kompositionen vollständig aus dem bestehenden Atelier-02-System geschrieben. Die Datei enthält keinen neuen CSS-Stil und keine Geschäftslogik. Diese Übernahme ist keine Erlaubnis, das Design abzuändern.

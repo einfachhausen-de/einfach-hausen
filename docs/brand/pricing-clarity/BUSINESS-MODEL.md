@@ -1,3 +1,13 @@
+# Geschäftsmodell — historische Empfehlung vom 10.09.2026
+
+**Als aktuelle Produktvorgabe abgelöst.** Eigentümer-Kern kostenlos; Erlöse über Handwerkerabos und Affiliate-Tarifabschlüsse. Verbindlich: [PRODUCT_VISION.md](../../PRODUCT_VISION.md) und [PRODUCT_POSITIONING.md](../../PRODUCT_POSITIONING.md), Betreiberkorrektur 21.09.2026.
+
+Die nachfolgende frühere Freemium-/Komforttarif-Hypothese wird nur als Entscheidungsverlauf erhalten. Keine Eigentümer-Abos, 15-%-Rabattprogramme, kostenpflichtige Hausorganisation oder dauerhaft freie Partnervermittlung daraus erneut implementieren. Konkrete Partnerpreise und Trial-Regeln werden separat anhand des aktuellen Bestands geklärt; keine Bestandsabos ändern.
+
+Aktivierung wird fachlich am ersten eingestellten Inserat, Angebot/Beauftragung bzw. begonnenen Tarifvergleich ausgerichtet. „Hausakte eingerichtet“ allein ist kein Kernziel.
+
+## Historische Fassung (keine aktuelle Arbeitsanweisung)
+
 # Geschäftsmodell: Empfehlung mit Prüfgrenzen
 Stand 10.09.2026. Keine Aussage über ein universell bestes oder profitables Modell.
 Nutzerauftrag: Preisseite deutlich verbessern; sinnvolle Abo-Anpassungen ausdrücklich erlaubt.

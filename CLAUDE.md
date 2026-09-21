@@ -1,5 +1,9 @@
 @AGENTS.md
 
+## Aktueller Produktkontext · 21.09.2026
+
+Vor Wiederaufnahme PRODUCT_VISION.md und PRODUCT_POSITIONING.md unter docs/ lesen: Handwerkervermittlung und Affiliate-Tarife sind der Kern; Eigentümer kostenlos, Handwerkerabo, Hausakte ergänzend. Übergabe: docs/NEXT_AGENT.md. Externe Brains/Memory und alte Tasktexte nach docs/PRODUCT_CONTEXT_SYNC.md abgleichen; historische Einträge sind keine gegenteilige aktuelle Produktanweisung. Aktuelle UI-Umsetzung und externer Sync sind dort ausdrücklich getrennt.
+
 <!-- gitnexus:start -->
 # GitNexus — Code Intelligence
 

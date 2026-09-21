@@ -1,6 +1,6 @@
 # Project Preferences & Standing Design Convergence Rules
 
-Diese Datei synchronisiert die verbindlichen Design- und Architektur-Präferenzen für Agenten und Mitwirkende.
+Diese Datei fasst Arbeitspräferenzen zusammen. Geschäftsmodell und Priorität folgen PRODUCT_VISION.md / PRODUCT_POSITIONING.md; konkrete Markenwerte folgen ausschließlich ../DESIGN.md und packages/eh-design. Die unten aufgeführten älteren Farbvarianten autorisieren keine alternative Palette.
 
 ## 1. Design System & Palette (Kanon)
 - **Canvas / Hintergrund:** Warmweiß `#faf8f4` (alternativ `#f4f7f7`). Keine harten Kaltweiß- oder Reinweiß-Überstrahlungen.
@@ -13,15 +13,14 @@ Diese Datei synchronisiert die verbindlichen Design- und Architektur-Präferenze
 - **Einheitlichkeit:** Webseiten, Eigentümer-App (`/app`), Partner-App (`/pro`) und CRM (`/admin`) teilen dieselbe ruhige Grundstimmung.
 - **Kein Dark-Mode:** Partnerbereich und CRM sind helle, konzentrierte Arbeitsumgebungen und keine dunklen ERP-Inseln.
 
-## 3. Informationsarchitektur & Prioritäten
-- **Eigentümer (`/app`):** 
-  1. Hausmeister-Composer steht ganz oben als primäre Aktion.
-  2. „Als Nächstes“ fasst echte nächste Schritte zusammen (Termine, Quotes, anstehende Wartungen).
-  3. Schnellaktionen dezent untergeordnet; störende Floating Action Buttons (FABs) sind verboten.
-- **Partner (`/pro`):** 
-  1. Keine überladenen 4-Karten-KPI-Blöcke.
-  2. Schlanke Statuszeile + genau ein nächster sinnvoller Handlungsschritt („Kostenvoranschlag senden“).
-  3. Fokussierte Auftragsliste.
+## 3. Informationsarchitektur & Prioritäten · Betreiberkorrektur 21.09.2026
+
+Verbindlich: PRODUCT_VISION.md und PRODUCT_POSITIONING.md. Der frühere Vorrang des Hausmeister-Composers ist abgelöst.
+
+- **Eigentümer (/app):** Auftrag einstellen und Tarife vergleichen direkt auffindbar. Aktuelle Angebote und der nächste Schritt laufender Aufträge haben Vorrang vor Hausaktenstatistiken. Kostenloser Kern; keine Hausaktenpflege oder Pflichtberatung vor dem ersten Nutzen.
+- **Partner (/pro):** passende Anfragen, Angebot/Kostenvoranschlag und beauftragte Arbeit bis zur Rechnung. Abozugang verständlich erklären; pro Vorgang einen nächsten sinnvollen Schritt zeigen.
+- **Hausakte und Assistenz:** vorhandene Zusatzfunktionen erhalten und kontextuell anbieten; Angaben wiederverwenden.
+- **Einfachheit:** wenige nötige Eingaben, verständliche Rückmeldungen, Details bei Bedarf. Keine zusätzlichen Verwaltungsflächen ohne konkreten Bedarf.
 
 ## 4. Absolute Design-Verbote (Design Laws)
 - **Keine Accent-Stripes:** Keine `border-left` / `border-right` Balken an Karten oder Listenelementen.

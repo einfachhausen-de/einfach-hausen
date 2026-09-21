@@ -38,9 +38,9 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 ### Single-goal coordination contract
 
 - **One repository = one goal.** Every agent works toward the same canonical goal from `.sin-gpt-web/taskplan.sqlite3`: finish the complete Einfach Hausen platform to production quality, prove acceptance, then converge the repository. Do not create side-roadmaps, duplicate task lists, speculative redesign waves, or parallel infrastructure goals.
-- **Mandatory read order before work:** `docs/NEXT_AGENT.md` → `.sin-gpt-web/TASKPLAN.md` → the exact `sin-gpt-web-state show <TASK>` record → `docs/PRODUCT_VISION.md` and any task-specific docs. Historical reports are evidence, never the current roadmap.
+- **Mandatory read order before work:** `docs/NEXT_AGENT.md` → `docs/PRODUCT_VISION.md` and `docs/PRODUCT_POSITIONING.md` → `docs/PRODUCT_CONTEXT_SYNC.md` → `.sin-gpt-web/TASKPLAN.md` and the exact `sin-gpt-web-state show <TASK>` record → task-specific docs and `DESIGN.md`. Apply the latest operator correction to an existing task before resuming stale priorities. Historical reports are evidence, never the current roadmap.
 - **Always take the highest-priority eligible canonical task.** Do not work a completed/cancelled task again. Do not invent a new task when an existing canonical task covers the work.
-- **Current explicit operator roadmap (2026-08-28 OCI migration):** First complete the verified **Mac-M1 → GitHub → OCI-VM** handoff. After the GitHub release SHA is proven, **OCI-VM is the canonical execution host** for `einfach-hausen`; Mac-M1 is source/release/recovery only. Immediate critical chain: **T-0170 OCI SIN Supabase auth convergence → T-0169 Notion 1:1 visual acceptance → T-0171 final convergence**, then resume the highest-priority eligible product-completion task. **SIN Supabase OSS on OCI is the target production auth/data authority; Supabase Cloud is not part of the target architecture.** SQLite remains explicit local-development fallback only.
+- **Historical operator roadmap (2026-08-28 OCI migration; not a current resume command):** The then-ordered chain was the verified **Mac-M1 → GitHub → OCI-VM** handoff. After the GitHub release SHA is proven, **OCI-VM is the canonical execution host** for `einfach-hausen`; Mac-M1 is source/release/recovery only. Historical critical chain: **T-0170 OCI SIN Supabase auth convergence → T-0169 Notion 1:1 visual acceptance → T-0171 final convergence**, then resume the highest-priority eligible product-completion task. **SIN Supabase OSS on OCI is the target production auth/data authority; Supabase Cloud is not part of the target architecture.** SQLite remains explicit local-development fallback only.
 - Before ending a wave, update canonical task evidence/state, render+validate the taskplan, and update `docs/NEXT_AGENT.md` only if the continuation point changed. Leave exactly one unambiguous next action for the next agent.
 - README, worker reports, GitHub issues, Notion and ad-hoc docs must not become competing engineering roadmaps. They may link to or summarize the canonical taskplan only.
 
@@ -61,6 +61,15 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 - Reuse the existing OCI stack (OmniRoute, **SIN Supabase OSS**, Kestra, Cloudflare) instead of introducing parallel infrastructure unless there is a demonstrated gap. After the migration release, run repository, test, build, GitNexus and Prime-Agent/Luna work for this project on **OCI-VM**, not Mac-M1. GitHub is the only Mac→OCI code-transfer boundary; never copy a dirty Mac working tree directly to OCI.
 - **Production/domain continuation:** Before changing production infrastructure, DNS, Cloudflare, STRATO, Stripe or OCI routing, read `docs/PRODUCTION_HANDOVER.md` and `docs/OPERATIONS.md`. Treat handover status as a starting point only; verify live state before mutations.
 - Keep the customer and partner products radically simple. Do not add generic ERP-style roles, settings, dashboards, or configuration unless required by the product vision.
+
+
+### Product context and external brains · 2026-09-21
+
+- Current business facts come from PRODUCT_VISION.md / PRODUCT_POSITIONING.md. Brain/Memory entries, dated mocks and old task descriptions are copies or historical evidence; stale copies do not override Jerry's correction.
+- Scope memory updates to `einfachhausen-de/einfach-hausen`. Preserve unrelated projects, brand decisions, security and historical receipts. Supersede the old house-manager-first / paid-homeowner / permanent-free-partner business guidance; do not delete unrelated memories.
+- External synchronization uses [docs/PRODUCT_CONTEXT_SYNC.md](docs/PRODUCT_CONTEXT_SYNC.md) and its versioned payload. Read back the stored result and record the real receipt before reporting a brain or task database as updated.
+- When hosts or the canonical SQLite taskplan are unavailable, keep the explicit pending status. No invented task IDs, receipt IDs or offline database substitutes. The authorized Markdown handoff records work without pretending to change host state.
+- Current next product action: simplify the owner entry around publishing a request, current offers and tariff comparison. Then simplify the partner request → estimate/offer → commissioned job → invoice flow. Additional search fields are not completion of this correction.
 
 ## GitHub issue ↔ Notion completion rule
 

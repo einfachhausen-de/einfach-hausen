@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "context_key": "einfach-hausen/product-model",
+  "effective_date": "2026-09-21",
+  "authority": "Jerry — ausdrückliche Betreiberkorrektur im laufenden Auftrag",
+  "repository": "einfachhausen-de/einfach-hausen",
+  "source_commit": "9d5bfa710688154c71afe59db0093d26b192ffb2",
+  "source_files": [
+    "docs/PRODUCT_VISION.md",
+    "docs/PRODUCT_POSITIONING.md"
+  ],
+  "scope": "Produktpriorität, Geschäftsmodell und App-Bedienung; keine Änderung an Unternehmensrollen, Markenwerten, Berechtigungen oder Abrechnung",
+  "facts": [
+    "Handwerker-Auftragsvermittlung und Affiliate-Tarifwechsel sind die zwei Kernangebote.",
+    "Eigentümer nutzen den Kern kostenlos: Inserat einstellen, Angebote/Kostenvoranschläge erhalten, vergleichen, selbst auswählen und beauftragen; Tarife vergleichen und wechseln.",
+    "Handwerker buchen ein Abo für Listung, passende Kundenvorschläge und Auftragswerkzeuge einschließlich Kostenvoranschlag/Angebot und Rechnung.",
+    "Affiliate-Tarife umfassen Strom, Gas, DSL/Internet, Versicherungen und weitere freigegebene Kategorien.",
+    "Die Hausakte ist ein ergänzender Nutzungs- und Bindungsvorteil; vorhandene Funktionen bleiben erhalten.",
+    "KI hilft bei Bedarf. Ein KI-Gespräch oder vollständige Hausaktenpflege ist kein Pflichtschritt vor dem Kernnutzen.",
+    "Die App soll für beide Rollen einfach und angenehm sein: wenige nötige Eingaben, klare nächste Schritte, wiederverwendete Angaben, Details bei Bedarf."
+  ],
+  "supersedes_guidance": [
+    "Homeowner Operating System / Hausmanager als vorrangiger Produktkern",
+    "Hausakte oder KI-Composer zwingend vor Auftrag und Tarifvergleich",
+    "Kostenpflichtige Eigentümer-Mitgliedschaften als Erlösmodell",
+    "Dauerhaft kostenlose Partnervermittlung als Zielvorgabe"
+  ],
+  "preserve": [
+    "Historische Belege und frühere Entscheidungen",
+    "Bestehende Abrechnung und Bestandsverträge",
+    "Fachliche Partnerprüfung und Qualitätsranking",
+    "Marken-/Designsystem und Schutzmechanismen",
+    "Andere Projekte und ihre Memories"
+  ],
+  "next_frontend_action": "Eigentümer-Einstieg anhand bestehender Komponenten auf Auftrag einstellen, aktuelle Angebote und Tarifvergleich ausrichten; anschließend Partnerablauf Anfrage → Angebot/Kostenvoranschlag → beauftragter Vorgang → Rechnung vereinfachen.",
+  "status": {
+    "repository_context": "prepared_in_PR_168",
+    "ui_reprioritization": "pending",
+    "external_brain": "pending_hosts_offline",
+    "external_memory": "pending_hosts_offline",
+    "canonical_taskplan_sqlite": "pending_hosts_offline",
+    "merge_deploy": "not_performed"
+  },
+  "sync_instructions": [
+    "Auf dem kanonischen Host installierte Brain/Memory- und sin-gpt-web-state-Schnittstellen lesen; keine Befehle oder Provider erfinden.",
+    "Vorhandene projektspezifische Einträge zur Positionierung lesen und gezielt mit dieser belegten Betreiberkorrektur aktualisieren bzw. als überholt kennzeichnen.",
+    "Den bestehenden App-/Frontend-Task anpassen, keinen parallelen Taskplan erzeugen; bereits erledigte technische Arbeiten behalten.",
+    "Gespeicherte Fakten und Taskrecord zurücklesen; echte IDs, Receipt und Quellcommit dokumentieren.",
+    "Pending erst nach erfolgreichem Readback ändern. Offline ist kein Sync-Nachweis."
+  ]
+}

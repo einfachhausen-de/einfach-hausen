@@ -37,3 +37,14 @@ Jerry hat nach der Frontend-Lieferung die bisherige Produktpriorität korrigiert
 - [ ] Anschließend bestehenden Partner-Ablauf Anfrage → Angebot/Kostenvoranschlag → Auftrag → Rechnung vereinfachen.
 
 Noch keine Umsetzung dieser neuen Priorisierung in den Screens behaupten. Keine neuen Preise oder Änderungen an Abrechnung/Berechtigungen ableiten. Vorhandene Aboregeln einschließlich Partner-FREE/Trial sind als separate fachliche Bestandsabweichung dokumentiert; dieser Frontend-/Dokumentationsauftrag ändert sie nicht.
+
+## Repo-/Brain-Konvergenz dieser Fortsetzung
+
+- [x] README, AGENTS, CLAUDE und aktive UX-/Präferenzvorgaben auf das korrigierte Geschäftsmodell ausrichten.
+- [x] Alte Handoffs, Eigentümer-Tarifhypothesen und Composer-zuerst-Abnahmen als fachlich abgelöst einordnen; Nachweise erhalten.
+- [x] NEXT_AGENT und zentrale Übergabe mit einem aktuellen Fortsetzungspunkt versehen.
+- [x] Brain-/Memory-Payload mit belegten Fakten und unveränderlicher Quellreferenz vorbereiten.
+- [ ] Externe Brains, Memory, globale projektspezifische Host-Anweisungen und kanonischen SQLite-Taskrecord synchronisieren: angebundene Hosts sind offline. Anleitung und Pending-Nachweis: PRODUCT_CONTEXT_SYNC.md.
+- [ ] Eigentümer-Einstieg und anschließend Partnerablauf nach korrigierter Priorität umsetzen; keine Gesamtfertigmeldung aufgrund der Dokumentation.
+
+Kein neuer Taskplan: diese Datei bleibt der autorisierte Markdown-Arbeitsnachweis, solange der kanonische Hoststand nicht erreichbar ist. Keine DB-IDs oder externen Receipts erfunden.

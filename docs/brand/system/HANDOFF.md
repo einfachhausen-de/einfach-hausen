@@ -1,3 +1,5 @@
+> **Produktkontext aktualisiert · 21.09.2026:** Maßgeblich sind [Produktvision](../../PRODUCT_VISION.md) und [Positionierung](../../PRODUCT_POSITIONING.md): Handwerkervermittlung und Affiliate-Tarife zuerst, Eigentümer kostenlos, Partnerabo, Hausakte ergänzend. Frühere Prioritäten und „nächste Aktionen“ dieser Lieferung gelten nur für ihren datierten Umfang; aktuelle Fortsetzung unter [NEXT_AGENT](../../NEXT_AGENT.md). Technische und gestalterische Nachweise bleiben historische Belege. 
+
 # Einfachhausen · verbindliche Übergabe · Designsystem 1.0.0
 
 Jerry hat Atelier 02 ausdrücklich freigegeben und diese Umsetzung beauftragt. Keine weitere Stilwahl. SIN-EH-design ist Pflicht. Agenten dürfen Inhalte, Reihenfolge, Datenbindungen und dokumentierte Varianten komponieren; eigene Farben, Schriften, Effekte, Rundungen, Logos, CSS-Systeme oder Neugestaltung sind verboten. Fehlende Primitive als konkrete Lücke melden; den Markenkern nicht ändern oder das Prüfsiegel erneuern.

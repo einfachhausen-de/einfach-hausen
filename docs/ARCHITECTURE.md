@@ -26,6 +26,8 @@ Für T-0165 gilt die Kette **Notion App Design → `DESIGN.md` → `docs/PRESENT
 
 ## Kernmodell
 
+**Produktpriorität 21.09.2026:** Eigentümer stellen kostenlos Inserate ein und vergleichen/beauftragen Angebote; Partner mit Abo und fachlicher Freigabe bearbeiten diese Vorgänge bis zur Rechnung. Affiliate-Tarifwechsel ist der zweite Kernweg. Die Immobilie bleibt ein langlebiger technischer Datensatz für den ergänzenden Hauskontext; daraus folgt kein Hausakte-zuerst-Einstieg. Quellen: PRODUCT_VISION.md und PRODUCT_POSITIONING.md.
+
 ![Plattformarchitektur](diagrams/platform-architecture.svg)
 
 [Interaktive Architektur öffnen](diagrams/platform-architecture.html)
@@ -33,6 +35,8 @@ Für T-0165 gilt die Kette **Notion App Design → `DESIGN.md` → `docs/PRESENT
 Die Immobilie ist ein eigener Datensatz. Sie gehört nicht technisch für immer zu einem einzelnen User. `property_ownerships` bildet den zeitlichen Eigentumsverlauf ab.
 
 ## Eigentümer-Serviceflow
+
+Aktuelles fachliches Ziel: Inserat → Angebot/Kostenvoranschlag → bewusste Auswahl/Beauftragung → Ausführung → Rechnung. Daneben steht Kategorie → Tarifvergleich → Abschluss beim freigegebenen Partner. Die nachfolgenden Diagramme dokumentieren frühere technische Abläufe; ein dort gezeigter KI-/Hauskontext-Einstieg ist keine Pflicht vor dem Kernnutzen. Keine neue technische Architektur aus dieser Prioritätskorrektur ableiten.
 
 ![Eigentümer-Serviceflow](diagrams/homeowner-service-flow.svg)
 

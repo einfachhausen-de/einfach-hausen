@@ -1,3 +1,15 @@
+# Aktuelle Übergabe · Produktkontext 21.09.2026
+
+Die aktive Produktkorrektur steht in [PRODUCT_VISION.md](PRODUCT_VISION.md) / [PRODUCT_POSITIONING.md](PRODUCT_POSITIONING.md). Handwerkervermittlung und Affiliate-Tarife sind der Kern; Eigentümer kostenlos, Partnerabo, Hausakte ergänzend.
+
+**Nächste Frontend-Aktion:** Eigentümer-Einstieg auf Auftrag einstellen, Tarifvergleich und aktuelle Angebote ausrichten. Details und Grenzen: [NEXT_AGENT.md](NEXT_AGENT.md). Die neue UI-Priorität ist noch nicht umgesetzt.
+
+PR #168 enthält die bisherigen Frontend-Korrekturen und diesen Dokumentationsabgleich. [Arbeitsnachweis](TASKPLAN_FRONTEND_20260921.md) · [Frontend-Lieferung](brand/workspace/FRONTEND-HANDOFF-20260921.md) · [Brain-/Memory-/Taskplan-Synchronisierung](PRODUCT_CONTEXT_SYNC.md). Externe Systeme sind wegen offline gemeldeter Hosts ausdrücklich noch nicht aktualisiert.
+
+## Historischer Betriebs-Handoff vom 20.09.2026
+
+Die folgende abgeschlossene Welle bleibt unverändert nachvollziehbar. Ihre SHAs, Gates und Folgeaktionen gelten nur für den damaligen Umfang.
+
 # Handover — ses_f40d79-Welle — Stand 2026-09-20
 
 **HEAD:** `3e8ecd9` (main, local == origin == `/srv/einfach-hausen`) · **Docs-Follow-up:** `f31f812`

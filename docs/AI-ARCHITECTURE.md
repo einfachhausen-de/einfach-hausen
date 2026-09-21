@@ -1,3 +1,5 @@
+> **Abgrenzung zur Produktentscheidung 21.09.2026:** Diese Datei dokumentiert die technische KI-Nutzung zum genannten Stand. KI-Kontingente sind keine Eigentümer-Mitgliedschaft und dürfen nicht zur Voraussetzung für Inserat, Angebotsauswahl oder Tarifvergleich werden. Der kostenlose Eigentümer-Kern und das Partnerabo folgen PRODUCT_VISION.md; ein technischer Kauf-/Freemium-Verweis autorisiert keinen neuen Eigentümer-Tarif. Backend-Limits werden durch diese Dokumentationskorrektur nicht geändert.
+
 # KI-3-Stufen-Architektur (EH T-0207)
 
 **Stand:** 2026-08-31 · **Ziel:** maximale KI-Fähigkeit bei ~0 € Betriebskosten, ohne Nutzer-Fallen.

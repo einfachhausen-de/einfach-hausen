@@ -1,69 +1,34 @@
-# Einfach Hausen — visuelle Produktlinie
+# Einfach Hausen — Produktführung und Design-Verweise
 
-Diese Datei beschreibt die verbindliche visuelle Richtung der Kunden-App. Referenz ist das von der Familie gelieferte Mobile-App-Board vom 21.08.2026.
+Stand: Betreiberkorrektur 21.09.2026. Diese Datei verbindet die fachliche Priorität mit dem bestehenden Designsystem; sie definiert keine zweite visuelle Norm.
 
-## Leitidee
+## Verbindliche Quellen
 
-Einfach Hausen soll wie ein hochwertiges, ruhiges Consumer-Produkt für Eigenheimbesitzer wirken — nicht wie ein KI-Demo-Tool und nicht wie ein ERP.
+- [PRODUCT_VISION.md](PRODUCT_VISION.md): Geschäftsmodell und fachliche Abläufe.
+- [PRODUCT_POSITIONING.md](PRODUCT_POSITIONING.md): Prioritäten und einfache Bedienung.
+- [DESIGN.md](../DESIGN.md) und packages/eh-design: Marke, Tokens und ausführbare Komponenten.
+- [NEXT_AGENT.md](NEXT_AGENT.md): aktuelle Fortsetzung.
+- [PRODUCT_CONTEXT_SYNC.md](PRODUCT_CONTEXT_SYNC.md): Abgleich von Agentenwissen und externen Brains.
 
-Priorität der Oberfläche:
+Die Referenz vom 21.08.2026 und frühere hier aufgelistete Farb-, Radius- oder Navigationswerte sind historische Stände. Daraus werden keine heutigen UI-Regeln abgeleitet.
 
-1. Kundennutzen und nächster sinnvoller Schritt
-2. persönlicher Ansprechpartner und Vertrauen
-3. Angebote, Termine, Aufträge und Hauswissen
-4. technische Assistenz im Hintergrund
+## Eigentümer: kostenlose Kernwege
 
-## Primäre Kunden-Screens
+- /app: verständlicher Einstieg in Auftrag einstellen, aktuelle Angebote/Vorgänge und Tarifvergleich (Zielpriorität; Umbau noch offen).
+- /app/jobs und /app/jobs/[id]: eigene Inserate, Angebote vergleichen, bewusst beauftragen und Vorgang verfolgen.
+- /app/contracts: Tarifvergleiche und Wechselwege für freigegebene Kategorien; gespeicherte Verträge können den Einstieg erleichtern.
+- /app/home, /app/documents und /app/year: ergänzende Hausakte, Unterlagen und Planung.
+- /app/hausmeister und /app/hausmanager: Hilfe bei Bedarf; kein Pflichtweg vor einem Inserat oder Vergleich.
+- /app/profile und /app/settings: Kontoverwaltung. Historische Eigentümer-Mitgliedschaften oder Premium-Pakete werden nicht wieder eingeführt.
 
-- `/app` — Startseite mit Schnellaktionen, nächstem Termin und offenen Angeboten
-- `/app/hausmeister` — fokussierter Hausservice-Chat
-- `/app/jobs/[id]` — Angebotsvergleich bzw. Auftragsdetail
-- `/app/home` — Mein Haus / digitale Hausakte
-- `/app/year` — Mein Jahr / Wartungs- und Aufgabenplan
-- `/app/plans` — Mitgliedschaften und Premium-/Jahrespakete
-- `/app/jobs` — aktive, geplante und abgeschlossene Aufträge
-- `/app/partners/[id]` — öffentliches Profil eines geprüften Partnerbetriebs
-- `/app/profile` — Profil und Einstellungen
+## Handwerker: vom Kundeninserat zur Rechnung
 
-## Mobile Navigation
+Passende Anfrage → Angebot/Kostenvoranschlag → Auswahl und Beauftragung durch den Eigentümer → Ausführung → Rechnung. Abozugang und fachliche Freigabe sind verständlich zu zeigen; bestehende Rechte bleiben erhalten. Keine neue Verwaltungssoftware neben diesen Vorgängen.
 
-Kunden sehen bewusst nur vier feste Primärziele:
+## Komposition
 
-- Start
-- Mein Haus
-- Aufträge
-- Profil
+Pro Ansicht eine klare Hauptaufgabe, wenige Eingaben und nächste Schritte am Vorgang. Bestehende Angaben wiederverwenden. Hausdaten optional ergänzen. Die vorhandene Navigation und Shell werden nicht nebenbei ersetzt; aktuelle Ziele aus den tatsächlichen Routing-/Navigationsquellen verwenden.
 
-Hausservice, Kontakte, Jahr, Pakete und Partnerprofile sind kontextuelle Unterseiten. Dadurch bleibt die Navigation ruhig und eindeutig.
+## Bewusste Nutzerentscheidungen
 
-## Farben
-
-> **Brand-Konvergenz (2026-08-30):** Die Markenidentität ist mit dem neuen Logo auf Petrol-Teal `#105258` kalibriert (siehe `DESIGN.md` §3). Die App-Oberflächen nutzen die gleiche Palette — die unten dokumentierten Grüns sind die historische Referenz und nicht mehr aktiv.
-
-- Dunkelgrün: `#075531`
-- Primärgrün: `#0A6A3C`
-- Helles Grün/Mint: `#EEF6ED`
-- Weiß: `#FFFFFF`
-- Text: `#111512`
-- Sekundärtext: `#69716B`
-- Linien: `#E4E6E2`
-
-## Stil
-
-- viel Weißraum
-- kleine, leichte Schatten statt "SaaS-Glow"
-- Karten mit 14–18 px Radius
-- klare Hierarchie und große, ruhige Headlines
-- grüne Akzente nur für Aktion, Status und Vertrauen
-- keine unnötigen Gradients oder dekorative KI-Elemente
-- 44 px+ Touch-Ziele
-- mobile-first, aber auf Desktop ohne Phone-Frame
-
-## Produktprinzip in der UI
-
-Eine normale Frage erzeugt keinen Auftrag. Nach der Einordnung entscheidet der Kunde bewusst zwischen:
-
-- **Ansprechpartner finden** — persönlicher Kontakt, noch kein Auftrag
-- **Auftrag organisieren** — Angebote, Termin und Ausführung
-
-Der persönliche Ansprechpartner bleibt dauerhaft in der Hausakte.
+Eine Frage ist keine Veröffentlichung; ein Angebot ist keine Beauftragung; ein Kostenvoranschlag ist keine Rechnung. Freigabe, Auswahl und Abschluss bleiben ausdrücklich. Hausakte und Assistenz ergänzen die Kernwege.

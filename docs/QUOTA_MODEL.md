@@ -1,3 +1,5 @@
+> **Abgrenzung zur Produktentscheidung 21.09.2026:** Diese Datei dokumentiert die technische KI-Nutzung zum genannten Stand. KI-Kontingente sind keine Eigentümer-Mitgliedschaft und dürfen nicht zur Voraussetzung für Inserat, Angebotsauswahl oder Tarifvergleich werden. Der kostenlose Eigentümer-Kern und das Partnerabo folgen PRODUCT_VISION.md; ein technischer Kauf-/Freemium-Verweis autorisiert keinen neuen Eigentümer-Tarif. Backend-Limits werden durch diese Dokumentationskorrektur nicht geändert.
+
 # KI-Kontingente (Quota-Modell)
 
 Stand: 2026-09-10. Belegt im Code: `src/lib/ai-engine.ts`,

@@ -1,3 +1,5 @@
+> **Produktkontext aktualisiert · 21.09.2026:** Maßgeblich sind [Produktvision](../../PRODUCT_VISION.md) und [Positionierung](../../PRODUCT_POSITIONING.md): Handwerkervermittlung und Affiliate-Tarife zuerst, Eigentümer kostenlos, Partnerabo, Hausakte ergänzend. Frühere Prioritäten und „nächste Aktionen“ dieser Lieferung gelten nur für ihren datierten Umfang; aktuelle Fortsetzung unter [NEXT_AGENT](../../NEXT_AGENT.md). Technische und gestalterische Nachweise bleiben historische Belege. 
+
 > Zusätzliche verbindliche Restabnahme und Skill-Regeln: AGENT-ACCEPTANCE.md. Quellübergaben nur aus expliziten Git-Commits; keine unversionierten Agentendateien.
 
 > Aktueller Stand 2026-09-09: Detail-/Upload-/Rechnungsintegration siehe DETAIL-INTEGRATION.md. Ältere Aussagen unten zu ausschließlich unverbundenen Vorschauen sind für InvoiceForm und DocumentForm überholt.

@@ -1,3 +1,5 @@
+> **Produktkontext aktualisiert · 21.09.2026:** Maßgeblich sind [Produktvision](../../PRODUCT_VISION.md) und [Positionierung](../../PRODUCT_POSITIONING.md): Handwerkervermittlung und Affiliate-Tarife zuerst, Eigentümer kostenlos, Partnerabo, Hausakte ergänzend. Frühere Prioritäten und „nächste Aktionen“ dieser Lieferung gelten nur für ihren datierten Umfang; aktuelle Fortsetzung unter [NEXT_AGENT](../../NEXT_AGENT.md). Technische und gestalterische Nachweise bleiben historische Belege. Die damalige Free/Abo-Sperre des Angebotsvergleichs ist keine heutige Zielvorgabe: Angebotsvergleich gehört zum kostenlosen Eigentümer-Kern. Bestehendes Verhalten vor einer Änderung prüfen; hier wurde keine Sperre technisch entfernt.
+
 # KI-Hausmanager - Handoff 2026-09-12
 
 ## Auftrag (Pi-Session 20260912, Nutzer + Schwester/Boss freigegeben)

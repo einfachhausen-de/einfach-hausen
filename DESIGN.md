@@ -1,3 +1,5 @@
+> **Fachliche Priorität · Betreiberkorrektur 21.09.2026:** Handwerker-Auftragsvermittlung und Affiliate-Tarife bilden den Kern; Eigentümer nutzen kostenlos, Handwerker buchen ein Abo, Hausakte und KI unterstützen. PRODUCT_VISION.md / PRODUCT_POSITIONING.md unter docs/ bestimmen die neue Reihenfolge der Produktaufgaben. Ältere Composer-/Hausakte-zuerst-Kompositionen in diesem Dokument sind keine gegenteilige Geschäftsmodellvorgabe. Markenwerte, Komponentenregeln, Schutzmechanismen und historische Belege bleiben erhalten; dieser Dokumentationsnachtrag versiegelt keinen Designkern neu.
+
 # Einfachhausen · Designsystem 1.0
 
 **Verbindlich seit 6. September 2026.** Jerry hat Atelier 02 ausdrücklich angenommen: „omg das ist MEGA!“ Diese Freigabe ersetzt den früheren Status „noch nicht visuell freigegeben“. Die drei alten Stilproben aus PR40 sind verworfen. Der angenommene Entwurf und seine ursprüngliche Begutachtung bleiben unter `design/brand-atelier/` und `docs/brand/ATELIER_02.md` als historische Referenz erhalten.

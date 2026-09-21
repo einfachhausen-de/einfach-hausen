@@ -1,3 +1,5 @@
+> **Terminologie und Einordnung · 21.09.2026:** Kundeninserat/Anfrage bezeichnet den Vorgang vor verbindlicher Beauftragung. Angebot/Kostenvoranschlag ist die Antwort des Betriebs; erst die ausdrückliche Auswahl/Beauftragung macht daraus beauftragte Arbeit. Die Tabelle `jobs` bleibt ein technischer Name und wird deshalb nicht umbenannt. Der Bestand unten ist vom 03.09.2026, kein aktueller Migrationsauftrag. Fachliches Ziel: PRODUCT_VISION.md.
+
 # Jobs-vs-Anfragen — Bestand + Migrationsskizze (2026-09-03)
 
 **Entscheidung dieser Welle: KEIN Zusammenführen.** Nur Bestandsaufnahme +
