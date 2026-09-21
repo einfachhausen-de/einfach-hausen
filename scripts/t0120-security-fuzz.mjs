@@ -111,7 +111,7 @@ console.log(bad === 0 ? 'IDS_OK' : 'IDS_BAD');
 async function fuzzPaths(scratch) {
   console.log('\n== path handling fuzz ==');
   writeProbe(scratch, 'probe-paths', `
-import { resolvePrivatePath } from './src/lib/security/private-files.mjs';
+import { resolvePrivatePath, privateRoot } from './src/lib/security/private-files.mjs';
 const hostile = [
   '../outside', '..\\\\\\\\outside', 'a/../../outside', './..', '.%2e/outside',
   '%2e%2e/outside', 'a%2F..%2Foutside', 'documents/..\\\\\\\\..\\\\\\\\x', 'C:/win',
@@ -119,7 +119,15 @@ const hostile = [
   'x/..%252f..%252f', 'a/./.././../b',
 ];
 let leaks = 0;
-const root = (await import('node:path')).resolve(process.cwd(), 'data', 'private');
+// Die Wurzel kommt aus der Implementierung selbst, nicht aus einer zweiten
+// Ableitung des Fallbacks. privateRoot() hat PRIVATE_ROOT Vorrang; in Produktion
+// liegt die Ablage unter /var/lib/einfach-hausen/private, waehrend
+// process.cwd()/data/private dort gar nicht existiert. Die frueher hier
+// festverdrahtete Erwartung erzeugte deshalb auf dem kanonischen Host ein
+// falsches BENIGN_BROKEN, obwohl die harmlose Datei korrekt innerhalb der
+// tatsaechlichen Wurzel aufgeloest wurde. Die Zusicherung ist unveraendert
+// streng: ausserhalb der Wurzel oder null bleibt ein Fehler.
+const root = privateRoot();
 for (const p of hostile) {
   const resolved = resolvePrivatePath(p);
   if (resolved !== null) {

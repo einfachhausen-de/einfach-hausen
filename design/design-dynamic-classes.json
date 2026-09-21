@@ -4,20 +4,6 @@
   "note": "Geschuetzte Liste. Eine neue dynamische Stelle heisst: hier eintragen, sonst wird die Klasse als tot gemeldet.",
   "sites": [
     {
-      "file": "src/components/visuals/CardVisual.tsx",
-      "line": 33,
-      "expression": "styles[size]",
-      "applies": "module",
-      "module": "src/components/visuals/CardVisual.module.css",
-      "source": "type CardVisualSize = 'sm' | 'md' | 'lg' | 'xl' (CardVisual.tsx:6)",
-      "values": [
-        "sm",
-        "md",
-        "lg",
-        "xl"
-      ]
-    },
-    {
       "file": "src/components/ui-toast.tsx",
       "line": 23,
       "expression": "eh-toast-${kind}",
@@ -64,22 +50,6 @@
       "values": [
         "tint",
         "bordered"
-      ]
-    },
-    {
-      "file": "src/components/Stepper.tsx",
-      "line": 12,
-      "lines": [
-        12,
-        13
-      ],
-      "expression": "${state}",
-      "applies": "global",
-      "source": "state = n < current ? \"done\" : n === current ? \"active\" : \"todo\" (Stepper.tsx:8)",
-      "values": [
-        "done",
-        "active",
-        "todo"
       ]
     }
   ]

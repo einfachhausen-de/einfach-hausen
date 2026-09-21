@@ -223,14 +223,7 @@ export function estimateSavings(input: SavingsInput): SavingsEstimate | null {
   return null;
 }
 
-/**
- * Affiliate routing is configuration, not code. Until partners are contracted
- * the list is empty and the Spar-Check shows no outgoing link - a tariff
- * recommendation without a contracted partner would be a legal risk, not a
- * feature.
- */
-export const AFFILIATE_LINKS: Record<string, string | undefined> = {};
-
-export function affiliateLink(kind: string): string | undefined {
-  return AFFILIATE_LINKS[kind];
-}
+// Affiliate comparison partners live in src/lib/affiliate.ts. That module is the
+// single source of truth: the partner list, the availability contract and the
+// outgoing URL are all resolved there and validated again on the server before
+// any redirect. There is deliberately no second partner list here.

@@ -4,7 +4,7 @@ import { breadcrumbJsonLd, canonical, ogImages, SITE_URL } from '@/lib/seo';
 import { BLOG_POSTS, CLUSTER_DATE_MODIFIED, CLUSTER_DATE_PUBLISHED } from '@/lib/seo-cluster';
 import { MarketingShell } from '@/components/marketing/site-shell';
 import { Steps } from '@/components/marketing/ui';
-import { EHScope, EHSection, EHPageHero, EHList, EHCallout, EHFAQ, EHRelated, EHClosing, EHButton, EHEyebrow, EHHeading, EHText, EHProse } from '@/design-system';
+import { EHScope, EHSection, EHPageHero, EHList, EHCallout, EHFAQ, EHRelated, EHClosing, EHButton, EHEyebrow, EHHeading, EHProse } from '@/design-system';
 
 export function generateStaticParams() {
   return BLOG_POSTS.map((p) => ({ slug: p.slug }));

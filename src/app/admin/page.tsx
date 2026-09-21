@@ -25,7 +25,7 @@ export default async function Admin({searchParams}:{searchParams:Promise<Record<
     (SELECT COUNT(*) FROM appointments) bookings,
     (SELECT COUNT(*) FROM job_dispatches) matches,
     (SELECT COUNT(*) FROM reviews) reviews,
-    (SELECT COUNT(*) FROM notifications WHERE read_at IS NULL) unreadNotifications`).get() as any;
+    (SELECT COUNT(*) FROM notifications WHERE read_at IS NULL AND channel='in_app') unreadNotifications`).get() as any;
   const recentJobs=db.prepare(`SELECT j.id,j.title,j.status,j.created_at,u.first_name,u.last_name
     FROM jobs j JOIN users u ON u.id=j.homeowner_id ORDER BY j.created_at DESC LIMIT 5`).all() as any[];
   const recentBookings=db.prepare(`SELECT a.start_at,a.status,j.title,p.business_name

@@ -9,7 +9,7 @@ import fs from 'node:fs';
 import net from 'node:net';
 import path from 'node:path';
 import { randomUUID } from 'node:crypto';
-import { spawn, execFileSync } from 'node:child_process';
+import { spawn } from 'node:child_process';
 import { importTs } from './lib/import-ts.mjs';
 import { createIdentity as createTestIdentity } from './lib/identity.mjs';
 
@@ -24,7 +24,7 @@ const VIEWPORTS = [
   { name: 'tablet', width: 768, height: 1024 },
   { name: 'desktop', width: 1320, height: 900 },
 ];
-const PUBLIC_ROUTES = ['/', '/preise', '/so-funktionierts', '/leistungen', '/partner', '/hilфe'.replace('ф','f'), '/kontakt', '/pilotphase', '/login'];
+const PUBLIC_ROUTES = ['/', '/preise', '/so-funktionierts', '/leistungen', '/partner', '/hilфe'.replace('ф','f'), '/kontakt', '/login'];
 const OWNER_ROUTES = ['/app', '/app/home', '/app/jobs', '/app/messages', '/app/documents', '/app/profile'];
 const PROVIDER_ROUTES = ['/pro', '/pro/jobs', '/pro/orders', '/pro/messages', '/pro/team', '/pro/profile'];
 

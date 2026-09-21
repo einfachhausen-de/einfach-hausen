@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Einfach Hausen</title>
+    <style>
+      html, body { margin: 0; height: 100%; background: #f4f7f7; }
+      body {
+        display: flex; align-items: center; justify-content: center;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        color: #105258; text-align: center; padding: 24px;
+      }
+      p { max-width: 22rem; line-height: 1.5; }
+    </style>
+  </head>
+  <body>
+    <!--
+      Fallback page for the native shell. The real app is server-rendered and is
+      loaded from the production URL (see server.url in capacitor.config.ts);
+      a static export of this app is not possible because it depends on 27 route
+      handlers, Server Actions, server-side session cookies and dynamic routes.
+      This page is what a user sees only when the device has no connection at
+      launch. It contains no scripts, no cookies and no external resources.
+    -->
+    <p>Keine Verbindung. Bitte prüfe deine Internetverbindung und starte die App erneut.</p>
+  </body>
+</html>

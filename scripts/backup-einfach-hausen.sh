@@ -88,4 +88,20 @@ if [[ -e "$final" ]]; then
 fi
 mv "$staging" "$final"
 trap - EXIT
+
+# Bounded growth. This script runs before every deploy and the nightly timer adds
+# another bundle, so without retention the directory grows until the disk is full
+# (observed 2026-09-21: 79 backups / 13.7 GB, no rotation at all). Retention runs
+# only after the new backup is committed, so a failure here can never cost the
+# backup that was just produced. It is reported loudly on stderr instead of
+# aborting, because silent retention failure is exactly how the directory grew
+# unbounded before. stdout stays reserved for the backup path.
+prune_script="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/prune-einfach-hausen-backups.sh"
+if [[ -x "$prune_script" ]]; then
+  BACKUP_ROOT="$BACKUP_ROOT" "$prune_script" >&2 ||
+    printf 'WARNING: backup retention failed; %s will keep growing.\n' "$BACKUP_ROOT" >&2
+else
+  printf 'WARNING: retention script missing (%s); backups are not pruned.\n' "$prune_script" >&2
+fi
+
 printf '%s\n' "$final"

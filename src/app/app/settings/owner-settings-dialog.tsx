@@ -58,9 +58,10 @@ export function parseSettingsSection(value: string | null | undefined): SectionI
 
 // Owner-Einstellungen im Sidebar-Dialog-Muster (vgl. settings-dialog-Vorlage).
 // Konto/Benachrichtigungen/KI/App-Texte sind 1:1 aus page.tsx übernommen.
-// Mitgliedschaft & Pakete sowie Hilfe & Kontakt leben auf ihren eigenen
-// Routen (/app/plans, /app/messages, /app/hilfe, /app/emergency) und sind
-// bewusst keine Dialog-Sektionen (IA-Block 3: 4 Sektionen).
+// Hilfe & Kontakt lebt auf einer eigenen Route (/app/hilfe) und ist bewusst
+// keine Dialog-Sektion (IA-Block 3: 4 Sektionen). Eine Mitgliedschafts- oder
+// Paket-Sektion gibt es nicht mehr: Eigentümer nutzen einfachhausen kostenlos
+// (Produktentscheidung: Eigentuemer kostenlos).
 // Keine eigene Logik, keine Mockdaten.
 // Gesteuert (open/onOpenChange/showTrigger=false) als globales Overlay aus dem
 // Rahmen; ungesteuert (Standard) mit eigenem Trigger, z.B. im Header von /app/settings.

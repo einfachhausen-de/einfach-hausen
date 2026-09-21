@@ -41,7 +41,6 @@ async function cookiesFor(email,password){
 const outDir=path.join(root,'artifacts','design-audit');
 fs.mkdirSync(outDir,{recursive:true});
 const browser=await chromium.launch({executablePath:'/usr/bin/chromium-browser',args:['--no-sandbox']});
-const identities=[new Set()]; // placeholder to keep structure clear
 const allIdentities=[];
 
 // --- Public auth + role screens (no persona needed) ---

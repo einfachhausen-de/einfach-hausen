@@ -92,25 +92,49 @@ async function waitForServer(url, timeoutMs = 90000) {
 }
 
 // ---- Layer 1: static gates -------------------------------------------------
+// A failing step must report WHY, not the tail of the stream. Node writes
+// warnings (e.g. ExperimentalWarning) to stderr after the script output, so the
+// blind 400-char tail showed "(Use `node --trace-warnings ...` to show where the
+// warning was created)" instead of the failing check. Prefer the lines that
+// actually name the failure, and fall back to the tail only when none do.
+function failureReason(output) {
+  const lines = String(output || '').split('\n').map((line) => line.trim()).filter(Boolean);
+  const named = lines.filter((line) => /^(FAIL|FAILED|FAILURES|\s*-\s)/.test(line) || /FAILED:|FAIL\s/.test(line));
+  if (named.length) return named.slice(-6).join(' | ').slice(-400);
+  return lines.slice(-6).join(' | ').slice(-400);
+}
+
 function staticGates() {
   if (!wants('static')) return true;
   log('\n== Layer 1: static gates ==');
   const lint = run('npm', ['run', 'lint']);
-  record('lint', lint.ok, lint.ok ? '' : (lint.output || '').slice(-400));
+  record('lint', lint.ok, lint.ok ? '' : failureReason(lint.output));
+  // `.next/types` is a generated artifact of `next build` and part of the
+  // tsconfig include set. A copy left over from the previous release still
+  // references routes that were deleted since, so `tsc --noEmit` failed on
+  // stale generated files and aborted the deployment before this run's own
+  // build step could regenerate them. Drop the generated types first; the
+  // production build below recreates them. No check is relaxed.
+  fs.rmSync(path.join(root, '.next', 'types'), { recursive: true, force: true });
   // tsc via direct .bin path: bare `npx` depends on the caller's PATH
   // (macOS zsh hard-PATH has no npx -> ENOENT with empty output, T-0131).
   const types = run(path.join(root, 'node_modules', '.bin', 'tsc'), ['--noEmit']);
-  record('types (tsc --noEmit)', types.ok, types.ok ? '' : (types.output || '').slice(-400));
+  record('types (tsc --noEmit)', types.ok, types.ok ? '' : failureReason(types.output));
   const security = run('npm', ['run', 'test:security']);
-  record('security regressions', security.ok, security.ok ? '' : (security.output || '').slice(-400));
+  record('security regressions', security.ok, security.ok ? '' : failureReason(security.output));
   const fixtures = run('npm', ['run', 'test:fixtures']);
-  record('fixture factory', fixtures.ok, fixtures.ok ? '' : (fixtures.output || '').slice(-400));
+  record('fixture factory', fixtures.ok, fixtures.ok ? '' : failureReason(fixtures.output));
   const flags = run('node', ['scripts/feature-flag-lifecycle.mjs']);
-  record('feature-flag lifecycle (T-0139)', flags.ok, flags.ok ? '' : (flags.output || '').slice(-400));
+  record('feature-flag lifecycle (T-0139)', flags.ok, flags.ok ? '' : failureReason(flags.output));
   const invEnv = { DATABASE_PATH: process.env.GATE_DATABASE_PATH || process.env.DATABASE_PATH || '' };
   const inventory = run('node', ['scripts/data-inventory-check.mjs'], invEnv);
   record('data-inventory (T-0146)', inventory.ok, inventory.ok ? '' : (inventory.output || '').slice(-400));
-  return lint.ok && types.ok && security.ok && fixtures.ok && flags.ok && inventory.ok;
+  // Backup retention deletes files, so its keep/remove decision is guarded here:
+  // a retention bug either loses a recent backup or stops pruning and fills the
+  // disk (observed 2026-09-21: 79 backups / 13.7 GB with no rotation).
+  const retention = run('node', ['scripts/backup-retention-regression.mjs']);
+  record('backup retention', retention.ok, retention.ok ? '' : (retention.output || '').slice(-400));
+  return lint.ok && types.ok && security.ok && fixtures.ok && flags.ok && inventory.ok && retention.ok;
 }
 
 // ---- Production build (shared by layers 2-4) --------------------------------
@@ -230,7 +254,6 @@ async function liveGates() {
 
     // ---- Layer 4: performance budgets ----
     if (runPerf) log('\n== Layer 4: performance budgets ==');
-    let perfFailures = [];
     const perfCtx = runPerf ? await browser.newContext({ viewport: { width: 390, height: 844 } }) : null;
     const perfPage = perfCtx ? await perfCtx.newPage() : null;
     const responses = [];
@@ -279,7 +302,7 @@ async function liveGates() {
   }
 }
 
-const staticOk = staticGates();
+staticGates();
 if (fast) {
   log('\n(--fast: build + live layers skipped)');
   const failed = results.filter((result) => !result.ok);

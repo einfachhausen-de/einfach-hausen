@@ -140,14 +140,9 @@ export async function registerAction(fd: FormData): Promise<{ error: string } | 
   const hash = await bcrypt.hash(password, 12);
   const tx = db.transaction(() => {
     const r = db.prepare('INSERT INTO users(email,password_hash,role,first_name,last_name,phone,auth_subject) VALUES(?,?,?,?,?,?,?)').run(email,hash,role,first,last,d.phone||null,authSubject);
-    // Pilotphase (marketing contract: first 1.000 households get a permanent
-    // 15% advantage): deterministic capped cohort assignment at registration.
-    if(role==='homeowner'){
-      try{
-        const joined=db.prepare('SELECT COUNT(*) c FROM pilot_cohort').get() as {c:number};
-        if(joined.c<1000) db.prepare('INSERT OR IGNORE INTO pilot_cohort(user_id) VALUES(?)').run(Number(r.lastInsertRowid));
-      }catch{}
-    }
+    // Hauseigentuemer nutzen einfachhausen kostenlos. Es gibt keine
+    // Eigentuemer-Mitgliedschaft und damit auch keine Pilot-Kohorte mit
+    // Preisvorteil mehr; bei der Registrierung wird kein Rabattbezug angelegt.
     const id = Number(r.lastInsertRowid);
     if (role==='homeowner') db.prepare('INSERT INTO homeowner_profiles(user_id,postcode,address,onboarding_step) VALUES(?,?,?,\'profile\')').run(id,d.postcode,d.address);
     else {
@@ -1058,53 +1053,7 @@ export async function completeMaintenanceTaskAction(taskId:number){
   revalidatePath('/app/home'); revalidatePath('/app/year');
 }
 
-export async function startMembershipCheckoutAction(planSlug:string, fd?:FormData){
-  const user=await requireUser('homeowner');
-  const plan=db.prepare('SELECT * FROM membership_plans WHERE slug=? AND active=1').get(planSlug) as any; if(!plan)return;
-  const current=db.prepare('SELECT stripe_subscription_id FROM subscriptions WHERE homeowner_id=?').get(user.id) as {stripe_subscription_id:string|null}|undefined;
-  if(plan.monthly_amount===0){
-    const remoteRef=current?.stripe_subscription_id||null;
-    if(remoteRef){
-      if(fd&&!fd.get('confirmFreeSwitch')) redirect('/app/plans?error=' + encodeURIComponent('Bitte best\u00e4tige zuerst den Wechsel auf Free, bevor du ihn abschickst.'));
-      if(!process.env.STRIPE_SECRET_KEY) redirect('/app/plans?error=' + encodeURIComponent('Die K\u00fcndigung deiner bezahlten Mitgliedschaft kann gerade nicht best\u00e4tigt werden, weil der Zahlungsdienst nicht konfiguriert ist. Es wurde nichts umgestellt; deine Mitgliedschaft bleibt aktiv.'));
-      const stripe=new Stripe(process.env.STRIPE_SECRET_KEY);
-      try{
-        await stripe.subscriptions.cancel(remoteRef);
-      }catch(error:unknown){
-        const message=String((error as {message?:string})?.message||'').toLowerCase();
-        const stale=String((error as {code?:string})?.code||'')==='resource_missing';
-        const already=message.includes('already cancel');
-        if(!stale&&!already) redirect('/app/plans?error=' + encodeURIComponent('Die K\u00fcndigung beim Zahlungsdienst ist fehlgeschlagen. Deine bezahlte Mitgliedschaft bleibt aktiv und bezahlt; es wurde nichts umgestellt. Bitte versuche es erneut oder kontaktiere den Support.'));
-      }
-    }
-    db.prepare(`INSERT INTO subscriptions(homeowner_id,plan_slug,status,stripe_subscription_id,current_period_end,updated_at) VALUES(?,?,'active',NULL,NULL,CURRENT_TIMESTAMP) ON CONFLICT(homeowner_id) DO UPDATE SET plan_slug=excluded.plan_slug,status='active',stripe_subscription_id=NULL,current_period_end=NULL,updated_at=CURRENT_TIMESTAMP`).run(user.id,plan.slug);
-    revalidatePath('/app/plans'); revalidatePath('/app'); redirect('/app/plans?switch=done');
-  }
-  if(!process.env.STRIPE_SECRET_KEY) redirect('/app/plans?error=Stripe%20ist%20noch%20nicht%20konfiguriert');
-  const stripe=new Stripe(process.env.STRIPE_SECRET_KEY); const origin=process.env.NEXT_PUBLIC_APP_URL||'http://localhost:3000';
-  db.prepare(`INSERT INTO subscriptions(homeowner_id,plan_slug,status,updated_at) VALUES(?,?,'pending',CURRENT_TIMESTAMP) ON CONFLICT(homeowner_id) DO UPDATE SET plan_slug=excluded.plan_slug,status='pending',updated_at=CURRENT_TIMESTAMP`).run(user.id,plan.slug);
-  // Pilotphase: first-1.000-households cohort pays with the permanent 15%
-  // advantage applied directly to the Stripe line item (T-0155 truth contract).
-  const pilot=db.prepare('SELECT discount_bps FROM pilot_cohort WHERE user_id=?').get(user.id) as {discount_bps:number}|undefined;
-  const memberPrice=pilot?Math.max(0,Math.round(plan.monthly_amount*(10000-pilot.discount_bps)/10000)):plan.monthly_amount;
-  const memberName=`Einfach Hausen ${plan.title}${pilot?' · Pilot-Vorteil −15%':''}`;
-  const session=await stripe.checkout.sessions.create({mode:'subscription',customer_email:user.email,line_items:[{price_data:{currency:'eur',product_data:{name:memberName},unit_amount:memberPrice,recurring:{interval:'month'}},quantity:1}],success_url:`${origin}/api/memberships/success?session_id={CHECKOUT_SESSION_ID}`,cancel_url:`${origin}/app/plans?checkout=cancelled`,metadata:{kind:'membership',homeownerId:String(user.id),planSlug:plan.slug,previousSubscriptionId:current?.stripe_subscription_id||''}});
-  redirect(session.url!);
-}
-
-export async function purchasePackageAction(packageSlug:string){
-  const user=await requireUser('homeowner'); const pkg=db.prepare('SELECT * FROM service_packages WHERE slug=? AND active=1').get(packageSlug) as any; if(!pkg)return;
-  if(!process.env.STRIPE_SECRET_KEY) redirect('/app/plans?error=Stripe%20ist%20noch%20nicht%20konfiguriert');
-  const stripe=new Stripe(process.env.STRIPE_SECRET_KEY); const origin=process.env.NEXT_PUBLIC_APP_URL||'http://localhost:3000';
-  const order=db.prepare(`INSERT INTO package_orders(homeowner_id,package_slug,status) VALUES(?,?,'pending')`).run(user.id,pkg.slug); const orderId=Number(order.lastInsertRowid);
-  const pilotPkg=db.prepare('SELECT discount_bps FROM pilot_cohort WHERE user_id=?').get(user.id) as {discount_bps:number}|undefined;
-  const pkgPrice=pilotPkg?Math.max(0,Math.round(pkg.price_amount*(10000-pilotPkg.discount_bps)/10000)):pkg.price_amount;
-  const pkgName=`Einfach Hausen · ${pkg.title}${pilotPkg?' · Pilot-Vorteil −15%':''}`;
-  const session=await stripe.checkout.sessions.create({mode:'payment',customer_email:user.email,line_items:[{price_data:{currency:'eur',product_data:{name:pkgName},unit_amount:pkgPrice},quantity:1}],success_url:`${origin}/api/packages/success?session_id={CHECKOUT_SESSION_ID}`,cancel_url:`${origin}/app/plans?checkout=cancelled`,metadata:{kind:'package',homeownerId:String(user.id),packageSlug:pkg.slug,packageOrderId:String(orderId)}});
-  db.prepare('UPDATE package_orders SET stripe_session_id=? WHERE id=?').run(session.id,orderId); redirect(session.url!);
-}
-
-// --- Verträge & Tarife ------------------------------------------------------
+// --- Vertraege & Tarife -----------------------------------------------------
 
 function ownHouseContract(id:number, homeownerId:number) {
   return db.prepare('SELECT * FROM house_contracts WHERE id=? AND homeowner_id=?').get(id, homeownerId) as any | undefined;

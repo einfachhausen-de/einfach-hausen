@@ -6,6 +6,7 @@ import { randomBytes } from 'node:crypto';
 import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { chromium, firefox, webkit } from 'playwright-core';
+import Database from 'better-sqlite3';
 // T-0129 Browser-E2E v2: the public-platform matrix is the SAME list the
 // visual canonicals (T-0130) are built from, so behavioral and visual proof
 // can never cover different route sets.
@@ -115,7 +116,6 @@ function createProjectCopy(){
 }
 
 async function freePort(){return await new Promise((resolve,reject)=>{const socket=net.createServer();socket.unref();socket.on('error',reject);socket.listen(0,'127.0.0.1',()=>{const address=socket.address();const port=typeof address==='object'&&address?address.port:0;socket.close(()=>resolve(port));});});}
-async function runChild(argv,{cwd,env,timeoutMs=180000}={}){return await new Promise((resolve,reject)=>{const child=spawn(process.execPath,argv,{cwd,env,stdio:['ignore','pipe','pipe']});let output='';for(const stream of [child.stdout,child.stderr])stream.on('data',chunk=>{output+=chunk.toString();if(output.length>120000)output=output.slice(-120000);});const timer=setTimeout(()=>{child.kill('SIGTERM');reject(new Error(`Child process timeout: ${argv.join(' ')}\n${output.slice(-12000)}`));},timeoutMs);child.on('error',reject);child.on('exit',code=>{clearTimeout(timer);if(code===0)resolve(output);else reject(new Error(`Child process failed (${code}): ${argv.join(' ')}\n${output.slice(-12000)}`));});});}
 async function waitForServer(url,timeoutMs=90000){const started=Date.now();while(Date.now()-started<timeoutMs){if(server?.exitCode!==null&&server?.exitCode!==undefined)throw new Error(`Next server exited early (${server.exitCode})\n${serverLog.slice(-60).join('')}`);try{const response=await fetch(url,{redirect:'manual'});if(response.status<500)return;}catch{}await new Promise(resolve=>setTimeout(resolve,250));}throw new Error(`Next server did not become ready\n${serverLog.slice(-60).join('')}`);}
 async function waitText(page,text){
   // Engine-agnostic text matching: WebKit drops the space at innerText line
@@ -148,6 +148,45 @@ async function nav(page,url,options){let response;try{response=await page.goto(u
 // Structural reads/writes can still race the hydration swap; retry until the
 // transient S:<n> tree is gone instead of failing the whole flow.
 async function strictRetry(page,fn,attempts=8){let lastError;for(let attempt=0;attempt<attempts;attempt++){try{return await fn();}catch(error){if(!String(error).includes('strict mode violation'))throw error;lastError=error;await page.waitForTimeout(600);}}throw lastError;}
+// Next.js haelt die serverseitig gerenderte Fassung waehrend der Hydration
+// kurzzeitig zusaetzlich im DOM (0x0 Groesse, unsichtbar, danach entfernt).
+// In diesem Fenster sieht der strict-Modus zwei Treffer - auch bei einem
+// eindeutigen id wie #owner-direct-message, weil die Serverkopie dasselbe id
+// traegt. settle() wartet auf genau einen sichtbaren Treffer und schlaegt fehl,
+// wenn keiner oder mehrere uebrig bleiben; .first() wuerde eine echte Dublette
+// verdecken.
+async function settle(locator,label){
+  const page=locator.page();
+  for(let attempt=0;attempt<60;attempt++){
+    const visible=await locator.evaluateAll(nodes=>nodes.map(node=>{const r=node.getBoundingClientRect();return r.width>0&&r.height>0;}));
+    if(visible.length===1&&visible[0])return;
+    if(attempt===59)throw new Error(`${label}: expected exactly one visible match, got ${visible.length} (visible: ${visible.filter(Boolean).length})`);
+    await page.waitForTimeout(250);
+  }
+}
+// Mobile navigation of the app surfaces. Every /app and /pro route renders
+// WerkbankRahmen (src/components/werkbank-rahmen.tsx) -> WerkbankShell, whose
+// sidebar opens as a Sheet on small viewports. The former
+// <details class="mobile-menu"> drawers in shell.tsx / owner-menu.tsx are not
+// rendered by any route any more, so asserting on them tested nothing but the
+// absence of a component that is still in the tree. These helpers assert the
+// navigation that actually reaches the user: the trigger in the top bar and the
+// links inside the sheet.
+const MOBILE_SIDEBAR='[data-mobile="true"]';
+async function openMobileSidebar(page,label){
+  const trigger=page.locator('[data-slot="sidebar-trigger"]').first();
+  await trigger.waitFor({timeout:30000});
+  await page.evaluate(()=>window.scrollTo(0,0));
+  await trigger.click();
+  await page.locator(MOBILE_SIDEBAR).first().waitFor({state:'visible',timeout:20000}).catch(()=>{throw new Error(`${label} mobile sidebar did not open`);});
+}
+async function mobileSidebarHrefs(page){
+  return await page.locator(`${MOBILE_SIDEBAR} a[href]`).evaluateAll(nodes=>nodes.map(node=>node.getAttribute('href')));
+}
+async function assertMobileSidebarCloses(page,label){
+  await page.keyboard.press('Escape');
+  await page.locator(MOBILE_SIDEBAR).first().waitFor({state:'hidden',timeout:10000}).catch(()=>{throw new Error(`${label} mobile sidebar did not close`);});
+}
 // A bare "has horizontal overflow" is impossible to act on: it does not say
 // which element is too wide. Report the boxes that stick out, and flag the
 // ones whose own content does not fit (scrollWidth > clientWidth) - that is
@@ -242,8 +281,29 @@ function isToleratedWebKitConsole(text,source){
   if(browserName!=='webkit')return false;
   return /^TypeError: Load failed$/.test(text) && /_next\/static\//.test(source||'');
 }
+// Chromium: a View Transition that a newer navigation supersedes is skipped, and
+// the in-flight transition promise rejects with `AbortError: Transition was
+// skipped`. The repository already names this condition and works around it in
+// one place - src/app/actions.ts: loginAction returns {redirectTo} instead of
+// redirect() precisely because throwing NEXT_REDIRECT inside a client form
+// wrapper aborts the in-flight transition and surfaces this message. A skipped
+// transition does not change what is rendered (the superseding navigation does),
+// so it is not a product failure and is not actionable for this suite.
+//
+// It is counted rather than swallowed: the number is reported in the summary, so
+// a growing amount of aborted transitions stays visible instead of becoming
+// invisible noise. Every other page error stays fatal.
+let skippedTransitions=0;
+function isToleratedViewTransitionAbort(message){
+  // Playwright hands the DOMException over in two shapes: `error.message` is the
+  // bare "Transition was skipped", while String(error) and the console variant
+  // carry the "AbortError: " prefix. Match both, and nothing else.
+  if(!/^(?:AbortError:\s*)?Transition was skipped$/.test(String(message).trim()))return false;
+  skippedTransitions++;
+  return true;
+}
 function isToleratedPageError(message){
-  return isToleratedFirefoxPageError(message)||isToleratedWebKitPageError(message);
+  return isToleratedFirefoxPageError(message)||isToleratedWebKitPageError(message)||isToleratedViewTransitionAbort(message);
 }
 function isToleratedConsoleError(text,source){
   // Offline probe and the 404 not-found probe are deliberately provoked.
@@ -261,6 +321,7 @@ function trackPage(page,label){
   page.on('console',message=>{
     if(message.type()!=='error')return;
     const text=message.text();
+    if(isToleratedViewTransitionAbort(text))return;
     const location=message.location();
     const source=location?.url?` source=${location.url}`:'';
     if(isToleratedConsoleError(text,source))return;
@@ -284,7 +345,7 @@ async function assertKeyboardFocus(page,label){
   if(!focused.tag||focused.tag==='BODY')throw new Error(`${label} has no keyboard focus target after Tab`);
 }
 async function clickAndWaitUrl(page,locator,matcher,timeout=30000){await Promise.all([page.waitForURL(matcher,{timeout}),locator.click()]);}
-async function clickServerAction(page,locator,timeout=90000){let response;try{await Promise.all([page.waitForResponse(r=>r.request().method()==='POST',{timeout}),locator.click()]);}catch(error){throw new Error(`server action click failed: ${error.message.split('\n')[0]}\nserverLog tail:\n${serverLog.slice(-12).join('')}`,{cause:error});} await page.waitForLoadState('load').catch(()=>{}); await page.waitForTimeout(400);}
+async function clickServerAction(page,locator,timeout=90000){try{await Promise.all([page.waitForResponse(r=>r.request().method()==='POST',{timeout}),locator.click()]);}catch(error){throw new Error(`server action click failed: ${error.message.split('\n')[0]}\nserverLog tail:\n${serverLog.slice(-12).join('')}`,{cause:error});} await page.waitForLoadState('load').catch(()=>{}); await page.waitForTimeout(400);}
 // The production hydration window can briefly double-render a freshly navigated
 // document; register fields are filled only after the DOM settles to one input.
 async function fillRegisterField(page,name,value){const field=page.locator(`input[name="${name}"]:visible`);await field.waitFor({timeout:20000});await field.fill(value);}
@@ -369,30 +430,37 @@ await publicPage.getByRole('heading',{name:'Das gibt es hier nicht.'}).waitFor()
 if(!(await publicPage.locator('a[href="/"]').count()))throw new Error('404 page has no way back to the start page');
 await assertNoOverflow(publicPage,'Mobile 404 state');
 await assertKeyboardFocus(publicPage,'Mobile 404 state');
-// App entry stays canonical at /welcome: login/account cards and role selection for app users.
-await nav(publicPage, base+'/welcome')
-await publicPage.getByRole('heading',{name:/Willkommen bei einfachhausen/i}).waitFor();
-await waitText(publicPage,'Dein Zuhause. Alles geregelt.');
-if(!(await publicPage.getByRole('link',{name:'Log in'}).count()))throw new Error('Welcome login card missing');
-if(!(await publicPage.getByRole('link',{name:'Neues Konto'}).count()))throw new Error('Welcome new-account card missing');
+// Legacy auth routes resolve on the server (T-0168): /welcome and /role have been
+// server redirects since 74a3406, not self-service pages. The role is read from the
+// application DB, never chosen in the client. Asserting the redirect is strictly
+// stronger than the page-copy assertions it replaces: it proves the deleted client
+// flow is gone AND that an anonymous visitor is sent to login.
+for(const legacyAuthRoute of ['/welcome','/role']){
+  await nav(publicPage, base+legacyAuthRoute);
+  try{ await publicPage.waitForURL(/\/login/,{timeout:30000}); }
+  catch{ throw new Error(`Legacy auth route ${legacyAuthRoute} did not resolve an anonymous visitor to /login (landed on ${publicPage.url()})`); }
+  if(await publicPage.getByRole('heading',{name:/Willkommen bei einfachhausen/i}).count())throw new Error(`Legacy welcome page still rendered at ${legacyAuthRoute}`);
+}
 // Intake entry moved into the product: /kontakt serves 'Anliegen starten' -> /register?role=homeowner.
 const kontaktResponse=await publicPage.request.get(base+'/kontakt'); if(!kontaktResponse.ok())throw new Error('Kontakt route failed');
 const kontaktHtml=await kontaktResponse.text();
 if(!kontaktHtml.includes('Anliegen starten')||!kontaktHtml.includes('/register?role=homeowner'))throw new Error('Kontakt intake entry missing');
-// Real logged-out new-owner entry: welcome card -> role selection.
-await nav(publicPage, base+'/welcome')
-await clickAndWaitUrl(publicPage,publicPage.locator('a[href="/role"]').first(),/\/role/);
-await waitText(publicPage,'dass du da bist!'); await waitText(publicPage,'Als Eigentümer starten'); await waitText(publicPage,'Ich bin Dienstleister');
+// The former logged-out new-owner entry (welcome card -> /role role selection) no
+// longer exists: /role is one of the server redirects asserted above, and the owner
+// entry is the registration form itself, checked next.
 // Owner registration (server action flow) stays the canonical owner onboarding entry.
+// /register (auth-v2) opens directly in register mode and exposes a stable submit id.
 await nav(publicPage, base+'/register?role=homeowner')
-await publicPage.getByRole('button',{name:'Kostenlos registrieren'}).first().waitFor();
-await publicPage.getByRole('button',{name:'Kostenlos registrieren'}).first().click();
+const ownerRegisterSubmit=publicPage.locator('#btn-submit-register');
+await ownerRegisterSubmit.waitFor();
 if(!(await publicPage.getByLabel(/Vorname/).count()))throw new Error('Owner registration missing Vorname field');
 if(!(await publicPage.getByLabel(/Nachname/).count()))throw new Error('Owner registration missing Nachname field');
 if(!(await publicPage.locator('input[name="password"]').count()))throw new Error('Owner registration missing Passwort field');
 if(!(await publicPage.getByLabel(/Postleitzahl/).count()))throw new Error('Owner registration missing PLZ field');
-if(!(await publicPage.getByRole('button',{name:'Kostenlos registrieren'}).last().count()))throw new Error('Owner registration missing submit action');
-if(!(await publicPage.locator('#btn-demo-kunde').count()))throw new Error('Owner registration missing demo fill');
+if(!(await ownerRegisterSubmit.isEnabled()))throw new Error('Owner registration submit action is not usable');
+// The P0 demo backdoors are fail-closed (88431f0): unless demo login is explicitly
+// switched on, the registration form must not offer the public demo fill.
+if(process.env.DEMO_LOGIN_ENABLED!=='1'&&await publicPage.locator('#btn-demo-kunde').count())throw new Error('Demo backdoor is visible although demo login is disabled');
 await nav(publicPage, base+'/')
 const manifestResponse=await publicPage.request.get(base+'/manifest.webmanifest'); if(!manifestResponse.ok())throw new Error('PWA manifest unavailable');
 const manifest=await manifestResponse.json(); if(manifest.display!=='standalone'||!Array.isArray(manifest.icons)||manifest.icons.length<3)throw new Error('PWA manifest incomplete');
@@ -419,12 +487,12 @@ const pageErrors=[];
 manager.on('console',(m)=>{if(m.type()==='error')pageErrors.push(m.text());});
 manager.on('pageerror',(e)=>pageErrors.push('pageerror: '+e.message));
 await nav(manager, base+'/register?role=provider')
-await manager.getByRole('button',{name:'Kostenlos registrieren'}).first().click();
+await manager.locator('#btn-submit-register').waitFor();
 await fillRegisterField(manager,'businessName','Gartenbau Müller'); await fillRegisterField(manager,'firstName','Daniel'); await fillRegisterField(manager,'lastName','Müller');
 await fillRegisterField(manager,'email',providerEmail); await fillRegisterField(manager,'password',password);
 await fillRegisterField(manager,'postcode','46325');
 await fillRegisterField(manager,'trades','Garten- und Landschaftsbau, Heckenschnitt, Hausmeisterservice');
-try{await Promise.all([manager.waitForURL('**/pro'),manager.getByRole('button',{name:'Kostenlos registrieren'}).last().click()]);}catch(navError){console.error('E2EDIAG register url=',manager.url());console.error('E2EDIAG register body=',(await manager.locator('body').innerText()).slice(0,500).replace(/\n+/g,' | '));throw navError;}
+try{await Promise.all([manager.waitForURL('**/pro'),manager.locator('#btn-submit-register').click()]);}catch(navError){console.error('E2EDIAG register url=',manager.url());console.error('E2EDIAG register body=',(await manager.locator('body').innerText()).slice(0,500).replace(/\n+/g,' | '));throw navError;}
 await nav(manager, base+'/pro/profile')
 await manager.waitForLoadState('networkidle').catch(()=>{});
 await waitForDomStable(manager,'input[name="document"]',1);
@@ -451,8 +519,11 @@ await clickAndWaitUrl(manager,manager.getByRole('button',{name:'Zur Prüfung ein
 const adminCtx=await newE2EContext({viewport:{width:1180,height:1000}}); const admin=await adminCtx.newPage(); trackPage(admin,'admin');
 await nav(admin, base+'/admin/login'); await admin.getByLabel('Admin-Passwort').fill(adminPassword);
 await Promise.all([admin.waitForURL('**/admin'),admin.getByRole('button',{name:'Admin anmelden'}).click()]);
-await admin.getByRole('heading',{name:'Betriebsübersicht'}).waitFor(); await waitText(admin,'Nutzer'); await waitText(admin,'Anfragen'); await waitText(admin,'Bookings'); await waitText(admin,'MATCHING'); await waitText(admin,'BENACHRICHTIGUNGEN'); await admin.getByRole('heading',{name:'Bewertungen'}).waitFor();
-let companyCard=admin.locator('.admin-card').filter({hasText:'Gartenbau Müller'}).first();
+await admin.getByRole('heading',{name:'Betriebsübersicht'}).waitFor(); await waitText(admin,'Nutzer'); await waitText(admin,'Anfragen'); await waitText(admin,'Bookings'); await waitText(admin,'Matching'); await waitText(admin,'Benachrichtigungen'); await admin.getByRole('heading',{name:'Bewertungen',exact:true}).waitFor();
+// Partner cards are EHFormSection blocks, which render <fieldset><legend>. Anchor on
+// the legend so the right partner is selected; the previous `.admin-card` class no
+// longer exists anywhere in the admin UI (it was rewritten onto the design system).
+let companyCard=admin.locator('fieldset').filter({has:admin.locator('legend',{hasText:'Gartenbau Müller'})}).first();
 await clickServerAction(admin,companyCard.getByRole('button',{name:'Unternehmen freigeben'}));
 try { await companyCard.getByText(/Prüfung Freigegeben/).waitFor({timeout:30000}); } catch(e) {
   console.error('E2EDIAG url=',admin.url());
@@ -464,7 +535,7 @@ try { await companyCard.getByText(/Prüfung Freigegeben/).waitFor({timeout:30000
 // uncontrolled contract form starts from fresh server state (a stale DOM resets
 // select/checkboxes to defaults before the submit lands).
 await nav(admin, admin.url()); await admin.getByRole('heading',{name:'Betriebsübersicht'}).waitFor();
-companyCard=admin.locator('.admin-card').filter({hasText:'Gartenbau Müller'}).first();
+companyCard=admin.locator('fieldset').filter({has:admin.locator('legend',{hasText:'Gartenbau Müller'})}).first();
 await companyCard.getByLabel('Status').selectOption('active');
 for(const name of ['Betriebshaftpflicht geprüft','Qualifikation/Zulassung geprüft','Partnervertrag unterschrieben','Qualitätsstandard akzeptiert']) await companyCard.getByLabel(name).check();
 await clickServerAction(admin,companyCard.getByRole('button',{name:'Partnervertrag speichern'}));
@@ -497,7 +568,17 @@ try{
   const afterWait=await manager.evaluate(()=>document.querySelectorAll('.app-page').length).catch(()=>-1);
   console.error('E2EDIAG app-page count after 3s:',afterWait);
   throw canvasError;
-} await manager.evaluate(()=>window.scrollTo(0,0)); const providerMenu=manager.locator('.mobile-menu'); await providerMenu.locator('summary').click(); if(!(await providerMenu.locator('.mobile-menu-panel').isVisible()))throw new Error('Provider mobile menu did not open'); await providerMenu.evaluate(el=>{el.open=false;});
+}
+// Partner-Navigation auf 390px: der Werkbank-Rahmen hat Pillen-Navi und
+// <details>-Drawer ersetzt, die Sidebar oeffnet mobil als Sheet. Geprueft wird
+// deshalb der Trigger in der Kopfzeile und dass das Sheet die echte
+// Partner-Navigation traegt - ein leeres Sheet wuerde "es oeffnet" bestehen.
+await openMobileSidebar(manager,'Provider');
+const providerHrefs=await mobileSidebarHrefs(manager);
+for(const href of ['/pro','/pro/orders','/pro/messages','/pro/team','/pro/profile']){
+  if(!providerHrefs.includes(href))throw new Error(`Provider mobile sidebar is missing ${href}`);
+}
+await assertMobileSidebarCloses(manager,'Provider');
 await manager.getByLabel('Firmenanschrift').fill('Gartenstraße 12, 46325 Borken'); await manager.getByLabel('Steuernummer').fill('307/1234/5678');
 // Partner onboarding completeness: region radius, weekly capacity, availability, team.
 const radiusInput=manager.getByLabel(/Einsatzradius/); if(await radiusInput.count())await radiusInput.fill('40');
@@ -509,7 +590,10 @@ const capacityAfterReload=await strictRetry(manager,()=>manager.getByLabel('Wöc
 const radiusAfterReload=await manager.getByLabel(/Einsatzradius/).inputValue(); if(radiusAfterReload!=='40')throw new Error(`Service radius did not persist, got ${radiusAfterReload}`);
 
 // 2) Firma legt einen echten Ansprechpartner an. Nur ein Schalter für Auftragsverwaltung.
-await nav(manager, base+'/pro/team'); await manager.getByRole('heading',{name:'Dein Team. Klare Zuständigkeiten.'}).waitFor(); await waitText(manager,'Aufträge verwalten'); await assertNoOverflow(manager,'Mobile partner team');
+// Die Seite führt jetzt EHPageHeader (h1 "Team" + Betriebsname als Kontext) und
+// EHMetricsBar; die frühere Marketing-Überschrift "Dein Team. Klare
+// Zuständigkeiten." gibt es dort nicht mehr.
+await nav(manager, base+'/pro/team'); await manager.getByRole('heading',{level:1,name:'Team',exact:true}).waitFor(); await waitText(manager,'Aufträge verwalten'); await assertNoOverflow(manager,'Mobile partner team');
 await manager.getByLabel('Vorname').last().fill('Thomas'); await manager.getByLabel('Nachname').last().fill('Weber');
 await manager.getByLabel('Funktion').fill('Techniker'); await manager.locator('input[name="email"]').last().fill(techEmail); await manager.getByLabel('Telefon').last().fill('+49 151 12345678'); await manager.getByLabel('Startpasswort').fill(password);
 await clickAndWaitUrl(manager,manager.getByRole('button',{name:'Ansprechpartner anlegen'}),/member=created/); await waitText(manager,'Thomas Weber');
@@ -533,46 +617,51 @@ await thomasCard.getByLabel('Aufträge verwalten').uncheck(); await clickServerA
 // 3) Kunde startet beim Hausmeisterservice und entscheidet danach bewusst: Mensch oder Auftrag.
 const ownerCtx=await newE2EContext({viewport:{width:390,height:844}}); const owner=await ownerCtx.newPage(); trackPage(owner,'homeowner');
 await nav(owner, base+'/register?role=homeowner')
-await owner.getByRole('button',{name:'Kostenlos registrieren'}).first().click();
+await owner.locator('#btn-submit-register').waitFor();
 await fillRegisterField(owner,'firstName','Maria'); await fillRegisterField(owner,'lastName','Test'); await fillRegisterField(owner,'email',ownerEmail); await fillRegisterField(owner,'password',password); await fillRegisterField(owner,'postcode','46325');
-await Promise.all([owner.waitForURL('**/app/onboarding'),owner.getByRole('button',{name:'Kostenlos registrieren'}).last().click()]);
-await waitText(owner,'Damit Partner in deiner Region arbeiten können');
+await Promise.all([owner.waitForURL('**/app/onboarding'),owner.locator('#btn-submit-register').click()]);
+await waitText(owner,'Trag Straße und PLZ ein, damit Einfach Hausen Betriebe in deiner Region findet.');
 // Resume works: leaving mid-onboarding and returning keeps the saved step.
 await nav(owner, base+'/app'); await waitText(owner,'Einrichtung unvollständig');
 await clickAndWaitUrl(owner,owner.getByRole('link',{name:'Einrichtung fortsetzen'}),/\/app\/onboarding$/);
-await waitText(owner,'Damit Partner in deiner Region arbeiten können');
+await waitText(owner,'Trag Straße und PLZ ein, damit Einfach Hausen Betriebe in deiner Region findet.');
 await strictRetry(owner,()=>owner.getByLabel('Straße und Hausnummer').fill('Gartenweg 12'));
-await clickServerAction(owner,owner.getByRole('button',{name:'Weiter'})); await waitText(owner,'Worum geht es bei deinem Haus?');
+await clickServerAction(owner,owner.getByRole('button',{name:'Weiter'})); await waitText(owner,'Wähle die Bereiche, die dich interessieren. Überspringen ist möglich.');
 // Optional steps are skippable.
-await strictRetry(owner,()=>owner.getByRole('button',{name:'Überspringen'}).click()); await waitText(owner,'Wie dürfen wir dich erreichen?');
+await strictRetry(owner,()=>owner.getByRole('button',{name:'Überspringen'}).click()); await waitText(owner,'Sag, über welchen Weg wir dich am besten erreichen.');
 await strictRetry(owner,()=>owner.getByRole('button',{name:'Überspringen'}).click());
 await Promise.all([owner.waitForURL('**/app?onboarding=done'),owner.waitForLoadState('load')]);
 if(await owner.getByText('Einrichtung unvollständig').count())throw new Error('Onboarding banner shown after completion');
 await assertNoOverflow(owner,'Mobile customer app');
-await nav(owner, base+'/app'); await waitText(owner,'Was möchtest du für dein Zuhause klären?'); await waitText(owner,'Als Nächstes');
-// Owner mobile navigation is the Notion drawer; the bottom tab bar is gone on owner mobile.
-const ownerDrawer=owner.locator('.mobile-menu');
-await owner.evaluate(()=>window.scrollTo(0,0));
-await ownerDrawer.locator('summary').click();
-const drawerPanel=ownerDrawer.locator('.side-menu.ehn-drawer');
-if(!(await drawerPanel.isVisible()))throw new Error('Mobile owner menu did not open');
-// The drawer mirrors the main navigation: five house areas, plus a separate
-// account block. It used to be five numbered sections of its own - which is
-// exactly the second, competing IA this drawer no longer carries.
-const drawerAreas=await ownerDrawer.locator('.sm-nav.ehn-acc').first().locator('.ehn-acc-sec').count();
-if(drawerAreas!==5)throw new Error(`Mobile homeowner drawer must expose five areas, got ${drawerAreas}`);
-const drawerKonto=await ownerDrawer.locator('nav[aria-label="Konto"]').locator('.ehn-acc-sec').count();
-if(drawerKonto<4)throw new Error(`Mobile homeowner drawer must expose an account block, got ${drawerKonto}`);
-if(await ownerDrawer.getByRole('button',{name:'Abmelden'}).count()<2)throw new Error('Drawer logout actions missing');
-const jobsSection=ownerDrawer.locator('.ehn-acc-sec').filter({hasText:'Aufträge'}); await jobsSection.locator('button.ehn-acc-head').click();
-await clickAndWaitUrl(owner,jobsSection.getByRole('button',{name:'Aufträge',exact:true}),/\/app\/jobs/);
-if(await drawerPanel.isVisible())throw new Error('Mobile owner menu did not close after navigation');
+// Die Owner-Startseite ist die EHOwnerSection-Komposition ("Wartet auf dich",
+// "Hausakte", "Nächste Termine"). Die früheren Anker gehören zu EHOwnerComposer,
+// das keine Seite mehr rendert.
+await nav(owner, base+'/app'); await waitText(owner,'Wartet auf dich'); await waitText(owner,'Hausakte'); await waitText(owner,'Nächste Termine');
+// Owner mobile navigation: derselbe Werkbank-Rahmen, also dieselbe Sidebar.
+// Der frueher hier gepruefte Notion-Drawer (.mobile-menu / .ehn-drawer) wird von
+// keiner Route mehr gerendert. Was bleiben muss: fuenf Hausbereiche, ein eigener
+// Konto-Block und das Schliessen nach einer Navigation.
+await openMobileSidebar(owner,'Owner');
+const ownerHrefs=await mobileSidebarHrefs(owner);
+for(const href of ['/app','/app/home','/app/contracts','/app/jobs','/app/messages']){
+  if(!ownerHrefs.includes(href))throw new Error(`Mobile homeowner sidebar must expose the area ${href}`);
+}
+for(const href of ['/app/profile','/notifications','/app/hilfe']){
+  if(!ownerHrefs.includes(href))throw new Error(`Mobile homeowner sidebar must expose the account entry ${href}`);
+}
+await clickAndWaitUrl(owner,owner.locator(`${MOBILE_SIDEBAR} a[href="/app/jobs"]`).first(),/\/app\/jobs/);
+if(await owner.locator(MOBILE_SIDEBAR).first().isVisible())throw new Error('Mobile owner menu did not close after navigation');
 await nav(owner, base+'/app/profile'); await waitText(owner,'Einfach Hausen aufs Handy'); await assertNoOverflow(owner,'Mobile customer profile');
 await nav(owner, base+'/app/hausmeister'); await assertNoOverflow(owner,'Mobile housemaster');
 await sendHousemaster(owner,'Meine Hecke ist zu hoch. Dienstag ab 14 Uhr hätte ich Zeit. Wen kann ich dazu fragen?',/answered=1/);
 await waitText(owner,'Wie soll es weitergehen?'); await waitText(owner,'Ansprechpartner finden'); await waitText(owner,'Auftrag organisieren');
 // Eine normale Hausfrage darf noch keine Partneranfrage erzeugen.
-await nav(manager, base+'/pro'); await waitText(manager,'Keine neuen Anfragen im Umkreis');
+await nav(manager, base+'/pro'); await waitText(manager,'Keine neuen Aufträge.');
+// A normal house question must not create a partner request, so there must be
+// no dispatch card to open. The earlier assertion looked for the empty-state
+// copy "Keine neuen Anfragen im Umkreis", which the rebuilt /pro start page no
+// longer renders.
+if(await manager.locator('a[href^="/pro/jobs/"]').count()!==0)throw new Error('A normal house question must not create a partner request');
 
 // 3a) Zuerst nur einen Menschen verbinden — ausdrücklich noch kein Auftrag.
 await clickAndWaitUrl(owner,owner.getByRole('button',{name:/Ansprechpartner finden/}),/\/app\/jobs\/\d+/); const contactJobId=Number(owner.url().split('/').pop()); if(!contactJobId)throw new Error('contact job missing');
@@ -589,7 +678,7 @@ if(contactHref!==`/pro/jobs/${contactJobId}`)throw new Error(`contact dispatch c
 // Dev-mode Fast Refresh can full-reload mid-interaction and swallow clicks;
 // a direct navigation with one retry is deterministic here.
 try { await nav(manager, base+`/pro/jobs/${contactJobId}`); }
-catch(e){ await manager.waitForTimeout(2000); await nav(manager, base+`/pro/jobs/${contactJobId}`); }
+catch{ await manager.waitForTimeout(2000); await nav(manager, base+`/pro/jobs/${contactJobId}`); }
 await waitText(manager,'Nur persönlicher Ansprechpartner gesucht');
 const contactSelect=manager.getByLabel('Ansprechpartner'); const contactThomas=contactSelect.locator('option').filter({hasText:'Thomas Weber'}); const contactThomasValue=await contactThomas.getAttribute('value'); if(!contactThomasValue)throw new Error('Thomas contact option missing'); await contactSelect.selectOption(contactThomasValue);
 await clickServerAction(manager,manager.getByRole('button',{name:'Kontakt übernehmen'}));
@@ -598,7 +687,7 @@ await nav(owner, base+`/app/jobs/${contactJobId}`); await waitText(owner,'Thomas
 
 // Direkter Kontakt funktioniert schon ohne Auftrag.
 await owner.getByRole('link',{name:'Nachricht',exact:true}).click(); await waitText(owner,'Zurück zur Kontaktliste'); await assertNoOverflow(owner,'Mobile contacts');
-await owner.getByPlaceholder(/Nachricht an Thomas/).fill('Thomas, kannst du kurz sagen, ob du dir das ansehen würdest?'); await clickServerAction(owner,owner.getByRole('button',{name:'Nachricht senden'}));
+const ownerDirect=owner.getByPlaceholder(/Nachricht an Thomas/); await settle(ownerDirect,'owner direct message'); await ownerDirect.fill('Thomas, kannst du kurz sagen, ob du dir das ansehen würdest?'); await clickServerAction(owner,owner.getByRole('button',{name:'Nachricht senden'}));
 const techCtx=await newE2EContext({viewport:{width:390,height:844}}); const tech=await techCtx.newPage(); trackPage(tech,'provider-contact');
 tech.on('framenavigated',f=>{ if(f===tech.mainFrame()) console.error('E2E-NAV:',JSON.stringify(tech.url())); });
 tech.on('response',r=>{ if(r.status()>=300){ console.error('E2E-RES:',r.status(),r.request().method(),r.url().slice(base.length)); } });
@@ -610,7 +699,7 @@ const supabaseAdminBase=supabaseUrl;
 let supabaseTechUserId=null;
 {
   const mk=await fetch(`${supabaseAdminBase}/auth/v1/admin/users`,{method:'POST',headers:{apikey:supabaseServiceKey,Authorization:`Bearer ${supabaseServiceKey}`,'Content-Type':'application/json'},body:JSON.stringify({email:techEmail,password,email_confirm:true,user_metadata:{role:'provider',e2e:true}})});
-  if(mk.ok){const u=await mk.json();supabaseTechUserId=u.id;}
+  if(mk.ok){const u=await mk.json();supabaseTechUserId=u.id;console.error('E2EDIAG supabase tech user id:',supabaseTechUserId);}
   // 422 = already exists. Resolve the id by exact address; `?email=` would be
   // ignored by GoTrue and `users[0]` would be an arbitrary other user.
   else if(mk.status===422){const existing=await findSupabaseUserByEmail(techEmail);supabaseTechUserId=existing?.id||null;}
@@ -625,7 +714,7 @@ for(let attempt=0;attempt<3&&!loggedIn;attempt++){
   let enabled=false;
   try{ await tech.waitForFunction(()=>{const b=[...document.querySelectorAll('button')].find(b=>b.textContent.trim().startsWith('Anmelden')&&b.getClientRects().length>0);return b&&!b.disabled;},{timeout:8000}); enabled=true; }catch{}
   if(enabled){
-    await Promise.all([tech.waitForURL('**/pro',{timeout:60000}).catch(async(e)=>{ await tech.waitForTimeout(1500); const errbox=await tech.locator('[role="alert"]').textContent().catch(()=>'(no alert)'); throw new Error('post-click nav failed: '+tech.url()+' | errbox='+errbox); }),loginButton.click()]);
+    await Promise.all([tech.waitForURL('**/pro',{timeout:60000}).catch(async()=>{ await tech.waitForTimeout(1500); const errbox=await tech.locator('[role="alert"]').textContent().catch(()=>'(no alert)'); throw new Error('post-click nav failed: '+tech.url()+' | errbox='+errbox); }),loginButton.click()]);
     loggedIn=true;
     const sbCookies=await techCtx.cookies(base+'/app');
     console.error('E2EDIAG sb cookies after login:',JSON.stringify(sbCookies.map(c=>c.name)));
@@ -633,7 +722,7 @@ for(let attempt=0;attempt<3&&!loggedIn;attempt++){
 }
 if(!loggedIn)throw new Error('Tech login never completed (form submit did not navigate to /pro)');
 await nav(tech, base+'/pro/messages',{timeout:60000}); await waitText(tech,'Maria Test'); await waitText(tech,'ob du dir das ansehen würdest');
-await tech.waitForLoadState('load').catch(()=>{}); await tech.waitForTimeout(800); await tech.getByPlaceholder(/Nachricht an Maria/).fill('Ja, das kann ich mir ansehen. Wenn du möchtest, kann daraus separat ein Auftrag werden.'); await clickServerAction(tech,tech.getByRole('button',{name:'Nachricht senden'}));
+await tech.waitForLoadState('load').catch(()=>{}); await tech.waitForTimeout(800); const techReply=tech.getByPlaceholder(/Nachricht an Maria/); await settle(techReply,'provider reply message'); await techReply.fill('Ja, das kann ich mir ansehen. Wenn du möchtest, kann daraus separat ein Auftrag werden.'); await clickServerAction(tech,tech.getByRole('button',{name:'Nachricht senden'}));
 await nav(owner, base+`/app/jobs/${contactJobId}`); await waitText(owner,'separat ein Auftrag');
 
 // 3b) Erst jetzt entscheidet Maria, daraus einen echten Auftrag zu machen.
@@ -650,21 +739,45 @@ await manager.screenshot({path:path.join(artifactsDir,'provider-dispatch-offer.p
 
 // 5) Kunde vergleicht und bucht. Danach existiert ein echter Ansprechpartner.
 await nav(owner, base+`/app/jobs/${jobId}`); await waitText(owner,'Gartenbau Müller'); await waitText(owner,'EMPFEHLUNG'); await waitText(owner,'GÜNSTIGST');
-await clickAndWaitUrl(owner,owner.getByRole('link',{name:/Gartenbau Müller/}).first(),/\/app\/partners\//); await waitText(owner,'Geprüfter Partner'); await waitText(owner,'Gartenbau Müller'); await assertNoOverflow(owner,'Mobile partner profile'); await clickAndWaitUrl(owner,owner.getByRole('link',{name:/Zum Angebot zurück/}),new RegExp(`/app/jobs/${jobId}`));
+await clickAndWaitUrl(owner,owner.getByRole('link',{name:/Gartenbau Müller/}).first(),/\/app\/partners\//); await waitText(owner,'Geprüfter Partner'); await waitText(owner,'Gartenbau Müller'); await assertNoOverflow(owner,'Mobile partner profile'); // Der Rueckweg steht bewusst zweimal auf der Partnerseite (Hauptaktion und
+// Hinweis im Angebots-Callout, src/app/app/partners/[id]/page.tsx:50,54).
+// Beide muessen auf dasselbe Angebot zeigen; erst dann wird geklickt.
+const backToJob=owner.getByRole('link',{name:/Zum Angebot zurück/});
+const backHrefs=[...new Set(await backToJob.evaluateAll(nodes=>nodes.map(node=>node.getAttribute('href'))))];
+if(backHrefs.length!==1||backHrefs[0]!==`/app/jobs/${jobId}`)throw new Error(`"Zum Angebot zurück" must point at the offer and nowhere else, got ${JSON.stringify(backHrefs)}`);
+await clickAndWaitUrl(owner,backToJob.first(),new RegExp(`/app/jobs/${jobId}`));
 await clickServerAction(owner,owner.getByRole('button',{name:'Diesen Partner buchen'})); await waitText(owner,'Gebucht');
 await waitText(owner,'Dein persönlicher Ansprechpartner');
 
 // Manager weist bewusst Thomas zu.
 await nav(manager, base+`/pro/jobs/${jobId}`); await waitText(manager,'Ansprechpartner');
-const assignmentDisclosure=manager.locator('details.provider-disclosure').filter({hasText:'Ansprechpartner ändern'}); if(await assignmentDisclosure.count())await assignmentDisclosure.locator('summary').click(); await assignmentDisclosure.waitFor({state:'open'}).catch(()=>{}); const assignmentForm=assignmentDisclosure.locator('form:visible').filter({has:manager.getByLabel('Ansprechpartner')}).first(); await assignmentForm.waitFor(); const assignmentSelect=assignmentForm.getByLabel('Ansprechpartner'); await assignmentSelect.waitFor(); const thomasOption=assignmentSelect.locator('option').filter({hasText:'Thomas Weber'}); await thomasOption.waitFor({state:'attached'}); const thomasValue=await thomasOption.getAttribute('value'); if(!thomasValue)throw new Error('Thomas option missing'); await assignmentSelect.selectOption(thomasValue); const assignmentButton=assignmentForm.getByRole('button',{name:/Ansprechpartner festlegen|Zuweisung speichern/}); await clickServerAction(manager,assignmentButton);
-await nav(owner, owner.url()); await waitText(owner,'Thomas Weber'); await waitText(owner,'Techniker · Gartenbau Müller');
+// Der Zuweisungsbereich ist ein EHDetailDisclosure mit stabiler id
+// (src/app/pro/jobs/[id]/page.tsx:247, packages/eh-design/src/property-overview.tsx).
+// Die früher geprüfte Klasse `provider-disclosure` gibt es nicht: der Baustein
+// setzt eine gehashte CSS-Module-Klasse. Und das `if(count)` war wirkungslos,
+// weil danach trotzdem unbedingt auf das Formular gewartet wurde - fehlte der
+// Bereich, lief der Test in einen 120-s-Timeout statt in eine klare Aussage.
+const assignmentDisclosure=manager.locator('#ansprechpartner-aendern');
+await settle(assignmentDisclosure,'assignment disclosure');
+await assignmentDisclosure.locator('summary').click();
+const assignmentForm=assignmentDisclosure.locator('form').first(); await assignmentForm.waitFor(); const assignmentSelect=assignmentForm.getByLabel('Ansprechpartner'); await assignmentSelect.waitFor(); const thomasOption=assignmentSelect.locator('option').filter({hasText:'Thomas Weber'}); await thomasOption.waitFor({state:'attached'}); const thomasValue=await thomasOption.getAttribute('value'); if(!thomasValue)throw new Error('Thomas option missing'); await assignmentSelect.selectOption(thomasValue); const assignmentButton=assignmentForm.getByRole('button',{name:/Ansprechpartner festlegen|Zuweisung speichern/}); await clickServerAction(manager,assignmentButton);
+await nav(owner, owner.url()); await waitText(owner,'Thomas Weber');
+// Die Owner-Ansicht eines Kontaktauftrags zeigt Name, Rolle und Betrieb als
+// EIGENE Felder (src/app/app/jobs/[id]/page.tsx: eh-werkbank-row
+// "Ansprechpartner"/"Betrieb" plus die EHRecordList-Eintraege), nicht als
+// zusammengesetzte Zeile "Techniker · Gartenbau Müller". Geprueft wird deshalb
+// die Zuordnung Label->Wert, nicht eine Zeichenkette, die es nie gab.
+const rowPairs=(pair)=>[...document.querySelectorAll('.eh-werkbank-row')].some(row=>row.innerText.includes(pair[0])&&row.innerText.includes(pair[1]));
+await owner.waitForFunction(rowPairs,['Ansprechpartner','Thomas Weber'],{timeout:15000}).catch(()=>{throw new Error('Owner job page must name the personal contact in its own row');});
+await owner.waitForFunction(rowPairs,['Betrieb','Gartenbau Müller'],{timeout:15000}).catch(()=>{throw new Error('Owner job page must name the business in its own row');});
+await waitText(owner,'Techniker');
 await owner.screenshot({path:path.join(artifactsDir,'owner-personal-contact.png'),fullPage:true});
 
 // 6) Derselbe Ansprechpartner bleibt auch nach der späteren Buchung erreichbar.
 await owner.getByRole('link',{name:'Nachricht',exact:true}).click(); await waitText(owner,'Zurück zur Kontaktliste');
-await owner.getByPlaceholder(/Nachricht an Thomas/).fill('Thomas, bitte kurz Bescheid sagen, bevor du losfährst.'); await clickServerAction(owner,owner.getByRole('button',{name:'Nachricht senden'}));
+const ownerDirect2=owner.getByPlaceholder(/Nachricht an Thomas/); await settle(ownerDirect2,'owner direct message (second)'); await ownerDirect2.fill('Thomas, bitte kurz Bescheid sagen, bevor du losfährst.'); await clickServerAction(owner,owner.getByRole('button',{name:'Nachricht senden'}));
 await nav(tech, base+'/pro/messages'); await waitText(tech,'Thomas, bitte kurz Bescheid');
-await tech.getByPlaceholder(/Nachricht an Maria/).fill('Gerne, ich melde mich etwa 30 Minuten vorher.'); await clickServerAction(tech,tech.getByRole('button',{name:'Nachricht senden'}));
+const techReply2=tech.getByPlaceholder(/Nachricht an Maria/); await settle(techReply2,'provider reply message (second)'); await techReply2.fill('Gerne, ich melde mich etwa 30 Minuten vorher.'); await clickServerAction(tech,tech.getByRole('button',{name:'Nachricht senden'}));
 await nav(owner, owner.url()); await waitText(owner,'30 Minuten vorher');
 
 // 7) Ansprechpartner führt aus, dokumentiert und bleibt danach gespeichert.
@@ -678,12 +791,32 @@ for(let attempt=0;attempt<2;attempt++){ await nav(owner, base+invoiceHref,{timeo
 await waitText(owner,'Rechnungsbetrag'); await waitText(owner,'Gartenbau Müller'); await assertNoOverflow(owner,'Mobile invoice');
 await clickAndWaitUrl(owner,owner.getByRole('button',{name:'Rechnung bezahlen'}),/error=/); await waitText(owner,'Onlinezahlung ist gerade nicht verfügbar'); if(!(await owner.getByRole('button',{name:'Rechnung bezahlen'}).isVisible()))throw new Error('Unavailable payment path mutated invoice state');
 await nav(tech, base+`/pro/jobs/${jobId}`); const documentSection=tech.locator('form').filter({has:tech.getByLabel('Datei')}).first(); await documentSection.waitFor(); await documentSection.getByLabel('Titel').fill('Leistungsnachweis Heckenschnitt'); await documentSection.getByLabel('Dokumenttyp').selectOption('report'); await documentSection.getByLabel('Datei').setInputFiles({name:'nachweis.pdf',mimeType:'application/pdf',buffer:Buffer.from('%PDF-1.4\n% Einfach Hausen Test\n')}); await clickServerAction(tech,documentSection.getByRole('button',{name:'Dokument hochladen'}));
-await nav(owner, base+'/app/messages'); await waitText(owner,'Wähle einen Bereich. Danach das passende Gewerk.'); await owner.locator('a[data-main-category="garten"]').first().waitFor(); { const firstLevel=await owner.locator('body').innerText(); if(firstLevel.includes('Thomas Weber'))throw new Error('contacts must not appear on the category first level'); } await nav(owner, base+'/app/messages?mode=manage'); await waitText(owner,'Alle Kontakte an einem Ort'); await waitText(owner,'Thomas Weber'); const docRow=owner.locator('a[href*="entry="]').filter({hasText:'Thomas Weber'}).first(); await docRow.click(); await waitText(owner,'Leistungen');
+await nav(owner, base+'/app/messages'); await waitText(owner,'Wähle einen Bereich. Danach das passende Gewerk.'); await owner.locator('a[data-main-category="garten"]').first().waitFor(); {
+  // /app/messages ist kein Vollbild-Schritt mehr: die Seite rendert EHWorkspaceGrid
+  // mit dem Verzeichnis als Hauptspalte und einer Kontextspalte daneben
+  // (src/app/app/messages/page.tsx:119-157). Die alte Zusicherung las den ganzen
+  // Body und traf damit die Kontextspalte, nicht das Verzeichnis. Geprueft wird
+  // jetzt die Grenze, um die es geht: die Bereichsauswahl selbst darf keinen
+  // Kontakt nennen, und jeder Name in der Kontextspalte muss in einer begruendeten
+  // Liste stehen (ungelesen oder erreichbar) - kein ungefilterter Kontakt-Dump.
+  const directoryColumn=await owner.locator('[class*="workspaceGrid"] > div').first().innerText();
+  if(directoryColumn.includes('Thomas Weber'))throw new Error('The category level of the directory must not list contacts');
+  const asideSections=await owner.locator('[class*="workspaceGrid"] > aside [class*="workSection"]').evaluateAll(nodes=>nodes.map(node=>({title:node.querySelector('h2')?.textContent||'',text:node.innerText})));
+  const justified=['Ungelesene Nachrichten','Erreichbarkeit'];
+  const withContact=asideSections.filter(section=>section.text.includes('Thomas Weber'));
+  if(!withContact.length)throw new Error('Expected the contact in a justified aside list (unread or reachable)');
+  for(const section of withContact){
+    if(!justified.includes(section.title))throw new Error(`Contact name appears in an unjustified aside section: ${section.title}`);
+  }
+} await nav(owner, base+'/app/messages?mode=manage'); await waitText(owner,'Alle Kontakte an einem Ort'); await waitText(owner,'Thomas Weber'); const docRow=owner.locator('a[href*="entry="]').filter({hasText:'Thomas Weber'}).first(); await docRow.click(); await waitText(owner,'Leistungen');
 await nav(owner, base+'/app/documents'); await waitText(owner,'Leistungsnachweis Heckenschnitt');
 
 // 7a) Notification Center: server-side read-state sync, per-item toggles, pagination chrome.
-await nav(manager, base+'/notifications'); await waitText(manager,'Angebote, Disposition');
-const readToggle=manager.locator('form').filter({has:manager.locator('button[aria-label^="Als gelesen markieren"]')}).first();
+await nav(manager, base+'/notifications'); await manager.getByRole('heading',{level:1,name:'Updates'}).waitFor();
+// The anchor used to be the title of a dispatch notification ("Angebote,
+// Disposition") that no longer exists. What this block actually proves is the
+// unread dispatch notification and its server-side read state, asserted right
+// below; the anchor only has to establish that the center rendered.
 const firstUnread=manager.locator('button[aria-label^="Als gelesen markieren"]').first();
 if(await firstUnread.count()===0)throw new Error('Manager should have unread dispatch notifications by now');
 // Read-state sync is server-rendered: the 'ungelesen' marker must disappear from the first row after marking read.
@@ -700,58 +833,108 @@ await manager.waitForFunction(()=>document.body.innerText.includes('ungelesen'),
 await assertNoOverflow(manager,'Mobile notification center');
 
 // 8) Hausakte und Tarife entsprechen dem Geschäftsmodell.
-await nav(owner, base+'/app/home'); await waitText(owner,'Mein Haus'); await owner.locator('#hausprofil > summary').click(); await assertNoOverflow(owner,'Mobile house file'); await owner.getByLabel('Haustyp').selectOption('Einfamilienhaus'); await owner.getByLabel('Baujahr').fill('2004'); await owner.getByLabel('Wohnfläche (m²)').fill('145'); await owner.getByLabel('Grundstück (m²)').fill('620'); await clickServerAction(owner,owner.getByRole('button',{name:'Hausprofil speichern'}));
+// Der Kopf der Hausakte ist die Adresse des Hauses (EHPageHeader
+// title={p?.address || 'Hausdaten ergänzen'}, src/app/app/home/page.tsx); "Mein
+// Haus" war nie eine Überschrift dieser Seite. Geprueft wird deshalb die Bindung
+// an das echte Haus aus dem Onboarding ("Gartenweg 12", oben bei der
+// Hausadresse erfasst) - das schliesst auch aus, dass ein fremdes Hausprofil
+// angezeigt wird.
+await nav(owner, base+'/app/home'); await owner.getByRole('heading',{level:1,name:/Gartenweg 12/}).waitFor(); await owner.locator('#hausprofil > summary').click(); await assertNoOverflow(owner,'Mobile house file'); await owner.getByLabel('Haustyp').selectOption('Einfamilienhaus'); await owner.getByLabel('Baujahr').fill('2004'); await owner.getByLabel('Wohnfläche (m²)').fill('145'); await owner.getByLabel('Grundstück (m²)').fill('620'); await clickServerAction(owner,owner.getByRole('button',{name:'Hausprofil speichern'}));
 await owner.locator('#technik-anlegen > summary').click(); const assetForm=owner.locator('form').filter({has:owner.locator('select[name="kind"]')}).first(); await assetForm.getByLabel('Bereich').selectOption('pv'); await assetForm.locator('input[name="name"]').fill('PV-Anlage 10 kWp'); await clickServerAction(owner,assetForm.getByRole('button',{name:'Zur Hausakte hinzufügen'})); await waitText(owner,'PV-Anlage und Ertrag prüfen');
 await nav(owner, base+'/app/home/history'); await owner.locator('#hist-category').selectOption({label:'Dach & Fassade'}); await owner.getByLabel('Datum').fill('2025-06-12'); await owner.getByLabel('Was wurde gemacht?').fill('Dachsanierung 2025'); await owner.getByLabel('Firma').fill('Gartenbau Müller'); await owner.getByLabel('E-Mail Handwerker').fill(providerEmail); await owner.getByLabel('Kosten €').fill('18500'); await clickServerAction(owner,owner.getByRole('button',{name:'In Hausakte speichern'})); await waitText(owner,'Dachsanierung 2025'); await waitText(owner,'Partner verbunden'); await assertNoOverflow(owner,'Mobile house history');
 await nav(owner, base+'/app/messages?mode=manage'); await waitText(owner,'Thomas Weber'); const thomasRow=owner.locator('a[href*="entry="]').filter({hasText:'Thomas Weber'}).first(); await thomasRow.click(); await waitText(owner,'Leistungen'); await owner.getByRole('link',{name:'Zuordnung bearbeiten'}).click(); await waitText(owner,'Leistungen zuordnen'); await owner.getByRole('checkbox',{name:'Gärtner / Gartenpflege'}).check(); await clickServerAction(owner,owner.getByRole('button',{name:'Änderungen speichern'})); await waitText(owner,'Gespeichert'); await waitText(owner,'Gärtner / Gartenpflege');
 await nav(owner, base+`/app/year?year=${new Date().getFullYear()+2}`); await waitText(owner,'Mein Jahr'); await waitText(owner,'PV-Anlage und Ertrag prüfen'); await assertNoOverflow(owner,'Mobile year plan');
-await nav(owner, base+'/app/plans'); await waitText(owner,'Monatliche Mitgliedschaften'); await waitText(owner,'Haus Jahrespflege'); await waitText(owner,'Energie & Technik Check'); await assertNoOverflow(owner,'Mobile plans');
+// Eigentuemer haben keine Mitgliedschaft mehr: /app/plans ist eine
+// Legacy-Route, die in die Einstellungen umleitet (Issue #132).
+await nav(owner, base+'/app/plans'); await waitText(owner,'Einstellungen'); await assertNoOverflow(owner,'Mobile plans redirect');
 await nav(owner, base+'/app/jobs?view=completed');
 if(!owner.url().includes('view=completed'))throw new Error('completed view param lost');
 {
-  const completedBody=await owner.locator('body').innerText();
-  if(completedBody.includes('Keine Aufträge in dieser Ansicht')){await waitText(owner,'Abgeschlossene Aufträge');}
-  else{
-    const completedList=owner.locator('ul[aria-label="Abgeschlossene Aufträge"]');
-    await waitForDomStable(owner,'ul[aria-label="Abgeschlossene Aufträge"]');
-    const listText=await completedList.innerText();
+  // /app/jobs rendert die Auftraege als EHDataTable (Standardansicht "liste",
+  // src/app/app/jobs/jobs-ansicht.tsx) - nicht als <ul aria-label>. Nur "karten"
+  // und "chronik" sind Listen, und die Suite wechselt die Ansicht nicht. Der
+  // Tabellenbereich traegt den Ansichtstitel als aria-label UND als caption
+  // (packages/eh-design/src/app.tsx, EHDataTable), bleibt also eindeutig
+  // adressierbar. Zusaetzlich war der Leerzustands-Zweig praktisch tot: er
+  // prueft auf body.includes('Keine Aufträge in dieser Ansicht'), und in genau
+  // diesem Fall rendert JobsAnsicht nur EHEmptyState - ohne caption, also ohne
+  // "Abgeschlossene Aufträge".
+  const completedRegion=owner.getByRole('region',{name:'Abgeschlossene Aufträge'});
+  await completedRegion.first().waitFor({timeout:30000}).catch(async()=>{
+    await owner.getByText('Keine Aufträge in dieser Ansicht').first().waitFor({timeout:30000});
+  });
+  if(await completedRegion.count()){
+    const listText=await completedRegion.first().innerText();
     if(/Angebot liegt vor|Angebote liegen vor|Angebotsstatus prüfen/.test(listText))throw new Error('Active quoted job leaked into completed view');
-    await completedList.getByText('Erledigt').first().waitFor();
+    await completedRegion.first().getByText('Erledigt').first().waitFor();
   }
 }
 await assertNoOverflow(owner,'Mobile completed jobs');
-await nav(manager, base+'/pro/plans'); await waitText(manager,'0 % Provision'); for(const plan of ['Free','Start — 29 €/Monat','Pro (beliebt)','Premium — 199 €/Monat'])await manager.getByText(plan).first().waitFor();
+// /pro/plans rendert die Tarife aus partner_plans (src/app/pro/plans/page.tsx:33)
+// und ist damit datengetrieben. Die alten Marketingtitel ("Pro (beliebt)") und
+// der Seitentext "0 % Provision" existieren nicht mehr - die Provision steht
+// heute in der Tarifbeschreibung. Geprueft wird die Seite gegen die Datenbank,
+// die derselbe Lauf benutzt: jede aktive Tarifzeile muss genau so erscheinen,
+// wie die Seite sie zusammensetzt. Das kann nicht veralten, weil es keine
+// zweite, abgeschriebene Erwartung mehr gibt.
+await nav(manager, base+'/pro/plans');
+const plansDb=new Database(databasePath,{readonly:true});
+const activePlans=plansDb.prepare('SELECT title,monthly_amount FROM partner_plans WHERE active=1 ORDER BY monthly_amount').all();
+plansDb.close();
+if(!activePlans.length)throw new Error('partner_plans seed is empty, so the tariff page cannot be verified');
+const money=(cents)=>new Intl.NumberFormat('de-DE',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(cents/100);
+const tariffList=manager.getByRole('list',{name:'Partner-Tarife'});
+await tariffList.first().waitFor({timeout:30000});
+const tariffText=await tariffList.first().innerText();
+for(const plan of activePlans){
+  const row=`${plan.title} — ${money(plan.monthly_amount)}/Monat`;
+  if(!tariffText.includes(row))throw new Error(`Tarifzeile fehlt auf /pro/plans: ${row}`);
+}
 
 // 9) Beratung und Notfall sind eigenständige, sehr einfache Einstiege.
 await nav(owner, base+'/app/consultation'); await owner.getByLabel('Wobei brauchst du Rat?').fill('Ich möchte kurz wissen, wie ich einen stark wachsenden Baum am besten prüfen lasse.'); await owner.getByLabel('Foto oder Video').setInputFiles({name:'baum.mp4',mimeType:'video/mp4',buffer:Buffer.from('test-video')}); await clickAndWaitUrl(owner,owner.getByRole('button',{name:'Ansprechpartner finden'}),/\/app\/jobs\/\d+/); await waitText(owner,'noch kein Auftrag'); if(await owner.locator('video.hero-photo').count()!==1)throw new Error('Consultation video must render on the resulting contact request');
-await nav(owner, base+'/app/emergency'); await owner.getByLabel('Notfall').selectOption('other'); await owner.getByLabel('Was ist passiert?').fill('Ein großer Ast ist nach einem Sturm abgebrochen und blockiert den Zugang zum Haus.'); await clickAndWaitUrl(owner,owner.getByRole('button',{name:'Jetzt Helfer suchen'}),/\/app\/jobs\/\d+/); await waitText(owner,'NOTFALL'); await waitText(owner,'Wir suchen jetzt verfügbare Hilfe'); await nav(manager, base+'/pro'); await waitText(manager,'Notfall');
+// Die Notfallart ueber ihre stabile id adressieren: `getByLabel('Notfall')` trifft
+// zwei Elemente, weil die Kennzahlenleiste denselben Text als Label traegt
+// (src/app/app/emergency/page.tsx, EHMetricsBar label="Notfall").
+await nav(owner, base+'/app/emergency'); await owner.locator('#emg-type').selectOption('other'); await owner.locator('#emg-desc').fill('Ein großer Ast ist nach einem Sturm abgebrochen und blockiert den Zugang zum Haus.'); await clickAndWaitUrl(owner,owner.getByRole('button',{name:'Jetzt Helfer suchen'}),/\/app\/jobs\/\d+/); await waitText(owner,'NOTFALL'); await waitText(owner,'Wir suchen jetzt verfügbare Hilfe'); await nav(manager, base+'/pro'); await waitText(manager,'Notfall');
 
 // 10) Servicefall bleibt zentral unterstützbar, ohne den direkten Kontakt zu ersetzen.
 await nav(owner, base+`/app/jobs/${jobId}`); await waitText(owner,'Wenn etwas nicht klappt'); await owner.getByPlaceholder('Beschreibe kurz, wo die Abstimmung festhängt.').fill('Die Ausführung soll von Einfach Hausen geprüft werden, weil noch eine Rückfrage zur Qualität offen ist.'); await clickServerAction(owner,owner.getByRole('button',{name:'Hausmeister einschalten'})); await waitText(owner,'Servicefall · Offen');
-await nav(admin, base+'/admin'); const claimCard=admin.locator('.admin-card').filter({hasText:'Rückfrage zur Qualität'}).first(); await claimCard.getByLabel('Status').selectOption('resolved'); await claimCard.getByPlaceholder('Rückmeldung / Entscheidung').fill('Fall geprüft und mit Kunde und Ansprechpartner geklärt.'); await clickServerAction(admin,claimCard.getByRole('button',{name:'Fall aktualisieren'})); await claimCard.locator('span[data-status="success"]').waitFor();
+await nav(admin, base+'/admin'); // Die Legende der Fallkarte ist der Auftragstitel (EHFormSection title={c.title},
+// src/app/admin/page.tsx:164), nicht der Text, den der Eigentuemer geschrieben
+// hat. Der Fall wird deshalb ueber seinen Abschnitt adressiert, und es wird
+// geprueft, dass genau ein Fall in der Warteschlange liegt.
+const claimSection=admin.locator('[class*="workSection"]').filter({has:admin.getByRole('heading',{name:'Servicefälle',exact:true})}).first();
+await claimSection.waitFor();
+const claimCards=claimSection.locator('fieldset');
+if(await claimCards.count()!==1)throw new Error(`Expected exactly one service case in the admin queue, got ${await claimCards.count()}`);
+const claimCard=claimCards.first(); await claimCard.getByLabel('Status').selectOption('resolved'); await claimCard.getByPlaceholder('Rückmeldung / Entscheidung').fill('Fall geprüft und mit Kunde und Ansprechpartner geklärt.'); await clickServerAction(admin,claimCard.getByRole('button',{name:'Fall aktualisieren'})); await claimCard.locator('span[data-status="success"]').waitFor();
 
 // 11) CRM-Lifecycle ist im integrierten Produkt erreichbar und kennt den registrierten Partner.
 await nav(admin, base+`/admin/crm?q=${encodeURIComponent('Gartenbau Müller')}`); await waitText(admin,'Leads & Outreach CRM'); await waitText(admin,'Gartenbau Müller'); await assertNoOverflow(admin,'Admin CRM');
 
 const buyerCtx=await newE2EContext({viewport:{width:390,height:844}}); const buyer=await buyerCtx.newPage(); trackPage(buyer,'homeowner-buyer');
 // 12a) First-run onboarding: guided steps, skippable optionals, resumable progress.
-await nav(buyer, base+'/register?role=homeowner'); await buyer.getByRole('button',{name:'Kostenlos registrieren'}).first().click(); await fillRegisterField(buyer,'firstName','Ben'); await fillRegisterField(buyer,'lastName','Käufer'); await fillRegisterField(buyer,'email',buyerEmail); await fillRegisterField(buyer,'password',password); await fillRegisterField(buyer,'postcode','46325'); await Promise.all([buyer.waitForURL('**/app/onboarding'),buyer.getByRole('button',{name:'Kostenlos registrieren'}).last().click()]);
-await waitText(buyer,'Damit Partner in deiner Region arbeiten können');
+await nav(buyer, base+'/register?role=homeowner'); await buyer.locator('#btn-submit-register').waitFor(); await fillRegisterField(buyer,'firstName','Ben'); await fillRegisterField(buyer,'lastName','Käufer'); await fillRegisterField(buyer,'email',buyerEmail); await fillRegisterField(buyer,'password',password); await fillRegisterField(buyer,'postcode','46325'); await Promise.all([buyer.waitForURL('**/app/onboarding'),buyer.locator('#btn-submit-register').click()]);
+await waitText(buyer,'Trag Straße und PLZ ein, damit Einfach Hausen Betriebe in deiner Region findet.');
 await buyer.getByLabel('Straße und Hausnummer').fill('Kaistraße 7');
 await clickAndWaitUrl(buyer,buyer.getByRole('button',{name:'Weiter'}),/\/app\/onboarding$/);
-await waitText(buyer,'Worum geht es bei deinem Haus?');
-await nav(buyer, buyer.url()); await waitText(buyer,'Worum geht es bei deinem Haus?');
+await waitText(buyer,'Wähle die Bereiche, die dich interessieren. Überspringen ist möglich.');
+await nav(buyer, buyer.url()); await waitText(buyer,'Wähle die Bereiche, die dich interessieren. Überspringen ist möglich.');
 await buyer.getByLabel(new RegExp('Garten')).check();
 await clickAndWaitUrl(buyer,buyer.getByRole('button',{name:'Weiter'}),/\/app\/onboarding$/);
-await waitText(buyer,'Wie dürfen wir dich erreichen?');
+await waitText(buyer,'Sag, über welchen Weg wir dich am besten erreichen.');
 await buyer.getByRole('button',{name:'Überspringen'}).click();
 await Promise.all([buyer.waitForURL('**/app?onboarding=done'),buyer.waitForLoadState('load')]);
-await waitText(buyer,'Was möchtest du für dein Zuhause klären?');
+// Dieselben Anker wie fuer den Eigentuemer: die Startseite ist die
+// EHOwnerSection-Komposition, "Was möchtest du für dein Zuhause klären?" gehoert
+// zu EHOwnerComposer, das keine Seite mehr rendert.
+await waitText(buyer,'Wartet auf dich'); await waitText(buyer,'Hausakte'); await waitText(buyer,'Nächste Termine');
 if(await buyer.getByText('Einrichtung unvollständig').count())throw new Error('Onboarding banner still shown after completion');
 await nav(buyer, buyer.url()); if(await buyer.getByText('Einrichtung unvollständig').count())throw new Error('Onboarding state did not persist after reload');
 // 12) Hausakte kann kontrolliert übergeben werden, private Vorgänge bleiben beim bisherigen Eigentümer.
 await nav(owner, base+'/app/home/history'); await owner.getByLabel('E-Mail des Käufers').fill(buyerEmail); await clickAndWaitUrl(owner,owner.getByRole('button',{name:'Übergabe vorbereiten'}),/transfer=/); const transferToken=new URL(owner.url()).searchParams.get('transfer'); if(!transferToken)throw new Error('House transfer token missing');
-await nav(buyer, base+'/app'); await waitText(buyer,'Was möchtest du für dein Zuhause klären?'); console.error('E2EDIAG buyer still authed before transfer accept');
+await nav(buyer, base+'/app'); await waitText(buyer,'Wartet auf dich'); await waitText(buyer,'Hausakte'); console.error('E2EDIAG buyer still authed before transfer accept');
 await waitForDomStable(buyer,'#owner-main-content',1);
 const buyerCookies=await buyerCtx.cookies(base+'/'); console.error('E2EDIAG buyer cookies:',JSON.stringify(buyerCookies.map(c=>c.name)));
 await nav(buyer, base+`/transfer/${transferToken}`); await waitText(buyer,'Hausakte übernehmen');
@@ -775,7 +958,7 @@ await buyerCtx.close();
 
 if(runtimeErrors.length)throw new Error(`Browser runtime errors:
 ${runtimeErrors.join('\n')}`);
-const evidence={ok:true,jobId,checks:['isolated production build/server','public multipage 390/1320','PWA offline shell','keyboard focus','provider verification/contract','provider AN/AUS','contact-only to job conversion','matching/quote/booking/assignment','cross-role messaging','invoice + unavailable payment truth','house history + maintenance','consultation + emergency','admin claim + CRM','house transfer privacy','zero browser runtime errors'],vision:'house service + explicit consultation or job + categorized contacts + invoices + property history + quality matching + 0% commission'};
+const evidence={ok:true,jobId,checks:['isolated production build/server','public multipage 390/1320','PWA offline shell','keyboard focus','provider verification/contract','provider AN/AUS','contact-only to job conversion','matching/quote/booking/assignment','cross-role messaging','invoice + unavailable payment truth','house history + maintenance','consultation + emergency','admin claim + CRM','house transfer privacy','zero browser runtime errors'],skippedViewTransitions:skippedTransitions,vision:'house service + explicit consultation or job + categorized contacts + invoices + property history + quality matching + 0% commission'};
 fs.writeFileSync(path.join(artifactsDir,'summary.json'),JSON.stringify(evidence,null,2)+'\n');
 console.log(JSON.stringify(evidence,null,2));
 } catch (fatalError) {

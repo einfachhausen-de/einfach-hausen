@@ -8,12 +8,26 @@ import { randomUUID } from 'node:crypto';
 import { spawn } from 'node:child_process';
 
 const root = process.cwd();
+// Browser discovery must not be macOS-only. This list used to hold two macOS app
+// bundles only, so the suite threw "No Chromium browser found" on the canonical
+// OCI VM and could never run there. Same order as
+// scripts/public-navigation-e2e.mjs: the Playwright-resolved browser first, then
+// explicit overrides, then the usual Linux locations.
 const executablePath = [
   process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH,
+  process.env.CHROME_PATH,
+  typeof chromium.executablePath === 'function' ? chromium.executablePath() : '',
   '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
   '/Applications/Chromium.app/Contents/MacOS/Chromium',
+  '/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge',
+  '/opt/google/chrome/chrome',
+  '/usr/bin/google-chrome',
+  '/usr/bin/google-chrome-stable',
+  '/usr/bin/chromium',
+  '/usr/bin/chromium-browser',
+  '/snap/bin/chromium',
 ].filter(Boolean).find((candidate) => fs.existsSync(candidate));
-if (!executablePath) throw new Error('No Chromium browser found');
+if (!executablePath) throw new Error('No Chromium browser found; set PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH or CHROME_PATH');
 if (!fs.existsSync(path.join(root, '.next', 'BUILD_ID'))) throw new Error('No production build found — run npm run build first');
 
 const routes = [

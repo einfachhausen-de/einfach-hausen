@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { canonical } from '@/lib/seo';
 import Image from 'next/image';
-import { Bell, FileText, Home, MessageCircle, UserRound, Wallet } from 'lucide-react';
+import { FileText, Home, UserRound, Wallet } from 'lucide-react';
 import { MarketingShell } from '@/components/marketing/site-shell';
 import { AppFrame, HomeScreen, MiniContact, MiniHausakte, MiniReminder } from '@/components/marketing/app-frames';
 import { EHScope, EHSection, EHPageHero, EHSplitStory, EHFeatureRows, EHServiceIndex, EHPanel, EHList, EHFacts, EHClosing, EHButton, EHEyebrow, EHHeading, EHText, EHProse, EHCallout, EHTextLink } from '@/design-system';

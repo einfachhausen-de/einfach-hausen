@@ -28,7 +28,7 @@ try {
   const n = await import(pathToFileURL(path.join(scratch, 'src/lib/notifications.mjs')).href);
   const result = await n.dispatchDueNotifications();
   // T-0145 retention sweep runs on the same cadence (cheap when nothing is due).
-  const { db } = await import(pathToFileURL(path.join(scratch, 'src/lib/db.mjs')).href);
+  await import(pathToFileURL(path.join(scratch, 'src/lib/db.mjs')).href);
   const sweep = await import(pathToFileURL(path.join(scratch, 'src/lib/retention.mjs')).href);
   const retention = await sweep.runRetentionSweep();
   console.log(JSON.stringify({ ...result, retention_finalized: retention.finalized }));

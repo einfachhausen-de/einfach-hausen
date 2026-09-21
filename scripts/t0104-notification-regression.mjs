@@ -29,6 +29,7 @@ function check(name, condition, detail = '') {
 try {
   const { db } = await import(pathToFileURL(path.join(scratch, 'src/lib/db.mjs')).href);
   const n = await import(pathToFileURL(path.join(scratch, 'src/lib/notifications.mjs')).href);
+  const m = await import(pathToFileURL(path.join(scratch, 'src/lib/mailer.mjs')).href);
 
   db.prepare("INSERT INTO users(email,password_hash,role,first_name,last_name) VALUES('t0104@example.test','x','homeowner','T','E')").run();
   const userId = Number(db.prepare("SELECT id FROM users WHERE email='t0104@example.test'").get().id);
@@ -98,6 +99,57 @@ try {
   // Legacy createNotification keeps working on top of the unified stack.
   n.createNotification(userId, 'Legacy', 'body', '/app');
   check('legacy insert still delivered', db.prepare("SELECT COUNT(*) c FROM notifications WHERE title='Legacy' AND status='sent'").get().c === 1);
+
+  // --- Transactional email fan-out (Issue #12) ------------------------------
+  // Only the two events where the message is the product value carry email:
+  // a quote arriving for the owner, and a new request reaching a provider.
+  check('email is reserved for the quote and dispatch kinds', n.EMAIL_EVENT_KINDS.has('quote') && n.EMAIL_EVENT_KINDS.has('dispatch') && !n.EMAIL_EVENT_KINDS.has('message') && !n.EMAIL_EVENT_KINDS.has('info'));
+
+  // A sandbox sender must not enqueue mail at all: it would dead-letter forever
+  // while the health check reported success (verified against Resend, which only
+  // accepts the account owner's own mailbox for @resend.dev senders).
+  process.env.SMTP_HOST = 'smtp.example.test';
+  process.env.MAIL_FROM = 'Einfach Hausen <onboarding@resend.dev>';
+  check('a sandbox sender is reported as undeliverable', m.mailDeliverability().deliverable === false && m.mailDeliverability().reason === 'sandbox-sender-domain');
+  n.createNotification(userId, 'Sandbox', 'body', '/app', 'quote');
+  check('no email row is created while the sender cannot deliver', db.prepare("SELECT COUNT(*) c FROM notifications WHERE user_id=? AND kind='quote' AND channel='email'").get(userId).c === 0);
+  check('the in-app row is still delivered while email is blocked', db.prepare("SELECT COUNT(*) c FROM notifications WHERE user_id=? AND title='Sandbox' AND channel='in_app' AND status='sent'").get(userId).c === 1);
+
+  process.env.MAIL_FROM = 'Einfach Hausen <noreply@einfachhausen.de>';
+  check('a verified sender domain is deliverable', m.mailDeliverability().deliverable === true);
+
+  const inAppBefore = db.prepare("SELECT COUNT(*) c FROM notifications WHERE user_id=? AND channel='in_app'").get(userId).c;
+  const emailBefore = db.prepare("SELECT COUNT(*) c FROM notifications WHERE user_id=? AND channel='email'").get(userId).c;
+  n.createNotification(userId, 'Neues Vergleichsangebot', 'Für „Heizung“ ist ein weiteres Angebot eingetroffen.', '/app/jobs/7', 'quote');
+  const quoteInApp = db.prepare("SELECT id,status FROM notifications WHERE user_id=? AND kind='quote' AND channel='in_app'").all(userId);
+  const quoteEmail = db.prepare("SELECT id,status,title,body,href FROM notifications WHERE user_id=? AND kind='quote' AND channel='email'").all(userId);
+  const inAppAfter = db.prepare("SELECT COUNT(*) c FROM notifications WHERE user_id=? AND channel='in_app'").get(userId).c;
+  const emailAfter = db.prepare("SELECT COUNT(*) c FROM notifications WHERE user_id=? AND channel='email'").get(userId).c;
+  check('quote adds exactly one in-app row and one email row', inAppAfter === inAppBefore + 1 && emailAfter === emailBefore + 1 && quoteEmail.length === 1);
+  check('in-app row is delivered on insert, email row waits in the outbox', quoteInApp[0].status === 'sent' && quoteEmail[0].status === 'pending');
+  check('the email row carries the same message as the in-app row', quoteEmail[0].title === 'Neues Vergleichsangebot' && quoteEmail[0].href === '/app/jobs/7' && quoteEmail[0].body.includes('Heizung'));
+
+  n.createNotification(userId, 'Neue Anfrage in deinem Gebiet', 'Heizung in 50667 Köln', '/pro/jobs/7', 'dispatch');
+  check('dispatch also fans out to email', db.prepare("SELECT COUNT(*) c FROM notifications WHERE user_id=? AND kind='dispatch' AND channel='email'").get(userId).c === 1);
+
+  n.createNotification(userId, 'Neue Nachricht', 'kurz', '/app/jobs/7', 'message');
+  check('an event outside the allowlist sends no email', db.prepare("SELECT COUNT(*) c FROM notifications WHERE user_id=? AND kind='message' AND channel='email'").get(userId).c === 0);
+
+  // In-app views must never show the email delivery as a second entry.
+  // 'sms' and 'test_channel' are the two synthetic rows from the adapter tests.
+  const inAppOnly = db.prepare("SELECT COUNT(*) c FROM notifications WHERE user_id=? AND channel='in_app'").get(userId).c;
+  const allRows = db.prepare('SELECT COUNT(*) c FROM notifications WHERE user_id=?').get(userId).c;
+  const emailRows = db.prepare("SELECT COUNT(*) c FROM notifications WHERE user_id=? AND channel='email'").get(userId).c;
+  check('in-app reads exclude the email deliveries', emailRows === 2 && inAppOnly === allRows - emailRows - 2, `in_app=${inAppOnly} all=${allRows} email=${emailRows}`);
+
+  // With no SMTP configured the email must fail honestly and retry, never
+  // report success. This is the guarantee that matters in production.
+  delete process.env.SMTP_HOST;
+  const dispatchResult = await n.dispatchDueNotifications(Date.now());
+  const quoteEmailAfter = db.prepare("SELECT status,retry_count FROM notifications WHERE id=?").get(quoteEmail[0].id);
+  check('unconfigured SMTP retries the email instead of claiming delivery', dispatchResult.sent === 0 && dispatchResult.retried >= 1 && quoteEmailAfter.status === 'pending' && quoteEmailAfter.retry_count >= 1);
+  const emailReceipts = n.deliveryReceipts(quoteEmail[0].id);
+  check('the failed email attempt is auditable in the receipt trail', emailReceipts.some(r => r.channel === 'email' && r.state === 'failed'));
 } catch (error) {
   failures.push(`module load failed :: ${error.message}`);
   console.error(error);

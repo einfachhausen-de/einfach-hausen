@@ -43,7 +43,10 @@ export async function GET() {
     package_orders: all("SELECT package_slug,status,created_at FROM package_orders WHERE homeowner_id=?"),
     house_transfers_initiated: all("SELECT property_id,status,created_at FROM house_transfers WHERE homeowner_id=?"),
     claims: allBoth(`SELECT c.id,c.kind,c.description,c.status,c.created_at FROM claims c WHERE c.homeowner_id=? OR c.provider_id=?`),
-    notifications: all("SELECT kind,title,body,href,created_at FROM notifications WHERE user_id=?"),
+    // Nur In-App-Zeilen: die E-Mail-Auslieferung eines Ereignisses ist eine
+    // identische zweite Outbox-Zeile (channel='email') und enthaelt keine
+    // zusaetzlichen Daten, wuerde den Export aber doppelt auffuehren.
+    notifications: all("SELECT kind,title,body,href,created_at FROM notifications WHERE user_id=? AND channel='in_app'"),
     // T-0143: partner role completeness - team memberships where the user is a
     // member or the owning provider, plus house transfer receive history.
     provider_memberships: all(`SELECT pm.provider_id,pm.job_title,pm.can_manage_jobs,pm.active,pm.created_at,

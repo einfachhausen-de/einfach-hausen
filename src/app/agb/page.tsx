@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { canonical } from '@/lib/seo';
 import { MarketingShell } from '@/components/marketing/site-shell';
-import { EHScope, EHSection, EHPageHero, EHList, EHCallout, EHPanel, EHButton, EHActions, EHEyebrow, EHHeading, EHText } from '@/design-system';
+import { EHScope, EHSection, EHPageHero, EHList, EHPanel, EHButton, EHActions, EHEyebrow, EHHeading, EHText } from '@/design-system';
 import { LegalNotice } from '@/components/marketing/ui';
 
 export const metadata: Metadata = {
@@ -51,7 +51,7 @@ export default function Page() {
         <EHList label="Kundenverhältnis" items={[
           'Rolle von Einfach Hausen als vermittelnde und organisierende Software-Plattform.',
           'Klarer Zeitpunkt des Vertragsschlusses bei Anfragen, Angeboten und Terminvereinbarungen.',
-          'Kostenloses Basiskonto (FREE) sowie optionale Premium-Pakete ohne versteckte Bindungen.',
+          'Kostenlose Nutzung für Eigentümer: keine Mitgliedschaft, kein Abo, keine kostenpflichtigen Pakete.',
           'Fristen für Kündigung, Stornierung und gesetzliche Widerrufsrechte.',
           'Haftungs- und Gewährleistungsabgrenzung zwischen Plattform und ausführendem Partnerbetrieb.',
         ].map((b, k) => ({ id: "agb-1-" + k, title: b }))} />

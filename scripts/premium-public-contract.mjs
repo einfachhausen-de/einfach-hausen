@@ -9,8 +9,10 @@ const routes = [
   'src/app/sicherheit/page.tsx',
   'src/app/ueber-uns/page.tsx',
   'src/app/hilfe/page.tsx',
-  'src/app/pilotphase/page.tsx',
 ];
+// /pilotphase ist keine oeffentliche Marketingseite mehr: das Pilot- und
+// Rabattmodell auf kostenpflichtige Pakete entfaellt (Issue #132), die Route
+// leitet nur noch auf /preise um und hat daher keinen Editorial-Hero.
 
 const failures = [];
 for (const file of routes) {

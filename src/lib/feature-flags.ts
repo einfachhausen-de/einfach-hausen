@@ -35,7 +35,6 @@ export type FlagDefinition = {
 /**
  * Known flag universe. Adding a flag = adding a definition here.
  * ki_chat: gates the AI assistant surface (default off; DB may enable).
- * pilot_cohort_open: gates pilot registration cohort (default off).
  * Lifecycle: scripts/feature-flag-lifecycle.mjs (release gate Layer 1) fails
  * when a flag lacks owner/expiry, its expiry passed while enabled, or the DB
  * carries rows for a flag that is no longer defined. Removal after rollout is
@@ -43,7 +42,6 @@ export type FlagDefinition = {
  */
 export const FLAG_DEFAULTS: Record<string, FlagDefinition> = {
   ki_chat: { default: false, productionToggleable: true, description: 'KI-Assistent Chat-Fläche', owner: 'product', expiresAt: '2026-12-31' },
-  pilot_cohort_open: { default: false, productionToggleable: true, description: 'Pilot-Kohorte Registrierung', owner: 'operations', expiresAt: '2026-12-31' },
 };
 
 export type FlagDecision = {

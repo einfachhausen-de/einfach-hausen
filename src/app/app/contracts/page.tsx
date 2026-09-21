@@ -13,10 +13,26 @@ import { db } from '@/lib/db';
 import { euroExact } from '@/lib/format';
 import {
   CONTRACT_KIND_KEYS, CONTRACT_KINDS, COST_INTERVAL_KEYS, COST_INTERVALS, SAVINGS_KINDS, type ContractKind,
-  affiliateLink, cancellationDeadline, contractKindLabel, costIntervalLabel, currentTermEnd,
+  cancellationDeadline, contractKindLabel, costIntervalLabel, currentTermEnd,
   deadlineDays, deadlineState, estimateSavings, formatDate, monthlyCents, yearlyCents,
 } from '@/lib/contracts';
 import { addHouseContractAction, setHouseContractStatusAction, updateHouseContractAction } from '@/app/actions';
+import {
+  AFFILIATE_CATEGORIES, AFFILIATE_CATEGORY_ACTIONS, AFFILIATE_CATEGORY_HINTS,
+  AFFILIATE_CATEGORY_LABELS, isAffiliateCategory, resolveAffiliate,
+} from '@/lib/affiliate';
+
+/**
+ * Hinweise, mit denen der Weiterleitungs-Endpunkt hierher zurueckkommt. Die
+ * Texte sagen, dass nichts geoeffnet und nichts uebertragen wurde - ein
+ * abgelehnter oder fehlender Partner darf nie wie ein Fehler des Nutzers
+ * aussehen.
+ */
+const COMPARISON_NOTICES: Record<string, string> = {
+  'nicht-verfuegbar': 'Für diese Kategorie ist derzeit kein Vergleichspartner freigegeben. Es wurde nichts geöffnet und nichts übertragen.',
+  'einwilligung': 'Ohne deine ausdrückliche Einwilligung wird der Klick nicht gemessen. Der Vergleich wurde deshalb nicht geöffnet.',
+  'fehler': 'Die Partnerkonfiguration ist unvollständig. Aus Sicherheitsgründen wurde nichts geöffnet und nichts übertragen.',
+};
 
 
 type ContractRow = {
@@ -48,7 +64,7 @@ function deadlineLabel(row: ContractRow): string {
 export default async function Contracts({ searchParams }: { searchParams: Promise<Record<string, string>> }) {
   const user = await requireUser('homeowner');
   const sp = await searchParams;
-  const tab = sp.tab === 'sparcheck' ? 'sparcheck' : 'vertraege';
+  const tab = sp.tab === 'sparcheck' ? 'sparcheck' : sp.tab === 'vergleichen' ? 'vergleichen' : 'vertraege';
   const saved = sp.saved === '1';
   const profile = db.prepare('SELECT postcode FROM homeowner_profiles WHERE user_id=?').get(user.id) as { postcode?: string } | undefined;
 
@@ -85,7 +101,21 @@ export default async function Contracts({ searchParams }: { searchParams: Promis
         switchWilling: true,
       })
     : null;
-  const outbound = selected ? affiliateLink(selected.kind) : undefined;
+  // Nur die fünf Vergleichskategorien haben einen Vergleichsweg. Wasser, Abfall,
+  // Wartung und sonstige Verträge werden bewusst nicht ausgeleitet.
+  const outbound = selected && isAffiliateCategory(selected.kind) ? resolveAffiliate(selected.kind, 'sparcheck') : null;
+
+  // Vergleichsbereich: je Kategorie ein Kontext aus dem tatsächlich erfassten
+  // Vertrag. Fehlt der Vertrag, bleibt der Kontext leer statt geschätzt - eigene
+  // Tarifdaten und künstliche Rankings gibt es hier bewusst nicht.
+  const comparisonRows = AFFILIATE_CATEGORIES.map((category) => ({
+    category,
+    contract: active.find((row) => row.kind === category) ?? null,
+    availability: resolveAffiliate(category, 'vergleichsuebersicht'),
+  }));
+  const comparisonNotice = isAffiliateCategory(sp.vergleich) && sp.hinweis
+    ? COMPARISON_NOTICES[sp.hinweis]
+    : null;
 
   // Die Ansichten haengen in der Seitenleiste (Vertraege & Tarife-Gruppe),
   // darum keine Pillen mehr im Inhalt. Der Spar-Check ist ein Bereich, kein
@@ -94,6 +124,7 @@ export default async function Contracts({ searchParams }: { searchParams: Promis
 
   return <WerkbankRahmen role="homeowner" active="/app/contracts" tabs={[
       { href: '/app/contracts?tab=vertraege', label: 'Laufende Verträge', active: tab === 'vertraege' },
+      { href: '/app/contracts?tab=vergleichen', label: 'Vergleichen & Wechseln', active: tab === 'vergleichen' },
       { href: '/app/contracts?tab=sparcheck', label: 'Spar-Check', active: tab === 'sparcheck' },
     ]} rail={<>
       <p className="eh-werkbank-rail-h">Kontext dieser Seite</p>
@@ -114,6 +145,11 @@ export default async function Contracts({ searchParams }: { searchParams: Promis
         <h4>Spar-Check</h4>
         <p className="eh-werkbank-item">Der Spar-Check schätzt aus deinen hinterlegten Kosten eine Ersparnis-Spanne. Möglich ist das für Strom, Gas, DSL und Versicherungen.</p>
         <Link href="/app/contracts?tab=sparcheck" className="eh-werkbank-go">Spar-Check öffnen →</Link>
+      </div>
+      <div className="eh-werkbank-karte">
+        <h4>Vergleichen &amp; Wechseln</h4>
+        <p className="eh-werkbank-item">Fünf Kategorien mit deinem Vertragskontext. Wo ein Partner freigegeben ist, geht es direkt zu seinem Vergleich – ohne eigene Tarifdaten und ohne Rangliste.</p>
+        <Link href="/app/contracts?tab=vergleichen" className="eh-werkbank-go">Vergleichsbereich öffnen →</Link>
       </div>
     </>}>
     
@@ -239,7 +275,7 @@ export default async function Contracts({ searchParams }: { searchParams: Promis
           </EHWorkflowForm>
         </EHWorkSection></section>
       </>
-    ) : (
+    ) : tab === 'sparcheck' ? (
       <>
         <div className="eh-werkbank-kennzahlen">
           <EHMetricsBar label="Spar-Check" items={[
@@ -281,15 +317,93 @@ export default async function Contracts({ searchParams }: { searchParams: Promis
                 <EHOwnerSection title="Nächste Schritte">
                   <EHList label="Nächste Schritte" items={[
                     { id: 'step-1', title: 'Kündigungsfrist prüfen', text: deadlineLabel(selected) },
-                    { id: 'step-2', title: 'Angebote einholen', text: outbound ? 'Über unseren Partnerlink – siehe unten.' : 'Aktuell direkt beim Anbieter oder einem Vergleichsportal deiner Wahl.' },
+                    { id: 'step-2', title: 'Angebote einholen', text: outbound?.status === 'available' ? 'Über den geprüften Partnervergleich in „Vergleichen & Wechseln“.' : 'Aktuell direkt beim Anbieter oder einem Vergleichsportal deiner Wahl.' },
                     { id: 'step-3', title: 'Nach dem Wechsel Vertrag hier aktualisieren', text: 'Neuer Anbieter, neuer Preis, neue Laufzeit – dann stimmt die nächste Frist wieder.' },
                   ]} />
-                  {outbound
-                    ? <EHButton href={outbound} arrow>Zum Tarifrechner des Partners</EHButton>
-                    : <EHCallout title="Noch keine Partnervermittlung"><p>Sobald Affiliate-Partner für {contractKindLabel(selected.kind).toLowerCase()} vertraglich feststehen, führt dieser Weg direkt zum Tarifrechner. Bis dahin bleibt der Spar-Check bewusst eine Einschätzung ohne Ausleitung.</p></EHCallout>}
+                  {outbound?.status === 'available'
+                    ? <EHButton href={outbound.entryHref} arrow>{AFFILIATE_CATEGORY_ACTIONS[outbound.category]}</EHButton>
+                    : <EHCallout title="Noch keine Partnervermittlung"><p>Sobald ein Vergleichspartner für {contractKindLabel(selected.kind).toLowerCase()} freigegeben ist, führt dieser Weg direkt zu seinem Tarifrechner. Bis dahin bleibt der Spar-Check bewusst eine Einschätzung ohne Ausleitung.</p></EHCallout>}
                 </EHOwnerSection>
               </>}
             </>}
+      </>
+    ) : (
+      <>
+        <div className="eh-werkbank-kennzahlen">
+          <EHMetricsBar label="Vergleichen & Wechseln" items={[
+            { id: 'kategorien', label: 'Vergleichskategorien', value: String(AFFILIATE_CATEGORIES.length), hint: 'Strom, Gas, Internet, Mobilfunk, Versicherung' },
+            { id: 'partner', label: 'Freigegebene Partner', value: String(comparisonRows.filter((row) => row.availability.status === 'available').length), hint: 'nur vertraglich freigegebene Partner' },
+            { id: 'eigene', label: 'Eigene Verträge', value: String(comparisonRows.filter((row) => row.contract).length), hint: 'Kategorien mit erfasstem Vertrag' },
+            { id: 'wechsel', label: 'Wechselfristen', value: String(withDeadline.length), hint: 'in den nächsten 90 Tagen' },
+          ]} />
+        </div>
+
+        {comparisonNotice && <EHFormFeedback kind="info">{comparisonNotice}</EHFormFeedback>}
+
+        <EHCallout title="Wie dieser Bereich arbeitet">
+          <p>Wir zeigen keine eigenen Tarife und keine Rangliste. Der Vergleich läuft beim jeweiligen Partner, dort wird auch abgeschlossen. Deine Vertragsdaten bleiben in der Hausakte und werden nicht an den Partner übertragen.</p>
+        </EHCallout>
+
+        <EHOwnerSection title="Vergleichen & Wechseln">
+          <EHText muted>Fünf Kategorien. Wo ein Partner freigegeben ist, führt der Weg direkt zu seinem Vergleich. Wo keiner freigegeben ist, sagen wir das offen, statt eine Ersatzseite zu erfinden.</EHText>
+          <EHRecordList label="Vergleichskategorien" items={comparisonRows.map(({ category, contract, availability }) => {
+            const yearly = contract ? yearlyCents(contract.cost_amount, contract.cost_interval) : null;
+            const deadline = contract ? cancellationDeadline(contract) : null;
+            return {
+              id: `vergleich-${category}`,
+              title: AFFILIATE_CATEGORY_LABELS[category],
+              detail: [
+                AFFILIATE_CATEGORY_HINTS[category],
+                contract ? `${contract.provider}${yearly != null ? ` · ${euroExact(yearly)} pro Jahr` : ''}` : 'Noch kein Vertrag erfasst',
+                deadline ? `Frist: ${formatDate(deadline)}` : null,
+              ].filter(Boolean).join(' · '),
+              status: availability.status === 'available'
+                ? <EHStatus tone="success">Partner freigegeben</EHStatus>
+                : availability.status === 'error'
+                  ? <EHStatus tone="error">Konfiguration prüfen</EHStatus>
+                  : <EHStatus>Kein Partner freigegeben</EHStatus>,
+            };
+          })} />
+        </EHOwnerSection>
+
+        <EHOwnerSection title="Direkter Weg je Kategorie">
+          {comparisonRows.map(({ category, contract, availability }) => (
+            <EHDetailDisclosure
+              key={category}
+              id={`wechsel-${category}`}
+              title={AFFILIATE_CATEGORY_LABELS[category]}
+              description={contract ? `Aus deinem Vertrag: ${contract.provider}` : 'Noch kein Vertrag in dieser Kategorie'}
+            >
+              {contract ? <>
+                <EHMetricsBar label={AFFILIATE_CATEGORY_LABELS[category]} items={[
+                  { id: 'anbieter', label: 'Anbieter', value: contract.provider },
+                  { id: 'kosten', label: 'Jahreskosten', value: yearlyCents(contract.cost_amount, contract.cost_interval) != null ? euroExact(yearlyCents(contract.cost_amount, contract.cost_interval) as number) : '–', hint: contract.cost_amount != null ? `${euroExact(contract.cost_amount)} ${costIntervalLabel(contract.cost_interval)}` : 'keine Kosten erfasst' },
+                  { id: 'frist', label: 'Kündigungsfrist', value: cancellationDeadline(contract) ? formatDate(cancellationDeadline(contract) as Date) : '–', hint: deadlineLabel(contract) },
+                ]} />
+                <Link className="eh-werkbank-go" href={`/app/contracts?tab=sparcheck&contract=${contract.id}`}>Spar-Check für diesen Vertrag öffnen →</Link>
+              </> : <EHText muted>Erfassten Vertrag ergänzen, dann erscheint hier Anbieter, Jahreskosten und Frist als Kontext für den Vergleich.</EHText>}
+
+              {availability.status === 'available'
+                ? <>
+                    <EHText>{availability.disclosure}</EHText>
+                    {availability.needsConsent && !availability.untrackedAllowed
+                      ? <>
+                          <EHText muted>Für diesen Partner messen wir den Klick nur mit deiner ausdrücklichen Zustimmung. Ohne Zustimmung öffnet sich der Vergleich nicht.</EHText>
+                          <EHButton href={availability.consentEntryHref ?? availability.entryHref} arrow>{AFFILIATE_CATEGORY_ACTIONS[category]} – Klickmessung erlauben</EHButton>
+                        </>
+                      : <>
+                          {availability.needsConsent && <EHText muted>Der Vergleich wird ohne Klickmessung geöffnet. Deine Vertragsdaten gehen nicht mit.</EHText>}
+                          <EHButton href={availability.entryHref} arrow>{AFFILIATE_CATEGORY_ACTIONS[category]}</EHButton>
+                        </>}
+                  </>
+                : availability.status === 'error'
+                  ? <EHCallout title="Vergleich derzeit nicht verfügbar"><p>Für diese Kategorie ist die Partnerkonfiguration unvollständig. Aus Sicherheitsgründen führen wir niemanden aus. Bitte direkt beim Anbieter oder über ein Vergleichsportal deiner Wahl vergleichen.</p></EHCallout>
+                  : <EHCallout title="Noch kein Partner freigegeben"><p>Für {AFFILIATE_CATEGORY_LABELS[category].toLowerCase()} ist noch kein Vergleichspartner vertraglich freigegeben. Bis dahin vergleichst du am besten direkt beim Anbieter oder über ein Vergleichsportal deiner Wahl – wir vermitteln hier bewusst noch nichts.</p></EHCallout>}
+            </EHDetailDisclosure>
+          ))}
+        </EHOwnerSection>
+
+        {comparisonRows.every((row) => !row.contract) && <EHEmptyState title="Erst einen Vertrag erfassen" text="Der Vergleichsbereich lebt von deinen echten Vertragsdaten: Anbieter, Jahreskosten und Kündigungsfrist bilden den Kontext. Trag im Bereich „Laufende Verträge“ deinen ersten Vertrag ein." action={<EHButton href="/app/contracts?tab=vertraege">Vertrag erfassen</EHButton>} />}
       </>
     )}
   </WerkbankRahmen>;

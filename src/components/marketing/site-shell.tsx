@@ -30,7 +30,6 @@ const helpLinks = [
 
 const mobileMore = [
   ['Für Eigenheimbesitzer', '/eigenheimbesitzer'],
-  ['Pilotphase', '/pilotphase'],
   ['Für Betriebe', '/partner'],
   ['Über uns', '/ueber-uns'],
   ['Kontakt', '/kontakt'],
@@ -57,7 +56,6 @@ const footerGroups = [
     title: 'Für Eigentümer',
     links: [
       ['Für Eigenheimbesitzer', '/eigenheimbesitzer'],
-      ['Pilotphase', '/pilotphase'],
       ['Sicherheit & Daten', '/sicherheit'],
       ['Beratung', '/beratung'],
       ['Notfall', '/notfall'],

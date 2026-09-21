@@ -18,7 +18,7 @@ await page.click('button:has-text("Konto erstellen")');
 await page.waitForTimeout(3000);
 console.log('nach register:', page.url());
 
-for (const [name, path] of [['app-home','/app'],['app-hausmeister','/app/hausmeister'],['app-home','/app/home'],['app-jobs','/app/jobs'],['app-plans','/app/plans'],['app-profile','/app/profile'],['app-messages','/app/messages'],['app-more','/app/more']]) {
+for (const [name, path] of [['app-home','/app'],['app-hausmeister','/app/hausmeister'],['app-home','/app/home'],['app-jobs','/app/jobs'],['app-profile','/app/profile'],['app-messages','/app/messages'],['app-more','/app/more']]) {
   try {
     await page.goto(BASE + path, { waitUntil: 'networkidle' });
     await page.waitForTimeout(800);

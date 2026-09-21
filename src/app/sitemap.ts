@@ -17,7 +17,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: '/leistungen', changeFrequency: 'weekly', priority: 0.9 },
     { path: '/preise', changeFrequency: 'monthly', priority: 0.8 },
     { path: '/so-funktionierts', changeFrequency: 'monthly', priority: 0.8 },
-    { path: '/pilotphase', changeFrequency: 'weekly', priority: 0.8 },
     { path: '/eigenheimbesitzer', changeFrequency: 'monthly', priority: 0.7 },
     { path: '/hausakte', changeFrequency: 'monthly', priority: 0.7 },
     { path: '/beratung', changeFrequency: 'monthly', priority: 0.7 },

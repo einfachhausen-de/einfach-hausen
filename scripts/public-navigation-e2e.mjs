@@ -8,11 +8,24 @@ import { randomUUID } from 'node:crypto';
 import { spawn } from 'node:child_process';
 
 const root = process.cwd();
+// Browser discovery must not be macOS-only. This script used to check three fixed
+// paths and throw otherwise, so it could never run on the canonical OCI VM even
+// though Chromium is installed there under PLAYWRIGHT_BROWSERS_PATH. It now resolves
+// the Playwright-registered browser first (like scripts/e2e.mjs does) and keeps the
+// explicit overrides and Linux paths as fallbacks.
 function browserExecutable() {
+  const bundled = typeof chromium.executablePath === 'function' ? chromium.executablePath() : '';
   const candidates = [
     process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH,
+    process.env.CHROME_PATH,
+    bundled,
     '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
     '/Applications/Chromium.app/Contents/MacOS/Chromium',
+    '/usr/bin/google-chrome',
+    '/usr/bin/google-chrome-stable',
+    '/usr/bin/chromium',
+    '/usr/bin/chromium-browser',
+    '/snap/bin/chromium',
   ].filter(Boolean);
   const found = candidates.find((candidate) => fs.existsSync(candidate));
   if (!found) throw new Error('No Chromium browser found');
@@ -74,14 +87,36 @@ try {
   await wideLogin.goto(`${base}/login`, { waitUntil: 'networkidle' });
   const wideGeometry = await wideLogin.evaluate(() => {
     const rect = (selector) => document.querySelector(selector)?.getBoundingClientRect();
-    const grid = rect('.arena-auth');
+    const card = rect('.arena-card');
     const hero = rect('.arena-hero');
-    const card = rect('#login-card-container');
-    return { gridWidth: grid?.width || 0, heroWidth: hero?.width || 0, cardWidth: card?.width || 0 };
+    const form = rect('#login-card-container');
+    return {
+      viewportWidth: document.documentElement.clientWidth,
+      documentWidth: document.documentElement.scrollWidth,
+      cardWidth: card?.width || 0,
+      cardLeft: card?.x || 0,
+      heroLeft: hero?.x || 0,
+      heroWidth: hero?.width || 0,
+      formWidth: form?.width || 0,
+    };
   });
-  if (wideGeometry.gridWidth < 1500) throw new Error(`wide auth grid too narrow: ${wideGeometry.gridWidth}px`);
-  if (wideGeometry.heroWidth < 820) throw new Error(`wide auth trust panel too narrow: ${wideGeometry.heroWidth}px`);
-  if (wideGeometry.cardWidth < 500) throw new Error(`wide auth login card too narrow: ${wideGeometry.cardWidth}px`);
+  // The accepted wide auth screen is ONE centred composition: a ~1000px card
+  // holding the form column and the trust panel. It replaced a full-bleed
+  // two-column grid, which is what the earlier thresholds described - they asked
+  // the trust panel for >=820px, i.e. for a layout that no longer exists, while
+  // their sibling measured `.arena-auth`, which is only ever as wide as the
+  // viewport. These assertions describe the card the design actually is, and add
+  // the centring and the overflow that were never checked at this width.
+  if (wideGeometry.cardWidth < 900) throw new Error(`wide auth card too narrow: ${wideGeometry.cardWidth}px`);
+  if (wideGeometry.heroWidth < 400) throw new Error(`wide auth trust panel too narrow: ${wideGeometry.heroWidth}px`);
+  if (wideGeometry.formWidth < 380) throw new Error(`wide auth login column too narrow: ${wideGeometry.formWidth}px`);
+  const leftGap = wideGeometry.cardLeft;
+  const rightGap = wideGeometry.viewportWidth - (wideGeometry.cardLeft + wideGeometry.cardWidth);
+  if (Math.abs(leftGap - rightGap) > 2) throw new Error(`wide auth card is not centred: ${Math.round(leftGap)}px left vs ${Math.round(rightGap)}px right`);
+  if (wideGeometry.heroLeft < wideGeometry.cardLeft || wideGeometry.heroLeft + wideGeometry.heroWidth > wideGeometry.cardLeft + wideGeometry.cardWidth + 1) {
+    throw new Error('wide auth trust panel is not part of the auth card');
+  }
+  if (wideGeometry.documentWidth > wideGeometry.viewportWidth + 1) throw new Error(`wide auth screen overflows horizontally by ${wideGeometry.documentWidth - wideGeometry.viewportWidth}px`);
   await wide.close();
 
   const mobile = await browser.newContext({ viewport: { width: 390, height: 844 }, locale: 'de-DE' });

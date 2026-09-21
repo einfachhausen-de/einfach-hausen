@@ -11,6 +11,7 @@
     "design:deadcss": "node scripts/eh-design-deadcss.mjs",
     "design:debt:sync": "node scripts/eh-design-debt-sync.mjs",
     "design:report": "node scripts/eh-design-report.mjs",
+    "brand:store-icons": "node scripts/generate-store-icons.mjs",
     "test:e2e": "node scripts/e2e.mjs",
     "test:api-contract": "node scripts/eh02-api-contract-regression.mjs",
     "test:security": "node scripts/security-regression.mjs && node scripts/t0003-security-regression.mjs && node scripts/t0120-security-fuzz.mjs && node --experimental-loader ./scripts/contact-directory-ts-hook.mjs scripts/demo-binding-regression.mjs",
@@ -51,6 +52,7 @@
     "test:observability": "node scripts/observability-regression.mjs",
     "test:slo": "node scripts/t0123-slo-probes.mjs",
     "test:backup-drill": "bash scripts/t0124-backup-drill.sh",
+    "test:backup-retention": "node scripts/backup-retention-regression.mjs",
     "test:error-tracking": "node scripts/t0132-error-tracking-regression.mjs",
     "test:health-regression": "node scripts/t0134-health-regression.mjs",
     "test:export-regression": "node scripts/t0143-export-regression.mjs",
@@ -60,7 +62,8 @@
     "test:flags": "node scripts/feature-flag-lifecycle.mjs",
     "test:inventory": "node scripts/data-inventory-check.mjs",
     "test:owner-coherence": "node --experimental-strip-types scripts/eh-owner-coherence.test.mjs",
-    "test:owner-coherence:browser": "node scripts/eh-owner-coherence-browser.test.mjs"
+    "test:owner-coherence:browser": "node scripts/eh-owner-coherence-browser.test.mjs",
+    "test:affiliate": "node --experimental-strip-types --test scripts/affiliate-contract.test.mjs"
   },
   "dependencies": {
     "@capacitor/keyboard": "^8.0.5",

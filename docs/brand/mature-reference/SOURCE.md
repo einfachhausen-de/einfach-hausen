@@ -705,7 +705,6 @@ evidence-sha256: 52a6748748dfe2d958322ba6584bcd9e8cd8284ed731054bf7f3d48948bf4d4
 -->
 
 <!-- SIN-GPT-WEB-HANDOVER
-<<<<<<< HEAD
 task: T-0132
 updated: 2026-09-03T13:48:49+00:00
 actor: local-agent
@@ -858,7 +857,7 @@ updated: 2026-09-07T19:04:42+00:00
 actor: local-agent
 evidence-sha256: 5f22e53b7db61e188b5dc47f904485e0d6871007582380be638be5b78ce4a5ab
 -->
-=======
+<!-- SIN-GPT-WEB-HANDOVER
 task: EH-01
 updated: 2026-09-05T02:00:41+00:00
 actor: chatgpt-web
@@ -911,7 +910,6 @@ Der Nutzer hat die drei Stilproben aus PR #40 ausdrücklich verworfen. Deren tec
 
 ## App-Vorlagen: verbindliche Ergänzung 2026-09-07
 Für Shell, Provider-Onboarding und Team zuerst docs/brand/app-foundation/NEXT_AGENT.md lesen. Bestehende Vorlagen wiederverwenden; fehlende Workflows nicht selbst gestalten. Edition 2 bedeutet nicht vollständige App-Abdeckung.
->>>>>>> origin/main
 
 <!-- SIN-GPT-WEB-HANDOVER
 task: T-0007

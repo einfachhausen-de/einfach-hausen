@@ -26,6 +26,9 @@
 # moved-aside build directories (a local build cannot delete .next under some
 # sandboxes, so it gets renamed instead of removed)
 /.next-*/
+# same, for copies that carry a suffix after `.next` (e.g. .next.bak-<reason>);
+# without this pattern such a copy is untracked and can end up in a `git add -A`
+/.next.*/
 /out/
 
 # production

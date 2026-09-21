@@ -93,10 +93,10 @@ export function CategoriesCompact() {
 }
 
 export function PilotBand() {
-  return <EHSection tone="sand"><EHSectionHeading eyebrow="Pilotphase" title="Die ersten 1.000 Haushalte zahlen dauerhaft 15 % weniger."
-    text="Wir bauen Einfach Hausen regional auf. Wer jetzt sein kostenloses Hauskonto anlegt, bekommt den Pilot-Status. Das FREE-Konto bleibt bei 0 €."/>
-    <EHCallout tone="paper" title="Dein Pilot-Vorteil"><EHText>15 % auf bezahlte Pakete, solange dein Konto besteht. Direkter Draht zum Team – dein Feedback prägt das Produkt.</EHText></EHCallout>
-    <EHActions><EHButton href="/register?role=homeowner" arrow>Hauskonto kostenlos anlegen</EHButton><EHTextLink href="/preise">Preise</EHTextLink><EHTextLink href="/pilotphase">Bedingungen</EHTextLink></EHActions>
+  return <EHSection tone="sand"><EHSectionHeading eyebrow="Regionaler Aufbau" title="Dein Hauskonto ist kostenlos. Dauerhaft."
+    text="Wir bauen Einfach Hausen Region für Region auf. Wer jetzt sein Hauskonto anlegt, nutzt die Kernfunktionen vollständig – ohne Mitgliedschaft und ohne Abo."/>
+    <EHCallout tone="paper" title="Kein Tarif für Eigentümer"><EHText>Es gibt keine Mitgliedschaft und keine kostenpflichtigen Pakete für Eigentümer. Handwerkerleistungen rechnest du direkt mit dem ausführenden Betrieb ab; auf den Auftragswert erheben wir keine Provision.</EHText></EHCallout>
+    <EHActions><EHButton href="/register?role=homeowner" arrow>Hauskonto kostenlos anlegen</EHButton><EHTextLink href="/preise">Preise ansehen</EHTextLink></EHActions>
   </EHSection>;
 }
 

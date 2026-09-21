@@ -102,7 +102,7 @@ try {
       for (const route of routes) {
         const checkLabel = `${label}/${viewport.name} ${route}`;
         try { await page.goto(`${base}${route}`, { waitUntil: 'load', timeout: 60000 }); }
-        catch { try { await page.goto(`${base}${route}`, { waitUntil: 'load', timeout: 60000 }); } catch (e) { failures.push(`${checkLabel}: goto`); continue; } }
+        catch { try { await page.goto(`${base}${route}`, { waitUntil: 'load', timeout: 60000 }); } catch { failures.push(`${checkLabel}: goto`); continue; } }
         await page.waitForTimeout(800);
         // 1) skip link present and functional on first tab (public + app)
         const skip = await page.evaluate(() => {

@@ -56,7 +56,7 @@ export default async function Dashboard() {
   const property = primaryProperty(user.id);
   const address = property?.address || profile?.address || '';
   const name = `${user.first_name} ${user.last_name}`.trim();
-  const unread = (db.prepare('SELECT COUNT(*) c FROM notifications WHERE user_id=? AND read_at IS NULL').get(user.id) as { c: number }).c;
+  const unread = (db.prepare("SELECT COUNT(*) c FROM notifications WHERE user_id=? AND read_at IS NULL AND channel='in_app'").get(user.id) as { c: number }).c;
   const offers = db.prepare(`SELECT j.id,j.title,COUNT(q.id) quote_count,MIN(q.amount) amount,(SELECT p.business_name FROM quotes q2 LEFT JOIN provider_profiles p ON p.user_id=q2.provider_id WHERE q2.job_id=j.id AND q2.status='pending' ORDER BY q2.amount,q2.id LIMIT 1) business_name FROM jobs j JOIN quotes q ON q.job_id=j.id AND q.status='pending' WHERE j.homeowner_id=? AND j.status='quoted' AND j.request_kind='service' GROUP BY j.id ORDER BY datetime(j.updated_at) DESC`).all(user.id) as { id: number; title: string; quote_count: number; amount: number; business_name: string | null }[];
   const next = db.prepare(`SELECT a.job_id,a.start_at,j.title,p.business_name FROM appointments a JOIN jobs j ON j.id=a.job_id LEFT JOIN provider_profiles p ON p.user_id=a.provider_id WHERE a.homeowner_id=? AND a.status='confirmed' AND datetime(a.start_at)>=datetime('now') ORDER BY datetime(a.start_at) LIMIT 1`).get(user.id) as { job_id: number; start_at: string; title: string; business_name: string | null } | undefined;
   const appointments = (db.prepare(`SELECT COUNT(*) c FROM appointments WHERE homeowner_id=? AND status='confirmed' AND datetime(start_at)>=datetime('now')`).get(user.id) as { c: number }).c;

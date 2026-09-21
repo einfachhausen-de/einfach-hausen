@@ -3,8 +3,7 @@ import {readFileSync,writeFileSync} from "node:fs";
 const b=await chromium.launch({executablePath:process.env.EH_CHROMIUM_PATH,headless:true,args:["--no-sandbox"]});
 const p=await b.newPage({viewport:{width:1440,height:1000},reducedMotion:"reduce"});
 const errs=[];p.on("pageerror",e=>errs.push(e.message));
-const checks={"/hausakte":["Dein Haus bekommt ein Gedächtnis","Was zusammenkommt","Eigentümerwechsel","Zur Hausakte","Beginne heute"],"/so-funktionierts":["Du sagst, was los ist","Drei Schritte","Ein echter Vorgang","Dein Ansprechpartner","Starte mit dem Problem"],"/pilotphase":["1.000 Haushalte","So sicherst du dir den Vorteil","Konditionen","Sichere dir deinen Pilot-Vorteil"]};
-const res=[];
+const checks={"/hausakte":["Dein Haus bekommt ein Gedächtnis","Was zusammenkommt","Eigentümerwechsel","Zur Hausakte","Beginne heute"],"/so-funktionierts":["Du sagst, was los ist","Drei Schritte","Ein echter Vorgang","Dein Ansprechpartner","Starte mit dem Problem"]};
 for(const [route,need] of Object.entries(checks)){
  await p.goto("http://127.0.0.1:4201"+route,{waitUntil:"networkidle",timeout:90000});
  const txt=await p.evaluate(()=>{const m=document.querySelector("#main-content");return (m?m.textContent:document.body.textContent);});

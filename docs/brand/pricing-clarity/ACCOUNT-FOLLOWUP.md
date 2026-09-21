@@ -1,4 +1,14 @@
 # Kontotarife – Folgeausbau von PR86
+
+> **Historisch / überholt seit 2026-09-21 (Issue #132).** Dieses Dokument beschreibt
+> die damalige Eigentümer-Monetarisierung (Mitgliedschaftsstufen, Einzelpakete,
+> Pilotrabatt, `/app/plans`). Dieses Modell existiert nicht mehr: Eigentümer nutzen
+> einfachhausen kostenlos, `/app/plans` leitet auf `/app/settings` um, und die
+> Serveraktionen `startMembershipCheckoutAction`/`purchasePackageAction` wurden
+> entfernt. Der Prüfauftrag unten ist damit gegenstandslos; er bleibt nur als
+> Nachweis der damaligen Arbeit erhalten. Verbindlich sind `docs/PRODUCT_VISION.md`
+> und `README.md`.
+
 Host OCI sin-supabase, selber Branch fix/eh-pricing-clarity-20260910.
 Aktuellsten PR-Head übernehmen; frühere SOURCE-Version enthält nur Centkorrektur.
 

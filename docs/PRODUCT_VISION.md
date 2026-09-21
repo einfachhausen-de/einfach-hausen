@@ -268,7 +268,7 @@ Ziel: Ein Handwerksbetrieb soll das Produkt in fünf Minuten verstehen — **Wha
 
 ### Kunden
 
-**FREE — 0 €/Monat**
+**Kostenlos — 0 €/Monat, dauerhaft**
 
 - KI-Hausmeister
 - Aufträge
@@ -277,26 +277,21 @@ Ziel: Ein Handwerksbetrieb soll das Produkt in fünf Minuten verstehen — **Wha
 - persönlicher Ansprechpartner nach Buchung
 - digitale Hausakte
 
-**PLUS — 19,90 €/Monat**
+Eigentümer zahlen nichts: es gibt keine Mitgliedschaftsstufe, kein Abo und keine
+kostenpflichtigen Einzelpakete (verbindlich seit Issue #132). Handwerkerleistungen,
+Material und Anfahrt rechnet der ausführende Betrieb direkt mit dem Eigentümer ab;
+Einfachhausen erhebt keine Vermittlungs- oder Servicegebühr auf den Auftragswert.
+Auch die Pilotphase mit 15-%-Dauer-Vorteil auf kostenpflichtige Pakete entfällt,
+weil es keinen kostenpflichtigen Eigentümer-Tarif mehr gibt.
 
-- automatische Wartungsplanung
-- Hausjahresplan
-- Erinnerungen
-- Dokumentenverwaltung
-- bevorzugte Vermittlung im Serviceprozess
-- erweiterte Hausakte
-- Prioritätsservice
+### Zusätzlicher Erlösweg (getrennt vom Eigentümer-Preis)
 
-**PREMIUM — 39,90 €/Monat**
-
-- persönliche Betreuung
-- höchste Servicepriorität
-- jährlicher Hauscheck
-- automatische Wartungsorganisation
-- Premium-Service
-- umfangreichere Hausverwaltung
-
-Zusätzlich können definierte Jahrespakete wie HausCare, GartenCare und Energie-/Technik-Checks angeboten werden.
+Der freiwillige Vergleichsbereich „Verträge & Vergleiche“ (`/app/contracts`)
+vermittelt Strom, Gas, Internet/Festnetz, Mobilfunk und Versicherungen an
+freigegebene Partner und wird über Partnervergütung refinanziert. Das ist keine
+Gebühr des Eigentümers an Einfachhausen; ein Abschluss findet beim Partner statt.
+Der Bereich ist fail-closed: ohne freigegebenen Partner wird nichts ausgeleitet
+(siehe `docs/affiliate-partner-config.md`).
 
 ### Partner
 
@@ -309,13 +304,21 @@ Zusätzlich können definierte Jahrespakete wie HausCare, GartenCare und Energie
 
 START, PRO und PREMIUM starten mit einer zweimonatigen kostenlosen Testphase. Der Partner-Tarif darf die fachliche Reihenfolge im Matching nicht kaufen.
 
-## Technische Zielarchitektur (Produktion HA)
+## Technische Zielarchitektur
 
-- mobile-first Kunden-Web-App (Next.js) + **Capacitor 6 native iOS/Android Apps** (gleiche Codebase, App Store + Play Store)
-- Partner-Web-App (Next.js) + Capacitor Hülle
-- PWA bleibt für Web/Offline-Hinweise, primäre mobile Auslieferung ist **Capacitor**
-- **Supabase Postgres (HA, Primary DB)** + **Supabase Storage (private/uploads für Fotos/Dokumente/Rechnungen)** — SQLite nur Local-Dev Fallback
-- WhatsApp Cloud API als zusätzlicher Kundeneingang
+> **Stand 2026-09-21:** Dieser Abschnitt ist ein **Zielbild**, keine Beschreibung des
+> Produktivstands. Produktiv heute: PWA als einziger Auslieferungskanal, self-hosted
+> Supabase OSS auf OCI (SQLite nur Local-Dev-Fallback), keine native App. Die native
+> Hülle ist vorbereitet, aber nicht gebaut — kein `ios/`/`android/`-Verzeichnis, kein
+> statischer Export für `webDir: "out"`. Verbindliche Betriebsaussagen:
+> `docs/EXTERNAL-BLOCKERS.md`, `docs/ARCHITECTURE.md`, `docs/OPERATIONS.md`.
+
+- mobile-first Kunden-Web-App (Next.js), installierbar als PWA — **das ist der heutige Produktivstand**
+- Zielbild: dünne native Hülle (Capacitor) für iOS/Android aus derselben Codebase; braucht Betreiberentscheidungen zu Apple-Developer-Konto, Bundle-ID und IAP-vs-Stripe und ist **nicht gebaut**
+- Partner-Web-App (Next.js); eine native Hülle für Partner ist Zielbild, nicht umgesetzt
+- PWA bleibt für Web/Offline-Hinweise; die PWA ist heute die primäre mobile Auslieferung, nicht Capacitor
+- **self-hosted Supabase OSS auf OCI (Produktion)** — SQLite nur Local-Dev-Fallback
+- WhatsApp Cloud API als zusätzlicher Kundeneingang (technisch vorbereitet, Kanal nicht freigeschaltet)
 - KI-Orchestrierung mit OpenAI-kompatiblem Gateway; deterministischer Fallback bleibt verfügbar
 - strukturierter Service-/Preis-Katalog
 - regionales Qualitätsmatching
@@ -323,7 +326,7 @@ START, PRO und PREMIUM starten mit einer zweimonatigen kostenlosen Testphase. De
 - digitale Hausakte und Wartungsplanung
 - Firmenkonto mit einfachen Ansprechpartner-Logins
 - direkte Kunde↔Ansprechpartner-Kommunikation nach Buchung
-- Stripe Checkout für Kunden- und Partnerabos / Jahrespakete
+- Stripe Checkout für Partnerabos (keine Eigentümer-Abos; siehe Monetarisierung)
 - Stripe Connect für zentrale Auftragszahlungen mit 0 % Plattformprovision
 - private Dokumentablage via Supabase Storage
 - Admin-Konsole für Prüfung, Verträge, Qualität und Servicefälle

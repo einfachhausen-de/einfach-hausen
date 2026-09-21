@@ -88,6 +88,23 @@ async function waitForServer(url,timeoutMs=90000){
 
 const waitText=async(page,text)=>{try{await page.waitForFunction(value=>document.body.innerText.includes(value),text,{timeout:15000});}catch(error){const body=(await page.locator('body').innerText()).slice(-4000);throw new Error(`Expected text not found: ${text} | url=${page.url()} | body-tail=${body}`,{cause:error});}};
 const assertNoOverflow=async(page,label)=>{const x=await page.evaluate(()=>document.documentElement.scrollWidth>document.documentElement.clientWidth);if(x)throw new Error(`${label} has horizontal overflow`);};
+// Next.js haelt die serverseitig gerenderte Fassung waehrend der Hydration
+// kurzzeitig zusaetzlich im DOM: sechs Kaestchen liegen dann zweimal vor, die
+// Serverkopie mit 0x0 Groesse (unsichtbar, nach der Hydration entfernt). Der
+// strict-Modus von Playwright sieht in diesem Fenster zwei Treffer und bricht
+// ab, obwohl der Nutzer nie eine Dublette sieht. Diese Zusicherung wartet
+// deshalb auf den eingeschwungenen Baum UND prueft dabei, dass genau ein
+// sichtbarer Treffer uebrig bleibt - statt die Mehrdeutigkeit mit .first() zu
+// verdecken.
+const settle=async(locator,label)=>{
+  const page=locator.page();
+  for(let attempt=0;attempt<60;attempt++){
+    const matches=await locator.evaluateAll(nodes=>nodes.map(node=>{const r=node.getBoundingClientRect();return r.width>0&&r.height>0;}));
+    if(matches.length===1&&matches[0])return;
+    if(attempt===59)throw new Error(`${label}: expected exactly one visible match, got ${matches.length} (visible: ${matches.filter(Boolean).length})`);
+    await page.waitForTimeout(250);
+  }
+};
 const clickAndWaitUrl=async(page,pattern,button,label)=>{try{await Promise.all([page.waitForURL(pattern,{timeout:45000}),button.click()]);}catch(error){const body=(await page.locator('body').innerText()).slice(-3500);const logs=serverLog.slice(-40).join('');throw new Error(`${label} navigation failed | url=${page.url()} | body-tail=${body} | server-tail=${logs}`,{cause:error});}};
 
 try{
@@ -143,14 +160,14 @@ try{
   const brokerCtx=await browser.newContext({viewport:{width:390,height:844}}); const broker=await brokerCtx.newPage();
   await broker.goto(base+'/register?role=provider');
   await broker.getByLabel('Vorname').fill('Mara'); await broker.getByLabel('Nachname').fill('Makler'); await broker.getByLabel('E-Mail').fill(brokerEmail); await broker.locator('input[name="password"]').fill(accountPassword);   await broker.getByLabel('Unternehmensname').fill('Hauswert Makler GmbH'); await broker.getByLabel('Gewerke').fill('Immobilienvermittlung, Bewertung'); await broker.getByLabel('Postleitzahl').fill('46325');
-  await Promise.all([broker.waitForURL('**/pro'),broker.getByRole('button',{name:'Kostenlos registrieren'}).click()]);
+  await Promise.all([broker.waitForURL('**/pro'),broker.getByRole('button',{name:'Konto erstellen'}).click()]);
   await broker.goto(base+'/pro/profile'); await waitText(broker,'Ein Konto, beliebig erweiterbar');
   // Tätigkeiten sind eine Profil-Einstellung, keine Frage bei der Registrierung:
   // ein Konto trägt beliebig viele davon. Die Kästchen werden über ihren Slug
   // adressiert, nicht über das Label – die Beschreibung hinter dem Titel kann
   // sich ändern, der Slug ist die Datenidentität.
   const categoryBox=slug=>broker.locator(`input[name="providerCategory"][value="${slug}"]`);
-  for(const slug of ['handwerk','makler'])await categoryBox(slug).check();
+  for(const slug of ['handwerk','makler']){await settle(categoryBox(slug),`provider category ${slug}`);await categoryBox(slug).check();}
   // Saving changed company or service data does not confirm with "saved": the
   // action sends the profile back into review whenever business name, trades,
   // categories or services differ (src/app/pro/profile/actions.ts:76-104). That
@@ -160,6 +177,7 @@ try{
   await Promise.all([broker.waitForURL(/profile=review/),broker.getByRole('button',{name:'Profil speichern'}).click()]);
   await waitText(broker,'Die Partnerfreigabe ist pausiert');
   await broker.goto(base+'/pro/profile'); await waitText(broker,'Ein Konto, beliebig erweiterbar');
+  for(const slug of ['handwerk','makler'])await settle(categoryBox(slug),`persisted provider category ${slug}`);
   if(!(await categoryBox('handwerk').isChecked())||!(await categoryBox('makler').isChecked()))throw new Error('Professional account must support multiple provider categories');
   await broker.getByLabel('Regionen / PLZ').fill('463, Borken'); await broker.getByLabel('Immobilientypen').fill('Einfamilienhaus, Doppelhaushälfte'); await broker.getByLabel('Kaufpreis ab €').fill('250000'); await broker.getByLabel('Kaufpreis bis €').fill('1200000'); await broker.getByLabel('Wohnfläche ab m²').fill('80'); await broker.getByLabel('Wohnfläche bis m²').fill('300'); await broker.getByLabel('Spezialisierungen').fill('Eigenheime, modernisierte Bestandsimmobilien');
   // Only the broker search fields change here, none of the fields the lifecycle
@@ -167,18 +185,23 @@ try{
   await Promise.all([broker.waitForURL(/profile=saved/),broker.getByRole('button',{name:'Profil speichern'}).click()]);
   await broker.getByLabel('Nachweis').setInputFiles({name:'makler-nachweis.pdf',mimeType:'application/pdf',buffer:Buffer.from('%PDF-1.4\n% Test\n')}); await broker.getByLabel('Hinweis').fill('Makler-Gewerbe und Berufshaftpflicht liegen vor.'); await Promise.all([broker.waitForURL(/verification=submitted/),broker.getByRole('button',{name:'Zur Prüfung einreichen'}).click()]);
 
-  const adminCtx=await browser.newContext({viewport:{width:1180,height:1000}}); const admin=await adminCtx.newPage(); await admin.goto(base+'/admin/login'); await admin.getByLabel('Admin-Passwort').fill(adminPassword); await Promise.all([admin.waitForURL('**/admin'),admin.getByRole('button',{name:'Admin anmelden'}).click()]); let card=admin.locator('.admin-card').filter({hasText:'Hauswert Makler GmbH'}).first(); await card.getByRole('button',{name:'Unternehmen freigeben'}).click(); await admin.reload();
+  const adminCtx=await browser.newContext({viewport:{width:1180,height:1000}}); const admin=await adminCtx.newPage(); await admin.goto(base+'/admin/login'); await admin.getByLabel('Admin-Passwort').fill(adminPassword); await Promise.all([admin.waitForURL('**/admin'),admin.getByRole('button',{name:'Admin anmelden'}).click()]); let card=admin.locator('fieldset').filter({has:admin.locator('legend',{hasText:'Hauswert Makler GmbH'})}).first(); await card.getByRole('button',{name:'Unternehmen freigeben'}).click(); await admin.reload();
   // EHStatus rendert eine CSS-Modul-Klasse plus data-status; die alte Prüfung
   // auf ".status.approved" traf nie ein Element. Der Ton ist die stabilere
   // Aussage: nach der Freigabe ist der Prüf-Status der einzige "success"-Chip
   // in der Karte (der Vertrag steht noch auf "pending").
-  await card.locator('[data-status="success"]').first().waitFor(); card=admin.locator('.admin-card').filter({hasText:'Hauswert Makler GmbH'}).first(); await card.getByLabel('Status').selectOption('active'); for(const name of ['Betriebshaftpflicht geprüft','Qualifikation/Zulassung geprüft','Partnervertrag unterschrieben','Qualitätsstandard akzeptiert'])await card.getByLabel(name).check(); await card.getByRole('button',{name:'Partnervertrag speichern'}).click(); await admin.reload(); await card.getByText(/Vertrag Aktiv/).waitFor();
+  await card.locator('[data-status="success"]').first().waitFor(); card=admin.locator('fieldset').filter({has:admin.locator('legend',{hasText:'Hauswert Makler GmbH'})}).first(); await card.getByLabel('Status').selectOption('active'); for(const name of ['Betriebshaftpflicht geprüft','Qualifikation/Zulassung geprüft','Partnervertrag unterschrieben','Qualitätsstandard akzeptiert'])await card.getByLabel(name).check(); await card.getByRole('button',{name:'Partnervertrag speichern'}).click(); await admin.reload(); await card.getByText(/Vertrag Aktiv/).waitFor();
 
   // B) Property is the durable central record; valuation and sale matching stay owner-controlled.
-  const ownerCtx=await browser.newContext({viewport:{width:390,height:844}}); const owner=await ownerCtx.newPage(); await owner.goto(base+'/register?role=homeowner'); await owner.getByLabel('Vorname').fill('Olivia'); await owner.getByLabel('Nachname').fill('Eigentümer'); await owner.getByLabel('E-Mail').fill(ownerEmail); await owner.locator('input[name="password"]').fill(accountPassword); await owner.getByLabel('Postleitzahl').fill('46325'); await owner.locator('input[name="address"]').fill('Musterstraße 12, 46325 Borken'); await clickAndWaitUrl(owner,'**/app**',owner.getByRole('button',{name:'Kostenlos registrieren'}),'owner registration');
+  const ownerCtx=await browser.newContext({viewport:{width:390,height:844}}); const owner=await ownerCtx.newPage(); await owner.goto(base+'/register?role=homeowner'); await owner.getByLabel('Vorname').fill('Olivia'); await owner.getByLabel('Nachname').fill('Eigentümer'); await owner.getByLabel('E-Mail').fill(ownerEmail); await owner.locator('input[name="password"]').fill(accountPassword); await owner.getByLabel('Postleitzahl').fill('46325'); await owner.locator('input[name="address"]').fill('Musterstraße 12, 46325 Borken'); await clickAndWaitUrl(owner,'**/app**',owner.getByRole('button',{name:'Konto erstellen'}),'owner registration');
   await owner.goto(base+'/app/home'); await owner.locator('#hausprofil summary').click(); await owner.getByLabel('Haustyp').selectOption('Einfamilienhaus'); await owner.getByLabel('Baujahr').fill('2001'); await owner.getByLabel('Wohnfläche (m²)').fill('160'); await owner.getByLabel('Grundstück (m²)').fill('650'); await owner.getByRole('button',{name:'Hausprofil speichern'}).click();
   await owner.goto(base+'/app/home/history'); await owner.locator('#hist-category').selectOption({label:'Dach & Fassade'}); await owner.getByLabel('Datum').fill('2025-06-12'); await owner.getByLabel('Was wurde gemacht?').fill('Dach erneuert 2025'); await owner.getByLabel('Firma').fill('Dachbau Alt GmbH'); await owner.getByLabel('Kosten €').fill('18500'); await owner.getByLabel('Garantie bis').fill('2030-06-12'); await owner.getByRole('button',{name:'In Hausakte speichern'}).click(); await waitText(owner,'Dach erneuert 2025');
-  await owner.goto(base+'/app/home/sale'); await owner.getByLabel('Von €').fill('700000'); await owner.getByLabel('Bis €').fill('800000'); await owner.getByRole('button',{name:/Bewertung speichern/}).click(); await owner.waitForTimeout(200); await waitText(owner,'700.000'); await owner.getByRole('button',{name:'Makler finden'}).click(); await owner.waitForURL(/lead=/); await waitText(owner,'Hauswert Makler GmbH'); await waitText(owner,'Private Nachrichten, Zahlungen, Rechnungen, Versicherungen und vollständige Dokumente bleiben außerhalb des Verkaufshandoffs.'); await assertNoOverflow(owner,'Mobile sale matching');
+  await owner.goto(base+'/app/home/sale'); await owner.getByLabel('Von €').fill('700000'); await owner.getByLabel('Bis €').fill('800000'); await owner.getByRole('button',{name:/Bewertung speichern/}).click(); await owner.waitForTimeout(200); await waitText(owner,'700.000'); await owner.getByRole('button',{name:'Makler finden'}).click(); await owner.waitForURL(/lead=/); await waitText(owner,'Hauswert Makler GmbH');
+// Der zitierte Handoff-Absatz existiert nicht mehr. Die Grenze wird heute am
+// Freigabe-Schalter selbst ausgesprochen - und strenger geprueft: der Abgleich
+// allein darf noch keine Freigabe erteilt haben.
+await waitText(owner,'ausdrücklich für die Verkaufsanbahnung frei');
+if(await owner.getByText('Freigabe aktiv').count())throw new Error('Sale matching must not release owner contact without explicit approval'); await assertNoOverflow(owner,'Mobile sale matching');
 
   // C) Broker cannot see owner contact before explicit release.
   await broker.goto(base+'/pro/leads'); await waitText(broker,'Noch keine freigegebenen Immobilienanfragen'); if((await broker.locator('body').innerText()).includes(ownerEmail))throw new Error('Owner contact leaked before explicit release');
@@ -190,7 +213,7 @@ try{
   // D) The same property and its history can be transferred to a new owner. An
   // active sale share is deliberately left in place so the transfer itself must
   // revoke it atomically.
-  const buyerCtx=await browser.newContext({viewport:{width:390,height:844}}); const buyer=await buyerCtx.newPage(); await buyer.goto(base+'/register?role=homeowner'); await buyer.getByLabel('Vorname').fill('Ben'); await buyer.getByLabel('Nachname').fill('Käufer'); await buyer.getByLabel('E-Mail').fill(buyerEmail); await buyer.locator('input[name="password"]').fill(accountPassword); await buyer.getByLabel('Postleitzahl').fill('46325'); await clickAndWaitUrl(buyer,'**/app**',buyer.getByRole('button',{name:'Kostenlos registrieren'}),'buyer registration');
+  const buyerCtx=await browser.newContext({viewport:{width:390,height:844}}); const buyer=await buyerCtx.newPage(); await buyer.goto(base+'/register?role=homeowner'); await buyer.getByLabel('Vorname').fill('Ben'); await buyer.getByLabel('Nachname').fill('Käufer'); await buyer.getByLabel('E-Mail').fill(buyerEmail); await buyer.locator('input[name="password"]').fill(accountPassword); await buyer.getByLabel('Postleitzahl').fill('46325'); await clickAndWaitUrl(buyer,'**/app**',buyer.getByRole('button',{name:'Konto erstellen'}),'buyer registration');
   await owner.goto(base+'/app/home/history'); await owner.getByLabel('E-Mail des Käufers').fill(buyerEmail); await owner.getByRole('button',{name:'Übergabe vorbereiten'}).click(); await owner.waitForURL(/transfer=/); const token=new URL(owner.url()).searchParams.get('transfer'); if(!token)throw new Error('house transfer token missing');
   await buyer.goto(base+`/transfer/${token}`); await waitText(buyer,'Hausakte übernehmen'); await buyer.getByRole('button',{name:'Hausakte jetzt übernehmen'}).click(); await buyer.waitForURL(/\/app\/home\?transfer=accepted/); await buyer.goto(base+'/app/home/history'); await waitText(buyer,'Dach erneuert 2025'); await waitText(buyer,'Olivia Eigentümer'); await waitText(buyer,'Ben Käufer'); await buyer.goto(base+'/app/home/sale'); await waitText(buyer,'700.000'); await assertNoOverflow(buyer,'Transferred property sale page');
   await broker.reload(); await waitText(broker,'Noch keine freigegebenen Immobilienanfragen'); if((await broker.locator('body').innerText()).includes(ownerEmail))throw new Error('Broker retained former-owner contact after property transfer');
