@@ -101,3 +101,32 @@ Dateien (`CardVisual.tsx`, `Stepper.tsx`) und erzeugt dadurch eine dauerhafte
 Meldung.
 
 **Nicht getan:** kein `--sync`, kein Löschen der toten Klassen.
+
+---
+
+## DA-2026-09-21-03 — Fehlender Ordnerbaustein für die Dokumentenablage
+
+**Antrag:** Aufnahme eines kanonischen **Ordner-/Ablage-Bausteins** in
+`packages/eh-design` (und damit ein Re-Seal von `design/design-lock.json`, da
+`packages/eh-design/src/documents.tsx` versiegelt ist).
+
+**Stand:** offen, **nicht blockierend**. `/app/documents` gruppiert Rechnungen,
+Angebote/Nachweise und Zahlungsbelege seit `c8e974f` in einem gemeinsamen Ordner
+„Ablage“ mit dem Ansichtswechsel **Liste/Karten/Chronik** (`EHRecordViews`, bereits
+vorhanden, kein neuer Baustein). Der **Ordner je Dokumentart** ist dort als
+führende Angabe der Zeile (`detail`) und über das Symbol der Zeile umgesetzt.
+
+**Warum das ein Antrag ist:** `COMPOSITION.md` verlangt, fehlende Exporte zu
+melden statt eine eigene Stilfamilie zu erfinden. Ein echter Ordner-/
+Gruppierungsbaustein existiert weder in `packages/eh-design/src` noch in
+`DESIGN.md`; `documents.tsx` exportiert nur `EHDocumentFrame`. Die aktuelle
+Umsetzung kommt ohne Änderung an versiegelten Dateien aus und ist ausdrücklich
+eine Zwischenlösung, bis die Designautorität entscheidet:
+
+1. eigener Ordnerbaustein (z. B. `EHRecordFolders` mit Ordnerkopf, Anzahl und
+   aufklappbaren Gruppen) — dann wird `EHRecordViews` in der Ablage ersetzt, oder
+2. Beibehaltung der flachen, chronologisch gemischten Liste mit Ordner als
+   führender Zeilenangabe — dann entfällt dieser Antrag.
+
+**Nicht getan:** kein neuer Baustein, kein Re-Seal, keine Änderung an
+`packages/eh-design`.
