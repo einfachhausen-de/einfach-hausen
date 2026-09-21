@@ -6,6 +6,7 @@ import { randomBytes } from 'node:crypto';
 import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { chromium, firefox, webkit } from 'playwright-core';
+import Database from 'better-sqlite3';
 // T-0129 Browser-E2E v2: the public-platform matrix is the SAME list the
 // visual canonicals (T-0130) are built from, so behavioral and visual proof
 // can never cover different route sets.
@@ -847,7 +848,26 @@ if(!owner.url().includes('view=completed'))throw new Error('completed view param
   }
 }
 await assertNoOverflow(owner,'Mobile completed jobs');
-await nav(manager, base+'/pro/plans'); await waitText(manager,'0 % Provision'); for(const plan of ['Free','Start — 29 €/Monat','Pro (beliebt)','Premium — 199 €/Monat'])await manager.getByText(plan).first().waitFor();
+// /pro/plans rendert die Tarife aus partner_plans (src/app/pro/plans/page.tsx:33)
+// und ist damit datengetrieben. Die alten Marketingtitel ("Pro (beliebt)") und
+// der Seitentext "0 % Provision" existieren nicht mehr - die Provision steht
+// heute in der Tarifbeschreibung. Geprueft wird die Seite gegen die Datenbank,
+// die derselbe Lauf benutzt: jede aktive Tarifzeile muss genau so erscheinen,
+// wie die Seite sie zusammensetzt. Das kann nicht veralten, weil es keine
+// zweite, abgeschriebene Erwartung mehr gibt.
+await nav(manager, base+'/pro/plans');
+const plansDb=new Database(databasePath,{readonly:true});
+const activePlans=plansDb.prepare('SELECT title,monthly_amount FROM partner_plans WHERE active=1 ORDER BY monthly_amount').all();
+plansDb.close();
+if(!activePlans.length)throw new Error('partner_plans seed is empty, so the tariff page cannot be verified');
+const money=(cents)=>new Intl.NumberFormat('de-DE',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(cents/100);
+const tariffList=manager.getByRole('list',{name:'Partner-Tarife'});
+await tariffList.first().waitFor({timeout:30000});
+const tariffText=await tariffList.first().innerText();
+for(const plan of activePlans){
+  const row=`${plan.title} — ${money(plan.monthly_amount)}/Monat`;
+  if(!tariffText.includes(row))throw new Error(`Tarifzeile fehlt auf /pro/plans: ${row}`);
+}
 
 // 9) Beratung und Notfall sind eigenständige, sehr einfache Einstiege.
 await nav(owner, base+'/app/consultation'); await owner.getByLabel('Wobei brauchst du Rat?').fill('Ich möchte kurz wissen, wie ich einen stark wachsenden Baum am besten prüfen lasse.'); await owner.getByLabel('Foto oder Video').setInputFiles({name:'baum.mp4',mimeType:'video/mp4',buffer:Buffer.from('test-video')}); await clickAndWaitUrl(owner,owner.getByRole('button',{name:'Ansprechpartner finden'}),/\/app\/jobs\/\d+/); await waitText(owner,'noch kein Auftrag'); if(await owner.locator('video.hero-photo').count()!==1)throw new Error('Consultation video must render on the resulting contact request');
