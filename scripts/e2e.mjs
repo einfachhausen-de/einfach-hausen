@@ -639,16 +639,36 @@ await assertNoOverflow(owner,'Mobile customer app');
 await nav(owner, base+'/app'); await waitText(owner,'Wartet auf dich'); await waitText(owner,'Hausakte'); await waitText(owner,'Nächste Termine');
 // Owner mobile navigation: derselbe Werkbank-Rahmen, also dieselbe Sidebar.
 // Der frueher hier gepruefte Notion-Drawer (.mobile-menu / .ehn-drawer) wird von
-// keiner Route mehr gerendert. Was bleiben muss: fuenf Hausbereiche, ein eigener
-// Konto-Block und das Schliessen nach einer Navigation.
+// keiner Route mehr gerendert. Was bleiben muss: die Hausbereiche oben, die
+// Zentrale (Ansprechpartner ueber Benachrichtigungen) unten ueber dem Profil,
+// Profil/Hilfe/Einstellungen im Avatar-Menue statt als Sidebar-Zeilen, und das
+// Schliessen nach einer Navigation.
 await openMobileSidebar(owner,'Owner');
 const ownerHrefs=await mobileSidebarHrefs(owner);
-for(const href of ['/app','/app/home','/app/contracts','/app/jobs','/app/messages']){
-  if(!ownerHrefs.includes(href))throw new Error(`Mobile homeowner sidebar must expose the area ${href}`);
+for(const href of ['/app','/app/home','/app/contracts','/app/jobs','/app/messages','/notifications']){
+  if(!ownerHrefs.includes(href))throw new Error(`Mobile homeowner sidebar must expose ${href}`);
 }
-for(const href of ['/app/profile','/notifications','/app/hilfe']){
-  if(!ownerHrefs.includes(href))throw new Error(`Mobile homeowner sidebar must expose the account entry ${href}`);
+for(const href of ['/app/profile','/app/hilfe','/app/settings']){
+  if(ownerHrefs.includes(href))throw new Error(`Mobile homeowner sidebar must not duplicate the avatar entry ${href}`);
 }
+// Avatar-Menue direkt ueber dem Profil-Button: Profil, Hilfe & Kontakt,
+// Einstellungen, Abmelden.
+await owner.locator(`${MOBILE_SIDEBAR} button[aria-label="Kontomenü öffnen"]`).first().click();
+const avatarMenu=owner.getByRole('menu');
+for(const name of ['Profil','Hilfe & Kontakt','Einstellungen','Abmelden']){
+  await avatarMenu.getByText(name,{exact:true}).first().waitFor({timeout:10000}).catch(()=>{throw new Error(`Homeowner avatar menu must expose ${name}`);});
+}
+for(const href of ['/app/profile','/app/hilfe']){
+  if(!(await avatarMenu.locator(`a[href="${href}"]`).count()))throw new Error(`Homeowner avatar menu must link ${href}`);
+}
+// Escape schliesst Menue (und ggf. das Sheet gleich mit): Sheet-Zustand danach
+// explizit sichern und bei Bedarf frisch oeffnen, bevor die Navigation folgt.
+await owner.keyboard.press('Escape');
+if(await owner.locator(MOBILE_SIDEBAR).first().isVisible().catch(()=>false)){
+  await owner.keyboard.press('Escape');
+}
+await owner.locator(MOBILE_SIDEBAR).first().waitFor({state:'hidden',timeout:10000});
+await openMobileSidebar(owner,'Owner');
 await clickAndWaitUrl(owner,owner.locator(`${MOBILE_SIDEBAR} a[href="/app/jobs"]`).first(),/\/app\/jobs/);
 if(await owner.locator(MOBILE_SIDEBAR).first().isVisible())throw new Error('Mobile owner menu did not close after navigation');
 await nav(owner, base+'/app/profile'); await waitText(owner,'Einfach Hausen aufs Handy'); await assertNoOverflow(owner,'Mobile customer profile');

@@ -16,11 +16,12 @@ export type AccountNavEntry = {
   isActive: boolean;
 };
 /**
- * Konto-Gruppe aus nav-config (ownerAccountItems / providerAccountItems).
+ * Untere Sidebar-Gruppe ("Zentrale" bei Ownern: Ansprechpartner und
+ * Benachrichtigungen; "Konto" bei Partnern aus nav-config).
  * IA-Regel ein Thema/ein Owner: reine Deep-Links mit identischem Label und
- * Ziel wie die Owner-Flaeche, keine Inhalte hier. /app/settings wird global
- * von settings-dialog-host.tsx als Overlay abgefangen (bestehender Vertrag).
- * Einzige Zahl in der Sidebar ist der echte ungelesene
+ * Ziel wie die jeweilige Flaeche, keine Inhalte hier. /app/settings wird
+ * global von settings-dialog-host.tsx als Overlay abgefangen (bestehender
+ * Vertrag). Einzige Zahl in der Sidebar ist der echte ungelesene
  * Benachrichtigungs-Count auf /notifications - keine Mock-Badges.
  */
 export function NavProjects({

@@ -1,6 +1,6 @@
-import { Bell, CircleHelp, Settings, UserRound, WalletCards } from 'lucide-react';
+import { Bell, CircleHelp, Settings, UserRound, UsersRound, WalletCards } from 'lucide-react';
 import { NavMain } from '@/components/nav-main';
-import { NavProjects } from '@/components/nav-projects';
+import { NavProjects, type AccountNavEntry } from '@/components/nav-projects';
 import { NavUser } from '@/components/nav-user';
 import { TeamSwitcher } from '@/components/team-switcher';
 import {
@@ -12,19 +12,23 @@ import {
 } from '@/components/ui/sidebar';
 import {
   matchesArea,
-  ownerAccountItems,
   ownerAreas,
   providerAccountItems,
   providerAreas,
 } from './nav-config';
-const OWNER_ACCOUNT_ICONS = [UserRound, Bell, WalletCards, CircleHelp, Settings] as const;
 const PROVIDER_ACCOUNT_ICONS = [UserRound, WalletCards, CircleHelp, Settings] as const;
 /**
- * App-Navigation aus nav-config: Hauptbereiche je Rolle plus Konto-Gruppe,
- * echter Nutzer im Footer, Marke im Kopf. Keine Demo-Daten, keine Mock-Badges.
- * IA-Regel ein Thema/ein Owner: Die Konto-Gruppe enthaelt reine Deep-Links mit
- * identischem Label und Ziel wie die Owner-Flaeche. /app/settings wird global
- * von settings-dialog-host.tsx als Overlay abgefangen (bestehender Vertrag).
+ * App-Navigation aus nav-config: Hauptbereiche je Rolle, echter Nutzer im
+ * Footer, Marke im Kopf. Keine Demo-Daten, keine Mock-Badges.
+ * IA-Regel ein Thema/ein Owner: Oben die Haus-Navigation, unten die
+ * "Zentrale" mit Ansprechpartner und Benachrichtigungen direkt ueber dem
+ * Profil-Button. Profil, Hilfe & Kontakt und Einstellungen leben im
+ * Avatar-Menue (NavUser), nicht als eigene Sidebar-Zeilen. /app/settings
+ * wird global von settings-dialog-host.tsx als Overlay abgefangen
+ * (bestehender Vertrag). nav-config bleibt die einzige Quelle: Der
+ * Ansprechpartner-Bereich wird hier nur anders platziert, nicht neu
+ * definiert (BottomNav, Breadcrumbs und Active-Logik lesen weiter
+ * ownerAreas).
  */
 export function AppSidebar({
   role,
@@ -36,6 +40,8 @@ export function AppSidebar({
   userSub,
   userInitials,
   unread,
+  profileHref,
+  hilfeHref,
 }: {
   role: 'homeowner' | 'provider';
   active: string;
@@ -51,7 +57,10 @@ export function AppSidebar({
 }) {
   const pro = role === 'provider';
   const areas = pro ? providerAreas : ownerAreas;
-  const entries = areas.map((area) => {
+  // Der Ansprechpartner-Bereich gehoert unten in die Zentrale, nicht in die
+  // obere Navigation. Nur Darstellung: ownerAreas bleibt unveraendert.
+  const mainAreas = pro ? areas : areas.filter((area) => area.href !== '/app/messages');
+  const entries = mainAreas.map((area) => {
     const Icon = area.icon;
     const items = area.children.map((child) => ({
       href: child.href,
@@ -67,17 +76,40 @@ export function AppSidebar({
       items,
     };
   });
-  const accountItems = pro ? providerAccountItems : ownerAccountItems;
-  const accountIcons = pro ? PROVIDER_ACCOUNT_ICONS : OWNER_ACCOUNT_ICONS;
-  const accountEntries = accountItems.map((item, index) => {
-    const Icon = accountIcons[index] ?? UserRound;
-    return {
-      href: item.href,
-      label: item.label,
-      icon: <Icon />,
-      isActive: item.href === active,
-    };
-  });
+  // Unten die "Zentrale": Ansprechpartner ueber Benachrichtigungen, direkt
+  // ueber dem Profil-Button. Einzige Zahl in der Sidebar ist der echte
+  // ungelesene Benachrichtigungs-Count - keine Mock-Badges.
+  let bottomEntries: readonly AccountNavEntry[];
+  let bottomLabel = 'Konto';
+  if (pro) {
+    bottomEntries = providerAccountItems.map((item, index) => {
+      const Icon = PROVIDER_ACCOUNT_ICONS[index] ?? UserRound;
+      return {
+        href: item.href,
+        label: item.label,
+        icon: <Icon />,
+        isActive: item.href === active,
+      };
+    });
+  } else {
+    const messagesArea = ownerAreas.find((area) => area.href === '/app/messages');
+    const MessagesIcon = messagesArea?.icon ?? UsersRound;
+    bottomEntries = [
+      {
+        href: messagesArea?.href ?? '/app/messages',
+        label: messagesArea?.label ?? 'Ansprechpartner',
+        icon: <MessagesIcon />,
+        isActive: messagesArea ? matchesArea(active, messagesArea) : active === '/app/messages',
+      },
+      {
+        href: '/notifications',
+        label: 'Benachrichtigungen',
+        icon: <Bell />,
+        isActive: active === '/notifications',
+      },
+    ];
+    bottomLabel = 'Zentrale';
+  }
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader>
@@ -85,13 +117,15 @@ export function AppSidebar({
       </SidebarHeader>
       <SidebarContent>
         <NavMain entries={entries} label="Navigation" />
-        <NavProjects entries={accountEntries} label="Konto" unread={unread} />
+        <NavProjects entries={bottomEntries} label={bottomLabel} unread={unread} />
       </SidebarContent>
       <SidebarFooter>
         <NavUser
           name={userName}
           sub={userSub}
           initials={userInitials}
+          profileHref={profileHref}
+          hilfeHref={hilfeHref}
         />
       </SidebarFooter>
       <SidebarRail />
