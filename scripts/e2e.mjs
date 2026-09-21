@@ -827,14 +827,23 @@ await nav(owner, base+'/app/plans'); await waitText(owner,'Einstellungen'); awai
 await nav(owner, base+'/app/jobs?view=completed');
 if(!owner.url().includes('view=completed'))throw new Error('completed view param lost');
 {
-  const completedBody=await owner.locator('body').innerText();
-  if(completedBody.includes('Keine Aufträge in dieser Ansicht')){await waitText(owner,'Abgeschlossene Aufträge');}
-  else{
-    const completedList=owner.locator('ul[aria-label="Abgeschlossene Aufträge"]');
-    await waitForDomStable(owner,'ul[aria-label="Abgeschlossene Aufträge"]');
-    const listText=await completedList.innerText();
+  // /app/jobs rendert die Auftraege als EHDataTable (Standardansicht "liste",
+  // src/app/app/jobs/jobs-ansicht.tsx) - nicht als <ul aria-label>. Nur "karten"
+  // und "chronik" sind Listen, und die Suite wechselt die Ansicht nicht. Der
+  // Tabellenbereich traegt den Ansichtstitel als aria-label UND als caption
+  // (packages/eh-design/src/app.tsx, EHDataTable), bleibt also eindeutig
+  // adressierbar. Zusaetzlich war der Leerzustands-Zweig praktisch tot: er
+  // prueft auf body.includes('Keine Aufträge in dieser Ansicht'), und in genau
+  // diesem Fall rendert JobsAnsicht nur EHEmptyState - ohne caption, also ohne
+  // "Abgeschlossene Aufträge".
+  const completedRegion=owner.getByRole('region',{name:'Abgeschlossene Aufträge'});
+  await completedRegion.first().waitFor({timeout:30000}).catch(async()=>{
+    await owner.getByText('Keine Aufträge in dieser Ansicht').first().waitFor({timeout:30000});
+  });
+  if(await completedRegion.count()){
+    const listText=await completedRegion.first().innerText();
     if(/Angebot liegt vor|Angebote liegen vor|Angebotsstatus prüfen/.test(listText))throw new Error('Active quoted job leaked into completed view');
-    await completedList.getByText('Erledigt').first().waitFor();
+    await completedRegion.first().getByText('Erledigt').first().waitFor();
   }
 }
 await assertNoOverflow(owner,'Mobile completed jobs');
