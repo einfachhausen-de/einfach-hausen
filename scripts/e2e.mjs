@@ -738,7 +738,16 @@ const assignmentDisclosure=manager.locator('#ansprechpartner-aendern');
 await settle(assignmentDisclosure,'assignment disclosure');
 await assignmentDisclosure.locator('summary').click();
 const assignmentForm=assignmentDisclosure.locator('form').first(); await assignmentForm.waitFor(); const assignmentSelect=assignmentForm.getByLabel('Ansprechpartner'); await assignmentSelect.waitFor(); const thomasOption=assignmentSelect.locator('option').filter({hasText:'Thomas Weber'}); await thomasOption.waitFor({state:'attached'}); const thomasValue=await thomasOption.getAttribute('value'); if(!thomasValue)throw new Error('Thomas option missing'); await assignmentSelect.selectOption(thomasValue); const assignmentButton=assignmentForm.getByRole('button',{name:/Ansprechpartner festlegen|Zuweisung speichern/}); await clickServerAction(manager,assignmentButton);
-await nav(owner, owner.url()); await waitText(owner,'Thomas Weber'); await waitText(owner,'Techniker · Gartenbau Müller');
+await nav(owner, owner.url()); await waitText(owner,'Thomas Weber');
+// Die Owner-Ansicht eines Kontaktauftrags zeigt Name, Rolle und Betrieb als
+// EIGENE Felder (src/app/app/jobs/[id]/page.tsx: eh-werkbank-row
+// "Ansprechpartner"/"Betrieb" plus die EHRecordList-Eintraege), nicht als
+// zusammengesetzte Zeile "Techniker · Gartenbau Müller". Geprueft wird deshalb
+// die Zuordnung Label->Wert, nicht eine Zeichenkette, die es nie gab.
+const rowPairs=(pair)=>[...document.querySelectorAll('.eh-werkbank-row')].some(row=>row.innerText.includes(pair[0])&&row.innerText.includes(pair[1]));
+await owner.waitForFunction(rowPairs,['Ansprechpartner','Thomas Weber'],{timeout:15000}).catch(()=>{throw new Error('Owner job page must name the personal contact in its own row');});
+await owner.waitForFunction(rowPairs,['Betrieb','Gartenbau Müller'],{timeout:15000}).catch(()=>{throw new Error('Owner job page must name the business in its own row');});
+await waitText(owner,'Techniker');
 await owner.screenshot({path:path.join(artifactsDir,'owner-personal-contact.png'),fullPage:true});
 
 // 6) Derselbe Ansprechpartner bleibt auch nach der späteren Buchung erreichbar.
