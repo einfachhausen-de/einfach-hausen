@@ -594,7 +594,10 @@ await strictRetry(owner,()=>owner.getByRole('button',{name:'Überspringen'}).cli
 await Promise.all([owner.waitForURL('**/app?onboarding=done'),owner.waitForLoadState('load')]);
 if(await owner.getByText('Einrichtung unvollständig').count())throw new Error('Onboarding banner shown after completion');
 await assertNoOverflow(owner,'Mobile customer app');
-await nav(owner, base+'/app'); await waitText(owner,'Was möchtest du für dein Zuhause klären?'); await waitText(owner,'Als Nächstes');
+// Die Owner-Startseite ist die EHOwnerSection-Komposition ("Wartet auf dich",
+// "Hausakte", "Nächste Termine"). Die früheren Anker gehören zu EHOwnerComposer,
+// das keine Seite mehr rendert.
+await nav(owner, base+'/app'); await waitText(owner,'Wartet auf dich'); await waitText(owner,'Hausakte'); await waitText(owner,'Nächste Termine');
 // Owner mobile navigation: derselbe Werkbank-Rahmen, also dieselbe Sidebar.
 // Der frueher hier gepruefte Notion-Drawer (.mobile-menu / .ehn-drawer) wird von
 // keiner Route mehr gerendert. Was bleiben muss: fuenf Hausbereiche, ein eigener
