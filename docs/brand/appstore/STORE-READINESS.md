@@ -17,10 +17,10 @@ Entwicklungsrechner bzw. gegen `main` geprüft, nicht angenommen.
 | `@capacitor/ios`, `@capacitor/android` | **nicht installiert** |
 | `ios/`, `android/` | **nicht vorhanden** (kein `cap add` gelaufen) |
 | Natives Verhalten im Web-Code | `src/components/NativeInit.tsx` setzt Statusleiste und Tastatur — nur nativ, auf Web wirkungslos |
-| Icons | `public/icons/`: `icon-192`, `icon-512`, `icon-maskable-512`, `apple-touch-icon`, `favicon-32`. **Kein 1024×1024** (App Store verlangt genau das) |
+| Icons | `public/icons/`: `icon-192`, `icon-512`, `icon-maskable-512`, `apple-touch-icon`, `favicon-32`, **`app-store-1024`** (ergänzt 2026-09-21, siehe Abschnitt 7) |
 | Splash Screens | **nicht vorhanden** |
-| Datenschutzdeklarationen | **nicht vorhanden** (siehe Abschnitt 5) |
-| Store-Metadaten | **nicht vorhanden** |
+| Datenschutzdeklarationen | vorbereitet (siehe Abschnitt 5) |
+| Store-Metadaten | **Entwurf fertig** — `docs/brand/appstore/STORE-METADATA.md` |
 
 Der Wert `webDir: "out"` im alten Stand war irreführend: `out/` entsteht nie, weil kein
 statischer Export konfiguriert ist. `webDir` zeigt jetzt auf `capacitor-www/`, das
@@ -141,23 +141,49 @@ Reihenfolge nach Wirkung:
 3. **Bundle-ID bestätigen:** `de.einfachhausen.app` endgültig? Nach der ersten
    Einreichung ist sie praktisch unveränderlich.
 4. **IAP oder Stripe** für digitale Güter entscheiden. Apples Regel: in der App verkaufte
-   digitale Güter müssen über IAP laufen (15–30 %). Betroffen sind die **Betriebstarife**;
-   Handwerkerleistungen für Eigentümer sind keine digitalen Güter.
+   digitale Güter müssen über IAP laufen (15–30 %). **Für die Owner-App ist diese Frage
+   seit dem 2026-09-21 beantwortet und entfällt:** die App hat keinen Kauf-Flow, Stripe
+   dient ausschließlich realen Dienstleistungen (Betriebsauszahlungen, Rechnungen), und
+   reale Dienstleistungen müssen laut Guideline 3.1.3(e)/3.1.5(a) sogar außerhalb von IAP
+   abgerechnet werden. Belege in `STORE-METADATA.md` Abschnitt 1 und
+   `docs/EXTERNAL-BLOCKERS.md` Punkt 13. **Offen bleibt nur**, ob je eine **Betriebs-App**
+   in die Stores soll — deren Tarife wären digitale Güter und müssten über IAP laufen.
 5. **CocoaPods installieren** (`brew install cocoapods`) und **JDK + Android SDK**
    (Android Studio) auf der Maschine, die bauen soll.
-6. **Icons und Splash erzeugen** lassen — 1024×1024 App-Store-Icon und Splash-Screens
-   fehlen; das kann ich vorbereiten, sobald Punkt 1–4 entschieden sind.
-7. **Store-Metadaten**: Name, Untertitel, Beschreibung, Keywords, Support-URL,
-   Datenschutz-URL, Kategorie, Altersfreigabe, Screenshots je Geräteklasse, Review-Hinweise
-   und ein **Testzugang** für den Review (Apple verlangt bei Login-Apps einen
-   Demo-Account). Der Demo-Account muss von euch bereitgestellt werden.
+6. **Splash-Screens erzeugen lassen.** Das App-Store-Icon 1024×1024 ist **erledigt**
+   (Abschnitt 7). Splash-Screens fehlen weiterhin; ihre Gestaltung wäre eine Komposition
+   und braucht deshalb die Designautorität, nicht nur eine Ableitung.
+7. **Store-Metadaten**: Die Entwürfe für Name, Untertitel, Beschreibung, Keywords,
+   Support-URL, Datenschutz-URL, Kategorie, Altersfreigabe, Review-Hinweise und
+   Screenshot-Liste stehen in `docs/brand/appstore/STORE-METADATA.md` und sind gegen die
+   Zeichenlimits geprüft. Es fehlen: die **Freigabe der Texte** durch die Betreiberin, die
+   **Screenshot-Aufnahmen**, und der **Review-Testzugang** (Apple verlangt bei Login-Apps
+   einen Demo-Account; die Plattform hat bewusst keine festen Demo-Konten, deshalb muss er
+   von euch bereitgestellt werden — siehe `STORE-METADATA.md` Abschnitt 2).
 8. **Datenschutzerklärung** muss die Store-Links bedienen — sie ist vorhanden und
    inhaltlich aktuell (`/datenschutz`), die juristische Freigabe bleibt offen (Punkt 16).
 
 ## 7. Was ich als Nächstes autonom liefern kann
 
-Sobald Punkt 1–4 beantwortet sind: Plattformen erzeugen (auf einer Maschine mit
-Toolchain), Icons/Splash aus dem Markenpaket ableiten, `PrivacyInfo.xcprivacy` als Datei
-anlegen, Store-Metadaten als Vorlage schreiben, Signierungs- und
-TestFlight-/Play-Console-Schritte dokumentieren. Ohne diese Antworten wäre jeder weitere
-Schritt geraten.
+**Erledigt am 2026-09-21:**
+
+- **App-Store-Icon 1024×1024** — `public/icons/app-store-1024.png`. Erzeugt von
+  `scripts/generate-store-icons.mjs` aus `public/brand/einfachhausen-app-icon.svg`.
+  Das Skript prüft die kanonischen Farben und den Pfad des Hauszeichens und bricht ab,
+  wenn sich die Markenquelle ändert; es ist also eine nachvollziehbare Ableitung und
+  keine zweite Bildmarke. Abweichend vom kanonischen SVG nur dort, wo die Plattform es
+  verlangt: 1024 statt 512, **quadratisch** (iOS maskiert selbst — eine vorgerundete
+  Datei hätte dunkle Ecken), und **RGB ohne Alphakanal** (App Store Connect lehnt
+  Transparenz ab). Hauszeichen, Strichstärke und beide Markenfarben unverändert.
+- **Einreichungstexte** für App Store und Play inklusive Review-Hinweisen und
+  Screenshot-Liste — `docs/brand/appstore/STORE-METADATA.md`, gegen die Zeichenlimits
+  geprüft (Name 14/30, Untertitel 28/30, Werbebotschaft 141/170, Keywords 85/100,
+  Play-Kurzbeschreibung 77/80).
+- **IAP-Frage beantwortet** (Abschnitt 6 Punkt 4).
+
+**Weiterhin autonom lieferbar, sobald die Toolchain steht** (CocoaPods, JDK, Android SDK):
+Plattformen erzeugen, `PrivacyInfo.xcprivacy` als Datei anlegen, Signierungs- und
+TestFlight-/Play-Console-Schritte dokumentieren.
+
+**Nicht autonom:** Splash-Screens (Komposition → Designautorität), Screenshot-Aufnahmen
+(zeigen echte Daten), Review-Testzugang (Zugangsdaten), Apple-Konto und Bundle-ID.

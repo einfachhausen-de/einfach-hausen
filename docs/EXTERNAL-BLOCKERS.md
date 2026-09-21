@@ -101,26 +101,52 @@ kurze Antwort die Arbeit sofort freigibt.
 11. **Native Store-Verteilung: entschieden, aber an Vorleistungen gebunden.**
     Entscheidung vom 2026-09-21: native Verteilung wird angegangen. Vorbereitet ist:
     korrigierte `capacitor.config.ts` (Remote-URL-Wrapper, vom Capacitor-CLI selbst
-    geparst), `capacitor-www/index.html` als Offline-Fallback, und
+    geparst), `capacitor-www/index.html` als Offline-Fallback,
     `docs/brand/appstore/STORE-READINESS.md` mit Architekturentscheidung,
-    Datenschutzdeklarationen und Checkliste.
+    Datenschutzdeklarationen und Checkliste, sowie seit dem 2026-09-21
+    `docs/brand/appstore/STORE-METADATA.md` mit Einreichungstexten, Review-Hinweisen
+    und Screenshot-Liste. Das **App-Store-Icon 1024×1024** liegt bereit
+    (`public/icons/app-store-1024.png`, quadratisch, opak, ohne Alphakanal, abgeleitet
+    aus dem kanonischen Marken-SVG über `scripts/generate-store-icons.mjs`).
     **Wichtigstes Risiko:** ein reiner Wrapper ist nach Apples Guideline 4.2
     („Minimum Functionality“) ein erhebliches Ablehnungsrisiko; Statusleiste und
     Tastaturstil genügen dafür nicht. Push ist der wirksamste zusätzliche native
     Hebel und hängt an Punkt 10.
+    **Harter Blocker für die Einreichung:** Apple verlangt bei Apps mit Anmeldung einen
+    funktionierenden Testzugang. Die Plattform hat **bewusst keine festen Demo-Konten**
+    (`docs/OPERATIONS.md`), und Zugangsdaten dürfen nicht erfunden werden. Ohne einen von
+    der Betreiberin bereitgestellten Review-Zugang mit realistischen Daten ist jede
+    Einreichung formal unvollständig.
     **Toolchain, hier geprüft:** Xcode 26.5 und iOS-18.3-Simulator vorhanden;
     **CocoaPods, Java und Android SDK fehlen**. Deshalb wurde bewusst kein
     halb erzeugtes `ios/`-/`android/`-Projekt committet.
     **Frage/Schritte (Betreiber):** Apple-Developer-Konto für Gina Schulze, Team-ID,
-    endgültige Bundle-ID bestätigen, IAP-vs-Stripe entscheiden, CocoaPods sowie
-    JDK + Android SDK installieren. Danach können Plattformen, Icons/Splash und
-    `PrivacyInfo.xcprivacy` erzeugt werden.
+    endgültige Bundle-ID bestätigen, Review-Testzugang bereitstellen, CocoaPods sowie
+    JDK + Android SDK installieren. Danach können Plattformen, Splash-Screens und
+    `PrivacyInfo.xcprivacy` erzeugt werden. Die IAP-Frage ist für die Owner-App
+    beantwortet (siehe Punkt 13).
 12. **Apple Developer-Konto und Bundle-ID.** **Frage:** Existiert ein
     Apple-Developer-Konto (Organisation oder Einzelperson) für Gina Schulze, und ist
     `de.einfachhausen.app` die endgültige Bundle-ID?
-13. **IAP oder Stripe für digitale Güter?** **Frage:** Werden digitale Güter in einer
-    nativen App über Apple/Google IAP abgerechnet oder weiter über Stripe, und wie
-    werden die Store-Regeln dazu erfüllt?
+13. **IAP oder Stripe für digitale Güter? — für die Owner-App beantwortet: keins von
+    beidem.** Am 2026-09-21 im Quelltext geprüft und in
+    `docs/brand/appstore/STORE-METADATA.md` Abschnitt 1 belegt:
+    - Die Owner-App hat **keinen** Kauf-, Abo- oder Upgrade-Flow (Suche nach
+      `checkout|subscribe|abo|kaufen|upgrade` unter `src/app/app/**` und
+      `src/components/homeowner/**` ohne Treffer).
+    - Stripe wird ausschließlich für **reale Dienstleistungen** genutzt:
+      Auszahlungen an Betriebe (Stripe Connect) und Rechnungen für ausgeführte
+      Arbeiten (`src/lib/payments.ts`, `src/app/api/stripe/**`).
+    - Handwerkerleistungen am eigenen Haus sind keine digitalen Güter; Apples
+      Guideline 3.1.3(e)/3.1.5(a) verlangt für reale Dienstleistungen sogar die
+      Abrechnung **außerhalb** von IAP. Eine IAP-Pflicht entsteht dadurch nicht.
+    **Konsequenz:** Für die Owner-App ist keine Store-Abrechnung nötig, es gibt keine
+    Marge an Apple/Google, und es ist kein IAP-Produkt anzulegen.
+    **Offen bleibt bewusst:** Für eine spätere **Betriebs-App** gilt das *nicht*.
+    Betriebstarife sind digitale Güter und müssten in einer iOS-App über IAP laufen.
+    Heute werden sie im Web unter `/pro/plans` verkauft, was davon nicht betroffen ist.
+    **Frage:** Soll überhaupt je eine Betriebs-App in die Stores, oder bleibt der
+    Betriebsbereich im Web?
 14. **Self-Service-Passwort-Reset freigeben?** Der automatische Reset ist im Code
     ausdrücklich als nicht freigegeben markiert; Nutzer werden auf `/kontakt`
     verwiesen. Er braucht einen Mailpfad und ein betreiberseitig gepflegtes Postfach.
