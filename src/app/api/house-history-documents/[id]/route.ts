@@ -7,6 +7,7 @@ import { db } from '@/lib/db';
 import { getProviderContext } from '@/lib/provider';
 import { canProviderReadSharedPropertyArtifact } from '@/lib/share-links';
 import { parseArtifactId,resolvePrivateFile } from '@/lib/security/private-files';
+import { archivedNeededBody } from '@/lib/byos-archive';
 
 function notFound(){return new NextResponse('Not found',{status:404});}
 
@@ -36,7 +37,11 @@ export async function GET(_req:NextRequest,{params}:{params:Promise<{id:string}>
   if(!allowed)return notFound();
 
   const file=await resolvePrivateFile(document.path);
-  if(!file)return notFound();
+  if(!file){
+    const archived=archivedNeededBody(document.path);
+    if(archived)return NextResponse.json(archived,{status:409});
+    return notFound();
+  }
 
   try{
     const body=await fs.readFile(file);

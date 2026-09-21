@@ -6,6 +6,7 @@ import { isAdmin } from '@/lib/admin-auth';
 import { db } from '@/lib/db';
 import { getProviderContext } from '@/lib/provider';
 import { canProviderReadJobMedia,canReadJobMedia,parseArtifactId,resolvePrivateFile } from '@/lib/security/private-files';
+import { archivedNeededBody } from '@/lib/byos-archive';
 
 function mime(file:string){
   const ext=path.extname(file).toLowerCase();
@@ -36,7 +37,11 @@ export async function GET(_req:NextRequest,{params}:{params:Promise<{id:string}>
   if(!canReadJobMedia(user,media.homeowner_id,providerAuthorized,admin))return notFound();
 
   const file=await resolvePrivateFile(media.path);
-  if(!file)return notFound();
+  if(!file){
+    const archived=archivedNeededBody(media.path);
+    if(archived)return NextResponse.json(archived,{status:409});
+    return notFound();
+  }
 
   try{
     const body=await fs.readFile(file);

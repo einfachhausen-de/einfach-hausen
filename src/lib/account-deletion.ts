@@ -3,6 +3,7 @@ import path from 'node:path';
 import { db } from './db';
 import { supabaseAdmin } from './auth';
 import { logSecurityEvent } from './security/audit';
+import { purgeUserArchiveState } from './byos-archive';
 import { privateRoot, publicRoot } from './security/private-files';
 
 // GDPR account lifecycle (EH T-0203): personal content is deleted, business
@@ -150,6 +151,10 @@ export async function deleteAccountData(userId: number): Promise<{ authSubject: 
     } catch { /* logged below via security event detail */ }
   }
   for (const stored of files) await unlinkStored(stored);
+  // BYOS-Archivzeilen und Cloud-Verknüpfung sterben mit dem Konto — die
+  // fremde Nutzer-Cloud selbst räumt die App beim nächsten Start per
+  // Manifest-Abgleich (Eintrag fehlt serverseitig → lokale Kopie löschen).
+  purgeUserArchiveState(userId);
   db.prepare("UPDATE data_requests SET status='completed',completed_at=CURRENT_TIMESTAMP WHERE id=(SELECT id FROM data_requests WHERE user_id=? AND kind='deletion' ORDER BY id DESC LIMIT 1)").run(userId);
   logSecurityEvent('account_delete', `user:${userId}`, `files=${files.length}`);
   return { authSubject: user.auth_subject, files: files.length };

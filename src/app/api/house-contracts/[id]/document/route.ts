@@ -5,6 +5,7 @@ import { getCurrentUser } from '@/lib/auth';
 import { isAdmin } from '@/lib/admin-auth';
 import { db } from '@/lib/db';
 import { parseArtifactId,resolvePrivateFile } from '@/lib/security/private-files';
+import { archivedNeededBody } from '@/lib/byos-archive';
 
 function notFound(){return new NextResponse('Not found',{status:404});}
 
@@ -28,7 +29,11 @@ export async function GET(_req:NextRequest,{params}:{params:Promise<{id:string}>
   if(!admin&&contract.homeowner_id!==user?.id)return notFound();
 
   const file=await resolvePrivateFile(contract.document_path);
-  if(!file)return notFound();
+  if(!file){
+    const archived=archivedNeededBody(contract.document_path);
+    if(archived)return NextResponse.json(archived,{status:409});
+    return notFound();
+  }
 
   try{
     const body=await fs.readFile(file);

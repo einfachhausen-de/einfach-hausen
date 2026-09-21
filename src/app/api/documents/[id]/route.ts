@@ -6,6 +6,7 @@ import { isAdmin } from '@/lib/admin-auth';
 import { db } from '@/lib/db';
 import { getProviderContext } from '@/lib/provider';
 import { canReadJobDocument,parseArtifactId,resolvePrivateFile } from '@/lib/security/private-files';
+import { archivedNeededBody } from '@/lib/byos-archive';
 
 function mime(file:string){
   const ext=path.extname(file).toLowerCase();
@@ -33,7 +34,11 @@ export async function GET(_req:NextRequest,{params}:{params:Promise<{id:string}>
   if(!canReadJobDocument(user,document.homeowner_id,context,document.document_provider,document.accepted_provider,document.contact_user_id,admin))return notFound();
 
   const file=await resolvePrivateFile(document.path);
-  if(!file)return notFound();
+  if(!file){
+    const archived=archivedNeededBody(document.path);
+    if(archived)return NextResponse.json(archived,{status:409});
+    return notFound();
+  }
 
   try{
     const body=await fs.readFile(file);

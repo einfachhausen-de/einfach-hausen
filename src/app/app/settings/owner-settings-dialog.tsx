@@ -33,6 +33,7 @@ import { EHFormSection, EHList } from "@/design-system";
 import { InstallAppCard } from "@/components/install-app-card";
 import { AccountActions } from "./account-actions";
 import { AiSettings } from "./ai-settings";
+import { CloudBackupCard } from "./cloud-backup-card";
 import { PwaSettingsStatus } from "./pwa-settings-status";
 import styles from "./settings.module.css";
 
@@ -188,6 +189,9 @@ export function OwnerSettingsDialog({
                 <EHFormSection title="App & Offline" description="Die App speichert keine privaten Seiten als Offline-Kopie.">
                   <InstallAppCard />
                   <PwaSettingsStatus />
+                </EHFormSection>
+                <EHFormSection title="Cloud-Backup" description="Große Originale liegen in deiner Cloud — Liste, Minibilder und Daten bleiben immer in der App.">
+                  <CloudBackupCard />
                 </EHFormSection>
               </section>
             </div>
