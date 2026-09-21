@@ -904,12 +904,15 @@ await clickAndWaitUrl(buyer,buyer.getByRole('button',{name:'Weiter'}),/\/app\/on
 await waitText(buyer,'Sag, über welchen Weg wir dich am besten erreichen.');
 await buyer.getByRole('button',{name:'Überspringen'}).click();
 await Promise.all([buyer.waitForURL('**/app?onboarding=done'),buyer.waitForLoadState('load')]);
-await waitText(buyer,'Was möchtest du für dein Zuhause klären?');
+// Dieselben Anker wie fuer den Eigentuemer: die Startseite ist die
+// EHOwnerSection-Komposition, "Was möchtest du für dein Zuhause klären?" gehoert
+// zu EHOwnerComposer, das keine Seite mehr rendert.
+await waitText(buyer,'Wartet auf dich'); await waitText(buyer,'Hausakte'); await waitText(buyer,'Nächste Termine');
 if(await buyer.getByText('Einrichtung unvollständig').count())throw new Error('Onboarding banner still shown after completion');
 await nav(buyer, buyer.url()); if(await buyer.getByText('Einrichtung unvollständig').count())throw new Error('Onboarding state did not persist after reload');
 // 12) Hausakte kann kontrolliert übergeben werden, private Vorgänge bleiben beim bisherigen Eigentümer.
 await nav(owner, base+'/app/home/history'); await owner.getByLabel('E-Mail des Käufers').fill(buyerEmail); await clickAndWaitUrl(owner,owner.getByRole('button',{name:'Übergabe vorbereiten'}),/transfer=/); const transferToken=new URL(owner.url()).searchParams.get('transfer'); if(!transferToken)throw new Error('House transfer token missing');
-await nav(buyer, base+'/app'); await waitText(buyer,'Was möchtest du für dein Zuhause klären?'); console.error('E2EDIAG buyer still authed before transfer accept');
+await nav(buyer, base+'/app'); await waitText(buyer,'Wartet auf dich'); await waitText(buyer,'Hausakte'); console.error('E2EDIAG buyer still authed before transfer accept');
 await waitForDomStable(buyer,'#owner-main-content',1);
 const buyerCookies=await buyerCtx.cookies(base+'/'); console.error('E2EDIAG buyer cookies:',JSON.stringify(buyerCookies.map(c=>c.name)));
 await nav(buyer, base+`/transfer/${transferToken}`); await waitText(buyer,'Hausakte übernehmen');
