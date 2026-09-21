@@ -147,6 +147,29 @@ async function nav(page,url,options){let response;try{response=await page.goto(u
 // Structural reads/writes can still race the hydration swap; retry until the
 // transient S:<n> tree is gone instead of failing the whole flow.
 async function strictRetry(page,fn,attempts=8){let lastError;for(let attempt=0;attempt<attempts;attempt++){try{return await fn();}catch(error){if(!String(error).includes('strict mode violation'))throw error;lastError=error;await page.waitForTimeout(600);}}throw lastError;}
+// Mobile navigation of the app surfaces. Every /app and /pro route renders
+// WerkbankRahmen (src/components/werkbank-rahmen.tsx) -> WerkbankShell, whose
+// sidebar opens as a Sheet on small viewports. The former
+// <details class="mobile-menu"> drawers in shell.tsx / owner-menu.tsx are not
+// rendered by any route any more, so asserting on them tested nothing but the
+// absence of a component that is still in the tree. These helpers assert the
+// navigation that actually reaches the user: the trigger in the top bar and the
+// links inside the sheet.
+const MOBILE_SIDEBAR='[data-mobile="true"]';
+async function openMobileSidebar(page,label){
+  const trigger=page.locator('[data-slot="sidebar-trigger"]').first();
+  await trigger.waitFor({timeout:30000});
+  await page.evaluate(()=>window.scrollTo(0,0));
+  await trigger.click();
+  await page.locator(MOBILE_SIDEBAR).first().waitFor({state:'visible',timeout:20000}).catch(()=>{throw new Error(`${label} mobile sidebar did not open`);});
+}
+async function mobileSidebarHrefs(page){
+  return await page.locator(`${MOBILE_SIDEBAR} a[href]`).evaluateAll(nodes=>nodes.map(node=>node.getAttribute('href')));
+}
+async function assertMobileSidebarCloses(page,label){
+  await page.keyboard.press('Escape');
+  await page.locator(MOBILE_SIDEBAR).first().waitFor({state:'hidden',timeout:10000}).catch(()=>{throw new Error(`${label} mobile sidebar did not close`);});
+}
 // A bare "has horizontal overflow" is impossible to act on: it does not say
 // which element is too wide. Report the boxes that stick out, and flag the
 // ones whose own content does not fit (scrollWidth > clientWidth) - that is
@@ -506,7 +529,17 @@ try{
   const afterWait=await manager.evaluate(()=>document.querySelectorAll('.app-page').length).catch(()=>-1);
   console.error('E2EDIAG app-page count after 3s:',afterWait);
   throw canvasError;
-} await manager.evaluate(()=>window.scrollTo(0,0)); const providerMenu=manager.locator('.mobile-menu'); await providerMenu.locator('summary').click(); if(!(await providerMenu.locator('.mobile-menu-panel').isVisible()))throw new Error('Provider mobile menu did not open'); await providerMenu.evaluate(el=>{el.open=false;});
+}
+// Partner-Navigation auf 390px: der Werkbank-Rahmen hat Pillen-Navi und
+// <details>-Drawer ersetzt, die Sidebar oeffnet mobil als Sheet. Geprueft wird
+// deshalb der Trigger in der Kopfzeile und dass das Sheet die echte
+// Partner-Navigation traegt - ein leeres Sheet wuerde "es oeffnet" bestehen.
+await openMobileSidebar(manager,'Provider');
+const providerHrefs=await mobileSidebarHrefs(manager);
+for(const href of ['/pro','/pro/orders','/pro/messages','/pro/team','/pro/profile']){
+  if(!providerHrefs.includes(href))throw new Error(`Provider mobile sidebar is missing ${href}`);
+}
+await assertMobileSidebarCloses(manager,'Provider');
 await manager.getByLabel('Firmenanschrift').fill('Gartenstraße 12, 46325 Borken'); await manager.getByLabel('Steuernummer').fill('307/1234/5678');
 // Partner onboarding completeness: region radius, weekly capacity, availability, team.
 const radiusInput=manager.getByLabel(/Einsatzradius/); if(await radiusInput.count())await radiusInput.fill('40');
@@ -559,23 +592,20 @@ await Promise.all([owner.waitForURL('**/app?onboarding=done'),owner.waitForLoadS
 if(await owner.getByText('Einrichtung unvollständig').count())throw new Error('Onboarding banner shown after completion');
 await assertNoOverflow(owner,'Mobile customer app');
 await nav(owner, base+'/app'); await waitText(owner,'Was möchtest du für dein Zuhause klären?'); await waitText(owner,'Als Nächstes');
-// Owner mobile navigation is the Notion drawer; the bottom tab bar is gone on owner mobile.
-const ownerDrawer=owner.locator('.mobile-menu');
-await owner.evaluate(()=>window.scrollTo(0,0));
-await ownerDrawer.locator('summary').click();
-const drawerPanel=ownerDrawer.locator('.side-menu.ehn-drawer');
-if(!(await drawerPanel.isVisible()))throw new Error('Mobile owner menu did not open');
-// The drawer mirrors the main navigation: five house areas, plus a separate
-// account block. It used to be five numbered sections of its own - which is
-// exactly the second, competing IA this drawer no longer carries.
-const drawerAreas=await ownerDrawer.locator('.sm-nav.ehn-acc').first().locator('.ehn-acc-sec').count();
-if(drawerAreas!==5)throw new Error(`Mobile homeowner drawer must expose five areas, got ${drawerAreas}`);
-const drawerKonto=await ownerDrawer.locator('nav[aria-label="Konto"]').locator('.ehn-acc-sec').count();
-if(drawerKonto<4)throw new Error(`Mobile homeowner drawer must expose an account block, got ${drawerKonto}`);
-if(await ownerDrawer.getByRole('button',{name:'Abmelden'}).count()<2)throw new Error('Drawer logout actions missing');
-const jobsSection=ownerDrawer.locator('.ehn-acc-sec').filter({hasText:'Aufträge'}); await jobsSection.locator('button.ehn-acc-head').click();
-await clickAndWaitUrl(owner,jobsSection.getByRole('button',{name:'Aufträge',exact:true}),/\/app\/jobs/);
-if(await drawerPanel.isVisible())throw new Error('Mobile owner menu did not close after navigation');
+// Owner mobile navigation: derselbe Werkbank-Rahmen, also dieselbe Sidebar.
+// Der frueher hier gepruefte Notion-Drawer (.mobile-menu / .ehn-drawer) wird von
+// keiner Route mehr gerendert. Was bleiben muss: fuenf Hausbereiche, ein eigener
+// Konto-Block und das Schliessen nach einer Navigation.
+await openMobileSidebar(owner,'Owner');
+const ownerHrefs=await mobileSidebarHrefs(owner);
+for(const href of ['/app','/app/home','/app/contracts','/app/jobs','/app/messages']){
+  if(!ownerHrefs.includes(href))throw new Error(`Mobile homeowner sidebar must expose the area ${href}`);
+}
+for(const href of ['/app/profile','/notifications','/app/hilfe']){
+  if(!ownerHrefs.includes(href))throw new Error(`Mobile homeowner sidebar must expose the account entry ${href}`);
+}
+await clickAndWaitUrl(owner,owner.locator(`${MOBILE_SIDEBAR} a[href="/app/jobs"]`).first(),/\/app\/jobs/);
+if(await owner.locator(MOBILE_SIDEBAR).first().isVisible())throw new Error('Mobile owner menu did not close after navigation');
 await nav(owner, base+'/app/profile'); await waitText(owner,'Einfach Hausen aufs Handy'); await assertNoOverflow(owner,'Mobile customer profile');
 await nav(owner, base+'/app/hausmeister'); await assertNoOverflow(owner,'Mobile housemaster');
 await sendHousemaster(owner,'Meine Hecke ist zu hoch. Dienstag ab 14 Uhr hätte ich Zeit. Wen kann ich dazu fragen?',/answered=1/);

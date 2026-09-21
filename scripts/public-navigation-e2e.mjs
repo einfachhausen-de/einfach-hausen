@@ -87,14 +87,36 @@ try {
   await wideLogin.goto(`${base}/login`, { waitUntil: 'networkidle' });
   const wideGeometry = await wideLogin.evaluate(() => {
     const rect = (selector) => document.querySelector(selector)?.getBoundingClientRect();
-    const grid = rect('.arena-auth');
+    const card = rect('.arena-card');
     const hero = rect('.arena-hero');
-    const card = rect('#login-card-container');
-    return { gridWidth: grid?.width || 0, heroWidth: hero?.width || 0, cardWidth: card?.width || 0 };
+    const form = rect('#login-card-container');
+    return {
+      viewportWidth: document.documentElement.clientWidth,
+      documentWidth: document.documentElement.scrollWidth,
+      cardWidth: card?.width || 0,
+      cardLeft: card?.x || 0,
+      heroLeft: hero?.x || 0,
+      heroWidth: hero?.width || 0,
+      formWidth: form?.width || 0,
+    };
   });
-  if (wideGeometry.gridWidth < 1500) throw new Error(`wide auth grid too narrow: ${wideGeometry.gridWidth}px`);
-  if (wideGeometry.heroWidth < 820) throw new Error(`wide auth trust panel too narrow: ${wideGeometry.heroWidth}px`);
-  if (wideGeometry.cardWidth < 500) throw new Error(`wide auth login card too narrow: ${wideGeometry.cardWidth}px`);
+  // The accepted wide auth screen is ONE centred composition: a ~1000px card
+  // holding the form column and the trust panel. It replaced a full-bleed
+  // two-column grid, which is what the earlier thresholds described - they asked
+  // the trust panel for >=820px, i.e. for a layout that no longer exists, while
+  // their sibling measured `.arena-auth`, which is only ever as wide as the
+  // viewport. These assertions describe the card the design actually is, and add
+  // the centring and the overflow that were never checked at this width.
+  if (wideGeometry.cardWidth < 900) throw new Error(`wide auth card too narrow: ${wideGeometry.cardWidth}px`);
+  if (wideGeometry.heroWidth < 400) throw new Error(`wide auth trust panel too narrow: ${wideGeometry.heroWidth}px`);
+  if (wideGeometry.formWidth < 380) throw new Error(`wide auth login column too narrow: ${wideGeometry.formWidth}px`);
+  const leftGap = wideGeometry.cardLeft;
+  const rightGap = wideGeometry.viewportWidth - (wideGeometry.cardLeft + wideGeometry.cardWidth);
+  if (Math.abs(leftGap - rightGap) > 2) throw new Error(`wide auth card is not centred: ${Math.round(leftGap)}px left vs ${Math.round(rightGap)}px right`);
+  if (wideGeometry.heroLeft < wideGeometry.cardLeft || wideGeometry.heroLeft + wideGeometry.heroWidth > wideGeometry.cardLeft + wideGeometry.cardWidth + 1) {
+    throw new Error('wide auth trust panel is not part of the auth card');
+  }
+  if (wideGeometry.documentWidth > wideGeometry.viewportWidth + 1) throw new Error(`wide auth screen overflows horizontally by ${wideGeometry.documentWidth - wideGeometry.viewportWidth}px`);
   await wide.close();
 
   const mobile = await browser.newContext({ viewport: { width: 390, height: 844 }, locale: 'de-DE' });
