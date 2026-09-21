@@ -768,7 +768,24 @@ for(let attempt=0;attempt<2;attempt++){ await nav(owner, base+invoiceHref,{timeo
 await waitText(owner,'Rechnungsbetrag'); await waitText(owner,'Gartenbau Müller'); await assertNoOverflow(owner,'Mobile invoice');
 await clickAndWaitUrl(owner,owner.getByRole('button',{name:'Rechnung bezahlen'}),/error=/); await waitText(owner,'Onlinezahlung ist gerade nicht verfügbar'); if(!(await owner.getByRole('button',{name:'Rechnung bezahlen'}).isVisible()))throw new Error('Unavailable payment path mutated invoice state');
 await nav(tech, base+`/pro/jobs/${jobId}`); const documentSection=tech.locator('form').filter({has:tech.getByLabel('Datei')}).first(); await documentSection.waitFor(); await documentSection.getByLabel('Titel').fill('Leistungsnachweis Heckenschnitt'); await documentSection.getByLabel('Dokumenttyp').selectOption('report'); await documentSection.getByLabel('Datei').setInputFiles({name:'nachweis.pdf',mimeType:'application/pdf',buffer:Buffer.from('%PDF-1.4\n% Einfach Hausen Test\n')}); await clickServerAction(tech,documentSection.getByRole('button',{name:'Dokument hochladen'}));
-await nav(owner, base+'/app/messages'); await waitText(owner,'Wähle einen Bereich. Danach das passende Gewerk.'); await owner.locator('a[data-main-category="garten"]').first().waitFor(); { const firstLevel=await owner.locator('body').innerText(); if(firstLevel.includes('Thomas Weber'))throw new Error('contacts must not appear on the category first level'); } await nav(owner, base+'/app/messages?mode=manage'); await waitText(owner,'Alle Kontakte an einem Ort'); await waitText(owner,'Thomas Weber'); const docRow=owner.locator('a[href*="entry="]').filter({hasText:'Thomas Weber'}).first(); await docRow.click(); await waitText(owner,'Leistungen');
+await nav(owner, base+'/app/messages'); await waitText(owner,'Wähle einen Bereich. Danach das passende Gewerk.'); await owner.locator('a[data-main-category="garten"]').first().waitFor(); {
+  // /app/messages ist kein Vollbild-Schritt mehr: die Seite rendert EHWorkspaceGrid
+  // mit dem Verzeichnis als Hauptspalte und einer Kontextspalte daneben
+  // (src/app/app/messages/page.tsx:119-157). Die alte Zusicherung las den ganzen
+  // Body und traf damit die Kontextspalte, nicht das Verzeichnis. Geprueft wird
+  // jetzt die Grenze, um die es geht: die Bereichsauswahl selbst darf keinen
+  // Kontakt nennen, und jeder Name in der Kontextspalte muss in einer begruendeten
+  // Liste stehen (ungelesen oder erreichbar) - kein ungefilterter Kontakt-Dump.
+  const directoryColumn=await owner.locator('[class*="workspaceGrid"] > div').first().innerText();
+  if(directoryColumn.includes('Thomas Weber'))throw new Error('The category level of the directory must not list contacts');
+  const asideSections=await owner.locator('[class*="workspaceGrid"] > aside [class*="workSection"]').evaluateAll(nodes=>nodes.map(node=>({title:node.querySelector('h2')?.textContent||'',text:node.innerText})));
+  const justified=['Ungelesene Nachrichten','Erreichbarkeit'];
+  const withContact=asideSections.filter(section=>section.text.includes('Thomas Weber'));
+  if(!withContact.length)throw new Error('Expected the contact in a justified aside list (unread or reachable)');
+  for(const section of withContact){
+    if(!justified.includes(section.title))throw new Error(`Contact name appears in an unjustified aside section: ${section.title}`);
+  }
+} await nav(owner, base+'/app/messages?mode=manage'); await waitText(owner,'Alle Kontakte an einem Ort'); await waitText(owner,'Thomas Weber'); const docRow=owner.locator('a[href*="entry="]').filter({hasText:'Thomas Weber'}).first(); await docRow.click(); await waitText(owner,'Leistungen');
 await nav(owner, base+'/app/documents'); await waitText(owner,'Leistungsnachweis Heckenschnitt');
 
 // 7a) Notification Center: server-side read-state sync, per-item toggles, pagination chrome.
@@ -823,7 +840,15 @@ await nav(owner, base+'/app/emergency'); await owner.getByLabel('Notfall').selec
 
 // 10) Servicefall bleibt zentral unterstützbar, ohne den direkten Kontakt zu ersetzen.
 await nav(owner, base+`/app/jobs/${jobId}`); await waitText(owner,'Wenn etwas nicht klappt'); await owner.getByPlaceholder('Beschreibe kurz, wo die Abstimmung festhängt.').fill('Die Ausführung soll von Einfach Hausen geprüft werden, weil noch eine Rückfrage zur Qualität offen ist.'); await clickServerAction(owner,owner.getByRole('button',{name:'Hausmeister einschalten'})); await waitText(owner,'Servicefall · Offen');
-await nav(admin, base+'/admin'); const claimCard=admin.locator('fieldset').filter({has:admin.locator('legend',{hasText:'Rückfrage zur Qualität'})}).first(); await claimCard.getByLabel('Status').selectOption('resolved'); await claimCard.getByPlaceholder('Rückmeldung / Entscheidung').fill('Fall geprüft und mit Kunde und Ansprechpartner geklärt.'); await clickServerAction(admin,claimCard.getByRole('button',{name:'Fall aktualisieren'})); await claimCard.locator('span[data-status="success"]').waitFor();
+await nav(admin, base+'/admin'); // Die Legende der Fallkarte ist der Auftragstitel (EHFormSection title={c.title},
+// src/app/admin/page.tsx:164), nicht der Text, den der Eigentuemer geschrieben
+// hat. Der Fall wird deshalb ueber seinen Abschnitt adressiert, und es wird
+// geprueft, dass genau ein Fall in der Warteschlange liegt.
+const claimSection=admin.locator('[class*="workSection"]').filter({has:admin.getByRole('heading',{name:'Servicefälle',exact:true})}).first();
+await claimSection.waitFor();
+const claimCards=claimSection.locator('fieldset');
+if(await claimCards.count()!==1)throw new Error(`Expected exactly one service case in the admin queue, got ${await claimCards.count()}`);
+const claimCard=claimCards.first(); await claimCard.getByLabel('Status').selectOption('resolved'); await claimCard.getByPlaceholder('Rückmeldung / Entscheidung').fill('Fall geprüft und mit Kunde und Ansprechpartner geklärt.'); await clickServerAction(admin,claimCard.getByRole('button',{name:'Fall aktualisieren'})); await claimCard.locator('span[data-status="success"]').waitFor();
 
 // 11) CRM-Lifecycle ist im integrierten Produkt erreichbar und kennt den registrierten Partner.
 await nav(admin, base+`/admin/crm?q=${encodeURIComponent('Gartenbau Müller')}`); await waitText(admin,'Leads & Outreach CRM'); await waitText(admin,'Gartenbau Müller'); await assertNoOverflow(admin,'Admin CRM');
