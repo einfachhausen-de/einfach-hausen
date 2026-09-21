@@ -1,10 +1,8 @@
-import { CalendarDays, FileText, MessageSquare } from 'lucide-react';
+import { CalendarDays, FileText } from 'lucide-react';
 import { WerkbankRahmen } from '@/components/werkbank-rahmen';
 import {
   EHFormFeedback,
-  EHManagerAttention,
   EHManagerAutomations,
-  EHMetricsBar,
   EHPageHeader,
   EHRecordList,
   EHWorkSection,
@@ -28,16 +26,6 @@ export default async function Hausmanager({
   const property = primaryProperty(user.id);
   const houseLabel = property?.address || '';
 
-  const threads = db
-    .prepare(
-      `SELECT t.id, t.updated_at,
-        (SELECT COUNT(*) FROM assistant_messages m WHERE m.thread_id = t.id) message_count
-      FROM assistant_threads t
-      WHERE t.user_id = ? AND t.channel = 'app'
-      ORDER BY t.updated_at DESC LIMIT 3`,
-    )
-    .all(user.id) as { id: number; updated_at: string; message_count: number }[];
-
   const quotedJobs = db
     .prepare(
       `SELECT j.id, j.title,
@@ -59,17 +47,6 @@ export default async function Hausmanager({
     : []) as { id: number; title: string; due_date: string }[];
 
   const prefs = getAutomationPrefs(user.id);
-  const attention = [
-    ...dueMaintenance.map((task) => `${task.title} (${dateLabel(task.due_date)})`),
-    ...quotedJobs.map((job) => `${job.title}: ${job.quote_count} ${job.quote_count === 1 ? 'Angebot' : 'Angebote'} prüfen`),
-  ];
-  const threadItems: EHRecordEntry[] = threads.map((thread) => ({
-    id: String(thread.id),
-    title: `Gespräch vom ${dateLabel(thread.updated_at)}`,
-    detail: `${thread.message_count} ${thread.message_count === 1 ? 'Nachricht' : 'Nachrichten'}`,
-    href: '/app/hausmeister',
-    icon: <MessageSquare aria-hidden="true" size={20} />,
-  }));
   const taskItems: EHRecordEntry[] = [
     ...dueMaintenance.map((task) => ({
       id: `maintenance-${task.id}`,
@@ -95,24 +72,12 @@ export default async function Hausmanager({
       <EHWorkflowStack>
       <EHPageHeader title="Hausmanager" context={houseLabel || undefined} />
 
-      <EHManagerAttention items={attention} actionHref="/app/hausmeister" actionLabel="Ansehen" />
-
       {sp.prefs === 'saved' && (
-        <EHFormFeedback kind="success">Automatisierungen gespeichert.</EHFormFeedback>
+        <EHFormFeedback kind="success">Erinnerungen gespeichert.</EHFormFeedback>
       )}
-
-      <EHMetricsBar label="Hausmanager" items={[
-        {id:'gespraeche',label:'Letzte Gespräche',value:threads.length},
-        {id:'wartung',label:'Wartungen fällig',value:dueMaintenance.length},
-        {id:'angebote',label:'Angebote zu prüfen',value:quotedJobs.length},
-      ]} />
 
       <EHWorkSection title="Anstehende Aufgaben">
         <EHRecordList label="Anstehende Aufgaben" items={taskItems} empty="Aktuell nichts fällig. Neue Aufgaben erscheinen hier automatisch." />
-      </EHWorkSection>
-
-      <EHWorkSection title="Letzte Gespräche">
-        <EHRecordList label="Letzte Gespräche" items={threadItems} empty="Noch keine Gespräche. Starte unten beim Hausmeister." />
       </EHWorkSection>
 
       <EHManagerAutomations

@@ -1,4 +1,4 @@
-import { EHActions, EHButton, EHEmptyState, EHMetricsBar, EHPageHeader, EHRecordList, EHRecordViews, EHRouteTabs, EHStatus, EHSubmitButton, EHText, EHWorkSection, EHWorkspaceGrid, EHWorkflowStack } from '@/design-system';
+import { EHButton, EHEmptyState, EHMetricsBar, EHPageHeader, EHRecordList, EHStatus, EHSubmitButton, EHText, EHWorkSection, EHWorkspaceGrid, EHWorkflowStack } from '@/design-system';
 import { completeMaintenanceTaskAction } from '@/app/actions';
 import { requireUser } from '@/lib/auth';
 import { db } from '@/lib/db';
@@ -9,7 +9,6 @@ import { WerkbankRahmen } from '@/components/werkbank-rahmen';
 type Task = { id: number; title: string; category: string; due_date: string; status: string };
 type Job = { id: number; title: string; preferred_date: string; status: string };
 type OpenInvoice = { id: number; invoice_number: string; total_gross: number; issue_date: string; due_date: string; title: string; business_name: string | null };
-type LastJob = { id: number; title: string; completed_at: string };
 const berlinDay = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Berlin', year: 'numeric', month: '2-digit', day: '2-digit' });
 
 export default async function YearPage({ searchParams }: {
@@ -54,14 +53,6 @@ export default async function YearPage({ searchParams }: {
     WHERE property_id=? AND homeowner_id=? AND status='open' AND due_date>=? AND due_date<? AND due_date<?
   `).get(property.id, user.id, start, end, today) as { c: number }).c : 0;
 
-  // Der letzte abgeschlossene Vorgang des Jahres ist der Anker der rechten
-  // Spalte - im Plan wie in der Historie derselbe Begriff.
-  const lastJob = db.prepare(`
-    SELECT id,title,updated_at completed_at FROM jobs
-    WHERE homeowner_id=? AND request_kind='service' AND status='completed' AND updated_at>=? AND updated_at<?
-    ORDER BY updated_at DESC LIMIT 1
-  `).get(user.id, start, end) as LastJob | undefined;
-
   const taskItems = (rows: Task[]) => rows.map(task => ({
     id: String(task.id),
     title: task.title,
@@ -80,34 +71,36 @@ export default async function YearPage({ searchParams }: {
 
   return <WerkbankRahmen role="homeowner" active="/app/year">
     <EHWorkflowStack>
-    <EHPageHeader title="Mein Jahr" context={`${view === 'plan' ? 'Plan' : 'Historie'} ${year}`} actions={<EHButton href="/app/hausmeister" arrow>Neue Aufgabe planen</EHButton>} />
-    <EHMetricsBar label="Mein Jahr" items={[
-      { id: 'wartungen', label: 'Wartungen', value: String(tasks.length), hint: view === 'history' ? 'nach Fälligkeit' : 'offen im gewählten Jahr' },
-      { id: 'auftraege', label: 'Aufträge', value: String(jobs.length), hint: view === 'history' ? 'nach letzter Aktualisierung' : 'mit Datum im Jahr' },
+    <EHPageHeader title="Mein Jahr" context={`${view === 'plan' ? 'Plan' : 'Erledigt'} ${year}`} actions={<EHButton href="/app/hausmeister" arrow>Neue Aufgabe planen</EHButton>} />
+    <EHMetricsBar label="Mein Jahr" items={view === 'plan' ? [
+      { id: 'offen', label: 'Noch offen', value: String(remaining.length), hint: 'Aufgaben in diesem Jahr' },
       { id: 'ueberfaellig', label: 'Überfällig', value: String(overdueCount), hint: overdueCount > 0 ? 'vor heute fällig' : 'nichts überfällig' },
-      { id: 'offen', label: 'Offene Posten', value: String(openInvoices.length), hint: openInvoices.length > 0 ? `${euroExact(openTotal)} offen` : 'nichts offen' },
+    ] : [
+      { id: 'erledigt', label: 'Erledigt', value: String(tasks.length), hint: 'Pflege in diesem Jahr' },
+      { id: 'auftraege', label: 'Aufträge erledigt', value: String(jobs.length), hint: 'in diesem Jahr' },
     ]} />
     <nav aria-label="Jahr auswählen">
-      <EHActions>
-        {year > 1900 && <EHButton variant="secondary" href={`/app/year?view=${view}&year=${year - 1}`}>← {year - 1}</EHButton>}
-        <EHButton variant="secondary" href={`/app/year?view=${view}&year=${currentYear}`}>Aktuelles Jahr · {currentYear}</EHButton>
-        {year < 9998 && <EHButton variant="secondary" href={`/app/year?view=${view}&year=${year + 1}`}>{year + 1} →</EHButton>}
-      </EHActions>
+      <EHRecordList label="Jahr" items={[
+        { id: 'dieses', title: `Dieses Jahr · ${currentYear}`, href: `/app/year?view=${view}&year=${currentYear}` },
+        ...(year !== currentYear - 1 ? [{ id: 'letztes', title: `Letztes Jahr · ${currentYear - 1}`, href: `/app/year?view=${view}&year=${currentYear - 1}` }] : []),
+      ]} />
     </nav>
-    <EHRouteTabs label="Jahresansicht" items={[
-      { href: `/app/year?view=plan&year=${year}`, label: 'Plan', active: view === 'plan' },
-      { href: `/app/year?view=history&year=${year}`, label: 'Historie', active: view === 'history' },
-    ]} />
+    <nav aria-label="Jahresansicht">
+      <EHRecordList label="Ansicht" items={[
+        { id: 'plan', title: `Plan ${year}`, detail: 'Was ansteht', href: `/app/year?view=plan&year=${year}`, status: view === 'plan' ? <EHStatus tone="info">Hier</EHStatus> : undefined },
+        { id: 'done', title: `Erledigt ${year}`, detail: 'Was geschafft ist', href: `/app/year?view=history&year=${year}`, status: view !== 'plan' ? <EHStatus tone="info">Hier</EHStatus> : undefined },
+      ]} />
+    </nav>
     <EHWorkspaceGrid main={<>
-      <EHWorkSection title={view === 'plan' ? `Wartungen · ${year}` : `Erledigte Wartungen · ${year}`}>
+      <EHWorkSection title={view === 'plan' ? `Pflege · ${year}` : `Erledigte Pflege · ${year}`}>
         {shownTasks.length > 0
-          ? <EHRecordViews label={view === 'plan' ? 'Geplante Wartungen' : 'Erledigte Wartungen'} storageKey="jahr-wartung" defaultView={view === 'history' ? 'chronik' : 'liste'} switcherLabel="Wartungen: Ansicht wechseln" items={taskItems(shownTasks)} />
-          : <EHEmptyState title={view === 'plan' ? 'Keine weiteren Wartungen geplant' : 'Keine erledigten Wartungen in diesem Fälligkeitsjahr'} text={view === 'plan' ? 'Hinterlege deine Technik in „Mein Haus“ oder plane ein Anliegen über den Hausmeister.' : 'Abgeschlossene Wartungen bleiben hier erhalten. Prüfe bei Bedarf ein anderes Jahr.'} />}
+          ? <EHRecordList label={view === 'plan' ? 'Geplante Pflege' : 'Erledigte Pflege'} items={taskItems(shownTasks)} />
+          : <EHEmptyState title={view === 'plan' ? 'Keine weiteren Pflegepunkte geplant' : 'Nichts erledigt in diesem Jahr'} text={view === 'plan' ? 'Hinterlege deine Technik in „Mein Haus“ oder plane ein Anliegen über den Hausmeister.' : 'Abgeschlossene Pflege bleibt hier erhalten.'} />}
       </EHWorkSection>
       <EHWorkSection title={view === 'plan' ? `Aufträge · ${year}` : `Erledigte Aufträge · ${year}`}>
         {jobs.length === 0
-          ? <EHEmptyState title={view === 'plan' ? 'Keine Aufträge mit geplantem Datum in diesem Jahr' : 'Keine abgeschlossenen Aufträge in diesem Jahr'} text="Alle deine Anfragen und Aufträge findest du unabhängig vom Jahr in der Auftragsübersicht." />
-          : <EHRecordViews label="Aufträge im gewählten Jahr" storageKey="jahr-auftraege" defaultView={view === 'history' ? 'chronik' : 'liste'} switcherLabel="Aufträge im Jahr: Ansicht wechseln" items={jobs.map(job => ({
+          ? <EHEmptyState title={view === 'plan' ? 'Keine Aufträge mit Datum in diesem Jahr' : 'Keine abgeschlossenen Aufträge in diesem Jahr'} text="Alle deine Anfragen und Aufträge findest du unabhängig vom Jahr in der Auftragsübersicht." />
+          : <EHRecordList label="Aufträge im gewählten Jahr" items={jobs.map(job => ({
               id: String(job.id),
               title: job.title,
               detail: 'Auftrag',
@@ -116,18 +109,11 @@ export default async function YearPage({ searchParams }: {
               status: job.status === 'completed' ? <EHStatus tone="success">Erledigt</EHStatus> : undefined,
               href: `/app/jobs/${job.id}`,
             }))} />}
-        <EHActions><EHButton variant="secondary" href="/app/jobs">Alle Aufträge öffnen</EHButton></EHActions>
+        <EHButton variant="secondary" href="/app/jobs">Alle Aufträge öffnen</EHButton>
       </EHWorkSection>
     </>} aside={<>
-      <EHWorkSection title={`Letzter Vorgang · ${year}`}>
-        {lastJob ? <>
-          <EHText>{dateLabel(lastJob.completed_at)}</EHText>
-          <EHStatus tone="success">Erledigt</EHStatus>
-          <EHButton href={`/app/jobs/${lastJob.id}`} variant="secondary" arrow>{lastJob.title}</EHButton>
-        </> : <EHText muted>In {year} wurde kein Auftrag abgeschlossen. Laufende Vorgänge stehen unter Aufträge.</EHText>}
-      </EHWorkSection>
-      <EHWorkSection title={`Offene Posten · ${year}`}>
-        <EHRecordList label={`Offene Posten ${year}`} empty={`Keine offenen Rechnungen mit Rechnungsdatum in ${year}.`} items={openInvoices.map(invoice => ({
+      <EHWorkSection title={`Noch zu zahlen · ${year}`}>
+        <EHRecordList label={`Noch zu zahlen ${year}`} empty={`Keine offenen Rechnungen mit Rechnungsdatum in ${year}.`} items={openInvoices.map(invoice => ({
           id: String(invoice.id),
           title: `Rechnung ${invoice.invoice_number}`,
           detail: [invoice.business_name, invoice.title, `fällig ${dateLabel(invoice.due_date)}`].filter(Boolean).join(' · '),
@@ -138,10 +124,6 @@ export default async function YearPage({ searchParams }: {
           href: `/app/invoices/${invoice.id}`,
         }))} />
         {openInvoices.length > 0 && <EHText muted>{openInvoices.length} {openInvoices.length === 1 ? 'Rechnung' : 'Rechnungen'} · {euroExact(openTotal)} noch offen.</EHText>}
-      </EHWorkSection>
-      <EHWorkSection title="Hausakte">
-        <EHText muted>Frühere Arbeiten, Wartungen und Nachweise zu deinem Zuhause sammelt die Haus-Historie – unabhängig vom gewählten Jahr.</EHText>
-        <EHButton href="/app/home/history" variant="secondary" arrow>Zur Haus-Historie</EHButton>
       </EHWorkSection>
     </>} />
     </EHWorkflowStack>

@@ -1,8 +1,7 @@
 import Link from 'next/link';
-import { HausmeisterAssistant } from '@/components/homeowner/hausmeister-assistant';
 import { createConsultationAction } from '@/app/actions';
 import { requireUser } from '@/lib/auth';
-import { EHButton, EHPageHeader, EHPanel, EHErrorState, EHField, EHTextarea, EHFileInput, EHSubmitButton, EHFormFeedback, EHMetricsBar, EHRecordList, EHStatus, EHText, EHWorkSection, EHWorkspaceGrid, EHWorkflowStack, type EHRecordEntry } from '@/design-system';
+import { EHPageHeader, EHErrorState, EHField, EHTextarea, EHFileInput, EHSubmitButton, EHFormFeedback, EHRecordList, EHStatus, EHText, EHWorkSection, EHWorkspaceGrid, EHWorkflowStack, type EHRecordEntry } from '@/design-system';
 import { db } from '@/lib/db';
 import { dateLabel, statusLabel } from '@/lib/format';
 import { WerkbankRahmen } from '@/components/werkbank-rahmen';
@@ -17,16 +16,12 @@ export default async function Consultation({ searchParams }: { searchParams: Pro
     ? db.prepare(`SELECT id FROM jobs WHERE id=? AND homeowner_id=? AND request_kind='contact'`).get(successId, user.id) as { id: number } | undefined
     : undefined;
 
-  // Kennzahlen und rechte Spalte zaehlen dieselben Kontaktanfragen - eine
-  // Beratung ist ausdruecklich kein Auftrag und traegt keinen Preis.
+  // Eine Beratung ist ausdruecklich kein Auftrag und traegt keinen Preis.
   const requests = db.prepare(`SELECT id,title,status,created_at,updated_at FROM jobs WHERE homeowner_id=? AND request_kind='contact' ORDER BY created_at DESC`).all(user.id) as ContactRequest[];
-  const openCount = requests.filter(request => request.status === 'open').length;
-  const inContactCount = requests.filter(request => request.status !== 'open' && request.status !== 'cancelled').length;
-  const lastRequest = requests[0];
   const requestItems: EHRecordEntry[] = requests.slice(0, 5).map(request => ({
     id: String(request.id),
     title: request.title,
-    detail: 'Kontaktauftrag · kein Auftrag, kein Preis',
+    detail: 'Beratung · kostenlos, kein Auftrag',
     date: String(request.created_at).slice(0, 10),
     dateLabel: dateLabel(request.created_at),
     status: <EHStatus tone={request.status === 'open' ? 'info' : request.status === 'cancelled' ? 'neutral' : 'success'}>{statusLabel(request.status)}</EHStatus>,
@@ -35,33 +30,25 @@ export default async function Consultation({ searchParams }: { searchParams: Pro
 
   return <WerkbankRahmen role="homeowner" active="/app">
     <EHWorkflowStack>
-    <EHPageHeader title="Beratung" context={lastRequest ? `Letzter Auftrag ${dateLabel(lastRequest.created_at)}` : 'Noch kein Auftrag'} />
-    <EHMetricsBar label="Beratung" items={[
-      { id: 'anfragen', label: 'Aufträge', value: String(requests.length), hint: 'seit Beginn' },
-      { id: 'offen', label: 'Offen', value: String(openCount), hint: openCount > 0 ? 'warten auf Antwort' : 'nichts offen' },
-      { id: 'kontakt', label: 'In Absprache', value: String(inContactCount), hint: 'mit einem Ansprechpartner' },
-      { id: 'letzte', label: 'Letzter Auftrag', value: lastRequest ? dateLabel(lastRequest.created_at) : '–', hint: lastRequest ? statusLabel(lastRequest.status) : 'noch keine' },
-    ]} />
+    <EHPageHeader title="Beratung" context={requests.length === 0 ? 'Stell deine erste Frage' : `${requests.length} ${requests.length === 1 ? 'Frage' : 'Fragen'} gestellt`} />
     <EHWorkspaceGrid main={<>
       {sp.error && <EHErrorState text={sp.error} />}
-      {created && <EHFormFeedback kind="success">Kontaktauftrag angelegt. Es wurde kein Auftrag und kein Preis erstellt. <Link href={`/app/jobs/${created.id}`}>Auftrag ansehen</Link></EHFormFeedback>}
-      <EHPanel title="Beratungs-Auftrag">
+      {created && <EHFormFeedback kind="success">Notiert. Ein Mensch meldet sich bei dir — Auftrag und Preis entstehen erst, wenn du das ausdrücklich willst. <Link href={`/app/jobs/${created.id}`}>Ansehen</Link></EHFormFeedback>}
+      <EHWorkSection title="Wobei brauchst du Rat?">
       <form action={createConsultationAction}>
-        <EHField id="con-desc" label="Wobei brauchst du Rat?"><EHTextarea id="con-desc" name="description" rows={6} minLength={4} maxLength={8000} required placeholder="Zum Beispiel: Mein Dach ist an einer Stelle feucht. Was könnte die Ursache sein?"/></EHField>
-        <div className="eh-werkbank-filefield"><EHField id="con-photo" label="Foto oder Video (optional)" hint="JPEG, PNG, WebP oder HEIC bis 8 MB; MP4, WebM, MOV oder M4V bis 25 MB."><EHFileInput id="con-photo" name="photo" accept="image/jpeg,image/png,image/webp,image/heic,video/mp4,video/webm,video/quicktime,video/x-m4v"/></EHField></div>
+        <EHField id="con-desc" label="Deine Frage"><EHTextarea id="con-desc" name="description" rows={6} minLength={4} maxLength={8000} required placeholder="Zum Beispiel: Mein Dach ist an einer Stelle feucht. Was könnte die Ursache sein?"/></EHField>
+        <div className="eh-werkbank-filefield"><EHField id="con-photo" label="Foto dazu (optional)"><EHFileInput id="con-photo" name="photo" accept="image/jpeg,image/png,image/webp,image/heic,video/mp4,video/webm,video/quicktime,video/x-m4v"/></EHField></div>
+        <EHText muted>Kostenlos und unverbindlich. Erst wenn du danach einen Auftrag willst, sprechen wir über Termin und Preis.</EHText>
         <EHSubmitButton>Ansprechpartner finden</EHSubmitButton>
       </form>
-      </EHPanel>
-      <HausmeisterAssistant showConsultationLink={false}/>
+      </EHWorkSection>
+      <EHText muted>Lieber erst mit dem Hausmeister sprechen? <Link href="/app/hausmeister">Hier geht es zum Chat</Link>.</EHText>
     </>} aside={<>
-      <EHWorkSection title="Deine letzten Aufträge">
-        <EHRecordList label="Deine letzten Aufträge" items={requestItems} empty="Noch kein Beratungsauftrag. Beschreibe links dein Thema – daraus entsteht kein Auftrag und kein Preis." />
-        <EHButton href="/app/jobs" variant="secondary" arrow>Alle Vorgänge ansehen</EHButton>
+      <EHWorkSection title="Deine Fragen">
+        <EHRecordList label="Deine Fragen" items={requestItems} empty="Noch keine Frage gestellt. Beschreibe links dein Thema." />
       </EHWorkSection>
       <EHWorkSection title="So geht es weiter">
-        <EHText muted>Wir suchen einen passenden Ansprechpartner. Erst wenn du danach ausdrücklich einen Auftrag möchtest, entstehen Termin und Preis.</EHText>
-        <EHText muted>Deine Beschreibung bleibt als Auftrag erhalten und ist jederzeit auffindbar.</EHText>
-        <EHButton href="/app/hausmeister" variant="secondary" arrow>Auftrag organisieren</EHButton>
+        <EHText muted>Wir suchen einen passenden Menschen für deine Frage. Auftrag und Preis entstehen erst, wenn du das danach ausdrücklich willst.</EHText>
       </EHWorkSection>
     </>} />
     </EHWorkflowStack>

@@ -1,4 +1,3 @@
-import type { CSSProperties } from 'react';
 import '@/components/werkbank-layout.css';
 import Link from 'next/link';
 import { WerkbankRahmen } from '@/components/werkbank-rahmen';
@@ -7,7 +6,7 @@ import { requireUser } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { euroExact, statusLabel } from '@/lib/format';
 import { ownerDate, ownerInstant } from '@/lib/owner-format';
-import { JobsAnsicht, JobsAnsichtSwitcher, type JobAnsichtRow } from './jobs-ansicht';
+import { JobsAnsicht, type JobAnsichtRow } from './jobs-ansicht';
 
 type SearchParams = Record<string, string | string[] | undefined>;
 
@@ -78,22 +77,6 @@ function shortDay(value: string): string {
   const instant = isDay ? new Date(`${raw}T12:00:00Z`) : ownerInstant(raw);
   if (!instant) return raw.slice(0, 10);
   return new Intl.DateTimeFormat('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit' }).format(instant);
-}
-
-function appointmentParts(value: string): { day: string; time: string } {
-  const instant = ownerInstant(value);
-  if (!instant) return { day: ownerDate(value), time: '' };
-  return {
-    day: new Intl.DateTimeFormat('de-DE', { timeZone: 'Europe/Berlin', weekday: 'short', day: '2-digit', month: '2-digit' }).format(instant),
-    time: new Intl.DateTimeFormat('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' }).format(instant),
-  };
-}
-
-function upcomingAppointments(jobs: JobRow[]): JobRow[] {
-  const nowMs = Date.now();
-  return jobs
-    .filter((job) => job.appointment_start && (ownerInstant(job.appointment_start)?.getTime() ?? 0) >= nowMs)
-    .sort((a, b) => (ownerInstant(a.appointment_start)?.getTime() ?? 0) - (ownerInstant(b.appointment_start)?.getTime() ?? 0));
 }
 
 /**
@@ -181,10 +164,6 @@ export default async function Jobs({
     )
     .all(user.id) as JobRow[];
 
-  const openJobs = jobs.filter((job) =>
-    ['open', 'quoted', 'accepted'].includes(job.status),
-  );
-
   const inProgressJobs = jobs.filter(
     (job) => job.status === 'in_progress',
   );
@@ -195,10 +174,9 @@ export default async function Jobs({
 
   const currentJobs = view === 'completed' ? completedJobs
     : view === 'in_progress' ? inProgressJobs
-    : view === 'open' ? openJobs
     : jobs.filter(job => !['completed', 'cancelled'].includes(job.status));
-  const currentView = ['open','in_progress','completed'].includes(view) ? view : 'current';
-  const viewTitle = currentView === 'completed' ? 'Abgeschlossene Aufträge' : currentView === 'in_progress' ? 'Aufträge in Arbeit' : currentView === 'open' ? 'Offene Aufträge' : 'Aktuelle Aufträge';
+  const currentView = ['in_progress','completed'].includes(view) ? view : 'current';
+  const viewTitle = currentView === 'completed' ? 'Abgeschlossene Aufträge' : currentView === 'in_progress' ? 'Aufträge in Arbeit' : 'Aktuelle Aufträge';
   const filterHref = (nextView: string) => {
     const next = new URLSearchParams();
     if (nextView !== 'current') next.set('view',nextView);
@@ -221,21 +199,9 @@ export default async function Jobs({
       )
     : currentJobs;
 
-  const quotedJobs = jobs.filter((job) => job.status === 'quoted');
-  const upcoming = upcomingAppointments(jobs);
   const jobTitle = (job: JobRow) => job.title.replace(/^Ansprechpartner:\s*/, '');
-  const total = jobs.length;
-  const statusParts = [
-    { id: 'quoted', label: 'Braucht dich', count: quotedJobs.length, tone: 'terra' },
-    { id: 'progress', label: 'In Arbeit', count: inProgressJobs.length, tone: 'petrol' },
-    { id: 'done', label: 'Abgeschlossen', count: completedJobs.length, tone: 'ok' },
-    { id: 'open', label: 'Offen', count: jobs.filter((job) => job.status === 'open').length, tone: 'line' },
-    { id: 'accepted', label: statusLabel('accepted'), count: jobs.filter((job) => job.status === 'accepted').length, tone: 'petrol' },
-    { id: 'cancelled', label: statusLabel('cancelled'), count: jobs.filter((job) => job.status === 'cancelled').length, tone: 'line' },
-  ].filter((part) => part.count > 0);
   const filters = [
     { href: filterHref('current'), label: 'Aktuell', active: currentView === 'current' },
-    { href: filterHref('open'), label: 'Offen', count: openJobs.length, active: currentView === 'open' },
     { href: filterHref('in_progress'), label: 'In Arbeit', count: inProgressJobs.length, active: currentView === 'in_progress' },
     { href: filterHref('completed'), label: 'Abgeschlossen', count: completedJobs.length, active: currentView === 'completed' },
   ];
@@ -244,8 +210,8 @@ export default async function Jobs({
     id: String(job.id),
     href: `/app/jobs/${job.id}`,
     title: jobTitle(job),
-    numberLine: `Nr. ${job.id} · ${shortDay(job.created_at)}`,
-    business: job.accepted_business || '–',
+    numberLine: `Auftrag ${job.id} · ${shortDay(job.created_at)}`,
+    business: job.accepted_business || 'Noch kein Betrieb',
     statusLabel: jobStatusCopy(job),
     tone: jobStatusTone(job.status),
     amount: typeof job.amount === 'number' ? euroExact(job.amount) : '–',
@@ -255,39 +221,7 @@ export default async function Jobs({
     note: jobScheduleCopy(job),
   }));
 
-  return <WerkbankRahmen role="homeowner" active="/app/jobs" searchLabel="Auftrag oder Betrieb" rail={<>
-      <p className="eh-werkbank-rail-h">Kontext dieser Seite</p>
-      <div className="eh-werkbank-karte">
-        <h4>Status</h4>
-        {total > 0 && (
-          <div className="eh-werkbank-stack" aria-hidden="true">
-            {statusParts.map((part) => (
-              <span
-                key={part.id}
-                className={`eh-werkbank-anteil-${part.tone}`}
-                style={{ '--eh-anteil': `${(part.count / total) * 100}%` } as CSSProperties}
-              />
-            ))}
-          </div>
-        )}
-        {statusParts.map((part) => (
-          <div key={part.id} className="eh-werkbank-row"><span>{part.label}</span><span>{part.count}</span></div>
-        ))}
-        {total === 0 && <p className="eh-werkbank-leer">Noch keine Aufträge.</p>}
-      </div>
-      <div className="eh-werkbank-karte">
-        <h4>Nächste Termine</h4>
-        {upcoming.length ? upcoming.map((job) => {
-          const parts = appointmentParts(job.appointment_start as string);
-          return (
-            <Link key={`${job.id}-${job.appointment_start}`} href={`/app/jobs/${job.id}`} className="eh-werkbank-item">
-              <span><b>{parts.day}</b><small>{parts.time}</small></span>
-              <span>{job.accepted_business || jobTitle(job)}</span>
-            </Link>
-          );
-        }) : <p className="eh-werkbank-leer">Kein bestätigter Termin in deinen Aufträgen. Ein Wunschtermin steht in der Zeile des jeweiligen Auftrags.</p>}
-      </div>
-    </>}>
+  return <WerkbankRahmen role="homeowner" active="/app/jobs" searchLabel="Auftrag oder Betrieb">
     
     <header className="eh-werkbank-kopf">
       <div className="eh-werkbank-kopf-copy">
@@ -295,11 +229,10 @@ export default async function Jobs({
         <span>{`${jobs.length} ${jobs.length === 1 ? 'Auftrag' : 'Aufträge'}`}</span>
       </div>
       <div className="eh-werkbank-kopf-tools">
-        <JobsAnsichtSwitcher />
         <Link className="eh-werkbank-kopf-cta" href="/app/hausmeister">+ Anliegen</Link>
       </div>
     </header>
-    <EHOwnerSearch action="/app/jobs" query={firstParam(params.q)} placeholder="Auftrag, Gewerk oder Betrieb" hidden={currentView === 'current' ? undefined : {name:'view',value:currentView}} />
+    <EHOwnerSearch action="/app/jobs" query={firstParam(params.q)} placeholder="Auftrag, Bereich oder Betrieb" hidden={currentView === 'current' ? undefined : {name:'view',value:currentView}} />
     <nav className="eh-werkbank-chips" aria-label="Aufträge filtern">
       {filters.map((item) => (
         <Link key={item.href} href={item.href} className="eh-werkbank-chip" aria-current={item.active ? 'page' : undefined}>

@@ -1,4 +1,4 @@
-import { CalendarDays, ClipboardList, MessageCircle, Wrench } from 'lucide-react';
+import { CalendarDays, ClipboardList, MessageCircle, PhoneCall, Wrench } from 'lucide-react';
 import { WerkbankRahmen } from '@/components/werkbank-rahmen';
 import { requireUser } from '@/lib/auth';
 import { db } from '@/lib/db';
@@ -7,9 +7,10 @@ import { EHButton, EHCallout, EHMetricsBar, EHPageHeader, EHRecordList, EHStatus
 
 const NEXT_STEPS: EHRecordEntry[] = [
   { id: 'request', title: 'Anliegen beschreiben', href: '/app/hausmeister', icon: <Wrench size={20} /> },
-  { id: 'order', title: 'Auftrag prüfen', href: '/app/jobs', icon: <ClipboardList size={20} /> },
+  { id: 'order', title: 'Aufträge ansehen', href: '/app/jobs', icon: <ClipboardList size={20} /> },
   { id: 'appointment', title: 'Termin nachsehen', href: '/app/calendar', icon: <CalendarDays size={20} /> },
-  { id: 'contact', title: 'Absprache wiederfinden', href: '/app/messages', icon: <MessageCircle size={20} /> },
+  { id: 'contact', title: 'Nachricht suchen', href: '/app/messages', icon: <MessageCircle size={20} /> },
+  { id: 'emergency', title: 'Notfall melden', href: '/app/emergency', icon: <PhoneCall size={20} /> },
 ];
 
 type OpenJob = { id: number; title: string; status: string; created_at: string };
@@ -18,18 +19,16 @@ type OpenInvoice = { id: number; invoice_number: string; total_gross: number; du
 export default async function HilfePage() {
   const user = await requireUser('homeowner');
 
-  // Die vier Kennzahlen sind der ehrliche Stand des Kontos: sie zeigen, wo
-  // gerade etwas offen ist - genau die Stellen, an denen Hilfe gebraucht wird.
+  // Die zwei Kennzahlen sind der ehrliche Stand: wo gerade etwas offen ist -
+  // genau die Stellen, an denen Hilfe gebraucht wird.
   const openJobs = db.prepare(`SELECT id,title,status,created_at FROM jobs WHERE homeowner_id=? AND status IN ('open','quoted','accepted','in_progress') ORDER BY created_at DESC`).all(user.id) as OpenJob[];
-  const upcomingAppointments = (db.prepare(`SELECT COUNT(*) c FROM appointments WHERE homeowner_id=? AND status!='cancelled' AND datetime(start_at)>=datetime('now')`).get(user.id) as { c: number }).c;
-  const unreadMessages = (db.prepare('SELECT COUNT(*) c FROM messages WHERE recipient_id=? AND read_at IS NULL').get(user.id) as { c: number }).c;
   const openInvoices = db.prepare(`SELECT i.id,i.invoice_number,i.total_gross,i.due_date,p.business_name FROM invoices i JOIN jobs j ON j.id=i.job_id LEFT JOIN provider_profiles p ON p.user_id=i.provider_id WHERE i.homeowner_id=? AND i.status='sent' ORDER BY i.due_date`).all(user.id) as OpenInvoice[];
   const openTotal = openInvoices.reduce((sum, invoice) => sum + (Number.isFinite(invoice.total_gross) ? invoice.total_gross : 0), 0);
 
   const openJobItems: EHRecordEntry[] = openJobs.slice(0, 4).map(job => ({
     id: String(job.id),
     title: job.title,
-    detail: 'Laufender Vorgang',
+    detail: 'Läuft gerade',
     date: String(job.created_at).slice(0, 10),
     dateLabel: dateLabel(job.created_at),
     status: <EHStatus tone={job.status === 'open' ? 'info' : 'success'}>{statusLabel(job.status)}</EHStatus>,
@@ -39,11 +38,9 @@ export default async function HilfePage() {
   return (
     <WerkbankRahmen role="homeowner" active="/app/hilfe">
       <EHWorkflowStack>
-      <EHPageHeader title="Hilfe & Kontakt" context={openJobs.length > 0 ? `${openJobs.length} ${openJobs.length === 1 ? 'Vorgang' : 'Vorgänge'} in Bearbeitung` : 'Alles abgeschlossen'} />
+      <EHPageHeader title="Hilfe & Kontakt" context={openJobs.length > 0 ? `${openJobs.length} ${openJobs.length === 1 ? 'Auftrag' : 'Aufträge'} in Bearbeitung` : 'Alles erledigt'} />
       <EHMetricsBar label="Dein Stand" items={[
-        { id: 'auftraege', label: 'Offene Aufträge', value: String(openJobs.length), hint: 'laufende Vorgänge' },
-        { id: 'termine', label: 'Anstehende Termine', value: String(upcomingAppointments), hint: 'vereinbart' },
-        { id: 'nachrichten', label: 'Ungelesen', value: String(unreadMessages), hint: 'Nachrichten in Absprachen' },
+        { id: 'auftraege', label: 'Offene Aufträge', value: String(openJobs.length), hint: 'laufende Aufträge' },
         { id: 'rechnungen', label: 'Offene Rechnungen', value: String(openInvoices.length), hint: openInvoices.length > 0 ? `${euroExact(openTotal)} offen` : 'nichts offen' },
       ]} />
       <EHWorkspaceGrid main={<>
@@ -54,26 +51,14 @@ export default async function HilfePage() {
           <EHRecordList label="Dein nächster Schritt" items={NEXT_STEPS} />
         </EHWorkSection>
       </>} aside={<>
-        <EHWorkSection title="Deine offenen Vorgänge">
-          <EHRecordList label="Deine offenen Vorgänge" items={openJobItems} empty="Zurzeit ist nichts offen. Neue Anliegen landen nach der Beschreibung hier." />
+        <EHWorkSection title="Deine offenen Aufträge">
+          <EHRecordList label="Deine offenen Aufträge" items={openJobItems} empty="Zurzeit ist nichts offen. Neue Anliegen landen nach der Beschreibung hier." />
           <EHButton href="/app/jobs" variant="secondary" arrow>Alle Aufträge ansehen</EHButton>
         </EHWorkSection>
         <EHWorkSection title="Offene Rechnungen">
-          <EHRecordList label="Offene Rechnungen" empty="Keine offene Rechnung. Bezahlte Belege liegen in den Dokumenten." items={openInvoices.map(invoice => ({
-            id: String(invoice.id),
-            title: `Rechnung ${invoice.invoice_number}`,
-            detail: [invoice.business_name, `fällig ${dateLabel(invoice.due_date)}`].filter(Boolean).join(' · '),
-            value: euroExact(invoice.total_gross),
-            date: String(invoice.due_date).slice(0, 10),
-            dateLabel: dateLabel(invoice.due_date),
-            status: <EHStatus tone="warning">Offen</EHStatus>,
-            href: `/app/invoices/${invoice.id}`,
-          }))} />
-          {openInvoices.length > 0 && <EHText muted>{openInvoices.length} {openInvoices.length === 1 ? 'Rechnung' : 'Rechnungen'} · {euroExact(openTotal)} noch offen.</EHText>}
-        </EHWorkSection>
-        <EHWorkSection title="Im Notfall">
-          <EHText muted>Bei Lebensgefahr, Brand oder Gasgeruch gilt allein der öffentliche Notruf 112. Für dringende, aber nicht lebensgefährliche Schäden melde den Notfall in der App.</EHText>
-          <EHButton href="/app/emergency" variant="secondary" arrow>Notfall melden</EHButton>
+          {openInvoices.length === 0
+            ? <EHText muted>Keine offene Rechnung. Bezahlte Belege liegen in den Dokumenten.</EHText>
+            : <><EHText>{openInvoices.length} {openInvoices.length === 1 ? 'Rechnung' : 'Rechnungen'} · {euroExact(openTotal)} noch offen.</EHText><EHButton href="/app/documents" variant="secondary" arrow>Zu den Dokumenten</EHButton></>}
         </EHWorkSection>
       </>} />
       </EHWorkflowStack>

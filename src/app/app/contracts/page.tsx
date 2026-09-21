@@ -71,10 +71,7 @@ export default async function Contracts({ searchParams }: { searchParams: Promis
   const contracts = db.prepare(`SELECT * FROM house_contracts WHERE homeowner_id=? ORDER BY CASE status WHEN 'active' THEN 0 WHEN 'cancelled' THEN 1 ELSE 2 END, provider COLLATE NOCASE`).all(user.id) as ContractRow[];
   const active = contracts.filter((c) => c.status === 'active');
   const monthlyTotal = active.reduce((sum, c) => sum + (monthlyCents(c.cost_amount, c.cost_interval) ?? 0), 0);
-  // Jahreskosten und Spartenaufteilung lesen dieselben aktiven Vertraege wie
-  // die Monatskennzahl: die Zahlen oben und die Eintraege rechts bleiben damit
-  // nachvollziehbar, auch wenn ein Intervall nicht monatlich ist.
-  const yearlyTotal = active.reduce((sum, c) => sum + (yearlyCents(c.cost_amount, c.cost_interval) ?? 0), 0);
+  // Jahreskosten liest dieselben aktiven Vertraege wie die Monatskennzahl.
   const monthlyByKind = new Map<string, { count: number; cents: number }>();
   for (const row of active) {
     const label = contractKindLabel(row.kind);
@@ -123,8 +120,8 @@ export default async function Contracts({ searchParams }: { searchParams: Promis
   const nextDeadline = withDeadline[0];
 
   return <WerkbankRahmen role="homeowner" active="/app/contracts" tabs={[
-      { href: '/app/contracts?tab=vertraege', label: 'Laufende Verträge', active: tab === 'vertraege' },
-      { href: '/app/contracts?tab=vergleichen', label: 'Vergleichen & Wechseln', active: tab === 'vergleichen' },
+      { href: '/app/contracts?tab=vertraege', label: 'Verträge', active: tab === 'vertraege' },
+      { href: '/app/contracts?tab=vergleichen', label: 'Vergleich', active: tab === 'vergleichen' },
       { href: '/app/contracts?tab=sparcheck', label: 'Spar-Check', active: tab === 'sparcheck' },
     ]} rail={<>
       <p className="eh-werkbank-rail-h">Kontext dieser Seite</p>
@@ -136,30 +133,17 @@ export default async function Contracts({ searchParams }: { searchParams: Promis
         </> : <p className="eh-werkbank-item">Keine Frist in den nächsten 90 Tagen. Sobald eine Kündigungsfrist näher rückt, steht sie hier.</p>}
       </div>
       <div className="eh-werkbank-karte">
-        <h4>Kosten nach Sparte</h4>
+        <h4>Kosten nach Art</h4>
         {monthlyByKind.size > 0 ? Array.from(monthlyByKind.entries()).sort((a, b) => b[1].cents - a[1].cents).map(([kind, group]) => (
           <div key={kind} className="eh-werkbank-row"><span>{kind} · {group.count} {group.count === 1 ? 'Vertrag' : 'Verträge'}</span><span>{euroExact(group.cents)}</span></div>
         )) : <p className="eh-werkbank-item">Noch kein aktiver Vertrag mit Kosten erfasst.</p>}
-      </div>
-      <div className="eh-werkbank-karte">
-        <h4>Spar-Check</h4>
-        <p className="eh-werkbank-item">Der Spar-Check schätzt aus deinen hinterlegten Kosten eine Ersparnis-Spanne. Möglich ist das für Strom, Gas, DSL und Versicherungen.</p>
-        <Link href="/app/contracts?tab=sparcheck" className="eh-werkbank-go">Spar-Check öffnen →</Link>
-      </div>
-      <div className="eh-werkbank-karte">
-        <h4>Vergleichen &amp; Wechseln</h4>
-        <p className="eh-werkbank-item">Fünf Kategorien mit deinem Vertragskontext. Wo ein Partner freigegeben ist, geht es direkt zu seinem Vergleich – ohne eigene Tarifdaten und ohne Rangliste.</p>
-        <Link href="/app/contracts?tab=vergleichen" className="eh-werkbank-go">Vergleichsbereich öffnen →</Link>
       </div>
     </>}>
     
     <header className="eh-werkbank-kopf">
       <div className="eh-werkbank-kopf-copy">
-        <h1>Verträge &amp; Tarife</h1>
+        <h1>Verträge</h1>
         <span>{`${active.length} aktiv · ${euroExact(monthlyTotal)} pro Monat`}</span>
-      </div>
-      <div className="eh-werkbank-kopf-tools">
-        <Link className="eh-werkbank-kopf-cta" href="/app/documents">Alle Dokumente</Link>
       </div>
     </header>
     {saved && <EHFormFeedback kind="success">Gespeichert. Deine Hausakte ist aktuell.</EHFormFeedback>}
@@ -170,8 +154,6 @@ export default async function Contracts({ searchParams }: { searchParams: Promis
           <EHMetricsBar label="Verträge" items={[
             { id: 'aktiv', label: 'Aktive Verträge', value: String(active.length), hint: `${contracts.length} erfasst` },
             { id: 'kosten', label: 'Kosten pro Monat', value: euroExact(monthlyTotal), hint: 'nur aktive Verträge' },
-            { id: 'jahr', label: 'Kosten pro Jahr', value: euroExact(yearlyTotal), hint: 'aus den erfassten Intervallen' },
-            { id: 'fristen', label: 'Fristen · 90 Tage', value: String(withDeadline.length), hint: withDeadline.length > 0 ? 'jetzt handeln' : 'nichts offen' },
           ]} />
         </div>
 
@@ -212,26 +194,26 @@ export default async function Contracts({ searchParams }: { searchParams: Promis
 
         <EHOwnerSection title="Vertrag anpassen">
           {contracts.length === 0
-            ? <EHText muted>Noch kein Vertrag erfasst. Erfasse zuerst einen Vertrag, dann kannst du hier Anbieter, Kosten und Laufzeit ändern.</EHText>
+            ? <EHEmptyState title="Noch kein Vertrag erfasst" text="Trag unten deinen ersten Vertrag ein. Danach kannst du hier Anbieter, Kosten und Laufzeit ändern." action={<EHButton href="#vertrag-anlegen">Vertrag erfassen</EHButton>} />
             : contracts.map((row) => <EHDetailDisclosure key={row.id} id={`vertrag-${row.id}`} title={`${contractKindLabel(row.kind)} · ${row.provider}`} description="Anbieter, Kosten, Laufzeit und Frist ändern">
               <EHWorkflowForm action={updateHouseContractAction}>
                 <input type="hidden" name="id" value={row.id} />
                 <EHFormSection title="Vertragsdaten"><EHFieldGrid>
-                  <EHField id={`kind-${row.id}`} label="Sparte"><EHSelect id={`kind-${row.id}`} name="kind" defaultValue={row.kind}>{CONTRACT_KIND_KEYS.map((k) => <option key={k} value={k}>{CONTRACT_KINDS[k]}</option>)}</EHSelect></EHField>
+                  <EHField id={`kind-${row.id}`} label="Art"><EHSelect id={`kind-${row.id}`} name="kind" defaultValue={row.kind}>{CONTRACT_KIND_KEYS.map((k) => <option key={k} value={k}>{CONTRACT_KINDS[k]}</option>)}</EHSelect></EHField>
                   <EHField id={`provider-${row.id}`} label="Anbieter" required><EHInput id={`provider-${row.id}`} name="provider" defaultValue={row.provider} required /></EHField>
-                  <EHField id={`tariff-${row.id}`} label="Tarif"><EHInput id={`tariff-${row.id}`} name="tariff" defaultValue={row.tariff} /></EHField>
+                  <EHField id={`tariff-${row.id}`} label="Tarif (steht auf deiner Rechnung)"><EHInput id={`tariff-${row.id}`} name="tariff" defaultValue={row.tariff} /></EHField>
                   <EHField id={`number-${row.id}`} label="Vertragsnummer"><EHInput id={`number-${row.id}`} name="contractNumber" defaultValue={row.contract_number} /></EHField>
                 </EHFieldGrid></EHFormSection>
                 <EHFormSection title="Kosten"><EHFieldGrid>
                   <EHField id={`cost-${row.id}`} label="Betrag €"><EHInput id={`cost-${row.id}`} name="cost" inputMode="decimal" defaultValue={row.cost_amount != null ? String(row.cost_amount / 100).replace('.', ',') : ''} /></EHField>
-                  <EHField id={`interval-${row.id}`} label="Intervall"><EHSelect id={`interval-${row.id}`} name="costInterval" defaultValue={row.cost_interval}>{COST_INTERVAL_KEYS.map((k) => <option key={k} value={k}>{COST_INTERVALS[k]}</option>)}</EHSelect></EHField>
+                  <EHField id={`interval-${row.id}`} label="Zahlweise"><EHSelect id={`interval-${row.id}`} name="costInterval" defaultValue={row.cost_interval}>{COST_INTERVAL_KEYS.map((k) => <option key={k} value={k}>{COST_INTERVALS[k]}</option>)}</EHSelect></EHField>
                 </EHFieldGrid></EHFormSection>
                 <EHFormSection title="Laufzeit & Kündigung"><EHFieldGrid>
                   <EHField id={`start-${row.id}`} label="Vertragsbeginn"><EHInput id={`start-${row.id}`} name="startedAt" type="date" defaultValue={row.started_at?.slice(0, 10) || ''} /></EHField>
-                  <EHField id={`term-${row.id}`} label="Erste Laufzeit in Monaten"><EHInput id={`term-${row.id}`} name="termMonths" type="number" min="0" defaultValue={row.term_months ?? ''} /></EHField>
-                  <EHField id={`renewal-${row.id}`} label="Verlängerung in Monaten"><EHInput id={`renewal-${row.id}`} name="renewalMonths" type="number" min="0" defaultValue={row.renewal_months ?? 12} /></EHField>
-                  <EHField id={`days-${row.id}`} label="Kündigungsfrist in Tagen"><EHInput id={`days-${row.id}`} name="cancellationDays" type="number" min="0" defaultValue={row.cancellation_days ?? 30} /></EHField>
-                  <EHField id={`deadline-${row.id}`} label="Stichtag" hint="Leer lassen, um aus Vertragsbeginn, Laufzeit und Frist zu rechnen."><EHInput id={`deadline-${row.id}`} name="cancellationDeadline" type="date" defaultValue={row.cancellation_deadline?.slice(0, 10) || ''} aria-describedby={`deadline-${row.id}-hint`} /></EHField>
+                  <EHField id={`term-${row.id}`} label="Laufzeit (Monate)"><EHInput id={`term-${row.id}`} name="termMonths" type="number" min="0" defaultValue={row.term_months ?? ''} /></EHField>
+                  <EHField id={`renewal-${row.id}`} label="Verlängerung (Monate)"><EHInput id={`renewal-${row.id}`} name="renewalMonths" type="number" min="0" defaultValue={row.renewal_months ?? 12} /></EHField>
+                  <EHField id={`days-${row.id}`} label="Kündigungsfrist (Tage)"><EHInput id={`days-${row.id}`} name="cancellationDays" type="number" min="0" defaultValue={row.cancellation_days ?? 30} /></EHField>
+                  <EHField id={`deadline-${row.id}`} label="Kündigen bis" hint="Leer lassen, um aus Vertragsbeginn, Laufzeit und Frist zu rechnen."><EHInput id={`deadline-${row.id}`} name="cancellationDeadline" type="date" defaultValue={row.cancellation_deadline?.slice(0, 10) || ''} aria-describedby={`deadline-${row.id}-hint`} /></EHField>
                 </EHFieldGrid></EHFormSection>
                 <EHFormSection title="Notiz"><EHField id={`notice-${row.id}`} label="Notiz"><EHTextarea id={`notice-${row.id}`} name="notice" rows={3} maxLength={2000} defaultValue={row.notice} /></EHField></EHFormSection>
                 <EHSubmitButton pendingLabel="Wird gespeichert …">Änderungen speichern</EHSubmitButton>
@@ -242,32 +224,21 @@ export default async function Contracts({ searchParams }: { searchParams: Promis
             </EHDetailDisclosure>)}
         </EHOwnerSection>
 
-        <EHOwnerSection title="Vertrag erfassen" action={{ href: '#vertrag-anlegen', label: 'Zum Formular' }}>
-          <EHText muted>Pflicht ist nur der Anbieter. Alles andere kannst du später ergänzen.</EHText>
-        </EHOwnerSection>
-        <section id="vertrag-anlegen" aria-label="Vertrag anlegen"><EHWorkSection title="Vertrag erfassen">
+        <section id="vertrag-anlegen" aria-label="Vertrag anlegen"><EHWorkSection title="Neuer Vertrag">
           <EHWorkflowForm action={addHouseContractAction}>
-            <EHFormSection title="Anbieter & Sparte" description="Pflicht ist nur der Anbieter. Alles andere kannst du später ergänzen."><EHFieldGrid>
-              <EHField id="new-kind" label="Sparte"><EHSelect id="new-kind" name="kind" defaultValue="strom">{CONTRACT_KIND_KEYS.map((k) => <option key={k} value={k}>{CONTRACT_KINDS[k]}</option>)}</EHSelect></EHField>
+            <EHFormSection title="Anbieter & Art" description="Pflicht ist nur der Anbieter. Laufzeit und Frist kannst du später ergänzen."><EHFieldGrid>
+              <EHField id="new-kind" label="Art"><EHSelect id="new-kind" name="kind" defaultValue="strom">{CONTRACT_KIND_KEYS.map((k) => <option key={k} value={k}>{CONTRACT_KINDS[k]}</option>)}</EHSelect></EHField>
               <EHField id="new-provider" label="Anbieter" required><EHInput id="new-provider" name="provider" required placeholder="z. B. Stadtwerke Musterstadt" /></EHField>
-              <EHField id="new-tariff" label="Tarif"><EHInput id="new-tariff" name="tariff" placeholder="z. B. Basisstrom 12" /></EHField>
-              <EHField id="new-number" label="Vertragsnummer"><EHInput id="new-number" name="contractNumber" /></EHField>
+              <EHField id="new-tariff" label="Tarif (steht auf deiner Rechnung)"><EHInput id="new-tariff" name="tariff" placeholder="z. B. Basisstrom 12" /></EHField>
             </EHFieldGrid></EHFormSection>
             <EHFormSection title="Kosten"><EHFieldGrid>
               <EHField id="new-cost" label="Betrag €"><EHInput id="new-cost" name="cost" inputMode="decimal" placeholder="89,90" /></EHField>
-              <EHField id="new-interval" label="Intervall"><EHSelect id="new-interval" name="costInterval" defaultValue="month">{COST_INTERVAL_KEYS.map((k) => <option key={k} value={k}>{COST_INTERVALS[k]}</option>)}</EHSelect></EHField>
+              <EHField id="new-interval" label="Zahlweise"><EHSelect id="new-interval" name="costInterval" defaultValue="month">{COST_INTERVAL_KEYS.map((k) => <option key={k} value={k}>{COST_INTERVALS[k]}</option>)}</EHSelect></EHField>
             </EHFieldGrid></EHFormSection>
-            <EHFormSection title="Laufzeit & Kündigungsfrist"><EHFieldGrid>
-              <EHField id="new-start" label="Vertragsbeginn"><EHInput id="new-start" name="startedAt" type="date" /></EHField>
-              <EHField id="new-term" label="Erste Laufzeit in Monaten"><EHInput id="new-term" name="termMonths" type="number" min="0" placeholder="24" /></EHField>
-              <EHField id="new-renewal" label="Verlängerung in Monaten"><EHInput id="new-renewal" name="renewalMonths" type="number" min="0" defaultValue={12} /></EHField>
-              <EHField id="new-days" label="Kündigungsfrist in Tagen"><EHInput id="new-days" name="cancellationDays" type="number" min="0" defaultValue={30} /></EHField>
-              <EHField id="new-deadline" label="Stichtag" hint="Nur ausfüllen, wenn er abweichend feststeht."><EHInput id="new-deadline" name="cancellationDeadline" type="date" aria-describedby="new-deadline-hint" /></EHField>
-            </EHFieldGrid></EHFormSection>
-            <EHFormSection title="Dokument & Notiz">
+            <EHFormSection title="Beleg & Notiz">
               <EHFieldGrid>
-                <div className="eh-werkbank-filefield"><EHField id="new-doc" label="Vertragsdokument"><EHFileInput id="new-doc" name="document" accept="application/pdf,image/*" /></EHField></div>
-                <EHField id="new-doctitle" label="Dokumenttitel"><EHInput id="new-doctitle" name="documentTitle" placeholder="z. B. Stromvertrag 2024" /></EHField>
+                <div className="eh-werkbank-filefield"><EHField id="new-doc" label="Foto oder Rechnung"><EHFileInput id="new-doc" name="document" accept="application/pdf,image/*" /></EHField></div>
+                <EHField id="new-doctitle" label="Titel des Belegs"><EHInput id="new-doctitle" name="documentTitle" placeholder="z. B. Stromvertrag 2024" /></EHField>
               </EHFieldGrid>
               <EHField id="new-notice" label="Notiz"><EHTextarea id="new-notice" name="notice" rows={3} maxLength={2000} /></EHField>
               <EHSubmitButton pendingLabel="Vertrag wird gespeichert …">In die Hausakte aufnehmen</EHSubmitButton>
@@ -304,10 +275,9 @@ export default async function Contracts({ searchParams }: { searchParams: Promis
                   {!estimate && <EHFormFeedback kind="info">Für diese Sparte gibt es noch keine Vergleichsstrecke. Ein Spar-Check ist für Strom, Gas, DSL und Versicherungen möglich.</EHFormFeedback>}
                   {estimate && <>
                       <EHMetricsBar label="Spar-Check" items={[
-                        { id: 'ersparnis', label: 'Ersparnis pro Jahr', value: `${euroExact(estimate.lowCents)} – ${euroExact(estimate.highCents)}` },
-                        { id: 'ansatz', label: 'Ansatz Jahreskosten', value: `${Math.round(estimate.rateBps / 100)} %` },
-                        { id: 'belastbarkeit', label: 'Belastbarkeit', value: estimate.confidence },
-                        { id: 'basis', label: 'Jahreskosten', value: euroExact(yearlyCents(selected.cost_amount, selected.cost_interval)), hint: 'aus dem erfassten Vertrag' },
+                        { id: 'ersparnis', label: 'Mögliche Ersparnis pro Jahr', value: `${euroExact(estimate.lowCents)} – ${euroExact(estimate.highCents)}` },
+                        { id: 'sicherheit', label: 'Wie sicher ist die Schätzung', value: estimate.confidence },
+                        { id: 'basis', label: 'Deine Jahreskosten', value: euroExact(yearlyCents(selected.cost_amount, selected.cost_interval)), hint: 'aus dem erfassten Vertrag' },
                       ]} />
                     <EHText>Diese Spanne beruht auf folgenden Annahmen:</EHText>
                     <EHList label="Annahmen der Einschätzung" items={estimate.reasons.map((reason, index) => ({ id: `grund-${index}`, title: reason }))} />
@@ -317,7 +287,7 @@ export default async function Contracts({ searchParams }: { searchParams: Promis
                 <EHOwnerSection title="Nächste Schritte">
                   <EHList label="Nächste Schritte" items={[
                     { id: 'step-1', title: 'Kündigungsfrist prüfen', text: deadlineLabel(selected) },
-                    { id: 'step-2', title: 'Angebote einholen', text: outbound?.status === 'available' ? 'Über den geprüften Partnervergleich in „Vergleichen & Wechseln“.' : 'Aktuell direkt beim Anbieter oder einem Vergleichsportal deiner Wahl.' },
+                    { id: 'step-2', title: 'Angebote einholen', text: outbound?.status === 'available' ? 'Über den geprüften Partnervergleich unten bei „Vergleich“.' : 'Aktuell direkt beim Anbieter oder einem Vergleichsportal deiner Wahl.' },
                     { id: 'step-3', title: 'Nach dem Wechsel Vertrag hier aktualisieren', text: 'Neuer Anbieter, neuer Preis, neue Laufzeit – dann stimmt die nächste Frist wieder.' },
                   ]} />
                   {outbound?.status === 'available'
@@ -330,11 +300,10 @@ export default async function Contracts({ searchParams }: { searchParams: Promis
     ) : (
       <>
         <div className="eh-werkbank-kennzahlen">
-          <EHMetricsBar label="Vergleichen & Wechseln" items={[
-            { id: 'kategorien', label: 'Vergleichskategorien', value: String(AFFILIATE_CATEGORIES.length), hint: 'Strom, Gas, Internet, Mobilfunk, Versicherung' },
+          <EHMetricsBar label="Vergleich" items={[
+            { id: 'kategorien', label: 'Kategorien', value: String(AFFILIATE_CATEGORIES.length), hint: 'Strom, Gas, Internet, Mobilfunk, Versicherung' },
             { id: 'partner', label: 'Freigegebene Partner', value: String(comparisonRows.filter((row) => row.availability.status === 'available').length), hint: 'nur vertraglich freigegebene Partner' },
             { id: 'eigene', label: 'Eigene Verträge', value: String(comparisonRows.filter((row) => row.contract).length), hint: 'Kategorien mit erfasstem Vertrag' },
-            { id: 'wechsel', label: 'Wechselfristen', value: String(withDeadline.length), hint: 'in den nächsten 90 Tagen' },
           ]} />
         </div>
 
@@ -366,44 +335,7 @@ export default async function Contracts({ searchParams }: { searchParams: Promis
           })} />
         </EHOwnerSection>
 
-        <EHOwnerSection title="Direkter Weg je Kategorie">
-          {comparisonRows.map(({ category, contract, availability }) => (
-            <EHDetailDisclosure
-              key={category}
-              id={`wechsel-${category}`}
-              title={AFFILIATE_CATEGORY_LABELS[category]}
-              description={contract ? `Aus deinem Vertrag: ${contract.provider}` : 'Noch kein Vertrag in dieser Kategorie'}
-            >
-              {contract ? <>
-                <EHMetricsBar label={AFFILIATE_CATEGORY_LABELS[category]} items={[
-                  { id: 'anbieter', label: 'Anbieter', value: contract.provider },
-                  { id: 'kosten', label: 'Jahreskosten', value: yearlyCents(contract.cost_amount, contract.cost_interval) != null ? euroExact(yearlyCents(contract.cost_amount, contract.cost_interval) as number) : '–', hint: contract.cost_amount != null ? `${euroExact(contract.cost_amount)} ${costIntervalLabel(contract.cost_interval)}` : 'keine Kosten erfasst' },
-                  { id: 'frist', label: 'Kündigungsfrist', value: cancellationDeadline(contract) ? formatDate(cancellationDeadline(contract) as Date) : '–', hint: deadlineLabel(contract) },
-                ]} />
-                <Link className="eh-werkbank-go" href={`/app/contracts?tab=sparcheck&contract=${contract.id}`}>Spar-Check für diesen Vertrag öffnen →</Link>
-              </> : <EHText muted>Erfassten Vertrag ergänzen, dann erscheint hier Anbieter, Jahreskosten und Frist als Kontext für den Vergleich.</EHText>}
-
-              {availability.status === 'available'
-                ? <>
-                    <EHText>{availability.disclosure}</EHText>
-                    {availability.needsConsent && !availability.untrackedAllowed
-                      ? <>
-                          <EHText muted>Für diesen Partner messen wir den Klick nur mit deiner ausdrücklichen Zustimmung. Ohne Zustimmung öffnet sich der Vergleich nicht.</EHText>
-                          <EHButton href={availability.consentEntryHref ?? availability.entryHref} arrow>{AFFILIATE_CATEGORY_ACTIONS[category]} – Klickmessung erlauben</EHButton>
-                        </>
-                      : <>
-                          {availability.needsConsent && <EHText muted>Der Vergleich wird ohne Klickmessung geöffnet. Deine Vertragsdaten gehen nicht mit.</EHText>}
-                          <EHButton href={availability.entryHref} arrow>{AFFILIATE_CATEGORY_ACTIONS[category]}</EHButton>
-                        </>}
-                  </>
-                : availability.status === 'error'
-                  ? <EHCallout title="Vergleich derzeit nicht verfügbar"><p>Für diese Kategorie ist die Partnerkonfiguration unvollständig. Aus Sicherheitsgründen führen wir niemanden aus. Bitte direkt beim Anbieter oder über ein Vergleichsportal deiner Wahl vergleichen.</p></EHCallout>
-                  : <EHCallout title="Noch kein Partner freigegeben"><p>Für {AFFILIATE_CATEGORY_LABELS[category].toLowerCase()} ist noch kein Vergleichspartner vertraglich freigegeben. Bis dahin vergleichst du am besten direkt beim Anbieter oder über ein Vergleichsportal deiner Wahl – wir vermitteln hier bewusst noch nichts.</p></EHCallout>}
-            </EHDetailDisclosure>
-          ))}
-        </EHOwnerSection>
-
-        {comparisonRows.every((row) => !row.contract) && <EHEmptyState title="Erst einen Vertrag erfassen" text="Der Vergleichsbereich lebt von deinen echten Vertragsdaten: Anbieter, Jahreskosten und Kündigungsfrist bilden den Kontext. Trag im Bereich „Laufende Verträge“ deinen ersten Vertrag ein." action={<EHButton href="/app/contracts?tab=vertraege">Vertrag erfassen</EHButton>} />}
+        {comparisonRows.every((row) => !row.contract) && <EHEmptyState title="Erst einen Vertrag erfassen" text="Der Vergleich lebt von deinen echten Vertragsdaten: Anbieter, Jahreskosten und Kündigungsfrist. Trag oben unter „Verträge“ deinen ersten Vertrag ein." action={<EHButton href="/app/contracts?tab=vertraege">Vertrag erfassen</EHButton>} />}
       </>
     )}
   </WerkbankRahmen>;

@@ -77,16 +77,13 @@ export default async function Messages({ searchParams }: { searchParams: Promise
   }
   const active = entry?.platformUserId ? activeById.get(entry.platformUserId) : undefined;
 
-  // Kennzahlen und rechte Spalte lesen denselben Kontaktbestand wie das
-  // Verzeichnis in der Hauptspalte: gespeicherte Kontakte, davon verknuepfte
-  // Partnerprofile, ungelesene Nachrichten und belegte Bereiche.
+  // Kennzahlen lesen denselben Kontaktbestand wie das Verzeichnis:
+  // gespeicherte Kontakte und ungelesene Nachrichten.
   const unreadTotal = contacts.reduce((sum, contact) => sum + Number(contact.unreadCount || 0), 0);
-  const linkedTotal = contacts.filter(contact => contact.platformUserId !== null).length;
   const unreadContacts = contacts.filter(contact => Number(contact.unreadCount || 0) > 0).sort((a, b) => Number(b.unreadCount || 0) - Number(a.unreadCount || 0));
-  // Erreichbarkeit aus echten Daten: verknüpfte Kontakte mit hinterlegter
+  // Anrufen aus echten Daten: verknüpfte Kontakte mit hinterlegter
   // Rufnummer (Name, Betrieb, Telefon). Keine erfundenen Sprechzeiten.
   const reachable = contacts.filter(contact => contact.platformUserId !== null && (contact.phone || '').trim() !== '').slice(0, 4);
-  const usedCategories = CONTACT_DIRECTORY_CATEGORIES.filter(category => (countsByMain[category.id] ?? 0) > 0);
 
   const messages = mode === 'detail' && active
     ? db.prepare(`SELECT 'direct' source,cm.id,cm.sender_id,cm.body,cm.read_at,cm.created_at,NULL context_title,NULL job_id
@@ -115,13 +112,11 @@ export default async function Messages({ searchParams }: { searchParams: Promise
   const conversation = active ? <EHConversation role="owner" name={`${active.first_name} ${active.last_name}`} detail={active.business_name} phone={active.phone || undefined}
     messages={messages.map(message => ({ id: `${message.source}-${message.id}`, mine: message.sender_id === u.id, author: `${message.sender_id === u.id ? 'Du' : active.first_name}${message.source === 'job' && message.context_title ? ` · Auftrag: ${message.context_title}` : ''}`, body: message.body }))}
     composer={<OwnerMessageComposer contactUserId={active.contact_user_id} peerName={active.first_name} unreadCount={Number(active.unread_count || 0)} />} />
-    : entry?.platformUserId ? <EHCallout title="Aktuell keine aktive Nachrichtenverbindung"><p>Der gespeicherte Kontakt und seine Zuordnungen bleiben erhalten. Ein App-Chat ist nur bei einer aktiven Partnerverbindung verfügbar.</p></EHCallout> : undefined;
+    : entry?.platformUserId ? <EHCallout title="Gerade kein Chat möglich"><p>Mit diesem Kontakt gibt es aktuell keinen laufenden Auftrag. Nachrichten gehen nur bei einem laufenden Auftrag — deine gespeicherten Daten bleiben erhalten.</p></EHCallout> : undefined;
   return <WerkbankRahmen role="homeowner" active="/app/messages">
-    <EHMetricsBar label="Ansprechpartner" items={[
+    <EHMetricsBar label="Nachrichten" items={[
       { id: 'kontakte', label: 'Kontakte', value: String(contacts.length), hint: 'in deinem Netzwerk' },
-      { id: 'verbunden', label: 'Verknüpft', value: String(linkedTotal), hint: 'mit Partnerprofil' },
       { id: 'ungelesen', label: 'Ungelesen', value: String(unreadTotal), hint: unreadTotal > 0 ? 'neue Nachrichten' : 'nichts ungelesen' },
-      { id: 'bereiche', label: 'Belegte Bereiche', value: String(usedCategories.length), hint: `von ${CONTACT_DIRECTORY_CATEGORIES.length} Bereichen` },
     ]} />
     <EHWorkspaceGrid main={
       <EHContactWorkspace categories={CONTACT_DIRECTORY_CATEGORIES} contacts={contacts} mode={mode} mainId={main?.id} subcategoryId={sub?.id} entryId={entryId} query={text('q').slice(0, 200)} requestId={randomUUID()} notice={text('saved') === '1' ? 'Gespeichert. Dein Kontakt und alle Zuordnungen sind aktuell.' : undefined} action={submitDirectoryAction} shortcutAction={submitDirectoryShortcut} counts={countsByMain} conversation={mode === 'detail' ? conversation : undefined} />
@@ -135,26 +130,17 @@ export default async function Messages({ searchParams }: { searchParams: Promise
           href: contact.platformUserId !== null ? `/app/messages?contact=${contact.platformUserId}` : `/app/messages?entry=${contact.id}`,
         }))} />
       </EHWorkSection>
-      <EHWorkSection title="Erreichbarkeit">
-        <EHRecordList label="Erreichbare Kontakte" empty="Noch keine Rufnummer hinterlegt. Sobald ein verknüpfter Kontakt eine Nummer hat, steht er hier." items={reachable.map(contact => ({
+      <EHWorkSection title="Anrufen">
+        <EHRecordList label="Kontakte mit Rufnummer" empty="Noch keine Rufnummer hinterlegt. Sobald ein Kontakt eine Nummer hat, steht er hier." items={reachable.map(contact => ({
           id: String(contact.id),
           title: contact.name,
           detail: contact.company || undefined,
           value: contact.phone,
         }))} />
       </EHWorkSection>
-      <EHWorkSection title="Deine Bereiche">
-        <EHRecordList label="Belegte Bereiche" empty="Noch kein Kontakt einem Bereich zugeordnet." items={usedCategories.map(category => ({
-          id: category.id,
-          title: category.label,
-          detail: `${countsByMain[category.id]} ${countsByMain[category.id] === 1 ? 'Kontakt' : 'Kontakte'}`,
-          href: `/app/messages?main=${category.id}`,
-        }))} />
-      </EHWorkSection>
       <EHWorkSection title="Kontakte verwalten">
-        <EHText muted>Angeheftete Kontakte und Notfall-Nummern pflegst du in der Verwaltung. Neue Betriebe speicherst du direkt im Verzeichnis.</EHText>
+        <EHText muted>Neue Betriebe speicherst du direkt im Verzeichnis links.</EHText>
         <EHButton href="/app/messages?mode=manage" variant="secondary" arrow>Kontakte verwalten</EHButton>
-        <EHButton href="/app/emergency" variant="secondary">Notfall-Bereich</EHButton>
       </EHWorkSection>
     </>} />
   </WerkbankRahmen>;

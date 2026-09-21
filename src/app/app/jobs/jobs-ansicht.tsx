@@ -4,12 +4,7 @@ import Link from 'next/link';
 import {
   EHDataTable,
   EHEmptyState,
-  EHRecordCards,
-  EHRecordTimeline,
   EHStatus,
-  EHViewSwitcher,
-  useEHRecordView,
-  type EHRecordEntry,
 } from '@/design-system';
 
 export type JobAnsichtRow = {
@@ -27,25 +22,6 @@ export type JobAnsichtRow = {
   note?: string;
 };
 
-function asRecords(rows: readonly JobAnsichtRow[]): EHRecordEntry[] {
-  return rows.map((row) => ({
-    id: row.id,
-    href: row.href,
-    title: row.title,
-    detail: row.detail,
-    value: row.amount === '–' ? undefined : row.amount,
-    date: row.date,
-    dateLabel: row.dateLabel,
-    note: row.note,
-    status: <EHStatus tone={row.tone}>{row.statusLabel}</EHStatus>,
-  }));
-}
-
-export function JobsAnsichtSwitcher() {
-  const [view, setView] = useEHRecordView('auftraege', 'liste');
-  return <EHViewSwitcher label="Aufträge: Ansicht wechseln" value={view} onChange={setView} />;
-}
-
 export function JobsAnsicht({
   label,
   rows,
@@ -57,34 +33,31 @@ export function JobsAnsicht({
   emptyTitle: string;
   emptyText: string;
 }) {
-  const [view] = useEHRecordView('auftraege', 'liste');
   if (!rows.length) return <EHEmptyState title={emptyTitle} text={emptyText} />;
 
-  const records = asRecords(rows);
-  if (view === 'karten') return <EHRecordCards label={label} items={records} />;
-  if (view === 'chronik') return <EHRecordTimeline label={label} items={records} />;
-
+  // Bewusst genau eine Ansicht: eine ruhige Tabelle. Karten und Chronik
+  // zeigten dieselben Aufträge nur anders an und verwirrten.
   return (
     <div className="eh-werkbank-tbl">
       <EHDataTable
         caption={label}
         columns={[
-          { key: 'vorgang', label: 'Vorgang' },
+          { key: 'auftrag', label: 'Auftrag' },
           { key: 'betrieb', label: 'Betrieb' },
-          { key: 'stand', label: 'Stand' },
+          { key: 'status', label: 'Status' },
           { key: 'betrag', label: 'Betrag', numeric: true },
         ]}
         rows={rows.map((row) => ({
           id: row.id,
           cells: {
-            vorgang: (
+            auftrag: (
               <>
                 <Link href={row.href}>{row.title}</Link>
                 <small>{row.numberLine}</small>
               </>
             ),
             betrieb: row.business,
-            stand: <EHStatus tone={row.tone}>{row.statusLabel}</EHStatus>,
+            status: <EHStatus tone={row.tone}>{row.statusLabel}</EHStatus>,
             betrag: row.amount,
           },
         }))}
