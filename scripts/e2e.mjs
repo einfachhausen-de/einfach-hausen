@@ -728,7 +728,16 @@ await waitText(owner,'Dein persönlicher Ansprechpartner');
 
 // Manager weist bewusst Thomas zu.
 await nav(manager, base+`/pro/jobs/${jobId}`); await waitText(manager,'Ansprechpartner');
-const assignmentDisclosure=manager.locator('details.provider-disclosure').filter({hasText:'Ansprechpartner ändern'}); if(await assignmentDisclosure.count())await assignmentDisclosure.locator('summary').click(); await assignmentDisclosure.waitFor({state:'open'}).catch(()=>{}); const assignmentForm=assignmentDisclosure.locator('form:visible').filter({has:manager.getByLabel('Ansprechpartner')}).first(); await assignmentForm.waitFor(); const assignmentSelect=assignmentForm.getByLabel('Ansprechpartner'); await assignmentSelect.waitFor(); const thomasOption=assignmentSelect.locator('option').filter({hasText:'Thomas Weber'}); await thomasOption.waitFor({state:'attached'}); const thomasValue=await thomasOption.getAttribute('value'); if(!thomasValue)throw new Error('Thomas option missing'); await assignmentSelect.selectOption(thomasValue); const assignmentButton=assignmentForm.getByRole('button',{name:/Ansprechpartner festlegen|Zuweisung speichern/}); await clickServerAction(manager,assignmentButton);
+// Der Zuweisungsbereich ist ein EHDetailDisclosure mit stabiler id
+// (src/app/pro/jobs/[id]/page.tsx:247, packages/eh-design/src/property-overview.tsx).
+// Die früher geprüfte Klasse `provider-disclosure` gibt es nicht: der Baustein
+// setzt eine gehashte CSS-Module-Klasse. Und das `if(count)` war wirkungslos,
+// weil danach trotzdem unbedingt auf das Formular gewartet wurde - fehlte der
+// Bereich, lief der Test in einen 120-s-Timeout statt in eine klare Aussage.
+const assignmentDisclosure=manager.locator('#ansprechpartner-aendern');
+await settle(assignmentDisclosure,'assignment disclosure');
+await assignmentDisclosure.locator('summary').click();
+const assignmentForm=assignmentDisclosure.locator('form').first(); await assignmentForm.waitFor(); const assignmentSelect=assignmentForm.getByLabel('Ansprechpartner'); await assignmentSelect.waitFor(); const thomasOption=assignmentSelect.locator('option').filter({hasText:'Thomas Weber'}); await thomasOption.waitFor({state:'attached'}); const thomasValue=await thomasOption.getAttribute('value'); if(!thomasValue)throw new Error('Thomas option missing'); await assignmentSelect.selectOption(thomasValue); const assignmentButton=assignmentForm.getByRole('button',{name:/Ansprechpartner festlegen|Zuweisung speichern/}); await clickServerAction(manager,assignmentButton);
 await nav(owner, owner.url()); await waitText(owner,'Thomas Weber'); await waitText(owner,'Techniker · Gartenbau Müller');
 await owner.screenshot({path:path.join(artifactsDir,'owner-personal-contact.png'),fullPage:true});
 
