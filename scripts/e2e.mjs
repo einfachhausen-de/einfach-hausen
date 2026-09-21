@@ -295,7 +295,10 @@ function isToleratedWebKitConsole(text,source){
 // invisible noise. Every other page error stays fatal.
 let skippedTransitions=0;
 function isToleratedViewTransitionAbort(message){
-  if(!/AbortError: Transition was skipped/.test(message))return false;
+  // Playwright hands the DOMException over in two shapes: `error.message` is the
+  // bare "Transition was skipped", while String(error) and the console variant
+  // carry the "AbortError: " prefix. Match both, and nothing else.
+  if(!/^(?:AbortError:\s*)?Transition was skipped$/.test(String(message).trim()))return false;
   skippedTransitions++;
   return true;
 }
