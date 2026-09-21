@@ -15,7 +15,7 @@ import s from './shell.module.css';
 export async function AppShell({ role, active, children, breadcrumbs, tabs, rail }: { role:'homeowner'|'provider'; active:string; children:ReactNode; title?:string; subtitle?:string; breadcrumbs?:readonly Crumb[]; tabs?:readonly ContextTab[]; rail?:ReactNode }) {
   const pro = role === 'provider';
   const user=await getCurrentUser();
-  const unread=user&&user.role===role?(db.prepare('SELECT COUNT(*) c FROM notifications WHERE user_id=? AND read_at IS NULL').get(user.id) as {c:number}).c:0;
+  const unread=user&&user.role===role?(db.prepare("SELECT COUNT(*) c FROM notifications WHERE user_id=? AND read_at IS NULL AND channel='in_app'").get(user.id) as {c:number}).c:0;
   const profileHref=pro?'/pro/profile':'/app/profile';
   const initials=user?`${user.first_name?.[0]||''}${user.last_name?.[0]||''}`.toUpperCase():'EH';
 

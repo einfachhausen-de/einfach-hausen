@@ -63,15 +63,34 @@ kurze Antwort die Arbeit sofort freigibt.
 
 ### Aus Issue #12 (App-Verteilung & Benachrichtigungen)
 
-9. **Transaktionale E-Mail aktivieren?** Die Infrastruktur ist vollständig gebaut und
-   getestet (SMTP-Transport mit Fail-closed-Verhalten, dauerhafte Outbox mit Retry und
-   Dead-Letter, registrierter E-Mail-Kanal-Adapter, zwei fertige Vorlagen), aber
-   **kein Produktereignis reiht derzeit eine E-Mail ein** — `enqueueNotification` wird
-   nirgends mit `channel: 'email'` aufgerufen. Folge: Nutzer erhalten ausschließlich
-   In-App-Benachrichtigungen. Das Senden echter E-Mails ist nicht rückholbar und
-   berührt die Datenschutzerklärung, deshalb keine stille Aktivierung.
-   **Frage:** Sollen für Angebote (Eigentümer) und neue Anfragen (Betrieb) echte
-   transaktionale E-Mails versendet werden, sobald SMTP konfiguriert ist?
+9. **Transaktionale E-Mail: Absenderdomain verifizieren (letzter Schritt).**
+   **Entscheidung vom 2026-09-21: E-Mail ist aktiviert** — für Angebote an Eigentümer
+   und neue Anfragen an Betrieb. Der Code ist fertig und getestet: Fan-out an einem
+   einzigen Choke-Point (`EMAIL_EVENT_KINDS` in `src/lib/notifications.ts`), eine
+   eigene Outbox-Zeile pro Ereignis, In-App-Ansichten lesen ausschließlich
+   `channel='in_app'` (keine Doppelanzeige), 37/37 Benachrichtigungstests grün.
+
+   **Der Versand ist noch blockiert — durch eine Konfiguration, die nur der Betreiber
+   ändern kann.** `MAIL_FROM` in `/etc/einfach-hausen.env` lautet
+   `ShopSIN <onboarding@resend.dev>`: Resends geteilte Sandbox-Adresse. Sie akzeptiert
+   **ausschließlich das eigene Postfach des Resend-Kontoinhabers** als Empfänger; jeder
+   andere Empfänger wird mit 403 abgelehnt. Zusätzlich lautet der Absendername
+   `ShopSIN`, und `resend.dev` ist keine für dieses Projekt verifizierte Domain (kein
+   SPF-/DKIM-Alignment). Ein Versand an echte Nutzer wäre damit ein stiller Ausfall.
+
+   Damit daraus keine stillen Fehlschläge werden, ist der Fan-out **fail-closed**:
+   `mailDeliverability()` erkennt eine Sandbox-Absenderdomain und reiht dann **gar
+   keine** E-Mail ein; der In-App-Kanal läuft unverändert weiter. Der Healthcheck meldet
+   in diesem Fall `smtp: sandbox_sender` mit `smtp_reason: sandbox-sender-domain` statt
+   `configured` — der Zustand ist also sichtbar, nicht geraten.
+   **Sobald `MAIL_FROM` auf eine in Resend verifizierte Adresse zeigt, beginnt der
+   Versand ohne Codeänderung.**
+
+   **Schritte (Betreiber):** (a) in Resend die Domain `einfachhausen.de` verifizieren und
+   die angezeigten SPF-/DKIM-Einträge bei STRATO/Cloudflare setzen, (b) `MAIL_FROM` auf
+   zum Beispiel `"Einfach Hausen <noreply@einfachhausen.de>"` ändern und den Dienst neu
+   starten, (c) einen Testversand an ein eigenes Postfach bestätigen. Danach ist dieser
+   Punkt erledigt.
 10. **Browser-Push implementieren oder weiter bewusst nicht anbieten?** Heute gibt es
     bewusst keinen Push: kein VAPID-Schlüssel, kein `PushManager`, keine
     `push_subscriptions`-Tabelle, kein `push`-Listener im Service Worker, und die

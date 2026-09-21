@@ -40,7 +40,7 @@ export async function WerkbankRahmen({
   const user = await getCurrentUser();
   const unread =
     user && user.role === role
-      ? (db.prepare('SELECT COUNT(*) c FROM notifications WHERE user_id=? AND read_at IS NULL').get(user.id) as { c: number }).c
+      ? (db.prepare("SELECT COUNT(*) c FROM notifications WHERE user_id=? AND read_at IS NULL AND channel='in_app'").get(user.id) as { c: number }).c
       : 0;
   const profileHref = pro ? '/pro/profile' : '/app/profile';
   const hilfeHref = pro ? '/pro/hilfe' : '/app/hilfe';

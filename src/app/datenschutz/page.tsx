@@ -86,7 +86,7 @@ const SECTIONS: { title: string; content: string[] }[] = [
       'Wir geben personenbezogene Daten nur weiter, soweit das zur Erbringung der Leistung erforderlich ist:',
       '· Oracle Cloud Infrastructure — Hosting innerhalb der EU, Auftragsverarbeiter nach Art. 28 DSGVO.',
       '· Stripe — Abwicklung der kostenpflichtigen Tarife unserer teilnehmenden Fachbetriebe sowie der Auftragszahlungen. Zahlungsdaten werden direkt bei Stripe verarbeitet; wir erhalten keine vollständigen Zahlungsdaten. Für Eigentümer fallen keine Kosten an, daher gibt es für sie keinen Zahlungsvorgang.',
-      '· Unser E-Mail-Versand — für transaktionale Benachrichtigungen (etwa zu Angeboten und Aufträgen) über einen konfigurierten SMTP-Anbieter. Dieser Kanal ist technisch vorbereitet; bis er freigeschaltet ist, erhältst du Benachrichtigungen ausschließlich in der App.',
+      '· Unser E-Mail-Versand — für transaktionale Benachrichtigungen zu Angeboten und Aufträgen über einen konfigurierten SMTP-Anbieter. Wir versenden dabei keine Werbung und keine Newsletter. E-Mail-Benachrichtigungen erhältst du nur zu Vorgängen, die du selbst ausgelöst hast.',
       '· OpenStreetMap (Nominatim) — zur Regionszuordnung wird ausschließlich die Postleitzahl und das Land übermittelt, keine personenbezogenen Daten.',
       '· WhatsApp Business (Meta) — dieser Kanal ist technisch vorbereitet, aber derzeit ausdrücklich noch nicht freigeschaltet. Bevor wir ihn anbieten, ergänzen wir diese Erklärung.',
       'Eine Weitergabe zu Werbezwecken oder ein Verkauf von Daten findet nicht statt.'

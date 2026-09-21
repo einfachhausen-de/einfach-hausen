@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { promises as fsPromises } from 'node:fs';
 import path from 'node:path';
 import { db } from '@/lib/db';
+import { mailDeliverability } from '@/lib/mailer';
 
 export const runtime = 'nodejs';
 
@@ -53,6 +54,11 @@ export async function GET() {
     const databaseReady = row?.ok === 1;
     const [auth, storage] = await Promise.all([authAuthorityCheck(), storageCheck()]);
     const smtpConfigured = Boolean(process.env.SMTP_HOST) && Boolean((process.env.MAIL_FROM || process.env.SMTP_USER || '').includes('@'));
+    // A configured transport with a sandbox sender cannot reach real users
+    // (see mailDeliverability). Report that distinctly instead of "configured",
+    // so a silent delivery failure is visible in monitoring.
+    const mail = smtpConfigured ? mailDeliverability() : { deliverable: false, reason: 'unconfigured' };
+    const smtpState = !smtpConfigured ? 'unconfigured' : mail.deliverable ? 'configured' : 'sandbox_sender';
     const ready = databaseReady && auth === 'reachable' && storage.status === 'ready';
 
     // T-0134: degradierte Komponenten sind diagnostizierbar ohne sensible
@@ -61,7 +67,7 @@ export async function GET() {
     const dependencies: Record<string, 'ready' | 'degraded' | 'unavailable' | 'unconfigured'> = {
       database: databaseReady ? 'ready' : 'unavailable',
       auth_authority: auth === 'reachable' ? 'ready' : auth === 'unconfigured' ? 'unconfigured' : 'unavailable',
-      smtp: smtpConfigured ? 'ready' : 'unconfigured',
+      smtp: smtpConfigured && mail.deliverable ? 'ready' : 'unconfigured',
       storage: storage.status === 'ready' ? 'ready' : 'unavailable',
     };
     const degraded = Object.entries(dependencies).filter(([, v]) => v === 'degraded' || v === 'unavailable').map(([k]) => k);
@@ -81,7 +87,8 @@ export async function GET() {
         checks: {
           database: databaseReady ? 'ready' : 'unavailable',
           auth_authority: auth,
-          smtp: smtpConfigured ? 'configured' : 'unconfigured',
+          smtp: smtpState,
+          smtp_reason: smtpConfigured ? mail.reason : undefined,
           storage: storage.status,
           ...(storage.freeDiskPercent !== undefined ? { free_disk_percent: storage.freeDiskPercent } : {}),
         },

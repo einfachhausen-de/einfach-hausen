@@ -1,11 +1,27 @@
 import { db } from './db';
-import { sendMail } from './mailer';
+import { sendMail, mailDeliverability } from './mailer';
 import { structuredLog, newCorrelationId } from './observability';
 
+// Transactional email is reserved for the two events where the message itself is
+// the product value: a quote arriving for the owner, and a new request reaching a
+// provider. Everything else stays in-app so the mailbox does not become noise.
+// The decision lives at this single choke point, which every domain event already
+// goes through, so no call site can silently opt an event in or out.
+// Operator decision: item 9 in docs/EXTERNAL-BLOCKERS.md.
+export const EMAIL_EVENT_KINDS: ReadonlySet<string> = new Set(['quote', 'dispatch']);
+
 export function createNotification(userId: number, title: string, body: string, href: string, kind = 'info') {
-  return db
+  const row = db
     .prepare('INSERT INTO notifications(user_id,kind,title,body,href) VALUES(?,?,?,?,?)')
     .run(userId, kind, title, body.slice(0, 800), href);
+  if (EMAIL_EVENT_KINDS.has(kind) && mailDeliverability().deliverable) {
+    // The email gets its own outbox row. In-app views read channel='in_app' rows
+    // only, so the two deliveries of one event never appear twice in the app.
+    // A missing SMTP configuration makes this row retry and dead-letter instead
+    // of pretending it was delivered.
+    enqueueNotification({ userId, title, body, href, kind, channel: 'email' });
+  }
+  return row;
 }
 
 export function markNotificationRead(userId: number, notificationId: number): boolean {
@@ -72,7 +88,7 @@ export type EnqueueNotificationInput = {
   body?: string;
   href?: string;
   kind?: string;
-  channel?: 'in_app';
+  channel?: 'in_app' | 'email';
   priority?: number;
   eventId?: number;
 };

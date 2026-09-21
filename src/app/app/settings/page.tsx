@@ -33,9 +33,9 @@ export default async function AppSettingsPage() {
   // KI-Kontingent, Bonus-Guthaben und das Alter des Kontos.
   const quota = aiQuotaSnapshot(user.id);
   const account = db.prepare('SELECT created_at FROM users WHERE id=?').get(user.id) as { created_at: string } | undefined;
-  const unread = (db.prepare('SELECT COUNT(*) c FROM notifications WHERE user_id=? AND read_at IS NULL').get(user.id) as { c: number }).c;
-  const noticeTotal = (db.prepare('SELECT COUNT(*) c FROM notifications WHERE user_id=?').get(user.id) as { c: number }).c;
-  const notices = db.prepare('SELECT id,title,body,href,read_at,created_at FROM notifications WHERE user_id=? ORDER BY created_at DESC LIMIT 5').all(user.id) as Notice[];
+  const unread = (db.prepare("SELECT COUNT(*) c FROM notifications WHERE user_id=? AND read_at IS NULL AND channel='in_app'").get(user.id) as { c: number }).c;
+  const noticeTotal = (db.prepare("SELECT COUNT(*) c FROM notifications WHERE user_id=? AND channel='in_app'").get(user.id) as { c: number }).c;
+  const notices = db.prepare("SELECT id,title,body,href,read_at,created_at FROM notifications WHERE user_id=? AND channel='in_app' ORDER BY created_at DESC LIMIT 5").all(user.id) as Notice[];
   const dataRequests = db.prepare('SELECT id,kind,status,created_at,completed_at FROM data_requests WHERE user_id=? ORDER BY created_at DESC LIMIT 3').all(user.id) as DataRequest[];
   const lastRequest = dataRequests[0];
 

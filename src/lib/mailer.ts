@@ -59,6 +59,30 @@ export async function sendMail(to: string, subject: string, html: string) {
   }
 }
 
+// A configured transport is not the same as a deliverable sender. Resend's shared
+// sandbox address (anything @resend.dev) only accepts the Resend account owner's
+// own mailbox as recipient; every other recipient is rejected with 403. Treating
+// that as "configured" would enqueue mail for real users that can never arrive,
+// retry three times and then dead-letter, while the health check kept reporting
+// success. Callers use this to stay fail-closed and to say so out loud.
+// Fix: replace MAIL_FROM with an address on a domain verified in Resend (or any
+// other provider that accepts arbitrary recipients). No code change needed then.
+export function mailDeliverability(): { deliverable: boolean; reason: string } {
+  if (!process.env.SMTP_HOST) return { deliverable: false, reason: 'no-smtp-host' };
+  const raw = mailFrom();
+  if (!raw) return { deliverable: false, reason: 'no-sender-address' };
+  // MAIL_FROM may be a full header value ("ShopSIN <onboarding@resend.dev>"),
+  // so read the address out of the angle brackets before looking at the domain.
+  const angle = raw.match(/<([^>]+)>/);
+  const addr = (angle ? angle[1] : raw).trim().toLowerCase();
+  const domain = addr.slice(addr.lastIndexOf('@') + 1);
+  if (!domain || domain === addr) return { deliverable: false, reason: 'no-sender-address' };
+  if (domain === 'resend.dev' || domain.endsWith('.resend.dev')) {
+    return { deliverable: false, reason: 'sandbox-sender-domain' };
+  }
+  return { deliverable: true, reason: 'ok' };
+}
+
 export const mailTemplates = {
   neuesAngebotFuerOwner: (firma: string, titel: string, preis: number, anfrageId: string) => `
     <div style="font-family:Helvetica,Arial,sans-serif;max-width:520px;margin:auto">
