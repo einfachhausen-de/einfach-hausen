@@ -457,8 +457,11 @@ await clickAndWaitUrl(manager,manager.getByRole('button',{name:'Zur Prüfung ein
 const adminCtx=await newE2EContext({viewport:{width:1180,height:1000}}); const admin=await adminCtx.newPage(); trackPage(admin,'admin');
 await nav(admin, base+'/admin/login'); await admin.getByLabel('Admin-Passwort').fill(adminPassword);
 await Promise.all([admin.waitForURL('**/admin'),admin.getByRole('button',{name:'Admin anmelden'}).click()]);
-await admin.getByRole('heading',{name:'Betriebsübersicht'}).waitFor(); await waitText(admin,'Nutzer'); await waitText(admin,'Anfragen'); await waitText(admin,'Bookings'); await waitText(admin,'MATCHING'); await waitText(admin,'BENACHRICHTIGUNGEN'); await admin.getByRole('heading',{name:'Bewertungen'}).waitFor();
-let companyCard=admin.locator('.admin-card').filter({hasText:'Gartenbau Müller'}).first();
+await admin.getByRole('heading',{name:'Betriebsübersicht'}).waitFor(); await waitText(admin,'Nutzer'); await waitText(admin,'Anfragen'); await waitText(admin,'Bookings'); await waitText(admin,'MATCHING'); await waitText(admin,'BENACHRICHTIGUNGEN'); await admin.getByRole('heading',{name:'Bewertungen',exact:true}).waitFor();
+// Partner cards are EHFormSection blocks, which render <fieldset><legend>. Anchor on
+// the legend so the right partner is selected; the previous `.admin-card` class no
+// longer exists anywhere in the admin UI (it was rewritten onto the design system).
+let companyCard=admin.locator('fieldset').filter({has:admin.locator('legend',{hasText:'Gartenbau Müller'})}).first();
 await clickServerAction(admin,companyCard.getByRole('button',{name:'Unternehmen freigeben'}));
 try { await companyCard.getByText(/Prüfung Freigegeben/).waitFor({timeout:30000}); } catch(e) {
   console.error('E2EDIAG url=',admin.url());
@@ -470,7 +473,7 @@ try { await companyCard.getByText(/Prüfung Freigegeben/).waitFor({timeout:30000
 // uncontrolled contract form starts from fresh server state (a stale DOM resets
 // select/checkboxes to defaults before the submit lands).
 await nav(admin, admin.url()); await admin.getByRole('heading',{name:'Betriebsübersicht'}).waitFor();
-companyCard=admin.locator('.admin-card').filter({hasText:'Gartenbau Müller'}).first();
+companyCard=admin.locator('fieldset').filter({has:admin.locator('legend',{hasText:'Gartenbau Müller'})}).first();
 await companyCard.getByLabel('Status').selectOption('active');
 for(const name of ['Betriebshaftpflicht geprüft','Qualifikation/Zulassung geprüft','Partnervertrag unterschrieben','Qualitätsstandard akzeptiert']) await companyCard.getByLabel(name).check();
 await clickServerAction(admin,companyCard.getByRole('button',{name:'Partnervertrag speichern'}));

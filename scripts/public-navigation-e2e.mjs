@@ -8,11 +8,24 @@ import { randomUUID } from 'node:crypto';
 import { spawn } from 'node:child_process';
 
 const root = process.cwd();
+// Browser discovery must not be macOS-only. This script used to check three fixed
+// paths and throw otherwise, so it could never run on the canonical OCI VM even
+// though Chromium is installed there under PLAYWRIGHT_BROWSERS_PATH. It now resolves
+// the Playwright-registered browser first (like scripts/e2e.mjs does) and keeps the
+// explicit overrides and Linux paths as fallbacks.
 function browserExecutable() {
+  const bundled = typeof chromium.executablePath === 'function' ? chromium.executablePath() : '';
   const candidates = [
     process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH,
+    process.env.CHROME_PATH,
+    bundled,
     '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
     '/Applications/Chromium.app/Contents/MacOS/Chromium',
+    '/usr/bin/google-chrome',
+    '/usr/bin/google-chrome-stable',
+    '/usr/bin/chromium',
+    '/usr/bin/chromium-browser',
+    '/snap/bin/chromium',
   ].filter(Boolean);
   const found = candidates.find((candidate) => fs.existsSync(candidate));
   if (!found) throw new Error('No Chromium browser found');
