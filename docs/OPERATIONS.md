@@ -80,6 +80,43 @@ Backup-Pfad: `/var/backups/einfach-hausen` (+ `scripts/backup-einfach-hausen.sh`
 
 Nightly-Sicherung: `einfach-hausen-backup.timer` (03:25 UTC) bündelt SQLite+private+uploads und lädt das Bundle in den Supabase-Bucket `einfach-hausen-backups` (`deploy/backup-to-supabase.sh`). Zweitkopie außerhalb der VM: siehe `docs/EXTERNAL-BLOCKERS.md`.
 
+### Retention / Rotation (seit 2026-09-21)
+
+`scripts/prune-einfach-hausen-backups.sh` begrenzt das Wachstum von
+`/var/backups/einfach-hausen`. Es läuft am Ende von
+`scripts/backup-einfach-hausen.sh`, also **vor jedem Deploy und bei jeder
+Nacht-Sicherung**; ein Retention-Fehler bricht die Sicherung nicht ab (der neue
+Backup existiert zu diesem Zeitpunkt bereits), wird aber laut auf stderr gemeldet.
+
+Aufbewahrung (GFS-lite, absichtlich klein):
+
+1. der neueste Backup bleibt immer erhalten,
+2. alles jünger als `BACKUP_KEEP_ALL_HOURS` (Standard **48**) bleibt erhalten,
+3. der neueste Backup je UTC-Tag für `BACKUP_KEEP_DAILY_DAYS` (Standard **14**),
+4. der neueste Backup je ISO-Woche für `BACKUP_KEEP_WEEKLY_WEEKS` (Standard **8**).
+
+Nichts jünger als das Keep-All-Fenster wird entfernt, damit ein laufender Deploy
+seinen eigenen Backup nicht verlieren kann. Nur Artefakte, die dieses Repository
+selbst erzeugt (`einfach-hausen-<UTC-Stempel>` als Verzeichnis oder `.tar.gz`),
+werden angefasst; Symlinks und fremde Einträge bleiben unberührt, und ein
+gemeinsamer Pfad (`/`, `/var`, `/var/lib`, …) wird verweigert.
+
+```bash
+# Trockenlauf (ändert nichts)
+sudo env BACKUP_PRUNE_DRY_RUN=1 /srv/einfach-hausen/scripts/prune-einfach-hausen-backups.sh
+
+# anwenden
+sudo /srv/einfach-hausen/scripts/prune-einfach-hausen-backups.sh
+```
+
+Der Grund für dieses Skript ist belegt: am 2026-09-21 lagen **79 Backups mit
+13,7 GB** ohne jede Rotation in `/var/backups/einfach-hausen` (der Deploy-Backup
+und die Nacht-Sicherung addierten je einen vollständigen Satz). Bei ~1,4 GB/Tag
+und 26 GB freiem Speicher wäre die VM in etwa 18 Tagen vollgelaufen — ein
+Produktionsausfall durch reines Backup-Wachstum. Die Entscheidung ist in
+`scripts/backup-retention-regression.mjs` abgesichert und läuft als Gate in
+Layer 1 des Release-Gates.
+
 Restore-Drill (verifiziert 2026-08-30): `scripts/restore-einfach-hausen.sh BACKUP_DIR --dry-run` prüft Checksummen, SQLite-`integrity_check` und Archive; `--stage DIR` extrahiert ohne Produktionskontakt. Beweis inkl. RPO/RTO: `docs/evidence/T-0204-restore-drill-20260830.md`.
 
 Notification-Dispatcher: `einfach-hausen-dispatch.timer` (alle 5 Min) liefert fällige Outbox-Einträge über die Channel-Adapter (in_app, E-Mail via SMTP/Resend) mit Retry/Dead-Letter (`scripts/dispatch-notifications.mjs`).
