@@ -1,5 +1,7 @@
 "use client";
-import {useCallback, useState, useSyncExternalStore, type ReactNode} from "react";
+import {useCallback, useId, useState, useSyncExternalStore, type ReactNode} from "react";
+import {EHEmptyState, EHField, EHInput} from "./app";
+import {EHActions, EHButton} from "./primitives";
 import type {EHRecordEntry} from "./workspace-records";
 import {EHRecordCards, EHRecordList, EHRecordTimeline} from "./workspace-records";
 import s from "./styles.module.css";
@@ -91,7 +93,7 @@ export function EHViewSwitcher({label = "Ansicht wechseln", value, onChange, vie
 }
 
 /** Umschalter und Darstellung in einem Stueck - der Normalfall fuer eine Seite. */
-export function EHRecordViews({label, items, empty, views = EH_RECORD_VIEWS, defaultView = "liste", storageKey = "standard", switcherLabel}: {
+export function EHRecordViews({label, items, empty, views = EH_RECORD_VIEWS, defaultView = "liste", storageKey = "standard", switcherLabel, searchLabel, searchPlaceholder = "Titel, Details oder Datum"}: {
   label: string;
   items: readonly EHRecordEntry[];
   empty?: ReactNode;
@@ -99,16 +101,42 @@ export function EHRecordViews({label, items, empty, views = EH_RECORD_VIEWS, def
   defaultView?: EHRecordView;
   storageKey?: string;
   switcherLabel?: string;
+  /** Optional: durchsucht nur den bereits geladenen Bestand dieser Liste. */
+  searchLabel?: string;
+  searchPlaceholder?: string;
 }) {
   const [view, setView] = useEHRecordView(storageKey, defaultView);
+  const searchId = useId();
+  const [query, setQuery] = useState("");
+  const terms = searchLabel ? query.trim().toLocaleLowerCase("de-DE").split(/\s+/u).filter(Boolean) : [];
+  const found = terms.length ? items.filter(item => {
+    const text = [item.title, item.detail, item.value, item.note, item.date, item.dateLabel].filter(Boolean).join(" ").toLocaleLowerCase("de-DE");
+    return terms.every(term => text.includes(term));
+  }) : items;
+  const activeView = views.includes(view) ? view : views.includes(defaultView) ? defaultView : views[0] ?? "liste";
+  function clearSearch() {
+    setQuery("");
+    document.getElementById(searchId)?.focus();
+  }
 
   return (
     <div className={s.recordViews}>
-      <EHViewSwitcher label={switcherLabel} value={view} onChange={setView} views={views}/>
+      {searchLabel && <>
+        <EHField id={searchId} label={searchLabel}>
+          <EHInput id={searchId} type="search" value={query} onChange={event => setQuery(event.target.value)} placeholder={searchPlaceholder} aria-describedby={searchId+"-count"}/>
+        </EHField>
+        <EHActions>
+          <p id={searchId+"-count"} className={s.fieldHint} role="status">{found.length} von {items.length} Einträgen</p>
+          {query && <EHButton type="button" variant="secondary" onClick={clearSearch}>Suche zurücksetzen</EHButton>}
+        </EHActions>
+      </>}
+      <EHViewSwitcher label={switcherLabel} value={activeView} onChange={setView} views={views}/>
 
-      {view === "liste" && <EHRecordList label={label} items={items} empty={empty}/>}
-      {view === "karten" && <EHRecordCards label={label} items={items} empty={empty}/>}
-      {view === "chronik" && <EHRecordTimeline label={label} items={items} empty={empty}/>}
+      {terms.length > 0 && found.length === 0 ? <EHEmptyState title="Keine Treffer" text="Ändere den Suchbegriff oder setze die Suche zurück, um wieder alle Einträge zu sehen."/> : <>
+        {activeView === "liste" && <EHRecordList label={label} items={found} empty={empty}/>}
+        {activeView === "karten" && <EHRecordCards label={label} items={found} empty={empty}/>}
+        {activeView === "chronik" && <EHRecordTimeline label={label} items={found} empty={empty}/>}
+      </>}
     </div>
   );
 }

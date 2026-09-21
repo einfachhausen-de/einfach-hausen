@@ -71,7 +71,7 @@ export default async function HouseHistory({searchParams}:{searchParams:Promise<
     ]} />
     {sp.transfer&&<EHFormFeedback kind="success">Übergabelink erstellt. Nur die angegebene Käufer-E-Mail kann ihn innerhalb von {HOUSE_TRANSFER_TTL_DAYS} Tagen annehmen.</EHFormFeedback>}
     <EHWorkSection title="Dokumentierte Arbeiten">
-    {entries.length > 0 && <EHRecordViews label="Haus-Historie" storageKey="historie" defaultView="chronik" items={entries.map(e=>({ id: String(e.id), title: e.title,
+    {entries.length > 0 && <EHRecordViews searchLabel="Haus-Historie durchsuchen" searchPlaceholder="Arbeit, Betrieb, Notiz oder Datum" label="Haus-Historie" storageKey="historie" defaultView="chronik" items={entries.map(e=>({ id: String(e.id), title: e.title,
       detail: [e.category, e.company_name||'Eigenleistung / unbekannt', e.contact_name, e.cost_amount!=null?euroExact(e.cost_amount):'', e.guarantee_until?`Garantie bis ${day(e.guarantee_until)}`:'', e.maintenance_due?`Wartung ${day(e.maintenance_due)}`:'', e.job_id?'Über Einfach Hausen dokumentiert':'Manuell eingetragen', e.notes].filter(Boolean).join(' · '),
       date: String(e.performed_at).slice(0, 10), dateLabel: day(e.performed_at),
       status: e.provider_id?<EHStatus tone="success">Partner verbunden</EHStatus>:e.contact_email?<EHStatus>Einladung vorgemerkt</EHStatus>:undefined,

@@ -188,7 +188,7 @@ export default async function Contracts({ searchParams }: { searchParams: Promis
         <EHOwnerSection title={`Alle Verträge · ${contracts.length}`}>
           {contracts.length === 0
             ? <EHEmptyState title="Noch kein Vertrag erfasst" text="Trag deinen Strom-, DSL- oder Versicherungsvertrag ein. Danach siehst du hier Kosten, Laufzeit und Kündigungsfrist – und im Spar-Check, ob sich ein Wechsel lohnt." />
-            : <EHRecordViews label="Erfasste Verträge" storageKey="vertraege" defaultView="liste" switcherLabel="Verträge: Ansicht wechseln" items={contracts.map((row) => {
+            : <EHRecordViews searchLabel="Verträge suchen" searchPlaceholder="Anbieter, Sparte oder Tarif" label="Erfasste Verträge" storageKey="vertraege" defaultView="liste" switcherLabel="Verträge: Ansicht wechseln" items={contracts.map((row) => {
                 const end = currentTermEnd(row);
                 const started = row.started_at ? formatDate(new Date(`${row.started_at.slice(0, 10)}T12:00:00`)) : '';
                 return {

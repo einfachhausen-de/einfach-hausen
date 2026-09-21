@@ -66,7 +66,7 @@ export default async function ProLeads() {
       // carried no contact channel at all whenever the owner had no phone.
       detail: [match.address || match.postcode, `${match.first_name} ${match.last_name}`, match.email, match.phone, match.living_area ? `${match.living_area} m² Wohnfläche` : 'Fläche offen', match.estimated_value_min != null && match.estimated_value_max != null ? `${euro(match.estimated_value_min)} – ${euro(match.estimated_value_max)}` : 'Noch nicht bewertet'].filter(Boolean).join(' · '),
       value: `Passung ${Math.round(match.match_score)} %`,
-      status: <EHStatus>{match.status}</EHStatus>,
+      status: <EHStatus>{STATUS_LABEL[match.status] ?? match.status}</EHStatus>,
       icon: <Building2 size={20} />,
       action: (
         <form action={updateBrokerLeadStatusAction.bind(null, match.id)}>

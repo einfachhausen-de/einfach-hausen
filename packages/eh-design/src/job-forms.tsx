@@ -10,7 +10,7 @@ export function EHQuoteForm({action, id, amountCents, availableAt = "", message 
   return <EHWorkflowForm action={action}><EHFormSection title={updating ? "Angebot aktualisieren" : "Dein Angebot"}>
     {error && <EHFormFeedback kind="error">{error}</EHFormFeedback>}
     <EHFieldGrid>
-      <EHField id={id+"-amount"} label="Gesamtpreis (€)" required><EHInput id={id+"-amount"} name="amount" type="number" min="1" required defaultValue={amountCents === undefined ? "" : amountCents/100}/></EHField>
+      <EHField id={id+"-amount"} label="Gesamtpreis (€)" required><EHInput id={id+"-amount"} name="amount" type="number" min="1" step="0.01" inputMode="decimal" required defaultValue={amountCents === undefined ? "" : amountCents/100}/></EHField>
       <EHField id={id+"-available"} label="Verfügbar ab"><EHInput id={id+"-available"} name="availableAt" type="datetime-local" defaultValue={availableAt.slice(0,16)}/></EHField>
     </EHFieldGrid>
     <EHField id={id+"-message"} label="Leistungsumfang" required hint="Beschreibe Leistung, Material, Entsorgung und mögliche Ausschlüsse.">

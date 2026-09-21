@@ -14,7 +14,7 @@ const CANCELLED_STATUS = 'cancelled';
 type AppointmentItem = EHRecordEntry & { _time: number; _done: boolean; _cancelled: boolean };
 
 function berlinDayKey(d: Date) {
-  return new Intl.DateTimeFormat('de-DE', { timeZone: 'Europe/Berlin', year: 'numeric', month: '2-digit', day: '2-digit' }).format(d);
+  return new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Berlin', year: 'numeric', month: '2-digit', day: '2-digit' }).format(d);
 }
 
 function toItem(row: any) {
@@ -24,7 +24,7 @@ function toItem(row: any) {
     id: String(row.id),
     title: row.title,
     detail: `${row.first_name} ${row.last_name}${row.contact_first ? ` · Ansprechpartner: ${row.contact_first} ${row.contact_last}` : ''}`,
-    dateLabel: new Intl.DateTimeFormat('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Berlin', timeZoneName: 'short' }).format(start),
+    dateLabel: Number.isFinite(time) ? new Intl.DateTimeFormat('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Berlin', timeZoneName: 'short' }).format(start) : 'Termin noch offen',
     date: Number.isFinite(time) ? berlinDayKey(start) : undefined,
     status: <EHStatus tone={DONE_STATUSES.has(String(row.status ?? '')) ? 'success' : String(row.status) === CANCELLED_STATUS ? 'warning' : 'neutral'}>{statusLabel(row.status)}</EHStatus>,
     icon: <CalendarDays size={20} />,
@@ -97,7 +97,7 @@ export default async function ProCalendar() {
         {items.length > 0 && (
           <div id="pro-cal-overdue">
             <EHWorkSection title={`Überfällig · ${overdue.length}`}>
-              {overdue.length > 0 ? <EHRecordViews label="Überfällige Termine" items={overdue} storageKey="pro-cal-ueberfaellig" switcherLabel="Überfällige Termine: Ansicht wechseln" /> : (
+              {overdue.length > 0 ? <EHRecordViews searchLabel="Überfällige Termine suchen" searchPlaceholder="Auftrag, Kunde oder Datum" label="Überfällige Termine" items={overdue} storageKey="pro-cal-ueberfaellig" switcherLabel="Überfällige Termine: Ansicht wechseln" /> : (
                 <ProviderState compact icon={<CalendarDays size={21} />} title="Nichts überfällig" description="Alle Termine sind im Plan." tone="success" />
               )}
             </EHWorkSection>
@@ -107,7 +107,7 @@ export default async function ProCalendar() {
         {items.length > 0 && (
           <div id="pro-cal-today">
             <EHWorkSection title={`Heute · ${today.length}`}>
-              {today.length > 0 ? <EHRecordViews label="Termine heute" items={today} storageKey="pro-cal-heute" switcherLabel="Termine heute: Ansicht wechseln" /> : (
+              {today.length > 0 ? <EHRecordViews searchLabel="Termine heute suchen" searchPlaceholder="Auftrag, Kunde oder Datum" label="Termine heute" items={today} storageKey="pro-cal-heute" switcherLabel="Termine heute: Ansicht wechseln" /> : (
                 <ProviderState compact icon={<CalendarDays size={21} />} title="Heute keine Termine" description="Der Tag ist frei für Vorbereitung und Anfragen." />
               )}
             </EHWorkSection>
@@ -117,7 +117,7 @@ export default async function ProCalendar() {
         {items.length > 0 && (
           <div id="pro-cal-upcoming">
             <EHWorkSection title={`Anstehend · ${upcoming.length + undated.length}`}>
-              {(upcoming.length + undated.length) > 0 ? <EHRecordViews label="Anstehende Termine" items={[...upcoming, ...undated]} storageKey="pro-cal-anstehend" switcherLabel="Anstehende Termine: Ansicht wechseln" /> : (
+              {(upcoming.length + undated.length) > 0 ? <EHRecordViews searchLabel="Anstehende Termine suchen" searchPlaceholder="Auftrag, Kunde oder Datum" label="Anstehende Termine" items={[...upcoming, ...undated]} storageKey="pro-cal-anstehend" switcherLabel="Anstehende Termine: Ansicht wechseln" /> : (
                 <ProviderState compact icon={<CalendarDays size={21} />} title="Keine Folgetermine" description="Sobald ein weiterer Kundentermin bestätigt ist, steht er hier." />
               )}
             </EHWorkSection>
@@ -127,7 +127,7 @@ export default async function ProCalendar() {
         {items.length > 0 && (
           <div id="pro-cal-done">
             <EHWorkSection title={`Erledigt · ${done.length}`}>
-              {done.length > 0 ? <EHRecordViews label="Erledigte Termine" items={done} storageKey="pro-cal-erledigt" switcherLabel="Erledigte Termine: Ansicht wechseln" /> : (
+              {done.length > 0 ? <EHRecordViews searchLabel="Erledigte Termine suchen" searchPlaceholder="Auftrag, Kunde oder Datum" label="Erledigte Termine" items={done} storageKey="pro-cal-erledigt" switcherLabel="Erledigte Termine: Ansicht wechseln" /> : (
                 <ProviderState compact icon={<CalendarDays size={21} />} title="Noch nichts erledigt" description="Abgeschlossene Termine bleiben hier nachvollziehbar." />
               )}
             </EHWorkSection>
@@ -136,7 +136,7 @@ export default async function ProCalendar() {
         {items.length > 0 && (
           <div id="pro-cal-cancelled">
             <EHWorkSection title={`Storniert · ${cancelled.length}`}>
-              {cancelled.length > 0 ? <EHRecordViews label="Stornierte Termine" items={cancelled} storageKey="pro-cal-storniert" switcherLabel="Stornierte Termine: Ansicht wechseln" /> : (
+              {cancelled.length > 0 ? <EHRecordViews searchLabel="Stornierte Termine suchen" searchPlaceholder="Auftrag, Kunde oder Datum" label="Stornierte Termine" items={cancelled} storageKey="pro-cal-storniert" switcherLabel="Stornierte Termine: Ansicht wechseln" /> : (
                 <ProviderState compact icon={<CalendarDays size={21} />} title="Nichts storniert" description="Abgesagte Termine bleiben hier getrennt von den erfolgreichen sichtbar." />
               )}
             </EHWorkSection>

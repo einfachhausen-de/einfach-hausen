@@ -101,13 +101,13 @@ export default async function YearPage({ searchParams }: {
     <EHWorkspaceGrid main={<>
       <EHWorkSection title={view === 'plan' ? `Wartungen · ${year}` : `Erledigte Wartungen · ${year}`}>
         {shownTasks.length > 0
-          ? <EHRecordViews label={view === 'plan' ? 'Geplante Wartungen' : 'Erledigte Wartungen'} storageKey="jahr-wartung" defaultView={view === 'history' ? 'chronik' : 'liste'} switcherLabel="Wartungen: Ansicht wechseln" items={taskItems(shownTasks)} />
+          ? <EHRecordViews searchLabel="Wartungen im gewählten Jahr suchen" searchPlaceholder="Wartung, Bereich oder Datum" label={view === 'plan' ? 'Geplante Wartungen' : 'Erledigte Wartungen'} storageKey="jahr-wartung" defaultView={view === 'history' ? 'chronik' : 'liste'} switcherLabel="Wartungen: Ansicht wechseln" items={taskItems(shownTasks)} />
           : <EHEmptyState title={view === 'plan' ? 'Keine weiteren Wartungen geplant' : 'Keine erledigten Wartungen in diesem Fälligkeitsjahr'} text={view === 'plan' ? 'Hinterlege deine Technik in „Mein Haus“ oder plane ein Anliegen über den Hausmeister.' : 'Abgeschlossene Wartungen bleiben hier erhalten. Prüfe bei Bedarf ein anderes Jahr.'} />}
       </EHWorkSection>
       <EHWorkSection title={view === 'plan' ? `Aufträge · ${year}` : `Erledigte Aufträge · ${year}`}>
         {jobs.length === 0
           ? <EHEmptyState title={view === 'plan' ? 'Keine Aufträge mit geplantem Datum in diesem Jahr' : 'Keine abgeschlossenen Aufträge in diesem Jahr'} text="Alle deine Anfragen und Aufträge findest du unabhängig vom Jahr in der Auftragsübersicht." />
-          : <EHRecordViews label="Aufträge im gewählten Jahr" storageKey="jahr-auftraege" defaultView={view === 'history' ? 'chronik' : 'liste'} switcherLabel="Aufträge im Jahr: Ansicht wechseln" items={jobs.map(job => ({
+          : <EHRecordViews searchLabel="Aufträge im gewählten Jahr suchen" label="Aufträge im gewählten Jahr" storageKey="jahr-auftraege" defaultView={view === 'history' ? 'chronik' : 'liste'} switcherLabel="Aufträge im Jahr: Ansicht wechseln" items={jobs.map(job => ({
               id: String(job.id),
               title: job.title,
               detail: 'Auftrag',

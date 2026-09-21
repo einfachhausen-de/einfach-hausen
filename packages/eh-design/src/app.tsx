@@ -16,14 +16,31 @@ export function EHInput(props: Native<InputHTMLAttributes<HTMLInputElement>>) {r
 // rein kosmetisch an. Die Feldbeschriftung liefert EHField (htmlFor); hier wird
 // bewusst kein weiteres <label> erzeugt. FormData und Validierung bleiben beim
 // nativen Control, Tastatur und Screenreader bleiben auf ihm.
-export function EHFileInput({label = "Datei auswählen …", placeholder = "Keine Datei ausgewählt", ...props}: Native<InputHTMLAttributes<HTMLInputElement>> & {label?: string; placeholder?: string}) {
+export function EHFileInput({label = "Datei auswählen …", placeholder = "Keine Datei ausgewählt", onChange, ...props}: Native<InputHTMLAttributes<HTMLInputElement>> & {label?: string; placeholder?: string}) {
   const generated = useId();
   const inputId = props.id ?? generated;
+  const inputRef = useRef<HTMLInputElement>(null);
   const [fileName, setFileName] = useState<string | null>(null);
+  useEffect(() => {
+    const form = inputRef.current?.form;
+    if (!form) return;
+    const reset = (event: Event) => {
+      // Native und erfolgreiche React-Form-Actions leeren die Dateiauswahl.
+      // Ein abgebrochener Reset muss dagegen auch den Dateinamen erhalten.
+      queueMicrotask(() => { if (!event.defaultPrevented) setFileName(null); });
+    };
+    form.addEventListener("reset", reset);
+    return () => form.removeEventListener("reset", reset);
+  }, [props.form]);
   return <span className={s.fileInput}>
-    <input {...props} id={inputId} type="file" className={s.fileInputNative} onChange={event=>{setFileName(event.target.files?.[0]?.name ?? null);}}/>
+    <input {...props} ref={inputRef} id={inputId} type="file" className={s.fileInputNative} onChange={event=>{
+      const input = event.currentTarget;
+      onChange?.(event);
+      const names = Array.from(input.files ?? []).map(file => file.name);
+      setFileName(names.length > 1 ? `${names.length} Dateien: ${names.join(", ")}` : names[0] ?? null);
+    }}/>
     <span className={s.fileInputButton} aria-hidden="true">{label}</span>
-    <span className={s.fileInputMeta} aria-hidden="true">{fileName ?? placeholder}</span>
+    <span className={s.fileInputMeta} aria-hidden="true" title={fileName ?? undefined}>{fileName ?? placeholder}</span>
   </span>;
 }
 export function EHTextarea(props: Native<TextareaHTMLAttributes<HTMLTextAreaElement>>) {return <textarea rows={5} {...props} className={s.textarea}/>;}

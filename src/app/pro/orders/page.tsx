@@ -93,7 +93,7 @@ export default async function Orders() {
               icon={<ClipboardList size={21} />}
               title="Noch keine Aufträge oder Kontakte"
               description={ctx.canManageJobs ? 'Sobald ein Kontakt übernommen oder ein Angebot gesendet wurde, bleibt der Vorgang hier bis zum Abschluss nachvollziehbar.' : 'Sobald dir ein Vorgang zugewiesen wurde, erscheint er hier.'}
-              action={{ href: '/pro/leads', label: 'Offene Anfragen ansehen' }}
+              action={{ href: '/pro#kundenanfragen', label: 'Offene Anfragen ansehen' }}
             />
           </EHWorkSection>
         )}
@@ -101,7 +101,7 @@ export default async function Orders() {
         {items.length > 0 && (
           <div id="pro-orders-active">
             <EHWorkSection title={`Aktive Aufträge · ${activeJobs.length}`}>
-              {activeJobs.length > 0 ? <EHRecordViews label="Aktive Aufträge" items={activeJobs} storageKey="pro-auftraege-aktiv" switcherLabel="Aktive Aufträge: Ansicht wechseln" /> : (
+              {activeJobs.length > 0 ? <EHRecordViews searchLabel="Aktive Aufträge suchen" label="Aktive Aufträge" items={activeJobs} storageKey="pro-auftraege-aktiv" switcherLabel="Aktive Aufträge: Ansicht wechseln" /> : (
                 <ProviderState compact icon={<ClipboardList size={21} />} title="Keine aktiven Aufträge" description="Sobald ein Angebot angenommen oder ein Auftrag zugewiesen wurde, erscheint er hier." />
               )}
             </EHWorkSection>
@@ -111,7 +111,7 @@ export default async function Orders() {
         {items.length > 0 && (
           <div id="pro-orders-contacts">
             <EHWorkSection title={`Kontakte · ${contacts.length}`}>
-              {contacts.length > 0 ? <EHRecordList label="Persönliche Ansprechpartner" items={contacts} /> : (
+              {contacts.length > 0 ? <EHRecordViews searchLabel="Kontakte suchen" label="Persönliche Ansprechpartner" items={contacts} storageKey="pro-auftraege-kontakte" /> : (
                 <ProviderState compact icon={<ClipboardList size={21} />} title="Keine Kontakte" description="Sobald du einen Kundenkontakt übernimmst, bleibt er hier nachvollziehbar." />
               )}
             </EHWorkSection>
@@ -121,7 +121,7 @@ export default async function Orders() {
         {items.length > 0 && (
           <div id="pro-orders-done">
             <EHWorkSection title={`Abgeschlossen · ${done.length}`}>
-              {done.length > 0 ? <EHRecordList label="Erledigte Vorgänge" items={done} /> : (
+              {done.length > 0 ? <EHRecordViews searchLabel="Abgeschlossene Vorgänge suchen" label="Erledigte Vorgänge" items={done} storageKey="pro-auftraege-erledigt" /> : (
                 <ProviderState compact icon={<ClipboardList size={21} />} title="Noch nichts abgeschlossen" description="Erledigte Vorgänge bleiben hier zur Nachvollziehbarkeit erhalten." />
               )}
             </EHWorkSection>
@@ -130,7 +130,7 @@ export default async function Orders() {
         {items.length > 0 && (
           <div id="pro-orders-cancelled">
             <EHWorkSection title={`Storniert · ${cancelled.length}`}>
-              {cancelled.length > 0 ? <EHRecordList label="Stornierte Vorgänge" items={cancelled} /> : (
+              {cancelled.length > 0 ? <EHRecordViews searchLabel="Stornierte Vorgänge suchen" label="Stornierte Vorgänge" items={cancelled} storageKey="pro-auftraege-storniert" /> : (
                 <ProviderState compact icon={<ClipboardList size={21} />} title="Nichts storniert" description="Abgebrochene Vorgänge bleiben hier getrennt von den erfolgreichen sichtbar." />
               )}
             </EHWorkSection>
@@ -147,7 +147,7 @@ export default async function Orders() {
         <EHWorkSection title="Zuletzt abgeschlossen">
           <EHRecordList label="Zuletzt abgeschlossene Vorgänge" items={done.slice(0, 3)} empty="Noch nichts abgeschlossen." />
         </EHWorkSection>
-        <EHButton href="/pro/leads" variant="secondary" arrow>Offene Anfragen ansehen</EHButton>
+        <EHButton href="/pro#kundenanfragen" variant="secondary" arrow>Offene Anfragen ansehen</EHButton>
       </>} />
     </WerkbankRahmen>
   );

@@ -128,7 +128,7 @@ export default async function Pro() {
   // Radius, in dem er Aufträge annimmt. Beides darf hier nicht verschwinden.
   const location = `${ctx.jobTitle || 'Ansprechpartner'} · ${p?.radius_km || 25} km um ${p?.postcode || 'deine Region'}`;
 
-  const requestItems: EHRecordEntry[] = requests.slice(0, 5).map((job) => {
+  const requestItems: EHRecordEntry[] = requests.map((job) => {
     const badge = requestBadge(job);
     const Icon = badge.icon;
     const price = job.my_quote ? euro(job.my_quote) : job.budget_min && job.budget_max ? `ca. ${euro((job.budget_min + job.budget_max) / 2)}` : job.budget_max ? `ca. ${euro(job.budget_max)}` : null;
@@ -184,9 +184,10 @@ export default async function Pro() {
       )}
 
       <EHWorkspaceGrid main={
-        <EHWorkSection title="Passende Kundenaufträge" link={{ href: '/pro/orders', label: 'Alle ansehen' }}>
-          <EHRecordViews label="Passende Kundenaufträge" items={requestItems} empty="Keine neuen Aufträge." storageKey="pro-start" switcherLabel="Aufträge: Ansicht wechseln" />
-        </EHWorkSection>
+        <div id="kundenanfragen"><EHWorkSection title={`Kundenanfragen · ${requestItems.length}`} link={{ href: '/pro/orders', label: 'Aufträge & Kontakte' }}>
+          <EHText muted>Die bis zu 30 zuletzt eingegangenen offenen Anfragen. Über Titel und Beschreibung findest du den passenden Vorgang.</EHText>
+          <EHRecordViews searchLabel="Kundenanfragen suchen" searchPlaceholder="Auftrag oder Beschreibung" label="Passende Kundenanfragen" items={requestItems} empty="Keine offenen Kundenanfragen." storageKey="pro-start" switcherLabel="Kundenanfragen: Ansicht wechseln" />
+        </EHWorkSection></div>
       } aside={
         <EHWorkSection title="Deine nächsten Termine" link={{ href: '/pro/calendar', label: 'Kalender' }}>
           <EHRecordList label="Kommende Vor-Ort-Termine" items={appointmentItems} empty="Keine anstehenden Termine." />
