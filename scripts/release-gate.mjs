@@ -97,6 +97,13 @@ function staticGates() {
   log('\n== Layer 1: static gates ==');
   const lint = run('npm', ['run', 'lint']);
   record('lint', lint.ok, lint.ok ? '' : (lint.output || '').slice(-400));
+  // `.next/types` is a generated artifact of `next build` and part of the
+  // tsconfig include set. A copy left over from the previous release still
+  // references routes that were deleted since, so `tsc --noEmit` failed on
+  // stale generated files and aborted the deployment before this run's own
+  // build step could regenerate them. Drop the generated types first; the
+  // production build below recreates them. No check is relaxed.
+  fs.rmSync(path.join(root, '.next', 'types'), { recursive: true, force: true });
   // tsc via direct .bin path: bare `npx` depends on the caller's PATH
   // (macOS zsh hard-PATH has no npx -> ENOENT with empty output, T-0131).
   const types = run(path.join(root, 'node_modules', '.bin', 'tsc'), ['--noEmit']);

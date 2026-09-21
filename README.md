@@ -145,15 +145,21 @@ Enthalten (Web + nativ identisch):
 - `capacitor.config.ts` mit AppId `de.einfachhausen.app`, native Push (`@capacitor/push-notifications`), Camera/Filesystem via Supabase Storage
 - App-Store Verteilung: App Store + Play Store sind **ab sofort aktiver Produktionspfad** (kein externer Blocker mehr), siehe `docs/ARCHITECTURE.md`
 
-## Kunden-Tarife
+## Eigentümer-Nutzung und Erlöswege
 
 | Tarif | Preis | Kernnutzen |
 |---|---:|---|
-| FREE | 0 €/Monat | Hausmeisterservice, Aufträge, Angebote, Ansprechpartner, Hausakte |
-| PLUS | 19,90 €/Monat | Wartungsplanung, Hausjahresplan, Erinnerungen, Dokumente, Prioritätsservice |
-| PREMIUM | 39,90 €/Monat | höchste Servicepriorität, jährlicher Hauscheck, automatische Wartungsorganisation, erweiterte Betreuung |
+| Hauskonto | 0 €/Monat, dauerhaft | Hausmeisterservice, Aufträge, Angebote, Ansprechpartner, Hausakte |
 
-Jahrespakete sind zusätzlich möglich und erzeugen konkrete Aufgaben im Hausjahresplan.
+Eigentümer nutzen einfachhausen kostenlos: keine Mitgliedschaft, kein Abo, keine
+kostenpflichtigen Einzelpakete und keine Vermittlungs-/Servicegebühr auf
+Handwerkeraufträge (verbindlich seit Issue #132). Handwerkerleistungen, Material und
+Anfahrt rechnet der ausführende Betrieb direkt mit dem Eigentümer ab.
+
+Getrennt davon stehen zwei Erlöswege, die den Eigentümer-Preis nicht berühren:
+Betriebstarife der teilnehmenden Handwerksbetriebe (`/preise#betriebe`) und der
+freiwillige Vergleichsbereich „Verträge & Vergleiche“ (`/app/contracts`,
+Konfiguration: `docs/affiliate-partner-config.md`).
 
 ## CRM & Leadgewinnung
 
@@ -221,12 +227,13 @@ Berücksichtigt werden unter anderem:
 
 ## Zahlungen
 
-- Stripe Checkout für Kunden-Mitgliedschaften
 - Stripe Checkout für Partner-Tarife
-- Stripe Checkout für Jahrespakete
 - Stripe Connect für Auftragszahlungen
 - **0 % Plattformprovision pro Auftrag**
 - signierter Stripe-Webhook
+
+Kein Stripe-Checkout für Eigentümer: es gibt weder Eigentümer-Mitgliedschaften noch
+kostenpflichtige Eigentümer-Pakete (Issue #132).
 
 Der konkrete rechtliche, steuerliche und haftungsrechtliche Aufbau muss vor kommerziellem Livebetrieb fachlich geprüft werden.
 
