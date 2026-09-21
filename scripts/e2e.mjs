@@ -551,7 +551,10 @@ const capacityAfterReload=await strictRetry(manager,()=>manager.getByLabel('Wöc
 const radiusAfterReload=await manager.getByLabel(/Einsatzradius/).inputValue(); if(radiusAfterReload!=='40')throw new Error(`Service radius did not persist, got ${radiusAfterReload}`);
 
 // 2) Firma legt einen echten Ansprechpartner an. Nur ein Schalter für Auftragsverwaltung.
-await nav(manager, base+'/pro/team'); await manager.getByRole('heading',{name:'Dein Team. Klare Zuständigkeiten.'}).waitFor(); await waitText(manager,'Aufträge verwalten'); await assertNoOverflow(manager,'Mobile partner team');
+// Die Seite führt jetzt EHPageHeader (h1 "Team" + Betriebsname als Kontext) und
+// EHMetricsBar; die frühere Marketing-Überschrift "Dein Team. Klare
+// Zuständigkeiten." gibt es dort nicht mehr.
+await nav(manager, base+'/pro/team'); await manager.getByRole('heading',{level:1,name:'Team',exact:true}).waitFor(); await waitText(manager,'Aufträge verwalten'); await assertNoOverflow(manager,'Mobile partner team');
 await manager.getByLabel('Vorname').last().fill('Thomas'); await manager.getByLabel('Nachname').last().fill('Weber');
 await manager.getByLabel('Funktion').fill('Techniker'); await manager.locator('input[name="email"]').last().fill(techEmail); await manager.getByLabel('Telefon').last().fill('+49 151 12345678'); await manager.getByLabel('Startpasswort').fill(password);
 await clickAndWaitUrl(manager,manager.getByRole('button',{name:'Ansprechpartner anlegen'}),/member=created/); await waitText(manager,'Thomas Weber');
