@@ -98,11 +98,23 @@ kurze Antwort die Arbeit sofort freigibt.
     wirkungslosen Schalter zu zeigen. **Frage:** Soll Browser-Push gebaut werden
     (Consent, Subscriptions, Zustellung, Opt-out), oder bleibt es bei „nicht
     verfügbar“?
-11. **Native Store-Verteilung jetzt oder PWA-only?** `@capacitor/ios` und
-    `@capacitor/android` sind nicht installiert, es gibt kein `ios/`/`android/`
-    Verzeichnis, und `webDir: "out"` hat keine Ausgabe, weil kein statischer Export
-    konfiguriert ist. **Frage:** Bleibt die PWA der freigegebene Launch-Kanal, oder
-    wird die native Verteilung jetzt verfolgt?
+11. **Native Store-Verteilung: entschieden, aber an Vorleistungen gebunden.**
+    Entscheidung vom 2026-09-21: native Verteilung wird angegangen. Vorbereitet ist:
+    korrigierte `capacitor.config.ts` (Remote-URL-Wrapper, vom Capacitor-CLI selbst
+    geparst), `capacitor-www/index.html` als Offline-Fallback, und
+    `docs/brand/appstore/STORE-READINESS.md` mit Architekturentscheidung,
+    Datenschutzdeklarationen und Checkliste.
+    **Wichtigstes Risiko:** ein reiner Wrapper ist nach Apples Guideline 4.2
+    („Minimum Functionality“) ein erhebliches Ablehnungsrisiko; Statusleiste und
+    Tastaturstil genügen dafür nicht. Push ist der wirksamste zusätzliche native
+    Hebel und hängt an Punkt 10.
+    **Toolchain, hier geprüft:** Xcode 26.5 und iOS-18.3-Simulator vorhanden;
+    **CocoaPods, Java und Android SDK fehlen**. Deshalb wurde bewusst kein
+    halb erzeugtes `ios/`-/`android/`-Projekt committet.
+    **Frage/Schritte (Betreiber):** Apple-Developer-Konto für Gina Schulze, Team-ID,
+    endgültige Bundle-ID bestätigen, IAP-vs-Stripe entscheiden, CocoaPods sowie
+    JDK + Android SDK installieren. Danach können Plattformen, Icons/Splash und
+    `PrivacyInfo.xcprivacy` erzeugt werden.
 12. **Apple Developer-Konto und Bundle-ID.** **Frage:** Existiert ein
     Apple-Developer-Konto (Organisation oder Einzelperson) für Gina Schulze, und ist
     `de.einfachhausen.app` die endgültige Bundle-ID?
