@@ -9,7 +9,6 @@ const need=["Kennst du das","Der Unterschied","Drei Schritte","Was du bekommst",
 const miss=need.filter(s=>!txt.includes(s));
 if(miss.length)throw Error("missing: "+miss.join("|"));
 console.log("content 9/9");
-const res=[];
 for(const w of [390,736,1440]){
  await p.setViewportSize({width:w,height:1000});
  await p.screenshot({path:"docs/brand/evidence/05-web/home-"+w+".png",fullPage:true});

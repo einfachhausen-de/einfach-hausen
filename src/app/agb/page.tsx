@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { canonical } from '@/lib/seo';
 import { MarketingShell } from '@/components/marketing/site-shell';
-import { EHScope, EHSection, EHPageHero, EHList, EHCallout, EHPanel, EHButton, EHActions, EHEyebrow, EHHeading, EHText } from '@/design-system';
+import { EHScope, EHSection, EHPageHero, EHList, EHPanel, EHButton, EHActions, EHEyebrow, EHHeading, EHText } from '@/design-system';
 import { LegalNotice } from '@/components/marketing/ui';
 
 export const metadata: Metadata = {

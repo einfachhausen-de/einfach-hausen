@@ -19,7 +19,6 @@ const gartenSubs = CONTACT_DIRECTORY_CATEGORIES.find((main) => main.id === 'gart
 const G1 = gartenSubs[0].id;
 const G2 = gartenSubs[1].id;
 const G3 = gartenSubs[2].id;
-const E1 = CONTACT_DIRECTORY_CATEGORIES.find((main) => main.id === 'elektro').subcategories[0].id;
 const E_WALLBOX = 'elektro-wallbox-und-ladeinfrastruktur';
 
 test('root taxonomy pins hold: 17 mains, Garten first3 IDs', () => {
@@ -458,7 +457,7 @@ test('concurrent duplicate creates from two connections return one entry', { tim
   const { mkdtempSync, writeFileSync, rmSync } = await import('node:fs');
   const { tmpdir } = await import('node:os');
   const { join, dirname } = await import('node:path');
-  const { fileURLToPath, pathToFileURL } = await import('node:url');
+  const { fileURLToPath } = await import('node:url');
   const { Worker } = await import('node:worker_threads');
   const repoRoot = dirname(dirname(fileURLToPath(import.meta.url)));
   const dir = mkdtempSync(join(tmpdir(), 'eh-dir-race-'));

@@ -237,7 +237,6 @@ async function liveGates() {
 
     // ---- Layer 4: performance budgets ----
     if (runPerf) log('\n== Layer 4: performance budgets ==');
-    let perfFailures = [];
     const perfCtx = runPerf ? await browser.newContext({ viewport: { width: 390, height: 844 } }) : null;
     const perfPage = perfCtx ? await perfCtx.newPage() : null;
     const responses = [];
@@ -286,7 +285,7 @@ async function liveGates() {
   }
 }
 
-const staticOk = staticGates();
+staticGates();
 if (fast) {
   log('\n(--fast: build + live layers skipped)');
   const failed = results.filter((result) => !result.ok);

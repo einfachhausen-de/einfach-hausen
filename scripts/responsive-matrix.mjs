@@ -9,7 +9,7 @@ import fs from 'node:fs';
 import net from 'node:net';
 import path from 'node:path';
 import { randomUUID } from 'node:crypto';
-import { spawn, execFileSync } from 'node:child_process';
+import { spawn } from 'node:child_process';
 import { importTs } from './lib/import-ts.mjs';
 import { createIdentity as createTestIdentity } from './lib/identity.mjs';
 

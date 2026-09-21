@@ -115,7 +115,6 @@ function createProjectCopy(){
 }
 
 async function freePort(){return await new Promise((resolve,reject)=>{const socket=net.createServer();socket.unref();socket.on('error',reject);socket.listen(0,'127.0.0.1',()=>{const address=socket.address();const port=typeof address==='object'&&address?address.port:0;socket.close(()=>resolve(port));});});}
-async function runChild(argv,{cwd,env,timeoutMs=180000}={}){return await new Promise((resolve,reject)=>{const child=spawn(process.execPath,argv,{cwd,env,stdio:['ignore','pipe','pipe']});let output='';for(const stream of [child.stdout,child.stderr])stream.on('data',chunk=>{output+=chunk.toString();if(output.length>120000)output=output.slice(-120000);});const timer=setTimeout(()=>{child.kill('SIGTERM');reject(new Error(`Child process timeout: ${argv.join(' ')}\n${output.slice(-12000)}`));},timeoutMs);child.on('error',reject);child.on('exit',code=>{clearTimeout(timer);if(code===0)resolve(output);else reject(new Error(`Child process failed (${code}): ${argv.join(' ')}\n${output.slice(-12000)}`));});});}
 async function waitForServer(url,timeoutMs=90000){const started=Date.now();while(Date.now()-started<timeoutMs){if(server?.exitCode!==null&&server?.exitCode!==undefined)throw new Error(`Next server exited early (${server.exitCode})\n${serverLog.slice(-60).join('')}`);try{const response=await fetch(url,{redirect:'manual'});if(response.status<500)return;}catch{}await new Promise(resolve=>setTimeout(resolve,250));}throw new Error(`Next server did not become ready\n${serverLog.slice(-60).join('')}`);}
 async function waitText(page,text){
   // Engine-agnostic text matching: WebKit drops the space at innerText line
@@ -284,7 +283,7 @@ async function assertKeyboardFocus(page,label){
   if(!focused.tag||focused.tag==='BODY')throw new Error(`${label} has no keyboard focus target after Tab`);
 }
 async function clickAndWaitUrl(page,locator,matcher,timeout=30000){await Promise.all([page.waitForURL(matcher,{timeout}),locator.click()]);}
-async function clickServerAction(page,locator,timeout=90000){let response;try{await Promise.all([page.waitForResponse(r=>r.request().method()==='POST',{timeout}),locator.click()]);}catch(error){throw new Error(`server action click failed: ${error.message.split('\n')[0]}\nserverLog tail:\n${serverLog.slice(-12).join('')}`,{cause:error});} await page.waitForLoadState('load').catch(()=>{}); await page.waitForTimeout(400);}
+async function clickServerAction(page,locator,timeout=90000){try{await Promise.all([page.waitForResponse(r=>r.request().method()==='POST',{timeout}),locator.click()]);}catch(error){throw new Error(`server action click failed: ${error.message.split('\n')[0]}\nserverLog tail:\n${serverLog.slice(-12).join('')}`,{cause:error});} await page.waitForLoadState('load').catch(()=>{}); await page.waitForTimeout(400);}
 // The production hydration window can briefly double-render a freshly navigated
 // document; register fields are filled only after the DOM settles to one input.
 async function fillRegisterField(page,name,value){const field=page.locator(`input[name="${name}"]:visible`);await field.waitFor({timeout:20000});await field.fill(value);}
@@ -589,7 +588,7 @@ if(contactHref!==`/pro/jobs/${contactJobId}`)throw new Error(`contact dispatch c
 // Dev-mode Fast Refresh can full-reload mid-interaction and swallow clicks;
 // a direct navigation with one retry is deterministic here.
 try { await nav(manager, base+`/pro/jobs/${contactJobId}`); }
-catch(e){ await manager.waitForTimeout(2000); await nav(manager, base+`/pro/jobs/${contactJobId}`); }
+catch{ await manager.waitForTimeout(2000); await nav(manager, base+`/pro/jobs/${contactJobId}`); }
 await waitText(manager,'Nur persönlicher Ansprechpartner gesucht');
 const contactSelect=manager.getByLabel('Ansprechpartner'); const contactThomas=contactSelect.locator('option').filter({hasText:'Thomas Weber'}); const contactThomasValue=await contactThomas.getAttribute('value'); if(!contactThomasValue)throw new Error('Thomas contact option missing'); await contactSelect.selectOption(contactThomasValue);
 await clickServerAction(manager,manager.getByRole('button',{name:'Kontakt übernehmen'}));
@@ -610,7 +609,7 @@ const supabaseAdminBase=supabaseUrl;
 let supabaseTechUserId=null;
 {
   const mk=await fetch(`${supabaseAdminBase}/auth/v1/admin/users`,{method:'POST',headers:{apikey:supabaseServiceKey,Authorization:`Bearer ${supabaseServiceKey}`,'Content-Type':'application/json'},body:JSON.stringify({email:techEmail,password,email_confirm:true,user_metadata:{role:'provider',e2e:true}})});
-  if(mk.ok){const u=await mk.json();supabaseTechUserId=u.id;}
+  if(mk.ok){const u=await mk.json();supabaseTechUserId=u.id;console.error('E2EDIAG supabase tech user id:',supabaseTechUserId);}
   // 422 = already exists. Resolve the id by exact address; `?email=` would be
   // ignored by GoTrue and `users[0]` would be an arbitrary other user.
   else if(mk.status===422){const existing=await findSupabaseUserByEmail(techEmail);supabaseTechUserId=existing?.id||null;}
@@ -625,7 +624,7 @@ for(let attempt=0;attempt<3&&!loggedIn;attempt++){
   let enabled=false;
   try{ await tech.waitForFunction(()=>{const b=[...document.querySelectorAll('button')].find(b=>b.textContent.trim().startsWith('Anmelden')&&b.getClientRects().length>0);return b&&!b.disabled;},{timeout:8000}); enabled=true; }catch{}
   if(enabled){
-    await Promise.all([tech.waitForURL('**/pro',{timeout:60000}).catch(async(e)=>{ await tech.waitForTimeout(1500); const errbox=await tech.locator('[role="alert"]').textContent().catch(()=>'(no alert)'); throw new Error('post-click nav failed: '+tech.url()+' | errbox='+errbox); }),loginButton.click()]);
+    await Promise.all([tech.waitForURL('**/pro',{timeout:60000}).catch(async()=>{ await tech.waitForTimeout(1500); const errbox=await tech.locator('[role="alert"]').textContent().catch(()=>'(no alert)'); throw new Error('post-click nav failed: '+tech.url()+' | errbox='+errbox); }),loginButton.click()]);
     loggedIn=true;
     const sbCookies=await techCtx.cookies(base+'/app');
     console.error('E2EDIAG sb cookies after login:',JSON.stringify(sbCookies.map(c=>c.name)));
@@ -683,7 +682,6 @@ await nav(owner, base+'/app/documents'); await waitText(owner,'Leistungsnachweis
 
 // 7a) Notification Center: server-side read-state sync, per-item toggles, pagination chrome.
 await nav(manager, base+'/notifications'); await waitText(manager,'Angebote, Disposition');
-const readToggle=manager.locator('form').filter({has:manager.locator('button[aria-label^="Als gelesen markieren"]')}).first();
 const firstUnread=manager.locator('button[aria-label^="Als gelesen markieren"]').first();
 if(await firstUnread.count()===0)throw new Error('Manager should have unread dispatch notifications by now');
 // Read-state sync is server-rendered: the 'ungelesen' marker must disappear from the first row after marking read.

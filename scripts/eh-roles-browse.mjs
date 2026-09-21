@@ -4,7 +4,6 @@ const b=await chromium.launch({executablePath:process.env.EH_CHROMIUM_PATH,headl
 const p=await b.newPage({viewport:{width:1440,height:1000},reducedMotion:"reduce"});
 const errs=[];p.on("pageerror",e=>errs.push(e.message));
 const checks={"/eigenheimbesitzer":["viele Themen","Kennst du das","Direkte Wege","Dein Hauskonto startet"],"/beratung":["Erst einen Fachmann","Was du davon hast","Häufige Fragen"],"/notfall":["verfügbarer Hilfe","Wichtig","Häufige Fragen"],"/versicherung":["Schadenfall","Wichtig"],"/immobilienverkauf":["Verkauf","Wichtig"]};
-const res=[];
 for(const [route,need] of Object.entries(checks)){
  await p.goto("http://127.0.0.1:4202"+route,{waitUntil:"networkidle",timeout:90000});
  const txt=await p.evaluate(()=>{const m=document.querySelector("#main-content");return (m?m.textContent:document.body.textContent);});

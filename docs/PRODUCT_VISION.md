@@ -304,13 +304,21 @@ Der Bereich ist fail-closed: ohne freigegebenen Partner wird nichts ausgeleitet
 
 START, PRO und PREMIUM starten mit einer zweimonatigen kostenlosen Testphase. Der Partner-Tarif darf die fachliche Reihenfolge im Matching nicht kaufen.
 
-## Technische Zielarchitektur (Produktion HA)
+## Technische Zielarchitektur
 
-- mobile-first Kunden-Web-App (Next.js) + **Capacitor 6 native iOS/Android Apps** (gleiche Codebase, App Store + Play Store)
-- Partner-Web-App (Next.js) + Capacitor Hülle
-- PWA bleibt für Web/Offline-Hinweise, primäre mobile Auslieferung ist **Capacitor**
-- **Supabase Postgres (HA, Primary DB)** + **Supabase Storage (private/uploads für Fotos/Dokumente/Rechnungen)** — SQLite nur Local-Dev Fallback
-- WhatsApp Cloud API als zusätzlicher Kundeneingang
+> **Stand 2026-09-21:** Dieser Abschnitt ist ein **Zielbild**, keine Beschreibung des
+> Produktivstands. Produktiv heute: PWA als einziger Auslieferungskanal, self-hosted
+> Supabase OSS auf OCI (SQLite nur Local-Dev-Fallback), keine native App. Die native
+> Hülle ist vorbereitet, aber nicht gebaut — kein `ios/`/`android/`-Verzeichnis, kein
+> statischer Export für `webDir: "out"`. Verbindliche Betriebsaussagen:
+> `docs/EXTERNAL-BLOCKERS.md`, `docs/ARCHITECTURE.md`, `docs/OPERATIONS.md`.
+
+- mobile-first Kunden-Web-App (Next.js), installierbar als PWA — **das ist der heutige Produktivstand**
+- Zielbild: dünne native Hülle (Capacitor) für iOS/Android aus derselben Codebase; braucht Betreiberentscheidungen zu Apple-Developer-Konto, Bundle-ID und IAP-vs-Stripe und ist **nicht gebaut**
+- Partner-Web-App (Next.js); eine native Hülle für Partner ist Zielbild, nicht umgesetzt
+- PWA bleibt für Web/Offline-Hinweise; die PWA ist heute die primäre mobile Auslieferung, nicht Capacitor
+- **self-hosted Supabase OSS auf OCI (Produktion)** — SQLite nur Local-Dev-Fallback
+- WhatsApp Cloud API als zusätzlicher Kundeneingang (technisch vorbereitet, Kanal nicht freigeschaltet)
 - KI-Orchestrierung mit OpenAI-kompatiblem Gateway; deterministischer Fallback bleibt verfügbar
 - strukturierter Service-/Preis-Katalog
 - regionales Qualitätsmatching

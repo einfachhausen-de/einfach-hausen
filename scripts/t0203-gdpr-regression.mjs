@@ -77,7 +77,6 @@ async function startNext(env) {
 
 async function phaseA() {
   const scratch = fs.mkdtempSync(path.join(os.tmpdir(), 'eh-t0203-app-'));
-  const dbPath = path.join(scratch, 'app.db');
   fs.symlinkSync(path.join(root, 'node_modules'), path.join(scratch, 'node_modules'), 'dir');
   const mediaDir = path.join(scratch, 'data', 'private', 'job-media');
   fs.mkdirSync(mediaDir, { recursive: true });

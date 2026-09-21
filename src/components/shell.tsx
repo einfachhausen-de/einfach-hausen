@@ -1,4 +1,4 @@
-import {EHScope, EHRouteTabs, EHWorkspaceFrame, EHWorkspaceNavItem} from "@/design-system";
+import {EHScope, EHRouteTabs, EHWorkspaceFrame} from "@/design-system";
 import Link from 'next/link';
 import { HouseAssistant } from './house-assistant';
 import { Bell, Menu, Search } from 'lucide-react';
@@ -12,7 +12,7 @@ import { db } from '@/lib/db';
 import type { ReactNode } from 'react';
 import s from './shell.module.css';
 
-export async function AppShell({ role, active, children, title, subtitle, breadcrumbs, tabs, rail }: { role:'homeowner'|'provider'; active:string; children:ReactNode; title?:string; subtitle?:string; breadcrumbs?:readonly Crumb[]; tabs?:readonly ContextTab[]; rail?:ReactNode }) {
+export async function AppShell({ role, active, children, breadcrumbs, tabs, rail }: { role:'homeowner'|'provider'; active:string; children:ReactNode; title?:string; subtitle?:string; breadcrumbs?:readonly Crumb[]; tabs?:readonly ContextTab[]; rail?:ReactNode }) {
   const pro = role === 'provider';
   const user=await getCurrentUser();
   const unread=user&&user.role===role?(db.prepare('SELECT COUNT(*) c FROM notifications WHERE user_id=? AND read_at IS NULL').get(user.id) as {c:number}).c:0;
