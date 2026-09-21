@@ -134,7 +134,9 @@ function staticGates() {
   // disk (observed 2026-09-21: 79 backups / 13.7 GB with no rotation).
   const retention = run('node', ['scripts/backup-retention-regression.mjs']);
   record('backup retention', retention.ok, retention.ok ? '' : (retention.output || '').slice(-400));
-  return lint.ok && types.ok && security.ok && fixtures.ok && flags.ok && inventory.ok && retention.ok;
+  const design = run('npm', ['run', 'design:check']);
+  record('design:check', design.ok, design.ok ? '' : failureReason(design.output));
+  return lint.ok && types.ok && security.ok && fixtures.ok && flags.ok && inventory.ok && retention.ok && design.ok;
 }
 
 // ---- Production build (shared by layers 2-4) --------------------------------
