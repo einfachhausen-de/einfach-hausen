@@ -1,3 +1,5 @@
+> **Betreiberkorrektur 21.09.2026 — Geschäftsmodell und Frontend-Priorität:** [PRODUCT_VISION.md](../../PRODUCT_VISION.md) und [PRODUCT_POSITIONING.md](../../PRODUCT_POSITIONING.md) korrigieren den Schwerpunkt auf Handwerkervermittlung und Affiliate-Tarife. Diese Übergabe dokumentiert bereits gelieferte Bedienkorrekturen; sie ist keine Gesamtabnahme der neuen Produktpriorität.
+
 # App-Frontend · Handoff 21.09.2026
 
 Repository: `einfachhausen-de/einfach-hausen`
@@ -44,8 +46,14 @@ Nur Dateilesen und Diff-/Quellvergleich; **keine Tests, kein Build, keine Browse
 
 Die drei geänderten Paketkomponenten gehören zum geteilten Designsystem. Keine neue Gestaltung, keine Palette und kein Stylesheet; bestehende Bausteine wiederverwendet. Design-Lock, Guards und Baselines wurden nicht geändert oder neu versiegelt.
 
-## Genau nächste Aktion
+## Übernahme der bereits gelieferten Bedienkorrekturen
 
 Lokaler Agent übernimmt diesen Branch in den aktuellen main-Stand und führt seine bestehende Übernahme durch. Bei Konflikten nur die hier dokumentierten Frontend-Deltas integrieren; nie komplette ältere Dateien über neue Quellen kopieren. Besondere Bedienpunkte: Anfrage Nr. 6–30 erreichbar; Suche/Zurücksetzen/Ansichtswechsel; Dateiauswahl und Formular-Reset; Cent-Angebot; Termin ohne gültiges Datum.
 
 PR #166 (Dokumentenbrowser) ist eine separate, noch offene Lieferung und wurde hier nicht integriert; bei der letzten Abfrage war sie nicht konfliktfrei mergebar. Keine Aussagen aus ihrer früheren Testabnahme auf diesen Frontend-Branch übertragen. Host-seitiges unversioniertes Design-WIP bleibt außerhalb dieser Lieferung.
+
+## Genau nächste Frontend-Aktion nach Betreiberkorrektur
+
+Eigentümer-Einstieg anhand der bestehenden Komponenten vereinfachen: Auftrag einstellen und Tarif vergleichen unmittelbar erreichbar, aktuelle Angebote/Vorgänge mit klarer nächster Handlung. Hausakte ergänzend erhalten. Danach den vorhandenen Handwerkerablauf vom Angebot/Kostenvoranschlag bis zur Rechnung vereinfachen. Keine weitere Such-/Listenwelle als Ersatz für diesen Kernauftrag.
+
+Die Produktdokumentation ist korrigiert; Screens, Aboregeln und Freischaltungen wurden in diesem Dokumentationsschritt nicht geändert. Kein Test-/Build-/Releaseaufwand für den Frontend-Agenten.

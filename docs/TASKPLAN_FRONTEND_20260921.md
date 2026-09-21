@@ -25,3 +25,15 @@ Die Suche gilt nur für den bereits geladenen Bestand der jeweiligen Liste; Kenn
 SQLite-Taskplan/GitNexus sind hier nicht verfügbar. Die bereits vom Operator erlaubte Markdown-Übergabe und direkte Quellprüfung wurden verwendet; kein kanonischer SQLite-Status wurde vorgetäuscht.
 
 [Konkrete Übergabe mit allen Quelldateien](brand/workspace/FRONTEND-HANDOFF-20260921.md).
+
+## Betreiberkorrektur: Kerngeschäft vor Zusatzfunktionen
+
+Jerry hat nach der Frontend-Lieferung die bisherige Produktpriorität korrigiert. Dieser Abschnitt steuert denselben Auftrag; die zuvor gelieferten Such-/Uploadfunktionen sind keine Abnahme der App-Benutzerfreundlichkeit.
+
+- [x] PRODUCT_VISION.md und PRODUCT_POSITIONING.md auf Handwerkervermittlung und Affiliate-Tarife ausrichten.
+- [x] Kostenloser Eigentümer-Kern, Partnerabo und ergänzende Hausakte eindeutig festhalten.
+- [x] Widersprechende Hauptanweisung in AGENTS.md ersetzen und NEXT_AGENT/Handoff synchronisieren.
+- [ ] Nächste Frontend-Arbeit: Eigentümer-Einstieg mit „Auftrag einstellen“, „Tarife vergleichen“ und aktuellen Angeboten vereinfachen.
+- [ ] Anschließend bestehenden Partner-Ablauf Anfrage → Angebot/Kostenvoranschlag → Auftrag → Rechnung vereinfachen.
+
+Noch keine Umsetzung dieser neuen Priorisierung in den Screens behaupten. Keine neuen Preise oder Änderungen an Abrechnung/Berechtigungen ableiten. Vorhandene Aboregeln einschließlich Partner-FREE/Trial sind als separate fachliche Bestandsabweichung dokumentiert; dieser Frontend-/Dokumentationsauftrag ändert sie nicht.

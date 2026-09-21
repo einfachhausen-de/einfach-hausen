@@ -1,48 +1,44 @@
 # Einfach Hausen — verbindliche Produktvision
 
+## Verbindliche Betreiberkorrektur · 21.09.2026
+
+Jerry hat die Priorisierung ausdrücklich korrigiert: **Handwerker-Auftragsvermittlung und Affiliate-Tarifwechsel sind das Kerngeschäft. Eigentümer nutzen den Kern kostenlos. Handwerker buchen ein Abo. Die Hausakte ist ein ergänzender Nutzungs- und Bindungsvorteil.**
+
+Diese Vorgabe ersetzt die frühere Hauptpositionierung als „Homeowner Operating System“ / Hausmanagerprodukt. Sie beschreibt das Produktziel, keine bereits vollständig umgesetzte Oberfläche oder Aboregel. [PRODUCT_POSITIONING.md](PRODUCT_POSITIONING.md) konkretisiert die Prioritäten.
+
 ## Strategischer Produktkern
 
-Die verbindliche Positionierung und psychologische Differenzierung steht in [`PRODUCT_POSITIONING.md`](PRODUCT_POSITIONING.md). Kurzform: **Einfach Hausen ist der persönliche Hausmanager und die Betriebszentrale für das eigene Zuhause.** Das Produkt verkauft nicht primär KI oder Vermittlung, sondern mentale Entlastung, Entscheidungssicherheit, Kontinuität und Werterhalt. Jede neue Produktentscheidung muss mit diesem Kern vereinbar sein.
+1. **Handwerker finden und beauftragen:** Eigentümer stellen kostenlos ein Anliegen als Auftrag/Inserat ein. Passende Handwerker senden Angebot bzw. Kostenvoranschlag direkt zum Vorgang. Eigentümer vergleichen, wählen selbst und beauftragen ausdrücklich. Kommunikation, Termin und spätere Rechnung bleiben am selben Auftrag.
+2. **Tarife vergleichen und wechseln:** Eigentümer finden den Vergleich für Strom, Gas, DSL/Internet, Versicherungen und weitere freigegebene Kategorien direkt. Abschlüsse über freigegebene Affiliate-Partner refinanzieren diesen Bereich.
+
+Kostenlose Eigentümernutzung fördert Nachfrage und wiederkehrende Nutzung. Handwerker buchen ein Abo für Listung, Vorschläge an passende Kunden und Auftragswerkzeuge einschließlich Angebot/Kostenvoranschlag und Rechnung. Die Hausakte bewahrt Unterlagen, Kontakte und Hausinformationen als Zusatznutzen.
 
 ## Produktversprechen
 
-**Ein Ansprechpartner für alles rund ums Eigenheim.**
+**Passende Handwerker finden. Tarife vergleichen. Einfach erledigen.**
 
-Der Eigentümer muss nicht wissen, welchen Handwerker er braucht und nicht selbst nach Gärtnern, Elektrikern, SHK-Betrieben, Reinigungsfirmen, Dachdeckern oder anderen Dienstleistern suchen.
+Eigentümer können sofort ein Anliegen einstellen oder einen Tarifvergleich beginnen. Vollständige Hausaktenpflege oder ein vorgelagertes KI-Gespräch sind dafür nicht erforderlich. Die App fragt nur die für den aktuellen Vorgang nötigen Angaben ab. KI kann im Hintergrund strukturieren; Veröffentlichung, Beauftragung und Wechsel bestätigt der Nutzer selbst.
 
-Er schreibt in der App oder über WhatsApp ganz normal, zum Beispiel:
-
-> Meine Hecke muss geschnitten werden. Dienstag ab 14 Uhr hätte ich Zeit.
-
-Der digitale Hausmeister ist für alle Kunden dauerhaft verfügbar. Er kann Fragen beantworten, Hausdaten einordnen, an frühere Vorgänge erinnern und das weitere Vorgehen vorbereiten.
-
-**Erst danach entscheidet der Kunde ausdrücklich, was er möchte:**
-
-1. **Nur einen passenden menschlichen Ansprechpartner** für Fragen oder eine fachliche Einschätzung. Dabei entsteht noch kein Auftrag und kein Preis.
-2. **Einen echten Auftrag organisieren lassen.** Dann klärt die KI die nötigen Auftragsdaten, bildet einen Richtpreis, fragt passende geprüfte regionale Partner an und holt – wenn sinnvoll – Angebote ein.
-
-In beiden Fällen bleibt der Hausmeisterservice parallel verfügbar. Ein menschlicher Ansprechpartner kann also schon vor einer Buchung entstehen; eine Buchung ist keine Voraussetzung für persönlichen Kontakt.
+Handwerker sehen passende Kundenanfragen und den nächsten Schritt: Angebot senden, Auftrag bearbeiten oder Rechnung erstellen. Vorhandene Angaben werden wiederverwendet.
 
 ## Außenkommunikation
 
-Die öffentliche Website verkauft **nicht KI als Selbstzweck**. Die Reihenfolge der Botschaft ist:
+1. Handwerker finden, Angebote erhalten und selbst auswählen.
+2. Strom, Gas, DSL und Versicherungen vergleichen und wechseln.
+3. Kostenlose Eigentümernutzung und nachvollziehbarer Ablauf.
+4. Unterlagen, Kontakte und Hauswissen als ergänzender Nutzen.
 
-1. **Kundennutzen:** eine Anlaufstelle, weniger Suche, klarer nächster Schritt.
-2. **Persönlichkeit:** ein konkreter Ansprechpartner, wenn der Kunde einen Menschen braucht.
-3. **Organisation:** Aufträge, Termine, Unterlagen und Hauswissen an einem Ort.
-4. **Technologie:** KI ist die unsichtbare Assistenzschicht, die versteht, vorbereitet, erinnert und vergleicht.
-
-Die Startseite soll daher eher sagen **„Ein Ansprechpartner für alles rund ums Eigenheim“** als „KI-Hausmeister“. Innerhalb der App darf der Hausmeister-Assistent sichtbar sein, weil dort die Interaktion selbst der Nutzen ist.
+„Hausmanager“ kann die unterstützende Funktion beschreiben. Er ersetzt die beiden Hauptangebote nicht.
 
 ## Produktprinzipien
 
-1. **Eine digitale Eingangstür.** Freitext, Foto und Sprache statt Kategorienwand und langer Formulare.
-2. **KI-Hausmeister immer, Mensch oder Auftrag auf Wunsch.** Die KI versteht, erklärt, plant, vergleicht, erinnert und dokumentiert. Der Kunde entscheidet separat, ob er nur einen Menschen sprechen oder eine Leistung beauftragen möchte.
-3. **Nur geprüfte Vertragspartner.** Kein offener Lead-Marktplatz.
+1. **Direkter Einstieg.** Auftrag einstellen oder Tarif vergleichen. Kurze Eingaben, optional Foto und Sprache; weitere Angaben erst im passenden Schritt.
+2. **Assistenz unterstützt.** KI hilft bei Bedarf. Ein Auftragswunsch führt direkt zur Inseratvorbereitung; eine allgemeine Frage bleibt unverbindlich. Veröffentlichung und spätere Beauftragung bestätigt der Eigentümer.
+3. **Geprüfte Partner mit Abo.** Listung und Vorschläge setzen fachliche Freigabe und den vorgesehenen Abozugang voraus. Ein Abo ersetzt keine Qualitätsprüfung.
 4. **Qualität vor Monetarisierung.** Matching priorisiert Qualität, Kundenzufriedenheit, Eignung, Entfernung, Verfügbarkeit, Kapazität und bestehende Beziehungen — niemals den gebuchten Partner-Tarif.
 5. **Direkter persönlicher Kontakt ohne Buchungszwang.** Für Fragen kann ein geprüfter Partner bereits als Ansprechpartner verbunden werden. Ein Auftrag entsteht erst durch eine separate bewusste Entscheidung des Kunden.
 6. **Beziehungen bleiben erhalten.** Ein verbundener Ansprechpartner bleibt in der Hausakte gespeichert – unabhängig davon, ob sofort ein Auftrag entsteht. Spätere Fragen oder Folgeaufträge können direkt mit ihm abgestimmt werden.
-7. **Mein Haus ist das Gedächtnis.** Hausdaten, Anlagen, Aufträge, Rechnungen, Termine, Dokumente, Wartungen, Ansprechpartner und Zukunftsaufgaben wachsen dauerhaft zu einer digitalen Hausakte.
+7. **Hausakte als Zusatznutzen.** Hausdaten, Rechnungen, Dokumente und Kontakte erleichtern Folgeaufträge. Ihre Pflege ist keine Voraussetzung für das erste Inserat oder den Tarifvergleich.
 8. **So wenig Partner-Software wie möglich.** Keine komplexen Rollen und Rechte. Pro Ansprechpartner gibt es nur App-Zugang und den Schalter „Aufträge verwalten“.
 9. **0 % Auftragsprovision.** Partner behalten 100 % ihres Auftragswertes. Partnerumsatz entsteht über planbare Monatsabos, nicht über eine Gebühr pro Auftrag.
 10. **Region für Region.** Erst ein dichtes hochwertiges Netzwerk in einer Region, dann Expansion.
@@ -59,37 +55,17 @@ Die Startseite soll daher eher sagen **„Ein Ansprechpartner für alles rund um
 
 ## Kundenerlebnis
 
-### 1. Hausmeisterservice
+### 1. Anliegen einstellen
 
-Der Kunde schreibt, spricht oder fotografiert. Zunächst ist das einfach ein Gespräch mit dem Hausmeisterservice – **noch keine Vermittlung und kein Auftrag**. Die KI beantwortet die Frage soweit sinnvoll und nutzt relevante Informationen aus der Hausakte.
+Der Eigentümer startet mit „Auftrag einstellen“ und beschreibt kurz, was gemacht werden soll. Die App fragt notwendige Angaben wie Ort, Umfang und gewünschten Zeitraum ab; Bilder sind optional. Eine vollständige Hausakte ist dafür nicht erforderlich.
 
-Wenn der Kunde anschließend einen Auftrag möchte, extrahiert der digitale Hausmeister unter anderem:
+Vor dem Veröffentlichen sieht er eine verständliche Zusammenfassung. Erst seine Bestätigung macht aus dem Entwurf eine Kundenanfrage. Angebote treffen am selben Vorgang ein.
 
-- Leistung / Gewerk
-- Ort / Haus
-- gewünschter Zeitraum
-- Größen / Umfang, soweit notwendig
-- Budget, falls genannt
-- relevante Hausdaten aus „Mein Haus“
+### 2. Hilfe bei Bedarf und eigenständiger Tarifweg
 
-Fehlt etwas Entscheidendes, kommt **genau eine sinnvolle Rückfrage nach der anderen** statt eines Formulars.
+Wer zunächst eine Frage hat, kann weiterhin Assistenz oder einen persönlichen Ansprechpartner nutzen. Beratung löst keinen Auftrag aus. Ein konkreter Auftragswunsch muss den Beratungsweg nicht vorher durchlaufen.
 
-Beispiel Heckenschnitt:
-
-1. „Wie lang ist die Hecke ungefähr?“
-2. „Wann soll es gemacht werden?“
-3. Foto optional, wenn es die Kalkulation verbessert.
-
-### 2. Entscheidung: Ansprechpartner oder Auftrag
-
-Nach der Einordnung zeigt das Produkt zwei klare Wege:
-
-- **Ansprechpartner finden:** passender geprüfter Betrieb übernimmt die Kontaktanfrage; kein Angebot und keine Buchung nötig.
-- **Auftrag organisieren:** Auftragsdaten werden vervollständigt, Partner angefragt und Angebote verglichen.
-
-Der Kunde kann auch erst einen Ansprechpartner sprechen und **später aus demselben Thema einen Auftrag machen**.
-
-In WhatsApp gilt dasselbe Produktmodell. Nach der KI-Antwort kann der Kunde einfach **ANSPRECHPARTNER** oder **AUFTRAG** schreiben; eine normale Frage löst nicht automatisch eine Vermittlung aus.
+Tarifvergleiche haben einen eigenen direkten Einstieg. Der Nutzer wählt die Kategorie und gibt nur die benötigten Angaben an; ein freigegebener Partner übernimmt Vergleich und Abschluss.
 
 ### 3. Richtpreis und Matching
 
@@ -156,7 +132,9 @@ Nach Abschluss bleibt der Ansprechpartner gespeichert:
 
 Ein späterer Satz wie „Thomas, kannst du dieses Jahr wieder die Hecke schneiden?“ geht direkt an Thomas. Keine neue Vermittlung ist erforderlich.
 
-## Mein Haus — digitale Hausakte
+## Mein Haus — ergänzende digitale Hausakte
+
+Die Hausakte ergänzt Vermittlung und Tarifnutzung. Bestehende Daten aus Vorgängen werden wiederverwendet; manuelle Pflege bleibt optional. Die folgende Datenbasis ist keine Pflichtfeldliste für den Einstieg.
 
 Langfristig gespeichert werden:
 
@@ -186,14 +164,16 @@ Aus Anlagen und erledigten Arbeiten entsteht automatisch ein Hausjahres- und War
 
 ## Beratung und Notfall
 
-Neben dem normalen Hausmeisterservice gibt es zwei besonders schnelle Einstiege:
+Zusätzlich zum direkten Auftragsweg gibt es zwei bedarfsbezogene Einstiege:
 
 - **Beratung:** Ein passender geprüfter Ansprechpartner kann fachlich helfen, ohne dass automatisch ein Auftrag oder Preis entsteht.
 - **Notfall:** Der Kunde beschreibt einen dringenden Fall und Einfach Hausen sucht zuerst nach qualifizierten verfügbaren Helfern in der Nähe. Berücksichtigt werden Entfernung, Bereitschaft, Qualifikation, Bewertung, Reaktionsgeschwindigkeit und hinterlegter Notfallzuschlag. 24/7-Notdienste und lokale Betriebe mit eigenen Bereitschaftszeiten laufen im selben Partnernetzwerk.
 
 Der Kunde soll nicht automatisch beim teuersten Notdienst landen. Mehrere passende Optionen und transparente Gesamtpreise bleiben das Ziel.
 
-## Rechnungen direkt über Einfach Hausen
+## Kostenvoranschläge und Rechnungen direkt über Einfach Hausen
+
+Der Handwerker sendet Angebot bzw. Kostenvoranschlag zum Eigentümer-Inserat. Der Eigentümer vergleicht Leistung, Preis und Verfügbarkeit und wählt selbst aus. Die Rechnung gehört zur späteren Abwicklung des beauftragten Vorgangs; sie ist kein unverbindlicher Kostenvoranschlag.
 
 Der ausführende Partner kann aus einem gebuchten Auftrag direkt eine Rechnung an den Eigentümer senden. Die Rechnung bleibt Teil der Hausakte und enthält mindestens Rechnungsnummer, Rechnungs-/Leistungsdatum, Zahlungsziel, Rechnungssteller/-empfänger, Positionen, Netto, Umsatzsteuer und Brutto.
 
@@ -284,7 +264,7 @@ Einfachhausen erhebt keine Vermittlungs- oder Servicegebühr auf den Auftragswer
 Auch die Pilotphase mit 15-%-Dauer-Vorteil auf kostenpflichtige Pakete entfällt,
 weil es keinen kostenpflichtigen Eigentümer-Tarif mehr gibt.
 
-### Zusätzlicher Erlösweg (getrennt vom Eigentümer-Preis)
+### Zweiter Kernerlös: Affiliate-Tarifwechsel
 
 Der freiwillige Vergleichsbereich „Verträge & Vergleiche“ (`/app/contracts`)
 vermittelt Strom, Gas, Internet/Festnetz, Mobilfunk und Versicherungen an
@@ -295,14 +275,11 @@ Der Bereich ist fail-closed: ohne freigegebenen Partner wird nichts ausgeleitet
 
 ### Partner
 
-**0 % Provision · keine Gebühr pro Auftrag**
+**Partnerabos finanzieren Listung, passende Kundenvorschläge und Auftragswerkzeuge.** Dazu gehören Angebote/Kostenvoranschläge zum Inserat und Rechnungen zum beauftragten Vorgang. Die bestehende Regel von 0 % Auftragsprovision bleibt erhalten.
 
-- FREE — 0 €/Monat, begrenzte Anzahl neuer Anfragen
-- START — 29 €/Monat
-- PRO — 79 €/Monat
-- PREMIUM — 199 €/Monat
+Die Betreiberkorrektur nennt ein Abo als Voraussetzung. Der früher dokumentierte FREE-Tarif mit neuen Anfragen ist damit keine verbindliche Zielvorgabe mehr. Die bisher genannten START/PRO/PREMIUM-Preise und die Testphase werden durch diese Korrektur nicht neu festgelegt. Tatsächliche Tarif-, Trial- und Berechtigungsregeln sind bei ihrer Umsetzung abzugleichen; diese Dokumentation ändert keine Abrechnung oder Bestandsverträge.
 
-START, PRO und PREMIUM starten mit einer zweimonatigen kostenlosen Testphase. Der Partner-Tarif darf die fachliche Reihenfolge im Matching nicht kaufen.
+Abozugang und fachliche Eignung sind getrennt: Ein höherer Tarif kauft keine bessere Qualitätsbewertung. Kontoeinrichtung vor Aboabschluss kann möglich bleiben; daraus folgt kein dauerhafter kostenloser Vermittlungszugang.
 
 ## Technische Zielarchitektur
 
@@ -342,12 +319,12 @@ Expansion erfolgt Region für Region: erst dichtes Netzwerk und perfekte Abläuf
 
 ## Vision
 
-> Wir wollen der digitale Hausmeister für jedes Eigenheim werden.
->
-> Der Eigentümer muss nicht wissen, welchen Handwerker er braucht. Er sagt einfach, was an seinem Haus gemacht werden muss. Unsere KI organisiert den Vorgang. Unser geprüftes Partnernetzwerk erledigt die Arbeit. Und der Kunde hat immer einen echten Menschen als direkten Ansprechpartner.
+Eigentümer finden kostenlos passende Handwerker, vergleichen Angebote, beauftragen und wechseln Tarife. Handwerker gewinnen passende Aufträge und erledigen Angebot, Kommunikation und Rechnung in einem verständlichen Ablauf. Die ergänzende Hausakte macht die nächste Nutzung bequemer.
 
 ## Design principle
 
-Einfach Hausen must feel calmer and simpler than the work happening behind it. The interface is content-first, editorial and minimal: generous whitespace, strong typography, very few surfaces, one restrained accent color and no decorative dashboard/card wall. The customer should primarily see one clear conversation with the digital housemaster, followed by decisions only when they are needed. Partner tooling follows the same rule: requests, assignments and customer contact are shown as simple operational lists, not an ERP.
+Der nächste sinnvolle Schritt muss sofort sichtbar sein. Die Eigentümer-App priorisiert Auftrag einstellen, Angebote/aktuelle Vorgänge und Tarifvergleich. Die Partner-App priorisiert passende Anfragen, Angebot/Kostenvoranschlag und laufende Aufträge bis zur Rechnung. Pro Ansicht eine dominante Aufgabe; Details bei Bedarf.
+
+Freude entsteht durch schnelle Erfolge, verständliche Rückmeldungen, wiederverwendete Angaben und wenig Aufwand. Kein Pflicht-Chat, keine Hausaktenpflege vor dem ersten Nutzen und keine zusätzliche Verwaltungsebene ohne konkreten Bedarf. Das bestehende Designsystem bleibt verbindlich.
 
 Visual inspiration may come from best-in-class contemporary software such as OpenAI products, but Einfach Hausen keeps its own identity and does not copy proprietary branding, typography or component designs.

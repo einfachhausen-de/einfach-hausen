@@ -1,199 +1,71 @@
-# Einfach Hausen — Produktkern, Positionierung und psychologische Differenzierung
+# Einfach Hausen — Produktkern und Positionierung
 
-## Kategorie
+## Verbindliche Betreiberkorrektur · 21.09.2026
 
-Einfach Hausen ist nicht primär ein Handwerkerportal, Immobilienportal, eine Hausakten-App oder ein KI-Chatbot. Die stärkste Kategorie ist:
+Quelle: Jerrys ausdrückliche Korrektur im laufenden Frontend-Auftrag. Diese Fassung ersetzt die vorherige Hauptpositionierung als „persönlicher Hausmanager / Homeowner Operating System“.
 
-> **Der persönliche Hausmanager — die Betriebszentrale für das eigene Zuhause.**
+**Einfach Hausen vermittelt Handwerkeraufträge und ermöglicht Tarifvergleiche mit Affiliate-Abschlüssen. Eigentümer nutzen den Kern kostenlos. Handwerker buchen ein Abo. Die Hausakte ergänzt diese Angebote und fördert wiederkehrende Nutzung.**
 
-Strategisch kann das Produkt als **Homeowner Operating System** verstanden werden.
+Das ist das vereinbarte Produktziel. Die App ist damit nicht als bereits benutzerfreundlich oder vollständig umgesetzt abgenommen.
 
-## Kernproblem
+## Geschäftsmodell
 
-Ein Eigenheim erzeugt dauerhaft organisatorische und mentale Last: Wartung, Reparaturen, Anbieterwahl, Termine, Rechnungen, Garantien, Dokumente, Schäden, Versicherungen, Bewertung und später möglicherweise Verkauf. Heute verteilt sich diese Verantwortung auf Google, WhatsApp, E-Mail, Aktenordner, Kalender, einzelne Handwerkerportale, Versicherer, Makler und die eigene Erinnerung.
+| Beteiligte | Nutzen | Beitrag zum Geschäft |
+| --- | --- | --- |
+| Eigentümer | Kostenlos Anliegen einstellen, Angebote erhalten, Handwerker auswählen und beauftragen; Tarife vergleichen und wechseln | Nachfrage nach Handwerkerleistungen und Tarifabschlüssen |
+| Handwerker | Mit Abo gelistet und passenden Kunden vorgeschlagen werden; Kostenvoranschläge/Angebote und Rechnungen am Auftrag senden | Wiederkehrende Aboerlöse |
+| Freigegebene Tarifpartner | Interessenten für Strom, Gas, DSL/Internet, Versicherungen und weitere unterstützte Kategorien | Affiliate-Vergütung gemäß vereinbarten Vermittlungs-/Abschlussbedingungen |
 
-Einfach Hausen bündelt diese fragmentierte Verantwortung in einem dauerhaften System.
+Kostenlose App-Nutzung bedeutet keine kostenlose Handwerkerleistung oder kostenlosen Energie-/Versicherungsvertrag. Keine neuen Preise, Provisionen oder Trial-Fristen erfinden. Alte Partner-FREE-Regeln sind mit dem korrigierten Aboziel abzugleichen; PRODUCT_VISION.md dokumentiert die Abgrenzung zum Bestand.
 
-## Zentrales Nutzenversprechen
+## Drei einfache Abläufe
 
-> **Du hast ein Haus. Wir kümmern uns um den Rest.**
+**Eigentümer:** Anliegen einstellen → Angebote/Kostenvoranschläge erhalten → vergleichen und selbst auswählen → beauftragen → abwickeln → Rechnung erhalten.
 
-Das Produkt verkauft nicht primär Features. Es verkauft:
+**Tarife:** Kategorie wählen → nötige Angaben ergänzen → freigegebenen Vergleich öffnen → Tarif wählen und beim Partner abschließen.
 
-- mentale Entlastung,
-- Sicherheit,
-- Kontrolle,
-- Vertrauen,
-- Werterhalt,
-- Kontinuität.
+**Handwerker:** Betrieb einrichten und Abo buchen → nach fachlicher Freigabe passende Anfragen erhalten → Angebot senden → Auftrag erledigen → Rechnung senden.
 
-## Fünf psychologische Grundkerne
+Veröffentlichung, Beauftragung und Abschluss verlangen eine bewusste Nutzerentscheidung. Abozugang ersetzt keine Qualitätsprüfung und kauft keine bessere fachliche Bewertung.
 
-### 1. Entlastung
+## Rolle der Hausakte
 
-Nutzerbedürfnis: „Ich möchte mich nicht ständig um alles selbst kümmern müssen.“
+Unterlagen, Rechnungen, Ansprechpartner und Hausdaten bleiben auffindbar und erleichtern Folgeaufträge. Dadurch hat Einfachhausen auch nach dem einzelnen Abschluss einen Nutzen.
 
-Leitbotschaft:
+- Vorhandene Angaben wiederverwenden.
+- Manuelle Hausaktenpflege optional halten.
+- Keine vollständige Hausakte vor Inserat oder Tarifvergleich verlangen.
+- Zusatzfunktionen nach tatsächlichem Bedarf zugänglich machen.
+- Bestehende Hausaktenfunktionen erhalten; diese Korrektur ist keine Löschanweisung.
 
-> **Weniger kümmern. Mehr zuhause sein.**
+Jerry nennt MyHammer und Check24 als Vergleich für Vermittlung und Tarife. Die ergänzende Nutzung soll Einfachhausen attraktiver machen. Daraus folgen keine ungeprüften Aussagen über konkrete Funktionen der Wettbewerber.
 
-### 2. Vertrauen und Entscheidungssicherheit
+## Frontend-Priorität
 
-Nutzerbedürfnis: „Ich weiß nicht, wem ich vertrauen kann und ob eine Empfehlung fair ist.“
+### Eigentümer
 
-Leitbotschaft:
+„Auftrag einstellen“ und „Tarife vergleichen“ sind unmittelbar auffindbar. Neue Angebote und nächste Schritte laufender Aufträge haben Vorrang vor Bestandsstatistiken. Ein konkreter Auftragswunsch braucht kein vorgeschaltetes KI-Gespräch.
 
-> **Nicht irgendeine Lösung. Die richtige für dein Haus.**
+### Handwerker
 
-### 3. Nichts Wichtiges vergessen
+Passende Anfragen und zu bearbeitende Aufträge stehen im Vordergrund. Ein Vorgang führt vom Angebot/Kostenvoranschlag über die Beauftragung bis zur Rechnung. Angaben aus Inserat und angenommenem Angebot werden weiterverwendet. Abo und Freischaltung müssen nachvollziehbar sein.
 
-Nutzerbedürfnis: „Ich möchte keine Wartung, Frist oder kleine Ursache übersehen, die später teuer wird.“
+### Gemeinsame Bedienregel
 
-Leitbotschaft:
+Pro Ansicht eine klare Hauptaufgabe. Weitere Details erscheinen bei Bedarf. Kleine verständliche Schritte, passende Voreinstellungen und klare Rückmeldungen reduzieren Aufwand. Die App soll schnell, angenehm und verlässlich sein. KI hilft bei der Vorbereitung; sie ist kein obligatorischer Umweg.
 
-> **Dein Haus vergisst nichts.**
+## Entscheidungsregel für Agenten
 
-### 4. Werterhalt
+Eine Änderung muss erkennbar helfen:
 
-Nutzerbedürfnis: „Mein Haus ist eines meiner größten Vermögenswerte.“
+1. ein Kundenanliegen einfach einzustellen;
+2. Angebote zu erhalten, zu verstehen und einen Handwerker zu beauftragen;
+3. Tarifvergleich oder Wechsel zu beginnen bzw. fortzuführen;
+4. als Handwerker vom Angebot bis zur Rechnung zu arbeiten;
+5. spätere Nutzung durch gespeicherte Unterlagen und Kontext zu erleichtern.
 
-Leitbotschaft:
+Die ersten vier Ziele tragen den Kern. Das fünfte ergänzt ihn. Suchfelder und zusätzliche Listen allein erfüllen diese Produktkorrektur nicht. Keine neuen Nebenfunktionen ohne konkreten Bedarf.
 
-> **Damit dein Zuhause langfristig gut dasteht.**
+## Umsetzungsgrenzen
 
-### 5. Ein Ansprechpartner
-
-Nutzerbedürfnis: „Ich will nicht für jedes Problem eine neue Plattform, Firma oder Nummer suchen.“
-
-Leitbotschaft:
-
-> **Egal was mit deinem Haus ist: Du weißt, wo du hingehst.**
-
-## Fundamentale Differenzierung
-
-Klassischer Marktplatz:
-
-```text
-Problem → Anfrage → Leads → Anbieter → Abschluss → Ende
-```
-
-Einfach Hausen:
-
-```text
-Haus → verstehen → erinnern → Bedarf erkennen → beraten → organisieren → durchführen → dokumentieren → daraus lernen
-```
-
-Der Unterschied ist eine dauerhafte Beziehung statt einer transaktionalen Vermittlung.
-
-## Daten-Flywheel
-
-Mit jeder Nutzung kennt Einfach Hausen mehr über das konkrete Haus:
-
-- Gewerke und Bauteile,
-- historische Arbeiten,
-- Dienstleister und Ansprechpartner,
-- Kosten,
-- Rechnungen und Garantien,
-- Wartungsintervalle,
-- Fotos und Dokumente,
-- Schäden,
-- Präferenzen und wiederkehrende Aufgaben.
-
-Dadurch steigt der Produktwert mit der Nutzungsdauer. Das Hausgedächtnis wird zum Bindungs- und Qualitätsvorteil.
-
-Beispiel:
-
-> „Deine Wärmepumpe wurde im Oktober 2026 von Firma X gewartet. Die nächste Wartung ist fällig. Beim letzten Termin kostete sie 189 €. Soll ich sie wieder organisieren?“
-
-## Drei Säulen für Marketing und UX
-
-### Alles wissen.
-Alle wichtigen Informationen, Dokumente und die Geschichte des Hauses.
-
-### Nichts vergessen.
-Wartung, Reparaturen, Termine und wichtige Aufgaben rechtzeitig im Blick.
-
-### Nicht alles selbst machen.
-Beratung, Organisation und passende Ansprechpartner, wenn etwas erledigt werden muss.
-
-## Sprachregelung
-
-Bevorzugt:
-
-- persönlicher Hausmanager,
-- dein Haus an einem Ort,
-- dein Haus vergisst nichts,
-- einfach geregelt,
-- weniger kümmern,
-- passende Ansprechpartner,
-- Werterhalt,
-- Sicherheit,
-- Übersicht.
-
-Nicht als Hauptpositionierung:
-
-- Handwerker-App,
-- Lead-Plattform,
-- KI-Plattform,
-- Immobilienportal,
-- Marketplace.
-
-KI ist ein Mittel, nicht die Produktkategorie.
-
-## Kernbotschaften
-
-Primär:
-
-> **Dein Haus. Einfach geregelt.**
-
-Emotional:
-
-> **Weniger kümmern. Mehr zuhause sein.**
-
-Produktvision:
-
-> **Ein Haus besitzen sollte nicht bedeuten, Hausverwaltung spielen zu müssen.**
-
-Kategorie:
-
-> **Dein persönlicher Hausmanager.**
-
-## Produktentscheidungsregel
-
-Jedes neue Feature muss mindestens eine dieser Fragen positiv beantworten:
-
-1. Reduziert es mentale Last?
-2. Erhöht es Entscheidungssicherheit?
-3. Verhindert es Vergessen oder Informationsverlust?
-4. Unterstützt es Werterhalt?
-5. Reduziert es die Zahl der Ansprechpartner oder Systeme?
-6. Macht es das Hausgedächtnis wertvoller?
-7. Macht es eine zukünftige Aktion leichter oder automatischer?
-
-Wenn keine Antwort „ja“ ist, gehört das Feature wahrscheinlich nicht in den Kern.
-
-## UX-Regel
-
-Das Produktversprechen „einfach“ muss sichtbar sein:
-
-- wenige klare Hauptaktionen,
-- konkrete nächste Schritte,
-- keine unnötigen Entscheidungen,
-- progressive Offenlegung,
-- pro Screen eine dominante Aufgabe,
-- Sprache aus Sicht des Eigentümers statt interner Prozesse.
-
-## Strategischer Moat
-
-Der langfristige Burggraben entsteht aus der Kombination von:
-
-- dauerhaftem Hauskontext,
-- historischer Hausakte,
-- wiederkehrenden Wartungsbeziehungen,
-- geprüften und erprobten Ansprechpartnern,
-- Transaktionshistorie,
-- Entscheidungshilfe,
-- Automatisierung,
-- Lebenszyklusabdeckung vom Besitz bis zum Verkauf.
-
-Kein einzelnes Feature ist der Moat. Der Moat ist die **kontinuierliche Beziehung zwischen Eigentümer, Hausdaten und ausführendem Netzwerk**.
+Diese Vorgabe ändert keine Markenfarben, Schrift, Logos, Authentifizierung, Abrechnung, Qualitätsranking oder Bestandsverträge. Bestehende Funktionen und fremde Agentenarbeit bleiben erhalten. Frontend-Arbeit konzentriert sich auf verständliche Kernabläufe. Tests, Infrastruktur und Release bleiben entsprechend dem Auftrag beim lokalen Agenten.
