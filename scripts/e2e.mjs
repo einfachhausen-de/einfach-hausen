@@ -147,6 +147,22 @@ async function nav(page,url,options){let response;try{response=await page.goto(u
 // Structural reads/writes can still race the hydration swap; retry until the
 // transient S:<n> tree is gone instead of failing the whole flow.
 async function strictRetry(page,fn,attempts=8){let lastError;for(let attempt=0;attempt<attempts;attempt++){try{return await fn();}catch(error){if(!String(error).includes('strict mode violation'))throw error;lastError=error;await page.waitForTimeout(600);}}throw lastError;}
+// Next.js haelt die serverseitig gerenderte Fassung waehrend der Hydration
+// kurzzeitig zusaetzlich im DOM (0x0 Groesse, unsichtbar, danach entfernt).
+// In diesem Fenster sieht der strict-Modus zwei Treffer - auch bei einem
+// eindeutigen id wie #owner-direct-message, weil die Serverkopie dasselbe id
+// traegt. settle() wartet auf genau einen sichtbaren Treffer und schlaegt fehl,
+// wenn keiner oder mehrere uebrig bleiben; .first() wuerde eine echte Dublette
+// verdecken.
+async function settle(locator,label){
+  const page=locator.page();
+  for(let attempt=0;attempt<60;attempt++){
+    const visible=await locator.evaluateAll(nodes=>nodes.map(node=>{const r=node.getBoundingClientRect();return r.width>0&&r.height>0;}));
+    if(visible.length===1&&visible[0])return;
+    if(attempt===59)throw new Error(`${label}: expected exactly one visible match, got ${visible.length} (visible: ${visible.filter(Boolean).length})`);
+    await page.waitForTimeout(250);
+  }
+}
 // Mobile navigation of the app surfaces. Every /app and /pro route renders
 // WerkbankRahmen (src/components/werkbank-rahmen.tsx) -> WerkbankShell, whose
 // sidebar opens as a Sheet on small viewports. The former
@@ -648,7 +664,7 @@ await nav(owner, base+`/app/jobs/${contactJobId}`); await waitText(owner,'Thomas
 
 // Direkter Kontakt funktioniert schon ohne Auftrag.
 await owner.getByRole('link',{name:'Nachricht',exact:true}).click(); await waitText(owner,'Zurück zur Kontaktliste'); await assertNoOverflow(owner,'Mobile contacts');
-await owner.getByPlaceholder(/Nachricht an Thomas/).fill('Thomas, kannst du kurz sagen, ob du dir das ansehen würdest?'); await clickServerAction(owner,owner.getByRole('button',{name:'Nachricht senden'}));
+const ownerDirect=owner.getByPlaceholder(/Nachricht an Thomas/); await settle(ownerDirect,'owner direct message'); await ownerDirect.fill('Thomas, kannst du kurz sagen, ob du dir das ansehen würdest?'); await clickServerAction(owner,owner.getByRole('button',{name:'Nachricht senden'}));
 const techCtx=await newE2EContext({viewport:{width:390,height:844}}); const tech=await techCtx.newPage(); trackPage(tech,'provider-contact');
 tech.on('framenavigated',f=>{ if(f===tech.mainFrame()) console.error('E2E-NAV:',JSON.stringify(tech.url())); });
 tech.on('response',r=>{ if(r.status()>=300){ console.error('E2E-RES:',r.status(),r.request().method(),r.url().slice(base.length)); } });
@@ -683,7 +699,7 @@ for(let attempt=0;attempt<3&&!loggedIn;attempt++){
 }
 if(!loggedIn)throw new Error('Tech login never completed (form submit did not navigate to /pro)');
 await nav(tech, base+'/pro/messages',{timeout:60000}); await waitText(tech,'Maria Test'); await waitText(tech,'ob du dir das ansehen würdest');
-await tech.waitForLoadState('load').catch(()=>{}); await tech.waitForTimeout(800); await tech.getByPlaceholder(/Nachricht an Maria/).fill('Ja, das kann ich mir ansehen. Wenn du möchtest, kann daraus separat ein Auftrag werden.'); await clickServerAction(tech,tech.getByRole('button',{name:'Nachricht senden'}));
+await tech.waitForLoadState('load').catch(()=>{}); await tech.waitForTimeout(800); const techReply=tech.getByPlaceholder(/Nachricht an Maria/); await settle(techReply,'provider reply message'); await techReply.fill('Ja, das kann ich mir ansehen. Wenn du möchtest, kann daraus separat ein Auftrag werden.'); await clickServerAction(tech,tech.getByRole('button',{name:'Nachricht senden'}));
 await nav(owner, base+`/app/jobs/${contactJobId}`); await waitText(owner,'separat ein Auftrag');
 
 // 3b) Erst jetzt entscheidet Maria, daraus einen echten Auftrag zu machen.
@@ -718,9 +734,9 @@ await owner.screenshot({path:path.join(artifactsDir,'owner-personal-contact.png'
 
 // 6) Derselbe Ansprechpartner bleibt auch nach der späteren Buchung erreichbar.
 await owner.getByRole('link',{name:'Nachricht',exact:true}).click(); await waitText(owner,'Zurück zur Kontaktliste');
-await owner.getByPlaceholder(/Nachricht an Thomas/).fill('Thomas, bitte kurz Bescheid sagen, bevor du losfährst.'); await clickServerAction(owner,owner.getByRole('button',{name:'Nachricht senden'}));
+const ownerDirect2=owner.getByPlaceholder(/Nachricht an Thomas/); await settle(ownerDirect2,'owner direct message (second)'); await ownerDirect2.fill('Thomas, bitte kurz Bescheid sagen, bevor du losfährst.'); await clickServerAction(owner,owner.getByRole('button',{name:'Nachricht senden'}));
 await nav(tech, base+'/pro/messages'); await waitText(tech,'Thomas, bitte kurz Bescheid');
-await tech.getByPlaceholder(/Nachricht an Maria/).fill('Gerne, ich melde mich etwa 30 Minuten vorher.'); await clickServerAction(tech,tech.getByRole('button',{name:'Nachricht senden'}));
+const techReply2=tech.getByPlaceholder(/Nachricht an Maria/); await settle(techReply2,'provider reply message (second)'); await techReply2.fill('Gerne, ich melde mich etwa 30 Minuten vorher.'); await clickServerAction(tech,tech.getByRole('button',{name:'Nachricht senden'}));
 await nav(owner, owner.url()); await waitText(owner,'30 Minuten vorher');
 
 // 7) Ansprechpartner führt aus, dokumentiert und bleibt danach gespeichert.
