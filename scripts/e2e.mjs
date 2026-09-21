@@ -480,7 +480,7 @@ await clickAndWaitUrl(manager,manager.getByRole('button',{name:'Zur Prüfung ein
 const adminCtx=await newE2EContext({viewport:{width:1180,height:1000}}); const admin=await adminCtx.newPage(); trackPage(admin,'admin');
 await nav(admin, base+'/admin/login'); await admin.getByLabel('Admin-Passwort').fill(adminPassword);
 await Promise.all([admin.waitForURL('**/admin'),admin.getByRole('button',{name:'Admin anmelden'}).click()]);
-await admin.getByRole('heading',{name:'Betriebsübersicht'}).waitFor(); await waitText(admin,'Nutzer'); await waitText(admin,'Anfragen'); await waitText(admin,'Bookings'); await waitText(admin,'MATCHING'); await waitText(admin,'BENACHRICHTIGUNGEN'); await admin.getByRole('heading',{name:'Bewertungen',exact:true}).waitFor();
+await admin.getByRole('heading',{name:'Betriebsübersicht'}).waitFor(); await waitText(admin,'Nutzer'); await waitText(admin,'Anfragen'); await waitText(admin,'Bookings'); await waitText(admin,'Matching'); await waitText(admin,'Benachrichtigungen'); await admin.getByRole('heading',{name:'Bewertungen',exact:true}).waitFor();
 // Partner cards are EHFormSection blocks, which render <fieldset><legend>. Anchor on
 // the legend so the right partner is selected; the previous `.admin-card` class no
 // longer exists anywhere in the admin UI (it was rewritten onto the design system).
@@ -581,15 +581,15 @@ await nav(owner, base+'/register?role=homeowner')
 await owner.locator('#btn-submit-register').waitFor();
 await fillRegisterField(owner,'firstName','Maria'); await fillRegisterField(owner,'lastName','Test'); await fillRegisterField(owner,'email',ownerEmail); await fillRegisterField(owner,'password',password); await fillRegisterField(owner,'postcode','46325');
 await Promise.all([owner.waitForURL('**/app/onboarding'),owner.locator('#btn-submit-register').click()]);
-await waitText(owner,'Damit Partner in deiner Region arbeiten können');
+await waitText(owner,'Trag Straße und PLZ ein, damit Einfach Hausen Betriebe in deiner Region findet.');
 // Resume works: leaving mid-onboarding and returning keeps the saved step.
 await nav(owner, base+'/app'); await waitText(owner,'Einrichtung unvollständig');
 await clickAndWaitUrl(owner,owner.getByRole('link',{name:'Einrichtung fortsetzen'}),/\/app\/onboarding$/);
-await waitText(owner,'Damit Partner in deiner Region arbeiten können');
+await waitText(owner,'Trag Straße und PLZ ein, damit Einfach Hausen Betriebe in deiner Region findet.');
 await strictRetry(owner,()=>owner.getByLabel('Straße und Hausnummer').fill('Gartenweg 12'));
-await clickServerAction(owner,owner.getByRole('button',{name:'Weiter'})); await waitText(owner,'Worum geht es bei deinem Haus?');
+await clickServerAction(owner,owner.getByRole('button',{name:'Weiter'})); await waitText(owner,'Wähle die Bereiche, die dich interessieren. Überspringen ist möglich.');
 // Optional steps are skippable.
-await strictRetry(owner,()=>owner.getByRole('button',{name:'Überspringen'}).click()); await waitText(owner,'Wie dürfen wir dich erreichen?');
+await strictRetry(owner,()=>owner.getByRole('button',{name:'Überspringen'}).click()); await waitText(owner,'Sag, über welchen Weg wir dich am besten erreichen.');
 await strictRetry(owner,()=>owner.getByRole('button',{name:'Überspringen'}).click());
 await Promise.all([owner.waitForURL('**/app?onboarding=done'),owner.waitForLoadState('load')]);
 if(await owner.getByText('Einrichtung unvollständig').count())throw new Error('Onboarding banner shown after completion');
@@ -614,7 +614,12 @@ await nav(owner, base+'/app/hausmeister'); await assertNoOverflow(owner,'Mobile 
 await sendHousemaster(owner,'Meine Hecke ist zu hoch. Dienstag ab 14 Uhr hätte ich Zeit. Wen kann ich dazu fragen?',/answered=1/);
 await waitText(owner,'Wie soll es weitergehen?'); await waitText(owner,'Ansprechpartner finden'); await waitText(owner,'Auftrag organisieren');
 // Eine normale Hausfrage darf noch keine Partneranfrage erzeugen.
-await nav(manager, base+'/pro'); await waitText(manager,'Keine neuen Anfragen im Umkreis');
+await nav(manager, base+'/pro'); await waitText(manager,'Keine neuen Aufträge.');
+// A normal house question must not create a partner request, so there must be
+// no dispatch card to open. The earlier assertion looked for the empty-state
+// copy "Keine neuen Anfragen im Umkreis", which the rebuilt /pro start page no
+// longer renders.
+if(await manager.locator('a[href^="/pro/jobs/"]').count()!==0)throw new Error('A normal house question must not create a partner request');
 
 // 3a) Zuerst nur einen Menschen verbinden — ausdrücklich noch kein Auftrag.
 await clickAndWaitUrl(owner,owner.getByRole('button',{name:/Ansprechpartner finden/}),/\/app\/jobs\/\d+/); const contactJobId=Number(owner.url().split('/').pop()); if(!contactJobId)throw new Error('contact job missing');
@@ -724,7 +729,11 @@ await nav(owner, base+'/app/messages'); await waitText(owner,'Wähle einen Berei
 await nav(owner, base+'/app/documents'); await waitText(owner,'Leistungsnachweis Heckenschnitt');
 
 // 7a) Notification Center: server-side read-state sync, per-item toggles, pagination chrome.
-await nav(manager, base+'/notifications'); await waitText(manager,'Angebote, Disposition');
+await nav(manager, base+'/notifications'); await manager.getByRole('heading',{level:1,name:'Updates'}).waitFor();
+// The anchor used to be the title of a dispatch notification ("Angebote,
+// Disposition") that no longer exists. What this block actually proves is the
+// unread dispatch notification and its server-side read state, asserted right
+// below; the anchor only has to establish that the center rendered.
 const firstUnread=manager.locator('button[aria-label^="Als gelesen markieren"]').first();
 if(await firstUnread.count()===0)throw new Error('Manager should have unread dispatch notifications by now');
 // Read-state sync is server-rendered: the 'ungelesen' marker must disappear from the first row after marking read.
@@ -771,7 +780,7 @@ await nav(owner, base+'/app/emergency'); await owner.getByLabel('Notfall').selec
 
 // 10) Servicefall bleibt zentral unterstützbar, ohne den direkten Kontakt zu ersetzen.
 await nav(owner, base+`/app/jobs/${jobId}`); await waitText(owner,'Wenn etwas nicht klappt'); await owner.getByPlaceholder('Beschreibe kurz, wo die Abstimmung festhängt.').fill('Die Ausführung soll von Einfach Hausen geprüft werden, weil noch eine Rückfrage zur Qualität offen ist.'); await clickServerAction(owner,owner.getByRole('button',{name:'Hausmeister einschalten'})); await waitText(owner,'Servicefall · Offen');
-await nav(admin, base+'/admin'); const claimCard=admin.locator('.admin-card').filter({hasText:'Rückfrage zur Qualität'}).first(); await claimCard.getByLabel('Status').selectOption('resolved'); await claimCard.getByPlaceholder('Rückmeldung / Entscheidung').fill('Fall geprüft und mit Kunde und Ansprechpartner geklärt.'); await clickServerAction(admin,claimCard.getByRole('button',{name:'Fall aktualisieren'})); await claimCard.locator('span[data-status="success"]').waitFor();
+await nav(admin, base+'/admin'); const claimCard=admin.locator('fieldset').filter({has:admin.locator('legend',{hasText:'Rückfrage zur Qualität'})}).first(); await claimCard.getByLabel('Status').selectOption('resolved'); await claimCard.getByPlaceholder('Rückmeldung / Entscheidung').fill('Fall geprüft und mit Kunde und Ansprechpartner geklärt.'); await clickServerAction(admin,claimCard.getByRole('button',{name:'Fall aktualisieren'})); await claimCard.locator('span[data-status="success"]').waitFor();
 
 // 11) CRM-Lifecycle ist im integrierten Produkt erreichbar und kennt den registrierten Partner.
 await nav(admin, base+`/admin/crm?q=${encodeURIComponent('Gartenbau Müller')}`); await waitText(admin,'Leads & Outreach CRM'); await waitText(admin,'Gartenbau Müller'); await assertNoOverflow(admin,'Admin CRM');
@@ -779,14 +788,14 @@ await nav(admin, base+`/admin/crm?q=${encodeURIComponent('Gartenbau Müller')}`)
 const buyerCtx=await newE2EContext({viewport:{width:390,height:844}}); const buyer=await buyerCtx.newPage(); trackPage(buyer,'homeowner-buyer');
 // 12a) First-run onboarding: guided steps, skippable optionals, resumable progress.
 await nav(buyer, base+'/register?role=homeowner'); await buyer.locator('#btn-submit-register').waitFor(); await fillRegisterField(buyer,'firstName','Ben'); await fillRegisterField(buyer,'lastName','Käufer'); await fillRegisterField(buyer,'email',buyerEmail); await fillRegisterField(buyer,'password',password); await fillRegisterField(buyer,'postcode','46325'); await Promise.all([buyer.waitForURL('**/app/onboarding'),buyer.locator('#btn-submit-register').click()]);
-await waitText(buyer,'Damit Partner in deiner Region arbeiten können');
+await waitText(buyer,'Trag Straße und PLZ ein, damit Einfach Hausen Betriebe in deiner Region findet.');
 await buyer.getByLabel('Straße und Hausnummer').fill('Kaistraße 7');
 await clickAndWaitUrl(buyer,buyer.getByRole('button',{name:'Weiter'}),/\/app\/onboarding$/);
-await waitText(buyer,'Worum geht es bei deinem Haus?');
-await nav(buyer, buyer.url()); await waitText(buyer,'Worum geht es bei deinem Haus?');
+await waitText(buyer,'Wähle die Bereiche, die dich interessieren. Überspringen ist möglich.');
+await nav(buyer, buyer.url()); await waitText(buyer,'Wähle die Bereiche, die dich interessieren. Überspringen ist möglich.');
 await buyer.getByLabel(new RegExp('Garten')).check();
 await clickAndWaitUrl(buyer,buyer.getByRole('button',{name:'Weiter'}),/\/app\/onboarding$/);
-await waitText(buyer,'Wie dürfen wir dich erreichen?');
+await waitText(buyer,'Sag, über welchen Weg wir dich am besten erreichen.');
 await buyer.getByRole('button',{name:'Überspringen'}).click();
 await Promise.all([buyer.waitForURL('**/app?onboarding=done'),buyer.waitForLoadState('load')]);
 await waitText(buyer,'Was möchtest du für dein Zuhause klären?');
