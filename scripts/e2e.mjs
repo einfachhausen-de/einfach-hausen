@@ -694,15 +694,14 @@ await jobsMenu.getByText('Neuer Auftrag',{exact:true}).first().waitFor({timeout:
 await jobsMenu.getByText('Alle Aufträge',{exact:true}).first().waitFor({timeout:10000});
 await clickAndWaitUrl(ownerDesktop,jobsMenu.getByRole('menuitem',{name:'Alle Aufträge'}),/\/app\/jobs/);
 await nav(ownerDesktop, base+'/app');
-// 3b3) Neuer-Auftrag-Untermenü: Hover zeigt die 12 Bereiche, Klick auf einen
+// 3b3) Neuer Auftrag + 12 Bereiche direkt im Menü (kein Hover-Submenü:
+// Radix-Sub schloss sich beim Anfahren, Klick hing). Klick auf einen
 // Bereich startet den Hausmeister mit passendem Thema.
 await headerMenu.getByRole('button',{name:'Aufträge'}).click();
 const jobsMenu2=ownerDesktop.getByRole('menu');
-await jobsMenu2.getByRole('menuitem',{name:'Neuer Auftrag'}).hover();
-const subMenu=ownerDesktop.locator('[data-slot="dropdown-menu-sub-content"]');
-await subMenu.getByText('Garten & Außen',{exact:true}).first().waitFor({timeout:10000});
-if(await subMenu.getByRole('menuitem').count()!==12)throw new Error('Area submenu must list exactly the 12 service areas');
-await clickAndWaitUrl(ownerDesktop,subMenu.getByRole('menuitem',{name:'Garten & Außen'}),/\/app\/hausmeister\?topic=garten-aussenbereich/);
+await jobsMenu2.getByText('Garten & Außen',{exact:true}).first().waitFor({timeout:10000});
+if(await jobsMenu2.locator('[data-testid^="bereich-"]').count()!==12)throw new Error('Area list must show exactly the 12 service areas');
+await clickAndWaitUrl(ownerDesktop,jobsMenu2.getByRole('menuitem',{name:'Garten & Außen'}),/\/app\/hausmeister\?topic=garten-aussenbereich/);
 await nav(ownerDesktop, base+'/app');
 // Direkt-Klick auf "Neuer Auftrag" navigiert ohne Umweg (Maus: detail>=1).
 await headerMenu.getByRole('button',{name:'Aufträge'}).click();
