@@ -1,5 +1,5 @@
 "use client";
-import {useEffect, useId, useRef, useState, type FormEvent, type ReactNode} from 'react';
+import {Fragment, useEffect, useId, useRef, useState, type FormEvent, type ReactNode} from 'react';
 import {ChevronsUpDown, Sparkles} from 'lucide-react';
 import {EHActivity, type EHActivityStep} from './blocks';
 import {EHButton, EHText} from './primitives';
@@ -7,7 +7,7 @@ import {EHField, EHTextarea} from './app';
 import s from './styles.module.css';
 
 export type EHAssistantMessage = {role: 'user' | 'assistant'; content: string};
-export type EHAssistantResult = {reply: string; kind: 'reply' | 'login' | 'quota' | 'error'; steps?: EHActivityStep[]};
+export type EHAssistantResult = {reply: string; kind: 'reply' | 'login' | 'quota' | 'error'; steps?: EHActivityStep[]; cards?: ReactNode};
 
 /**
  * User-opened customer assistant; data access and account policy belong to the
@@ -39,12 +39,27 @@ export function EHAssistant({onSend, loginHref, settingsHref, aboveNavigation = 
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<EHAssistantResult | null>(null);
   const [steps, setSteps] = useState<EHActivityStep[]>([]);
+  // Empfehlungskarten haengen an der Antwort, zu der sie gehoeren - nicht am
+  // Ende des Verlaufs, damit die naechste Frage sie nicht ueberschreibt.
+  const [karten, setKarten] = useState<Record<number, ReactNode>>({});
+  // Die Karte ist die Antwort: nach ihr richtet sich der Blick, nicht nach dem
+  // Seitenfluss darunter.
+  const kartenRefs = useRef<Record<number, HTMLDivElement | null>>({});
   const [offenIntern, setOffenIntern] = useState(false);
   const istPanel = placement === 'panel';
   const offen = open ?? offenIntern;
 
   useEffect(() => () => request.current?.abort(), []);
-  useEffect(() => { if (log.current) log.current.scrollTop = log.current.scrollHeight; }, [messages, busy, notice, steps]);
+  useEffect(() => {
+    const bereich = log.current; if (!bereich) return;
+    const letzte = busy ? null : kartenRefs.current[messages.length - 1];
+    if (letzte) {
+      const kasten = bereich.getBoundingClientRect(); const ziel = letzte.getBoundingClientRect();
+      bereich.scrollTop += ziel.top - kasten.top - 8;
+      return;
+    }
+    bereich.scrollTop = bereich.scrollHeight;
+  }, [messages, busy, notice, steps]);
   // Der Bereich ist kein Dialog: Escape schliesst ihn, wie es die Karte selbst
   // auch kann.
   useEffect(() => {
@@ -76,7 +91,10 @@ export function EHAssistant({onSend, loginHref, settingsHref, aboveNavigation = 
       const result = await onSend(next.slice(-12), controller.signal, istPanel ? schrittMerken : undefined);
       if (controller.signal.aborted) return;
       if (istPanel && result.steps?.length) setSteps(result.steps);
-      if (result.kind === 'reply') { setMessages([...next, {role: 'assistant', content: result.reply}]); setInput(''); }
+      if (result.kind === 'reply') {
+        if (istPanel && result.cards) setKarten(bisher => ({...bisher, [next.length]: result.cards}));
+        setMessages([...next, {role: 'assistant', content: result.reply}]); setInput('');
+      }
       else setNotice(result);
     } catch {
       if (!controller.signal.aborted) setNotice({kind: 'error', reply: 'Die Verbindung ist gerade unterbrochen. Deine Frage bleibt im Eingabefeld. Du kannst es erneut versuchen.'});
@@ -103,6 +121,16 @@ export function EHAssistant({onSend, loginHref, settingsHref, aboveNavigation = 
     ? {...step, retry: {label: 'Erneut versuchen', onClick: wiederholen}}
     : step);
 
+  const nachricht = (message: EHAssistantMessage, index: number) => {
+    const blase = <div className={s.assistantMessage} data-role={message.role}>
+      <strong>{message.role === 'user' ? 'Du' : 'Hausmanager · KI'}</strong><p>{message.content}</p>
+    </div>;
+    const anhang = karten[index];
+    return anhang
+      ? <div key={index} className={s.assistantTurn} ref={el => { kartenRefs.current[index] = el; }}>{blase}<div className={s.assistantAttachment}>{anhang}</div></div>
+      : <Fragment key={index}>{blase}</Fragment>;
+  };
+
   const kopf = (schliessen: ReactNode) => (
     <header className={s.assistantHeader}>
       <img src="/brand/logo-full.png" alt="einfachhausen" width={72} height={46} />
@@ -116,11 +144,11 @@ export function EHAssistant({onSend, loginHref, settingsHref, aboveNavigation = 
       <div className={s.assistantWelcome}>
         <h3>Was beschäftigt dich an deinem Haus?</h3>
         <EHText>Beschreibe dein Anliegen. Ich helfe dir, Fragen zu klären und den nächsten Schritt zu finden.</EHText>
-        <EHText size="meta" muted>Du sprichst mit einer KI. Antworten können Fehler enthalten. Ein Chat beauftragt keinen Betrieb.</EHText>
+        <EHText size="meta" muted>{istPanel
+          ? 'Du sprichst mit einer KI. Antworten können Fehler enthalten. Verbindlich wird nur, was du in einer Karte bestätigst.'
+          : 'Du sprichst mit einer KI. Antworten können Fehler enthalten. Ein Chat beauftragt keinen Betrieb.'}</EHText>
       </div>
-      {messages.map((message, index) => <div key={index} className={s.assistantMessage} data-role={message.role}>
-        <strong>{message.role === 'user' ? 'Du' : 'Hausmanager · KI'}</strong><p>{message.content}</p>
-      </div>)}
+      {messages.map(nachricht)}
       {busy && (!istPanel || !steps.length) && <p role="status">Deine Antwort wird vorbereitet …</p>}
       {istPanel && <EHActivity steps={schritte} title="Was die KI macht" label="Ablauf der Antwort" />}
       {notice && <div className={s.assistantNotice} role="status">

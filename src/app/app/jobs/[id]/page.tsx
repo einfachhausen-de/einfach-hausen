@@ -7,11 +7,12 @@ import { JobMedia } from '@/components/job-media';
 import { mediaKindFromPath } from '@/lib/intake-media';
 import { requireUser } from '@/lib/auth';
 import { db } from '@/lib/db';
-import { acceptQuoteAction,cancelJobAction,createCheckoutAction,createClaimAction,reviewAction,sendMessageAction,sendSavedContactMessageAction,turnContactIntoServiceAction } from '@/app/actions';
+import { acceptQuoteAction,bookQuoteAction,cancelJobAction,createCheckoutAction,createClaimAction,reviewAction,sendMessageAction,sendSavedContactMessageAction,turnContactIntoServiceAction } from '@/app/actions';
 import { dateLabel,euro,statusLabel } from '@/lib/format';
 import { ownerDate } from '@/lib/owner-format';
 import { getQuoteRecommendations } from '@/lib/orchestrator';
-import { EHActivity,EHActions,EHButton,EHCallout,EHConversation,EHEmptyState,EHErrorState,EHField,EHFormFeedback,EHFormSection,EHInput,EHMetricsBar,EHRecordList,EHSelect,EHStatus,EHSubmitButton,EHText,EHTextarea,EHWorkflowForm,EHWorkflowStack,EHWorkSection,type EHActivityStep } from '@/design-system';
+import { offerCard } from '@/lib/offer-cards';
+import { EHActivity,EHActions,EHButton,EHCallout,EHConversation,EHEmptyState,EHErrorState,EHField,EHFormFeedback,EHFormSection,EHInput,EHMetricsBar,EHRecommendation,EHRecordList,EHSelect,EHStatus,EHSubmitButton,EHText,EHTextarea,EHWorkflowForm,EHWorkflowStack,EHWorkSection,type EHActivityStep } from '@/design-system';
 
 /**
  * Rechte Spalte und Kopf dieser Seite. Dieselben Token wie auf /app und /app/jobs:
@@ -54,7 +55,7 @@ function vermittlung(job:any,stand:{modus:'auftrag'|'kontakt';angefragt:number;g
     { key:'betriebe', label:'Passende Betriebe geprüft', state:geprueft?'done':'pending', meta:geprueft?betriebe(geprueft):'Noch keine Prüfung',
       details:geprueft?['Geprüft werden Betriebe im Netzwerk, die das Gewerk anbieten.',...ausgeschlossen]
         :['Sobald der Vorgang vorliegt, prüft Einfach Hausen Gewerk, Region und Verfügbarkeit.'] },
-    { key:'anfragen', label:kontaktweg?'Kontaktbetriebe angefragt':'Betriebe angefragt', state:stand.angefragt?'done':'pending', meta:stand.angefragt?betriebe(stand.angefragt):'Noch keiner',
+    { key:'anfragen', label:kontaktweg?'Kontaktbetriebe angefragt':'Betriebe angefragt', state:stand.angefragt?'done':'pending', meta:stand.angefragt?betriebe(stand.angefragt):'Noch keine Anfrage',
       details:stand.angefragt?[`${stand.geantwortet} von ${stand.angefragt} ${stand.angefragt===1?'hat':'haben'} geantwortet.`,'Namen zeigen wir erst, wenn ein Betrieb zusagt.']
         :['Aktuell passt kein Betrieb zu Gewerk und Region.'] },
     kontaktweg
@@ -180,6 +181,8 @@ export default async function JobDetail({params,searchParams}:{params:Promise<{i
   const messages=contact?db.prepare('SELECT * FROM contact_messages WHERE homeowner_id=? AND contact_user_id=? ORDER BY created_at').all(u.id,contact.contact_user_id) as any[]:[];
   const dispatches=db.prepare(`SELECT COUNT(*) total,SUM(CASE WHEN status='quoted' THEN 1 ELSE 0 END) quoted,SUM(CASE WHEN status IN ('declined','quoted','accepted') THEN 1 ELSE 0 END) geantwortet FROM job_dispatches WHERE job_id=?`).get(job.id) as any;
   const cheapest=quotes.length?Math.min(...quotes.map(q=>q.amount)):null;
+  // Offene Angebote als Entscheidungskarte; null, sobald gebucht oder keins offen ist.
+  const angebotsKarte=offerCard(u.id,job.id);
   const available=quotes.filter(q=>q.available_at).sort((a,b)=>new Date(a.available_at).getTime()-new Date(b.available_at).getTime()); const fastest=available[0]?.id;
 
   return <WerkbankRahmen role="homeowner" active="/app/jobs" rail={<>
@@ -252,6 +255,7 @@ export default async function JobDetail({params,searchParams}:{params:Promise<{i
     </EHWorkSection>
 
     <EHWorkSection title="Vergleich">
+    {angebotsKarte&&<EHRecommendation question={angebotsKarte.question} subject={angebotsKarte.subject} options={angebotsKarte.options} onPrimary={bookQuoteAction} />}
     {quotes.length===0?<EHEmptyState title="Angebote werden eingeholt" text="Einfach Hausen klärt Verfügbarkeit und Angebote mit passenden Partnern." />:<EHRecordList label="Angebote im Vergleich" items={quotes.map((q,index)=>({
       id:String(q.id),
       title:q.business_name,

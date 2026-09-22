@@ -26,7 +26,9 @@ export async function POST(req: Request) {
 
   let body: unknown;
   try { body = await req.json(); } catch { return NextResponse.json({ reply: "Ungültige Anfrage." }, { status: 400 }); }
-  const messages = (body as { messages?: unknown } | null)?.messages;
+  const roh = (body as { messages?: unknown } | null)?.messages;
+  // Nur Fragen und Antworten erreichen das Modell; alles andere wird verworfen.
+  const messages = Array.isArray(roh) ? roh.filter(m => Boolean(m) && typeof m === 'object' && (m.role === 'user' || m.role === 'assistant')) : [];
 
   // Mit ?stream=1 laeuft die Antwort als Ereignisstrom: jeder Schritt kommt
   // sofort, das Ergebnis am Ende. Ohne Streaming bleibt es beim gewohnten JSON.

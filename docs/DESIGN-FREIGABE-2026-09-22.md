@@ -73,6 +73,35 @@ Ablauf und Live-Meldung ab.
 `design/design-lock.json` ist erneut mit `node scripts/eh-design-seal.mjs`
 versiegelt.
 
+## Angebote als Entscheidung (`EHRecommendation`)
+
+`packages/eh-design/src/recommendation.tsx` zeigt ein offenes Angebot als Karte:
+Titel als Frage, ein Satz mit Betrieb-Chip und Preis-Pille, darunter Termin und
+Entfernung, die übrigen Angebote hinter einem nativ aufklappbaren Fach
+(`<details>`, `<summary>`) und eine Fußzeile mit den Auszeichnungen der
+Vorgangsseite – „Günstigstes“, „Schnellster Termin“, „Neu im Netzwerk“,
+„24/7 Notdienst“ – samt Hauptaktion. Die Töne sind dieselben wie im Vergleich
+(`success`/`info`/`neutral`/`warning`), es gibt bewusst keine Skala.
+
+Die Daten kommen aus `src/lib/offer-cards.ts`, derselben Quelle für Chat und
+Vorgangsseite: `offerCard(homeownerId, jobId)` und `offerCards(homeownerId)`.
+Gefiltert wird wie in `getQuoteRecommendations`: geprüftes Profil, aktiver
+Partnervertrag, offenes Angebot, Vorgang noch offen. Die Flächen und Pills
+entstehen über `color-mix` in eigenen Variablen, damit in der Deklaration kein
+Rohwert steht.
+
+Gebucht wird ausschließlich über den Knopf: `bookQuoteAction` ruft
+`acceptQuoteAction` auf und meldet zurück, ob die Buchung angekommen ist –
+„Gebucht“ erscheint nur bei `true`, sonst der Hinweis, im Vorgang zu buchen.
+Der Bereichschat schreibt darum „Verbindlich wird nur, was du in einer Karte
+bestätigst.“; die schwebende Website-Karte bleibt unverändert. Der Chat hängt
+die Karte an die Antwort, zu der sie gehört (`cards` in der Antwort von
+`answerAssistant`, verdrahtet in `src/components/house-assistant.tsx`), die
+Vorgangsseite zeigt dieselbe Karte über dem Angebotsvergleich.
+
+`design/design-lock.json` ist erneut mit `node scripts/eh-design-seal.mjs`
+versiegelt.
+
 ## PR-Check
 
 Der PR-Job (`eh-design.yml`) vergleicht geschützte Pfade mit der Basis und

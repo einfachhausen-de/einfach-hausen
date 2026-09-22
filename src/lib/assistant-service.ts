@@ -5,6 +5,7 @@ import { structuredLog } from './observability';
 import { assistantRouter, explicitCapability, type Capability } from './ai-router';
 import { executeAssistantTool, requireAssistantOwner, type ToolResult } from './ai-tools';
 import { aiQuotaSnapshot, byokEnabled, byokKeyEnc, byokGateway, consumeCloudAction, voidCloudAction } from './ai-engine';
+import { offerCards, type OfferCard } from './offer-cards';
 import { decryptSecret } from './security/secret-box';
 import { resolvePrivateFile } from './security/private-files';
 
@@ -19,6 +20,8 @@ export type AssistantStepState = 'done' | 'running' | 'failed' | 'pending';
 export type AssistantStep = { key: string; label: string; state: AssistantStepState; meta?: string; details?: string[] };
 export type AssistantResponse = {
   status: number; reply: string; links?: ToolResult['links']; provider?: string; steps?: AssistantStep[];
+  /** Angebote als Entscheidungskarten: der Chat zeigt sie unter der Antwort. */
+  cards?: OfferCard[];
   quota?: ReturnType<typeof aiQuotaSnapshot> | { byok: boolean }; exhausted?: boolean; options?: string[];
 };
 const THEMA: Record<Capability, string> = {
@@ -107,8 +110,17 @@ export async function answerAssistant(userId: number, rawMessages: unknown, sign
   });
   if (capability !== 'generative') {
     if (LIEST_DATEN.includes(capability)) melde({ key: 'daten', label: 'Deine Daten gelesen', state: 'done', meta: THEMA[capability], details: ['Direkt in deinen eigenen Daten nachgeschlagen.', 'Nichts wurde an einen Anbieter übermittelt.'] });
-    melde({ key: 'antwort', label: 'Antwort zusammengestellt', state: 'done', meta: 'Ohne KI-Modell', details: ['Diese Antwort verbraucht kein Kontingent.'] });
-    return abschluss({ status: 200, ...executeAssistantTool(userId, capability, question), provider, quota: aiQuotaSnapshot(userId) });
+    // Offene Angebote kommen als Karte: das guenstigste steht vorausgewaehlt,
+    // gebucht wird erst mit dem Knopf und nie durch die Antwort selbst.
+    const karten = capability === 'quotes' ? offerCards(userId) : [];
+    melde({ key: 'antwort', label: 'Antwort zusammengestellt', state: 'done', meta: 'Ohne KI-Modell', details: [karten.length ? 'Offene Angebote stehen als Karte bereit.' : 'Diese Antwort verbraucht kein Kontingent.'] });
+    const tool = executeAssistantTool(userId, capability, question);
+    if (!karten.length) return abschluss({ status: 200, ...tool, provider, quota: aiQuotaSnapshot(userId) });
+    const vorgaenge = karten.length === 1 ? 'Ein Vorgang hat offene Angebote' : `${karten.length} Vorgänge haben offene Angebote`;
+    return abschluss({
+      status: 200, reply: `${vorgaenge}. Prüfe die Auswahl in der Karte – mit „Buchen“ bestätigst du ein Angebot, vorher passiert nichts.`,
+      links: tool.links, provider, quota: aiQuotaSnapshot(userId), cards: karten,
+    });
   }
   const gateway = generativeGateway(userId);
   if (!gateway) {

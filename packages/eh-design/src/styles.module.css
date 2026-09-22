@@ -635,6 +635,36 @@ summary.activityHead { cursor:pointer; list-style:none; }
 @keyframes activitySpin { to { transform:rotate(1turn); } }
 @media (prefers-reduced-motion: reduce) { [data-stand="running"] .activityMark::before { animation:none; } }
 
+/* Empfehlung (EHRecommendation): eine Karte je Entscheidung, Alternativen
+   nativ aufklappbar. Betrieb und Wert sitzen in Chips, die Auszeichnungen
+   tragen dieselben Begriffe wie der Vergleich auf der Vorgangsseite. Die
+   Chipflaeche entsteht als eigene Variable, damit kein Rohwert in der
+   Deklaration steht. */
+.recommendation { display:grid; --eh-rec-chip: color-mix(in srgb, var(--eh-color-petrol) 10%, var(--eh-color-white)); border:1px solid var(--eh-rule); border-radius:var(--eh-radius-panel); background:var(--eh-color-white); box-shadow:var(--eh-shadow-panel); overflow:hidden; }
+.recommendationBody { display:grid; gap:8px; padding:14px; }
+.recommendationQuestion { font-size:var(--eh-font-label); font-weight:var(--eh-weight-semibold); line-height:var(--eh-leading-normal); }
+.recommendationText { font-size:var(--eh-font-meta); line-height:var(--eh-leading-loose); color:var(--eh-muted); }
+.recommendationChip { display:inline-flex; align-items:center; gap:6px; margin:0 2px; padding:2px 9px 2px 3px; border:1px solid var(--eh-rule); border-radius:var(--eh-radius-pill); background:var(--eh-color-paper); color:var(--eh-color-ink); vertical-align:middle; }
+.recommendationInitial { display:grid; place-items:center; width:18px; height:18px; border-radius:var(--eh-radius-control); background:var(--eh-color-petrol); color:var(--eh-color-white); font-size:var(--eh-font-eyebrow); font-weight:var(--eh-weight-semibold); }
+.recommendationValue { display:inline-flex; align-items:center; margin:0 2px; padding:2px 9px; border-radius:var(--eh-radius-pill); background:var(--eh-rec-chip); color:var(--eh-color-petrol); font-weight:var(--eh-weight-medium); font-variant-numeric:tabular-nums; vertical-align:middle; }
+.recommendationAvailability { display:block; margin-top:2px; }
+.recommendationDrawer { border-top:1px solid var(--eh-rule); }
+.recommendationToggle { display:flex; align-items:center; justify-content:center; gap:6px; min-height:44px; padding:8px 14px; color:var(--eh-color-petrol); font-size:var(--eh-font-meta); font-weight:var(--eh-weight-medium); cursor:pointer; list-style:none; }
+.recommendationChevron { transition:transform var(--eh-motion-duration) var(--eh-motion-ease); }
+.recommendationDrawer[open] .recommendationChevron { transform:rotate(180deg); }
+.recommendationOther { padding:2px 14px 6px; font-size:var(--eh-font-eyebrow); font-weight:var(--eh-weight-semibold); letter-spacing:var(--eh-track-wide); text-transform:uppercase; color:var(--eh-muted); }
+.recommendationDrawer ul { list-style:none; margin:0; padding:0 6px 8px; }
+.recommendationOption { display:grid; gap:4px; width:100%; padding:8px; border:0; border-radius:var(--eh-radius-control); background:transparent; color:inherit; font:inherit; text-align:left; cursor:pointer; }
+.recommendationOption:hover { background:var(--eh-color-paper); }
+.recommendationOptionHead { display:flex; align-items:baseline; justify-content:space-between; gap:10px; }
+.recommendationOptionName { flex:1 1 auto; min-width:0; font-size:var(--eh-font-meta); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.recommendationOptionPrice { flex:none; font-size:var(--eh-font-meta); font-weight:var(--eh-weight-medium); font-variant-numeric:tabular-nums; }
+.recommendationMarkers { display:flex; align-items:center; flex-wrap:wrap; gap:6px; min-width:0; }
+.recommendationFoot { display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; padding:12px 14px; border-top:1px solid var(--eh-rule); }
+.recommendationActions { display:flex; align-items:center; gap:8px; margin-left:auto; }
+.recommendationNote,.recommendationFehler { padding:0 14px 14px; font-size:var(--eh-font-meta); line-height:var(--eh-leading-normal); color:var(--eh-muted); }
+.recommendationFehler { color:var(--eh-color-error); }
+
 /* Customer assistant: one quiet launcher; native modal owns focus and Escape. */
 /* Der Knopf traegt die Form des Kontomenues aus der Seitenleiste: runde
    Symbolflaeche, zweizeilige Beschriftung, Zeichen rechts. Er sitzt unten
@@ -657,6 +687,8 @@ summary.activityHead { cursor:pointer; list-style:none; }
 .assistantWelcome p + p { margin-top:12px; }
 .assistantMessage { max-width:100%;padding:14px 16px;border:1px solid var(--eh-color-line);border-radius:var(--eh-radius-panel);background:var(--eh-color-white);overflow-wrap:anywhere; }
 .assistantMessage[data-role="user"] { margin-left:24px;background:var(--eh-color-deep);color:var(--eh-color-paper); }
+.assistantTurn { display:grid; gap:8px; }
+.assistantAttachment { display:grid; gap:12px; }
 .assistantMessage strong { font-size:var(--eh-font-meta); }
 .assistantMessage p,.assistantNotice p { margin:8px 0 0;font-size:16px;line-height: var(--eh-leading-loose);white-space:pre-wrap;overflow-wrap:anywhere; }
 .assistantNotice { padding:16px;border:1px solid var(--eh-color-line);background:var(--eh-color-sand);border-radius:var(--eh-radius-panel); }

@@ -17,6 +17,7 @@ export * from "./workspace-conversation";
 export * from "./workspace-detail";
 export * from "./documents";
 export * from "./assistant";
+export * from "./recommendation";
 
 export * from "./property-overview";
 
