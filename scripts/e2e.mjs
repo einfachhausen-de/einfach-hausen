@@ -690,7 +690,8 @@ await nav(ownerDesktop, base+'/app');
 await ownerDesktop.getByRole('button',{name:/Benachrichtigungen/}).click();
 const bellMenu=ownerDesktop.getByRole('menu');
 await bellMenu.getByText('Alle ansehen',{exact:true}).first().waitFor({timeout:10000});
-await clickAndWaitUrl(ownerDesktop,bellMenu.getByRole('link',{name:'Alle ansehen'}),/\/notifications/);
+// Radix rollt den Link als menuitem (Rolle statt Link in der AX-Hierarchie).
+await clickAndWaitUrl(ownerDesktop,bellMenu.getByRole('menuitem',{name:'Alle ansehen'}),/\/notifications/);
 await ownerDesktopCtx.close();
 await nav(owner, base+'/app/profile'); await waitText(owner,'Deine Hausdaten bleiben privat.'); await assertNoOverflow(owner,'Mobile customer profile');
 await nav(owner, base+'/app/hausmeister'); await assertNoOverflow(owner,'Mobile housemaster');
