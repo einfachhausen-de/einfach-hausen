@@ -26,9 +26,38 @@ export async function POST(req: Request) {
 
   let body: unknown;
   try { body = await req.json(); } catch { return NextResponse.json({ reply: "Ungültige Anfrage." }, { status: 400 }); }
-  const result = await answerAssistant(user.id, (body as { messages?: unknown } | null)?.messages, req.signal);
-  const { status, ...response } = result;
-  return NextResponse.json(response, { status, headers: { 'Cache-Control': 'no-store' } });
+  const messages = (body as { messages?: unknown } | null)?.messages;
+
+  // Mit ?stream=1 laeuft die Antwort als Ereignisstrom: jeder Schritt kommt
+  // sofort, das Ergebnis am Ende. Ohne Streaming bleibt es beim gewohnten JSON.
+  const streamWanted = new URL(req.url).searchParams.get("stream") === "1";
+  if (!streamWanted) {
+    const result = await answerAssistant(user.id, messages, req.signal);
+    const { status, ...response } = result;
+    return NextResponse.json(response, { status, headers: { 'Cache-Control': 'no-store' } });
+  }
+
+  const encoder = new TextEncoder();
+  const rahmen = (payload: unknown) => encoder.encode("data: " + JSON.stringify(payload) + "\n\n");
+  const stream = new ReadableStream({
+    async start(controller) {
+      const sende = (payload: unknown) => {
+        try { controller.enqueue(rahmen(payload)); return true; }
+        catch { return false; } // Ein geschlossener Kanal beendet den Aufruf nicht.
+      };
+      try {
+        const result = await answerAssistant(user.id, messages, req.signal, null, step => { sende({ type: "step", step }); });
+        const { status, ...response } = result;
+        sende({ type: "done", status, ...response });
+      } catch {
+        sende({ type: "done", status: 503, reply: "Die KI-Anfrage konnte nicht abgeschlossen werden. Dein Kontingent wurde nicht belastet. Bitte versuche es später erneut." });
+      }
+      try { controller.close(); } catch { /* schon geschlossen */ }
+    },
+  });
+  return new Response(stream, {
+    headers: { "Content-Type": "text/event-stream; charset=utf-8", "Cache-Control": "no-store, no-cache", "X-Accel-Buffering": "no" },
+  });
 }
 
 // Quota snapshot + rewarded-ad credit grant for the settings screen.

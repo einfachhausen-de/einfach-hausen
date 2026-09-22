@@ -605,6 +605,36 @@
  .eh-documentFrame [class~="invoice-totals"],.eh-documentFrame [class~="passport-row"],.eh-documentFrame [class~="receipt-total"] { break-inside:avoid; }
 }
 
+/* Ablauf mit Zustand (EHActivity): eine Zeile je Schritt, Details nativ
+   aufklappbar. Der Zustand reist in data-stand; die Flaechen entstehen aus den
+   Marken-Token als eigene Variable, damit kein Rohwert in der Deklaration
+   steht. Die Zahl im Ring ist die Position des laufenden Schrittes. */
+.eh-activity { display:grid; gap:8px; --eh-step-fertig: color-mix(in srgb, var(--eh-color-success) 14%, var(--eh-color-white)); --eh-step-fehler: color-mix(in srgb, var(--eh-color-error) 12%, var(--eh-color-white)); --eh-step-laeuft: color-mix(in srgb, var(--eh-color-petrol) 10%, var(--eh-color-white)); }
+.eh-activityList { list-style:none; margin:0; padding:0; display:grid; grid-template-columns:minmax(0,1fr); gap:6px; }
+.eh-activityList > li { min-width:0; }
+.eh-activityRow { border:1px solid var(--eh-rule); border-radius:var(--eh-radius-panel); background:var(--eh-color-white); color:inherit; }
+.eh-activityHead { display:flex; align-items:center; gap:10px; min-height:44px; padding:8px 10px; }
+summary.eh-activityHead { cursor:pointer; list-style:none; }
+.eh-activityMark { position:relative; display:grid; place-items:center; flex:none; width:22px; height:22px; border:1px solid var(--eh-rule); border-radius:var(--eh-radius-pill); color:var(--eh-muted); font-size:var(--eh-font-meta); font-weight:var(--eh-weight-medium); line-height:1; font-variant-numeric:tabular-nums; }
+.eh-activityMark svg { display:block; }
+[data-stand="done"] .eh-activityMark { border-color:transparent; background:var(--eh-step-fertig); color:var(--eh-color-success); }
+[data-stand="failed"] .eh-activityMark { border-color:transparent; background:var(--eh-step-fehler); color:var(--eh-color-error); }
+[data-stand="running"] .eh-activityMark { border-color:transparent; background:var(--eh-step-laeuft); color:var(--eh-color-petrol); }
+[data-stand="running"] .eh-activityMark::before { content:""; position:absolute; inset:-3px; border:2px solid var(--eh-color-line); border-top-color:var(--eh-color-petrol); border-radius:var(--eh-radius-pill); animation:activitySpin 1s linear infinite; }
+.eh-activityLabel { flex:1 1 auto; min-width:0; font-size:var(--eh-font-label); font-weight:var(--eh-weight-medium); line-height:var(--eh-leading-normal); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.eh-activityMeta { flex:0 1 auto; min-width:0; font-size:var(--eh-font-meta); color:var(--eh-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.eh-activityChevron { flex:none; color:var(--eh-muted); transition:transform var(--eh-motion-duration) var(--eh-motion-ease); }
+.eh-activityRow[open] .eh-activityChevron { transform:rotate(180deg); }
+.eh-activityDetails { list-style:none; margin:0; padding:0 12px 10px 42px; display:grid; gap:4px; }
+.eh-activityDetails li { display:flex; gap:8px; font-size:var(--eh-font-meta); line-height:var(--eh-leading-normal); color:var(--eh-muted); }
+.eh-activityDetails li::before { content:"–"; flex:none; color:var(--eh-color-petrol); }
+.eh-activityAction { padding:0 12px 12px 42px; }
+.eh-activityRetry { display:inline-flex; align-items:center; gap:6px; min-height:36px; padding:6px 12px; border:1px solid var(--eh-rule); border-radius:var(--eh-radius-control); background:transparent; color:var(--eh-color-petrol); font:inherit; font-size:var(--eh-font-meta); font-weight:var(--eh-weight-medium); cursor:pointer; }
+.eh-activityRetry:hover { background:var(--eh-color-paper); }
+.eh-activityRetry:focus-visible { outline:3px solid var(--eh-color-focus); outline-offset:2px; }
+@keyframes activitySpin { to { transform:rotate(1turn); } }
+@media (prefers-reduced-motion: reduce) { [data-stand="running"] .eh-activityMark::before { animation:none; } }
+
 /* Customer assistant: one quiet launcher; native modal owns focus and Escape. */
 /* Der Knopf traegt die Form des Kontomenues aus der Seitenleiste: runde
    Symbolflaeche, zweizeilige Beschriftung, Zeichen rechts. Er sitzt unten

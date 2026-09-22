@@ -50,6 +50,29 @@ if(mod){
   assert.equal(genCalls,before);
  });
 }
+ test('ein Schrittablauf begleitet jede Antwort und wird live gemeldet',async()=>{
+  capability='jobs';
+  const gemeldet=[];
+  const out=await mod.answerAssistant(user,messages,undefined,null,step=>gemeldet.push(step));
+  assert.equal(out.status,200);
+  assert.deepEqual(out.steps?.map(s=>s.key),['frage','daten','antwort']);
+  assert.ok(out.steps.every(s=>s.state==='done'));
+  assert.deepEqual(gemeldet.map(s=>s.key),['frage','frage','daten','antwort']);
+  assert.equal(gemeldet.find(s=>s.key==='antwort').meta,'Ohne KI-Modell');
+ });
+ test('gescheiterte Modellantwort nennt die Ursache und entlastet das Kontingent',async()=>{
+  capability='generative';genFails=true;
+  db.prepare('DELETE FROM ai_usage WHERE user_id=?').run(user);
+  const gemeldet=[];
+  const out=await mod.answerAssistant(user,messages,undefined,null,step=>gemeldet.push(step));
+  genFails=false;
+  assert.equal(out.status,502);
+  const antwort=out.steps.find(s=>s.key==='antwort');
+  assert.equal(antwort.state,'failed');
+  assert.match(antwort.details.join(' '),/Status 503/);
+  assert.match(antwort.details.join(' '),/nicht belastet/);
+  assert.equal(ai.aiQuotaSnapshot(user).freemiumUsed,0);
+ });
 test('Hausmeister uses free data tools after quota exhaustion',async()=>{
  capability='jobs';
  db.prepare('INSERT INTO homeowner_profiles(user_id) VALUES(?)').run(user);

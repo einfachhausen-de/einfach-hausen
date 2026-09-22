@@ -52,6 +52,27 @@ Heizung, Smart Home, Wallbox. Eigene Anker tragen nur die fünf Kategorien, die
 `--eh-color-sand` bleibt als Akzentfarbe im Wortschatz (Button-Hover,
 Hervorhebungen, Rechnungsübersicht).
 
+## KI-Schritte (`EHActivity`)
+
+Der Kundenberater legt seinen Ablauf offen: `EHActivity` in
+`packages/eh-design/src/blocks.tsx` zeigt eine Zeile je Schritt, den Zustand in
+`data-stand`, die Details nativ aufklappbar (`<details>`) und die Wiederholung
+nur auf der letzten fehlgeschlagenen Zeile. Die Gestaltung steht in
+`packages/eh-design/src/styles.module.css`; die Flaechen entstehen ueber
+`color-mix` in eigenen Variablen, damit in der Deklaration kein Rohwert steht.
+Die Zahl im Ring ist die Position des laufenden Schrittes, kein Zaehler.
+
+`src/lib/assistant-service.ts` meldet die echten Schritte: erkannter Bereich und
+Einstufung, gelesene eigene Daten samt uebermittelter Zeichenzahl, Modell und
+Kontingent, Fehlerursache samt Entlastung. `/api/ki?stream=1` liefert sie als
+Ereignisstrom; ohne Streaming bleibt es beim JSON mit denselben `steps`. Die
+schwebende Website-Karte bleibt unveraendert und zeigt keine Schritte - das
+entscheidet `placement="panel"`. `scripts/assistant-service.test.mjs` sichert
+Ablauf und Live-Meldung ab.
+
+`design/design-lock.json` ist erneut mit `node scripts/eh-design-seal.mjs`
+versiegelt.
+
 ## PR-Check
 
 Der PR-Job (`eh-design.yml`) vergleicht geschützte Pfade mit der Basis und

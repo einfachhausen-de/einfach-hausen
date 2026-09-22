@@ -1,12 +1,13 @@
 "use client";
 import {useEffect, useId, useRef, useState, type FormEvent, type ReactNode} from 'react';
 import {ChevronsUpDown, Sparkles} from 'lucide-react';
+import {EHActivity, type EHActivityStep} from './blocks';
 import {EHButton, EHText} from './primitives';
 import {EHField, EHTextarea} from './app';
 import s from './styles.module.css';
 
 export type EHAssistantMessage = {role: 'user' | 'assistant'; content: string};
-export type EHAssistantResult = {reply: string; kind: 'reply' | 'login' | 'quota' | 'error'};
+export type EHAssistantResult = {reply: string; kind: 'reply' | 'login' | 'quota' | 'error'; steps?: EHActivityStep[]};
 
 /**
  * User-opened customer assistant; data access and account policy belong to the
@@ -22,7 +23,8 @@ export type EHAssistantResult = {reply: string; kind: 'reply' | 'login' | 'quota
  *   mittleren Bereich mitschrumpfen lassen.
  */
 export function EHAssistant({onSend, loginHref, settingsHref, aboveNavigation = false, placement = 'floating', open, onOpenChange}: {
-  onSend: (messages: EHAssistantMessage[], signal: AbortSignal) => Promise<EHAssistantResult>;
+  /** `onStep` meldet die Schritte des Aufrufs, wenn der Aufrufer sie zeigen will. */
+  onSend: (messages: EHAssistantMessage[], signal: AbortSignal, onStep?: (step: EHActivityStep) => void) => Promise<EHAssistantResult>;
   loginHref: string; settingsHref: string; aboveNavigation?: boolean; placement?: 'floating' | 'toolbar' | 'panel';
   open?: boolean; onOpenChange?: (open: boolean) => void;
 }) {
@@ -31,16 +33,18 @@ export function EHAssistant({onSend, loginHref, settingsHref, aboveNavigation = 
   const launcher = useRef<HTMLButtonElement>(null);
   const log = useRef<HTMLDivElement>(null);
   const request = useRef<AbortController | null>(null);
+  const letzteFrage = useRef<{text: string; verlauf: EHAssistantMessage[]} | null>(null);
   const [messages, setMessages] = useState<EHAssistantMessage[]>([]);
   const [input, setInput] = useState('');
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<EHAssistantResult | null>(null);
+  const [steps, setSteps] = useState<EHActivityStep[]>([]);
   const [offenIntern, setOffenIntern] = useState(false);
   const istPanel = placement === 'panel';
   const offen = open ?? offenIntern;
 
   useEffect(() => () => request.current?.abort(), []);
-  useEffect(() => { if (log.current) log.current.scrollTop = log.current.scrollHeight; }, [messages, busy, notice]);
+  useEffect(() => { if (log.current) log.current.scrollTop = log.current.scrollHeight; }, [messages, busy, notice, steps]);
   // Der Bereich ist kein Dialog: Escape schliesst ihn, wie es die Karte selbst
   // auch kann.
   useEffect(() => {
@@ -52,16 +56,26 @@ export function EHAssistant({onSend, loginHref, settingsHref, aboveNavigation = 
     return () => document.removeEventListener('keydown', onKey);
   }, [istPanel, offen, onOpenChange]);
 
-  async function send(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const text = input.trim();
-    if (!text || request.current) return;
+  /** Ein gemeldeter Schritt ersetzt seinen Vorgaenger mit demselben Schluessel. */
+  function schrittMerken(step: EHActivityStep) {
+    setSteps(bisher => {
+      const stelle = bisher.findIndex(vorhanden => vorhanden.key === step.key);
+      return stelle < 0 ? [...bisher, step] : bisher.map((vorhanden, i) => i === stelle ? step : vorhanden);
+    });
+  }
+
+  async function sende(text: string, verlauf: EHAssistantMessage[]) {
+    if (request.current) return;
     const controller = new AbortController(); request.current = controller;
-    setBusy(true); setNotice(null);
-    const next: EHAssistantMessage[] = [...messages, {role: 'user', content: text}];
+    const next: EHAssistantMessage[] = [...verlauf, {role: 'user', content: text}];
+    letzteFrage.current = {text, verlauf};
+    setBusy(true); setNotice(null); setSteps([]);
     try {
-      const result = await onSend(next.slice(-12), controller.signal);
+      // Der Bereich liest mit, was gerade passiert; schwebende Karte und
+      // Werkzeugleiste bleiben unveraendert.
+      const result = await onSend(next.slice(-12), controller.signal, istPanel ? schrittMerken : undefined);
       if (controller.signal.aborted) return;
+      if (istPanel && result.steps?.length) setSteps(result.steps);
       if (result.kind === 'reply') { setMessages([...next, {role: 'assistant', content: result.reply}]); setInput(''); }
       else setNotice(result);
     } catch {
@@ -70,6 +84,24 @@ export function EHAssistant({onSend, loginHref, settingsHref, aboveNavigation = 
       if (request.current === controller) { request.current = null; setBusy(false); }
     }
   }
+
+  function send(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const text = input.trim();
+    if (text) void sende(text, messages);
+  }
+
+  /** Ein fehlgeschlagener Schritt laesst sich mit derselben Frage wiederholen. */
+  function wiederholen() {
+    const letzte = letzteFrage.current;
+    if (letzte && !request.current) void sende(letzte.text, letzte.verlauf);
+  }
+
+  // Nur der letzte, fehlgeschlagene Schritt bekommt die Wiederholung: sie gilt
+  // immer der ganzen Frage.
+  const schritte = steps.map((step, i) => (!busy && step.state === 'failed' && i === steps.length - 1)
+    ? {...step, retry: {label: 'Erneut versuchen', onClick: wiederholen}}
+    : step);
 
   const kopf = (schliessen: ReactNode) => (
     <header className={s.assistantHeader}>
@@ -89,7 +121,8 @@ export function EHAssistant({onSend, loginHref, settingsHref, aboveNavigation = 
       {messages.map((message, index) => <div key={index} className={s.assistantMessage} data-role={message.role}>
         <strong>{message.role === 'user' ? 'Du' : 'Hausmanager · KI'}</strong><p>{message.content}</p>
       </div>)}
-      {busy && <p role="status">Deine Antwort wird vorbereitet …</p>}
+      {busy && (!istPanel || !steps.length) && <p role="status">Deine Antwort wird vorbereitet …</p>}
+      {istPanel && <EHActivity steps={schritte} title="Was die KI macht" label="Ablauf der Antwort" />}
       {notice && <div className={s.assistantNotice} role="status">
         <p>{notice.reply}</p>
         {notice.kind === 'login' && <EHButton href={loginHref}>Zum Hauskonto anmelden</EHButton>}
