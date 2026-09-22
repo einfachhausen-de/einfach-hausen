@@ -14,7 +14,13 @@ import { Search } from 'lucide-react';
 import { ownerAreas, providerAreas, type NavArea } from './nav-config';
 import s from './shell.module.css';
 
-export function WerkbankSuche({ pro, label }: { pro: boolean; label: string }) {
+/** Globaler Trigger: oeffnet die Bereichssuche aus der Kopf-Menueleiste. */
+export const SEARCH_OPEN_EVENT = 'eh:open-search';
+export function openSearch() {
+  window.dispatchEvent(new CustomEvent(SEARCH_OPEN_EVENT));
+}
+
+export function WerkbankSuche({ pro }: { pro: boolean; label: string }) {
   const areas = (pro ? providerAreas : ownerAreas) as readonly NavArea[];
   const items = areas.flatMap(area => [{ href: area.href, label: area.label }, ...area.children]);
   const [open, setOpen] = useState(false);
@@ -35,8 +41,15 @@ export function WerkbankSuche({ pro, label }: { pro: boolean; label: string }) {
         toggle(false);
       }
     }
+    function onOpenSearch() {
+      toggle(true);
+    }
     window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
+    window.addEventListener(SEARCH_OPEN_EVENT, onOpenSearch);
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      window.removeEventListener(SEARCH_OPEN_EVENT, onOpenSearch);
+    };
   }, [open]);
 
   function toggle(next: boolean) {
@@ -61,13 +74,10 @@ export function WerkbankSuche({ pro, label }: { pro: boolean; label: string }) {
     router.push(href);
   }
 
+  // Der Ausloeser lebt in der Kopf-Menueleiste (HeaderMenu) und oeffnet per
+  // Event oder Tastaturkuerzel; hier rendert nur die Palette selbst.
   if (!open) {
-    return (
-      <button type="button" className={s.search} aria-label="Suche öffnen (Cmd + K)" onClick={() => toggle(true)}>
-        <Search size={16} aria-hidden="true" />
-        <span>{label}</span>
-      </button>
-    );
+    return null;
   }
 
   return (

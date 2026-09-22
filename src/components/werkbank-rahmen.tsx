@@ -3,6 +3,7 @@ import { cookies } from 'next/headers';
 import { EHScope, EHRouteTabs } from '@/design-system';
 import { getCurrentUser } from '@/lib/auth';
 import { db } from '@/lib/db';
+import { getProviderContext } from '@/lib/provider';
 import {
   activeArea,
   activeProviderArea,
@@ -42,9 +43,28 @@ export async function WerkbankRahmen({
   const unread = sameRole
     ? (db.prepare("SELECT COUNT(*) c FROM notifications WHERE user_id=? AND read_at IS NULL AND channel='in_app'").get(user.id) as { c: number }).c
     : 0;
-  // Neueste Mitteilungen fuer das Glocken-Menue: ungelesene zuerst, dann die
-  // juengsten gelesenen — maximal fuenf. Volle Liste und Lesestand weiter auf
-  // /notifications, hier keine Mutationen.
+  // Menueleisten-Zaehler: offene Aufträge, bestaetigte bevorstehende Termine.
+  // Dieselben Definitionen wie die Seiten selbst (jobs: nicht
+  // abgeschlossen/storniert; Kalender: bestaetigt und bevorstehend).
+  const jobsHref = pro ? '/pro/orders' : '/app/jobs';
+  const calHref = pro ? '/pro/calendar' : '/app/calendar';
+  let jobsCount = 0;
+  let calCount = 0;
+  if (sameRole) {
+    if (!pro) {
+      jobsCount = (db.prepare("SELECT COUNT(*) c FROM jobs WHERE homeowner_id=? AND status NOT IN ('completed','cancelled')").get(user.id) as { c: number }).c;
+      calCount = (db.prepare("SELECT COUNT(*) c FROM appointments WHERE homeowner_id=? AND status='confirmed' AND datetime(start_at)>=datetime('now')").get(user.id) as { c: number }).c;
+    } else {
+      const pctx = getProviderContext(user.id);
+      if (pctx) {
+        const ownJobs = pctx.canManageJobs ? '' : 'AND a.contact_user_id=?';
+        const ownCal = pctx.canManageJobs ? '' : 'AND contact_user_id=?';
+        const ownArgs: number[] = pctx.canManageJobs ? [] : [user.id];
+        jobsCount = (db.prepare(`SELECT COUNT(DISTINCT j.id) c FROM job_assignments a JOIN jobs j ON j.id=a.job_id WHERE a.provider_id=? ${ownJobs} AND j.status NOT IN ('completed','closed','cancelled')`).get(pctx.providerId, ...ownArgs) as { c: number }).c;
+        calCount = (db.prepare(`SELECT COUNT(*) c FROM appointments WHERE provider_id=? ${ownCal} AND status<>'cancelled' AND datetime(start_at)>=datetime('now')`).get(pctx.providerId, ...ownArgs) as { c: number }).c;
+      }
+    }
+  }
   const notices = sameRole
     ? (db.prepare("SELECT id,title,body,href,read_at,created_at FROM notifications WHERE user_id=? AND channel='in_app' ORDER BY read_at IS NULL DESC, created_at DESC, id DESC LIMIT 5").all(user.id) as { id: number; title: string; body: string; href: string; read_at: string | null; created_at: string }[]).map((notice) => ({
         id: notice.id,
@@ -107,6 +127,10 @@ export async function WerkbankRahmen({
         userInitials={initials}
         unread={unread}
         notices={notices}
+        jobsHref={jobsHref}
+        jobsCount={jobsCount}
+        calHref={calHref}
+        calCount={calCount}
         profileHref={profileHref}
         hilfeHref={hilfeHref}
         searchLabel={searchLabel || 'Suchen'}

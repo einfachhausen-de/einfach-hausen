@@ -19,7 +19,8 @@ import {
 } from '@/components/ui/breadcrumb';
 import { AppSidebar } from './app-sidebar';
 import { ClientNav } from './client-nav';
-import { NotificationsMenu, type NoticeItem } from './notifications-menu';
+import { HeaderMenu } from './header-menu';
+import type { NoticeItem } from './notifications-menu';
 import { SettingsDialogHost } from './settings-dialog-host';
 import { WerkbankSuche } from './werkbank-suche';
 import { BottomNav } from './bottom-nav';
@@ -30,7 +31,8 @@ export type Crumb = { section: { href: string; label: string } | null; page: str
 /**
  * Client-Huelle des Werkbank-Rahmens: TooltipProvider plus SidebarProvider mit
  * AppSidebar und SidebarInset. Kopfzeile nur Werkzeuge (Trigger, Breadcrumb,
- * Suche, Glocke, Avatar); BottomNav bleibt fuer Mobile erhalten.
+ * Menueleiste mit Suche/Aufträgen/Kalender/Benachrichtigung, Avatar);
+ * BottomNav bleibt fuer Mobile erhalten.
  */
 export function WerkbankShell({
   role,
@@ -45,6 +47,10 @@ export function WerkbankShell({
   userInitials,
   unread,
   notices,
+  jobsHref,
+  jobsCount,
+  calHref,
+  calCount,
   profileHref,
   hilfeHref,
   searchLabel,
@@ -64,6 +70,10 @@ export function WerkbankShell({
   userInitials: string;
   unread: number;
   notices: readonly NoticeItem[];
+  jobsHref: string;
+  jobsCount: number;
+  calHref: string;
+  calCount: number;
   profileHref: string;
   hilfeHref: string;
   searchLabel: string;
@@ -111,7 +121,14 @@ export function WerkbankShell({
             </div>
             <div className={s['wb-tools']}>
               <WerkbankSuche pro={pro} label={searchLabel} />
-              <NotificationsMenu unread={unread} items={notices} />
+              <HeaderMenu
+                jobsHref={jobsHref}
+                jobsCount={jobsCount}
+                calHref={calHref}
+                calCount={calCount}
+                unread={unread}
+                notices={notices}
+              />
               <Link
                 href={profileHref}
                 className={s.toolAvatar}

@@ -22,17 +22,20 @@ export type NoticeItem = {
  */
 const MENU_ITEM_CLASS = "min-h-[44px] gap-2 px-2 py-2 text-sm";
 
-export function NotificationsMenu({ unread, items }: { unread: number; items: readonly NoticeItem[] }) {
-  const label = unread > 0 ? `${unread} ungelesene Benachrichtigungen` : 'Benachrichtigungen';
+export function NotificationsMenu({ unread, items, menuLabel }: { unread: number; items: readonly NoticeItem[]; menuLabel?: string }) {
+  const label = menuLabel
+    ? (unread > 0 ? `${menuLabel}, ${unread} ungelesen` : menuLabel)
+    : (unread > 0 ? `${unread} ungelesene Benachrichtigungen` : 'Benachrichtigungen');
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button
           type="button"
-          className={s.toolIcon}
-          aria-label={label}
+          className={menuLabel ? s.menuItem : s.toolIcon}
+          aria-label={menuLabel ? `${label} (Menü)` : label}
         >
-          <Bell size={22} />
+          <Bell size={menuLabel ? 18 : 22} />
+          {menuLabel ? <span className={s.menuLabel}>{menuLabel}</span> : null}
           {unread > 0 && <span className={s.toolBadge}>{unread > 99 ? '99+' : unread}</span>}
         </button>
       </DropdownMenuTrigger>
