@@ -3,7 +3,6 @@ import { cookies } from 'next/headers';
 import { EHScope, EHRouteTabs } from '@/design-system';
 import { getCurrentUser } from '@/lib/auth';
 import { db } from '@/lib/db';
-import { ownerDate } from '@/lib/owner-format';
 import { statusLabel } from '@/lib/format';
 import { getProviderContext } from '@/lib/provider';
 import {
@@ -45,31 +44,23 @@ export async function WerkbankRahmen({
   const unread = sameRole
     ? (db.prepare("SELECT COUNT(*) c FROM notifications WHERE user_id=? AND read_at IS NULL AND channel='in_app'").get(user.id) as { c: number }).c
     : 0;
-  // Menueleisten-Zaehler: offene Aufträge, bestaetigte bevorstehende Termine.
-  // Dieselben Definitionen wie die Seiten selbst (jobs: nicht
-  // abgeschlossen/storniert; Kalender: bestaetigt und bevorstehend).
+  // Menueleisten-Zaehler: offene Aufträge. Dieselbe Definition wie die
+  // Auftragsseite selbst (nicht abgeschlossen/storniert).
   const jobsHref = pro ? '/pro/orders' : '/app/jobs';
   const calHref = pro ? '/pro/calendar' : '/app/calendar';
   const jobsNewHref = pro ? null : '/app/hausmeister';
   let jobsCount = 0;
-  let calCount = 0;
   let jobRows: { id: number; title: string; status: string }[] = [];
-  let eventRows: { id: number; title: string; start_at: string; job_id: number }[] = [];
   const pctx = pro && user ? getProviderContext(user.id) : null;
   if (sameRole) {
     if (!pro) {
       jobsCount = (db.prepare("SELECT COUNT(*) c FROM jobs WHERE homeowner_id=? AND status NOT IN ('completed','cancelled')").get(user.id) as { c: number }).c;
-      calCount = (db.prepare("SELECT COUNT(*) c FROM appointments WHERE homeowner_id=? AND status='confirmed' AND datetime(start_at)>=datetime('now')").get(user.id) as { c: number }).c;
       jobRows = db.prepare("SELECT id,title,status FROM jobs WHERE homeowner_id=? AND status NOT IN ('completed','cancelled') ORDER BY datetime(updated_at) DESC LIMIT 5").all(user.id) as { id: number; title: string; status: string }[];
-      eventRows = db.prepare("SELECT a.id,j.title title,a.start_at,a.job_id FROM appointments a JOIN jobs j ON j.id=a.job_id WHERE a.homeowner_id=? AND a.status='confirmed' AND datetime(a.start_at)>=datetime('now') ORDER BY datetime(a.start_at) ASC LIMIT 5").all(user.id) as { id: number; title: string; start_at: string; job_id: number }[];
     } else if (pctx) {
       const ownJobs = pctx.canManageJobs ? '' : 'AND a.contact_user_id=?';
-      const ownCal = pctx.canManageJobs ? '' : 'AND a.contact_user_id=?';
       const ownArgs: number[] = pctx.canManageJobs ? [] : [user.id];
       jobsCount = (db.prepare(`SELECT COUNT(DISTINCT j.id) c FROM job_assignments a JOIN jobs j ON j.id=a.job_id WHERE a.provider_id=? ${ownJobs} AND j.status NOT IN ('completed','closed','cancelled')`).get(pctx.providerId, ...ownArgs) as { c: number }).c;
-      calCount = (db.prepare(`SELECT COUNT(*) c FROM appointments a WHERE a.provider_id=? ${ownCal} AND a.status<>'cancelled' AND datetime(a.start_at)>=datetime('now')`).get(pctx.providerId, ...ownArgs) as { c: number }).c;
       jobRows = db.prepare(`SELECT j.id,j.title,j.status FROM job_assignments a JOIN jobs j ON j.id=a.job_id WHERE a.provider_id=? ${ownJobs} AND j.status NOT IN ('completed','closed','cancelled') ORDER BY datetime(j.updated_at) DESC LIMIT 5`).all(pctx.providerId, ...ownArgs) as { id: number; title: string; status: string }[];
-      eventRows = db.prepare(`SELECT a.id,j.title title,a.start_at,a.job_id FROM appointments a JOIN jobs j ON j.id=a.job_id WHERE a.provider_id=? ${ownCal} AND a.status<>'cancelled' AND datetime(a.start_at)>=datetime('now') ORDER BY datetime(a.start_at) ASC LIMIT 5`).all(pctx.providerId, ...ownArgs) as { id: number; title: string; start_at: string; job_id: number }[];
     }
   }
   const jobsList = jobRows.map((row) => ({
@@ -77,12 +68,6 @@ export async function WerkbankRahmen({
     title: row.title,
     statusText: statusLabel(row.status),
     href: `${pro ? '/pro/jobs' : '/app/jobs'}/${row.id}`,
-  }));
-  const calList = eventRows.map((row) => ({
-    id: row.id,
-    title: row.title,
-    when: ownerDate(row.start_at),
-    href: `${pro ? '/pro/jobs' : '/app/jobs'}/${row.job_id}`,
   }));
   const notices = sameRole
     ? (db.prepare("SELECT id,title,body,href,read_at,created_at FROM notifications WHERE user_id=? AND channel='in_app' ORDER BY read_at IS NULL DESC, created_at DESC, id DESC LIMIT 5").all(user.id) as { id: number; title: string; body: string; href: string; read_at: string | null; created_at: string }[]).map((notice) => ({
@@ -150,9 +135,7 @@ export async function WerkbankRahmen({
         jobsCount={jobsCount}
         jobsNewHref={jobsNewHref}
         jobsList={jobsList}
-        calList={calList}
         calHref={calHref}
-        calCount={calCount}
         profileHref={profileHref}
         hilfeHref={hilfeHref}
         searchLabel={searchLabel || 'Suchen'}

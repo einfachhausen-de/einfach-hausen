@@ -29,7 +29,19 @@ export default async function Hausmeister({searchParams}:{searchParams:Promise<R
   const lastAssistant=[...messages].reverse().find(m=>m.role==='assistant');
   let lastMeta:any={}; try{lastMeta=lastAssistant?JSON.parse((lastAssistant as any).metadata_json||'{}'):{};}catch{}
   const showNextChoice=Boolean(lastMeta.assistantOnly&&!draft);
-  const starterHints:Record<string,string>={garten:'Was soll draußen oder im Garten gemacht werden?',reparatur:'Was ist kaputt oder muss repariert werden?',pflege:'Was soll gereinigt oder gepflegt werden?',technik:'Wobei brauchst du Hilfe mit Technik oder Installation?'};
+  const starterHints:Record<string,string>={garten:'Was soll draußen oder im Garten gemacht werden?',reparatur:'Was ist kaputt oder muss repariert werden?',pflege:'Was soll gereinigt oder gepflegt werden?',technik:'Wobei brauchst du Hilfe mit Technik oder Installation?',
+    'haus-technik':'Was klemmt, wackelt oder muss montiert werden?',
+    'elektro-smart-home':'Was macht bei Strom, Wallbox oder Smart Home Probleme?',
+    heizung:'Geht es um Wartung, Störung oder Optimierung von Heizung oder Klima?',
+    'sanitaer-wasser':'Wo tropft, klemmt oder läuft etwas mit Wasser nicht rund?',
+    'dach-fenster-tueren':'Was ist an Dach, Fenstern oder Türen auffällig?',
+    'innenausbau-sanierung':'Welche Räume sollen renoviert oder umgebaut werden?',
+    'garten-aussenbereich':'Was soll draußen oder im Garten gemacht werden?',
+    'reinigung-pflege':'Was soll gereinigt oder gepflegt werden?',
+    'saisonale-dienste':'Welcher saisonale Einsatz steht an?',
+    spezialfaelle:'Was passt in kein Gewerk oder braucht besondere Fachkunde?',
+    'umzug-entruempelung':'Was soll geräumt, transportiert oder umgezogen werden?',
+    'beratung-notfall':'Brauchst du zuerst nur eine Einschätzung oder ist es dringend?'};
   const starterHint=sp.topic?starterHints[sp.topic]:undefined;
 
   const quota = aiQuotaSnapshot(user.id);

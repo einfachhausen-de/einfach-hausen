@@ -59,7 +59,7 @@ export function NotificationsMenu({ unread, items, menuLabel }: { unread: number
             </Link>
           </DropdownMenuItem>
         ))}
-        <DropdownMenuSeparator />
+        {items.length > 0 && <DropdownMenuSeparator />}
         <DropdownMenuItem asChild className={MENU_ITEM_CLASS}>
           <Link href="/notifications" className="text-inherit"><span>Alle ansehen</span></Link>
         </DropdownMenuItem>
