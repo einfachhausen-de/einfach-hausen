@@ -29,6 +29,9 @@ export type MainNavEntry = {
   isActive: boolean;
   exact: boolean;
   items: readonly MainNavChild[];
+  /** Optionaler Zusatz rechts vom Label (z.B. Ungelesen-Zähler). Traegt seine
+   *  eigenen Icon-Modus-Klassen und wird nur gerendert, wenn gesetzt. */
+  badge?: ReactNode;
 };
 
 /**
@@ -48,6 +51,7 @@ export function NavMain({ entries, label }: { entries: readonly MainNavEntry[]; 
                 <Link href={entry.href} aria-current={entry.isActive ? 'page' : undefined} aria-label={entry.label}>
                   {entry.icon}
                   <span className="group-data-[collapsible=icon]:hidden">{entry.label}</span>
+                  {entry.badge}
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
@@ -83,6 +87,7 @@ function NavCollapsibleEntry({ entry }: { entry: MainNavEntry }) {
           <Link href={entry.href} aria-current={entry.exact ? 'page' : undefined} aria-label={entry.label}>
             {entry.icon}
             <span className="group-data-[collapsible=icon]:hidden">{entry.label}</span>
+            {entry.badge}
           </Link>
         </SidebarMenuButton>
         <CollapsibleTrigger asChild>
