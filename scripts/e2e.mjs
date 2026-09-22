@@ -704,6 +704,10 @@ await subMenu.getByText('Garten & Außen',{exact:true}).first().waitFor({timeout
 if(await subMenu.getByRole('menuitem').count()!==12)throw new Error('Area submenu must list exactly the 12 service areas');
 await clickAndWaitUrl(ownerDesktop,subMenu.getByRole('menuitem',{name:'Garten & Außen'}),/\/app\/hausmeister\?topic=garten-aussenbereich/);
 await nav(ownerDesktop, base+'/app');
+// Direkt-Klick auf "Neuer Auftrag" navigiert ohne Umweg (Maus: detail>=1).
+await headerMenu.getByRole('button',{name:'Aufträge'}).click();
+await clickAndWaitUrl(ownerDesktop,ownerDesktop.getByRole('menu').getByRole('menuitem',{name:'Neuer Auftrag'}),/\/app\/hausmeister$/);
+await nav(ownerDesktop, base+'/app');
 // 3b4) Alle Termine lebt im Aufträge-Menü (kein eigener Kalender-Punkt).
 if(await headerMenu.getByRole('button',{name:'Kalender'}).count()!==0)throw new Error('Calendar must not be a top-level menu item');
 await headerMenu.getByRole('button',{name:'Aufträge'}).click();
