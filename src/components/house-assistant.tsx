@@ -77,10 +77,12 @@ async function send(messages: EHAssistantMessage[], signal: AbortSignal, onStep?
   }
 }
 
-export function HouseAssistant({placement = 'floating', open, onOpenChange}: {
+export function HouseAssistant({placement = 'floating', open, onOpenChange, compact = false}: {
   placement?: 'floating' | 'toolbar' | 'panel';
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
+  /** Der rechte Bereich ist eingeklappt: nur die Kachel bleibt sichtbar. */
+  compact?: boolean;
 }) {
   const path = usePathname();
   const isOwner = path === '/app' || path?.startsWith('/app/');
@@ -93,5 +95,5 @@ export function HouseAssistant({placement = 'floating', open, onOpenChange}: {
       || /^\/(passport|receipt)(\/|$)/.test(path) || /^\/app\/invoices\//.test(path)
       || ['/impressum', '/datenschutz', '/app/hausmeister'].includes(path) || (path === '/app/messages' && placement !== 'toolbar')) return null;
   return <EHAssistant placement={placement} key={path} onSend={send} loginHref="/login" settingsHref="/app/settings"
-    aboveNavigation={path === '/app' || path.startsWith('/app/')} open={open} onOpenChange={onOpenChange} />;
+    aboveNavigation={path === '/app' || path.startsWith('/app/')} open={open} onOpenChange={onOpenChange} compact={compact} />;
 }

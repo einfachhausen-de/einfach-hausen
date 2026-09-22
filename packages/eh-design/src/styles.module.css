@@ -761,6 +761,12 @@ summary.activityHead { cursor:pointer; list-style:none; }
 .assistantLauncherChevron { flex:none;color:var(--eh-color-secondary);transition:transform .15s ease; }
 .assistantLauncher[data-placement="panel"][data-offen] { background:var(--eh-color-paper); }
 .assistantLauncher[data-placement="panel"][data-offen] .assistantLauncherChevron { transform:rotate(180deg); }
+/* Schmaler Bereich: nur die Kachel, damit der Kundenberater auch im
+   eingeklappten Streifen sichtbar und erreichbar bleibt. */
+.assistantLauncher[data-kompakt] { width:36px;min-height:36px;padding:0;justify-content:center;gap:0; }
+.assistantLauncher[data-kompakt] .assistantLauncherCopy,
+.assistantLauncher[data-kompakt] .assistantLauncherChevron { display:none; }
+
 .assistantPanel { order:1;display:flex;flex-direction:column;flex:0 0 auto;height:min(620px,calc(100dvh - 170px));min-height:320px;border:1px solid var(--eh-color-line);border-radius:var(--eh-radius-panel);background:var(--eh-color-paper);overflow:hidden; }
 .assistantPanel .assistantHeader { padding:14px; }
 .assistantPanel .assistantHeader img { display:none; }

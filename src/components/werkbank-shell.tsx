@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useId, useState, type ReactNode } from 'react';
+import { ChevronLeft } from 'lucide-react';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import {
   SidebarInset,
@@ -96,13 +97,18 @@ export function WerkbankShell({
   // Seite nach dem Neuladen gleich aussieht.
   const [railZu, setRailZu] = useState(!defaultRailOpen);
   const railId = useId();
+  function railSetzen(zu: boolean) {
+    setRailZu(zu);
+    if (zu) setKiOffen(false);
+    document.cookie = `rail_state=${zu ? 'false' : 'true'}; path=/; max-age=${60 * 60 * 24 * 7}`;
+  }
   function railUmschalten() {
-    setRailZu(zu => {
-      const naechster = !zu;
-      if (naechster) setKiOffen(false);
-      document.cookie = `rail_state=${naechster ? 'false' : 'true'}; path=/; max-age=${60 * 60 * 24 * 7}`;
-      return naechster;
-    });
+    railSetzen(!railZu);
+  }
+  /** Die Kachel im schmalen Streifen holt den Bereich zurueck und oeffnet den Chat. */
+  function kiUmschalten(offen: boolean) {
+    if (offen && railZu) railSetzen(false);
+    setKiOffen(offen);
   }
   return (
     <TooltipProvider>
@@ -175,8 +181,14 @@ export function WerkbankShell({
                   aria-label={railZu ? 'Rechten Bereich ausklappen' : 'Rechten Bereich einklappen'}
                   title={railZu ? 'Rechten Bereich ausklappen' : 'Rechten Bereich einklappen'}
                   onClick={railUmschalten} />
+                {railZu && (
+                  <button type="button" className={s['wb-rail-auf']} aria-controls={railId} aria-expanded={false}
+                    aria-label="Rechten Bereich ausklappen" title="Rechten Bereich ausklappen" onClick={railUmschalten}>
+                    <ChevronLeft size={18} aria-hidden="true" />
+                  </button>
+                )}
                 {rail && <div className={s['wb-rail-kontext']}>{rail}</div>}
-                {hatKi && <HouseAssistant placement="panel" open={kiOffen} onOpenChange={setKiOffen} />}
+                {hatKi && <HouseAssistant placement="panel" compact={railZu} open={kiOffen} onOpenChange={kiUmschalten} />}
               </aside>
             )}
           </div>

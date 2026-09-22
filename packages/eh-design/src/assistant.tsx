@@ -22,11 +22,13 @@ export type EHAssistantResult = {reply: string; kind: 'reply' | 'login' | 'quota
  *   Aufrufer haelt Breite und Zustand (`open`/`onOpenChange`) und kann den
  *   mittleren Bereich mitschrumpfen lassen.
  */
-export function EHAssistant({onSend, loginHref, settingsHref, aboveNavigation = false, placement = 'floating', open, onOpenChange}: {
+export function EHAssistant({onSend, loginHref, settingsHref, aboveNavigation = false, placement = 'floating', open, onOpenChange, compact = false}: {
   /** `onStep` meldet die Schritte des Aufrufs, wenn der Aufrufer sie zeigen will. */
   onSend: (messages: EHAssistantMessage[], signal: AbortSignal, onStep?: (step: EHActivityStep) => void) => Promise<EHAssistantResult>;
   loginHref: string; settingsHref: string; aboveNavigation?: boolean; placement?: 'floating' | 'toolbar' | 'panel';
   open?: boolean; onOpenChange?: (open: boolean) => void;
+  /** Schmaler Bereich: der Knopf zeigt nur die Kachel, die Beschriftung entfaellt. */
+  compact?: boolean;
 }) {
   const id = useId();
   const dialog = useRef<HTMLDialogElement>(null);
@@ -179,7 +181,7 @@ export function EHAssistant({onSend, loginHref, settingsHref, aboveNavigation = 
       {eingabe}
     </section>}
 
-    <button ref={launcher} type="button" className={s.assistantLauncher} data-placement={placement} data-above-nav={aboveNavigation || undefined}
+    <button ref={launcher} type="button" className={s.assistantLauncher} data-placement={placement} data-kompakt={compact || undefined} data-above-nav={aboveNavigation || undefined}
       aria-label={istPanel ? (offen ? 'Kundenberater schließen' : 'Kundenberater öffnen') : 'Hausassistent öffnen'}
       aria-haspopup={istPanel ? undefined : 'dialog'} aria-expanded={istPanel ? offen : undefined} aria-controls={id}
       data-offen={istPanel && offen ? true : undefined}

@@ -761,6 +761,12 @@ summary.eh-activityHead { cursor:pointer; list-style:none; }
 .eh-assistantLauncherChevron { flex:none;color:var(--eh-color-secondary);transition:transform .15s ease; }
 .eh-assistantLauncher[data-placement="panel"][data-offen] { background:var(--eh-color-paper); }
 .eh-assistantLauncher[data-placement="panel"][data-offen] .eh-assistantLauncherChevron { transform:rotate(180deg); }
+/* Schmaler Bereich: nur die Kachel, damit der Kundenberater auch im
+   eingeklappten Streifen sichtbar und erreichbar bleibt. */
+.eh-assistantLauncher[data-kompakt] { width:36px;min-height:36px;padding:0;justify-content:center;gap:0; }
+.eh-assistantLauncher[data-kompakt] .eh-assistantLauncherCopy,
+.eh-assistantLauncher[data-kompakt] .eh-assistantLauncherChevron { display:none; }
+
 .eh-assistantPanel { order:1;display:flex;flex-direction:column;flex:0 0 auto;height:min(620px,calc(100dvh - 170px));min-height:320px;border:1px solid var(--eh-color-line);border-radius:var(--eh-radius-panel);background:var(--eh-color-paper);overflow:hidden; }
 .eh-assistantPanel .eh-assistantHeader { padding:14px; }
 .eh-assistantPanel .eh-assistantHeader img { display:none; }
