@@ -43,11 +43,14 @@ def make_server(model, key, port=8097):
                 if size < 1 or size > MAX_BODY: return self.reply(413, {"error": "body_size"})
                 body = json.loads(self.rfile.read(size))
                 state, questions = body["state"], body["questions"]
-                route = questions["route"]
                 if not isinstance(state, str) or not state.strip() or len(state) > 4000: raise ValueError()
-                if set(questions) != {"route"} or route["type"] != "choice": raise ValueError()
-                if not isinstance(route["instructions"], str) or len(route["instructions"]) > 1000: raise ValueError()
-                criteria = route["criteria"]
+                if not isinstance(questions, dict) or len(questions) != 1: raise ValueError()
+                question_name, question = next(iter(questions.items()))
+                if not isinstance(question_name, str) or not question_name or len(question_name) > 50: raise ValueError()
+                if not isinstance(question, dict) or question.get("type") != "choice": raise ValueError()
+                instructions = question.get("instructions")
+                if not isinstance(instructions, str) or len(instructions) > 1000: raise ValueError()
+                criteria = question.get("criteria")
                 if not isinstance(criteria, dict) or not 1 <= len(criteria) <= 20: raise ValueError()
                 if any(not isinstance(k,str) or not isinstance(v,str) or len(k)>50 or len(v)>300 for k,v in criteria.items()): raise ValueError()
             except (ValueError, KeyError, TypeError, socket.timeout):

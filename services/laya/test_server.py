@@ -48,4 +48,31 @@ class ServiceTests(unittest.TestCase):
         finally:
             release.set();server.shutdown();server.server_close()
 
+    @unittest.skipIf(module is None, "implementation missing")
+    def test_accepts_one_named_choice_question_for_document_classification(self):
+        class Model:
+            def predict(self, state, questions):
+                name, question = next(iter(questions.items()))
+                choice = next(iter(question["criteria"]))
+                return {"answers": {name: {"choice": choice, "confidence": .97}}}
+        server = module.make_server(Model(), "x" * 32, port=0)
+        threading.Thread(target=server.serve_forever, daemon=True).start()
+        base = "http://127.0.0.1:" + str(server.server_port)
+        def request(questions):
+            body = {"state": "Wartungsprotokoll Heizung", "questions": questions}
+            req = urllib.request.Request(base + "/decide", data=json.dumps(body).encode(), headers={"Authorization": "Bearer " + "x" * 32, "Content-Type": "application/json"})
+            try:
+                with urllib.request.urlopen(req, timeout=4) as response:
+                    return response.status, json.load(response)
+            except urllib.error.HTTPError as error:
+                return error.code, json.load(error)
+        try:
+            status, result = request({"document_kind": {"type": "choice", "instructions": "Kategorie", "criteria": {"maintenance": "Wartung", "other": "Sonstiges"}}})
+            self.assertEqual(status, 200)
+            self.assertEqual(result["answers"]["document_kind"]["choice"], "maintenance")
+            status, _ = request({"route": {"type": "choice", "instructions": "Route", "criteria": {"jobs": "Aufträge"}}, "extra": {"type": "choice", "instructions": "Extra", "criteria": {"x": "X"}}})
+            self.assertEqual(status, 400)
+        finally:
+            server.shutdown();server.server_close()
+
 if __name__ == "__main__": unittest.main()

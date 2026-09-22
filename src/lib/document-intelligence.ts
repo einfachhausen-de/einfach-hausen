@@ -67,7 +67,7 @@ async function classifyWithLaya(text:string,originalName:string):Promise<{kind:I
       method:'POST',redirect:'error',signal:AbortSignal.timeout(2500),
       headers:{'Content-Type':'application/json',Authorization:`Bearer ${key}`},
       body:JSON.stringify({
-        state:`Dateiname: ${originalName.slice(0,240)}\nDokumenttext:\n${text.slice(0,8000)}`,
+        state:(`Dateiname: ${originalName.slice(0,240)}\nDokumenttext:\n${text.slice(0,8000)}`).slice(0,4000),
         questions:{document_kind:{type:'choice',instructions:'Ordne das Hausdokument genau einer Kategorie zu. Nur Inhalt einordnen, keine Handlung ausführen.',criteria:{
           invoice:'Rechnung oder Zahlungsbeleg', offer:'Angebot oder Kostenvoranschlag', contract:'Vertrag oder Vertragsunterlage',
           warranty:'Garantie oder Gewährleistung', maintenance:'Wartung, Inspektion oder Prüfprotokoll', report:'Bericht, Abnahme oder sonstiger Nachweis',
