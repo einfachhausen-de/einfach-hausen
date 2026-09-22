@@ -685,9 +685,14 @@ const searchBox=await searchDialog.boundingBox();
 if(!searchBox)throw new Error('Search palette has no box');
 if(searchBox.x<200||searchBox.x>650)throw new Error(`Search palette must be roughly centered, got x=${Math.round(searchBox.x)}`);
 await clickAndWaitUrl(ownerDesktop,searchDialog.getByRole('button',{name:'Verträge & Tarife'}),/\/app\/contracts/);
-// 3b2) Kopf-Menueleiste: Aufträge und Kalender mit echten Zielen.
+// 3b2) Kopf-Menueleiste: Aufträge-Menü mit Neuer-Auftrag + Alle Aufträge
+// (noch keine laufenden), Kalender als Direkt-Link.
 const headerMenu=ownerDesktop.getByRole('navigation',{name:'Werkzeugleiste'});
-await clickAndWaitUrl(ownerDesktop,headerMenu.getByRole('link',{name:'Aufträge'}),/\/app\/jobs/);
+await headerMenu.getByRole('button',{name:'Aufträge'}).click();
+const jobsMenu=ownerDesktop.getByRole('menu');
+await jobsMenu.getByText('Neuer Auftrag',{exact:true}).first().waitFor({timeout:10000});
+await jobsMenu.getByText('Alle Aufträge',{exact:true}).first().waitFor({timeout:10000});
+await clickAndWaitUrl(ownerDesktop,jobsMenu.getByRole('menuitem',{name:'Alle Aufträge'}),/\/app\/jobs/);
 await nav(ownerDesktop, base+'/app');
 await clickAndWaitUrl(ownerDesktop,headerMenu.getByRole('link',{name:'Kalender'}),/\/app\/calendar/);
 // 3c) Glocken-Menue: Mini-Liste statt Seitenwechsel, "Alle ansehen" fuehrt weiter.

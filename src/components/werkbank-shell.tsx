@@ -19,7 +19,7 @@ import {
 } from '@/components/ui/breadcrumb';
 import { AppSidebar } from './app-sidebar';
 import { ClientNav } from './client-nav';
-import { HeaderMenu } from './header-menu';
+import { HeaderMenu, type MenuJob } from './header-menu';
 import type { NoticeItem } from './notifications-menu';
 import { SettingsDialogHost } from './settings-dialog-host';
 import { WerkbankSuche } from './werkbank-suche';
@@ -49,6 +49,8 @@ export function WerkbankShell({
   notices,
   jobsHref,
   jobsCount,
+  jobsNewHref,
+  jobsList,
   calHref,
   calCount,
   profileHref,
@@ -72,6 +74,8 @@ export function WerkbankShell({
   notices: readonly NoticeItem[];
   jobsHref: string;
   jobsCount: number;
+  jobsNewHref: string | null;
+  jobsList: readonly MenuJob[];
   calHref: string;
   calCount: number;
   profileHref: string;
@@ -124,6 +128,8 @@ export function WerkbankShell({
               <HeaderMenu
                 jobsHref={jobsHref}
                 jobsCount={jobsCount}
+                jobsNewHref={jobsNewHref}
+                jobsList={jobsList}
                 calHref={calHref}
                 calCount={calCount}
                 unread={unread}

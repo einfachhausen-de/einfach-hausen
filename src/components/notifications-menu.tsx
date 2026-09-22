@@ -20,7 +20,7 @@ export type NoticeItem = {
  * Vollstaendigkeit leben weiter auf der Benachrichtigungsseite. Zeilen und
  * Ecken folgen der Menue-Geometrie (min-h 44px, rounded-md).
  */
-const MENU_ITEM_CLASS = "min-h-[44px] gap-2 px-2 py-2 text-sm";
+const MENU_ITEM_CLASS = "min-h-[44px] gap-2 px-2 py-2 text-base";
 
 export function NotificationsMenu({ unread, items, menuLabel }: { unread: number; items: readonly NoticeItem[]; menuLabel?: string }) {
   const label = menuLabel
@@ -34,12 +34,12 @@ export function NotificationsMenu({ unread, items, menuLabel }: { unread: number
           className={menuLabel ? s.menuItem : s.toolIcon}
           aria-label={menuLabel ? `${label} (Menü)` : label}
         >
-          <Bell size={menuLabel ? 18 : 22} />
+          <Bell size={menuLabel ? 20 : 22} />
           {menuLabel ? <span className={s.menuLabel}>{menuLabel}</span> : null}
           {unread > 0 && <span className={s.toolBadge}>{unread > 99 ? '99+' : unread}</span>}
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent side="bottom" align="end" sideOffset={8} className="w-80 max-w-[calc(100vw-2rem)] rounded-md p-2">
+      <DropdownMenuContent side="bottom" align="end" sideOffset={8} className="w-80 max-w-[calc(100vw-2rem)] rounded-lg p-2">
         <DropdownMenuLabel className="py-2">
           <span className="flex items-baseline justify-between gap-2">
             <span className="truncate font-medium">Benachrichtigungen</span>
@@ -53,6 +53,7 @@ export function NotificationsMenu({ unread, items, menuLabel }: { unread: number
         {items.map((item) => (
           <DropdownMenuItem key={item.id} asChild className={MENU_ITEM_CLASS}>
             <Link href={item.href} className="text-inherit">
+              <Bell size={20} aria-hidden="true" className="shrink-0 opacity-70" />
               <span className="grid min-w-0 flex-1 text-left leading-tight">
                 <span className="truncate font-medium">{item.unread ? `${item.title} · ungelesen` : item.title}</span>
                 {item.body ? <span className="truncate opacity-70">{item.body}</span> : null}
