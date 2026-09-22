@@ -1,40 +1,102 @@
 "use client";
-import {useEffect, useId, useRef, useState, type FormEvent} from 'react';
+import {Fragment, useEffect, useId, useRef, useState, type FormEvent, type ReactNode} from 'react';
+import {ChevronsUpDown, Sparkles} from 'lucide-react';
+import {EHActivity, type EHActivityStep} from './blocks';
 import {EHButton, EHText} from './primitives';
 import {EHField, EHTextarea} from './app';
 import s from './styles.module.css';
 
 export type EHAssistantMessage = {role: 'user' | 'assistant'; content: string};
-export type EHAssistantResult = {reply: string; kind: 'reply' | 'login' | 'quota' | 'error'};
+export type EHAssistantResult = {reply: string; kind: 'reply' | 'login' | 'quota' | 'error'; steps?: EHActivityStep[]; cards?: ReactNode};
 
-/** User-opened customer assistant; data access and account policy belong to the consumer. */
-export function EHAssistant({onSend, loginHref, settingsHref, aboveNavigation = false, placement = 'floating'}: {
-  onSend: (messages: EHAssistantMessage[], signal: AbortSignal) => Promise<EHAssistantResult>;
-  loginHref: string; settingsHref: string; aboveNavigation?: boolean; placement?: 'floating' | 'toolbar';
+/**
+ * User-opened customer assistant; data access and account policy belong to the
+ * consumer.
+ *
+ * `placement` legt den Ort fest:
+ * - `floating` schwebt als Karte ueber der Website,
+ * - `toolbar` sitzt als Knopf in einer Werkzeugleiste,
+ * - `panel` sitzt im Fluss eines rechten Bereiches. Dort schwebt nichts: der
+ *   Knopf sitzt am unteren Rand des Bereiches wie das Kontomenue der
+ *   Seitenleiste, und die Chatkarte oeffnet darueber im selben Bereich. Der
+ *   Aufrufer haelt Breite und Zustand (`open`/`onOpenChange`) und kann den
+ *   mittleren Bereich mitschrumpfen lassen.
+ */
+export function EHAssistant({onSend, loginHref, settingsHref, aboveNavigation = false, placement = 'floating', open, onOpenChange, compact = false}: {
+  /** `onStep` meldet die Schritte des Aufrufs, wenn der Aufrufer sie zeigen will. */
+  onSend: (messages: EHAssistantMessage[], signal: AbortSignal, onStep?: (step: EHActivityStep) => void) => Promise<EHAssistantResult>;
+  loginHref: string; settingsHref: string; aboveNavigation?: boolean; placement?: 'floating' | 'toolbar' | 'panel';
+  open?: boolean; onOpenChange?: (open: boolean) => void;
+  /** Schmaler Bereich: der Knopf zeigt nur die Kachel, die Beschriftung entfaellt. */
+  compact?: boolean;
 }) {
   const id = useId();
   const dialog = useRef<HTMLDialogElement>(null);
   const launcher = useRef<HTMLButtonElement>(null);
   const log = useRef<HTMLDivElement>(null);
   const request = useRef<AbortController | null>(null);
+  const letzteFrage = useRef<{text: string; verlauf: EHAssistantMessage[]} | null>(null);
   const [messages, setMessages] = useState<EHAssistantMessage[]>([]);
   const [input, setInput] = useState('');
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<EHAssistantResult | null>(null);
-  useEffect(() => () => request.current?.abort(), []);
-  useEffect(() => { if (log.current) log.current.scrollTop = log.current.scrollHeight; }, [messages, busy, notice]);
+  const [steps, setSteps] = useState<EHActivityStep[]>([]);
+  // Empfehlungskarten haengen an der Antwort, zu der sie gehoeren - nicht am
+  // Ende des Verlaufs, damit die naechste Frage sie nicht ueberschreibt.
+  const [karten, setKarten] = useState<Record<number, ReactNode>>({});
+  // Die Karte ist die Antwort: nach ihr richtet sich der Blick, nicht nach dem
+  // Seitenfluss darunter.
+  const kartenRefs = useRef<Record<number, HTMLDivElement | null>>({});
+  const [offenIntern, setOffenIntern] = useState(false);
+  const istPanel = placement === 'panel';
+  const offen = open ?? offenIntern;
 
-  async function send(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const text = input.trim();
-    if (!text || request.current) return;
+  useEffect(() => () => request.current?.abort(), []);
+  useEffect(() => {
+    const bereich = log.current; if (!bereich) return;
+    const letzte = busy ? null : kartenRefs.current[messages.length - 1];
+    if (letzte) {
+      const kasten = bereich.getBoundingClientRect(); const ziel = letzte.getBoundingClientRect();
+      bereich.scrollTop += ziel.top - kasten.top - 8;
+      return;
+    }
+    bereich.scrollTop = bereich.scrollHeight;
+  }, [messages, busy, notice, steps]);
+  // Der Bereich ist kein Dialog: Escape schliesst ihn, wie es die Karte selbst
+  // auch kann.
+  useEffect(() => {
+    if (!istPanel) return;
+    function onKey(event: KeyboardEvent) {
+      if (event.key === 'Escape' && offen) { event.preventDefault(); setOffenIntern(false); onOpenChange?.(false); }
+    }
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [istPanel, offen, onOpenChange]);
+
+  /** Ein gemeldeter Schritt ersetzt seinen Vorgaenger mit demselben Schluessel. */
+  function schrittMerken(step: EHActivityStep) {
+    setSteps(bisher => {
+      const stelle = bisher.findIndex(vorhanden => vorhanden.key === step.key);
+      return stelle < 0 ? [...bisher, step] : bisher.map((vorhanden, i) => i === stelle ? step : vorhanden);
+    });
+  }
+
+  async function sende(text: string, verlauf: EHAssistantMessage[]) {
+    if (request.current) return;
     const controller = new AbortController(); request.current = controller;
-    setBusy(true); setNotice(null);
-    const next: EHAssistantMessage[] = [...messages, {role: 'user', content: text}];
+    const next: EHAssistantMessage[] = [...verlauf, {role: 'user', content: text}];
+    letzteFrage.current = {text, verlauf};
+    setBusy(true); setNotice(null); setSteps([]);
     try {
-      const result = await onSend(next.slice(-12), controller.signal);
+      // Der Bereich liest mit, was gerade passiert; schwebende Karte und
+      // Werkzeugleiste bleiben unveraendert.
+      const result = await onSend(next.slice(-12), controller.signal, istPanel ? schrittMerken : undefined);
       if (controller.signal.aborted) return;
-      if (result.kind === 'reply') { setMessages([...next, {role: 'assistant', content: result.reply}]); setInput(''); }
+      if (istPanel && result.steps?.length) setSteps(result.steps);
+      if (result.kind === 'reply') {
+        if (istPanel && result.cards) setKarten(bisher => ({...bisher, [next.length]: result.cards}));
+        setMessages([...next, {role: 'assistant', content: result.reply}]); setInput('');
+      }
       else setNotice(result);
     } catch {
       if (!controller.signal.aborted) setNotice({kind: 'error', reply: 'Die Verbindung ist gerade unterbrochen. Deine Frage bleibt im Eingabefeld. Du kannst es erneut versuchen.'});
@@ -43,44 +105,108 @@ export function EHAssistant({onSend, loginHref, settingsHref, aboveNavigation = 
     }
   }
 
-  return <div className={s.scope} data-eh-app>
-    <button ref={launcher} type="button" className={s.assistantLauncher} data-placement={placement} data-above-nav={aboveNavigation || undefined}
-      aria-label="Hausassistent öffnen" aria-haspopup="dialog" aria-controls={id} onClick={() => dialog.current?.showModal()}>
-      <img src="/brand/logo-full.png" alt="" width={64} height={42} />
-      <span><strong>{placement === 'toolbar' ? 'Hausmanager' : 'Frag deinen Hausmanager'}</strong>{placement !== 'toolbar' && <small>KI-Hilfe rund um dein Zuhause</small>}</span>
-    </button>
-    <dialog ref={dialog} id={id} className={s.assistantDialog} aria-labelledby={id+'-title'} onClose={() => launcher.current?.focus()}>
-      <header className={s.assistantHeader}>
-        <img src="/brand/logo-full.png" alt="einfachhausen" width={72} height={46} />
-        <div><h2 id={id+'-title'}>Dein Hausmanager</h2><span>Kennt dein Zuhause</span></div>
-        <EHButton variant="quiet" aria-label="Chat schließen" onClick={() => dialog.current?.close()}>×</EHButton>
-      </header>
-      <div ref={log} className={s.assistantMessages} role="log" aria-label="Chatverlauf" aria-live="polite" aria-relevant="additions text">
-        <div className={s.assistantWelcome}>
-          <h3>Was beschäftigt dich an deinem Haus?</h3>
-          <EHText>Beschreibe dein Anliegen. Ich helfe dir, Fragen zu klären und den nächsten Schritt zu finden.</EHText>
-          <EHText size="meta" muted>Du sprichst mit einer KI. Antworten können Fehler enthalten. Ein Chat beauftragt keinen Betrieb.</EHText>
-        </div>
-        {messages.map((message, index) => <div key={index} className={s.assistantMessage} data-role={message.role}>
-          <strong>{message.role === 'user' ? 'Du' : 'Hausmanager · KI'}</strong><p>{message.content}</p>
-        </div>)}
-        {busy && <p role="status">Deine Antwort wird vorbereitet …</p>}
-        {notice && <div className={s.assistantNotice} role="status">
-          <p>{notice.reply}</p>
-          {notice.kind === 'login' && <EHButton href={loginHref}>Zum Hauskonto anmelden</EHButton>}
-          {notice.kind === 'quota' && <EHButton href={settingsHref} variant="secondary">KI-Kontingent ansehen</EHButton>}
-        </div>}
+  function send(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const text = input.trim();
+    if (text) void sende(text, messages);
+  }
+
+  /** Ein fehlgeschlagener Schritt laesst sich mit derselben Frage wiederholen. */
+  function wiederholen() {
+    const letzte = letzteFrage.current;
+    if (letzte && !request.current) void sende(letzte.text, letzte.verlauf);
+  }
+
+  // Nur der letzte, fehlgeschlagene Schritt bekommt die Wiederholung: sie gilt
+  // immer der ganzen Frage.
+  const schritte = steps.map((step, i) => (!busy && step.state === 'failed' && i === steps.length - 1)
+    ? {...step, retry: {label: 'Erneut versuchen', onClick: wiederholen}}
+    : step);
+
+  const nachricht = (message: EHAssistantMessage, index: number) => {
+    const blase = <div className={s.assistantMessage} data-role={message.role}>
+      <strong>{message.role === 'user' ? 'Du' : 'Hausmanager · KI'}</strong><p>{message.content}</p>
+    </div>;
+    const anhang = karten[index];
+    return anhang
+      ? <div key={index} className={s.assistantTurn} ref={el => { kartenRefs.current[index] = el; }}>{blase}<div className={s.assistantAttachment}>{anhang}</div></div>
+      : <Fragment key={index}>{blase}</Fragment>;
+  };
+
+  const kopf = (schliessen: ReactNode) => (
+    <header className={s.assistantHeader}>
+      <img src="/brand/logo-full.png" alt="einfachhausen" width={72} height={46} />
+      <div><h2 id={id+'-title'}>Dein Hausmanager</h2><span>Kennt dein Zuhause</span></div>
+      {schliessen}
+    </header>
+  );
+
+  const verlauf = (
+    <div ref={log} className={s.assistantMessages} role="log" aria-label="Chatverlauf" aria-live="polite" aria-relevant="additions text">
+      <div className={s.assistantWelcome}>
+        <h3>Was beschäftigt dich an deinem Haus?</h3>
+        <EHText>Beschreibe dein Anliegen. Ich helfe dir, Fragen zu klären und den nächsten Schritt zu finden.</EHText>
+        <EHText size="meta" muted>{istPanel
+          ? 'Du sprichst mit einer KI. Antworten können Fehler enthalten. Verbindlich wird nur, was du in einer Karte bestätigst.'
+          : 'Du sprichst mit einer KI. Antworten können Fehler enthalten. Ein Chat beauftragt keinen Betrieb.'}</EHText>
       </div>
-      <form className={s.assistantComposer} onSubmit={send}>
-        <EHField id={id+'-question'} label="Deine Frage" hint="Bitte keine Passwörter oder Zahlungsdaten eingeben.">
-          <EHTextarea id={id+'-question'} value={input} onChange={event => setInput(event.target.value)}
-            rows={3} maxLength={4000} required disabled={busy} aria-describedby={id+'-question-hint'} placeholder="Zum Beispiel: Meine Heizung macht ungewöhnliche Geräusche." />
-        </EHField>
-        <div className={s.assistantActions}>
-          <a href="/kontakt">Persönlicher Kontakt</a>
-          <EHButton type="submit" disabled={busy || !input.trim()} aria-busy={busy} arrow>{busy ? 'Wird gesendet …' : 'Frage senden'}</EHButton>
-        </div>
-      </form>
-    </dialog>
+      {messages.map(nachricht)}
+      {busy && (!istPanel || !steps.length) && <p role="status">Deine Antwort wird vorbereitet …</p>}
+      {istPanel && <EHActivity steps={schritte} title="Was die KI macht" label="Ablauf der Antwort" />}
+      {notice && <div className={s.assistantNotice} role="status">
+        <p>{notice.reply}</p>
+        {notice.kind === 'login' && <EHButton href={loginHref}>Zum Hauskonto anmelden</EHButton>}
+        {notice.kind === 'quota' && <EHButton href={settingsHref} variant="secondary">KI-Kontingent ansehen</EHButton>}
+      </div>}
+    </div>
+  );
+
+  const eingabe = (
+    <form className={s.assistantComposer} onSubmit={send}>
+      <EHField id={id+'-question'} label="Deine Frage" hint="Bitte keine Passwörter oder Zahlungsdaten eingeben.">
+        <EHTextarea id={id+'-question'} value={input} onChange={event => setInput(event.target.value)}
+          rows={3} maxLength={4000} required disabled={busy} aria-describedby={id+'-question-hint'} placeholder="Zum Beispiel: Meine Heizung macht ungewöhnliche Geräusche." />
+      </EHField>
+      <div className={s.assistantActions}>
+        <a href="/kontakt">Persönlicher Kontakt</a>
+        <EHButton type="submit" disabled={busy || !input.trim()} aria-busy={busy} arrow>{busy ? 'Wird gesendet …' : 'Frage senden'}</EHButton>
+      </div>
+    </form>
+  );
+
+  return <div className={s.scope} data-eh-app>
+    {istPanel && offen && <section id={id} className={s.assistantPanel} aria-labelledby={id+'-title'}>
+      {kopf(<EHButton variant="quiet" aria-label="Chat schließen" onClick={() => { setOffenIntern(false); onOpenChange?.(false); }}>×</EHButton>)}
+      {verlauf}
+      {eingabe}
+    </section>}
+
+    <button ref={launcher} type="button" className={s.assistantLauncher} data-placement={placement} data-kompakt={compact || undefined} data-above-nav={aboveNavigation || undefined}
+      aria-label={istPanel ? (offen ? 'Kundenberater schließen' : 'Kundenberater öffnen') : 'Hausassistent öffnen'}
+      aria-haspopup={istPanel ? undefined : 'dialog'} aria-expanded={istPanel ? offen : undefined} aria-controls={id}
+      data-offen={istPanel && offen ? true : undefined}
+      onClick={() => {
+        if (istPanel) { setOffenIntern(!offen); onOpenChange?.(!offen); return; }
+        dialog.current?.showModal();
+      }}>
+      {istPanel
+        ? <><span className={s.assistantLauncherAvatar} aria-hidden="true"><Sparkles size={18} /></span>
+            <span className={s.assistantLauncherCopy}>
+              <strong>Hausmanager</strong>
+              <small>KI-Hilfe</small>
+            </span>
+            <ChevronsUpDown className={s.assistantLauncherChevron} size={16} aria-hidden="true" /></>
+        : <><img src="/brand/logo-full.png" alt="" width={64} height={42} />
+            <span><strong>{placement === 'toolbar' ? 'Hausmanager' : 'Frag deinen Hausmanager'}</strong>{placement !== 'toolbar' && <small>KI-Hilfe rund um dein Zuhause</small>}</span></>}
+    </button>
+
+    {/* Schwebend und Werkzeugleiste bleiben ein modaler Dialog - wie auf der
+        Website vorgesehen; der Bereich braucht keinen. */}
+    {!istPanel && <dialog ref={dialog} id={id} className={s.assistantDialog} aria-labelledby={id+'-title'}
+      onClose={() => launcher.current?.focus()}>
+      {kopf(<EHButton variant="quiet" aria-label="Chat schließen" onClick={() => dialog.current?.close()}>×</EHButton>)}
+      {verlauf}
+      {eingabe}
+    </dialog>}
   </div>;
 }

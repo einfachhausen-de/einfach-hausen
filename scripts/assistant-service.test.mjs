@@ -50,6 +50,56 @@ if(mod){
   assert.equal(genCalls,before);
  });
 }
+ test('ein Schrittablauf begleitet jede Antwort und wird live gemeldet',async()=>{
+  capability='jobs';
+  const gemeldet=[];
+  const out=await mod.answerAssistant(user,messages,undefined,null,step=>gemeldet.push(step));
+  assert.equal(out.status,200);
+  assert.deepEqual(out.steps?.map(s=>s.key),['frage','daten','antwort']);
+  assert.ok(out.steps.every(s=>s.state==='done'));
+  assert.deepEqual(gemeldet.map(s=>s.key),['frage','frage','daten','antwort']);
+  assert.equal(gemeldet.find(s=>s.key==='antwort').meta,'Ohne KI-Modell');
+ });
+ test('gescheiterte Modellantwort nennt die Ursache und entlastet das Kontingent',async()=>{
+  capability='generative';genFails=true;
+  db.prepare('DELETE FROM ai_usage WHERE user_id=?').run(user);
+  const gemeldet=[];
+  const out=await mod.answerAssistant(user,messages,undefined,null,step=>gemeldet.push(step));
+  genFails=false;
+  assert.equal(out.status,502);
+  const antwort=out.steps.find(s=>s.key==='antwort');
+  assert.equal(antwort.state,'failed');
+  assert.match(antwort.details.join(' '),/Status 503/);
+  assert.match(antwort.details.join(' '),/nicht belastet/);
+  assert.equal(ai.aiQuotaSnapshot(user).freemiumUsed,0);
+ });
+ test('offene Angebote kommen als Entscheidungskarte, das guenstigste zuerst',async()=>{
+  const anleger=(name)=>{const id=Number(db.prepare("INSERT INTO users(email,password_hash,role,first_name,last_name) VALUES(?, 'x','provider','Test',?)").run(name+'@example.test',name).lastInsertRowid);
+   db.prepare('INSERT INTO provider_profiles(user_id,business_name,verified,rating_count) VALUES(?,?,1,?)').run(id,name,name==='Kartenbetrieb A'?7:0);
+   db.prepare("INSERT INTO partner_contracts(provider_id,status) VALUES(?,'active')").run(id);
+   return id;};
+  const guenstig=anleger('Kartenbetrieb A'),teuer=anleger('Kartenbetrieb B');
+  const job=Number(db.prepare("INSERT INTO jobs(homeowner_id,title,description,category,postcode,status) VALUES(?,'Kartentest','Wasser laeuft aus','sanitaer-wasser','47051','quoted')").run(user).lastInsertRowid);
+  db.prepare("INSERT INTO quotes(job_id,provider_id,amount,available_at,status) VALUES(?,?,?,?,'pending')").run(job,guenstig,18900,'2026-10-05');
+  db.prepare("INSERT INTO quotes(job_id,provider_id,amount,available_at,status) VALUES(?,?,?,?,'pending')").run(job,teuer,24500,'2026-10-01');
+  const out=await mod.answerAssistant(user,[{role:'user',content:'Welche Angebote habe ich aktuell?'}],undefined,null);
+  assert.equal(out.status,200);
+  assert.equal(out.cards.length,1);
+  assert.equal(out.cards[0].jobId,job);
+  const betrag=(cent)=>new Intl.NumberFormat('de-DE',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(cent/100);
+  assert.deepEqual(out.cards[0].options.map(o=>[o.provider,o.price]),[['Kartenbetrieb A',betrag(18900)],['Kartenbetrieb B',betrag(24500)]]);
+  assert.deepEqual(out.cards[0].options[0].markers,['Günstigstes']);
+  assert.deepEqual(out.cards[0].options[1].markers,['Schnellster Termin','Neu im Netzwerk']);
+  assert.match(out.reply,/Buchen/);
+ });
+ test('gebuchte Angebote verschwinden aus der Karte',async()=>{
+  const offen=db.prepare("SELECT id FROM quotes WHERE status='pending' ORDER BY amount ASC LIMIT 1").get();
+  db.prepare("UPDATE quotes SET status='accepted' WHERE id=?").run(offen.id);
+  const out=await mod.answerAssistant(user,[{role:'user',content:'Welche Angebote habe ich aktuell?'}],undefined,null);
+  assert.equal(out.cards.length,1);
+  assert.deepEqual(out.cards[0].options.map(o=>o.provider),['Kartenbetrieb B']);
+ });
+
 test('Hausmeister uses free data tools after quota exhaustion',async()=>{
  capability='jobs';
  db.prepare('INSERT INTO homeowner_profiles(user_id) VALUES(?)').run(user);

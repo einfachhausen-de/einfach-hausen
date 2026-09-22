@@ -20,7 +20,7 @@
 .eh-section[data-compact] { padding-block: var(--eh-space-xl); }
 .eh-section[data-tone="paper"], .eh-callout[data-tone="paper"] { --eh-bg: var(--eh-color-paper); }
 .eh-section[data-tone="white"] { --eh-bg: var(--eh-color-white); }
-.eh-section[data-tone="sand"], .eh-callout[data-tone="sand"] { --eh-bg: var(--eh-color-sand); }
+.eh-section[data-tone="sand"] { --eh-bg: var(--eh-color-sand); }
 .eh-section[data-tone="deep"], .eh-callout[data-tone="deep"], .eh-recordCover {
   --eh-bg: var(--eh-color-deep); --eh-fg: var(--eh-color-paper);
   --eh-muted: var(--eh-color-sand); --eh-rule: var(--eh-color-secondary);
@@ -131,7 +131,7 @@
 .eh-faq summary span { font-size: 1.5rem; font-weight: var(--eh-weight-regular); }
 .eh-faq details[open] summary span { transform: rotate(45deg); }
 .eh-faq details > div { max-width: 72ch; padding: 0 36px 28px 0; font-size: var(--eh-font-body); }
-.eh-callout { background: var(--eh-bg); padding: clamp(24px,4vw,40px); display: grid; gap: 18px; border-left: 2px solid var(--eh-color-terra); }
+.eh-callout { background: var(--eh-bg); padding: clamp(24px,4vw,40px); display: grid; gap: 18px; border: 1px solid var(--eh-rule); border-radius: var(--eh-radius-panel); }
 .eh-calloutBody { font-size: var(--eh-font-body); line-height: 1.65; }
 .eh-closing { display: flex; flex-direction: column; align-items: flex-start; gap: 30px; }
 .eh-closing .eh-heading { font-size: clamp(2.75rem,6.5vw,6rem); max-width: 15ch; }
@@ -605,9 +605,72 @@
  .eh-documentFrame [class~="invoice-totals"],.eh-documentFrame [class~="passport-row"],.eh-documentFrame [class~="receipt-total"] { break-inside:avoid; }
 }
 
+/* Ablauf mit Zustand (EHActivity): eine Zeile je Schritt, Details nativ
+   aufklappbar. Der Zustand reist in data-stand; die Flaechen entstehen aus den
+   Marken-Token als eigene Variable, damit kein Rohwert in der Deklaration
+   steht. Die Zahl im Ring ist die Position des laufenden Schrittes. */
+.eh-activity { display:grid; gap:8px; --eh-step-fertig: color-mix(in srgb, var(--eh-color-success) 14%, var(--eh-color-white)); --eh-step-fehler: color-mix(in srgb, var(--eh-color-error) 12%, var(--eh-color-white)); --eh-step-laeuft: color-mix(in srgb, var(--eh-color-petrol) 10%, var(--eh-color-white)); }
+.eh-activityList { list-style:none; margin:0; padding:0; display:grid; grid-template-columns:minmax(0,1fr); gap:6px; }
+.eh-activityList > li { min-width:0; }
+.eh-activityRow { border:1px solid var(--eh-rule); border-radius:var(--eh-radius-panel); background:var(--eh-color-white); color:inherit; }
+.eh-activityHead { display:flex; align-items:center; gap:10px; min-height:44px; padding:8px 10px; }
+summary.eh-activityHead { cursor:pointer; list-style:none; }
+.eh-activityMark { position:relative; display:grid; place-items:center; flex:none; width:22px; height:22px; border:1px solid var(--eh-rule); border-radius:var(--eh-radius-pill); color:var(--eh-muted); font-size:var(--eh-font-meta); font-weight:var(--eh-weight-medium); line-height:1; font-variant-numeric:tabular-nums; }
+.eh-activityMark svg { display:block; }
+[data-stand="done"] .eh-activityMark { border-color:transparent; background:var(--eh-step-fertig); color:var(--eh-color-success); }
+[data-stand="failed"] .eh-activityMark { border-color:transparent; background:var(--eh-step-fehler); color:var(--eh-color-error); }
+[data-stand="running"] .eh-activityMark { border-color:transparent; background:var(--eh-step-laeuft); color:var(--eh-color-petrol); }
+[data-stand="running"] .eh-activityMark::before { content:""; position:absolute; inset:-3px; border:2px solid var(--eh-color-line); border-top-color:var(--eh-color-petrol); border-radius:var(--eh-radius-pill); animation:activitySpin 1s linear infinite; }
+.eh-activityLabel { flex:1 1 auto; min-width:0; font-size:var(--eh-font-label); font-weight:var(--eh-weight-medium); line-height:var(--eh-leading-normal); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.eh-activityMeta { flex:0 1 auto; min-width:0; font-size:var(--eh-font-meta); color:var(--eh-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.eh-activityChevron { flex:none; color:var(--eh-muted); transition:transform var(--eh-motion-duration) var(--eh-motion-ease); }
+.eh-activityRow[open] .eh-activityChevron { transform:rotate(180deg); }
+.eh-activityDetails { list-style:none; margin:0; padding:0 12px 10px 42px; display:grid; gap:4px; }
+.eh-activityDetails li { display:flex; gap:8px; font-size:var(--eh-font-meta); line-height:var(--eh-leading-normal); color:var(--eh-muted); }
+.eh-activityDetails li::before { content:"–"; flex:none; color:var(--eh-color-petrol); }
+.eh-activityAction { padding:0 12px 12px 42px; }
+.eh-activityRetry { display:inline-flex; align-items:center; gap:6px; min-height:36px; padding:6px 12px; border:1px solid var(--eh-rule); border-radius:var(--eh-radius-control); background:transparent; color:var(--eh-color-petrol); font:inherit; font-size:var(--eh-font-meta); font-weight:var(--eh-weight-medium); cursor:pointer; }
+.eh-activityRetry:hover { background:var(--eh-color-paper); }
+.eh-activityRetry:focus-visible { outline:3px solid var(--eh-color-focus); outline-offset:2px; }
+@keyframes activitySpin { to { transform:rotate(1turn); } }
+@media (prefers-reduced-motion: reduce) { [data-stand="running"] .eh-activityMark::before { animation:none; } }
+
+/* Empfehlung (EHRecommendation): eine Karte je Entscheidung, Alternativen
+   nativ aufklappbar. Betrieb und Wert sitzen in Chips, die Auszeichnungen
+   tragen dieselben Begriffe wie der Vergleich auf der Vorgangsseite. Die
+   Chipflaeche entsteht als eigene Variable, damit kein Rohwert in der
+   Deklaration steht. */
+.eh-recommendation { display:grid; --eh-rec-chip: color-mix(in srgb, var(--eh-color-petrol) 10%, var(--eh-color-white)); border:1px solid var(--eh-rule); border-radius:var(--eh-radius-panel); background:var(--eh-color-white); box-shadow:var(--eh-shadow-panel); overflow:hidden; }
+.eh-recommendationBody { display:grid; gap:8px; padding:14px; }
+.eh-recommendationQuestion { font-size:var(--eh-font-label); font-weight:var(--eh-weight-semibold); line-height:var(--eh-leading-normal); }
+.eh-recommendationText { font-size:var(--eh-font-meta); line-height:var(--eh-leading-loose); color:var(--eh-muted); }
+.eh-recommendationChip { display:inline-flex; align-items:center; gap:6px; margin:0 2px; padding:2px 9px 2px 3px; border:1px solid var(--eh-rule); border-radius:var(--eh-radius-pill); background:var(--eh-color-paper); color:var(--eh-color-ink); vertical-align:middle; }
+.eh-recommendationInitial { display:grid; place-items:center; width:18px; height:18px; border-radius:var(--eh-radius-control); background:var(--eh-color-petrol); color:var(--eh-color-white); font-size:var(--eh-font-eyebrow); font-weight:var(--eh-weight-semibold); }
+.eh-recommendationValue { display:inline-flex; align-items:center; margin:0 2px; padding:2px 9px; border-radius:var(--eh-radius-pill); background:var(--eh-rec-chip); color:var(--eh-color-petrol); font-weight:var(--eh-weight-medium); font-variant-numeric:tabular-nums; vertical-align:middle; }
+.eh-recommendationAvailability { display:block; margin-top:2px; }
+.eh-recommendationDrawer { border-top:1px solid var(--eh-rule); }
+.eh-recommendationToggle { display:flex; align-items:center; justify-content:center; gap:6px; min-height:44px; padding:8px 14px; color:var(--eh-color-petrol); font-size:var(--eh-font-meta); font-weight:var(--eh-weight-medium); cursor:pointer; list-style:none; }
+.eh-recommendationChevron { transition:transform var(--eh-motion-duration) var(--eh-motion-ease); }
+.eh-recommendationDrawer[open] .eh-recommendationChevron { transform:rotate(180deg); }
+.eh-recommendationOther { padding:2px 14px 6px; font-size:var(--eh-font-eyebrow); font-weight:var(--eh-weight-semibold); letter-spacing:var(--eh-track-wide); text-transform:uppercase; color:var(--eh-muted); }
+.eh-recommendationDrawer ul { list-style:none; margin:0; padding:0 6px 8px; }
+.eh-recommendationOption { display:grid; gap:4px; width:100%; padding:8px; border:0; border-radius:var(--eh-radius-control); background:transparent; color:inherit; font:inherit; text-align:left; cursor:pointer; }
+.eh-recommendationOption:hover { background:var(--eh-color-paper); }
+.eh-recommendationOptionHead { display:flex; align-items:baseline; justify-content:space-between; gap:10px; }
+.eh-recommendationOptionName { flex:1 1 auto; min-width:0; font-size:var(--eh-font-meta); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.eh-recommendationOptionPrice { flex:none; font-size:var(--eh-font-meta); font-weight:var(--eh-weight-medium); font-variant-numeric:tabular-nums; }
+.eh-recommendationMarkers { display:flex; align-items:center; flex-wrap:wrap; gap:6px; min-width:0; }
+.eh-recommendationFoot { display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; padding:12px 14px; border-top:1px solid var(--eh-rule); }
+.eh-recommendationActions { display:flex; align-items:center; gap:8px; margin-left:auto; }
+.eh-recommendationNote,.eh-recommendationFehler { padding:0 14px 14px; font-size:var(--eh-font-meta); line-height:var(--eh-leading-normal); color:var(--eh-muted); }
+.eh-recommendationFehler { color:var(--eh-color-error); }
+
 /* Customer assistant: one quiet launcher; native modal owns focus and Escape. */
+/* Der Knopf traegt die Form des Kontomenues aus der Seitenleiste: runde
+   Symbolflaeche, zweizeilige Beschriftung, Zeichen rechts. Er sitzt unten
+   rechts im rechten Bereich und ist dort festgehalten. */
 .eh-assistantLauncher { position:fixed;right:24px;bottom:24px;z-index:40;display:flex;align-items:center;gap:14px;max-width:calc(100vw - 32px);min-height:64px;padding:12px 18px;border:1px solid var(--eh-color-line);border-radius:var(--eh-radius-panel);background:var(--eh-color-white);color:var(--eh-color-ink);text-align:left;font:inherit;cursor:pointer; }
-.eh-assistantLauncher img,.eh-assistantHeader img { object-fit:contain;flex-shrink:0; }
+.eh-assistantHeader img { object-fit:contain;flex-shrink:0; }
 .eh-assistantLauncher strong { display:block;font-size:var(--eh-font-label);line-height:1.4; }
 .eh-assistantLauncher small { display:block;font-size:var(--eh-font-meta);color:var(--eh-color-secondary);line-height: var(--eh-leading-normal); }
 .eh-assistantLauncher:focus-visible { outline:3px solid var(--eh-color-petrol);outline-offset:3px; }
@@ -624,6 +687,8 @@
 .eh-assistantWelcome p + p { margin-top:12px; }
 .eh-assistantMessage { max-width:100%;padding:14px 16px;border:1px solid var(--eh-color-line);border-radius:var(--eh-radius-panel);background:var(--eh-color-white);overflow-wrap:anywhere; }
 .eh-assistantMessage[data-role="user"] { margin-left:24px;background:var(--eh-color-deep);color:var(--eh-color-paper); }
+.eh-assistantTurn { display:grid; gap:8px; }
+.eh-assistantAttachment { display:grid; gap:12px; }
 .eh-assistantMessage strong { font-size:var(--eh-font-meta); }
 .eh-assistantMessage p,.eh-assistantNotice p { margin:8px 0 0;font-size:16px;line-height: var(--eh-leading-loose);white-space:pre-wrap;overflow-wrap:anywhere; }
 .eh-assistantNotice { padding:16px;border:1px solid var(--eh-color-line);background:var(--eh-color-sand);border-radius:var(--eh-radius-panel); }
@@ -684,7 +749,37 @@
 
 /* App assistant occupies its own toolbar slot; never floats over workflow controls. */
 .eh-assistantLauncher[data-placement="toolbar"] { position:static; min-height:44px; padding:8px 12px; gap:8px; max-width:none; z-index:auto; }
-.eh-assistantLauncher[data-placement="toolbar"] img { display:none; }
+/* Bereichsfassung (rechter Bereich der App): der Knopf sitzt im Fluss und
+   sieht aus wie das Kontomenue der Seitenleiste - gleiche Hoehe, gleicher
+   Innenabstand, gleiche Zeile aus Kachel, Name, Untertitel und Chevron. */
+.eh-assistantLauncher[data-placement="panel"] { order:2;position:static;width:100%;min-height:48px;padding:8px;gap:8px;border:0;background:transparent;z-index:auto; }
+.eh-assistantLauncher[data-placement="panel"]:hover { background:var(--eh-color-line); }
+.eh-assistantLauncher[data-placement="panel"] strong { font-size:var(--eh-font-label);font-weight:var(--eh-weight-medium);line-height:var(--eh-leading-tight);white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+.eh-assistantLauncher[data-placement="panel"] small { line-height:var(--eh-leading-tight);white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+.eh-assistantLauncherAvatar { display:grid;place-items:center;flex:none;width:32px;height:32px;border-radius:var(--eh-radius-pill);background:var(--eh-color-deep);color:var(--eh-color-white); }
+.eh-assistantLauncherCopy { display:grid;flex:1;min-width:0;overflow:hidden; }
+.eh-assistantLauncherChevron { flex:none;color:var(--eh-color-secondary);transition:transform .15s ease; }
+.eh-assistantLauncher[data-placement="panel"][data-offen] { background:var(--eh-color-paper); }
+.eh-assistantLauncher[data-placement="panel"][data-offen] .eh-assistantLauncherChevron { transform:rotate(180deg); }
+/* Schmaler Bereich: nur die Kachel, damit der Kundenberater auch im
+   eingeklappten Streifen sichtbar und erreichbar bleibt. */
+.eh-assistantLauncher[data-kompakt] { width:36px;min-height:36px;padding:0;justify-content:center;gap:0; }
+.eh-assistantLauncher[data-kompakt] .eh-assistantLauncherCopy,
+.eh-assistantLauncher[data-kompakt] .eh-assistantLauncherChevron { display:none; }
+
+.eh-assistantPanel { order:1;display:flex;flex-direction:column;flex:0 0 auto;height:min(620px,calc(100dvh - 170px));min-height:320px;border:1px solid var(--eh-color-line);border-radius:var(--eh-radius-panel);background:var(--eh-color-paper);overflow:hidden; }
+.eh-assistantPanel .eh-assistantHeader { padding:14px; }
+.eh-assistantPanel .eh-assistantHeader img { display:none; }
+.eh-assistantPanel .eh-assistantHeader h2 { font-size:var(--eh-font-label); }
+.eh-assistantPanel .eh-assistantHeader button { min-width:32px;height:32px;font-size:20px; }
+.eh-assistantPanel .eh-assistantMessages { padding:16px 14px;gap:16px; }
+.eh-assistantPanel .eh-assistantWelcome h3 { font-size:var(--eh-font-body);margin-bottom:10px; }
+.eh-assistantPanel .eh-assistantWelcome p,.eh-assistantPanel .eh-assistantMessage p,.eh-assistantPanel .eh-assistantNotice p { font-size:var(--eh-font-meta); }
+.eh-assistantPanel .eh-assistantComposer { padding:14px;gap:12px; }
+.eh-assistantPanel .eh-assistantActions { flex-direction:column;align-items:stretch; }
+.eh-assistantPanel .eh-assistantActions > a { text-align:center; }
+@media(max-width:1023.5px) { .eh-assistantPanel,.eh-assistantLauncher[data-placement="panel"] { display:none; } }
+.eh-assistantLauncher[data-placement="toolbar"] .eh-assistantLauncherAvatar { display:none; }
 .eh-assistantLauncher[data-placement="toolbar"] strong { font-size:14px; white-space:nowrap; }
 @media(max-width:600px) { .eh-assistantLauncher[data-placement="toolbar"] { padding:8px; } }
 

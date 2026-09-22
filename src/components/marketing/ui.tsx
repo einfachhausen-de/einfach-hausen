@@ -16,7 +16,7 @@ export function Section({eyebrow,title,text,children,tone="plain",tight=false,ce
 export function CardGrid({children,cols=3}: {children:React.ReactNode;cols?:2|3|4}) {return <div className={styles.cardGrid} data-cols={cols}>{children}</div>;}
 export function Card({icon,title,text,tone="surface",children}: {icon?:React.ReactNode;title:string;text?:string;tone?:"surface"|"sand"|"soft"|"dark";children?:React.ReactNode}) {
   const body=<>{icon && <span className={styles.cardIcon} aria-hidden="true">{icon}</span>}{text && <EHText>{text}</EHText>}{children}</>;
-  return tone==="dark" || tone==="sand" ? <EHCallout title={title} tone={tone==="dark"?"deep":"sand"}>{body}</EHCallout> : <EHPanel title={title}>{body}</EHPanel>;
+  return tone==="dark" || tone==="sand" ? <EHCallout title={title} tone={tone==="dark"?"deep":"paper"}>{body}</EHCallout> : <EHPanel title={title}>{body}</EHPanel>;
 }
 export function FeatureGrid({items}: {items:ReadonlyArray<{icon:React.ReactNode;title:string;text:string}>;cols?:2|3|4}) {return <EHFeatureRows items={[...items]}/>;}
 export function Statement({kicker,tone="sand",children}: {kicker:string;tone?:Tone;children:React.ReactNode}) {return <EHEditorialStatement eyebrow={kicker} tone={tones[tone]}>{children}</EHEditorialStatement>;}

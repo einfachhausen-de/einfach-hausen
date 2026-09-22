@@ -7,10 +7,12 @@ import { JobMedia } from '@/components/job-media';
 import { mediaKindFromPath } from '@/lib/intake-media';
 import { requireUser } from '@/lib/auth';
 import { db } from '@/lib/db';
-import { acceptQuoteAction,cancelJobAction,createCheckoutAction,createClaimAction,reviewAction,sendMessageAction,sendSavedContactMessageAction,turnContactIntoServiceAction } from '@/app/actions';
+import { acceptQuoteAction,bookQuoteAction,cancelJobAction,createCheckoutAction,createClaimAction,reviewAction,sendMessageAction,sendSavedContactMessageAction,turnContactIntoServiceAction } from '@/app/actions';
 import { dateLabel,euro,statusLabel } from '@/lib/format';
+import { ownerDate } from '@/lib/owner-format';
 import { getQuoteRecommendations } from '@/lib/orchestrator';
-import { EHActions,EHButton,EHCallout,EHConversation,EHEmptyState,EHErrorState,EHField,EHFormFeedback,EHFormSection,EHInput,EHMetricsBar,EHRecordList,EHSelect,EHStatus,EHSubmitButton,EHText,EHTextarea,EHWorkflowForm,EHWorkflowStack,EHWorkSection } from '@/design-system';
+import { offerCard } from '@/lib/offer-cards';
+import { EHActivity,EHActions,EHButton,EHCallout,EHConversation,EHEmptyState,EHErrorState,EHField,EHFormFeedback,EHFormSection,EHInput,EHMetricsBar,EHRecommendation,EHRecordList,EHSelect,EHStatus,EHSubmitButton,EHText,EHTextarea,EHWorkflowForm,EHWorkflowStack,EHWorkSection,type EHActivityStep } from '@/design-system';
 
 /**
  * Rechte Spalte und Kopf dieser Seite. Dieselben Token wie auf /app und /app/jobs:
@@ -27,6 +29,45 @@ function emergencyAvailability(value?:string|null){
   return `verfügbar ab ${dateLabel(value)}`;
 }
 
+// Gruende, aus denen ein Betrieb nicht angefragt wurde: das Protokoll der
+// Vermittlung speichert Schluessel, hier bekommen sie Klartext.
+const AUSSCHLUSS:Record<string,string> = {
+  already_dispatched:'war schon angefragt', unsupported_service:'Gewerk passt nicht', consultation_off:'nimmt keine Beratungen an',
+  normal_jobs_off:'nimmt keine Aufträge an', short_notice_off:'keine kurzfristigen Termine', emergency_off:'keine Notfall-Bereitschaft',
+  lead_limit_reached:'Monatslimit erreicht', out_of_radius:'zu weit entfernt', no_geo_fail_closed:'Ort nicht prüfbar',
+};
+
+/**
+ * Was fuer diesen Vorgang geschehen ist - aus dem Pruefprotokoll der Vermittlung
+ * (`match_decision_trace`) und den Anfragen, nicht aus einer Schaetzung. Betriebe,
+ * die nicht angefragt wurden, bleiben namenlos.
+ */
+function vermittlung(job:any,stand:{modus:'auftrag'|'kontakt';angefragt:number;geantwortet:number;angebote:number;guenstigst:number|null;kontakt:boolean}):EHActivityStep[]{
+  const trace=db.prepare(`SELECT decision,reason_key,COUNT(*) anzahl,MIN(detail) beispiel FROM match_decision_trace WHERE job_id=? GROUP BY decision,reason_key ORDER BY anzahl DESC`).all(job.id) as Array<{decision:string;reason_key:string;anzahl:number;beispiel:string}>;
+  const geprueft=trace.reduce((sum,zeile)=>sum+Number(zeile.anzahl),0);
+  const ausgeschlossen=trace.filter(zeile=>zeile.decision==='excluded').slice(0,5).map(zeile=>`${zeile.anzahl}× ${AUSSCHLUSS[zeile.reason_key]||zeile.beispiel||zeile.reason_key}`);
+  const beendet=['cancelled','completed'].includes(String(job.status));
+  const kontaktweg=stand.modus==='kontakt';
+  const betriebe=(anzahl:number)=>`${anzahl} ${anzahl===1?'Betrieb':'Betriebe'}`;
+  return [
+    { key:'anfrage', label:'Anfrage aufgenommen', state:'done', meta:ownerDate(job.created_at),
+      details:[`Bereich: ${job.category||'ohne Angabe'}`,`Ort: ${job.postcode||'ohne PLZ'}`] },
+    { key:'betriebe', label:'Passende Betriebe geprüft', state:geprueft?'done':'pending', meta:geprueft?betriebe(geprueft):'Noch keine Prüfung',
+      details:geprueft?['Geprüft werden Betriebe im Netzwerk, die das Gewerk anbieten.',...ausgeschlossen]
+        :['Sobald der Vorgang vorliegt, prüft Einfach Hausen Gewerk, Region und Verfügbarkeit.'] },
+    { key:'anfragen', label:kontaktweg?'Kontaktbetriebe angefragt':'Betriebe angefragt', state:stand.angefragt?'done':'pending', meta:stand.angefragt?betriebe(stand.angefragt):'Noch keine Anfrage',
+      details:stand.angefragt?[`${stand.geantwortet} von ${stand.angefragt} ${stand.angefragt===1?'hat':'haben'} geantwortet.`,'Namen zeigen wir erst, wenn ein Betrieb zusagt.']
+        :['Aktuell passt kein Betrieb zu Gewerk und Region.'] },
+    kontaktweg
+      ? { key:'ergebnis', label:'Ansprechpartner verbunden', state:stand.kontakt?'done':'pending', meta:stand.kontakt?'Verbunden':'Wird gesucht',
+          details:stand.kontakt?['Ein Betrieb hat den Kontakt übernommen.','Name und Telefon stehen oben auf dieser Seite.']
+            :['Sobald ein Betrieb übernimmt, wird ein Ansprechpartner benannt.'] }
+      : { key:'ergebnis', label:'Angebote eingegangen', state:stand.angebote?'done':'pending', meta:stand.angebote?`${stand.angebote} ${stand.angebote===1?'Angebot':'Angebote'}`:'Noch keins',
+          details:stand.angebote?[stand.guenstigst!==null?`Günstigstes Angebot: ab ${euro(stand.guenstigst)}.`:'Den Preis findest du im Angebot.','Die Betriebe stehen unten im Vergleich.']
+            :[beendet?'Zu diesem Vorgang wurde kein Angebot abgegeben.':'Einfach Hausen fragt bei den angefragten Betrieben nach.'] },
+  ];
+}
+
 function scopeNotes(message:string|undefined,jobDescription:string){
   const offer=(message||'').toLowerCase(); const job=jobDescription.toLowerCase(); const notes:string[]=[];
   if(!offer.includes('material'))notes.push('Material nicht ausdrücklich genannt');
@@ -41,7 +82,7 @@ export default async function JobDetail({params,searchParams}:{params:Promise<{i
   if(job.request_kind==='contact'){
     const contact=db.prepare(`SELECT a.provider_id,a.contact_user_id,u.first_name,u.last_name,u.phone,u.email,m.job_title,p.business_name FROM job_assignments a JOIN users u ON u.id=a.contact_user_id JOIN provider_members m ON m.user_id=a.contact_user_id JOIN provider_profiles p ON p.user_id=a.provider_id WHERE a.job_id=?`).get(job.id) as any;
     const messages=contact?db.prepare('SELECT * FROM contact_messages WHERE homeowner_id=? AND contact_user_id=? ORDER BY created_at').all(u.id,contact.contact_user_id) as any[]:[];
-    const dispatches=db.prepare(`SELECT COUNT(*) total FROM job_dispatches WHERE job_id=?`).get(job.id) as any;
+    const dispatches=db.prepare(`SELECT COUNT(*) total,SUM(CASE WHEN status IN ('declined','quoted','accepted') THEN 1 ELSE 0 END) geantwortet FROM job_dispatches WHERE job_id=?`).get(job.id) as any;
     return <WerkbankRahmen role="homeowner" active="/app/jobs" rail={<>
         <p className="eh-werkbank-rail-h">Kontext dieser Seite</p>
         <div className="eh-werkbank-karte">
@@ -94,6 +135,10 @@ export default async function JobDetail({params,searchParams}:{params:Promise<{i
       <EHCallout title="Du hast nur einen Ansprechpartner gewählt">
         <EHText muted>Es wurde noch kein Auftrag vergeben und kein Preis vereinbart.</EHText>
       </EHCallout>
+      <EHWorkSection title="Wie wir passende Betriebe gesucht haben">
+        <EHActivity steps={vermittlung(job,{modus:'kontakt',angefragt:dispatches.total||0,geantwortet:dispatches.geantwortet||0,angebote:0,guenstigst:null,kontakt:Boolean(contact)})} />
+        <EHText size="meta" muted>Angaben aus dem Prüfprotokoll der Vermittlung. Betriebe, die nicht angefragt wurden, bleiben namenlos.</EHText>
+      </EHWorkSection>
       {!contact?<EHEmptyState title="Passender Ansprechpartner wird gesucht" text={`${dispatches.total||0} geprüfte regionale Partner wurden angefragt. Sobald ein Betrieb übernimmt, kannst du direkt schreiben oder anrufen.`} />:<>
         <EHWorkSection title="Dein persönlicher Ansprechpartner">
           <EHRecordList label="Ansprechpartner" items={[
@@ -134,8 +179,10 @@ export default async function JobDetail({params,searchParams}:{params:Promise<{i
   const claim=accepted?db.prepare('SELECT * FROM claims WHERE job_id=?').get(job.id) as any:null;
   const contact=accepted?db.prepare(`SELECT a.provider_id,a.contact_user_id,u.first_name,u.last_name,u.phone,u.email,m.job_title,p.business_name FROM job_assignments a JOIN users u ON u.id=a.contact_user_id JOIN provider_members m ON m.user_id=a.contact_user_id JOIN provider_profiles p ON p.user_id=a.provider_id WHERE a.job_id=?`).get(job.id) as any:null;
   const messages=contact?db.prepare('SELECT * FROM contact_messages WHERE homeowner_id=? AND contact_user_id=? ORDER BY created_at').all(u.id,contact.contact_user_id) as any[]:[];
-  const dispatches=db.prepare(`SELECT COUNT(*) total,SUM(CASE WHEN status='quoted' THEN 1 ELSE 0 END) quoted FROM job_dispatches WHERE job_id=?`).get(job.id) as any;
+  const dispatches=db.prepare(`SELECT COUNT(*) total,SUM(CASE WHEN status='quoted' THEN 1 ELSE 0 END) quoted,SUM(CASE WHEN status IN ('declined','quoted','accepted') THEN 1 ELSE 0 END) geantwortet FROM job_dispatches WHERE job_id=?`).get(job.id) as any;
   const cheapest=quotes.length?Math.min(...quotes.map(q=>q.amount)):null;
+  // Offene Angebote als Entscheidungskarte; null, sobald gebucht oder keins offen ist.
+  const angebotsKarte=offerCard(u.id,job.id);
   const available=quotes.filter(q=>q.available_at).sort((a,b)=>new Date(a.available_at).getTime()-new Date(b.available_at).getTime()); const fastest=available[0]?.id;
 
   return <WerkbankRahmen role="homeowner" active="/app/jobs" rail={<>
@@ -202,7 +249,13 @@ export default async function JobDetail({params,searchParams}:{params:Promise<{i
       <EHText muted>Richtpreis {job.budget_min&&job.budget_max?`${euro(job.budget_min)}–${euro(job.budget_max)}`:'wird ermittelt'}.</EHText>
     </EHCallout>
 
+    <EHWorkSection title="Wie wir passende Betriebe gesucht haben">
+      <EHActivity steps={vermittlung(job,{modus:'auftrag',angefragt:dispatches.total||0,geantwortet:dispatches.geantwortet||0,angebote:quotes.length,guenstigst:cheapest,kontakt:Boolean(contact)})} />
+      <EHText size="meta" muted>Angaben aus dem Prüfprotokoll der Vermittlung. Betriebe, die nicht angefragt wurden, bleiben namenlos.</EHText>
+    </EHWorkSection>
+
     <EHWorkSection title="Vergleich">
+    {angebotsKarte&&<EHRecommendation question={angebotsKarte.question} subject={angebotsKarte.subject} options={angebotsKarte.options} onPrimary={bookQuoteAction} />}
     {quotes.length===0?<EHEmptyState title="Angebote werden eingeholt" text="Einfach Hausen klärt Verfügbarkeit und Angebote mit passenden Partnern." />:<EHRecordList label="Angebote im Vergleich" items={quotes.map((q,index)=>({
       id:String(q.id),
       title:q.business_name,

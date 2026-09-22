@@ -93,6 +93,9 @@ export async function WerkbankRahmen({
 
   const jar = await cookies();
   const defaultOpen = jar.get('sidebar_state')?.value !== 'false';
+  // Rechter Bereich: derselbe Griff zum Ein- und Ausklappen wie links an der
+  // Seitenleiste; der Zustand liegt wie dort in einem Cookie.
+  const defaultRailOpen = jar.get('rail_state')?.value !== 'false';
 
   const pathOnly = active.split('?')[0];
   const area = pro ? activeProviderArea(active) : activeArea(active);
@@ -122,6 +125,7 @@ export async function WerkbankRahmen({
         role={role}
         active={active}
         defaultOpen={defaultOpen}
+        defaultRailOpen={defaultRailOpen}
         pro={pro}
         brandTitle={brandTitle}
         brandSub={brandSub || (pro ? 'Geschäftsführung' : undefined)}

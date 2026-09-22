@@ -2,6 +2,11 @@ import type { NextConfig } from 'next';
 
 const isDev = process.env.NODE_ENV === 'development';
 
+// Die Live-Vorschau erreicht den Dev-Server unter einem wechselnden Public-Host.
+// Ohne Freigabe blockiert Next.js Dev-Ressourcen (HMR, Schriften) cross-origin -
+// im Browser bleibt dann eine alte, ungestylte Fassung stehen.
+const devPreviewOrigins = isDev ? ['*.e2b.app'] : [];
+
 // Global CSP tuned to this app's integrations: no third-party browser scripts,
 // same-origin API/server actions/uploads, inline styles/scripts required by
 // Next.js without nonce-based dynamic rendering (see next/dist/docs CSP guide).
@@ -40,13 +45,19 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
-  allowedDevOrigins: ['127.0.0.1', 'localhost'],
+  allowedDevOrigins: ['127.0.0.1', 'localhost', ...devPreviewOrigins],
   serverExternalPackages: ['better-sqlite3'],
   experimental: {
     // OCI production runs on ARM; serialize Next page-data collection to avoid
     // native-addon fork instability during `next build`.
     cpus: 1,
-    serverActions: { bodySizeLimit: '14mb' },
+    serverActions: {
+      bodySizeLimit: '14mb',
+      // Browser-Origin der Vorschau neben dem Host-Header des Proxys; sonst
+      // bricht Next die Server-Action (Login) dort still ab. Nur im
+      // Dev-Betrieb, damit in Produktion keine fremde Origin erlaubt ist.
+      allowedOrigins: [...devPreviewOrigins],
+    },
   },
   turbopack: { root: process.cwd() },
   // /app/more war ein Relikt-Navigationspunkt; alle Bereiche haben heute einen
@@ -58,6 +69,12 @@ const nextConfig: NextConfig = {
   },
   async headers(){
     return [
+      // Nur Dev: Turbopack benennt CSS-Chunks nach dem Pfad, nicht nach dem
+      // Inhalt. Ohne no-store kann ein Vorschauregler eine alte Fassung unter
+      // derselben Adresse ausliefern (Symptom: ungestylte Sektionen).
+      ...(isDev
+        ? [{source:'/_next/static/(.*)',headers:[{key:'Cache-Control',value:'no-store, max-age=0, must-revalidate'}]}]
+        : []),
       {source:'/(.*)',headers:securityHeaders},
       {source:'/sw.js',headers:[{key:'Cache-Control',value:'no-cache, no-store, must-revalidate'}]},
       {source:'/manifest.webmanifest',headers:[{key:'Cache-Control',value:'no-cache, max-age=0, must-revalidate'}]},

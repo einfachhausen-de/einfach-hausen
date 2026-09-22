@@ -1,7 +1,8 @@
 "use client";
 
 import Link from 'next/link';
-import type { ReactNode } from 'react';
+import { useId, useState, type ReactNode } from 'react';
+import { PanelRight } from 'lucide-react';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import {
   SidebarInset,
@@ -22,6 +23,7 @@ import { ClientNav } from './client-nav';
 import { HeaderMenu, type MenuJob } from './header-menu';
 import type { NoticeItem } from './notifications-menu';
 import { SettingsDialogHost } from './settings-dialog-host';
+import { HouseAssistant } from './house-assistant';
 import { WerkbankSuche } from './werkbank-suche';
 import { BottomNav } from './bottom-nav';
 import s from './shell.module.css';
@@ -38,6 +40,7 @@ export function WerkbankShell({
   role,
   active,
   defaultOpen,
+  defaultRailOpen = true,
   pro,
   brandTitle,
   brandSub,
@@ -82,7 +85,31 @@ export function WerkbankShell({
   breadcrumb: Crumb;
   main: ReactNode;
   rail?: ReactNode;
+  defaultRailOpen?: boolean;
 }) {
+  // Der Kundenberater sitzt als rechter Bereich im Fluss - wie die Sidebar
+  // links: der Bereich schiebt sich auf, der mittlere Bereich wird schmaler.
+  // Nichts schwebt ueber dem Inhalt.
+  const [kiOffen, setKiOffen] = useState(false);
+  const hatKi = role === 'homeowner';
+  // Der rechte Bereich laesst sich am Rand ein- und ausklappen - mit demselben
+  // Griff wie die Seitenleiste links. Der Zustand bleibt im Cookie, damit die
+  // Seite nach dem Neuladen gleich aussieht.
+  const [railZu, setRailZu] = useState(!defaultRailOpen);
+  const railId = useId();
+  function railSetzen(zu: boolean) {
+    setRailZu(zu);
+    if (zu) setKiOffen(false);
+    document.cookie = `rail_state=${zu ? 'false' : 'true'}; path=/; max-age=${60 * 60 * 24 * 7}`;
+  }
+  function railUmschalten() {
+    railSetzen(!railZu);
+  }
+  /** Die Kachel im schmalen Streifen holt den Bereich zurueck und oeffnet den Chat. */
+  function kiUmschalten(offen: boolean) {
+    if (offen && railZu) railSetzen(false);
+    setKiOffen(offen);
+  }
   return (
     <TooltipProvider>
       <SidebarProvider defaultOpen={defaultOpen}>
@@ -144,9 +171,24 @@ export function WerkbankShell({
           </div>
           <div className={s['wb-content']}>
             <main className={s['wb-main']}>{main}</main>
-            {rail && (
-              <aside aria-label="Kontext dieser Seite" className={s['wb-rail']}>
-                {rail}
+            {(rail || hatKi) && (
+              <aside id={railId} aria-label={rail ? 'Kontext dieser Seite' : 'Kundenberater'} className={s['wb-rail']}
+                data-ki={hatKi && kiOffen ? 'offen' : undefined} data-zu={railZu || undefined}>
+                {/* Griff am Rand des Bereiches, Gegenstueck zum Griff der
+                    Seitenleiste: unsichtbarer Streifen, Linie beim Zeigen,
+                    Ziehen-Symbol als Zeiger, Klick klappt ein oder aus. */}
+                <button type="button" className={s['wb-rail-griff']} aria-controls={railId} aria-expanded={!railZu}
+                  aria-label={railZu ? 'Rechten Bereich ausklappen' : 'Rechten Bereich einklappen'}
+                  title={railZu ? 'Rechten Bereich ausklappen' : 'Rechten Bereich einklappen'}
+                  onClick={railUmschalten} />
+                {railZu && (
+                  <button type="button" className={s['wb-rail-auf']} aria-controls={railId} aria-expanded={false}
+                    aria-label="Rechten Bereich ausklappen" title="Rechten Bereich ausklappen" onClick={railUmschalten}>
+                    <PanelRight size={18} aria-hidden="true" />
+                  </button>
+                )}
+                {rail && <div className={s['wb-rail-kontext']}>{rail}</div>}
+                {hatKi && <HouseAssistant placement="panel" compact={railZu} open={kiOffen} onOpenChange={kiUmschalten} />}
               </aside>
             )}
           </div>

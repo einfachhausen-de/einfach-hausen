@@ -31,12 +31,14 @@
     "src/app/globals.css",
     "src/app/design-system.css",
     "src/app/app/homeowner.module.css",
+    "src/app/app/eigentuemer-start.module.css",
     "src/app/pro/provider-workspace.module.css"
   ],
   "ownedStyleFiles": [
     "src/components/marketing/tokens.css",
     "src/components/marketing/mkt.module.css",
     "src/app/app/homeowner.module.css",
+    "src/app/app/eigentuemer-start.module.css",
     "src/app/pro/provider-workspace.module.css"
   ]
 }

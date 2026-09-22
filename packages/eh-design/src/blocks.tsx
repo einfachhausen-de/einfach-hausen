@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import {Check, ChevronDown, RotateCw, X} from "lucide-react";
 import {EHSection, EHHeading, EHText, EHEyebrow, EHButton, EHTextLink, EHActions, EHImageFrame, type EHTone} from "./primitives";
 import s from "./styles.module.css";
 export type EHItem = {title: string; text?: ReactNode; icon?: ReactNode};
@@ -21,6 +22,41 @@ export function EHSteps({items}: {items: EHItem[]}) {
 export function EHTimeline({items}: {items: {when: string; title: string; text?: ReactNode; current?: boolean}[]}) {
   return <ol className={s.timeline}>{items.map((item,i)=><li key={i} aria-current={item.current ? "step" : undefined}><span className={s.timelineDate}>{item.when}</span><div><EHHeading as="h3" scale="item">{item.title}</EHHeading>{item.text && <div className={s.text}>{item.text}</div>}</div></li>)}</ol>;
 }
+export type EHActivityState = "done" | "running" | "failed" | "pending";
+export type EHActivityStep = {
+  key: string; label: string; state: EHActivityState; meta?: string; details?: string[];
+  /** Wiederholung gehoert in eine Client-Komponente: der Knopf loest den Aufruf erneut aus. */
+  retry?: {label: string; onClick: () => void};
+};
+const ACTIVITY_STATE: Record<EHActivityState, string> = {done: "Erledigt", running: "Laeuft", failed: "Fehlgeschlagen", pending: "Offen"};
+/**
+ * Ablauf mit Zustand: eine Zeile je Schritt, der Zustand reist in `data-stand`,
+ * die Details klappen nativ auf (`<details>`, kein Skript, kein Zustand in der
+ * Klasse). Ein Fehler mit `retry` bleibt offen, damit Ursache und Wiederholung
+ * sofort sichtbar sind. Der Inhalt kommt fertig vom Aufrufer: hier wird nichts
+ * erfunden, nur gezeigt.
+ */
+export function EHActivity({steps, title, label}: {steps: EHActivityStep[]; title?: string; label?: string}) {
+  if (!steps.length) return null;
+  return <div className={s.activity} role="group" aria-label={label}>
+    {title && <EHText size="meta" muted>{title}</EHText>}
+    <ol className={s.activityList}>{steps.map((step, index) => {
+      const kopf = <>
+        <span className={s.activityMark} role="img" aria-label={ACTIVITY_STATE[step.state]}>{step.state === "done" ? <Check size={14} /> : step.state === "failed" ? <X size={14} /> : index + 1}</span>
+        <span className={s.activityLabel}>{step.label}</span>
+        {step.meta && <span className={s.activityMeta}>{step.meta}</span>}
+      </>;
+      const details = step.details?.length ? <ul className={s.activityDetails}>{step.details.map((zeile, i) => <li key={i}>{zeile}</li>)}</ul> : null;
+      return <li key={step.key} data-stand={step.state} aria-current={step.state === "running" ? "step" : undefined}>
+        {details && !step.retry
+          ? <details className={s.activityRow}><summary className={s.activityHead}>{kopf}<ChevronDown className={s.activityChevron} size={16} aria-hidden="true" /></summary>{details}</details>
+          : <div className={s.activityRow}><div className={s.activityHead}>{kopf}</div>{details}
+              {step.retry && <div className={s.activityAction}><button type="button" className={s.activityRetry} onClick={step.retry.onClick}><RotateCw size={14} aria-hidden="true" />{step.retry.label}</button></div>}
+            </div>}
+      </li>;
+    })}</ol>
+  </div>;
+}
 export function EHFacts({items}: {items: {value: ReactNode; label: string; source?: string}[]}) {
   return <dl className={s.facts}>{items.map(item=><div key={item.label}><dt>{item.label}</dt><dd>{item.value}</dd>{item.source && <dd className={s.factSource}>{item.source}</dd>}</div>)}</dl>;
 }
@@ -30,7 +66,7 @@ export function EHComparison({left, right}: {left: {title: string; items: string
 export function EHFAQ({items}: {items: {q: string; a: ReactNode}[]}) {
   return <div className={s.faq}>{items.map(item=><details key={item.q}><summary>{item.q}<span aria-hidden="true">+</span></summary><div>{item.a}</div></details>)}</div>;
 }
-export function EHCallout({title, children, tone = "sand"}: {title: string; children: ReactNode; tone?: "sand" | "paper" | "deep"}) {
+export function EHCallout({title, children, tone = "paper"}: {title: string; children: ReactNode; tone?: "paper" | "deep"}) {
   return <aside className={s.callout} data-tone={tone}><EHHeading as="h3" scale="item">{title}</EHHeading><div className={s.calloutBody}>{children}</div></aside>;
 }
 export function EHClosing({title, text, href, label = "Anliegen besprechen", secondary}: {title: ReactNode; text?: string; href?: string; label?: string; secondary?: ReactNode}) {

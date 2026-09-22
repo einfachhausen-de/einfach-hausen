@@ -420,6 +420,20 @@ export async function acceptQuoteAction(quoteId:number){
   revalidatePath(`/app/jobs/${q.job_id}`); revalidatePath('/app/calendar'); revalidatePath('/app/messages'); revalidatePath('/pro'); revalidatePath('/pro/orders'); revalidatePath('/notifications');
 }
 
+/**
+ * Bucht ein Angebot aus einer Empfehlungskarte (Chat oder Vorgangsseite) und
+ * meldet zurueck, ob die Buchung wirklich angekommen ist. Die Karte zeigt
+ * "Gebucht" nur, wenn hier true steht - eine stille Ablehnung (fremdes Angebot,
+ * nicht gepruefter Betrieb) bleibt damit sichtbar.
+ */
+export async function bookQuoteAction(quoteId:number|string){
+  const id=Number(quoteId);
+  if(!Number.isSafeInteger(id)||id<=0)return false;
+  await acceptQuoteAction(id);
+  const stand=db.prepare('SELECT q.status quote_status,j.status job_status FROM quotes q JOIN jobs j ON j.id=q.job_id WHERE q.id=?').get(id) as {quote_status?:string;job_status?:string}|undefined;
+  return stand?.quote_status==='accepted'&&stand?.job_status==='accepted';
+}
+
 export async function sendMessageAction(jobId:number, recipientId:number, fd:FormData){
   const user=await requireUser(); const body=text(fd,'body'); if(!body) return;
   const row=db.prepare(`SELECT j.homeowner_id,a.contact_user_id FROM jobs j JOIN job_assignments a ON a.job_id=j.id WHERE j.id=?`).get(jobId) as {homeowner_id:number,contact_user_id:number}|undefined;

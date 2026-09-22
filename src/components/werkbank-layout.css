@@ -53,6 +53,8 @@
 /* Touch-Ziele gemaess DESIGN.md §13: mindestens 44x44 px. padding allein
    erreicht das bei Meta-Schriftgroesse nicht, daher zusaetzliche min-height. */
 .eh-werkbank-chip { display:inline-flex; align-items:center; gap:6px; min-height:44px; padding:6px 14px; border:1px solid var(--eh-color-line); border-radius:var(--eh-radius-pill); text-decoration:none; font-size:var(--eh-font-meta); color:var(--eh-color-ink); background:var(--eh-color-white); }
+.eh-werkbank-chip:hover { border-color:var(--eh-color-petrol); background:var(--eh-color-paper); }
+.eh-werkbank-chip:focus-visible { border-color:var(--eh-color-petrol); }
 .eh-werkbank-chip[aria-current="page"] { background:var(--eh-color-petrol); color:var(--eh-color-white); border-color:var(--eh-color-petrol); }
 .eh-werkbank-chip-n { font-variant-numeric:tabular-nums; }
 .eh-werkbank-tbl small { display:block; color:var(--eh-muted); font-size:var(--eh-font-eyebrow); margin-top:2px; }
