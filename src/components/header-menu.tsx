@@ -1,7 +1,8 @@
 "use client";
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Calendar, ClipboardList, FileText, Plus, Search } from 'lucide-react';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { SERVICE_CATEGORIES } from '@/components/marketing/service-catalog';
 import { NotificationsMenu, type NoticeItem } from './notifications-menu';
 import { openSearch } from './werkbank-suche';
@@ -36,6 +37,7 @@ const MENU_ITEM_CLASS = "min-h-[44px] gap-2 px-2 py-2 text-base";
  * Optik: schlanke Bar, reine Icon-Reihen.
  */
 export function HeaderMenu({ jobsHref, jobsCount, jobsNewHref, jobsList, calHref, unread, notices }: HeaderMenuCounts) {
+  const router = useRouter();
   const jobsLabel = jobsCount > 0 ? `Aufträge, ${jobsCount} offen` : 'Aufträge';
   const hasJobsContent = Boolean(jobsNewHref) || jobsList.length > 0;
   return (
@@ -61,25 +63,37 @@ export function HeaderMenu({ jobsHref, jobsCount, jobsNewHref, jobsList, calHref
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
           {jobsNewHref && (
-            <>
-              <DropdownMenuItem asChild className={MENU_ITEM_CLASS}>
-                <Link href={jobsNewHref} className="text-inherit">
-                  <Plus size={16} aria-hidden="true" className="shrink-0 opacity-70" />
-                  <span>Neuer Auftrag</span>
-                </Link>
-              </DropdownMenuItem>
-              {SERVICE_CATEGORIES.map((area) => {
-                const Icon = area.icon;
-                return (
-                  <DropdownMenuItem key={area.slug} data-testid={`bereich-${area.slug}`} asChild className={MENU_ITEM_CLASS}>
-                    <Link href={`/app/hausmeister?topic=${area.slug}`} className="text-inherit">
-                      <Icon size={16} aria-hidden="true" className="shrink-0 opacity-70" />
-                      <span>{area.shortTitle}</span>
-                    </Link>
-                  </DropdownMenuItem>
-                );
-              })}
-            </>
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger
+                className={MENU_ITEM_CLASS}
+                aria-label="Neuer Auftrag"
+                onClick={(event) => {
+                  // Maus-Klick navigiert direkt; Tastatur-Enter (detail 0)
+                  // oeffnet nur das Bereichs-Untermenue (Radix-Verhalten).
+                  // Plaine Trigger (kein asChild): Der Wrapper hängt einen
+                  // eigenen Chevron an — mit asChild sähe der Slot zwei
+                  // Kinder und würde werfen.
+                  if (event.detail === 0 || !jobsNewHref) return;
+                  router.push(jobsNewHref);
+                }}
+              >
+                <Plus size={16} aria-hidden="true" className="shrink-0 opacity-70" />
+                <span>Neuer Auftrag</span>
+              </DropdownMenuSubTrigger>
+              <DropdownMenuSubContent className="max-h-[50vh] w-64 overflow-y-auto rounded-lg p-2">
+                {SERVICE_CATEGORIES.map((area) => {
+                  const Icon = area.icon;
+                  return (
+                    <DropdownMenuItem key={area.slug} asChild className={MENU_ITEM_CLASS}>
+                      <Link href={`/app/hausmeister?topic=${area.slug}`} className="text-inherit">
+                        <Icon size={16} aria-hidden="true" className="shrink-0 opacity-70" />
+                        <span>{area.shortTitle}</span>
+                      </Link>
+                    </DropdownMenuItem>
+                  );
+                })}
+              </DropdownMenuSubContent>
+            </DropdownMenuSub>
           )}
           {jobsList.map((job) => (
             <DropdownMenuItem key={job.id} asChild className={MENU_ITEM_CLASS}>
