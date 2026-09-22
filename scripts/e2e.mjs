@@ -626,9 +626,9 @@ await nav(owner, base+'/app'); await waitText(owner,'Einrichtung unvollständig'
 await clickAndWaitUrl(owner,owner.getByRole('link',{name:'Einrichtung fortsetzen'}),/\/app\/onboarding$/);
 await waitText(owner,'Trag Straße und PLZ ein, damit Einfach Hausen Betriebe in deiner Region findet.');
 await strictRetry(owner,()=>owner.getByLabel('Straße und Hausnummer').fill('Gartenweg 12'));
-await clickServerAction(owner,owner.getByRole('button',{name:'Weiter'})); await waitText(owner,'Wähle die Bereiche, die dich interessieren. Überspringen ist möglich.');
+await clickServerAction(owner,owner.getByRole('button',{name:'Weiter'})); await waitText(owner,'Wähle die Bereiche, die dich interessieren. Überspringen geht auch — ergänzen kannst du später im Profil.');
 // Optional steps are skippable.
-await strictRetry(owner,()=>owner.getByRole('button',{name:'Überspringen'}).click()); await waitText(owner,'Sag, über welchen Weg wir dich am besten erreichen.');
+await strictRetry(owner,()=>owner.getByRole('button',{name:'Überspringen'}).click()); await waitText(owner,'Sag, über welchen Weg wir dich am besten erreichen. Überspringen geht auch.');
 await strictRetry(owner,()=>owner.getByRole('button',{name:'Überspringen'}).click());
 await Promise.all([owner.waitForURL('**/app?onboarding=done'),owner.waitForLoadState('load')]);
 if(await owner.getByText('Einrichtung unvollständig').count())throw new Error('Onboarding banner shown after completion');
