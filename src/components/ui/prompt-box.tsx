@@ -39,7 +39,7 @@ export const PromptBox = React.forwardRef<HTMLTextAreaElement, PromptBoxProps>(
       const textarea = internalTextareaRef.current;
       if (textarea) {
         textarea.style.height = "auto";
-        const newHeight = Math.min(Math.max(textarea.scrollHeight, 44), 180);
+        const newHeight = Math.min(Math.max(textarea.scrollHeight, 40), 180);
         textarea.style.height = `${newHeight}px`;
       }
     }, [value]);
@@ -92,7 +92,12 @@ export const PromptBox = React.forwardRef<HTMLTextAreaElement, PromptBoxProps>(
     const ActiveToolIcon = activeTool?.icon;
 
     return (
-      <div className={cn("relative flex flex-col rounded-xl border bg-card p-3 shadow-sm transition-colors", className)}>
+      <div
+        className={cn(
+          "relative flex flex-col rounded-[28px] border border-[var(--eh-color-line)] bg-white p-2.5 shadow-[var(--eh-shadow-panel)] transition-colors focus-within:border-[var(--eh-color-line)] focus-within:shadow-none focus-within:outline-none",
+          className
+        )}
+      >
         <input
           type="file"
           ref={fileInputRef}
@@ -103,12 +108,12 @@ export const PromptBox = React.forwardRef<HTMLTextAreaElement, PromptBoxProps>(
         />
 
         {imagePreview && (
-          <div className="relative mb-2 w-fit rounded-lg border bg-muted/40 p-1">
-            <img src={imagePreview} alt="Image preview" className="h-14 w-14 rounded-md object-cover" />
+          <div className="relative mb-2 w-fit rounded-[var(--eh-radius-control)] border border-[var(--eh-color-line)] bg-[var(--eh-color-paper)] p-1">
+            <img src={imagePreview} alt="Image preview" className="h-14 w-14 rounded-[var(--eh-radius-control)] object-cover" />
             <button
               type="button"
               onClick={handleRemoveImage}
-              className="absolute -right-1.5 -top-1.5 flex size-5 items-center justify-center rounded-md bg-foreground text-background shadow transition-opacity hover:opacity-80"
+              className="absolute -right-1.5 -top-1.5 flex size-5 items-center justify-center rounded-[var(--eh-radius-pill)] bg-[var(--eh-color-deep)] text-[var(--eh-color-white)] transition-opacity hover:opacity-85 focus-visible:outline-none"
               aria-label="Remove image"
             >
               <X className="size-3" />
@@ -122,17 +127,17 @@ export const PromptBox = React.forwardRef<HTMLTextAreaElement, PromptBoxProps>(
           value={value}
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
-          placeholder="Nachricht an deinen Hausmanager …"
-          className="w-full resize-none border-0 bg-transparent p-1 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-0 focus-visible:outline-none"
+          placeholder="Nachricht…"
+          className="w-full resize-none border-0 bg-transparent px-2.5 py-1.5 text-sm text-[var(--eh-color-ink)] placeholder:text-[var(--eh-color-secondary)] outline-none focus:border-0 focus:outline-none focus:ring-0 focus-visible:outline-none"
           {...props}
         />
 
-        <div className="mt-2 flex items-center justify-between gap-2 border-t pt-2">
+        <div className="mt-1 flex items-center justify-between gap-2 px-1 pt-1">
           <div className="flex items-center gap-1.5">
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="flex size-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+              className="flex size-8 items-center justify-center rounded-[var(--eh-radius-pill)] text-[var(--eh-color-secondary)] transition-colors hover:bg-[var(--eh-color-paper)] hover:text-[var(--eh-color-ink)] focus-visible:outline-none"
               aria-label="Bild anfügen"
               title="Bild anfügen"
             >
@@ -142,7 +147,7 @@ export const PromptBox = React.forwardRef<HTMLTextAreaElement, PromptBoxProps>(
             <button
               type="button"
               onClick={() => setIsToolsOpen(!isToolsOpen)}
-              className="flex h-8 items-center gap-1.5 rounded-md px-2 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+              className="flex h-8 items-center gap-1.5 rounded-[var(--eh-radius-pill)] px-2.5 text-sm font-medium text-[var(--eh-color-secondary)] transition-colors hover:bg-[var(--eh-color-paper)] hover:text-[var(--eh-color-ink)] focus-visible:outline-none"
               aria-label="Tools"
               aria-expanded={isToolsOpen}
             >
@@ -154,7 +159,7 @@ export const PromptBox = React.forwardRef<HTMLTextAreaElement, PromptBoxProps>(
               <button
                 type="button"
                 onClick={() => setSelectedTool(null)}
-                className="flex h-7 items-center gap-1.5 rounded-md bg-muted px-2 text-sm text-foreground transition-colors hover:bg-muted/80"
+                className="flex h-7 items-center gap-1.5 rounded-[var(--eh-radius-pill)] bg-[var(--eh-color-sand)] px-2.5 text-sm font-medium text-[var(--eh-color-petrol)] transition-colors hover:opacity-90 focus-visible:outline-none"
                 title={`${activeTool.name} entfernen`}
               >
                 {ActiveToolIcon && <ActiveToolIcon className="size-3.5" />}
@@ -164,10 +169,10 @@ export const PromptBox = React.forwardRef<HTMLTextAreaElement, PromptBoxProps>(
             )}
           </div>
 
-          <div className="flex items-center gap-1.5">
+          <div className="ml-auto flex items-center gap-1.5">
             <button
               type="button"
-              className="flex size-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+              className="flex size-8 items-center justify-center rounded-[var(--eh-radius-pill)] text-[var(--eh-color-secondary)] transition-colors hover:bg-[var(--eh-color-paper)] hover:text-[var(--eh-color-ink)] focus-visible:outline-none"
               aria-label="Spracheingabe"
               title="Spracheingabe"
             >
@@ -178,7 +183,7 @@ export const PromptBox = React.forwardRef<HTMLTextAreaElement, PromptBoxProps>(
               type="button"
               onClick={handleSubmit}
               disabled={!hasValue}
-              className="flex size-8 items-center justify-center rounded-md bg-primary text-primary-foreground shadow transition-all hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+              className="flex size-8 items-center justify-center rounded-[var(--eh-radius-pill)] bg-[var(--eh-color-ink)] text-[var(--eh-color-white)] transition-all hover:bg-[var(--eh-color-petrol)] disabled:cursor-not-allowed disabled:opacity-35 focus-visible:outline-none"
               aria-label="Nachricht senden"
               title="Senden"
             >
@@ -188,7 +193,7 @@ export const PromptBox = React.forwardRef<HTMLTextAreaElement, PromptBoxProps>(
         </div>
 
         {isToolsOpen && (
-          <div className="absolute bottom-full left-3 z-50 mb-2 w-60 rounded-xl border bg-card p-1.5 shadow-lg">
+          <div className="absolute bottom-full left-2 z-50 mb-2 w-64 rounded-[var(--eh-radius-panel)] border border-[var(--eh-color-line)] bg-white p-1.5 shadow-[var(--eh-shadow-panel)]">
             <div className="flex flex-col gap-0.5">
               {tools.map(tool => {
                 const Icon = tool.icon;
@@ -200,12 +205,12 @@ export const PromptBox = React.forwardRef<HTMLTextAreaElement, PromptBoxProps>(
                       setSelectedTool(tool.id);
                       setIsToolsOpen(false);
                     }}
-                    className="flex w-full items-center gap-2 rounded-md p-2 text-left text-sm text-foreground transition-colors hover:bg-muted"
+                    className="flex w-full items-center gap-2 rounded-[var(--eh-radius-control)] p-2 text-left text-sm text-[var(--eh-color-ink)] transition-colors hover:bg-[var(--eh-color-paper)] focus-visible:outline-none"
                   >
-                    <Icon className="size-4 text-muted-foreground" />
-                    <span className="flex-1">{tool.name}</span>
+                    <Icon className="size-4 text-[var(--eh-color-secondary)]" />
+                    <span className="flex-1 font-medium">{tool.name}</span>
                     {tool.extra && (
-                      <span className="text-muted-foreground">{tool.extra}</span>
+                      <span className="text-[var(--eh-color-secondary)]">{tool.extra}</span>
                     )}
                   </button>
                 );

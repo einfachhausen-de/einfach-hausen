@@ -78,7 +78,7 @@ function ResponseAction({
       whileTap={reduce ? undefined : { scale: 0.9 }}
       transition={SPRING_PRESS}
       className={cn(
-        "grid size-7 place-items-center rounded-md text-muted-foreground outline-none transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring",
+        "grid size-7 place-items-center rounded-md text-muted-foreground outline-none transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none",
         isOn && "bg-muted text-foreground",
       )}
     >
@@ -224,7 +224,7 @@ export function StreamingResponse({
                   aria-expanded={currentSourcesOpen}
                   aria-controls={sourcesContentId}
                   onClick={() => setSourcesOpen(!currentSourcesOpen)}
-                  className="group ml-1 inline-flex min-h-7 items-center gap-2 rounded-md px-1.5 text-sm text-muted-foreground outline-none transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+                  className="group ml-1 inline-flex min-h-7 items-center gap-2 rounded-md px-1.5 text-sm text-muted-foreground outline-none transition-colors hover:text-foreground focus-visible:outline-none"
                 >
                   <CitationStack citations={sources} />
                   <span className="tabular-nums">

@@ -381,7 +381,7 @@ export function EHAssistant({
         value={input}
         onChange={e => setInput(e.target.value)}
         onKeyDown={onKeyDown}
-        placeholder="Nachricht an deinen Hausmanager …"
+        placeholder="Nachricht…"
         className={s.assistantPromptInput}
         disabled={busy}
         maxLength={4000}
@@ -475,9 +475,9 @@ export function EHAssistant({
   );
 
   return (
-    <div className={s.scope} data-eh-app>
+    <div className={s.scope} data-eh-app data-has-panel={istPanel && offen ? true : undefined}>
       {istPanel && offen && (
-        <section id={id} className={s.assistantPanel} aria-labelledby={id + '-title'}>
+        <section id={id} className={s.assistantPanel} data-assistant-panel aria-labelledby={id + '-title'}>
           {kopf(
             <button
               type="button"
