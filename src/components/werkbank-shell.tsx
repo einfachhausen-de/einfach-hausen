@@ -18,6 +18,7 @@ import {
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 import { AppSidebar } from './app-sidebar';
+import { ClientNav } from './client-nav';
 import { NotificationsMenu, type NoticeItem } from './notifications-menu';
 import { SettingsDialogHost } from './settings-dialog-host';
 import { WerkbankSuche } from './werkbank-suche';
@@ -73,6 +74,7 @@ export function WerkbankShell({
   return (
     <TooltipProvider>
       <SidebarProvider defaultOpen={defaultOpen}>
+        <ClientNav />
         <AppSidebar
           role={role}
           active={active}

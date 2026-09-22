@@ -692,6 +692,14 @@ const bellMenu=ownerDesktop.getByRole('menu');
 await bellMenu.getByText('Alle ansehen',{exact:true}).first().waitFor({timeout:10000});
 // Radix rollt den Link als menuitem (Rolle statt Link in der AX-Hierarchie).
 await clickAndWaitUrl(ownerDesktop,bellMenu.getByRole('menuitem',{name:'Alle ansehen'}),/\/notifications/);
+// 3d) Client-Navigation: Sidebar-Wechsel laesst das Dokument leben (Marker
+// ueberlebt), statt neu zu laden — gilt auch fuer plain-`<a>`-Zeilen aus
+// EH-Komponenten (ClientNav-Horcher).
+await nav(ownerDesktop, base+'/app');
+await ownerDesktop.evaluate(()=>{window.__e2eNavAlive=1;});
+await ownerDesktop.locator('[data-slot="sidebar"]:not([data-mobile])').getByRole('link',{name:'Benachrichtigungen'}).click();
+await ownerDesktop.waitForURL(/\/notifications/);
+if(await ownerDesktop.evaluate(()=>window.__e2eNavAlive)!==1)throw new Error('Navigation to /notifications must be client-side (no document reload)');
 await ownerDesktopCtx.close();
 await nav(owner, base+'/app/profile'); await waitText(owner,'Deine Hausdaten bleiben privat.'); await assertNoOverflow(owner,'Mobile customer profile');
 await nav(owner, base+'/app/hausmeister'); await assertNoOverflow(owner,'Mobile housemaster');
