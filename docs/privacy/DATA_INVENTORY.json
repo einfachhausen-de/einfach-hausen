@@ -235,6 +235,11 @@
       "purpose": "KI-Haushaltshinweise: Stand und Duplikatschutz je Nutzer",
       "retention": "account"
     },
+    "owner_ai_user_state": {
+      "personal": true,
+      "purpose": "KI-Scan-Stand je Nutzer (Duplikatschutz)",
+      "retention": "account"
+    },
     "package_orders": {
       "personal": true,
       "purpose": "Paketbestellungen (Stripe-Referenz)",
@@ -369,6 +374,10 @@
       "personal": true,
       "purpose": "Homeowner-Abos (Stripe-Referenz)",
       "retention": "business"
+    },
+    "tariff_partner_offers": {
+      "personal": false,
+      "purpose": "Tarifvergleichs-Referenzdaten (Anbieter, PLZ-Prefix, kein Personenbezug)"
     },
     "user_settings": {
       "personal": true,
