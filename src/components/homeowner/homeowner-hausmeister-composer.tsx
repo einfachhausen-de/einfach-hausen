@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useId, useRef, useState } from 'react';
-import { Camera, Mic, Send, Square } from 'lucide-react';
+import { Camera, FileText, Mic, Send, Square } from 'lucide-react';
 import { sendHausmeisterAction } from '@/app/actions';
 import { EHPanel, EHText, EHButton, EHActions } from '@/design-system';
 
@@ -30,6 +30,7 @@ export function HomeownerHausmeisterComposer({
   const [listening, setListening] = useState(false);
   const [offline, setOffline] = useState(false);
   const [speechSupported, setSpeechSupported] = useState(true);
+  const [hasDocument, setHasDocument] = useState(false);
   const [voiceStatus, setVoiceStatus] = useState('');
   const recognition = useRef<any>(null);
   const descriptionId = useId();
@@ -155,11 +156,21 @@ export function HomeownerHausmeisterComposer({
         value={text}
         onChange={(event) => setText(event.target.value)}
         rows={3}
-        required
-        placeholder={placeholder}
+        required={!hasDocument}
+        placeholder={hasDocument ? 'Optional: Was möchtest du zu dem Dokument wissen?' : placeholder}
         aria-describedby={connectionStatus ? statusId : undefined}
       />
       <div className="agent-actions">
+        <label className="icon-action" title="Dokument zur Hausakte hinzufügen">
+          <FileText size={19} aria-hidden="true" />
+          <span>Dokument</span>
+          <input
+            name="document"
+            type="file"
+            accept="application/pdf,image/*"
+            onChange={(event) => setHasDocument(Boolean(event.currentTarget.files?.[0]))}
+          />
+        </label>
         <label className="icon-action" htmlFor={fileId} title="Foto, Video oder Sprachnachricht hinzufügen">
           <Camera size={19} aria-hidden="true" />
           <span>Medien</span>
@@ -181,7 +192,7 @@ export function HomeownerHausmeisterComposer({
           {listening ? <Square size={18} aria-hidden="true" /> : <Mic size={19} aria-hidden="true" />}
           <span>{listening ? 'Stopp' : speechSupported ? 'Diktieren' : 'Sprache nicht verfügbar'}</span>
         </button>
-        <button className="send-action" type="submit" disabled={offline || submitting || text.trim().length < 4} aria-busy={submitting}>
+        <button className="send-action" type="submit" disabled={offline || submitting || (text.trim().length < 4 && !hasDocument)} aria-busy={submitting}>
           <Send size={18} aria-hidden="true" />
           <span>{submitting ? 'Wird gesendet…' : continuingIntent ? 'Weiter' : 'Anliegen senden'}</span>
         </button>
