@@ -915,7 +915,7 @@ for(const plan of activePlans){
 }
 
 // 9) Beratung und Notfall sind eigenständige, sehr einfache Einstiege.
-await nav(owner, base+'/app/consultation'); await owner.getByLabel('Deine Frage').fill('Ich möchte kurz wissen, wie ich einen stark wachsenden Baum am besten prüfen lasse.'); await owner.getByLabel('Foto dazu (optional)').setInputFiles({name:'baum.mp4',mimeType:'video/mp4',buffer:Buffer.from('test-video')}); await clickAndWaitUrl(owner,owner.getByRole('button',{name:'Ansprechpartner finden'}),/\/app\/jobs\/\d+/); await waitText(owner,'noch kein Auftrag'); if(await owner.locator('video.hero-photo').count()!==1)throw new Error('Consultation video must render on the resulting contact request');
+await nav(owner, base+'/app/consultation'); await owner.getByLabel('Deine Frage',{exact:true}).fill('Ich möchte kurz wissen, wie ich einen stark wachsenden Baum am besten prüfen lasse.'); await owner.getByLabel('Foto dazu (optional)',{exact:true}).setInputFiles({name:'baum.mp4',mimeType:'video/mp4',buffer:Buffer.from('test-video')}); await clickAndWaitUrl(owner,owner.getByRole('button',{name:'Ansprechpartner finden'}),/\/app\/jobs\/\d+/); await waitText(owner,'noch kein Auftrag'); if(await owner.locator('video.hero-photo').count()!==1)throw new Error('Consultation video must render on the resulting contact request');
 // Die Notfallart ueber ihre stabile id adressieren: `getByLabel('Notfall')` trifft
 // zwei Elemente, weil die Kennzahlenleiste denselben Text als Label traegt
 // (src/app/app/emergency/page.tsx, EHMetricsBar label="Notfall").
