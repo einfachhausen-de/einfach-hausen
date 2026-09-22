@@ -1,7 +1,7 @@
 "use client";
 import Link from 'next/link';
 import { Calendar, CalendarDays, ClipboardList, FileText, Plus, Search } from 'lucide-react';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { NotificationsMenu, type NoticeItem } from './notifications-menu';
 import { openSearch } from './werkbank-suche';
 import s from './shell.module.css';
@@ -62,6 +62,13 @@ export function HeaderMenu({ jobsHref, jobsCount, jobsNewHref, jobsList, calHref
           </button>
         </DropdownMenuTrigger>
         <DropdownMenuContent side="bottom" align="start" sideOffset={8} className="w-80 max-w-[calc(100vw-2rem)] rounded-lg p-2">
+          <DropdownMenuLabel className="py-2">
+            <span className="flex items-baseline justify-between gap-2">
+              <span className="truncate font-medium">Aufträge</span>
+              <span className="shrink-0 opacity-70">{jobsCount > 0 ? `${jobsCount} offen` : 'Nichts offen'}</span>
+            </span>
+          </DropdownMenuLabel>
+          <DropdownMenuSeparator />
           {jobsNewHref && (
             <DropdownMenuItem asChild className={MENU_ITEM_CLASS}>
               <Link href={jobsNewHref} className="text-inherit">
@@ -99,6 +106,13 @@ export function HeaderMenu({ jobsHref, jobsCount, jobsNewHref, jobsList, calHref
           </button>
         </DropdownMenuTrigger>
         <DropdownMenuContent side="bottom" align="start" sideOffset={8} className="w-80 max-w-[calc(100vw-2rem)] rounded-lg p-2">
+          <DropdownMenuLabel className="py-2">
+            <span className="flex items-baseline justify-between gap-2">
+              <span className="truncate font-medium">Termine</span>
+              <span className="shrink-0 opacity-70">{calCount > 0 ? `${calCount} anstehend` : 'Nichts anstehend'}</span>
+            </span>
+          </DropdownMenuLabel>
+          <DropdownMenuSeparator />
           {calList.map((event) => (
             <DropdownMenuItem key={event.id} asChild className={MENU_ITEM_CLASS}>
               <Link href={event.href} className="text-inherit">
