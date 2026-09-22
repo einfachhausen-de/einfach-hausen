@@ -33,8 +33,8 @@ export function NavUser({ name, sub, initials, profileHref, hilfeHref }: { name:
           <span className="grid flex-1 text-left leading-tight"><span className="truncate font-medium">{name}</span><span className="truncate text-xs opacity-70">{sub}</span></span>
         </span></DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem asChild className={MENU_ITEM_CLASS}><Link href={profileHref}><UserRound /><span>Profil</span></Link></DropdownMenuItem>
-        <DropdownMenuItem asChild className={MENU_ITEM_CLASS}><Link href={hilfeHref}><CircleHelp /><span>Hilfe & Kontakt</span></Link></DropdownMenuItem>
+        <DropdownMenuItem asChild className={MENU_ITEM_CLASS}><Link href={profileHref} className="text-inherit"><UserRound /><span>Profil</span></Link></DropdownMenuItem>
+        <DropdownMenuItem asChild className={MENU_ITEM_CLASS}><Link href={hilfeHref} className="text-inherit"><CircleHelp /><span>Hilfe & Kontakt</span></Link></DropdownMenuItem>
         <DropdownMenuItem onSelect={() => openSettingsDialog('account')} className={MENU_ITEM_CLASS}><Settings /><span>Einstellungen</span></DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild className={MENU_ITEM_CLASS}><form action={logoutAction}><button type="submit" aria-label="Abmelden" className="flex w-full items-center gap-2"><LogOut /><span>Abmelden</span></button></form></DropdownMenuItem>
