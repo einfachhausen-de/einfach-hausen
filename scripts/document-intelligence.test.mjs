@@ -20,6 +20,8 @@ test('document classifier uses conservative deterministic categories',()=>{
 
 test('relevant date requires deadline/maintenance context',()=>{
  assert.equal(mod.extractRelevantDate('Nächste Wartung: 12.10.2027'),'2027-10-12');
+ assert.equal(mod.extractRelevantDate('Garantie bis: 20.12.2028'),'2028-12-20');
+ assert.equal(mod.extractRelevantDate('Gewährleistung endet am 03.04.2029'),'2029-04-03');
  assert.equal(mod.extractRelevantDate('Erstellt am 12.10.2027'),null);
 });
 

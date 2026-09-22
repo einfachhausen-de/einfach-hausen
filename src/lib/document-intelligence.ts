@@ -86,7 +86,7 @@ async function classifyWithLaya(text:string,originalName:string):Promise<{kind:I
 
 export function extractRelevantDate(text:string):string|null{
   const q=text.replace(/\s+/g,' ');
-  const re=/(.{0,70}(?:kündigungsfrist|kuendigungsfrist|fällig|faellig|wartung|inspektion|gültig bis|gueltig bis|ablauf|endet am).{0,50})/giu;
+  const re=/(.{0,70}(?:kündigungsfrist|kuendigungsfrist|fällig|faellig|wartung|inspektion|gültig bis|gueltig bis|garantie(?:\s+bis|\s*ende|\s*ablauf)?|gewährleistung(?:\s+bis|\s*ende|\s*ablauf)?|gewaehrleistung(?:\s+bis|\s*ende|\s*ablauf)?|ablauf|endet am).{0,50})/giu;
   for(const match of q.matchAll(re)){
     const context=match[1];
     const iso=context.match(/\b(20\d{2})[-/.](0?[1-9]|1[0-2])[-/.](0?[1-9]|[12]\d|3[01])\b/);
