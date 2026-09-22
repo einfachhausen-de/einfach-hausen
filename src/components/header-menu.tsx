@@ -68,12 +68,6 @@ export function HeaderMenu({ jobsHref, jobsCount, jobsNewHref, jobsList, calHref
                   <span>Neuer Auftrag</span>
                 </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem asChild className={MENU_ITEM_CLASS}>
-                <Link href={jobsNewHref} className="text-inherit">
-                  <Plus size={16} aria-hidden="true" className="shrink-0 opacity-70" />
-                  <span>Neuer Auftrag</span>
-                </Link>
-              </DropdownMenuItem>
               {SERVICE_CATEGORIES.map((area) => {
                 const Icon = area.icon;
                 return (
