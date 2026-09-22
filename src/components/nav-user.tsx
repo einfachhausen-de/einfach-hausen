@@ -24,8 +24,8 @@ export function NavUser({ name, sub, initials, profileHref, hilfeHref }: { name:
     <SidebarMenu><SidebarMenuItem><DropdownMenu>
       <DropdownMenuTrigger asChild><SidebarMenuButton size="lg" aria-label="Kontomenü öffnen">
         <Avatar className="size-8 rounded-lg"><AvatarFallback className="rounded-lg">{initials}</AvatarFallback></Avatar>
-        <span className="grid flex-1 text-left leading-tight"><span className="truncate font-medium">{name}</span><span className="truncate opacity-70">{sub}</span></span>
-        <ChevronsUpDown className="ml-auto size-4" />
+        <span className="grid flex-1 text-left leading-tight group-data-[collapsible=icon]:hidden"><span className="truncate font-medium">{name}</span><span className="truncate opacity-70">{sub}</span></span>
+        <ChevronsUpDown className="ml-auto size-4 group-data-[collapsible=icon]:hidden" />
       </SidebarMenuButton></DropdownMenuTrigger>
       <DropdownMenuContent side={isMobile ? 'bottom' : 'top'} align="end" sideOffset={8} className="w-[var(--radix-dropdown-menu-trigger-width)] min-w-56 rounded-md p-2">
         <DropdownMenuLabel className="py-3"><span className="flex items-center gap-3">

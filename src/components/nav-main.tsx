@@ -45,9 +45,9 @@ export function NavMain({ entries, label }: { entries: readonly MainNavEntry[]; 
           entry.items.length === 0 ? (
             <SidebarMenuItem key={entry.href}>
               <SidebarMenuButton asChild isActive={entry.isActive} tooltip={entry.label}>
-                <Link href={entry.href} aria-current={entry.isActive ? 'page' : undefined}>
+                <Link href={entry.href} aria-current={entry.isActive ? 'page' : undefined} aria-label={entry.label}>
                   {entry.icon}
-                  <span>{entry.label}</span>
+                  <span className="group-data-[collapsible=icon]:hidden">{entry.label}</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
@@ -80,9 +80,9 @@ function NavCollapsibleEntry({ entry }: { entry: MainNavEntry }) {
     >
       <SidebarMenuItem>
         <SidebarMenuButton asChild isActive={entry.isActive} tooltip={entry.label}>
-          <Link href={entry.href} aria-current={entry.exact ? 'page' : undefined}>
+          <Link href={entry.href} aria-current={entry.exact ? 'page' : undefined} aria-label={entry.label}>
             {entry.icon}
-            <span>{entry.label}</span>
+            <span className="group-data-[collapsible=icon]:hidden">{entry.label}</span>
           </Link>
         </SidebarMenuButton>
         <CollapsibleTrigger asChild>
@@ -90,7 +90,7 @@ function NavCollapsibleEntry({ entry }: { entry: MainNavEntry }) {
             <ChevronRightIcon />
           </SidebarMenuAction>
         </CollapsibleTrigger>
-        <CollapsibleContent>
+        <CollapsibleContent className="group-data-[collapsible=icon]:hidden">
           <SidebarMenuSub>
             {entry.items.map((child) => (
               <SidebarMenuSubItem key={child.href}>

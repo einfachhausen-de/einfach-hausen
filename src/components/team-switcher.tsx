@@ -15,7 +15,7 @@ export function TeamSwitcher({ title, sub, homeHref }: { title: string; sub?: st
             <span className={s['wb-mark']} aria-hidden="true">
               eh
             </span>
-            <span className="grid flex-1 text-left leading-tight">
+            <span className="grid flex-1 text-left leading-tight group-data-[collapsible=icon]:hidden">
               <span className="truncate font-medium">{title}</span>
               {sub ? <span className="truncate opacity-70">{sub}</span> : null}
             </span>

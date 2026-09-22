@@ -40,11 +40,11 @@ export function NavProjects({
         {entries.map((entry) => (
           <SidebarMenuItem key={entry.href}>
             <SidebarMenuButton asChild isActive={entry.isActive} tooltip={entry.label}>
-              <Link href={entry.href} aria-current={entry.isActive ? 'page' : undefined}>
+              <Link href={entry.href} aria-current={entry.isActive ? 'page' : undefined} aria-label={entry.label}>
                 {entry.icon}
-                <span>{entry.label}</span>
+                <span className="group-data-[collapsible=icon]:hidden">{entry.label}</span>
                 {entry.href === '/notifications' && unread > 0 && (
-                  <span className={s.count}>{unread > 99 ? '99+' : unread}</span>
+                  <span className={`${s.count} group-data-[collapsible=icon]:hidden`}>{unread > 99 ? '99+' : unread}</span>
                 )}
               </Link>
             </SidebarMenuButton>
