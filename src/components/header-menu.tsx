@@ -65,22 +65,17 @@ export function HeaderMenu({ jobsHref, jobsCount, jobsNewHref, jobsList, calHref
           {jobsNewHref && (
             <DropdownMenuSub>
               <DropdownMenuSubTrigger
-                asChild
                 className={MENU_ITEM_CLASS}
+                aria-label="Neuer Auftrag"
+                onClick={(event) => {
+                  // Maus-Klick navigiert direkt; Tastatur-Enter (detail 0)
+                  // oeffnet nur das Bereichs-Untermenue (Radix-Verhalten).
+                  if (event.detail === 0 || !jobsNewHref) return;
+                  router.push(jobsNewHref);
+                }}
               >
-                <button
-                  type="button"
-                  aria-label="Neuer Auftrag"
-                  onClick={(event) => {
-                    // Maus-Klick navigiert direkt; Tastatur-Enter (detail 0)
-                    // oeffnet nur das Bereichs-Untermenue (Radix-Verhalten).
-                    if (event.detail === 0 || !jobsNewHref) return;
-                    router.push(jobsNewHref);
-                  }}
-                >
-                  <Plus size={16} aria-hidden="true" className="shrink-0 opacity-70" />
-                  <span>Neuer Auftrag</span>
-                </button>
+                <Plus size={16} aria-hidden="true" className="shrink-0 opacity-70" />
+                <span>Neuer Auftrag</span>
               </DropdownMenuSubTrigger>
               <DropdownMenuSubContent className="max-h-[50vh] w-64 overflow-y-auto rounded-lg p-2">
                 {SERVICE_CATEGORIES.map((area) => {
