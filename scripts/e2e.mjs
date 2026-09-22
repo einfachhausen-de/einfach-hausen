@@ -671,7 +671,7 @@ await owner.locator(MOBILE_SIDEBAR).first().waitFor({state:'hidden',timeout:1000
 await openMobileSidebar(owner,'Owner');
 await clickAndWaitUrl(owner,owner.locator(`${MOBILE_SIDEBAR} a[href="/app/jobs"]`).first(),/\/app\/jobs/);
 if(await owner.locator(MOBILE_SIDEBAR).first().isVisible())throw new Error('Mobile owner menu did not close after navigation');
-await nav(owner, base+'/app/profile'); await waitText(owner,'Einfach Hausen aufs Handy'); await assertNoOverflow(owner,'Mobile customer profile');
+await nav(owner, base+'/app/profile'); await waitText(owner,'Deine Hausdaten bleiben privat.'); await assertNoOverflow(owner,'Mobile customer profile');
 await nav(owner, base+'/app/hausmeister'); await assertNoOverflow(owner,'Mobile housemaster');
 await sendHousemaster(owner,'Meine Hecke ist zu hoch. Dienstag ab 14 Uhr hätte ich Zeit. Wen kann ich dazu fragen?',/answered=1/);
 await waitText(owner,'Wie soll es weitergehen?'); await waitText(owner,'Ansprechpartner finden'); await waitText(owner,'Auftrag organisieren');
