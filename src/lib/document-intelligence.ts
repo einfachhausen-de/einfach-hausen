@@ -128,6 +128,15 @@ async function extractDocumentText(file:string,mime:string):Promise<{text:string
         return {text,method:'pdf-ocr',error:text?'':'empty_ocr'};
       }finally{await fs.rm(tmp,{recursive:true,force:true}).catch(()=>{});}
     }
+    if(['image/heic','image/heif'].includes(mime)||['.heic','.heif'].includes(ext)){
+      const tmp=await fs.mkdtemp(path.join(os.tmpdir(),'eh-heic-'));
+      try{
+        const normalized=path.join(tmp,'image.png');
+        await execFileAsync('heif-convert',[file,normalized],{timeout:20000,maxBuffer:256*1024});
+        const text=await ocrImage(normalized);
+        return {text,method:'image-ocr',error:text?'':'empty_ocr'};
+      }finally{await fs.rm(tmp,{recursive:true,force:true}).catch(()=>{});}
+    }
     if(mime.startsWith('image/')||['.png','.jpg','.jpeg','.webp','.tif','.tiff'].includes(ext)){
       const text=await ocrImage(file);
       return {text,method:'image-ocr',error:text?'':'empty_ocr'};
