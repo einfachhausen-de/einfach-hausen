@@ -694,7 +694,11 @@ await jobsMenu.getByText('Neuer Auftrag',{exact:true}).first().waitFor({timeout:
 await jobsMenu.getByText('Alle Aufträge',{exact:true}).first().waitFor({timeout:10000});
 await clickAndWaitUrl(ownerDesktop,jobsMenu.getByRole('menuitem',{name:'Alle Aufträge'}),/\/app\/jobs/);
 await nav(ownerDesktop, base+'/app');
-await clickAndWaitUrl(ownerDesktop,headerMenu.getByRole('link',{name:'Kalender'}),/\/app\/calendar/);
+// Kalender-Menü: Alle Termine führt weiter (noch keine anstehenden).
+await headerMenu.getByRole('button',{name:'Kalender'}).click();
+const calMenu=ownerDesktop.getByRole('menu');
+await calMenu.getByText('Alle Termine',{exact:true}).first().waitFor({timeout:10000});
+await clickAndWaitUrl(ownerDesktop,calMenu.getByRole('menuitem',{name:'Alle Termine'}),/\/app\/calendar/);
 // 3c) Glocken-Menue: Mini-Liste statt Seitenwechsel, "Alle ansehen" fuehrt weiter.
 await nav(ownerDesktop, base+'/app');
 await ownerDesktop.getByRole('button',{name:'Benachrichtigung'}).click();
