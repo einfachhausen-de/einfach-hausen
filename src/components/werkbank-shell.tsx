@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useId, useState, type ReactNode } from 'react';
-import { ChevronLeft } from 'lucide-react';
+import { PanelRight } from 'lucide-react';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import {
   SidebarInset,
@@ -184,7 +184,7 @@ export function WerkbankShell({
                 {railZu && (
                   <button type="button" className={s['wb-rail-auf']} aria-controls={railId} aria-expanded={false}
                     aria-label="Rechten Bereich ausklappen" title="Rechten Bereich ausklappen" onClick={railUmschalten}>
-                    <ChevronLeft size={18} aria-hidden="true" />
+                    <PanelRight size={18} aria-hidden="true" />
                   </button>
                 )}
                 {rail && <div className={s['wb-rail-kontext']}>{rail}</div>}

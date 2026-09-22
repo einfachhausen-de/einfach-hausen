@@ -96,13 +96,13 @@
    (48 px): oben der Ausklapp-Knopf, unten das Symbol des Kundenberaters,
    dazwischen der Griff am Rand. Der Streifen folgt dem Blatt und bleibt unter
    der Werkbank-Leiste stehen, genau wie die Seitenleiste. */
-.wb-rail[data-zu]{flex:0 0 48px;width:48px;max-width:48px;padding:8px 6px;gap:8px;align-self:stretch;justify-content:flex-end}
+.wb-rail[data-zu]{flex:0 0 48px;width:48px;max-width:48px;padding:8px 6px;gap:8px;align-self:stretch}
 .wb-rail[data-zu]>.wb-rail-kontext{display:none}
 .wb-rail[data-zu]>.wb-rail-griff{left:-8px;cursor:w-resize}
-/* Ausklapp-Knopf ueber dem Symbol des Kundenberaters: das Symbol ist 36 px
-   hoch und 8 px vom Rand entfernt, darueber liegen 8 px Luft. Beide bleiben
-   beim Blaettern am unteren Rand stehen - wie das Kontomenue unten links. */
-.wb-rail[data-zu]>.wb-rail-auf{position:sticky;bottom:calc(36px + 16px);z-index:2}
-.wb-rail[data-zu]>[data-eh-app]{position:sticky;bottom:8px;margin-top:0;align-items:center}
+/* Eingeklappt: oben das Aufklapp-Symbol (Panel nach rechts, Linie rechts),
+   unten das KI-Symbol. Beide bleiben beim Blaettern sichtbar - oben bzw.
+   unten sticky, wie die linke Seitenleiste. */
+.wb-rail[data-zu]>.wb-rail-auf{position:sticky;top:8px;z-index:2}
+.wb-rail[data-zu]>[data-eh-app]{position:sticky;bottom:8px;margin-top:auto;align-items:center}
 .wb-rail-auf{display:grid;place-items:center;flex:0 0 auto;width:36px;min-height:32px;padding:0;border:1px solid var(--eh-color-line);border-radius:var(--eh-radius-control);background:var(--eh-color-white);color:var(--eh-color-secondary);cursor:pointer}
 .wb-rail-auf:hover{border-color:var(--eh-color-petrol);color:var(--eh-color-petrol)}
