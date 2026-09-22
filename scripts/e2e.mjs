@@ -818,11 +818,14 @@ await nav(owner, base+'/app/messages'); await waitText(owner,'Wähle einen Berei
   // Body und traf damit die Kontextspalte, nicht das Verzeichnis. Geprueft wird
   // jetzt die Grenze, um die es geht: die Bereichsauswahl selbst darf keinen
   // Kontakt nennen, und jeder Name in der Kontextspalte muss in einer begruendeten
-  // Liste stehen (ungelesen oder erreichbar) - kein ungefilterter Kontakt-Dump.
+  // Liste stehen (ungelesen oder anrufbar) - kein ungefilterter Kontakt-Dump.
   const directoryColumn=await owner.locator('[class*="workspaceGrid"] > div').first().innerText();
   if(directoryColumn.includes('Thomas Weber'))throw new Error('The category level of the directory must not list contacts');
   const asideSections=await owner.locator('[class*="workspaceGrid"] > aside [class*="workSection"]').evaluateAll(nodes=>nodes.map(node=>({title:node.querySelector('h2')?.textContent||'',text:node.innerText})));
-  const justified=['Ungelesene Nachrichten','Erreichbarkeit'];
+  // "Anrufen" ist der Nachfolger der frueheren "Erreichbarkeit"-Sektion
+  // (EINFACH-WELLE; src/app/app/messages/page.tsx:133-140): verknuepfte
+  // Kontakte mit echter hinterlegter Rufnummer, maximal 4 - kein Dump.
+  const justified=['Ungelesene Nachrichten','Anrufen'];
   const withContact=asideSections.filter(section=>section.text.includes('Thomas Weber'));
   if(!withContact.length)throw new Error('Expected the contact in a justified aside list (unread or reachable)');
   for(const section of withContact){
