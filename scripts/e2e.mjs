@@ -942,11 +942,11 @@ await nav(buyer, base+'/register?role=homeowner'); await buyer.locator('#btn-sub
 await waitText(buyer,'Trag Straße und PLZ ein, damit Einfach Hausen Betriebe in deiner Region findet.');
 await buyer.getByLabel('Straße und Hausnummer').fill('Kaistraße 7');
 await clickAndWaitUrl(buyer,buyer.getByRole('button',{name:'Weiter'}),/\/app\/onboarding$/);
-await waitText(buyer,'Wähle die Bereiche, die dich interessieren. Überspringen ist möglich.');
-await nav(buyer, buyer.url()); await waitText(buyer,'Wähle die Bereiche, die dich interessieren. Überspringen ist möglich.');
+await waitText(buyer,'Wähle die Bereiche, die dich interessieren. Überspringen geht auch — ergänzen kannst du später im Profil.');
+await nav(buyer, buyer.url()); await waitText(buyer,'Wähle die Bereiche, die dich interessieren. Überspringen geht auch — ergänzen kannst du später im Profil.');
 await buyer.getByLabel(new RegExp('Garten')).check();
 await clickAndWaitUrl(buyer,buyer.getByRole('button',{name:'Weiter'}),/\/app\/onboarding$/);
-await waitText(buyer,'Sag, über welchen Weg wir dich am besten erreichen.');
+await waitText(buyer,'Sag, über welchen Weg wir dich am besten erreichen. Überspringen geht auch.');
 await buyer.getByRole('button',{name:'Überspringen'}).click();
 await Promise.all([buyer.waitForURL('**/app?onboarding=done'),buyer.waitForLoadState('load')]);
 // Dieselben Anker wie fuer den Eigentuemer: die Startseite ist die
