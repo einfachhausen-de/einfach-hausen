@@ -54,9 +54,9 @@
 .wb-side a:focus-visible{border-radius:var(--eh-radius-control);background-color:var(--eh-color-white)}
 
 /* Bereichssuche der Werkbank-Topbar (Cmd+K / Cmd+S) */
-.searchOpen{position:fixed;inset:0;z-index:200;display:grid;grid-template-rows:auto 1fr;justify-items:end}
+.searchOpen{position:fixed;inset:0;z-index:200;display:grid;grid-template-rows:auto 1fr;justify-items:center}
 .searchBackdrop{position:fixed;inset:0;background:var(--eh-color-ink);opacity:.28;border:0;padding:0;cursor:default}
-.searchPanel{position:relative;grid-row:1;width:min(520px,calc(100vw - 32px));margin:74px 18px 0;background:var(--eh-color-white);border:1px solid var(--eh-color-line);border-radius:var(--eh-radius-panel);box-shadow:var(--eh-shadow-panel);overflow:hidden}
+.searchPanel{position:relative;z-index:1;grid-row:1;width:min(520px,calc(100vw - 32px));margin:74px 18px 0;background:var(--eh-color-white);border:1px solid var(--eh-color-line);border-radius:var(--eh-radius-panel);box-shadow:var(--eh-shadow-panel);overflow:hidden}
 .searchField{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--eh-color-line);color:var(--eh-color-secondary)}
 .searchField input{flex:1;min-width:0;border:0;outline:0;background:transparent;color:var(--eh-color-ink);font:var(--eh-font-body) var(--eh-font-family)}
 .searchField input:focus{box-shadow:none}

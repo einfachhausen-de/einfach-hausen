@@ -671,6 +671,21 @@ await owner.locator(MOBILE_SIDEBAR).first().waitFor({state:'hidden',timeout:1000
 await openMobileSidebar(owner,'Owner');
 await clickAndWaitUrl(owner,owner.locator(`${MOBILE_SIDEBAR} a[href="/app/jobs"]`).first(),/\/app\/jobs/);
 if(await owner.locator(MOBILE_SIDEBAR).first().isVisible())throw new Error('Mobile owner menu did not close after navigation');
+// 3b) Bereichssuche am Desktop: Palette mittig im Vordergrund, ein Klick auf
+// einen Treffer navigiert (statt im Backdrop zu versickern).
+const ownerDesktopCtx=await newE2EContext({viewport:{width:1320,height:900}}); const ownerDesktop=await ownerDesktopCtx.newPage(); trackPage(ownerDesktop,'homeowner-desktop');
+await nav(ownerDesktop, base+'/login'); await ownerDesktop.getByRole('heading',{name:/Willkommen zurück/}).waitFor();
+await ownerDesktop.locator('input[inputmode="email"]:visible').fill(ownerEmail);
+await ownerDesktop.locator('input[type="password"]:visible').fill(password);
+await Promise.all([ownerDesktop.waitForURL('**/app',{timeout:60000}),ownerDesktop.locator('#btn-submit-login:visible').click()]);
+await ownerDesktop.locator('button[aria-label^="Suche öffnen"]').first().click();
+const searchDialog=ownerDesktop.getByRole('dialog',{name:'Bereichssuche'});
+await searchDialog.waitFor({timeout:10000});
+const searchBox=await searchDialog.boundingBox();
+if(!searchBox)throw new Error('Search palette has no box');
+if(searchBox.x<200||searchBox.x>650)throw new Error(`Search palette must be roughly centered, got x=${Math.round(searchBox.x)}`);
+await clickAndWaitUrl(ownerDesktop,searchDialog.getByRole('button',{name:'Verträge & Tarife'}),/\/app\/contracts/);
+await ownerDesktopCtx.close();
 await nav(owner, base+'/app/profile'); await waitText(owner,'Deine Hausdaten bleiben privat.'); await assertNoOverflow(owner,'Mobile customer profile');
 await nav(owner, base+'/app/hausmeister'); await assertNoOverflow(owner,'Mobile housemaster');
 await sendHousemaster(owner,'Meine Hecke ist zu hoch. Dienstag ab 14 Uhr hätte ich Zeit. Wen kann ich dazu fragen?',/answered=1/);
