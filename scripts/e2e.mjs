@@ -685,6 +685,12 @@ const searchBox=await searchDialog.boundingBox();
 if(!searchBox)throw new Error('Search palette has no box');
 if(searchBox.x<200||searchBox.x>650)throw new Error(`Search palette must be roughly centered, got x=${Math.round(searchBox.x)}`);
 await clickAndWaitUrl(ownerDesktop,searchDialog.getByRole('button',{name:'Verträge & Tarife'}),/\/app\/contracts/);
+// 3c) Glocken-Menue: Mini-Liste statt Seitenwechsel, "Alle ansehen" fuehrt weiter.
+await nav(ownerDesktop, base+'/app');
+await ownerDesktop.getByRole('button',{name:/Benachrichtigungen/}).click();
+const bellMenu=ownerDesktop.getByRole('menu');
+await bellMenu.getByText('Alle ansehen',{exact:true}).first().waitFor({timeout:10000});
+await clickAndWaitUrl(ownerDesktop,bellMenu.getByRole('link',{name:'Alle ansehen'}),/\/notifications/);
 await ownerDesktopCtx.close();
 await nav(owner, base+'/app/profile'); await waitText(owner,'Deine Hausdaten bleiben privat.'); await assertNoOverflow(owner,'Mobile customer profile');
 await nav(owner, base+'/app/hausmeister'); await assertNoOverflow(owner,'Mobile housemaster');

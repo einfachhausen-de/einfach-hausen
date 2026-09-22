@@ -2,7 +2,6 @@
 
 import Link from 'next/link';
 import type { ReactNode } from 'react';
-import { Bell } from 'lucide-react';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import {
   SidebarInset,
@@ -19,6 +18,7 @@ import {
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 import { AppSidebar } from './app-sidebar';
+import { NotificationsMenu, type NoticeItem } from './notifications-menu';
 import { SettingsDialogHost } from './settings-dialog-host';
 import { WerkbankSuche } from './werkbank-suche';
 import { BottomNav } from './bottom-nav';
@@ -43,6 +43,7 @@ export function WerkbankShell({
   userSub,
   userInitials,
   unread,
+  notices,
   profileHref,
   hilfeHref,
   searchLabel,
@@ -61,6 +62,7 @@ export function WerkbankShell({
   userSub: string;
   userInitials: string;
   unread: number;
+  notices: readonly NoticeItem[];
   profileHref: string;
   hilfeHref: string;
   searchLabel: string;
@@ -107,14 +109,7 @@ export function WerkbankShell({
             </div>
             <div className={s['wb-tools']}>
               <WerkbankSuche pro={pro} label={searchLabel} />
-              <Link
-                href="/notifications"
-                className={s.toolIcon}
-                aria-label={unread > 0 ? `${unread} ungelesene Benachrichtigungen` : 'Benachrichtigungen'}
-              >
-                <Bell size={22} />
-                {unread > 0 && <span className={s.toolBadge}>{unread > 99 ? '99+' : unread}</span>}
-              </Link>
+              <NotificationsMenu unread={unread} items={notices} />
               <Link
                 href={profileHref}
                 className={s.toolAvatar}

@@ -38,10 +38,23 @@ export async function WerkbankRahmen({
 }) {
   const pro = role === 'provider';
   const user = await getCurrentUser();
-  const unread =
-    user && user.role === role
-      ? (db.prepare("SELECT COUNT(*) c FROM notifications WHERE user_id=? AND read_at IS NULL AND channel='in_app'").get(user.id) as { c: number }).c
-      : 0;
+  const sameRole = user && user.role === role;
+  const unread = sameRole
+    ? (db.prepare("SELECT COUNT(*) c FROM notifications WHERE user_id=? AND read_at IS NULL AND channel='in_app'").get(user.id) as { c: number }).c
+    : 0;
+  // Neueste Mitteilungen fuer das Glocken-Menue: ungelesene zuerst, dann die
+  // juengsten gelesenen — maximal fuenf. Volle Liste und Lesestand weiter auf
+  // /notifications, hier keine Mutationen.
+  const notices = sameRole
+    ? (db.prepare("SELECT id,title,body,href,read_at,created_at FROM notifications WHERE user_id=? AND channel='in_app' ORDER BY read_at IS NULL DESC, created_at DESC, id DESC LIMIT 5").all(user.id) as { id: number; title: string; body: string; href: string; read_at: string | null; created_at: string }[]).map((notice) => ({
+        id: notice.id,
+        title: notice.title,
+        body: notice.body || '',
+        href: notice.href || '/notifications',
+        unread: notice.read_at === null,
+        when: new Date(`${notice.created_at}Z`).toLocaleString('de-DE', { dateStyle: 'short', timeStyle: 'short' }),
+      }))
+    : [];
   const profileHref = pro ? '/pro/profile' : '/app/profile';
   const hilfeHref = pro ? '/pro/hilfe' : '/app/hilfe';
   const homeHref = pro ? '/pro' : '/app';
@@ -93,6 +106,7 @@ export async function WerkbankRahmen({
         userSub={userSub}
         userInitials={initials}
         unread={unread}
+        notices={notices}
         profileHref={profileHref}
         hilfeHref={hilfeHref}
         searchLabel={searchLabel || 'Suchen'}
