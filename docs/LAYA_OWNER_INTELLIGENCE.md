@@ -35,8 +35,7 @@ Proaktive Prüfungen und Dokumentverarbeitung laufen im bereits vorhandenen `ein
 
 - PDFs: zuerst `pdftotext`, damit digitaler Text ohne OCR gelesen wird.
 - Scan-PDFs: bis zu sechs Seiten bounded über `pdftoppm`, danach Tesseract. Sehr große Scans blockieren dadurch nicht den gemeinsamen Worker.
-- JPG/PNG/WebP/TIFF: Tesseract direkt.
-- HEIC/HEIF: lokal mit `heif-convert` in ein temporäres PNG normalisieren und danach Tesseract; das private Original bleibt unverändert.
+- Bilder: Tesseract direkt.
 - Standardsprachen: `deu+eng` (`OCR_LANG` kann angepasst werden).
 - Laya klassifiziert lokal in: Rechnung, Angebot, Vertrag, Garantie, Wartung, Bericht, Versicherung, Energie, Sonstiges.
 - Bei niedriger Sicherheit bleibt die Datei erhalten und wird mit „Bitte prüfen“ markiert.
@@ -46,10 +45,9 @@ Proaktive Prüfungen und Dokumentverarbeitung laufen im bereits vorhandenen `ein
 Produktionsabhängigkeiten auf dem Host:
 
 ```text
-poppler-utils      # pdftotext, pdftoppm
+poppler-utils   # pdftotext, pdftoppm
 tesseract-ocr
 tesseract-ocr-deu
-libheif-examples    # heif-convert für iPhone-HEIC/HEIF
 ```
 
 ## Tarifpartner
@@ -103,15 +101,6 @@ Ein Insight erzeugt nur dann eine neue Benachrichtigung, wenn sich sein Fingerpr
 - Allgemeine Hausdokumente sind Teil von BYOS/Archiv und folgen bei einer Hausübergabe der Immobilie.
 - Laya erhält keine freie SQL- oder Mutationsfähigkeit.
 - Aufträge, Tarifwechsel und Handwerkerkontakte werden nicht autonom ausgelöst.
-
-## Produktionsnachweis 2026-09-22
-
-- Laya-Service-Validator: genau eine benannte Choice-Frage; `route` und `document_kind` erlaubt, Mehrfachfragen fail-closed.
-- Echter `document_kind`-Request am residenten Laya-Dienst: HTTP 200, Wartung korrekt, Confidence 1.0.
-- Wegwerf-Smoke ohne Produktionsnutzerdaten: digitales PDF als Rechnung + Fälligkeit, PNG-OCR als Wartung + Wartungsdatum, echtes macOS/iPhone-HEIC als Garantie + Garantieende.
-- Bei den Dokument-Smokes stieg `/health.completed` exakt pro Laya-Aufruf; damit ist nicht nur der lokale Fallback, sondern OCR/Text → Laya belegt.
-- `npm run test:ai`: 35/35 grün; `services/laya/test_server.py`: 3/3 grün; Release-Gate 17/17; öffentlicher Smoke 18/18.
-- Auf der OCI-VM sind `pdftotext`, `pdftoppm`, Tesseract und `heif-convert` installiert. `einfach-hausen.service`, `einfach-hausen-laya.service` und `einfach-hausen-dispatch.timer` laufen aktiv.
 
 ## Wichtige Dateien
 
