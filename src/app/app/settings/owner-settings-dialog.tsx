@@ -89,7 +89,7 @@ export function OwnerSettingsDialog({
           <Button size="sm" variant="secondary">Einstellungen öffnen</Button>
         </DialogTrigger>
       )}
-      <DialogContent className="overflow-hidden p-0 md:max-h-[85vh] lg:max-w-[1024px] xl:max-w-[1100px]">
+      <DialogContent className="overflow-hidden rounded-lg p-0 md:max-h-[85vh] lg:max-w-[1024px] xl:max-w-[1100px]">
         <DialogTitle className="sr-only">App-Einstellungen</DialogTitle>
         <DialogDescription className="sr-only">
           Konto und Daten, Benachrichtigungen, KI-Assistent sowie App-Installation und Offline-Status.
@@ -124,7 +124,7 @@ export function OwnerSettingsDialog({
                 <Breadcrumb>
                   <BreadcrumbList>
                     <BreadcrumbItem className="hidden md:block">
-                      <BreadcrumbLink href="/app/settings">Einstellungen</BreadcrumbLink>
+                      <BreadcrumbLink href="/app/settings" className="text-inherit">Einstellungen</BreadcrumbLink>
                     </BreadcrumbItem>
                     <BreadcrumbSeparator className="hidden md:block" />
                     <BreadcrumbItem>
