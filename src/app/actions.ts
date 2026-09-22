@@ -289,7 +289,9 @@ export async function sendHausmeisterAction(fd:FormData){
     let reply:string;
     if(analysis?.status==='done'){
       const date=analysis.relevantDate?` Als relevantes Datum habe ich ${analysis.relevantDate.split('-').reverse().join('.')} erkannt – bitte kurz prüfen.`:'';
-      reply=`Ich habe „${title}“ sicher in deiner Hausakte gespeichert und als ${labels[analysis.kind]||'Dokument'} erkannt.${date} Du kannst mich jetzt dazu fragen oder es unter „Dokumente“ öffnen.`;
+      const excerpt=description&&analysis.searchText?analysis.searchText.replace(/\s+/g,' ').trim().slice(0,700):'';
+      const content=excerpt?` Aus dem Dokument konnte ich u. a. lesen: „${excerpt}${analysis.searchText.length>700?' …':''}“`:'';
+      reply=`Ich habe „${title}“ sicher in deiner Hausakte gespeichert und als ${labels[analysis.kind]||'Dokument'} erkannt.${date}${content} Du kannst mich weiter dazu fragen oder es unter „Dokumente“ öffnen.`;
     }else if(analysis?.status==='review'){
       reply=`Ich habe „${title}“ sicher in deiner Hausakte gespeichert. Die automatische Texterkennung oder Zuordnung war nicht eindeutig genug; das Dokument ist deshalb zur kurzen Prüfung markiert. Es geht dabei nichts verloren.`;
     }else{

@@ -193,6 +193,7 @@ export type DocumentIntelligenceResult = {
   relevantDate:string|null;
   confidence:number|null;
   errorCode:string;
+  searchText:string;
 };
 
 export async function processDocumentIntelligenceSource(homeownerId:number,sourceType:DocumentSourceType,sourceId:number):Promise<DocumentIntelligenceResult|null>{
@@ -205,11 +206,11 @@ export async function processDocumentIntelligenceSource(homeownerId:number,sourc
   catch{
     db.prepare("UPDATE document_intelligence_jobs SET status=CASE WHEN attempts>=3 THEN 'failed' ELSE 'queued' END,error_code='worker_error',updated_at=CURRENT_TIMESTAMP WHERE id=?").run(row.id);
   }
-  const result=db.prepare(`SELECT status,document_kind,relevant_date,confidence,error_code FROM document_intelligence_jobs
-    WHERE id=? AND homeowner_id=?`).get(row.id,homeownerId) as {status:string;document_kind:string;relevant_date:string|null;confidence:number|null;error_code:string}|undefined;
+  const result=db.prepare(`SELECT status,document_kind,relevant_date,confidence,error_code,search_text FROM document_intelligence_jobs
+    WHERE id=? AND homeowner_id=?`).get(row.id,homeownerId) as {status:string;document_kind:string;relevant_date:string|null;confidence:number|null;error_code:string;search_text:string}|undefined;
   if(!result)return null;
   const status=result.status==='done'||result.status==='review'||result.status==='failed'?result.status:'review';
-  return {status,kind:normalizeLayaKind(result.document_kind)||'other',relevantDate:result.relevant_date,confidence:result.confidence,errorCode:result.error_code||''};
+  return {status,kind:normalizeLayaKind(result.document_kind)||'other',relevantDate:result.relevant_date,confidence:result.confidence,errorCode:result.error_code||'',searchText:clampText(result.search_text||'',4000)};
 }
 
 export async function processDocumentIntelligenceBatch(limit=12){
