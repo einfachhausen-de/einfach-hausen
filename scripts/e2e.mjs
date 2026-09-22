@@ -694,12 +694,13 @@ await jobsMenu.getByText('Neuer Auftrag',{exact:true}).first().waitFor({timeout:
 await jobsMenu.getByText('Alle Aufträge',{exact:true}).first().waitFor({timeout:10000});
 await clickAndWaitUrl(ownerDesktop,jobsMenu.getByRole('menuitem',{name:'Alle Aufträge'}),/\/app\/jobs/);
 await nav(ownerDesktop, base+'/app');
-// 3b3) Neuer-Auftrag-Untermenü: Hover öffnet das Bereichs-Flyout LINKS
-// neben dem Menü (rechts wäre es außerhalb des Schirms), Klick auf einen
-// Bereich startet den Hausmeister mit passendem Thema.
+// 3b3) Bereichs-Untermenü: Klick auf "Nach Bereich" öffnet das Flyout
+// (bleibt offen, kein Hover-Grace-Rennen), es liegt LINKS neben dem Menü
+// (rechts wäre es außerhalb des Schirms). Klick auf einen Bereich startet
+// den Hausmeister mit passendem Thema.
 await headerMenu.getByRole('button',{name:'Aufträge'}).click();
 const jobsMenu2=ownerDesktop.getByRole('menu');
-await jobsMenu2.getByRole('menuitem',{name:'Neuer Auftrag'}).hover();
+await jobsMenu2.getByRole('menuitem',{name:'Nach Bereich'}).click();
 const subMenu=ownerDesktop.locator('[data-slot="dropdown-menu-sub-content"]');
 await subMenu.getByText('Garten & Außen',{exact:true}).first().waitFor({timeout:10000});
 if(await subMenu.getByRole('menuitem').count()!==12)throw new Error('Area submenu must list exactly the 12 service areas');
