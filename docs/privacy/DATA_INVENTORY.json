@@ -145,6 +145,11 @@
       "purpose": "Hausakte: laufende Vertraege (Anbieter, Tarif, Kosten, Laufzeit, Kuendigungsfrist, Vertragsdokument)",
       "retention": "account"
     },
+    "house_documents": {
+      "personal": true,
+      "purpose": "Hausakte: hochgeladene Dokumente (Titel, Pfad, Art)",
+      "retention": "account"
+    },
     "house_history_documents": {
       "personal": true,
       "purpose": "Dokumente zur Hausakte (Pfad)",
@@ -223,6 +228,11 @@
     "notifications": {
       "personal": true,
       "purpose": "In-App-Benachrichtigungen an User",
+      "retention": "account"
+    },
+    "owner_ai_insight_state": {
+      "personal": true,
+      "purpose": "KI-Haushaltshinweise: Stand und Duplikatschutz je Nutzer",
       "retention": "account"
     },
     "package_orders": {
