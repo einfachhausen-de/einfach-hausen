@@ -77,7 +77,7 @@ export function HeaderMenu({ jobsHref, jobsCount, jobsNewHref, jobsList, calHref
                 <Plus size={16} aria-hidden="true" className="shrink-0 opacity-70" />
                 <span>Neuer Auftrag</span>
               </DropdownMenuSubTrigger>
-              <DropdownMenuSubContent side="bottom" align="start" className="max-h-[50vh] w-64 overflow-y-auto rounded-lg p-2">
+              <DropdownMenuSubContent className="max-h-[50vh] w-64 overflow-y-auto rounded-lg p-2">
                 {SERVICE_CATEGORIES.map((area) => {
                   const Icon = area.icon;
                   return (
