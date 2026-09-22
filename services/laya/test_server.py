@@ -39,7 +39,11 @@ class ServiceTests(unittest.TestCase):
             worker=threading.Thread(target=lambda:first.append(request()))
             worker.start(); self.assertTrue(entered.wait(1))
             self.assertEqual(request(),503)
-            with urllib.request.urlopen(base+"/health") as r: self.assertTrue(json.load(r)["ready"])
+            with urllib.request.urlopen(base+"/health") as r:
+                health=json.load(r)
+                self.assertTrue(health["ready"])
+                self.assertIs(health["busy"], True)
+                self.assertEqual(health["busy_rejections"], 1)
             release.set();worker.join();self.assertEqual(first,[200])
         finally:
             release.set();server.shutdown();server.server_close()

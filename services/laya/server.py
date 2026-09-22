@@ -14,7 +14,7 @@ def make_server(model, key, port=8097):
         raise ValueError("LAYA_API_KEY must contain at least 32 characters")
     inference = threading.Lock()
     workers = threading.BoundedSemaphore(8)
-    counters = {"completed": 0, "busy": 0, "errors": 0}
+    counters = {"completed": 0, "busy_rejections": 0, "errors": 0}
     class Handler(BaseHTTPRequestHandler):
         def setup(self):
             super().setup()
@@ -53,7 +53,7 @@ def make_server(model, key, port=8097):
             except (ValueError, KeyError, TypeError, socket.timeout):
                 return self.reply(400, {"error": "invalid_request"})
             if not inference.acquire(blocking=False):
-                counters["busy"] += 1
+                counters["busy_rejections"] += 1
                 return self.reply(503, {"error": "busy"})
             started = time.monotonic()
             try:
