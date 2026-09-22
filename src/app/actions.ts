@@ -22,6 +22,7 @@ import { completeMaintenanceAndScheduleNext, ensureAssetMaintenance, ensureCompl
 import { createPropertyForOwner, primaryProperty, propertyOwnedBy, syncPropertyFromLegacyProfile } from '@/lib/properties';
 import { createBrokerMatches } from '@/lib/broker-matching';
 import { isContractKind, isCostInterval } from '@/lib/contracts';
+import { enqueueDocumentIntelligence } from '@/lib/document-intelligence';
 import { headers } from 'next/headers';
 import { checkRateLimit, consumeRateLimitAttempt, applyRateLimitLockout, rateLimitBlockedEvent, recordRateLimitFailure, recordRateLimitSuccess } from '@/lib/security/rate-limit';
 import { logAdminAudit, logSecurityEvent } from '@/lib/security/audit';
@@ -671,11 +672,24 @@ export async function uploadDocumentAction(jobId:number, fd:FormData){
   const file=fd.get('document'); if(!(file instanceof File) || file.size===0) return;
   const stored=await savePrivateFile(file,'documents');
   const kind=['invoice','offer','report','warranty','other'].includes(text(fd,'kind'))?text(fd,'kind'):'other';
-  db.prepare('INSERT INTO documents(job_id,provider_id,kind,title,path) VALUES(?,?,?,?,?)').run(jobId,ctx.providerId,kind,text(fd,'title').slice(0,160),stored);
+  const inserted=db.prepare('INSERT INTO documents(job_id,provider_id,kind,title,path) VALUES(?,?,?,?,?)').run(jobId,ctx.providerId,kind,text(fd,'title').slice(0,160),stored);
+  enqueueDocumentIntelligence({homeownerId:allowed.homeowner_id,sourceType:'job_document',sourceId:Number(inserted.lastInsertRowid),storedPath:stored,originalName:text(fd,'title').slice(0,160)||file.name,mimeType:file.type});
   createNotification(allowed.homeowner_id,'Neues Dokument',`${text(fd,'title').slice(0,160)} wurde zu „${allowed.title}“ hinzugefügt.`,`/app/documents`,'document');
   revalidatePath(`/pro/jobs/${jobId}`); revalidatePath('/app/documents'); revalidatePath(`/app/jobs/${jobId}`); revalidatePath('/notifications');
 }
 
+
+export async function uploadOwnerDocumentAction(fd:FormData){
+  const user=await requireUser('homeowner');
+  const property=primaryProperty(user.id);
+  const file=fd.get('document');
+  if(!(file instanceof File)||file.size===0)return;
+  const stored=await savePrivateFile(file,'house-documents');
+  const title=(text(fd,'title')||file.name).slice(0,180);
+  const inserted=db.prepare(`INSERT INTO house_documents(homeowner_id,property_id,title,path,kind) VALUES(?,?,?,?,'other')`).run(user.id,property?.id??null,title,stored);
+  enqueueDocumentIntelligence({homeownerId:user.id,sourceType:'house_document',sourceId:Number(inserted.lastInsertRowid),storedPath:stored,originalName:title,mimeType:file.type});
+  revalidatePath('/app/documents');revalidatePath('/notifications');redirect('/app/documents?uploaded=1');
+}
 
 export async function addHouseHistoryAction(fd:FormData){
   const user=await requireUser('homeowner'); const property=primaryProperty(user.id); if(!property)return; const title=text(fd,'title'); const performedAt=text(fd,'performedAt'); if(!title||!performedAt)return;
@@ -687,7 +701,11 @@ export async function addHouseHistoryAction(fd:FormData){
   const cost=Number(String(fd.get('cost')||'').replace(',','.')); const costAmount=Number.isFinite(cost)&&cost>=0?Math.round(cost*100):null; const category=normalizeContactCategory(text(fd,'category')||'Haus');
   const r=db.prepare(`INSERT INTO house_history_entries(homeowner_id,category,title,performed_at,company_name,provider_id,contact_name,contact_phone,contact_email,cost_amount,guarantee_until,maintenance_due,notes,before_photo,after_photo,property_id) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`).run(user.id,category,title,performedAt,companyName,providerId,text(fd,'contactName'),text(fd,'contactPhone'),contactEmail,costAmount,text(fd,'guaranteeUntil')||null,text(fd,'maintenanceDue')||null,text(fd,'notes').slice(0,3000),beforePath,afterPath,property.id);
   const entryId=Number(r.lastInsertRowid);
-  if(document instanceof File&&document.size){const stored=await savePrivateFile(document,'house-history');db.prepare(`INSERT INTO house_history_documents(entry_id,title,path) VALUES(?,?,?)`).run(entryId,text(fd,'documentTitle')||document.name,stored);}
+  if(document instanceof File&&document.size){
+    const stored=await savePrivateFile(document,'house-history');
+    const inserted=db.prepare(`INSERT INTO house_history_documents(entry_id,title,path) VALUES(?,?,?)`).run(entryId,text(fd,'documentTitle')||document.name,stored);
+    enqueueDocumentIntelligence({homeownerId:user.id,sourceType:'history_document',sourceId:Number(inserted.lastInsertRowid),storedPath:stored,originalName:text(fd,'documentTitle')||document.name,mimeType:document.type});
+  }
   if(providerId){const member=db.prepare(`SELECT user_id FROM provider_members WHERE provider_id=? AND active=1 ORDER BY can_manage_jobs DESC,id LIMIT 1`).get(providerId) as {user_id:number}|undefined;if(member)db.prepare(`INSERT INTO homeowner_contacts(homeowner_id,provider_id,contact_user_id,category,last_job_id,property_id,updated_at) VALUES(?,?,?,?,NULL,?,CURRENT_TIMESTAMP) ON CONFLICT(homeowner_id,contact_user_id) DO UPDATE SET provider_id=excluded.provider_id,category=excluded.category,property_id=excluded.property_id,updated_at=CURRENT_TIMESTAMP`).run(user.id,providerId,member.user_id,category,property.id);}
   else if(contactEmail){db.prepare(`INSERT INTO provider_invites(homeowner_id,email,company_name,category,token,property_id) VALUES(?,?,?,?,?,?)`).run(user.id,contactEmail,companyName,category,randomUUID(),property.id);}
   const maintenanceDue=text(fd,'maintenanceDue');
@@ -714,6 +732,8 @@ export async function acceptHouseTransferAction(token:string){
     db.prepare(`UPDATE homeowner_profiles SET postcode=?,address=?,lat=?,lon=?,house_type=?,build_year=?,living_area=?,plot_area=? WHERE user_id=?`).run(property.postcode,property.address,property.lat,property.lon,property.property_type,property.build_year,property.living_area,property.plot_area,user.id);
     db.prepare(`UPDATE house_assets SET homeowner_id=? WHERE property_id=?`).run(user.id,propertyId);
     db.prepare(`UPDATE maintenance_tasks SET homeowner_id=? WHERE property_id=?`).run(user.id,propertyId);
+    db.prepare(`UPDATE document_intelligence_jobs SET homeowner_id=? WHERE source_type='house_document' AND source_id IN (SELECT id FROM house_documents WHERE property_id=?)`).run(user.id,propertyId);
+    db.prepare(`UPDATE house_documents SET homeowner_id=?,updated_at=CURRENT_TIMESTAMP WHERE property_id=?`).run(user.id,propertyId);
     const contacts=db.prepare(`SELECT * FROM homeowner_contacts WHERE property_id=? AND homeowner_id=?`).all(propertyId,transfer.homeowner_id) as any[];
     const upsertContact=db.prepare(`INSERT INTO homeowner_contacts(homeowner_id,provider_id,contact_user_id,category,last_job_id,property_id,updated_at) VALUES(?,?,?,?,NULL,?,CURRENT_TIMESTAMP) ON CONFLICT(homeowner_id,contact_user_id) DO UPDATE SET provider_id=excluded.provider_id,category=excluded.category,property_id=excluded.property_id,updated_at=CURRENT_TIMESTAMP`);
     for(const contact of contacts)upsertContact.run(user.id,contact.provider_id,contact.contact_user_id,contact.category,propertyId);
@@ -1075,12 +1095,13 @@ export async function addHouseContractAction(fd:FormData){
   const intervalRaw=text(fd,'costInterval'); const costInterval=isCostInterval(intervalRaw)?intervalRaw:'month';
   const document=fd.get('document');
   const stored=document instanceof File&&document.size?await savePrivateFile(document,'house-contracts'):null;
-  db.prepare(`INSERT INTO house_contracts(homeowner_id,property_id,kind,provider,tariff,contract_number,cost_amount,cost_interval,started_at,term_months,renewal_months,cancellation_days,cancellation_deadline,notice,document_title,document_path) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`)
+  const inserted=db.prepare(`INSERT INTO house_contracts(homeowner_id,property_id,kind,provider,tariff,contract_number,cost_amount,cost_interval,started_at,term_months,renewal_months,cancellation_days,cancellation_deadline,notice,document_title,document_path) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`)
     .run(user.id,property?.id??null,kind,provider,text(fd,'tariff'),text(fd,'contractNumber'),
       centsFromEurosInput(text(fd,'cost')),costInterval,text(fd,'startedAt')||null,
       int(fd,'termMonths'),int(fd,'renewalMonths')??12,int(fd,'cancellationDays')??30,
       text(fd,'cancellationDeadline')||null,text(fd,'notice').slice(0,2000),
       text(fd,'documentTitle')||(document instanceof File?document.name:''),stored);
+  if(stored&&document instanceof File)enqueueDocumentIntelligence({homeownerId:user.id,sourceType:'contract_document',sourceId:Number(inserted.lastInsertRowid),storedPath:stored,originalName:text(fd,'documentTitle')||document.name,mimeType:document.type});
   revalidatePath('/app/contracts'); redirect('/app/contracts?saved=1');
 }
 

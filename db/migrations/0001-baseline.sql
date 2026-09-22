@@ -266,3 +266,17 @@ CREATE TRIGGER IF NOT EXISTS trg_hc_entry_mirror_update AFTER UPDATE ON homeowne
 -- Inhaltsgleich mit src/lib/db.ts.
 CREATE TABLE IF NOT EXISTS affiliate_clicks (id INTEGER PRIMARY KEY AUTOINCREMENT,category TEXT NOT NULL,partner_id TEXT NOT NULL,source TEXT NOT NULL,click_ref TEXT NOT NULL,created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,UNIQUE(partner_id,click_ref));
 CREATE INDEX IF NOT EXISTS idx_affiliate_clicks_created ON affiliate_clicks(created_at DESC);
+
+-- Lokale, freigegebene Tarifangebotsdaten. Keine Nutzerdaten und keine zweite
+-- Partnerliste: partner_id muss weiterhin durch src/lib/affiliate.ts freigegeben sein.
+CREATE TABLE IF NOT EXISTS tariff_partner_offers (id INTEGER PRIMARY KEY AUTOINCREMENT,partner_id TEXT NOT NULL,category TEXT NOT NULL CHECK(category IN ('strom','gas','dsl','mobilfunk','versicherung')),provider_name TEXT NOT NULL,tariff_name TEXT NOT NULL,annual_cents INTEGER NOT NULL CHECK(annual_cents>=0),postcode_prefix TEXT NOT NULL DEFAULT '',source_ref TEXT NOT NULL DEFAULT '',valid_from TEXT,valid_until TEXT,active INTEGER NOT NULL DEFAULT 1,updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,UNIQUE(partner_id,category,provider_name,tariff_name,postcode_prefix));
+CREATE INDEX IF NOT EXISTS idx_tariff_partner_offers_lookup ON tariff_partner_offers(category,partner_id,active,annual_cents);
+
+-- Idempotente Laya-Hinweise: pro Nutzer/Signal nur bei geaendertem Fingerprint neu.
+CREATE TABLE IF NOT EXISTS owner_ai_user_state (user_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,last_scanned_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP);
+CREATE TABLE IF NOT EXISTS owner_ai_insight_state (user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,insight_key TEXT NOT NULL,fingerprint TEXT NOT NULL,notified_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,PRIMARY KEY(user_id,insight_key));
+CREATE TABLE IF NOT EXISTS house_documents (id INTEGER PRIMARY KEY AUTOINCREMENT,homeowner_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,property_id INTEGER REFERENCES properties(id) ON DELETE CASCADE,title TEXT NOT NULL,path TEXT NOT NULL,kind TEXT NOT NULL DEFAULT 'other' CHECK(kind IN ('invoice','offer','contract','warranty','maintenance','report','insurance','energy','other')),created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP);
+CREATE INDEX IF NOT EXISTS idx_house_documents_owner ON house_documents(homeowner_id,created_at DESC);
+CREATE TABLE IF NOT EXISTS document_intelligence_jobs (id INTEGER PRIMARY KEY AUTOINCREMENT,homeowner_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,source_type TEXT NOT NULL CHECK(source_type IN ('house_document','job_document','history_document','contract_document')),source_id INTEGER NOT NULL,stored_path TEXT NOT NULL,original_name TEXT NOT NULL DEFAULT '',mime_type TEXT NOT NULL DEFAULT '',status TEXT NOT NULL DEFAULT 'queued' CHECK(status IN ('queued','processing','done','review','failed')),document_kind TEXT NOT NULL DEFAULT '',relevant_date TEXT,search_text TEXT NOT NULL DEFAULT '',confidence REAL,attempts INTEGER NOT NULL DEFAULT 0,error_code TEXT NOT NULL DEFAULT '',created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,UNIQUE(source_type,source_id));
+CREATE INDEX IF NOT EXISTS idx_document_intelligence_queue ON document_intelligence_jobs(status,updated_at,id);
+CREATE INDEX IF NOT EXISTS idx_document_intelligence_owner ON document_intelligence_jobs(homeowner_id,document_kind,updated_at DESC);

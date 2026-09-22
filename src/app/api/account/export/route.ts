@@ -31,6 +31,9 @@ export async function GET() {
     maintenance_tasks: all("SELECT * FROM maintenance_tasks WHERE homeowner_id=?"),
     house_history_entries: all("SELECT * FROM house_history_entries WHERE homeowner_id=?"),
     house_contracts: all("SELECT id,kind,provider,tariff,contract_number,cost_amount,cost_interval,started_at,term_months,renewal_months,cancellation_days,cancellation_deadline,notice,document_title,status,created_at,updated_at FROM house_contracts WHERE homeowner_id=?"),
+    house_documents: all("SELECT id,property_id,title,kind,created_at,updated_at FROM house_documents WHERE homeowner_id=?"),
+    document_intelligence: all("SELECT source_type,source_id,original_name,mime_type,status,document_kind,relevant_date,search_text,confidence,error_code,created_at,updated_at FROM document_intelligence_jobs WHERE homeowner_id=?"),
+    owner_ai_insight_state: all("SELECT insight_key,fingerprint,notified_at FROM owner_ai_insight_state WHERE user_id=?"),
     jobs_as_homeowner: all("SELECT id,title,description,category,status,created_at FROM jobs WHERE homeowner_id=?"),
     quotes_as_provider: all("SELECT job_id,amount,status,message,created_at FROM quotes WHERE provider_id=?"),
     subscriptions: all("SELECT plan_slug,status,current_period_end,created_at FROM subscriptions WHERE homeowner_id=?"),
@@ -76,9 +79,12 @@ export async function GET() {
          JOIN house_history_entries hhe ON hhe.id = hhd.entry_id WHERE hhe.homeowner_id = ?
        UNION ALL
        SELECT hc.id, hc.document_path, hc.created_at, 'house_contract_document' AS kind FROM house_contracts hc
-         WHERE hc.homeowner_id = ? AND hc.document_path IS NOT NULL`,
+         WHERE hc.homeowner_id = ? AND hc.document_path IS NOT NULL
+       UNION ALL
+       SELECT hd.id, hd.path, hd.created_at, 'house_document' AS kind FROM house_documents hd
+         WHERE hd.homeowner_id = ?`,
     )
-    .all(id, id, id) as Array<{ id: number; path: string; created_at: string; kind: string }>;
+    .all(id, id, id, id) as Array<{ id: number; path: string; created_at: string; kind: string }>;
 
   const exportPayload = {
     ...payload,

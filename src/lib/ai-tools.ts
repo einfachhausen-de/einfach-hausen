@@ -3,6 +3,11 @@ import { cancellationDeadline, currentTermEnd, formatDate, contractKindLabel, co
 import { euroExact, statusLabel } from './format';
 import { createContactDirectoryStore } from './contact-directory-store';
 import type { Capability } from './ai-router';
+import {
+  classifyHouseEvent, compareOwnerQuotes, compareOwnerTariffs, ownerHouseCheck,
+  ownerJobOverview, ownerNextActions, prepareOwnerJobDraft,
+} from './owner-intelligence';
+import { searchIntelligentDocuments } from './document-intelligence';
 
 export type ToolResult = { reply: string; links: Array<{ label: string; href: string }> };
 type Row = Record<string, string | number | null>;
@@ -20,11 +25,14 @@ export function executeAssistantTool(userId: number, capability: Capability, que
   const result = (sql: string, ...args: Array<string | number | null>) => db.prepare(sql).all(...args) as Row[];
   switch (capability) {
     case 'jobs': {
+      if (/organis|überblick|ueberblick|status|was läuft|was laeuft|entscheidung/i.test(question)) return ownerJobOverview(userId);
       const open = /offen|laufend|aktuell|unerledigt/i.test(question);
       const rows = result("SELECT id,title,status FROM jobs WHERE homeowner_id=? AND (? IS NULL OR id=?) AND (?=0 OR status IN ('open','quoted','accepted','in_progress')) ORDER BY updated_at DESC LIMIT 10",userId,id,id,Number(open));
       return list('Aufträge', rows.map(r => '#' + r.id + ' ' + text(r.title) + ' – ' + statusLabel(String(r.status))), '/app/jobs');
     }
-    case 'quotes': return list('Angebote',result("SELECT q.id,q.amount,q.available_at,j.title,p.business_name FROM quotes q JOIN jobs j ON j.id=q.job_id JOIN provider_profiles p ON p.user_id=q.provider_id WHERE j.homeowner_id=? AND (? IS NULL OR q.id=?) AND q.status!='withdrawn' ORDER BY q.created_at DESC LIMIT 10",userId,id,id).map(r=>text(r.business_name)+' · '+text(r.title)+' · '+euroExact(Number(r.amount))+(r.available_at?' · '+text(r.available_at):'')),'/app/jobs');
+    case 'quotes':
+      if (/vergleich|gegenüber|gegenueber|welches angebot|prüf|pruef/i.test(question)) return compareOwnerQuotes(userId, question);
+      return list('Angebote',result("SELECT q.id,q.amount,q.available_at,j.title,p.business_name FROM quotes q JOIN jobs j ON j.id=q.job_id JOIN provider_profiles p ON p.user_id=q.provider_id WHERE j.homeowner_id=? AND (? IS NULL OR q.id=?) AND q.status!='withdrawn' ORDER BY q.created_at DESC LIMIT 10",userId,id,id).map(r=>text(r.business_name)+' · '+text(r.title)+' · '+euroExact(Number(r.amount))+(r.available_at?' · '+text(r.available_at):'')),'/app/jobs');
     case 'contracts': {
       const kind = /strom/i.test(question)?'strom':/\bgas\b/i.test(question)?'gas':/dsl|internet/i.test(question)?'dsl':null;
       const rows = result("SELECT id,kind,provider,tariff,cost_amount,cost_interval,started_at,term_months,renewal_months,cancellation_days,cancellation_deadline,status FROM house_contracts WHERE homeowner_id=? AND (? IS NULL OR id=?) AND (? IS NULL OR kind=?) ORDER BY status='active' DESC,updated_at DESC LIMIT 10",userId,id,id,kind,kind);
@@ -42,12 +50,21 @@ export function executeAssistantTool(userId: number, capability: Capability, que
       const kind = /rechnung/i.test(question) ? 'invoice' : /angebot/i.test(question) ? 'offer' : null;
       const rows = result("SELECT d.title,d.kind FROM documents d JOIN jobs j ON j.id=d.job_id LEFT JOIN provider_profiles p ON p.user_id=d.provider_id WHERE j.homeowner_id=? AND (? IS NULL OR d.id=?) AND (? IS NULL OR d.kind=?) AND (? IS NULL OR d.title LIKE ? OR p.business_name LIKE ?) ORDER BY d.created_at DESC,d.id DESC LIMIT 10",userId,id,id,kind,kind,search,search,search);
       const invoices = kind === 'offer' ? [] : result("SELECT i.invoice_number,i.total_gross,i.status FROM invoices i LEFT JOIN provider_profiles p ON p.user_id=i.provider_id WHERE i.homeowner_id=? AND (? IS NULL OR i.id=?) AND (? IS NULL OR i.invoice_number LIKE ? OR p.business_name LIKE ?) ORDER BY i.created_at DESC LIMIT 10",userId,id,id,search,search,search);
-      return list('Dokumente', [...rows.map(r=>text(r.title)),...invoices.map(r=>'Rechnung '+text(r.invoice_number)+' · '+euroExact(Number(r.total_gross))+' · '+text(r.status))],'/app/documents');
+      const intelligent = searchIntelligentDocuments(userId, question);
+      const combined = [...intelligent.map(d=>`${text(d.title)} · ${text(d.kind)}${d.relevantDate?` · relevantes Datum ${text(d.relevantDate)}`:''}`),...rows.map(r=>text(r.title)),...invoices.map(r=>'Rechnung '+text(r.invoice_number)+' · '+euroExact(Number(r.total_gross))+' · '+text(r.status))];
+      return list('Dokumente', [...new Set(combined)].slice(0,12),'/app/documents');
     }
     case 'contacts': {
       const contacts = createContactDirectoryStore(db).list(userId);
-      const rows = contacts.ok ? contacts.value.filter(c=>!/notfall/i.test(question)||c.isEmergency).slice(0,10) : [];
-      return list('Ansprechpartner',rows.map(c=>[c.name,c.company,c.phone,c.email].filter(Boolean).map(text).join(' · ')),'/app/partners');
+      const all = contacts.ok ? contacts.value : [];
+      const query = question.toLocaleLowerCase('de-DE');
+      const tokens = query.split(/[^\p{L}\p{N}]+/u).filter(v => v.length >= 4 && !['meine','mein','einen','eine','zeige','finde','suche','ansprechpartner','kontakt'].includes(v));
+      const ranked = all.map(contact => {
+        const haystack = [contact.name, contact.company, contact.legacyCategory, ...contact.subcategoryIds].join(' ').toLocaleLowerCase('de-DE');
+        return { contact, score: tokens.reduce((sum, token) => sum + (haystack.includes(token) ? 1 : 0), 0) + (contact.isPinned ? .25 : 0) };
+      }).filter(entry => !/notfall/i.test(question) || entry.contact.isEmergency).sort((a,b)=>b.score-a.score);
+      const matched = ranked.some(entry=>entry.score>=1) ? ranked.filter(entry=>entry.score>=1) : ranked;
+      return list('Ansprechpartner',matched.slice(0,10).map(({contact:c})=>[c.name,c.company,c.phone,c.email].filter(Boolean).map(text).join(' · ')),'/app/partners');
     }
     case 'calendar': return list('Termine',result("SELECT j.title,a.start_at FROM appointments a JOIN jobs j ON j.id=a.job_id WHERE a.homeowner_id=? AND j.homeowner_id=? AND a.status='confirmed' AND datetime(a.start_at)>=datetime('now') ORDER BY datetime(a.start_at) LIMIT 10",userId,userId).map(r=>text(r.title)+' · '+text(r.start_at)),'/app/calendar');
     case 'house': {
@@ -56,9 +73,13 @@ export function executeAssistantTool(userId: number, capability: Capability, que
       return list('Hausakte',[...houses.map(r=>[r.address,r.postcode,r.property_type,r.build_year?'Baujahr '+r.build_year:null,r.living_area?r.living_area+' m²':null].filter(Boolean).map(text).join(' · ')),...assets.map(r=>text(r.name)+' · '+text(r.kind))],'/app/home');
     }
     case 'maintenance': return list('Pflege',result("SELECT title,due_date FROM maintenance_tasks WHERE homeowner_id=? AND status='open' ORDER BY due_date LIMIT 10",userId).map(r=>text(r.title)+' · fällig '+text(r.due_date)),'/app/year');
-    case 'find_provider': return {reply:'Unter „Ansprechpartner“ kannst du passende Handwerker finden oder einen eigenen Kontakt hinzufügen. Für ein Angebot starte einen neuen Auftrag. Du entscheidest, wen du kontaktierst.',links:[{label:'Ansprechpartner',href:'/app/partners'}]};
-    case 'create_job': return {reply:'Wähle „Auftrag organisieren“ beim Hausmeister und beschreibe kurz, was erledigt werden soll. Fehlende Angaben werden anschließend abgefragt. Es wurde noch kein Auftrag verschickt.',links:[{label:'Auftrag organisieren',href:'/app/hausmeister'}]};
-    case 'compare_tariffs': return {reply:'Öffne „Verträge & Tarife“ und dort „Vergleichen“. Wähle Strom, Gas, Internet oder Versicherung. Du entscheidest selbst über eine Weiterleitung und einen Abschluss beim freigegebenen Partner.',links:[{label:'Tarife vergleichen',href:'/app/contracts?tab=vergleichen'}]};
+    case 'find_provider': return {reply:'Ich kann zuerst deine gespeicherten Ansprechpartner nutzen. Wenn dort niemand passt, startest du über den Hausmeister eine gezielte regionale Suche – ohne dass automatisch jemand beauftragt wird.',links:[{label:'Ansprechpartner',href:'/app/partners'},{label:'Passenden Handwerker suchen',href:`/app/hausmeister?draft=${encodeURIComponent(question)}`}]};
+    case 'create_job': return prepareOwnerJobDraft(userId, question);
+    case 'compare_tariffs': return compareOwnerTariffs(userId, question);
+    case 'next_actions': return ownerNextActions(userId);
+    case 'compare_quotes': return compareOwnerQuotes(userId, question);
+    case 'house_check': return ownerHouseCheck(userId);
+    case 'house_event': return classifyHouseEvent(question);
     case 'help': {
       const reply=/adresse|profil/i.test(question)?'Deine Adresse und persönlichen Angaben kannst du unter „Profil“ bearbeiten.'
         :/hochlad|dokument|rechnung/i.test(question)?'Dokumente zu einem Auftrag findest du beim jeweiligen Auftrag. Öffne dessen Details, um die verfügbaren Dokumentaktionen zu nutzen. Alle vorhandenen Belege findest du unter „Dokumente“.'

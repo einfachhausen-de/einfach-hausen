@@ -30,7 +30,7 @@ import { privateRoot, resolvePrivatePath } from './security/private-files';
 export type ArchiveProvider = 'google-drive' | 'icloud';
 export type CloudProviderSetting = ArchiveProvider | 'none';
 
-export type ArchiveFileKind = 'job_media' | 'job_document' | 'house_history_document' | 'house_contract_document';
+export type ArchiveFileKind = 'job_media' | 'job_document' | 'house_history_document' | 'house_contract_document' | 'house_document';
 
 export interface ArchiveManifestEntry {
   kind: ArchiveFileKind;
@@ -163,6 +163,11 @@ export function ownedArchiveRows(userId: number): Array<OwnedRow & { kind: Archi
         hc.document_path AS stored_path, hc.created_at FROM house_contracts hc
       WHERE hc.homeowner_id=? AND hc.document_path IS NOT NULL`).all(userId) as OwnedRow[],
     'house_contract_document', (id) => `/api/house-contracts/${id}/document`,
+  );
+  push(
+    db.prepare(`SELECT hd.id, hd.title, hd.path AS stored_path, hd.created_at FROM house_documents hd
+      WHERE hd.homeowner_id=?`).all(userId) as OwnedRow[],
+    'house_document', (id) => `/api/house-documents/${id}`,
   );
   return rows;
 }

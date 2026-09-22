@@ -29,7 +29,7 @@ if(mod){
   assert.doesNotThrow(()=>mod.executeAssistantTool(a,'documents',"' OR 1=1 --"));
  });
  test('every capability returns a bounded useful result',()=>{
-  for(const cap of ['jobs','quotes','contracts','documents','contacts','calendar','house','maintenance','find_provider','create_job','compare_tariffs','help','clarify']){
+  for(const cap of ['jobs','quotes','contracts','documents','contacts','calendar','house','maintenance','next_actions','compare_quotes','house_check','house_event','find_provider','create_job','compare_tariffs','help','clarify']){
    const r=mod.executeAssistantTool(a,cap,'Meine Daten');
    assert.equal(typeof r.reply,'string');assert.ok(r.reply.length>10&&r.reply.length<16000);
   }
@@ -40,10 +40,25 @@ if(mod){
  });
  test('workflow suggestions never create jobs or contact others',()=>{
   const before=db.prepare('SELECT COUNT(*) c FROM jobs').get().c;
-  for(const cap of ['create_job','find_provider','compare_tariffs'])mod.executeAssistantTool(a,cap,'Bitte jetzt abschicken');
+  for(const cap of ['create_job','find_provider','compare_tariffs','next_actions','compare_quotes','house_check','house_event'])mod.executeAssistantTool(a,cap,'Bitte jetzt abschicken');
   assert.equal(db.prepare('SELECT COUNT(*) c FROM jobs').get().c,before);
  });
 }
+
+test('create-job capability prepares the existing Hausmeister flow instead of mutating jobs',()=>{
+ const before=db.prepare('SELECT COUNT(*) c FROM jobs WHERE homeowner_id=?').get(a).c;
+ const out=mod.executeAssistantTool(a,'create_job','Meine Küchenarmatur tropft und soll repariert werden');
+ assert.match(out.links[0].href,/^\/app\/hausmeister\?draft=/);
+ assert.match(out.reply,/Entwurf|entwurf|Hausmeister/);
+ assert.equal(db.prepare('SELECT COUNT(*) c FROM jobs WHERE homeowner_id=?').get(a).c,before);
+});
+test('owner next-actions stay tenant scoped and useful',()=>{
+ db.prepare("INSERT INTO maintenance_tasks(homeowner_id,title,category,due_date) VALUES(?,'Annas Wartung','Heizung',date('now'))").run(a);
+ db.prepare("INSERT INTO maintenance_tasks(homeowner_id,title,category,due_date) VALUES(?,'Bens Geheimwartung','Heizung',date('now'))").run(b);
+ const out=mod.executeAssistantTool(a,'next_actions','Was braucht meine Aufmerksamkeit?');
+ assert.match(out.reply,/Annas Wartung/);assert.doesNotMatch(out.reply,/Bens Geheimwartung/);
+});
+
 test('document lookup filters named document rather than returning unrelated latest files',()=>{
  const insert=db.prepare("INSERT INTO documents(job_id,kind,title,path) VALUES(?,'invoice',?,'private')");
  insert.run(ja,'Rechnung Müller');insert.run(ja,'Rechnung Meier');

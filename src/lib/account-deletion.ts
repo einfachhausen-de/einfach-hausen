@@ -41,6 +41,7 @@ function storedPaths(userId: number): string[] {
     'SELECT d.path AS p FROM house_history_documents d JOIN house_history_entries e ON e.id=d.entry_id WHERE e.homeowner_id=?', userId,
   )) push(row.p);
   for (const row of all('SELECT document_path AS p FROM house_contracts WHERE homeowner_id=?', userId)) push(row.p);
+  for (const row of all('SELECT path AS p FROM house_documents WHERE homeowner_id=?', userId)) push(row.p);
   return paths;
 }
 
@@ -96,8 +97,13 @@ export async function deleteAccountData(userId: number): Promise<{ authSubject: 
     // Verification queue and private media metadata.
     db.prepare('DELETE FROM verification_requests WHERE provider_id=?').run(userId);
 
-    // Assistant history.
+    // Assistant history and derived homeowner intelligence. OCR text is
+    // personal content too; the account lifecycle must remove it explicitly
+    // because the anonymized users row itself intentionally survives.
     db.prepare('DELETE FROM assistant_threads WHERE user_id=?').run(userId);
+    db.prepare('DELETE FROM document_intelligence_jobs WHERE homeowner_id=?').run(userId);
+    db.prepare('DELETE FROM owner_ai_insight_state WHERE user_id=?').run(userId);
+    db.prepare('DELETE FROM owner_ai_user_state WHERE user_id=?').run(userId);
 
     // In-app notifications and sessions.
     db.prepare('DELETE FROM notifications WHERE user_id=?').run(userId);
@@ -108,6 +114,7 @@ export async function deleteAccountData(userId: number): Promise<{ authSubject: 
     db.prepare('DELETE FROM maintenance_tasks WHERE homeowner_id=?').run(userId);
     db.prepare('DELETE FROM house_history_entries WHERE homeowner_id=?').run(userId);
     db.prepare('DELETE FROM house_contracts WHERE homeowner_id=?').run(userId);
+    db.prepare('DELETE FROM house_documents WHERE homeowner_id=?').run(userId);
     const propertyIds = (db.prepare('SELECT property_id FROM property_ownerships WHERE homeowner_id=?').all(userId) as Row[])
       .map((row) => Number(row.property_id));
     db.prepare('DELETE FROM property_ownerships WHERE homeowner_id=?').run(userId);

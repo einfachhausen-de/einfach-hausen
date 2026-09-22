@@ -694,22 +694,17 @@ await jobsMenu.getByText('Neuer Auftrag',{exact:true}).first().waitFor({timeout:
 await jobsMenu.getByText('Alle Aufträge',{exact:true}).first().waitFor({timeout:10000});
 await clickAndWaitUrl(ownerDesktop,jobsMenu.getByRole('menuitem',{name:'Alle Aufträge'}),/\/app\/jobs/);
 await nav(ownerDesktop, base+'/app');
-// 3b3) Bereichs-Untermenü: Klick auf "Nach Bereich" öffnet das Flyout
-// (bleibt offen, kein Hover-Grace-Rennen), es liegt LINKS neben dem Menü
-// (rechts wäre es außerhalb des Schirms). Klick auf einen Bereich startet
-// den Hausmeister mit passendem Thema.
+// 3b3) Bereiche flach im Aufträge-Menü: alle 12 direkt klickbar, kein
+// Flyout (Radix-Sub ist hier mit Maus nicht erreichbar: Slot-Crash mit
+// asChild, Off-Screen rechts ohne, Grace-Schließung beim Anfahren — je per
+// Fixture-Probe belegt). Klick auf einen Bereich startet den Hausmeister
+// mit passendem Thema.
 await headerMenu.getByRole('button',{name:'Aufträge'}).click();
 const jobsMenu2=ownerDesktop.getByRole('menu');
-await jobsMenu2.getByRole('menuitem',{name:'Nach Bereich'}).click();
-const subMenu=ownerDesktop.locator('[data-slot="dropdown-menu-sub-content"]');
-await subMenu.getByText('Garten & Außen',{exact:true}).first().waitFor({timeout:10000});
-if(await subMenu.getByRole('menuitem').count()!==12)throw new Error('Area submenu must list exactly the 12 service areas');
-const parentMenu=ownerDesktop.getByRole('menu').filter({hasText:'Alle Aufträge'});
-const parentBox=await parentMenu.boundingBox(); const subBox=await subMenu.boundingBox();
-if(!parentBox||!subBox||subBox.x>=parentBox.x)throw new Error(`Area submenu must open left of the jobs menu, got sub.x=${subBox?.x}, parent.x=${parentBox?.x}`);
-await clickAndWaitUrl(ownerDesktop,subMenu.getByRole('menuitem',{name:'Garten & Außen'}),/\/app\/hausmeister\?topic=garten-aussenbereich/);
+if(await jobsMenu2.locator('[data-testid^="bereich-"]').count()!==12)throw new Error('Jobs menu must list exactly the 12 service areas');
+await clickAndWaitUrl(ownerDesktop,jobsMenu2.getByRole('menuitem',{name:'Garten & Außen'}),/\/app\/hausmeister\?topic=garten-aussenbereich/);
 await nav(ownerDesktop, base+'/app');
-// Direkt-Klick auf "Neuer Auftrag" navigiert ohne Umweg (Maus: detail>=1).
+// Direkt-Klick auf "Neuer Auftrag" navigiert ohne Umweg.
 await headerMenu.getByRole('button',{name:'Aufträge'}).click();
 await clickAndWaitUrl(ownerDesktop,ownerDesktop.getByRole('menu').getByRole('menuitem',{name:'Neuer Auftrag'}),/\/app\/hausmeister$/);
 await nav(ownerDesktop, base+'/app');

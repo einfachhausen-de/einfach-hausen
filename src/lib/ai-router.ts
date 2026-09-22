@@ -8,6 +8,10 @@ export const CAPABILITIES = {
   calendar: 'Eigene vereinbarte Termine anzeigen',
   house: 'Gespeicherte Hausdaten und Anlagen anzeigen',
   maintenance: 'Pflege, Wartungen und fällige Aufgaben anzeigen',
+  next_actions: 'Was jetzt Aufmerksamkeit braucht: Fristen, Wartung, Termine, Angebote und nächste Schritte',
+  compare_quotes: 'Eigene Handwerkerangebote eines Auftrags nach Preis, Termin, Entfernung und Bewertung gegenüberstellen',
+  house_check: 'Hausakte auf fehlende Kernangaben und sinnvolle Ergänzungen prüfen',
+  house_event: 'Neue Hausinformation, Dokument, Wartung oder Problem dem passenden Bereich zuordnen',
   find_provider: 'Einen Handwerker oder neuen Ansprechpartner finden',
   create_job: 'Einen Auftrag erstellen, beauftragen oder Arbeit machen lassen',
   compare_tariffs: 'Strom, Gas, Internet oder Versicherungen wechseln/vergleichen',
@@ -91,11 +95,16 @@ export const assistantRouter = new DecisionRouter({
 /** Narrow explicit commands, not a second general-purpose language model. */
 export function explicitCapability(question: string): Capability | null {
   const q = question.toLocaleLowerCase('de-DE').trim();
+  if (/angebote?.{0,45}(vergleich|gegenüber|gegenueber)|vergleich.{0,30}angebote?|welches angebot|angebote? prüfen|angebote? pruefen/.test(q)) return 'compare_quotes';
+  if (/was .{0,40}(aufmerksamkeit|ansteht|fällig|faellig)|was muss ich (jetzt|als nächstes|als naechstes)|nächste schritte|naechste schritte|erinnerungen|was ist überfällig|was ist ueberfaellig/.test(q)) return 'next_actions';
+  if (/hausakte.{0,30}(vollständig|vollstaendig|prüfen|pruefen|fehlt)|was fehlt.{0,30}(haus|hausakte)|hausdaten.{0,30}(vollständig|vollstaendig)/.test(q)) return 'house_check';
+  if (/wo gehört .{0,60}hin|wo gehoert .{0,60}hin|einordnen|welcher bereich.{0,30}(dokument|rechnung|vertrag|wartung|problem)/.test(q)) return 'house_event';
+  if (/\b(günstig\w*|guenstig\w*|besser\w*|sparen|wechseln|vergleichen)\b/u.test(q) && /anbieter|tarif|strom|gas|dsl|internet|festnetz|mobilfunk|versicherung/.test(q)) return 'compare_tariffs';
+  if (/\b(beauftragen|auftrag .{0,40}erstellen|neuen auftrag|machen lassen|reparieren lassen)\b/.test(q) || /\b(kaputt|defekt|tropft|ausgefallen)\b/.test(q)) return 'create_job';
   if (/\b(erklär\w*|erlaeuter\w*|erläuter\w*|analysier\w*|begründe\w*|bewerte\w*|formulier\w*|schreib\w*)\b/u.test(q) || /vor- und nachteile|ausführlich|ausfuehrlich/.test(q)) return 'generative';
   if (/wie .{0,50}(hochlad|lade .{0,30}hoch|adresse .{0,15}änder|ändere .{0,20}adresse)|einstellungen|passwort|profil bearbeiten/.test(q)) return 'help';
-  if (/\b(wechseln|vergleichen)\b/.test(q) && /anbieter|tarif|strom|gas|dsl|internet|versicherung/.test(q)) return 'compare_tariffs';
-  if (/\b(beauftragen|auftrag .{0,40}erstellen|neuen auftrag|machen lassen)\b/.test(q)) return 'create_job';
   if (/\b(suche|finden)\b/.test(q) && /handwerker|elektriker|klempner|maler|neuen ansprechpartner/.test(q)) return 'find_provider';
+  if (/(?:wer ist|zeige|mein\w*|unsere?\w*).{0,35}(elektriker|klempner|sanitär|sanitaer|heizung|maler|dachdecker|handwerker|ansprechpartner|kontakt)/.test(q)) return 'contacts';
   const lookup = /\b(mein\w*|zeige?\w*|welche\w*|wann|was zahle|wie viel|wieviel|wo finde)\b/.test(q);
   if (!lookup) return null;
   const matches: Capability[] = [];
