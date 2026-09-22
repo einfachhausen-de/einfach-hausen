@@ -984,3 +984,8 @@ Jedes Thema hat genau eine Owner-Flaeche (einzige Stelle mit Inhalt/Logik). Alle
 | Hilfe & Kontakt | Route /app/hilfe (Sidebar "Konto") | – |
 | Einstellungen (Konto & Daten, Benachrichtigungen, KI, App/Offline) | Einstellungs-Dialog | Sidebar "Einstellungen" (/app/settings), Popover "Einstellungen", ?einstellungen=<section> |
 Regeln: Dialog enthaelt keine Link-Hubs zu Routen. Sidebar enthaelt keine Einstellungen-Inhalte. Badge nur an Glocke + Sidebar-Eintrag "Benachrichtigungen". Neues Thema: erst Owner bestimmen, dann Einstiege – nie Inhalt duplizieren.
+
+
+## Laya-Router — 2026-09-22
+Gemeinsamer Assistentenpfad für API und Hausmanager mit eigentümergebundenen Lese-Tools, Laya-Entscheidungen, Jev nur bei Überlast/Transportfehler und DeepSeek/BYOK ausschließlich hinter dem bestehenden generativen Kontingent. Architektur, Grenzen, Tests und Installation: [AI_ROUTER.md](AI_ROUTER.md).
+26 JS-Regressionen und 2 Python-Service-Tests bestanden; Kalender-Review-Fund behoben. Modellmessung führte zu expliziten Produktrouten und Rückfrage bei Confidence < 0.9. Jev-/DeepSeek-Betreiberkeys fehlen bislang. Installation/Deployment wird separat mit tatsächlichem Ergebnis nachgetragen. Keine Änderung an Dokument-OCR in dieser Welle.

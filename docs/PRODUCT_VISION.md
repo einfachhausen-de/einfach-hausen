@@ -351,3 +351,6 @@ Expansion erfolgt Region für Region: erst dichtes Netzwerk und perfekte Abläuf
 Einfach Hausen must feel calmer and simpler than the work happening behind it. The interface is content-first, editorial and minimal: generous whitespace, strong typography, very few surfaces, one restrained accent color and no decorative dashboard/card wall. The customer should primarily see one clear conversation with the digital housemaster, followed by decisions only when they are needed. Partner tooling follows the same rule: requests, assignments and customer contact are shown as simple operational lists, not an ERP.
 
 Visual inspiration may come from best-in-class contemporary software such as OpenAI products, but Einfach Hausen keeps its own identity and does not copy proprietary branding, typography or component designs.
+
+## KI-Ergänzung · Betreiberentscheidung 2026-09-22
+Die Eigentümer-Kernfunktionen bleiben kostenlos. Ausschließlich generative KI darf ein separates begrenztes Kontingent und künftig optionale Credits/KI-Abos erhalten; Preise und Kaufangebote sind noch nicht freigegeben. Laya auf OCI ist der Entscheidungsstandard, Jev technischer Overflow, DeepSeek die generative Stufe. Technischer Vertrag und Grenzen: [AI_ROUTER.md](AI_ROUTER.md). Dies präzisiert die ältere pauschale Aussage „keine kostenpflichtigen Einzelpakete“ nur für optionale generative KI.

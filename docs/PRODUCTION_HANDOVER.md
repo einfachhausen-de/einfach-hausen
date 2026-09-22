@@ -1180,3 +1180,8 @@ Release:
 
 Hinweis zum Deploy-Gate:
 Der Security-Fuzz benötigt `WEBHOOK_SECRET` als temporären Gate-Fixture-Wert, obwohl die Produktion bewusst ohne diesen Legacy-Secret fail-closed läuft. Der erste Beobachtungslauf war deshalb 14/15; der maßgebliche Lauf mit ausschließlich prozesslokalem Fixture-Secret war 15/15. Die Produktions-Environment wurde dafür nicht verändert.
+
+
+## Laya-Router — 2026-09-22
+Gemeinsamer Assistentenpfad für API und Hausmanager mit eigentümergebundenen Lese-Tools, Laya-Entscheidungen, Jev nur bei Überlast/Transportfehler und DeepSeek/BYOK ausschließlich hinter dem bestehenden generativen Kontingent. Architektur, Grenzen, Tests und Installation: [AI_ROUTER.md](AI_ROUTER.md).
+26 JS-Regressionen und 2 Python-Service-Tests bestanden; Kalender-Review-Fund behoben. Modellmessung führte zu expliziten Produktrouten und Rückfrage bei Confidence < 0.9. Jev-/DeepSeek-Betreiberkeys fehlen bislang. Installation/Deployment wird separat mit tatsächlichem Ergebnis nachgetragen. Keine Änderung an Dokument-OCR in dieser Welle.

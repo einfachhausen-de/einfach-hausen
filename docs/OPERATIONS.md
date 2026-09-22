@@ -295,3 +295,8 @@ Flags are defined in `src/lib/feature-flags.ts` (`FLAG_DEFAULTS`) and each defin
 ## Data inventory (T-0146)
 
 `docs/privacy/DATA_INVENTORY.json` is the machine-readable record of every table (purpose, retention key, personal flag). `npm run test:inventory` (release-gate Layer 1) keeps it in sync: every table must be classified, personal tables need purpose + retention from the legend, and any new column matching sensitive patterns inside a **non-personal** table fails the gate until classified. Retention execution lives in T-0145 (`src/lib/retention.ts`, dispatcher) and the deletion workflow in T-0144.
+
+
+## Laya-Router — 2026-09-22
+Gemeinsamer Assistentenpfad für API und Hausmanager mit eigentümergebundenen Lese-Tools, Laya-Entscheidungen, Jev nur bei Überlast/Transportfehler und DeepSeek/BYOK ausschließlich hinter dem bestehenden generativen Kontingent. Architektur, Grenzen, Tests und Installation: [AI_ROUTER.md](AI_ROUTER.md).
+26 JS-Regressionen und 2 Python-Service-Tests bestanden; Kalender-Review-Fund behoben. Modellmessung führte zu expliziten Produktrouten und Rückfrage bei Confidence < 0.9. Jev-/DeepSeek-Betreiberkeys fehlen bislang. Installation/Deployment wird separat mit tatsächlichem Ergebnis nachgetragen. Keine Änderung an Dokument-OCR in dieser Welle.

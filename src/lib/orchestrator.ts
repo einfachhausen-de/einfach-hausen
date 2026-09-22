@@ -1,17 +1,8 @@
 import { db } from './db';
-import { analyzeRequest, answerHouseQuestion, parseRequest } from './request-ai';
-import { classifyLocally, byokEnabled, consumeCloudAction, type IntentResult } from './ai-engine';
+import { analyzeRequest, parseRequest } from './request-ai';
+import { classifyLocally } from './ai-engine';
+import { answerAssistant } from './assistant-service';
 
-// Stage-1 local assistant: a deterministic, template-based reply built from
-// the local intent result. Zero cloud cost, instant.
-function localAssistantReply(intent:IntentResult):string{
-  const urgency=intent.urgency==='emergency'?'Sofort-Hilfe: das klingt dringend.':intent.urgency==='short_notice'?'Kurzfristig lässt sich das gut koordinieren.':'Das lässt sich gut planen.';
-  const mode=intent.mode==='consultation'
-    ?'Ich stelle dir gern eine fachliche Person für eine Beratung zusammen — oder du entscheidest dich direkt für einen Auftrag.'
-    :'Ich kann daraus eine Anfrage machen und passende geprüfte Betriebe in deiner Region fragen.';
-  const category=intent.category!=='Hausmeister & Sonstiges'?`Eingeordnet als: ${intent.category}.`:'';
-  return `${urgency} ${category} ${mode}`.trim();
-}
 import { geocodePostcode, distanceKm, regionalPostcodeGeo } from './geocode';
 import { structuredLog } from './observability';
 import { berlinRequestTimestamp, classifyAvailabilityFreshness, emergencyAvailableAt, emergencyResponseScore, explainMatchScore, preferredRequestWindow, type MatchReason } from './matching';
@@ -129,29 +120,10 @@ export async function answerHausmeisterQuestion(userId:number,body:string,channe
   if(!user)throw new Error('Homeowner not found');
   const threadId=getThread(userId,channel);
   addAgentMessage(threadId,'user',body,photoPath?{photo:photoPath}:{});
-  const property=primaryProperty(userId);
-  const assets=property?db.prepare(`SELECT kind,name,details,installed_year FROM house_assets WHERE property_id=? ORDER BY created_at DESC LIMIT 8`).all(property.id) as any[]:[];
-  const maintenance=property?db.prepare(`SELECT title,category,due_date,status FROM maintenance_tasks WHERE property_id=? AND status='open' ORDER BY due_date ASC LIMIT 8`).all(property.id) as any[]:[];
-  const contacts=property?db.prepare(`SELECT hc.category,u.first_name,u.last_name,p.business_name FROM homeowner_contacts hc JOIN users u ON u.id=hc.contact_user_id JOIN provider_profiles p ON p.user_id=hc.provider_id WHERE hc.property_id=? ORDER BY hc.updated_at DESC LIMIT 8`).all(property.id) as any[]:[];
-  const recent=db.prepare(`SELECT title,category,status,updated_at FROM jobs WHERE homeowner_id=? ORDER BY updated_at DESC LIMIT 6`).all(userId) as any[];
-  const history=property?db.prepare(`SELECT category,title,performed_at,company_name,cost_amount,guarantee_until,maintenance_due FROM house_history_entries WHERE property_id=? ORDER BY performed_at DESC LIMIT 10`).all(property.id) as any[]:[];
-  const context=JSON.stringify({house:property?{postcode:property.postcode,address:property.address,houseType:property.property_type,buildYear:property.build_year,livingArea:property.living_area,plotArea:property.plot_area,estimatedValueMin:property.estimated_value_min,estimatedValueMax:property.estimated_value_max}:{postcode:user.postcode,address:user.address,houseType:user.house_type,buildYear:user.build_year,livingArea:user.living_area,plotArea:user.plot_area},assets,maintenance,contacts,history,recentJobs:recent});
-  // Stage 1 (EH T-0207): try the local intent engine first. Only fall back to
-  // the cloud model when the local classification says the request needs real
-  // reasoning (open question / no trade match).
-  const intent=classifyLocally(body);
-  let reply:string;
-  if(!intent.needsCloud){
-    reply=localAssistantReply(intent);
-  }else if(byokEnabled(userId)){
-    // BYOK runs unmetered against the user's own gateway.
-    reply=await answerHouseQuestion(body,context);
-  }else if(consumeCloudAction(userId).ok){
-    reply=await answerHouseQuestion(body,context);
-  }else{
-    reply='Dein kostenloses KI-Kontingent für diesen Monat ist aufgebraucht (402 – keine weiteren Gratis-Aktionen). Du kannst in den Einstellungen einen eigenen API-Key hinterlegen (die Limits deines Anbieterkontos gelten) oder – sobald verfügbar – über eine Werbeanzeige 10 weitere Aktionen freischalten. Für konkrete Aufträge kannst du natürlich jederzeit eine Anfrage stellen. Dein Entwurf bleibt erhalten.';
-  }
-  addAgentMessage(threadId,'assistant',reply,{assistantOnly:true});
+  const history = (db.prepare("SELECT role,body content FROM assistant_messages WHERE thread_id=? AND role IN ('user','assistant') ORDER BY id DESC LIMIT 8").all(threadId) as Array<{role:'user'|'assistant';content:string}>).reverse();
+  const result = await answerAssistant(userId, history, undefined, photoPath);
+  const reply = result.reply;
+  addAgentMessage(threadId,'assistant',reply,{assistantOnly:true,status:result.status,provider:result.provider,links:result.links});
   return {threadId,reply};
 }
 

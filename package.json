@@ -63,7 +63,8 @@
     "test:inventory": "node scripts/data-inventory-check.mjs",
     "test:owner-coherence": "node --experimental-strip-types scripts/eh-owner-coherence.test.mjs",
     "test:owner-coherence:browser": "node scripts/eh-owner-coherence-browser.test.mjs",
-    "test:affiliate": "node --experimental-strip-types --test scripts/affiliate-contract.test.mjs"
+    "test:affiliate": "node --experimental-strip-types --test scripts/affiliate-contract.test.mjs",
+    "test:ai": "node --experimental-strip-types --experimental-loader ./scripts/contact-directory-ts-hook.mjs --test scripts/ai-router.test.mjs scripts/ai-tools.test.mjs scripts/assistant-service.test.mjs"
   },
   "dependencies": {
     "@capacitor/keyboard": "^8.0.5",

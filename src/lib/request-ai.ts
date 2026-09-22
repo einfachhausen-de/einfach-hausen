@@ -23,7 +23,6 @@ const TITLE_RULES:Array<[string,RegExp]>=[
   ['Energie-/Haustechnik',/pv|photovoltaik|wallbox|wärmepumpe|smart home/i],
 ];
 
-const CATEGORIES=new Set(['Garten & Außenbereich','Reinigung','Elektro','Sanitär & Heizung','Maler & Ausbau','Montage & Reparatur','Dach & Fassade','Umzug & Transport','Energie & Smart Home','Hausmeister & Sonstiges']);
 const DAY_INDEX:Record<string,number>={sonntag:0,montag:1,dienstag:2,mittwoch:3,donnerstag:4,freitag:5,samstag:6};
 const WEEKDAY_INDEX:Record<string,number>={Sun:0,Mon:1,Tue:2,Wed:3,Thu:4,Fri:5,Sat:6};
 
@@ -98,52 +97,8 @@ export function parseRequest(text:string,now=new Date()):ParsedRequest{
   return {category,title,postcode,preferredDate,preferredTime,budgetMin:range?Number(range[1]):null,budgetMax:range?Number(range[2]):budget?Number(budget[1]):null};
 }
 
-function jsonObject(text:string){const start=text.indexOf('{'),end=text.lastIndexOf('}');if(start<0||end<=start)return null;try{return JSON.parse(text.slice(start,end+1));}catch{return null;}}
-function normalizedWords(value:string){return String(value||'').toLocaleLowerCase('de-DE').normalize('NFKD').replace(/\p{Diacritic}/gu,'').replace(/ß/g,'ss').match(/[a-z0-9]{4,}/g)||[];}
-function groundedTitle(value:unknown,text:string,fallback:string){
-  if(typeof value!=='string')return fallback;
-  const title=value.replace(/[\r\n\t]+/g,' ').replace(/\s+/g,' ').trim().slice(0,100);
-  if(!title)return fallback;
-  const evidence=new Set(normalizedWords(text));
-  const titleWords=normalizedWords(title);
-  const titleNumbers=title.match(/\d+/g)||[];
-  const textNumbers=new Set(text.match(/\d+/g)||[]);
-  if(!titleWords.length||!titleWords.every(word=>evidence.has(word))||titleNumbers.some(value=>!textNumbers.has(value)))return fallback;
-  return title;
-}
-
+// Extraction is a deterministic product operation, never a paid chat call.
+// Keep this async public interface for existing intake/emergency callers.
 export async function analyzeRequest(text:string):Promise<ParsedRequest>{
-  const fallback=parseRequest(text);
-  const key=process.env.AI_API_KEY||process.env.OMNIROUTE_MASTER_KEY;
-  if(!key)return fallback;
-  const base=(process.env.AI_BASE_URL||'http://127.0.0.1:20128/v1').replace(/\/$/,'');
-  const model=process.env.AI_MODEL||'auto/best-fast';
-  const today=addCalendarDays(berlinToday(),0);
-  const system=`Du extrahierst Auftragsdaten für einen deutschen digitalen Hausmeister. Heute ist ${today}. Antworte ausschließlich mit einem JSON-Objekt mit category,title,postcode,preferredDate,preferredTime,budgetMin,budgetMax. category muss eine der folgenden sein: Garten & Außenbereich, Reinigung, Elektro, Sanitär & Heizung, Maler & Ausbau, Montage & Reparatur, Dach & Fassade, Umzug & Transport, Energie & Smart Home, Hausmeister & Sonstiges. preferredDate YYYY-MM-DD oder null, preferredTime HH:mm oder null, Budgets als Euro-Zahl oder null. Erfinde nichts.`;
-  try{
-    const res=await fetch(`${base}/chat/completions`,{method:'POST',headers:{Authorization:`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model,stream:false,messages:[{role:'system',content:system},{role:'user',content:text}],temperature:0.1,max_tokens:300}),signal:AbortSignal.timeout(8000)});
-    if(!res.ok)return fallback;
-    const data=await res.json() as any;
-    const raw=String(data?.choices?.[0]?.message?.content||'');
-    const ai=jsonObject(raw);
-    if(!ai)return fallback;
-    const category=typeof ai.category==='string'&&CATEGORIES.has(ai.category)&&ai.category===fallback.category?ai.category:fallback.category;
-    return {...fallback,category,title:groundedTitle(ai.title,text,fallback.title)};
-  }catch{return fallback;}
-}
-
-export async function answerHouseQuestion(question:string,context:string):Promise<string>{
-  const key=process.env.AI_API_KEY||process.env.OMNIROUTE_MASTER_KEY;
-  const fallback='Ich kann dir dabei helfen, das einzuordnen. Wenn du nur eine fachliche Person sprechen möchtest, wähle „Ansprechpartner finden“. Wenn tatsächlich etwas erledigt werden soll, wähle „Auftrag organisieren“.';
-  if(!key)return fallback;
-  const base=(process.env.AI_BASE_URL||'http://127.0.0.1:20128/v1').replace(/\/$/,'');
-  const model=process.env.AI_MODEL||'auto/best-fast';
-  const system=`Du bist der digitale Hausmeister von Einfach Hausen für private Hauseigentümer in Deutschland. Antworte knapp, praktisch und verständlich. Nutze die vorhandene Hausakte nur, wenn sie wirklich relevant ist. Erfinde keine Fakten, Preise, Diagnosen oder Termine. Bei potenziell gefährlichen Elektro-, Gas-, Brand-, Wasser- oder Statikproblemen priorisiere sichere Sofortmaßnahmen und professionelle Hilfe. Nach deiner fachlichen Einordnung darfst du in einem kurzen letzten Satz erwähnen, dass der Kunde entweder einen menschlichen Ansprechpartner finden oder einen Auftrag organisieren lassen kann. Die Auswahl trifft immer der Kunde. Hauskontext:\n${context}`;
-  try{
-    const res=await fetch(`${base}/chat/completions`,{method:'POST',headers:{Authorization:`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model,stream:false,messages:[{role:'system',content:system},{role:'user',content:question}],temperature:0.25,max_tokens:500}),signal:AbortSignal.timeout(10000)});
-    if(!res.ok)return fallback;
-    const data=await res.json() as any;
-    const raw=String(data?.choices?.[0]?.message?.content||'').trim();
-    return raw||fallback;
-  }catch{return fallback;}
+  return parseRequest(text);
 }
