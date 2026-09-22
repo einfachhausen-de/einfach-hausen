@@ -11,14 +11,21 @@ async function send(messages: EHAssistantMessage[], signal: AbortSignal): Promis
   return {kind: response.ok ? 'reply' : 'error', reply};
 }
 
-export function HouseAssistant({placement = 'floating'}: {placement?: 'floating' | 'toolbar'}) {
+export function HouseAssistant({placement = 'floating', open, onOpenChange}: {
+  placement?: 'floating' | 'toolbar' | 'panel';
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+}) {
   const path = usePathname();
   const isOwner = path === '/app' || path?.startsWith('/app/');
+  // Die schwebende Karte gehoert zur Website; im Eigentuemerbereich sitzt der
+  // Kundenberater im rechten Bereich der Werkbank und in der Werkzeugleiste.
   if (placement === 'floating' && isOwner) return null;
-  if (placement === 'toolbar' && !isOwner) return null;
+  if (placement !== 'floating' && !isOwner) return null;
   // Do not compete with authentication, provider work, payments, print or existing chat.
   if (!path || path === '/app/onboarding' || path.startsWith('/app/onboarding/') || /^\/(login|register|auth|onboarding|pro|admin|ki-chat|checkout|pay|transfer|partner-invite|design-system)(\/|$)/.test(path)
       || /\/(passport|receipt)(\/|$)/.test(path) || /^\/app\/invoices\//.test(path)
       || ['/impressum', '/datenschutz', '/app/hausmeister'].includes(path) || (path === '/app/messages' && placement !== 'toolbar')) return null;
-  return <EHAssistant placement={placement} key={path} onSend={send} loginHref="/login" settingsHref="/app/settings" aboveNavigation={path === '/app' || path.startsWith('/app/')} />;
+  return <EHAssistant placement={placement} key={path} onSend={send} loginHref="/login" settingsHref="/app/settings"
+    aboveNavigation={path === '/app' || path.startsWith('/app/')} open={open} onOpenChange={onOpenChange} />;
 }

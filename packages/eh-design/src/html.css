@@ -20,7 +20,7 @@
 .eh-section[data-compact] { padding-block: var(--eh-space-xl); }
 .eh-section[data-tone="paper"], .eh-callout[data-tone="paper"] { --eh-bg: var(--eh-color-paper); }
 .eh-section[data-tone="white"] { --eh-bg: var(--eh-color-white); }
-.eh-section[data-tone="sand"], .eh-callout[data-tone="sand"] { --eh-bg: var(--eh-color-sand); }
+.eh-section[data-tone="sand"] { --eh-bg: var(--eh-color-sand); }
 .eh-section[data-tone="deep"], .eh-callout[data-tone="deep"], .eh-recordCover {
   --eh-bg: var(--eh-color-deep); --eh-fg: var(--eh-color-paper);
   --eh-muted: var(--eh-color-sand); --eh-rule: var(--eh-color-secondary);
@@ -131,7 +131,7 @@
 .eh-faq summary span { font-size: 1.5rem; font-weight: var(--eh-weight-regular); }
 .eh-faq details[open] summary span { transform: rotate(45deg); }
 .eh-faq details > div { max-width: 72ch; padding: 0 36px 28px 0; font-size: var(--eh-font-body); }
-.eh-callout { background: var(--eh-bg); padding: clamp(24px,4vw,40px); display: grid; gap: 18px; border-left: 2px solid var(--eh-color-terra); }
+.eh-callout { background: var(--eh-bg); padding: clamp(24px,4vw,40px); display: grid; gap: 18px; border: 1px solid var(--eh-rule); border-radius: var(--eh-radius-panel); }
 .eh-calloutBody { font-size: var(--eh-font-body); line-height: 1.65; }
 .eh-closing { display: flex; flex-direction: column; align-items: flex-start; gap: 30px; }
 .eh-closing .eh-heading { font-size: clamp(2.75rem,6.5vw,6rem); max-width: 15ch; }
@@ -606,8 +606,11 @@
 }
 
 /* Customer assistant: one quiet launcher; native modal owns focus and Escape. */
+/* Der Knopf traegt die Form des Kontomenues aus der Seitenleiste: runde
+   Symbolflaeche, zweizeilige Beschriftung, Zeichen rechts. Er sitzt unten
+   rechts im rechten Bereich und ist dort festgehalten. */
 .eh-assistantLauncher { position:fixed;right:24px;bottom:24px;z-index:40;display:flex;align-items:center;gap:14px;max-width:calc(100vw - 32px);min-height:64px;padding:12px 18px;border:1px solid var(--eh-color-line);border-radius:var(--eh-radius-panel);background:var(--eh-color-white);color:var(--eh-color-ink);text-align:left;font:inherit;cursor:pointer; }
-.eh-assistantLauncher img,.eh-assistantHeader img { object-fit:contain;flex-shrink:0; }
+.eh-assistantHeader img { object-fit:contain;flex-shrink:0; }
 .eh-assistantLauncher strong { display:block;font-size:var(--eh-font-label);line-height:1.4; }
 .eh-assistantLauncher small { display:block;font-size:var(--eh-font-meta);color:var(--eh-color-secondary);line-height: var(--eh-leading-normal); }
 .eh-assistantLauncher:focus-visible { outline:3px solid var(--eh-color-petrol);outline-offset:3px; }
@@ -684,7 +687,31 @@
 
 /* App assistant occupies its own toolbar slot; never floats over workflow controls. */
 .eh-assistantLauncher[data-placement="toolbar"] { position:static; min-height:44px; padding:8px 12px; gap:8px; max-width:none; z-index:auto; }
-.eh-assistantLauncher[data-placement="toolbar"] img { display:none; }
+/* Bereichsfassung (rechter Bereich der App): der Knopf sitzt im Fluss und
+   sieht aus wie das Kontomenue der Seitenleiste - gleiche Hoehe, gleicher
+   Innenabstand, gleiche Zeile aus Kachel, Name, Untertitel und Chevron. */
+.eh-assistantLauncher[data-placement="panel"] { order:2;position:static;width:100%;min-height:48px;padding:8px;gap:8px;border:0;background:transparent;z-index:auto; }
+.eh-assistantLauncher[data-placement="panel"]:hover { background:var(--eh-color-line); }
+.eh-assistantLauncher[data-placement="panel"] strong { font-size:var(--eh-font-label);font-weight:var(--eh-weight-medium);line-height:var(--eh-leading-tight);white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+.eh-assistantLauncher[data-placement="panel"] small { line-height:var(--eh-leading-tight);white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+.eh-assistantLauncherAvatar { display:grid;place-items:center;flex:none;width:32px;height:32px;border-radius:var(--eh-radius-pill);background:var(--eh-color-deep);color:var(--eh-color-white); }
+.eh-assistantLauncherCopy { display:grid;flex:1;min-width:0;overflow:hidden; }
+.eh-assistantLauncherChevron { flex:none;color:var(--eh-color-secondary);transition:transform .15s ease; }
+.eh-assistantLauncher[data-placement="panel"][data-offen] { background:var(--eh-color-paper); }
+.eh-assistantLauncher[data-placement="panel"][data-offen] .eh-assistantLauncherChevron { transform:rotate(180deg); }
+.eh-assistantPanel { order:1;display:flex;flex-direction:column;flex:0 0 auto;height:min(620px,calc(100dvh - 170px));min-height:320px;border:1px solid var(--eh-color-line);border-radius:var(--eh-radius-panel);background:var(--eh-color-paper);overflow:hidden; }
+.eh-assistantPanel .eh-assistantHeader { padding:14px; }
+.eh-assistantPanel .eh-assistantHeader img { display:none; }
+.eh-assistantPanel .eh-assistantHeader h2 { font-size:var(--eh-font-label); }
+.eh-assistantPanel .eh-assistantHeader button { min-width:32px;height:32px;font-size:20px; }
+.eh-assistantPanel .eh-assistantMessages { padding:16px 14px;gap:16px; }
+.eh-assistantPanel .eh-assistantWelcome h3 { font-size:var(--eh-font-body);margin-bottom:10px; }
+.eh-assistantPanel .eh-assistantWelcome p,.eh-assistantPanel .eh-assistantMessage p,.eh-assistantPanel .eh-assistantNotice p { font-size:var(--eh-font-meta); }
+.eh-assistantPanel .eh-assistantComposer { padding:14px;gap:12px; }
+.eh-assistantPanel .eh-assistantActions { flex-direction:column;align-items:stretch; }
+.eh-assistantPanel .eh-assistantActions > a { text-align:center; }
+@media(max-width:1023.5px) { .eh-assistantPanel,.eh-assistantLauncher[data-placement="panel"] { display:none; } }
+.eh-assistantLauncher[data-placement="toolbar"] .eh-assistantLauncherAvatar { display:none; }
 .eh-assistantLauncher[data-placement="toolbar"] strong { font-size:14px; white-space:nowrap; }
 @media(max-width:600px) { .eh-assistantLauncher[data-placement="toolbar"] { padding:8px; } }
 

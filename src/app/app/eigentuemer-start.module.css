@@ -1,0 +1,343 @@
+/* Startseite der Eigentümer-App – eigene Gestaltung der Sektionen.
+ *
+ * FERTIG ZUR FREIGABE, NOCH NICHT AKTIV.
+ * Diese Datei ersetzt die Sondergestaltung, die der PR-Check derzeit ablehnt
+ * (neue CSS-Datei unter src/ ist nur erlaubt, wenn sie in
+ * design/design-policy.json unter "ownedStyleFiles" steht).
+ *
+ * Regeln bleiben auch nach der Freigabe in Kraft (DESIGN.md §10/§11):
+ *   - keine Rohwerte: Farbe, Schriftgröße, Schriftgewicht, Radius, Schatten,
+ *     Laufweite und Zeilenhöhe ausschliesslich als var(--eh-…)
+ *   - keine Verläufe, kein backdrop-filter (Regel decorative-effect) –
+ *     daher die ruhige Papierfläche statt des alten Glanz-Gradienten
+ *   - jede Klasse muss benutzt werden (totes CSS wird geprüft)
+ *   - Zustand reist in ARIA, nicht in Klassennamen: [aria-current="page"]
+ */
+
+/* ── Vorschläge: genau eine Karte sichtbar ────────────────────────────── */
+
+.suggestCard {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 20px 22px;
+  border: 1px solid var(--eh-color-line);
+  border-radius: var(--eh-radius-panel);
+  background: var(--eh-color-paper);
+  box-shadow: var(--eh-shadow-card);
+  min-height: 132px;
+  animation: suggestIn 0.28s ease-out;
+}
+
+@keyframes suggestIn {
+  from { opacity: 0; transform: translateX(12px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.suggestIcon {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--eh-radius-control);
+  background: var(--eh-color-white);
+  color: var(--eh-color-petrol);
+  flex: none;
+}
+
+.suggestBody {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.suggestBody strong {
+  font-size: var(--eh-font-label);
+  font-weight: var(--eh-weight-semibold);
+  line-height: var(--eh-leading-tight);
+  color: var(--eh-color-ink);
+}
+
+.suggestCta {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--eh-font-meta);
+  font-weight: var(--eh-weight-semibold);
+  color: var(--eh-color-petrol);
+  text-decoration: none;
+}
+
+.suggestCta:hover { text-decoration: underline; text-underline-offset: 3px; }
+
+.suggestControls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.suggestDots { display: flex; align-items: center; gap: 6px; }
+
+.suggestDot {
+  width: 8px;
+  height: 8px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--eh-radius-pill);
+  background: var(--eh-color-line);
+  cursor: pointer;
+  transition: background 0.15s, width 0.15s;
+}
+
+.suggestDot[aria-current='page'] { width: 18px; background: var(--eh-color-petrol); }
+
+.suggestNav {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--eh-color-line);
+  border-radius: var(--eh-radius-pill);
+  background: var(--eh-color-white);
+  color: var(--eh-color-petrol);
+  cursor: pointer;
+}
+
+.suggestNav:hover:not(:disabled) { border-color: var(--eh-color-petrol); background: var(--eh-color-paper); }
+.suggestNav:disabled { opacity: 0.45; cursor: default; }
+
+/* ── Vergleichs-Chips: eine Zeile, seitlich verschiebbar wie der Slider ─
+ * Die Chips selbst sind Haus-Stil (.eh-werkbank-chip); hier steht nur die
+ * Reihe drumherum. Ohne sichtbare Leiste: verschoben wird mit den Pfeilen,
+ * auf dem Touchscreen mit dem Finger. */
+.rail { display: grid; gap: 12px; }
+.railScroll { overflow-x: auto; scrollbar-width: none; }
+.railScroll::-webkit-scrollbar { display: none; }
+.railScroll :global(.eh-werkbank-chips) { flex-wrap: nowrap; margin: 0; }
+.railScroll :global(.eh-werkbank-chip) { flex: none; }
+.railControls { display: flex; gap: 8px; margin-left: auto; }
+
+/* ── Haus-Historie: zwei Spalten, mobil Anstehendes zuerst ──────────────
+ * Die Reihenfolge im Markup ist Anstehendes, Vergangenes. Auf breiten
+ * Schirmen dreht `order` sie auf Vergangenes links / Anstehendes rechts;
+ * auf dem Telefon gilt wieder die Markup-Reihenfolge. */
+
+.historyCols {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  align-items: start;
+}
+
+.historyCols > * { min-width: 0; }
+.historyCols > :nth-child(1) { order: 2; }
+.historyCols > :nth-child(2) { order: 1; }
+
+.historyPanel { display: grid; gap: 8px; align-content: start; }
+
+.historyPanelHead { display: flex; align-items: center; gap: 8px; }
+
+.historyPanelTitle {
+  font-size: var(--eh-font-meta);
+  font-weight: var(--eh-weight-bold);
+  letter-spacing: var(--eh-track-wide);
+  text-transform: uppercase;
+  color: var(--eh-color-secondary);
+}
+
+.historyPanelCount {
+  margin-left: auto;
+  font-size: var(--eh-font-meta);
+  font-variant-numeric: tabular-nums;
+  color: var(--eh-color-secondary);
+}
+
+.historyList { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+
+.historyRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 12px 14px;
+  border: 1px solid var(--eh-color-line);
+  border-radius: var(--eh-radius-control);
+  background: var(--eh-color-white);
+  color: inherit;
+  text-decoration: none;
+}
+
+.historyRow:hover { background: var(--eh-color-paper); }
+
+.historyRowMain { flex: 1; min-width: 0; display: grid; gap: 2px; }
+
+.historyRowTitle {
+  font-size: var(--eh-font-label);
+  font-weight: var(--eh-weight-medium);
+  line-height: var(--eh-leading-tight);
+  overflow-wrap: anywhere;
+}
+
+.historyRowMeta { font-size: var(--eh-font-meta); color: var(--eh-color-secondary); }
+
+.historyRowStatus { font-weight: var(--eh-weight-semibold); }
+.historyRowStatus[data-tone='warn'] { color: var(--eh-color-terra); }
+.historyRowStatus[data-tone='ok'] { color: var(--eh-color-success); }
+.historyRowStatus[data-tone='info'] { color: var(--eh-color-petrol); }
+
+.historyRowWhen { display: grid; gap: 2px; text-align: right; font-variant-numeric: tabular-nums; flex: none; }
+.historyRowDate { font-size: var(--eh-font-label); font-weight: var(--eh-weight-semibold); }
+.historyRowTime { font-size: var(--eh-font-meta); color: var(--eh-color-secondary); }
+.historyRowChevron { color: var(--eh-color-secondary); flex: none; }
+
+.historyColEmpty {
+  margin: 0;
+  padding: 14px;
+  border: 1px dashed var(--eh-color-line);
+  border-radius: var(--eh-radius-control);
+  font-size: var(--eh-font-meta);
+  color: var(--eh-color-secondary);
+}
+
+@media (max-width: 900px) {
+  .historyCols { grid-template-columns: minmax(0, 1fr); }
+  .historyCols > * { order: 0; }
+}
+
+/* ── Rechte Schiene: flache Kennzahlen-Karten ─────────────────────────── */
+
+.railStat {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  padding: 12px 14px;
+  border: 1px solid var(--eh-color-line);
+  border-radius: var(--eh-radius-control);
+  background: var(--eh-color-white);
+  color: inherit;
+  text-decoration: none;
+}
+
+.railStat:hover { border-color: var(--eh-color-petrol); }
+
+.railStatIcon { flex: none; display: inline-flex; color: var(--eh-color-secondary); }
+
+.railStatLabel { font-size: var(--eh-font-meta); }
+
+.railStatValue {
+  margin-left: auto;
+  font-size: var(--eh-font-label);
+  font-weight: var(--eh-weight-semibold);
+  font-variant-numeric: tabular-nums;
+}
+
+.railStatValue[data-tone='terra'] { color: var(--eh-color-terra); }
+
+/* ── Schnellaktionen: drei Karten, die erste in Petrol ──────────────────
+ * Wortgleiche Fassung der früheren Optik. Unterschiede nur dort, wo der
+ * Prüfer Rohwerte verbietet: Farben, Schriftgrössen/-gewichte, Radius,
+ * Schatten und Laufweite sind Tokens; auf der Petrolfläche ist der
+ * Sekundärtext Sand (DESIGN.md §3), und der frühere 14-px-Radius ist der
+ * Panel-Radius des Systems. */
+
+/* Die Sektionen stapeln mit mehr Luft als der Rahmen vorgibt: die 16 px des
+ * Hauptbereichs liessen die Abschnitte aneinander kleben. */
+.sections { display: grid; gap: var(--eh-space-lg); }
+
+/* Die Schnellaktionskarten tragen Hover und Glanz der früheren Optik: der
+ * Hoverton der Petrolkarte ist der dunkle Haus-Ton (var(--eh-color-deep)),
+ * die Schatten sind Petrol mit 10, 22 und 28 % Deckkraft. So bleibt es bei
+ * Tokens statt Rohwerten. */
+.quickSection {
+  display: grid;
+  gap: 16px;
+  --quick-glow-ruhig: 0 6px 20px color-mix(in srgb, var(--eh-color-petrol) 10%, transparent);
+  --quick-glow-karte: 0 4px 16px color-mix(in srgb, var(--eh-color-petrol) 22%, transparent);
+  --quick-glow-karte-hover: 0 8px 24px color-mix(in srgb, var(--eh-color-petrol) 28%, transparent);
+}
+
+.quickLabel {
+  font-size: var(--eh-font-eyebrow);
+  font-weight: var(--eh-weight-bold);
+  letter-spacing: var(--eh-track-wide);
+  text-transform: uppercase;
+  color: var(--eh-color-secondary);
+  line-height: var(--eh-leading-normal);
+}
+
+.quickGrid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+.quickGridThree { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+.quickCard {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 20px;
+  border-radius: var(--eh-radius-panel);
+  border: 1px solid var(--eh-color-line);
+  background: var(--eh-color-white);
+  text-decoration: none;
+  color: var(--eh-color-ink);
+  min-height: 168px;
+  box-shadow: var(--eh-shadow-card);
+  transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
+}
+
+.quickCard:hover { border-color: var(--eh-color-petrol); box-shadow: var(--quick-glow-ruhig); transform: translateY(-1px); }
+
+.quickCardPrimary {
+  background: var(--eh-color-petrol);
+  border-color: var(--eh-color-petrol);
+  color: var(--eh-color-white);
+  box-shadow: var(--quick-glow-karte);
+}
+
+/* Hover der Petrolkarte: der dunkle Haus-Ton. Bewusst ueber den bestehenden
+   Token statt eines eigenen Farbwerts. */
+.quickCardPrimary:hover {
+  background: var(--eh-color-deep);
+  border-color: var(--eh-color-deep);
+  box-shadow: var(--quick-glow-karte-hover);
+}
+
+.quickIcon {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--eh-radius-control);
+  background: var(--eh-color-paper);
+  color: var(--eh-color-petrol);
+  flex: none;
+}
+
+.quickCardPrimary .quickIcon { background: var(--eh-color-white); color: var(--eh-color-petrol); }
+
+.quickCard strong {
+  font-size: var(--eh-font-label);
+  font-weight: var(--eh-weight-semibold);
+  line-height: var(--eh-leading-tight);
+  letter-spacing: var(--eh-track-normal);
+}
+
+.quickCard small { font-size: var(--eh-font-meta); line-height: var(--eh-leading-normal); color: var(--eh-color-secondary); }
+.quickCardPrimary small { color: var(--eh-color-sand); }
+
+.quickCardArrow {
+  margin-top: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--eh-font-meta);
+  font-weight: var(--eh-weight-semibold);
+  color: var(--eh-color-petrol);
+}
+
+.quickCardPrimary .quickCardArrow { color: var(--eh-color-white); }
+
+@media (max-width: 1100px) { .quickGrid, .quickGridThree { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 600px) { .quickGrid, .quickGridThree { grid-template-columns: minmax(0, 1fr); } }

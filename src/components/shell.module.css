@@ -33,7 +33,8 @@
 .wb-side a.wb-on{background:var(--eh-color-petrol);color:var(--eh-color-white);font-weight:var(--eh-weight-semibold)}
 .wb-main{padding:22px 26px;min-width:0;flex:1 1 auto;display:flex;flex-direction:column;gap:16px;background:var(--eh-color-white)}
 .wb-content{display:flex;min-width:0;flex:1 1 auto;align-items:stretch}
-.wb-rail{padding:18px;min-width:0;flex:0 0 240px;width:240px;max-width:240px;box-sizing:border-box;background:var(--eh-color-paper);border-left:1px solid var(--eh-color-line);display:flex;flex-direction:column;gap:10px}
+.wb-rail{padding:18px;min-width:0;flex:0 0 240px;width:240px;max-width:240px;box-sizing:border-box;background:var(--eh-color-paper);border-left:1px solid var(--eh-color-line);display:flex;flex-direction:column;gap:10px;transition:flex-basis .2s ease,width .2s ease,max-width .2s ease;position:relative}
+.wb-rail>[data-eh-app]{display:flex;flex-direction:column;gap:10px;flex:0 0 auto;min-height:0;background:transparent}
 .wb-rail>*{min-width:0;max-width:100%}
 .wb-bottom{display:none}
 @media(max-width:1180px){.wb-body{grid-template-columns:198px minmax(0,1fr) 220px}.wb-rail{flex-basis:220px;width:220px;max-width:220px}}
@@ -73,3 +74,24 @@
 .menuItem:hover{background:var(--eh-color-paper);color:var(--eh-color-ink)}
 .menuItem[data-state="open"]{background:var(--eh-color-paper);color:var(--eh-color-ink)}
 @media(max-width:760px){.menuItem{padding:8px 10px}.menuLabel{display:none}}
+
+/* Rechter Bereich mit geoeffnetem Kundenberater: der Bereich schiebt sich
+   auf, der mittlere Bereich wird schmaler - wie die Sidebar links. */
+.wb-rail[data-ki]{flex-basis:400px;width:400px;max-width:400px}
+/* Der Kundenberater haengt am unteren Rand des rechten Bereiches - wie das
+   Kontomenue am unteren Rand der Seitenleiste: gleiche Flaeche wie der
+   Bereich, kein Verlassen der Spalte. */
+.wb-rail>[data-eh-app]{position:sticky;bottom:18px;margin-top:auto;z-index:1;background:var(--eh-color-paper)}
+@media(max-width:1180px) { .wb-rail[data-ki]{flex-basis:320px;width:320px;max-width:320px} }
+
+/* Griff am Rand des rechten Bereiches - das Gegenstueck zum Griff der
+   Seitenleiste links: ein unsichtbarer Streifen auf dem Rand, beim Zeigen
+   erscheint die Linie und der Zeiger wird zum Ziehen-Symbol. Klick klappt den
+   Bereich ein oder aus; eingeklappt bleibt der Griff am Fensterrand stehen. */
+.wb-rail-griff{position:absolute;inset-block:0;left:-8px;width:16px;z-index:20;padding:0;border:0;background:transparent;cursor:e-resize}
+.wb-rail-griff::after{content:'';position:absolute;inset-block:0;left:7px;width:2px;background:transparent;transition:background-color .15s ease}
+.wb-rail-griff:hover::after,.wb-rail-griff:focus-visible::after{background:var(--eh-color-line)}
+.wb-rail-griff:focus-visible{outline:none}
+.wb-rail[data-zu]{flex:0 0 0;width:0;max-width:0;padding:0;border-left:0}
+.wb-rail[data-zu]>*{display:none}
+.wb-rail[data-zu]>.wb-rail-griff{display:block;left:-16px;width:16px;max-width:none;cursor:w-resize}

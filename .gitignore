@@ -91,3 +91,6 @@ __pycache__/
 /*.db
 /*.db-wal
 /*.db-shm
+
+# Oertliches Hilfsskript fuer die Vorschau (Demo-Inhalt), nicht Teil des Produkts
+scripts/seed-demo-preview.cjs

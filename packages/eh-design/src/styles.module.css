@@ -20,7 +20,7 @@
 .section[data-compact] { padding-block: var(--eh-space-xl); }
 .section[data-tone="paper"], .callout[data-tone="paper"] { --eh-bg: var(--eh-color-paper); }
 .section[data-tone="white"] { --eh-bg: var(--eh-color-white); }
-.section[data-tone="sand"], .callout[data-tone="sand"] { --eh-bg: var(--eh-color-sand); }
+.section[data-tone="sand"] { --eh-bg: var(--eh-color-sand); }
 .section[data-tone="deep"], .callout[data-tone="deep"], .recordCover {
   --eh-bg: var(--eh-color-deep); --eh-fg: var(--eh-color-paper);
   --eh-muted: var(--eh-color-sand); --eh-rule: var(--eh-color-secondary);
@@ -131,7 +131,7 @@
 .faq summary span { font-size: 1.5rem; font-weight: var(--eh-weight-regular); }
 .faq details[open] summary span { transform: rotate(45deg); }
 .faq details > div { max-width: 72ch; padding: 0 36px 28px 0; font-size: var(--eh-font-body); }
-.callout { background: var(--eh-bg); padding: clamp(24px,4vw,40px); display: grid; gap: 18px; border-left: 2px solid var(--eh-color-terra); }
+.callout { background: var(--eh-bg); padding: clamp(24px,4vw,40px); display: grid; gap: 18px; border: 1px solid var(--eh-rule); border-radius: var(--eh-radius-panel); }
 .calloutBody { font-size: var(--eh-font-body); line-height: 1.65; }
 .closing { display: flex; flex-direction: column; align-items: flex-start; gap: 30px; }
 .closing .heading { font-size: clamp(2.75rem,6.5vw,6rem); max-width: 15ch; }
@@ -606,8 +606,11 @@
 }
 
 /* Customer assistant: one quiet launcher; native modal owns focus and Escape. */
+/* Der Knopf traegt die Form des Kontomenues aus der Seitenleiste: runde
+   Symbolflaeche, zweizeilige Beschriftung, Zeichen rechts. Er sitzt unten
+   rechts im rechten Bereich und ist dort festgehalten. */
 .assistantLauncher { position:fixed;right:24px;bottom:24px;z-index:40;display:flex;align-items:center;gap:14px;max-width:calc(100vw - 32px);min-height:64px;padding:12px 18px;border:1px solid var(--eh-color-line);border-radius:var(--eh-radius-panel);background:var(--eh-color-white);color:var(--eh-color-ink);text-align:left;font:inherit;cursor:pointer; }
-.assistantLauncher img,.assistantHeader img { object-fit:contain;flex-shrink:0; }
+.assistantHeader img { object-fit:contain;flex-shrink:0; }
 .assistantLauncher strong { display:block;font-size:var(--eh-font-label);line-height:1.4; }
 .assistantLauncher small { display:block;font-size:var(--eh-font-meta);color:var(--eh-color-secondary);line-height: var(--eh-leading-normal); }
 .assistantLauncher:focus-visible { outline:3px solid var(--eh-color-petrol);outline-offset:3px; }
@@ -684,7 +687,31 @@
 
 /* App assistant occupies its own toolbar slot; never floats over workflow controls. */
 .assistantLauncher[data-placement="toolbar"] { position:static; min-height:44px; padding:8px 12px; gap:8px; max-width:none; z-index:auto; }
-.assistantLauncher[data-placement="toolbar"] img { display:none; }
+/* Bereichsfassung (rechter Bereich der App): der Knopf sitzt im Fluss und
+   sieht aus wie das Kontomenue der Seitenleiste - gleiche Hoehe, gleicher
+   Innenabstand, gleiche Zeile aus Kachel, Name, Untertitel und Chevron. */
+.assistantLauncher[data-placement="panel"] { order:2;position:static;width:100%;min-height:48px;padding:8px;gap:8px;border:0;background:transparent;z-index:auto; }
+.assistantLauncher[data-placement="panel"]:hover { background:var(--eh-color-line); }
+.assistantLauncher[data-placement="panel"] strong { font-size:var(--eh-font-label);font-weight:var(--eh-weight-medium);line-height:var(--eh-leading-tight);white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+.assistantLauncher[data-placement="panel"] small { line-height:var(--eh-leading-tight);white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+.assistantLauncherAvatar { display:grid;place-items:center;flex:none;width:32px;height:32px;border-radius:var(--eh-radius-pill);background:var(--eh-color-deep);color:var(--eh-color-white); }
+.assistantLauncherCopy { display:grid;flex:1;min-width:0;overflow:hidden; }
+.assistantLauncherChevron { flex:none;color:var(--eh-color-secondary);transition:transform .15s ease; }
+.assistantLauncher[data-placement="panel"][data-offen] { background:var(--eh-color-paper); }
+.assistantLauncher[data-placement="panel"][data-offen] .assistantLauncherChevron { transform:rotate(180deg); }
+.assistantPanel { order:1;display:flex;flex-direction:column;flex:0 0 auto;height:min(620px,calc(100dvh - 170px));min-height:320px;border:1px solid var(--eh-color-line);border-radius:var(--eh-radius-panel);background:var(--eh-color-paper);overflow:hidden; }
+.assistantPanel .assistantHeader { padding:14px; }
+.assistantPanel .assistantHeader img { display:none; }
+.assistantPanel .assistantHeader h2 { font-size:var(--eh-font-label); }
+.assistantPanel .assistantHeader button { min-width:32px;height:32px;font-size:20px; }
+.assistantPanel .assistantMessages { padding:16px 14px;gap:16px; }
+.assistantPanel .assistantWelcome h3 { font-size:var(--eh-font-body);margin-bottom:10px; }
+.assistantPanel .assistantWelcome p,.assistantPanel .assistantMessage p,.assistantPanel .assistantNotice p { font-size:var(--eh-font-meta); }
+.assistantPanel .assistantComposer { padding:14px;gap:12px; }
+.assistantPanel .assistantActions { flex-direction:column;align-items:stretch; }
+.assistantPanel .assistantActions > a { text-align:center; }
+@media(max-width:1023.5px) { .assistantPanel,.assistantLauncher[data-placement="panel"] { display:none; } }
+.assistantLauncher[data-placement="toolbar"] .assistantLauncherAvatar { display:none; }
 .assistantLauncher[data-placement="toolbar"] strong { font-size:14px; white-space:nowrap; }
 @media(max-width:600px) { .assistantLauncher[data-placement="toolbar"] { padding:8px; } }
 

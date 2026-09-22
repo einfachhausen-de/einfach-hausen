@@ -30,7 +30,7 @@ export function EHComparison({left, right}: {left: {title: string; items: string
 export function EHFAQ({items}: {items: {q: string; a: ReactNode}[]}) {
   return <div className={s.faq}>{items.map(item=><details key={item.q}><summary>{item.q}<span aria-hidden="true">+</span></summary><div>{item.a}</div></details>)}</div>;
 }
-export function EHCallout({title, children, tone = "sand"}: {title: string; children: ReactNode; tone?: "sand" | "paper" | "deep"}) {
+export function EHCallout({title, children, tone = "paper"}: {title: string; children: ReactNode; tone?: "paper" | "deep"}) {
   return <aside className={s.callout} data-tone={tone}><EHHeading as="h3" scale="item">{title}</EHHeading><div className={s.calloutBody}>{children}</div></aside>;
 }
 export function EHClosing({title, text, href, label = "Anliegen besprechen", secondary}: {title: ReactNode; text?: string; href?: string; label?: string; secondary?: ReactNode}) {
