@@ -61,7 +61,7 @@ export async function WerkbankRahmen({
       jobsCount = (db.prepare("SELECT COUNT(*) c FROM jobs WHERE homeowner_id=? AND status NOT IN ('completed','cancelled')").get(user.id) as { c: number }).c;
       calCount = (db.prepare("SELECT COUNT(*) c FROM appointments WHERE homeowner_id=? AND status='confirmed' AND datetime(start_at)>=datetime('now')").get(user.id) as { c: number }).c;
       jobRows = db.prepare("SELECT id,title,status FROM jobs WHERE homeowner_id=? AND status NOT IN ('completed','cancelled') ORDER BY datetime(updated_at) DESC LIMIT 5").all(user.id) as { id: number; title: string; status: string }[];
-      eventRows = db.prepare("SELECT a.id,COALESCE(a.title,j.title) title,a.start_at,a.job_id FROM appointments a JOIN jobs j ON j.id=a.job_id WHERE a.homeowner_id=? AND a.status='confirmed' AND datetime(a.start_at)>=datetime('now') ORDER BY datetime(a.start_at) ASC LIMIT 5").all(user.id) as { id: number; title: string; start_at: string; job_id: number }[];
+      eventRows = db.prepare("SELECT a.id,j.title title,a.start_at,a.job_id FROM appointments a JOIN jobs j ON j.id=a.job_id WHERE a.homeowner_id=? AND a.status='confirmed' AND datetime(a.start_at)>=datetime('now') ORDER BY datetime(a.start_at) ASC LIMIT 5").all(user.id) as { id: number; title: string; start_at: string; job_id: number }[];
     } else if (pctx) {
       const ownJobs = pctx.canManageJobs ? '' : 'AND a.contact_user_id=?';
       const ownCal = pctx.canManageJobs ? '' : 'AND a.contact_user_id=?';
@@ -69,7 +69,7 @@ export async function WerkbankRahmen({
       jobsCount = (db.prepare(`SELECT COUNT(DISTINCT j.id) c FROM job_assignments a JOIN jobs j ON j.id=a.job_id WHERE a.provider_id=? ${ownJobs} AND j.status NOT IN ('completed','closed','cancelled')`).get(pctx.providerId, ...ownArgs) as { c: number }).c;
       calCount = (db.prepare(`SELECT COUNT(*) c FROM appointments a WHERE a.provider_id=? ${ownCal} AND a.status<>'cancelled' AND datetime(a.start_at)>=datetime('now')`).get(pctx.providerId, ...ownArgs) as { c: number }).c;
       jobRows = db.prepare(`SELECT j.id,j.title,j.status FROM job_assignments a JOIN jobs j ON j.id=a.job_id WHERE a.provider_id=? ${ownJobs} AND j.status NOT IN ('completed','closed','cancelled') ORDER BY datetime(j.updated_at) DESC LIMIT 5`).all(pctx.providerId, ...ownArgs) as { id: number; title: string; status: string }[];
-      eventRows = db.prepare(`SELECT a.id,COALESCE(a.title,j.title) title,a.start_at,a.job_id FROM appointments a JOIN jobs j ON j.id=a.job_id WHERE a.provider_id=? ${ownCal} AND a.status<>'cancelled' AND datetime(a.start_at)>=datetime('now') ORDER BY datetime(a.start_at) ASC LIMIT 5`).all(pctx.providerId, ...ownArgs) as { id: number; title: string; start_at: string; job_id: number }[];
+      eventRows = db.prepare(`SELECT a.id,j.title title,a.start_at,a.job_id FROM appointments a JOIN jobs j ON j.id=a.job_id WHERE a.provider_id=? ${ownCal} AND a.status<>'cancelled' AND datetime(a.start_at)>=datetime('now') ORDER BY datetime(a.start_at) ASC LIMIT 5`).all(pctx.providerId, ...ownArgs) as { id: number; title: string; start_at: string; job_id: number }[];
     }
   }
   const jobsList = jobRows.map((row) => ({
