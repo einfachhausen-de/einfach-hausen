@@ -115,6 +115,11 @@
       "purpose": "Auftrags-/Rechnungsdokumente (Pfad)",
       "retention": "business"
     },
+    "document_intelligence_jobs": {
+      "personal": true,
+      "purpose": "Dokumenten-Intelligenz: Extraktionsauftraege zu Hausdateien (Dateiname, Text, Status)",
+      "retention": "account"
+    },
     "error_events": {
       "personal": true,
       "purpose": "Fehlerberichte (redacted, ohne Geheimnisse)",
@@ -376,8 +381,9 @@
       "retention": "business"
     },
     "tariff_partner_offers": {
-      "personal": false,
-      "purpose": "Tarifvergleichs-Referenzdaten (Anbieter, PLZ-Prefix, kein Personenbezug)"
+      "personal": true,
+      "purpose": "Tarifvergleich: Anbieter- und Tarifnamen als B2B-Referenzdaten (kein Nutzerbezug, bleibt erhalten)",
+      "retention": "business"
     },
     "user_settings": {
       "personal": true,
