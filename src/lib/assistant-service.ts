@@ -26,7 +26,9 @@ export type AssistantResponse = {
 };
 const THEMA: Record<Capability, string> = {
   jobs: 'Aufträge', quotes: 'Angebote', contracts: 'Verträge', documents: 'Dokumente', contacts: 'Ansprechpartner',
-  calendar: 'Termine', house: 'Hausakte', maintenance: 'Pflege', find_provider: 'Betriebe finden',
+  calendar: 'Termine', house: 'Hausakte', maintenance: 'Pflege', next_actions: 'Nächste Schritte',
+  compare_quotes: 'Angebote vergleichen', house_check: 'Haus-Check', house_event: 'Haus-Ereignis',
+  find_provider: 'Betriebe finden',
   create_job: 'Auftrag anlegen', compare_tariffs: 'Tarife vergleichen', help: 'App-Hilfe', generative: 'Beratung', clarify: 'Rückfrage',
 };
 // Diese Faehigkeiten schlagen in den eigenen Daten nach; die uebrigen erklaeren nur die App.
