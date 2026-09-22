@@ -81,11 +81,13 @@ export function HeaderMenu({ jobsHref, jobsCount, jobsNewHref, jobsList, calHref
                 {SERVICE_CATEGORIES.map((area) => {
                   const Icon = area.icon;
                   return (
-                    <DropdownMenuItem key={area.slug} asChild className={MENU_ITEM_CLASS}>
-                      <Link href={`/app/hausmeister?topic=${area.slug}`} className="text-inherit">
-                        <Icon size={16} aria-hidden="true" className="shrink-0 opacity-70" />
-                        <span>{area.shortTitle}</span>
-                      </Link>
+                    <DropdownMenuItem
+                      key={area.slug}
+                      className={MENU_ITEM_CLASS}
+                      onSelect={() => router.push(`/app/hausmeister?topic=${area.slug}`)}
+                    >
+                      <Icon size={16} aria-hidden="true" className="shrink-0 opacity-70" />
+                      <span>{area.shortTitle}</span>
                     </DropdownMenuItem>
                   );
                 })}
