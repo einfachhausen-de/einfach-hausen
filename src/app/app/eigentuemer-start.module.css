@@ -152,7 +152,9 @@
 
 /* Die Liste: grosse Punkte, luftige Zeilen, ein Klickfeld pro Eintrag.
    Die Linie faengt unter dem Kopf an und laeuft bis zum letzten Punkt. */
-.tlList { position:relative; list-style:none; margin:16px 0 0; padding:2px 0 0; display:grid; gap:20px; }
+.tlGruppen { display:grid; gap:24px; padding-top:16px; }
+.tlGruppe { margin:0 0 8px; font-size:var(--eh-font-meta); font-weight:var(--eh-weight-semibold); letter-spacing:var(--eh-track-wide); text-transform:uppercase; color:var(--eh-color-secondary); }
+.tlList { position:relative; list-style:none; margin:0; padding:2px 0 0; display:grid; gap:20px; }
 .tlList::before { content:''; position:absolute; left:8px; top:12px; bottom:16px; width:1px; background:var(--eh-color-line); }
 .tlItem { position:relative; }
 .tlRow { display:flex; align-items:center; gap:10px; min-height:44px; text-decoration:none; color:inherit; border-radius:var(--eh-radius-control); transition:background-color .12s ease; }
@@ -160,9 +162,16 @@
 /* Erledigtes und abgebrochenes tritt zurueck: Titel und Terminhinweis in
    Sekundaertinte, die Statusplakette bleibt als Anker lesbar. */
 .tlRow[data-vergangen] .tlTitel { color:var(--eh-color-secondary); }
+/* Punkt-Sprache (Betreiber-Nachschurf 23.09.): offen/laufend = petrolrandig
+   mit gefuelltem Kern, vergangen = hohl und grau — Unterscheidung ohne Lesen. */
+.tlRow:not([data-vergangen]) .tlDot { border-color:var(--eh-color-petrol); }
+.tlRow:not([data-vergangen]) .tlDot::after { background:var(--eh-color-petrol); }
+.tlRow[data-vergangen] .tlDot::after { content:none; }
 .tlDot { z-index:1; flex:none; width:17px; height:17px; border:1px solid var(--eh-color-line); border-radius:var(--eh-radius-pill); background:var(--eh-color-white); display:grid; place-items:center; }
 .tlDot::after { content:''; width:7px; height:7px; border-radius:var(--eh-radius-pill); background:var(--eh-color-secondary); }
-.tlDot[data-neuest]::after { background:var(--eh-color-petrol); }
+.tlDot[data-neuest]::after { background:var(--eh-color-petrol); width:9px; height:9px; }
+.tlMehr { justify-self:start; display:inline-flex; align-items:center; padding:8px 14px; border:1px solid var(--eh-color-line); border-radius:var(--eh-radius-pill); background:var(--eh-color-white); font-size:var(--eh-font-meta); font-weight:var(--eh-weight-semibold); color:var(--eh-color-secondary); cursor:pointer; }
+.tlMehr:hover, .tlMehr:focus-visible { color:var(--eh-color-petrol); border-color:var(--eh-color-petrol); background:var(--eh-color-paper); }
 .tlBody { flex:1 1 auto; min-width:0; display:flex; align-items:baseline; gap:6px 14px; flex-wrap:wrap; }
 .tlTitel { font-size:var(--eh-font-label); font-weight:var(--eh-weight-medium); line-height:var(--eh-leading-tight); overflow-wrap:anywhere; flex:1 1 180px; }
 .tlWhen { margin-left:auto; font-size:var(--eh-font-meta); color:var(--eh-color-secondary); font-variant-numeric:tabular-nums; flex:none; }

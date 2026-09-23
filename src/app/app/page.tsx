@@ -110,7 +110,7 @@ export default async function Dashboard() {
     SELECT id, title, status, updated_at AS shown_at, NULL AS next_at
     FROM jobs
     WHERE homeowner_id=? AND status IN ('completed','done','cancelled')
-    ORDER BY datetime(updated_at) DESC LIMIT 6
+    ORDER BY datetime(updated_at) DESC LIMIT 18
   `).all(user.id) as HistoryRow[];
 
   // Haus-Historie als Zeitleiste (Muster 21st.dev, Betreiber-Order 23.09.):
