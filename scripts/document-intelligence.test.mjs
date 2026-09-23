@@ -107,4 +107,12 @@ test('chat tool click is wired end-to-end: package options, app body, route allo
  assert.match(service,/Object\.hasOwn\(CHAT_TOOLS, tool\)/);
 });
 
+test('Foto machen opens a camera, never the plain file picker',()=>{
+ const pkg=fs.readFileSync(path.join(process.cwd(),'packages/eh-design/src/assistant.tsx'),'utf8');
+ assert.match(pkg,/navigator\.mediaDevices\.getUserMedia/,'kamera braucht getUserMedia');
+ assert.match(pkg,/onClick=\{fotoMachen\}/,'Menuepunkt Haengt an fotoMachen, nicht am Datei-Input');
+ assert.match(pkg,/capture="environment"/,'Touch-Geraete oeffnen die Systemkamera direkt');
+ assert.match(pkg,/aria-label="Foto aufnehmen"/,'Aufnahme-Knopf ist benannt');
+});
+
 test.after(()=>{db.close();fs.rmSync(tmp,{recursive:true,force:true})});

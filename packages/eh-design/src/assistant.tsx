@@ -105,6 +105,7 @@ export function EHAssistant({onSend, loginHref, settingsHref, aboveNavigation = 
     document.addEventListener('pointerdown', ausserhalb, true);
     return () => document.removeEventListener('pointerdown', ausserhalb, true);
   }, [toolsOpen, anhangMenu]);
+
   useEffect(() => {
     const bereich = log.current; if (!bereich) return;
     const letzte = busy ? null : kartenRefs.current[messages.length - 1];
@@ -278,20 +279,92 @@ export function EHAssistant({onSend, loginHref, settingsHref, aboveNavigation = 
   const hasValue = input.trim().length > 0 || anhang !== null;
   const photoInputRef = useRef<HTMLInputElement>(null);
   const dokumentInputRef = useRef<HTMLInputElement>(null);
+  /** In-App-Kamera (Desktop); auf Touch-Geraeten oeffnet das Eingabefeld mit
+      capture direkt die Kamera-App des Systems. */
+  const [kameraAktiv, setKameraAktiv] = useState(false);
+  const [kameraFehler, setKameraFehler] = useState<string | null>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const kameraStream = useRef<MediaStream | null>(null);
+  const kameraRichtung = useRef<'environment' | 'user'>('environment');
+  function kameraSchliessen() {
+    kameraStream.current?.getTracks().forEach(spur => spur.stop());
+    kameraStream.current = null;
+    setKameraAktiv(false);
+    setKameraFehler(null);
+  }
+  async function kameraStarten() {
+    try {
+      const strom = await navigator.mediaDevices.getUserMedia({ video: { facingMode: kameraRichtung.current }, audio: false });
+      kameraStream.current = strom;
+      setKameraFehler(null);
+      setKameraAktiv(true);
+      requestAnimationFrame(() => { const v = videoRef.current; if (v) { v.srcObject = strom; void v.play().catch(() => {}); } });
+    } catch (fehler) {
+      setKameraFehler(fehler instanceof DOMException && fehler.name === 'NotAllowedError'
+        ? 'Der Zugriff auf die Kamera wurde abgelehnt.'
+        : 'Eine nutzbare Kamera ist hier nicht erreichbar.');
+      setKameraAktiv(true); // Der Rahmen bleibt offen: er zeigt den Ausweichweg.
+    }
+  }
+  function fotoMachen() {
+    setAnhangMenu(false);
+    if (typeof window.matchMedia === 'function' && window.matchMedia('(pointer: coarse)').matches) { photoInputRef.current?.click(); return; }
+    void kameraStarten();
+  }
+  function fotoAufnehmen() {
+    const v = videoRef.current;
+    if (!v || !v.videoWidth) return;
+    const leinwand = document.createElement('canvas');
+    leinwand.width = v.videoWidth;
+    leinwand.height = v.videoHeight;
+    const maler = leinwand.getContext('2d');
+    if (!maler) return;
+    maler.drawImage(v, 0, 0);
+    leinwand.toBlob(blob => {
+      if (!blob) return;
+      const zeit = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');
+      anhangSetzen(new File([blob], `Kamerafoto-${zeit}.jpg`, { type: 'image/jpeg' }), 'photo');
+    }, 'image/jpeg', 0.92);
+  }
+  async function kameraRichten() {
+    kameraRichtung.current = kameraRichtung.current === 'environment' ? 'user' : 'environment';
+    try {
+      kameraStream.current?.getTracks().forEach(spur => spur.stop());
+      const strom = await navigator.mediaDevices.getUserMedia({ video: { facingMode: kameraRichtung.current }, audio: false });
+      kameraStream.current = strom;
+      if (videoRef.current) videoRef.current.srcObject = strom;
+    } catch { /* Diese Kamera laesst sich nicht wenden; der alte Rahmen bleibt. */ }
+  }
+  const anhangSetzen = (datei: File, kind: EHChatAttachment['kind']) => {
+    setAnhang({ file: datei, kind });
+    setImagePreview(null);
+    if (kind === 'photo' && (datei.type.startsWith('image/') || datei.type === 'image/heic' || datei.type === 'image/heif')) {
+      const leser = new FileReader();
+      leser.onloadend = () => setImagePreview(leser.result as string);
+      leser.readAsDataURL(datei);
+    }
+    kameraSchliessen();
+  };
   const handlePlus = () => { setAnhangMenu(o => !o); setToolsOpen(false); };
   const anhangNehmen = (e: React.ChangeEvent<HTMLInputElement>, kind: EHChatAttachment['kind']) => {
     const f = e.target.files?.[0];
     e.target.value = '';
     setAnhangMenu(false);
     if (!f) return;
-    setAnhang({file: f, kind});
-    if (kind === 'photo' && (f.type.startsWith('image/') || f.type === 'image/heic' || f.type === 'image/heif')) {
-      const r = new FileReader();
-      r.onloadend = () => setImagePreview(r.result as string);
-      r.readAsDataURL(f);
-    }
+    anhangSetzen(f, kind);
   };
   const anhangEntfernen = () => { setAnhang(null); setImagePreview(null); };
+  // Die Kamera stirbt mit der Komponente; ein offener Rahmen schluckt Escape,
+  // damit er das Panel nicht schliesst, sondern nur die Kamera.
+  useEffect(() => () => { kameraStream.current?.getTracks().forEach(spur => spur.stop()); }, []);
+  useEffect(() => {
+    if (!kameraAktiv) return;
+    function onKey(event: KeyboardEvent) {
+      if (event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); kameraSchliessen(); }
+    }
+    document.addEventListener('keydown', onKey, true);
+    return () => document.removeEventListener('keydown', onKey, true);
+  }, [kameraAktiv]);
   // Vorschlaege ueber dem Eingabefeld: im leeren Verlauf die Startvorschlaege
   // des Aufrufers, danach die Follow-ups der letzten Antwort. Klick uebernimmt
   // den Text in die Eingabe; gesendet wird erst mit Enter.
@@ -342,7 +415,7 @@ export function EHAssistant({onSend, loginHref, settingsHref, aboveNavigation = 
               <button type="button" onClick={handlePlus} className={s.assistantPromptIconBtn} aria-label="Foto oder Datei hinzufügen" aria-haspopup="menu" aria-expanded={anhangMenu}><Plus size={18} /></button>
               {anhangMenu && (
                 <div className={s.assistantPromptToolsMenu} role="menu" aria-label="Anhang hinzufügen">
-                  <button type="button" role="menuitem" onClick={() => { photoInputRef.current?.click(); setAnhangMenu(false); }}><Camera size={16} /> <span>Foto machen</span></button>
+                  <button type="button" role="menuitem" onClick={fotoMachen}><Camera size={16} /> <span>Foto machen</span></button>
                   <button type="button" role="menuitem" onClick={() => { dokumentInputRef.current?.click(); setAnhangMenu(false); }}><FileUp size={16} /> <span>Datei hochladen</span></button>
                 </div>
               )}
@@ -412,5 +485,29 @@ export function EHAssistant({onSend, loginHref, settingsHref, aboveNavigation = 
       {verlauf}
       {eingabe}
     </dialog>}
+
+    {/* Die Kamera gehoert vor den Chat: Panel und Dialog bleiben dahinter
+        stehen; abgebrochen oder aufgenommen ist sie immer. */}
+    {kameraAktiv && (
+      <div className={s.assistantCamera} role="dialog" aria-modal="true" aria-label="Kamera">
+        <div className={s.assistantCameraCard}>
+          <video ref={videoRef} className={s.assistantCameraVideo} autoPlay playsInline muted aria-label="Kamerabild" />
+          <p className={s.assistantCameraNote} role={kameraFehler ? 'alert' : undefined}>
+            {kameraFehler ?? 'Motiv rahmen und mit dem runden Knopf aufnehmen.'}
+          </p>
+          <div className={s.assistantCameraBar}>
+            <button type="button" className={s.assistantCameraGhost} onClick={kameraSchliessen}>Abbrechen</button>
+            {!kameraFehler ? (
+              <>
+                <button type="button" className={s.assistantCameraShutter} aria-label="Foto aufnehmen" onClick={fotoAufnehmen}><Camera size={20} aria-hidden="true" /></button>
+                <button type="button" className={s.assistantCameraGhost} aria-label="Kamera wechseln" onClick={() => void kameraRichten()}>Wenden</button>
+              </>
+            ) : (
+              <button type="button" className={s.assistantCameraGhost} onClick={() => photoInputRef.current?.click()}>Bild wählen</button>
+            )}
+          </div>
+        </div>
+      </div>
+    )}
   </div>;
 }
