@@ -88,6 +88,23 @@ export function EHAssistant({onSend, loginHref, settingsHref, aboveNavigation = 
   }, [input]);
 
   useEffect(() => () => request.current?.abort(), []);
+  // Die Menues (Anhang, Tools) sind normale Bereiche, keine Dialoge: sie
+  // schliessen, sobald ausserhalb geklickt wird, und schliessen einander,
+  // damit nie zwei offen zugleich stehen.
+  const anhangWrapRef = useRef<HTMLDivElement>(null);
+  const toolsWrapRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!toolsOpen && !anhangMenu) return;
+    function ausserhalb(event: PointerEvent) {
+      const ziel = event.target as Node;
+      if (toolsOpen && toolsWrapRef.current?.contains(ziel)) return;
+      if (anhangMenu && anhangWrapRef.current?.contains(ziel)) return;
+      setToolsOpen(false);
+      setAnhangMenu(false);
+    }
+    document.addEventListener('pointerdown', ausserhalb, true);
+    return () => document.removeEventListener('pointerdown', ausserhalb, true);
+  }, [toolsOpen, anhangMenu]);
   useEffect(() => {
     const bereich = log.current; if (!bereich) return;
     const letzte = busy ? null : kartenRefs.current[messages.length - 1];
@@ -261,7 +278,7 @@ export function EHAssistant({onSend, loginHref, settingsHref, aboveNavigation = 
   const hasValue = input.trim().length > 0 || anhang !== null;
   const photoInputRef = useRef<HTMLInputElement>(null);
   const dokumentInputRef = useRef<HTMLInputElement>(null);
-  const handlePlus = () => setAnhangMenu(o => !o);
+  const handlePlus = () => { setAnhangMenu(o => !o); setToolsOpen(false); };
   const anhangNehmen = (e: React.ChangeEvent<HTMLInputElement>, kind: EHChatAttachment['kind']) => {
     const f = e.target.files?.[0];
     e.target.value = '';
@@ -321,7 +338,7 @@ export function EHAssistant({onSend, loginHref, settingsHref, aboveNavigation = 
         />
         <div className={s.assistantPromptBar}>
           <div className={s.assistantPromptLeft} style={{position:'relative'}}>
-            <div style={{position:'relative'}}>
+            <div style={{position:'relative'}} ref={anhangWrapRef}>
               <button type="button" onClick={handlePlus} className={s.assistantPromptIconBtn} aria-label="Foto oder Datei hinzufügen" aria-haspopup="menu" aria-expanded={anhangMenu}><Plus size={18} /></button>
               {anhangMenu && (
                 <div className={s.assistantPromptToolsMenu} role="menu" aria-label="Anhang hinzufügen">
@@ -330,8 +347,8 @@ export function EHAssistant({onSend, loginHref, settingsHref, aboveNavigation = 
                 </div>
               )}
             </div>
-            <div style={{position:'relative'}}>
-              <button type="button" onClick={() => setToolsOpen(o => !o)} className={s.assistantPromptToolsBtn} aria-expanded={toolsOpen} aria-haspopup="menu"><SlidersHorizontal size={16} /> Tools</button>
+            <div style={{position:'relative'}} ref={toolsWrapRef}>
+              <button type="button" onClick={() => { setToolsOpen(o => !o); setAnhangMenu(false); }} className={s.assistantPromptToolsBtn} aria-expanded={toolsOpen} aria-haspopup="menu"><SlidersHorizontal size={16} /> Tools</button>
               {toolsOpen && (
                 <div className={s.assistantPromptToolsMenu} role="menu">
                   {tools.map(t => (
