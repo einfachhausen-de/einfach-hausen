@@ -865,7 +865,7 @@ summary.activityHead { cursor:pointer; list-style:none; }
 .assistantPanel .assistantMessages { background:var(--eh-color-white); padding:20px 16px 12px; }
 .assistantPanel .assistantComposer { background:transparent; border-top:0; padding:12px 12px 14px; }
 .assistantComposer { background:transparent; border-top:0; padding:14px 16px 16px; }
-.assistantPromptBox { display:flex; flex-direction:column; gap:0; background:var(--eh-color-white); border:1px solid var(--eh-color-line); border-radius:28px; padding:8px; box-shadow:0 4px 24px rgba(16,34,42,.06), 0 1px 2px rgba(16,34,42,.04); transition:border-color var(--eh-motion-duration) var(--eh-motion-ease), box-shadow var(--eh-motion-duration) var(--eh-motion-ease); }
+.assistantPromptBox { display:flex; flex-direction:column; gap:0; background:var(--eh-color-white); border:1px solid var(--eh-color-line); border-radius:var(--eh-radius-panel); padding:8px; box-shadow:0 4px 24px rgba(16,34,42,.06), 0 1px 2px rgba(16,34,42,.04); transition:border-color var(--eh-motion-duration) var(--eh-motion-ease), box-shadow var(--eh-motion-duration) var(--eh-motion-ease); }
 .assistantPromptBox:focus-within { border-color:var(--eh-color-petrol); box-shadow:0 0 0 3px color-mix(in srgb, var(--eh-color-petrol) 12%, transparent), 0 8px 32px rgba(16,34,42,.08); }
 .assistantPromptInput { width:100%; min-height:52px; max-height:160px; resize:none; border:0; background:transparent; color:var(--eh-color-ink); font:400 var(--eh-font-input)/1.55 var(--eh-font-family); padding:10px 14px; outline:0; }
 .assistantPromptInput::placeholder { color:var(--eh-color-secondary); }

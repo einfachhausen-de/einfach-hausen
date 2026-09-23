@@ -1,6 +1,6 @@
 "use client";
 import {Fragment, useEffect, useId, useRef, useState, type FormEvent, type ReactNode} from 'react';
-import {ArrowUp, BookOpen, Check, ChevronsUpDown, Clock, Copy, ExternalLink, Globe, History, Lightbulb, Mic, Palette, Pencil, Plus, Search, SlidersHorizontal, Sparkles, Telescope, ThumbsDown, ThumbsUp, X} from 'lucide-react';
+import {ArrowUp, BookOpen, Check, ChevronsUpDown, ClipboardPlus, Clock, Copy, ExternalLink, FilePlus2, FolderSearch, History, Mic, Plus, Scale, Search, SlidersHorizontal, Sparkles, ThumbsDown, ThumbsUp, X} from 'lucide-react';
 import {motion, AnimatePresence} from 'motion/react';
 import {EHActivity, type EHActivityStep} from './blocks';
 import {EHButton, EHText} from './primitives';
@@ -60,11 +60,10 @@ export function EHAssistant({onSend, loginHref, settingsHref, aboveNavigation = 
   const istPanel = placement === 'panel';
   const offen = open ?? offenIntern;
   const tools = [
-    {id: 'image', label: 'Bild erstellen', icon: Palette, short: 'Bild'},
-    {id: 'web', label: 'Web durchsuchen', icon: Globe, short: 'Web'},
-    {id: 'code', label: 'Code schreiben', icon: Pencil, short: 'Code'},
-    {id: 'deep', label: 'Tief recherchieren', icon: Telescope, short: 'Research', extra: '5 übrig'},
-    {id: 'think', label: 'Länger nachdenken', icon: Lightbulb, short: 'Denken'},
+    {id: 'job', label: 'Auftrag erstellen', icon: ClipboardPlus, short: 'Auftrag'},
+    {id: 'compare', label: 'Anbieter vergleichen', icon: Scale, short: 'Vergleich'},
+    {id: 'houseFile', label: 'Hausakte durchsuchen', icon: FolderSearch, short: 'Hausakte'},
+    {id: 'report', label: 'Bericht erstellen', icon: FilePlus2, short: 'Bericht'},
   ] as const;
   const activeTool = selectedTool ? tools.find(t => t.id === selectedTool) : null;
   useEffect(() => {

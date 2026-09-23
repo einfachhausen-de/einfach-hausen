@@ -90,16 +90,26 @@ export function WerkbankShell({
   // Der Kundenberater sitzt als rechter Bereich im Fluss - wie die Sidebar
   // links: der Bereich schiebt sich auf, der mittlere Bereich wird schmaler.
   // Nichts schwebt ueber dem Inhalt.
-  const [kiOffen, setKiOffen] = useState(false);
+  // Der Chat-Offenzustand bleibt wie der Rail-Zustand im Cookie, damit der
+  // Kundenberater beim Seitenwechsel geoeffnet bleibt (neue Shell-Instanz
+  // pro Route liest das Cookie beim Initialisieren).
+  const [kiOffen, setKiOffen] = useState(() => {
+    if (typeof document === 'undefined') return false;
+    return document.cookie.split('; ').some((c) => c === 'ki_state=true');
+  });
   const hatKi = role === 'homeowner';
   // Der rechte Bereich laesst sich am Rand ein- und ausklappen - mit demselben
   // Griff wie die Seitenleiste links. Der Zustand bleibt im Cookie, damit die
   // Seite nach dem Neuladen gleich aussieht.
   const [railZu, setRailZu] = useState(!defaultRailOpen);
   const railId = useId();
+  function kiSetzen(offen: boolean) {
+    setKiOffen(offen);
+    document.cookie = `ki_state=${offen ? 'true' : 'false'}; path=/; max-age=${60 * 60 * 24 * 7}`;
+  }
   function railSetzen(zu: boolean) {
     setRailZu(zu);
-    if (zu) setKiOffen(false);
+    if (zu) kiSetzen(false);
     document.cookie = `rail_state=${zu ? 'false' : 'true'}; path=/; max-age=${60 * 60 * 24 * 7}`;
   }
   function railUmschalten() {
@@ -108,7 +118,7 @@ export function WerkbankShell({
   /** Die Kachel im schmalen Streifen holt den Bereich zurueck und oeffnet den Chat. */
   function kiUmschalten(offen: boolean) {
     if (offen && railZu) railSetzen(false);
-    setKiOffen(offen);
+    kiSetzen(offen);
   }
   return (
     <TooltipProvider>

@@ -129,7 +129,6 @@
    Blickfeld - oben bzw. unten im fixierten Streifen. */
 .wb-rail[data-zu]>.wb-rail-auf{position:sticky;top:8px;z-index:2}
 .wb-rail[data-zu]>[data-eh-app]{position:sticky;bottom:8px;margin-top:auto;align-items:center}
-@media(max-width:1120px){.wb-rail[data-zu]{position:static;height:auto;top:auto}}
 .wb-rail-auf{display:grid;place-items:center;flex:0 0 auto;width:36px;min-height:32px;padding:0;border:1px solid var(--eh-color-line);border-radius:var(--eh-radius-control);background:var(--eh-color-white);color:var(--eh-color-secondary);cursor:pointer}
 .wb-rail-auf:hover{border-color:var(--eh-color-petrol);color:var(--eh-color-petrol)}
 /* 2026-09-23: Dicken Fokus-Rahmen in Werkbank raus - ohne Important (spaeter gewinnt) */
