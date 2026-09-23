@@ -157,6 +157,9 @@
 .tlItem { position:relative; }
 .tlRow { display:flex; align-items:center; gap:10px; min-height:44px; text-decoration:none; color:inherit; border-radius:var(--eh-radius-control); transition:background-color .12s ease; }
 .tlRow:hover { background:var(--eh-color-paper); }
+/* Erledigtes und abgebrochenes tritt zurueck: Titel und Terminhinweis in
+   Sekundaertinte, die Statusplakette bleibt als Anker lesbar. */
+.tlRow[data-vergangen] .tlTitel { color:var(--eh-color-secondary); }
 .tlDot { z-index:1; flex:none; width:17px; height:17px; border:1px solid var(--eh-color-line); border-radius:var(--eh-radius-pill); background:var(--eh-color-white); display:grid; place-items:center; }
 .tlDot::after { content:''; width:7px; height:7px; border-radius:var(--eh-radius-pill); background:var(--eh-color-secondary); }
 .tlDot[data-neuest]::after { background:var(--eh-color-petrol); }

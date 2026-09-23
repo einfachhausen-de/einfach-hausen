@@ -116,7 +116,7 @@ export default async function Dashboard() {
   // Haus-Historie als Zeitleiste (Muster 21st.dev, Betreiber-Order 23.09.):
   // Anstehendes und Vergangenes in einer absteigenden Liste; der Fuss zeigt
   // den naechsten Termin oder den naechsten offenen Schritt.
-  const verlauf = [...upcomingHistory, ...pastHistory]
+  const verlauf = [...upcomingHistory.map((job) => ({ ...job, past: false })), ...pastHistory.map((job) => ({ ...job, past: true }))]
     .map((job) => {
       const meta = jobStatus(job.status);
       const when = job.next_at ?? job.shown_at;
@@ -129,6 +129,7 @@ export default async function Dashboard() {
         datum: shortDay(when),
         iso: when ? String(when).slice(0, 10) : undefined,
         zusatz: job.next_at ? (zeit ? `Termin ${shortDay(job.next_at)}, ${zeit} Uhr` : `Termin ${shortDay(job.next_at)}`) : undefined,
+        vergangen: job.past,
         href: `/app/jobs/${job.id}`,
       };
     })

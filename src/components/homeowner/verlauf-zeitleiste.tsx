@@ -24,6 +24,8 @@ export type VerlaufEintrag = {
   iso?: string;
   /** Zeile unter dem Titel, z. B. „Termin 10:00 Uhr“. */
   zusatz?: string;
+  /** Erledigte oder abgebrochene Vorgaenge: blassere Schrift (Betreiber-Order). */
+  vergangen?: boolean;
   href: string;
 };
 
@@ -59,7 +61,7 @@ export function VerlaufZeitleiste({ eintraege, fuss }: {
           <ul className={styles.tlList} aria-label="Verlauf als Zeitleiste">
             {eintraege.map((eintrag, i) => (
               <li key={eintrag.id} className={styles.tlItem}>
-                <Link className={styles.tlRow} href={eintrag.href}>
+                <Link className={styles.tlRow} href={eintrag.href} data-vergangen={eintrag.vergangen || undefined}>
                   <span className={styles.tlDot} data-neuest={i === 0 || undefined} aria-hidden="true" />
                   <span className={styles.tlBody}>
                     <strong className={styles.tlTitel}>{eintrag.titel}</strong>
