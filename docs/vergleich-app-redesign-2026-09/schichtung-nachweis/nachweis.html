@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="de" data-page-node-id="zHeZQROxkRBEQYgZCOZQyd">
+<head data-page-node-id="7WuiP41D66naXjChjen09Q">
+<meta charset="utf-8" data-page-node-id="vf9pXB0hmqlfRcXSyCUH2p">
+<meta name="viewport" content="width=device-width,initial-scale=1" data-page-node-id="xrgDEBtBARaKgxikA2tsEQ">
+<title>Kaskadenschichtung — Nachweis</title>
+<style>
+  :root{
+    --bg:#0e1116; --panel:#161b22; --line:#242c38; --ink:#e6edf3;
+    --sec:#9aa7b4; --green:#3fb950; --amber:#d29922; --red:#f85149; --petrol:#2dd4bf;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;padding:40px 24px;background:var(--bg);color:var(--ink);
+    font:15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif}
+  .wrap{max-width:860px;margin:auto}
+  h1{font-size:26px;margin:0 0 6px;letter-spacing:-.02em}
+  .sub{color:var(--sec);margin:0 0 32px;font-size:14px}
+  h2{font-size:15px;text-transform:uppercase;letter-spacing:.08em;color:var(--sec);
+    margin:34px 0 12px;font-weight:600}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px 20px}
+  pre{margin:0;overflow-x:auto;font:13px/1.7 ui-monospace,SFMono-Regular,Menlo,monospace}
+  .layer{color:var(--petrol)}
+  table{width:100%;border-collapse:collapse}
+  td,th{padding:9px 10px;border-bottom:1px solid var(--line);text-align:left;font-size:14px}
+  th{color:var(--sec);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.06em}
+  td:last-child,th:last-child{text-align:right;font-variant-numeric:tabular-nums}
+  tr:last-child td{border-bottom:0}
+  .ok{color:var(--green)} .warn{color:var(--amber)} .bad{color:var(--red)}
+  .probe{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .box{border:1px solid var(--line);border-radius:10px;padding:16px;background:#0b0f14}
+  .box b{display:block;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--sec);margin-bottom:10px}
+  .sw{height:44px;border-radius:8px;display:flex;align-items:center;justify-content:center;
+    font:600 13px ui-monospace,monospace;margin-bottom:8px}
+  .note{color:var(--sec);font-size:13px;line-height:1.55}
+  code{background:#0b0f14;border:1px solid var(--line);border-radius:4px;padding:1px 5px;
+    font:12.5px ui-monospace,SFMono-Regular,Menlo,monospace}
+  ul{margin:10px 0 0;padding-left:20px} li{margin:5px 0}
+</style>
+</head>
+<body data-page-node-id="2GSjIhG4sIfJNFaBRrBlxV">
+<div class="wrap" data-page-node-id="Jayu7Q8plL9a7HABwW3UXf">
+
+<h1 data-page-node-id="SnHfnuS4BDZLAOiv8BGFkw">Kaskadenschichtung — Nachweis</h1>
+<p class="sub" data-page-node-id="kYghtIPhRJzu6XAVhTtjVP">Branch <code data-page-node-id="9LKeCT1a92F9ic9DwLQCJR">feat/app-werkbank</code> · Commit <code data-page-node-id="9MBwDB8Zuz5F21nY3prpbf">412dc16</code> · 16.09.2026 · erstmals erhoben auf <code>design/zukunftssicherung</code> @ <code>85e13f6</code></p>
+
+<div style="margin:0 0 28px;padding:14px 18px;border:1px solid var(--line);border-radius:10px;background:#0b0f14">
+  <b style="color:var(--sec);text-transform:uppercase;letter-spacing:.06em;font-size:12px">Wie diese Seite zu lesen ist</b>
+  <p style="margin:8px 0 0;color:var(--ink);font-size:14px;line-height:1.55">
+    Diese Seite dokumentiert den <b>Weg</b>, nicht nur den Endzustand. Jeder Abschnitt nennt das Datum und den Commit seiner Messung; Älteres bleibt stehen, weil die Reihenfolge der Erkenntnisse dazugehört. Aktueller Stand: Branch <code>feat/app-werkbank</code>, Commit <code>412dc16</code>, 16.09.2026 — <b>6260 Schuldenpunkte in 71 Dateien</b> (belegt durch <code>design/design-debt.json</code>). Was sich seit der Ersterhebung nicht mehr belegen lässt, steht als <span class="warn">nicht belegt</span> auf der Seite — nicht als geratene Zahl.
+  </p>
+</div>
+
+<h2 data-page-node-id="qNPume9Rs0xn9d6GXtUzY7">Die eine Zeile</h2>
+<div class="panel" data-page-node-id="hpSXas7S7EF6f5W5QlV3Pa">
+<pre data-page-node-id="OtsjzqK3owKNeaFpXlxZFT"><span class="layer" data-page-node-id="vOQBmve94LrGHBFy6uI7PU">@layer eh-tokens, eh-reset, eh-base, theme, base, eh-legacy,
+       components, utilities, eh-blocks, eh-pages;</span>
+@import 'tailwindcss';
+@import "tw-animate-css";</pre>
+<p class="note" style="margin-top:12px">
+Stand nach <code>884dbdc</code>, heute gültig und in <code>DESIGN.md §9</code> begründet. Die Fassung, mit der diese Seite ursprünglich live ging
+(Commit <code>85e13f6</code>), hatte <code>eh-legacy</code> eine Position weiter vorn — das war falsch:</p>
+<pre style="margin-top:8px"><span class="layer" style="opacity:.45">@layer eh-tokens, eh-reset, eh-base, <span class="bad">eh-legacy</span>,
+       theme, base, components, utilities,
+       eh-blocks, eh-pages;</span></pre>
+<p class="note" style="margin-top:8px">Warum das falsch war, steht im Abschnitt
+<i>„Was danach schiefging und was wir daraus gelernt haben"</i> weiter unten.</p>
+</div>
+<p class="note" style="margin-top:12px" data-page-node-id="pW0xDphNTIlW9LzR627yR0">
+Der Altbestand von <code data-page-node-id="DC0FbG1sceOayDFxGaHRiL">globals.css</code>, <code data-page-node-id="xDS3DFWR0qPueTMV44g6YH">design-system.css</code> und
+<code>auth-shell.css</code> liegt in <code data-page-node-id="GCWmA3vH05H9Oe069L3FQH">eh-legacy</code> — unter
+<code>components</code>, <code>utilities</code>, <code data-page-node-id="yUJFDEsDwTPC6kPThyI8d9">eh-blocks</code> und
+<code>eh-pages</code>, aber über <code>base</code>. Damit gewinnt alles Neue gegen 2000 Zeilen Alt-CSS
+<i>und</i> Tailwinds Preflight schlägt unsere Produktregeln nicht mehr — ohne dass eine alte Zeile angefasst wird.</p>
+
+<h2>Was danach schiefging und was wir daraus gelernt haben</h2>
+<p class="note" style="margin-bottom:12px">
+Nach dem Landen auf <code>main</code> (<code>930f0fd</code>) und dem Umbau der 40 App-Seiten (<code>355a9d3</code>) brachen
+<b>Login und Welcome visuell</b>: 20 %+ Pixel-Differenz auf drei Auflösungsstufen. Ursache war genau die eine Zeile oben.
+<code>eh-legacy</code> stand <i>vor</i> Tailwinds <code>base</code>, und die Kaskade sortiert vor der Spezifität nach Ebene.
+Also überschrieb Tailwinds Preflight (<code>h1{font-size:inherit}</code>) unsere Produktregeln aus
+<code>design-system.css</code> und <code>auth-shell.css</code> — trotz höherer Spezifität. Fix in Commit
+<code>884dbdc</code>: <code>eh-legacy</code> liegt jetzt <i>zwischen</i> <code>base</code> und <code>components</code>.
+Es gewinnt damit gegen die Resets und verliert weiterhin gegen <code>components</code>, <code>utilities</code>,
+<code>eh-blocks</code> und <code>eh-pages</code>. Die Begründung steht in <code>DESIGN.md §9</code>.</p>
+<ul>
+  <li><b>Eine Schichtkorrektur verschiebt <i>jede</i> Überschreibung auf einmal.</b> Nicht eine Regel — alle Klassenregeln des Altbestands ändern gleichzeitig ihren Rang. Spezifität hilft nicht, sie kommt erst nach der Ebene.</li>
+  <li><b>Das Sicherheitsnetz sind die visuellen Baselines.</b> Kein Linter, kein Unit-Test und kein grüner Build hat den Bruch gesehen. Nur der Pixelvergleich hat ihn gesehen.</li>
+  <li><b>Und die laufen nur in CI.</b> Lokal grün sagt nichts: die Baselines werden auf dem Linux-Runner erzeugt. Sie stammten zu diesem Zeitpunkt noch aus der Zeit <i>vor</i> dem 40-Seiten-Umbau und wurden mit <b>PR #117 (CI-Run 403)</b> erneuert.</li>
+  <li><b>Gelernt:</b> nach jeder Schichtänderung die Baselines erneuern — nicht erst, wenn etwas auffällt.</li>
+</ul>
+
+<h2 data-page-node-id="bn3wPmFLY9A3c7HeU4MPDp">Der Beweis, im echten Browser</h2>
+<p class="note" style="margin-bottom:12px" data-page-node-id="yNgchStUEXdsHZrPZ1kcsu">
+Gemessen am 16.09.2026 auf <code>85e13f6</code>; die Aussage gilt unverändert, auch nach der Schichtkorrektur in
+<code>884dbdc</code>.
+Dieselbe Klasse, einmal in <code data-page-node-id="us2IHIZxFClwHEdkLzHCvE">globals.css</code>, einmal in <code data-page-node-id="jcIGEPjLEFqOQkD2Cvhbja">eh-blocks</code>.
+Wer gewinnt, entscheidet darüber, ob man die App überhaupt noch umbauen kann.</p>
+<div class="probe" data-page-node-id="q1fGxpN2ChC9hxhaw3hZQP">
+  <div class="box" data-page-node-id="LCk7U9Ib1ggD7WOrkGHBIu"><b data-page-node-id="rXmA7HOLchv05az4too0Uh">Vorher</b><div class="sw" style="background:rgb(1,2,3);color:#8b949e" data-page-node-id="YZO6gqJBk4eCPwcuPUktz4">rgb(1, 2, 3)</div>
+    <div class="note" data-page-node-id="hOGPKFjRnElypnpq3GuB3X">Das Alte gewinnt. <span class="bad" data-page-node-id="Fi3JGuuB8Ctw2nnt32QSQG">Ein neuer Baustein kommt nicht durch.</span></div></div>
+  <div class="box" data-page-node-id="AdJs22vmLgoJfQRogH787F"><b data-page-node-id="HRRXxsWF3bCaWCLAIA6wQv">Nachher</b><div class="sw" style="background:rgb(4,5,6);color:#8b949e" data-page-node-id="feM31z2TOK5T02KhyYkAY1">rgb(4, 5, 6)</div>
+    <div class="note" data-page-node-id="L9IAt2k2eA291vgpqQGmaj">Das Neue gewinnt. <span class="ok" data-page-node-id="c42Tq3tRzFiCzy5XS1yZCW">Der Altbestand verliert planmäßig.</span></div></div>
+</div>
+<p class="note" style="margin-top:14px" data-page-node-id="57FC2am4t0MPetuNGCDqIJ">
+Gegenprobe an einer echten Regel: <code data-page-node-id="RHy4kf9JkXPHqE0mLRZJAr">.brand-icon b{font-size:10px}</code> aus
+<code data-page-node-id="5oDgBPK5gIWJqNNUlZ1Y0D">globals.css</code> wird von einem <code data-page-node-id="CHrtIhZGBWqSuF5qqOp4r1">eh-blocks</code>-Override auf
+<code data-page-node-id="udFWgJ8vTk1AfQg891cWuy">99px</code> gesetzt. Gemessen, nicht geschlossen.</p>
+
+<h2 data-page-node-id="kwiITx1tOWuBGy1lfzzPG1">Warum es nicht riskant ist</h2>
+<p class="note" style="margin-bottom:12px">
+Alle fünf Zeilen gemessen am 16.09.2026 auf <code>85e13f6</code>, also <i>vor</i> der Schichtkorrektur und dem
+40-Seiten-Umbau. Eine Zeile daraus hat sich inzwischen als zu optimistisch erwiesen — siehe den Abschnitt oben.</p>
+<table data-page-node-id="VcvZmO6pAz5pURwI3ZDzO3">
+  <thead data-page-node-id="CsrLQCWzFSD09F88S1eNIP"><tr data-page-node-id="81RnYaQLxOrQMFU2yx5gSL"><th data-page-node-id="88VQGPPd0xOczD2dc9qCm5">Prüfung</th><th data-page-node-id="fOUhCuODPgQ029FiLWhhT6">Ergebnis</th></tr></thead>
+  <tbody data-page-node-id="V4U4aEL0jrXbttiR1hkMuY">
+    <tr data-page-node-id="I3cWtRRNUIkLKpMcJOwmSD"><td data-page-node-id="H2imCj9qFjZT7HQbW5yChh">Die Schichtanweisung überlebt die Tailwind-Pipeline</td><td class="ok" data-page-node-id="Hr7xEvIaRCcWNoNCgxptDG">ja, vor Tailwinds eigener Zeile</td></tr>
+    <tr data-page-node-id="AsBJTogkQKZ7vF5sQt6nf5"><td data-page-node-id="tihdQIpxDGXRZlWEBiJtWR">Eigene Custom Properties in den drei Token-Dateien</td><td data-page-node-id="i9GuCV68XqvWXuJkaJZVJV">125</td></tr>
+    <tr data-page-node-id="AHCNuxnSFnLaQO7KwOoH8m"><td data-page-node-id="N9ewHmVIyfC3pQkYkRSlSd">davon Kollision mit Tailwinds Theme</td><td class="ok" data-page-node-id="7CGY7LcE7At0AbvsI5vOQ6">0</td></tr>
+    <tr data-page-node-id="xCdS5XsrCc0Pi2THW5L0ea"><td data-page-node-id="Mtpfx1BTIilc7utlhakEyO">Neue Designschuld durch den Umbau</td><td class="ok" data-page-node-id="s1EEsTGSEIR8J4BEBPvnXG">0</td></tr>
+    <tr data-page-node-id="08D2biFWIEPgDQry178tQQ"><td data-page-node-id="Otr4Oue7MFK790x8m98VJh">Gebrochene Prüfsummen (Siegel)</td><td class="warn" data-page-node-id="E6vFN7oGUhfPIT8GPquj8g">3 — erwartet</td></tr>
+  </tbody>
+</table>
+
+<h2 data-page-node-id="98q0dlZfg3KiNyJ6A9ODth">Erste Erhebung — und wo dieselben Zahlen heute stehen</h2>
+<table data-page-node-id="RWqNBxGI5JZmnJ9stcGkNc">
+  <thead data-page-node-id="r16FJWgLaSQICRDGQ3Ums1"><tr data-page-node-id="8RStwctBtk3Do8XMixN9nX"><th data-page-node-id="zYErB5Iq3BPBPaOYpnilTP">Kennzahl</th><th data-page-node-id="Gx8ENJiVPkL07fZgdIuV3u">16.09. · 85e13f6</th><th>heute · 412dc16</th></tr></thead>
+  <tbody data-page-node-id="NCqu4ZCYUEGQYrKu7yjkxA">
+    <tr data-page-node-id="nkQpfD7Qk1C812N04YygvR"><td data-page-node-id="Ho51dBHNKB5BdseVjtpGvh">Schuldenpunkte</td><td data-page-node-id="wGPg2orhLYmOoFDN1F0j4s">3585</td><td><b>6260</b></td></tr>
+    <tr data-page-node-id="12BY4hnTHsnlGW9XjZc0gT"><td data-page-node-id="4PTDsdJ0dOH2EpU4kkqx1T">Dateien mit Schulden</td><td data-page-node-id="tParCtX66nFvLTWsiTyw4J">67</td><td><b>71</b></td></tr>
+    <tr data-page-node-id="ubglabjbxo1QWAQDSH7LMy"><td data-page-node-id="fXmYfqzNI50ElGQkQ5c0cm">Verschiedene Schriftgrößen</td><td data-page-node-id="iZH82pAdEWBbo1CXIEjhXG">174</td><td class="warn">nicht belegt</td></tr>
+    <tr data-page-node-id="9p7Fbqam1bCJZ49XKmvBzd"><td data-page-node-id="jMAdCr73EPulPwWyzfpXjp">Verschiedene Schriftgewichte</td><td data-page-node-id="Z0116DqQ6elH8eGPHKuuXw">32</td><td><b>5</b> — 400/500/600/700/800</td></tr>
+    <tr data-page-node-id="hEL2f7xUPzhjcNXsvlEpAi"><td data-page-node-id="3WnrUhEF1rkZuyy679FyP4"><code data-page-node-id="b89lMt99Ug9QWAybTk1AdO">!important</code></td><td data-page-node-id="ANbU4j3G19sjYTGTcfnUa5">112</td><td class="warn">nicht belegt</td></tr>
+    <tr data-page-node-id="1bgBrTw8cw9asmGucbDe3F"><td data-page-node-id="AZ90kBZDmrORmW4DoSXKXB">Top-Level-Selektoren in ≥ 2 Dateien</td><td data-page-node-id="io8CsDP1iHRS56YEHZLpXQ">45</td><td class="warn">nicht belegt</td></tr>
+    <tr data-page-node-id="QF92CdEUyRETb3hUuplC5M"><td data-page-node-id="VGtIpFJMK7vMNcjAaBwALh">Klassennamen ohne jede Referenz</td><td data-page-node-id="gXmTUKZjtpaq06oDs60Sbl">633</td><td class="warn">nicht belegt</td></tr>
+    <tr data-page-node-id="Fe3bOZpk6kP8UbgiWjUia2"><td data-page-node-id="ATAOQcRUtphBuo2BvpKJsj">Regeln außerhalb einer Schicht</td><td data-page-node-id="HlyQLn0cn5ozAshTfMN82g">3006</td><td class="warn">nicht belegt</td></tr>
+  </tbody>
+</table>
+<p class="note" style="margin-top:12px" data-page-node-id="ACsR18BM7ElkZq3qpsu1Rn">
+Nur zwei Zeilen sind heute belegt — und beide nicht durch Schätzung, sondern durch Zählen in
+<code>design/design-debt.json</code>: <b>6260 Schuldenpunkte in 71 Dateien</b>. Der Weg dorthin:
+40 App-Seiten von Dokument auf Werkbank umgebaut (<code>355a9d3</code>), danach 471 Rohwerte mit exakt
+passendem Token auf <code>var(--eh-…)</code> umgestellt — 0 % Pixel-Unterschied, Schulden 7073 → 6537 —
+danach die Schriftgewichte von 29 verschiedenen Werten auf die Skala 400/500/600/700/800, Schulden
+<b>6260</b>. Alle übrigen Zeilen wurden nach diesen Eingriffen nicht neu gemessen und stehen deshalb als
+<i>nicht belegt</i> hier. Zwei Kennzahlen bleiben zusätzlich absichtlich leer: die Tot-Quote zur Laufzeit und
+die CSS-Bytes pro Route. Beide brauchen einen Browser gegen einen Produktionsbau.</p>
+
+<h2 data-page-node-id="Rl44fcz4HWnEWFOb0VF3DK">Stand — erledigt, auf <code>main</code> gelandet</h2>
+<p class="note" style="margin-bottom:12px">
+<b>Siegel ist gesetzt, Baseline nachgezogen, alles auf <code>main</code> (<code>930f0fd</code>).</b>
+Design-Gate grün, Tot-CSS-Gate grün, 27 Tests grün, Build kompiliert mit 142/142 Seiten. Was unten
+als „fehlt" steht, war der Weg dorthin — es bleibt als Dokumentation der Reihenfolge stehen.
+Dieser Abschnitt beschreibt den Stand von <code>930f0fd</code>, also <i>vor</i> dem 40-Seiten-Umbau
+(<code>355a9d3</code>) und der Schichtkorrektur (<code>884dbdc</code>).</p>
+<ul data-page-node-id="oWMI6q9HXbbyG8TXdEhg9N">
+  <li data-page-node-id="qpHjHSp8Jh0aCFttATGXLx"><b data-page-node-id="mNGMttQf9NqQGaflLRiy0O">Neues Siegel.</b> <code data-page-node-id="IqiTjpWeyjxYndALgR6LeF">scripts/eh-design-seal.mjs</code> ist bewusst <i data-page-node-id="6vSfN7sN6n75TsOMpqnaxR">nicht</i> gelaufen — es setzt den Maßstab und braucht deine Freigabe. Ohne Siegel bleibt der Prüfer rot.</li>
+  <li data-page-node-id="eIDs7zH5QVRsgN2RqfEQsL"><b data-page-node-id="bAezmvg7UFEdUxQKIXsqLj">Direkter Push, kein PR.</b> Der Wächter lehnt einen PR auf geschützte Pfade ab. Die Schichtung muss auf <code data-page-node-id="YZLBv4wHnwclIFTceq0djT">main</code> geschoben werden.</li>
+  <li data-page-node-id="n8mDFmQEVt2tGdonb3oQ7y"><b data-page-node-id="YOGrcnewre5cAXhjGZPvPw">Sichtprüfung.</b> Eine Schichtänderung kann jede Überschreibung verschieben. Das Sicherheitsnetz sind die visuellen Baselines — und die laufen nur in CI.</li>
+</ul>
+
+<h2>Whitelist statt Blacklist — die Regel, die den Nachwuchs stoppt</h2>
+<p class="note" style="margin-bottom:12px">
+Bestandsaufnahme und Proben vom <b>16.09.2026</b> (<code>85e13f6</code>). Methode, Whitelist und
+Erwartungswerte sind seither unverändert gültig — sie hängen an der Prüfregel, nicht an der Schichtreihenfolge.</p>
+<p class="note" style="margin-bottom:12px">
+Die sechs alten Regexe verbieten <i>bestimmte</i> Rohwerte. Das kann nicht funktionieren, weil die
+Liste der Rohwerte offen ist: <code>small-type</code> greift nur bei <code>px</code>,
+<code>literal-color</code> sieht <code>oklch(</code> nicht, <code>decorative-effect</code> matcht
+<code>rounded-full</code> aber nicht <code>border-radius:999px</code>, <code>box-shadow</code> war
+komplett ungeprüft.</p>
+<div class="panel">
+<pre>erlaubt:  var(--…)  inherit  initial  unset  revert
+          currentColor  transparent  none  0  auto  100%
+          normal  bold  bolder  lighter
+sonst:    <span class="bad">Fehler</span></pre>
+</div>
+<table style="margin-top:16px">
+  <thead><tr><th>Probe</th><th>Erwartung</th><th>Ergebnis</th></tr></thead>
+  <tbody>
+    <tr><td><code>font-size:13px</code></td><td>rot</td><td class="ok">rot</td></tr>
+    <tr><td><code>font-weight:650</code></td><td>rot</td><td class="ok">rot</td></tr>
+    <tr><td><code>color:oklch(0.5 0 0)</code></td><td>rot</td><td class="ok">rot</td></tr>
+    <tr><td><code>box-shadow:0 1px 2px #000</code></td><td>rot</td><td class="ok">rot</td></tr>
+    <tr><td><code>border-radius:999px</code></td><td>rot</td><td class="ok">rot</td></tr>
+    <tr><td><code>style={{fontSize:13}}</code></td><td>rot</td><td class="ok">rot</td></tr>
+    <tr><td><code>font-size:var(--eh-font-body)</code></td><td>grün</td><td class="ok">grün</td></tr>
+    <tr><td><code>aria-current="page"</code></td><td>grün</td><td class="ok">grün</td></tr>
+    <tr><td><code>:root{--eh-color-primary:#fff}</code></td><td>grün</td><td class="ok">grün</td></tr>
+  </tbody>
+</table>
+
+<h2>Die Ratsche — der Beweis, dass sie vorher durchgerutscht ist</h2>
+<p class="note" style="margin-bottom:12px">
+Bisher galt „nicht schlechter als der Höchststand“. Wer fünf Verstöße aufräumte, behielt den alten
+Spielraum und konnte ihn später mit neuem Schaden füllen. Jetzt muss die Baseline dem Ist-Zustand
+<b>exakt</b> entsprechen — in beide Richtungen. Der Befund unten stammt vom <b>16.09.2026</b>, gemessen
+nach dem Whitelist-Commit und <i>vor</i> dem 40-Seiten-Umbau; er bleibt als Dokumentation stehen.</p>
+<table>
+  <thead><tr><th>Befund</th><th>16.09. · nach Whitelist-Commit</th><th>heute · 412dc16</th></tr></thead>
+  <tbody>
+    <tr><td>Bereits veraltete Baseline-Einträge (aufgeräumt, nicht nachgezogen)</td><td class="bad">117</td><td class="warn">nicht belegt</td></tr>
+    <tr><td>Neue Schuldenpunkte durch die Whitelist</td><td>+4729</td><td class="warn">nicht belegt</td></tr>
+    <tr><td>davon Rohwerte</td><td>4991</td><td class="warn">nicht belegt</td></tr>
+    <tr><td>davon <code>!important</code></td><td>112</td><td class="warn">nicht belegt</td></tr>
+    <tr><td>davon Zustandsklassen</td><td>16</td><td class="warn">nicht belegt</td></tr>
+    <tr><td><b>Schuldenstand</b></td><td><b>3585 → 8314</b></td><td><b>6260 in 71 Dateien</b></td></tr>
+  </tbody>
+</table>
+<p class="note" style="margin-top:12px">
+Die 117 sind der eigentliche Befund: genau dieser Spielraum stand für neuen Schaden offen, und
+niemand hat es gesehen. Der Stand 8314 war nicht schlechter geworden — er war erstmals vollständig
+gezählt. Heute steht die gezählte Schuld bei <b>6260 Punkten in 71 Dateien</b>; der Stufenplan drückt
+sie bis 2027-04-30 auf 0.</p>
+
+<h2>Danach</h2>
+<p class="note">
+Der Umbau der App-Routen — inzwischen geschehen: <b>40 App-Seiten von Dokument auf Werkbank</b>
+(<code>355a9d3</code>), danach 471 Rohwerte auf Tokens (<code>0f603dd</code>, 0 % Pixel-Unterschied) und die
+Schriftgewichte auf 400/500/600/700/800 (<code>412dc16</code>). Ohne die Sperre von oben wäre er verlorene
+Arbeit: die Seiten sind genau der Ort, an dem die nächsten Schriftgrößen entstehen — heute 5 Gewichte
+statt 29, und die Schichtreihenfolge hält sie dort fest.</p>
+
+</div>
+</body>
+</html>

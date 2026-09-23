@@ -1,0 +1,189 @@
+[
+  {
+    "tag": "owner",
+    "route": "/app",
+    "status": 200,
+    "h1": "Dein Zuhause",
+    "h1size": "44px",
+    "mainW": 1192,
+    "bodyH": 1455,
+    "textLen": 1056,
+    "overflowX": false
+  },
+  {
+    "tag": "owner",
+    "route": "/app/home",
+    "status": 200,
+    "h1": "Mein Haus",
+    "h1size": "43.2px",
+    "mainW": 1192,
+    "bodyH": 2411,
+    "textLen": 1817,
+    "overflowX": false
+  },
+  {
+    "tag": "owner",
+    "route": "/app/home/history",
+    "status": 200,
+    "h1": "Was wurde wann am Haus gemacht?",
+    "h1size": "43.2px",
+    "mainW": 1192,
+    "bodyH": 2922,
+    "textLen": 2008,
+    "overflowX": false
+  },
+  {
+    "tag": "owner",
+    "route": "/app/documents",
+    "status": 200,
+    "h1": "Dokumente & Rechnungen",
+    "h1size": "43.2px",
+    "mainW": 1192,
+    "bodyH": 900,
+    "textLen": 571,
+    "overflowX": false
+  },
+  {
+    "tag": "owner",
+    "route": "/app/jobs",
+    "status": 200,
+    "h1": "Deine Aufträge",
+    "h1size": "44px",
+    "mainW": 1192,
+    "bodyH": 1194,
+    "textLen": 795,
+    "overflowX": false
+  },
+  {
+    "tag": "owner",
+    "route": "/app/contracts",
+    "status": 200,
+    "h1": "Verträge & Tarife",
+    "h1size": "43.2px",
+    "mainW": 1192,
+    "bodyH": 2265,
+    "textLen": 1236,
+    "overflowX": false
+  },
+  {
+    "tag": "owner",
+    "route": "/app/partners",
+    "status": 200,
+    "h1": "Ansprechpartner",
+    "h1size": "34.56px",
+    "mainW": 1192,
+    "bodyH": 1212,
+    "textLen": 802,
+    "overflowX": false
+  },
+  {
+    "tag": "owner",
+    "route": "/app/messages",
+    "status": 200,
+    "h1": "Ansprechpartner",
+    "h1size": "34.56px",
+    "mainW": 1192,
+    "bodyH": 1212,
+    "textLen": 802,
+    "overflowX": false
+  },
+  {
+    "tag": "owner",
+    "route": "/app/calendar",
+    "status": 200,
+    "h1": "Deine Termine",
+    "h1size": "44px",
+    "mainW": 1192,
+    "bodyH": 900,
+    "textLen": 483,
+    "overflowX": false
+  },
+  {
+    "tag": "owner",
+    "route": "/app/year",
+    "status": 200,
+    "h1": "Mein Jahr",
+    "h1size": "43.2px",
+    "mainW": 1192,
+    "bodyH": 1513,
+    "textLen": 924,
+    "overflowX": false
+  },
+  {
+    "tag": "owner",
+    "route": "/app/profile",
+    "status": 200,
+    "h1": "Profil & Einstellungen",
+    "h1size": "43.2px",
+    "mainW": 1192,
+    "bodyH": 2070,
+    "textLen": 1161,
+    "overflowX": false
+  },
+  {
+    "tag": "provider",
+    "route": "/pro",
+    "status": 200,
+    "h1": "Guten Abend, Demo.",
+    "h1size": "43.2px",
+    "mainW": 1192,
+    "bodyH": 1568,
+    "textLen": 1104,
+    "overflowX": false
+  },
+  {
+    "tag": "provider",
+    "route": "/pro/orders",
+    "status": 200,
+    "h1": "Aufträge & Kontakte",
+    "h1size": "44px",
+    "mainW": 1192,
+    "bodyH": 2030,
+    "textLen": 1341,
+    "overflowX": false
+  },
+  {
+    "tag": "provider",
+    "route": "/pro/leads",
+    "status": 200,
+    "h1": "Freigegebene Kontakte",
+    "h1size": "44px",
+    "mainW": 1192,
+    "bodyH": 900,
+    "textLen": 480,
+    "overflowX": false
+  },
+  {
+    "tag": "provider",
+    "route": "/pro/messages",
+    "status": 200,
+    "h1": "Nachrichten",
+    "h1size": "44px",
+    "mainW": 1192,
+    "bodyH": 1030,
+    "textLen": 667,
+    "overflowX": false
+  },
+  {
+    "tag": "provider",
+    "route": "/pro/team",
+    "status": 200,
+    "h1": "Dein Team. Klare Zuständigkeiten.",
+    "h1size": "43.2px",
+    "mainW": 1192,
+    "bodyH": 1720,
+    "textLen": 1281,
+    "overflowX": false
+  },
+  {
+    "tag": "provider",
+    "route": "/pro/profile",
+    "status": 200,
+    "h1": "Profil & Vertrauen",
+    "h1size": "44px",
+    "mainW": 1192,
+    "bodyH": 7120,
+    "textLen": 3298,
+    "overflowX": false
+  }
+]

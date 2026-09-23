@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="de" data-page-node-id="rT6jeSVGWRN9Xs7EraEDU6">
+<head data-page-node-id="jCOT5v4imXEnomk7A7ctCB">
+<meta charset="utf-8" data-page-node-id="u8uyMnaX2ombUNUKgwDkil">
+<meta name="viewport" content="width=device-width, initial-scale=1" data-page-node-id="A6dnZd7bqr5AvcYDfD5076">
+<title>einfachhausen — was wir sinnlos zu komplex gemacht haben</title>
+<style>
+  :root{
+    --ink:#10222a; --sec:#4b5b60; --mut:#8b979b; --line:#e4e2dc; --paper:#faf8f4;
+    --panel:#ffffff; --petrol:#105258; --terra:#a84d29; --ok:#236344; --sand:#ecdfc9; --chip:#f0ede7;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{background:var(--paper);color:var(--ink);
+       font:14px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif;
+       -webkit-font-smoothing:antialiased}
+  .wrap{max-width:1080px;margin:0 auto;padding:34px 26px 70px}
+
+  header.top{border-bottom:1px solid var(--line);padding-bottom:22px;margin-bottom:26px}
+  header.top .kicker{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)}
+  header.top h1{margin:9px 0 10px;font-size:28px;font-weight:660;letter-spacing:-.024em;line-height:1.2}
+  header.top p{margin:0 0 10px;color:var(--sec);font-size:14.5px;max-width:820px}
+
+  .method{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:15px 17px;margin-bottom:30px}
+  .method h3{margin:0 0 8px;font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--mut)}
+  .method table{width:100%;border-collapse:collapse;font-size:13px;margin:0}
+  .method td{padding:5px 0;vertical-align:top;border:0}
+  .method td:first-child{width:190px;color:var(--sec)}
+  .method code{font-size:12.5px}
+
+  .lead{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);
+        border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:0 0 32px}
+  .lead div{background:var(--panel);padding:15px 16px}
+  .lead b{display:block;font-size:29px;font-weight:650;letter-spacing:-.03em;line-height:1}
+  .lead b small{font-size:15px;font-weight:600;color:var(--mut);margin-left:3px;letter-spacing:0}
+  .lead span{display:block;font-size:12px;color:var(--sec);margin-top:7px;line-height:1.4}
+  .lead .hot b{color:var(--terra)}
+  .lead .safe b{color:var(--ok)}
+
+  h2{font-size:17px;font-weight:660;letter-spacing:-.014em;margin:34px 0 6px;
+     padding-top:20px;border-top:1px solid var(--line)}
+  h2 .no{display:inline-block;min-width:22px;color:var(--mut);font-weight:600}
+  h2 + .sub{margin:0 0 14px;color:var(--sec);font-size:13.5px;max-width:820px}
+
+  table.data{width:100%;border-collapse:collapse;font-size:13px;margin:14px 0 8px;
+        border:1px solid var(--line);border-radius:8px;overflow:hidden}
+  table.data th,table.data td{text-align:left;padding:9px 13px;border-bottom:1px solid var(--line)}
+  table.data th{font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--mut);background:var(--chip)}
+  table.data tr:last-child td{border-bottom:0}
+  table.data td.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+  table.data td b{font-weight:640}
+  code{background:var(--chip);padding:1.5px 5px;border-radius:4px;font-size:12.5px;
+       font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+  .bad{color:var(--terra);font-weight:650}
+  .good{color:var(--ok);font-weight:650}
+
+  .callout{display:flex;gap:12px;border-radius:9px;padding:13px 15px;margin:16px 0;font-size:13.5px}
+  .callout svg{width:17px;height:17px;flex:none;margin-top:3px;fill:none;stroke-width:1.9}
+  .callout b{display:block;margin-bottom:2px}
+  .callout.warn{background:color-mix(in srgb,var(--terra) 7%,transparent);
+                border:1px solid color-mix(in srgb,var(--terra) 22%,transparent)}
+  .callout.warn svg{stroke:var(--terra)} .callout.warn b{color:var(--terra)}
+  .callout.info{background:color-mix(in srgb,var(--petrol) 6%,transparent);
+                border:1px solid color-mix(in srgb,var(--petrol) 20%,transparent)}
+  .callout.info svg{stroke:var(--petrol)} .callout.info b{color:var(--petrol)}
+  .callout.ok{background:color-mix(in srgb,var(--ok) 7%,transparent);
+              border:1px solid color-mix(in srgb,var(--ok) 22%,transparent)}
+  .callout.ok svg{stroke:var(--ok)} .callout.ok b{color:var(--ok)}
+
+  .bar{height:7px;border-radius:4px;background:var(--chip);overflow:hidden;margin:4px 0 2px}
+  .bar i{display:block;height:100%;background:var(--terra);border-radius:4px}
+
+  ol.plan{padding-left:0;list-style:none;counter-reset:s;margin:16px 0 0}
+  ol.plan li{counter-increment:s;position:relative;padding:0 0 18px 46px;border-left:1px solid var(--line);margin-left:14px}
+  ol.plan li:last-child{border-left-color:transparent;padding-bottom:0}
+  ol.plan li::before{content:counter(s);position:absolute;left:-14px;top:-2px;width:28px;height:28px;border-radius:50%;
+       background:var(--panel);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;
+       font-size:12.5px;font-weight:700;color:var(--petrol)}
+  ol.plan b{display:block;font-size:14px;font-weight:650;margin-bottom:3px}
+  ol.plan p{margin:0;font-size:13.5px;color:var(--sec)}
+  ol.plan .risk{display:block;margin-top:6px;font-size:12.5px;color:var(--mut)}
+
+  .fixed,.liveonly{display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;
+         padding:2px 7px;border-radius:5px}
+  .fixed{background:color-mix(in srgb,var(--ok) 12%,transparent);color:var(--ok)}
+  .liveonly{background:color-mix(in srgb,var(--terra) 12%,transparent);color:var(--terra)}
+
+  footer{margin-top:40px;padding-top:20px;border-top:1px solid var(--line);color:var(--mut);font-size:12.5px}
+  footer b{color:var(--sec)}
+</style>
+</head>
+<body data-page-node-id="xvTxUaUHFCd5yW5Ljwa00k">
+<div class="wrap" data-page-node-id="CbdkbNr9jAZOBQLgyDYtrj">
+
+  <header class="top" data-page-node-id="xXZy89Qm1rpbeB1VJOOOta">
+    <div class="kicker" data-page-node-id="w23eXhSxgXNnYCJ4FCW6fH">einfachhausen · Innenansicht · 16.09.2026 · Fassung 2 (korrigiert)</div>
+    <h1 data-page-node-id="tRIiKdIzd4FWydMCvfGNuB">Was wir sinnlos zu komplex gemacht haben</h1>
+    <p data-page-node-id="y8HKGfkQxLSQdWrTmWubRC">
+      Deine Frage war: „prüfe auch, was haben wir sinnlos zu komplex gemacht". Hier ist die Antwort in Zahlen.
+      Diese Fassung korrigiert zwei Fehler meiner ersten Auswertung — beide stehen unten offen benannt.
+    </p>
+  </header>
+
+  <div class="method" data-page-node-id="v2diosaarMf1JDgpG2c5iD">
+    <h3 data-page-node-id="JVGsiEKHZX2dkw7oFuJPqo">Methodik und Grenzen — bitte zuerst lesen</h3>
+    <table data-page-node-id="rjqsYYqTVqKckNnwBRQes0">
+      <tr data-page-node-id="0VVzE21ppMmZa0EAZ5khs3">
+        <td data-page-node-id="4ENBi6uXbhSXGVUC2Cf6bB">Wo gemessen</td>
+        <td data-page-node-id="ClY9ltmBEiBZhKiG4OCmI0">An der <b data-page-node-id="mxV3p14Zy30VCqGYB0IMWN">laufenden Seite</b> <code data-page-node-id="eLiCrj1MPA13CoLb7yGEMR">einfachhausen.de</code>. Die läuft auf <code data-page-node-id="jd4ylveHr805UwmgIOYLV8">36eaa7c</code>
+            und damit <b data-page-node-id="9wcIGDUpTsj0BR0CBjEdSD">hinter <code data-page-node-id="rjr6kBfVCNNf6BIUf1QKBP">main</code></b> (<code data-page-node-id="kGHg7HKWM9yDDXcLLU0Zkz">a91a44d</code>). Aussagen über das <em data-page-node-id="JBZduPc4VniLzbRKz9CrIL">Aussehen</em>
+            betreffen also den alten Build; Strukturzahlen aus den Quelldateien betreffen <code data-page-node-id="UhIH74oPyIDeApgWO4bpCY">HEAD</code>.</td>
+      </tr>
+      <tr data-page-node-id="9eWAKqexcvC2e1xapjAaRO">
+        <td data-page-node-id="iiogLzRj8LSyteDaX1GFbT">Umfang</td>
+        <td data-page-node-id="JA3qZRvhCJy0HIhbDABhMR">78 statische Routen aus <code data-page-node-id="mqRZhLIA1RBDjhh6TBD6cq">src/app</code>, je einmal Desktop 1440×1000 und Handy 390×844
+            → 156 Seitenaufrufe, 0 Fehler.</td>
+      </tr>
+      <tr data-page-node-id="BLHZax1jqGQm2ZVfEQrYAD">
+        <td data-page-node-id="pDLNP5Hj0FjGZ8KcRj0L56">Verfahren</td>
+        <td data-page-node-id="DlFsHvRBVUTW7ECJ5tXOLr">Alle <code data-page-node-id="rNbZES0XNP2D7IYlKcFyDc">document.styleSheets</code> durchlaufen, Selektoren ohne Pseudo-Zustände gegen
+            <code data-page-node-id="mTkzl88wxf7f8eB9lNKafD">document.querySelector</code> prüfen; über alle Routen vereinigen. Tote Regel = geladen, nie getroffen.</td>
+      </tr>
+      <tr data-page-node-id="70FvP4IDp0GChz9XCdFfGn">
+        <td data-page-node-id="WuWREbOTlJBgB9o6wU1yjk">Grenzen</td>
+        <td data-page-node-id="GxVVhgnJCWvDooxOazopjQ">Hover, Fokus, Dialoge, Fehlerzustände und abgemeldete App-Varianten werden nicht ausgelöst →
+            die Prozentwerte sind eine <b data-page-node-id="N5JOi5Ezl7Cz3gOWoxttQF">Obergrenze</b>. Tailwind-Utilities lassen sich nicht restlos von
+            eigenem CSS trennen (Begründung in Abschnitt 5).</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="lead" data-page-node-id="ifkhqDceyhd8Ib6rkeEETI">
+    <div class="hot" data-page-node-id="SbLCKME1ws5Wzk3TPu6OEF"><b data-page-node-id="HKBNbrPdSiioMA403Fw0oY">78<small data-page-node-id="4hD7PqTCoFeGjRj8Le6wtC">%</small></b><span data-page-node-id="XD77OAvlyqMtoWYeStQ4mw">der geladenen CSS-Regeln greifen auf <b data-page-node-id="q648byUc1XzUi0EC7YEKYp">keiner</b> der 78 Routen</span></div>
+    <div class="safe" data-page-node-id="XV9Fl7Wkr9EoFNDa1BpjcT"><b data-page-node-id="jG9H0s9Yb9MjKCD0uvT2Gu">606</b><span data-page-node-id="t8acf9r9gFAHPux5X6qMCp">von 1046 Klassennamen kommen in keiner Code-Datei vor — <b data-page-node-id="owHqy9pGOWA3cEmZTq9Xmk">routeunabhängig</b></span></div>
+    <div class="hot" data-page-node-id="HHVJDEHZSBCs58bFmsokf4"><b data-page-node-id="1SjMZH2Q0BsvBo3Mh0H39I">3585</b><span data-page-node-id="DBppjfr8uexjUGV8RRcVdf">Designverstöße, die die Prüfung stillschweigend duldet</span></div>
+    <div data-page-node-id="Y9vGo9F8EtFxJBhDOiZxwz"><b data-page-node-id="wtBzSxGVoOQ2dBq8e71evt">2</b><span data-page-node-id="D8E2TsQReMnfOEmRv2VIVc">Navigationssysteme definiert — eines davon zielt auf Elemente, die es nicht gibt</span></div>
+  </div>
+
+  <!-- 1 -->
+  <h2 data-page-node-id="1HlZAwWP0xezuKMYBvNcKu"><span class="no" data-page-node-id="m2JFLInynsMt9AOSoSjh6z">1</span> Der Kern: niemand kann vorhersagen, welche Regel gilt</h2>
+  <p class="sub" data-page-node-id="3DtBz3GsVawTC86PCBcrc0">
+    Auf <code data-page-node-id="ACCNkg2MUNCI5QhNgODE6Q">/app</code> lädt der Browser <b data-page-node-id="jSIb8cuNiSHV5uxCE0SQWe">5697 verschiedene Regeln</b>. Aktiv werden davon <b data-page-node-id="g1vE2TPFilNUUsAeohNU6f">1248</b> — 22 %.
+  </p>
+  <table class="data" data-page-node-id="zbqVWjWZwcOu8FDj6IEiAN">
+    <tr data-page-node-id="vn6zs5o4FKESeIS3edQvS3"><th data-page-node-id="GqEokgpb1DSdw9wHtDcpiB">Messung</th><th style="text-align:right" data-page-node-id="qonr4BZOQ0VhAKqkarBqMk">Zahl</th><th data-page-node-id="JEox9z8SRoLuF1gYbfoJlj">Bedeutung</th></tr>
+    <tr data-page-node-id="vX0wGUYadYFzP8O7iPFWr9"><td data-page-node-id="VreJGU30qMkTXVngnFXk3e">Verschiedene CSS-Regeln geladen</td><td class="num" data-page-node-id="AEOlsvQ98rDcVHqvw57J5m"><b data-page-node-id="SKek8Lvb4dV3J6VMG1DK40">5697</b></td><td data-page-node-id="iEfAOT1XYslmHnDi97sELJ">über alle 78 Routen, beide Viewports</td></tr>
+    <tr data-page-node-id="TKFNfKM18fZ7cdnIi3MkC3"><td data-page-node-id="9qDFcFCs6xnSzIuTZUm1Dd">davon irgendwo aktiv</td><td class="num good" data-page-node-id="KTLLnHrUb4WpZxR06wBoxR">1248</td><td data-page-node-id="p8fA9EpUZ4VvkHniNDn7kB">22 %</td></tr>
+    <tr data-page-node-id="OkxM3UfB4EVulqftkSOyX7"><td data-page-node-id="itDFOSvfBFeJNIVNJMqPVH">davon <b data-page-node-id="AtFEsP2twkwiPgOTAI9EpG">nirgends</b> aktiv</td><td class="num bad" data-page-node-id="dEd11OycNLJQ9lDL0yMjqp">4449</td><td data-page-node-id="pgXCyRUHN1dOPCTXvutEbZ">78 %</td></tr>
+    <tr data-page-node-id="hmtA55bHTOy038FtBhitSC"><td data-page-node-id="ck2z2EB3mzTgnv8QSU3Bkc">davon nachweislich Fremdcode</td><td class="num" data-page-node-id="FbjXIYz3vnRQuHhJLWE8Al">268</td><td data-page-node-id="6uspCcynd5sfZEiHBwtnZG">Tailwind-Reset und Utilities mit <code data-page-node-id="7sfSnWMOkeycRAQlY87zAY">--tw-</code></td></tr>
+    <tr data-page-node-id="Ie5O0OrDp71kEs0G4Jr7vb"><td data-page-node-id="QtXLCVxpr1bj9dnfiCVnwQ">aus unseren Dateien</td><td class="num bad" data-page-node-id="NyCr1rxiacoFpb6E2iwyuI">4181</td><td data-page-node-id="LQcpYXuZNk5BKaWsvTDv9U">73 % aller Regeln — <b data-page-node-id="0sDjNorwRNIDfV6VjeSC7c">Obergrenze</b>, siehe Abschnitt 5</td></tr>
+  </table>
+  <div class="callout info" data-page-node-id="q2k7vS8rG89TM6FRDPneVy">
+    <svg viewBox="0 0 24 24" data-page-node-id="PEL2S8FDHVPEIA3rykZz89"><circle cx="12" cy="12" r="9" data-page-node-id="GU1MZJJ51DQ2zFRc4DhfIa"/><path d="M12 11v5M12 8v.01" data-page-node-id="0FXxchKLNjxessjIa7kjDK"/></svg>
+    <div data-page-node-id="G0CafyiCfFFliL6YfsD78V"><b data-page-node-id="O7YHjXZDmSTtcWz4Rzw6SI">Warum das die eigentliche Ursache ist</b>
+      Wenn auf einer Seite 5697 Regeln liegen und 1248 gewinnen, kann kein Mensch — und kein Modell — vorhersagen,
+      was eine Änderung bewirkt. Also ändert niemand etwas. Also bleibt das Layout so, wie es zufällig geworden ist.
+      <b data-page-node-id="t7JIXmRBqUQqby8hKKTE1q">Genau das ist das „nicht pro".</b> Nicht die Schriftgröße.</div>
+  </div>
+
+  <!-- 2 -->
+  <h2 data-page-node-id="lFr8fLi9ZTxJkjWBwap99n"><span class="no" data-page-node-id="SOilr6bl9OHq62vV8FIgFB">2</span> Zwei Navigationssysteme — eines zielt ins Leere</h2>
+  <p class="sub" data-page-node-id="PpBqm6P0v5rEPduLkkzZiD">
+    Die tatsächliche Seitenleiste im DOM heißt <code data-page-node-id="w1EXa0VY5uDYvHaB4zGr3g">.styles-module__…__workspaceNav</code> in
+    <code data-page-node-id="nZWaXDG2gBdmuZQhDTF4K4">workspaceSidebar</code> und kommt aus <code data-page-node-id="BlordApJ9JwAOl6oLYF55R">packages/eh-design</code>. Ihr Aktiv-Zustand funktioniert:
+  </p>
+  <table class="data" data-page-node-id="Ygpw7nCSaaB4BawFmhGqJ0">
+    <tr data-page-node-id="DmzZUFeLpX42ktEpgyGKRT"><th data-page-node-id="V3iK2oEIBdKtEsQlhL4GTG">Ebene</th><th data-page-node-id="FRRjoC6x4mveUb7H6X2KaF">Selektor</th><th data-page-node-id="EhlpAKi0CGjDvjM9QvmWGH">Status</th></tr>
+    <tr data-page-node-id="S00daq6xAM9RqOQgFwMeUf"><td data-page-node-id="BcxVHpnzSIuYNxonzH5zR8">Echt (eh-design)</td><td data-page-node-id="xVKM9UCYFmNaM5xSRvgnGd"><code data-page-node-id="O86O7wT82FlA9SMEZ2OCNP">.workspaceNav a[aria-current="page"]</code></td><td class="good" data-page-node-id="ULMipPFqmwBCYsaENZKAKZ">greift — Petrol-Hintergrund, weiße Schrift</td></tr>
+    <tr data-page-node-id="j7GuVhIS6WfCdpHEy1MmBs"><td data-page-node-id="xv8gSV4Q4ErvnHeodKQk64">Echt (globals)</td><td data-page-node-id="NYWo269y2c5OwoI5BlGd3t"><code data-page-node-id="HjTABOypz167DDCbsqWem9">.bottom-nav a.active</code></td><td class="good" data-page-node-id="QyGIOI54x7pzGnTmUZhOxt">greift</td></tr>
+    <tr data-page-node-id="EXkrM7gopv5P43NR4yvE6N"><td data-page-node-id="SGOKYgYIiTlw1QWQfGIFKZ">Alt (design-system)</td><td data-page-node-id="OH6w09kLxhbLa58MQGZ53c"><code data-page-node-id="1iEezGdaDxq87V9Z1nOEZK">.app-shell-v3 .sidebar-nav a.active</code></td><td class="bad" data-page-node-id="vXEwTj5tdBMvtcHlxgfxRJ">tot — <code data-page-node-id="dIcaYtSgZFJCaBvIRNNVEB">.sidebar-nav</code> existiert im DOM nicht</td></tr>
+    <tr data-page-node-id="j7A6HGMNRtFmQln3VfojBV"><td data-page-node-id="eB1jyKWY6OUfpyiF9EacrG">Alt (design-system)</td><td data-page-node-id="2R7oI8UNrwhp5Sb7JSM77g"><code data-page-node-id="DMfj9QzxUCoRyVacwCqSGr">.app-shell-v3 .app-menu[open] .sidebar-nav a</code></td><td class="bad" data-page-node-id="v86CXIROj47Wa4iIXrHva5">tot</td></tr>
+    <tr data-page-node-id="DTsK3HMVDBr6KKEJUq3LFJ"><td data-page-node-id="dDGg7IWjvYc2Avw5lKUfDE">Alt (design-system)</td><td data-page-node-id="kuLYlZaGj5tTy2BeNFxh0u"><code data-page-node-id="4Q82BcyYC2IIi0bBInyQsX">.app-shell-v3 .bottom-nav a{font-size:9px}</code></td><td class="bad" data-page-node-id="9SSEBtA06v5x4fFtA7z2O9">tot — <code data-page-node-id="k2nZKBFWYVHLO5GrxXRRHJ">.bottom-nav</code> liegt außerhalb <code data-page-node-id="ZWtGoM87LVDxZOWCgaP5pA">.app-shell-v3</code></td></tr>
+    <tr data-page-node-id="XmmJsTwiWWrPp9VOA5DODS"><td data-page-node-id="aJUaqWXgi8v0Bt1EqRnl26">Alt (homeowner)</td><td data-page-node-id="T7VTVjxjyHX9F3ZLH6RWYU"><code data-page-node-id="vkj0TEs7o3j2taL8v2MJDq">.ownerScope .app-shell-v3 .bottom-nav</code></td><td class="bad" data-page-node-id="f2Bg0Y3AcBQldAgB6qDW59">tot</td></tr>
+  </table>
+  <p class="sub" style="margin-top:10px" data-page-node-id="u6Z5T09cYcMGdx01oq1Rab">
+    <code data-page-node-id="oHqDf6FoTEvM2rBA6CigmT">design-system.css</code> beschreibt auf über 20 Regeln eine Seitenleiste (<code data-page-node-id="RG5VJoFkaizGND7LCoK69C">.sidebar-nav</code>,
+    <code data-page-node-id="9ziS2KK0CMopivnk5Bj2rL">.app-menu</code>, <code data-page-node-id="Fose8U0GUudAKvO7jdzP1h">.sidebar-brand</code>, <code data-page-node-id="hBRweBJhfot8843PSFnlnU">.sidebar-footer</code>), die es im DOM
+    <b data-page-node-id="Mh7YGAotqQaUljI3NUXVZ9">nicht gibt</b>. Gemessen über die Elternkette des echten Elements:
+    <code data-page-node-id="M7Qz5w60FBk9F9jWc0sj4n">nav.bottom-nav → .workspaceBottom → .workspace → .scope → .mainAnchor → .ownerScope</code>.
+    <code data-page-node-id="Ijs2SATRf446LiFaHpKyXa">.app-shell-v3</code> kommt darin nicht vor.
+  </p>
+  <div class="callout warn" data-page-node-id="jcRlSa3SfXJAwVfBIiV57M">
+    <svg viewBox="0 0 24 24" data-page-node-id="A5EAcOpDIPGNr7zQnhtGdp"><path d="M12 3v6M12 15v.01" data-page-node-id="HGbCuTEm8fcKTgflQyZadO"/><path d="M10.3 4.3 2.6 18a2 2 0 0 0 1.7 3h15.4a2 2 0 0 0 1.7-3L13.7 4.3a2 2 0 0 0-3.4 0z" data-page-node-id="nhAH8t9IO9ZDRWVBMfmXvw"/></svg>
+    <div data-page-node-id="9uBA36gZ5vLeHAiMSH8Im3"><b data-page-node-id="AOORQ7HM0se7Ga22bVTxdC">Zwei Mechanismen für denselben Begriff</b>
+      Die Seitenleiste markiert den aktuellen Eintrag mit <code data-page-node-id="BZ2cJjFXjpZh9dLNEFiBYm">aria-current="page"</code>.
+      Die untere Navigation markiert ihn mit der Klasse <code data-page-node-id="ofoInNCNbhpaBF7dtcM8o7">active</code>.
+      Deshalb existieren rund 15 tote <code data-page-node-id="85ckLKm03GFfijwaCqHtUo">.active</code>-Regeln: sie wurden für die Seitenleiste
+      geschrieben, die diesen Mechanismus nie bekommen hat.</div>
+  </div>
+
+  <!-- 3 -->
+  <h2 data-page-node-id="Q6h9V27jGZlpMuOB2hHxV6"><span class="no" data-page-node-id="HAYFm01n5cbb4MSLoer8SB">3</span> Tote Generationen: sechs abgebrochene Fassungen liegen noch drin</h2>
+  <p class="sub" data-page-node-id="6KfEiAu1xxYWfpD7z9cm5o">
+    Jede Generation hat ein eigenes Namenspräfix bekommen — keine wurde entfernt.
+    Diese Regeln sind definiert und werden auf <b data-page-node-id="MH7tCnrBBBj5i8DBdrq9ET">keiner</b> der 78 Routen aktiv:
+  </p>
+  <table class="data" data-page-node-id="wknCZfkkIXGW6TmHd41kTS">
+    <tr data-page-node-id="mIa8MpNBNSPPQ0uqTLma5i"><th data-page-node-id="ZWha10TeYptEhwmD5V8T5X">Präfix</th><th style="text-align:right" data-page-node-id="Hf8E8L501mKuXHL9IurMxs">tote Regeln</th><th data-page-node-id="WzcDUladusVK5LGV0F9hmK">was es war</th></tr>
+    <tr data-page-node-id="X5VARIDtpx6BHtvFzo17tE"><td data-page-node-id="1VxRW4p6QvTXF1Ock8EcHa"><code data-page-node-id="xAviC8E07WytgkDiCEQbXS">pdx-</code></td><td class="num" data-page-node-id="P1an51U4nFFmcfAtjE2iaF">65</td><td data-page-node-id="4KLY6J8vdw89dLWrDmCa8G">Provider-Dashboard (request, appointment, quote-cta, stat …)</td></tr>
+    <tr data-page-node-id="Vyc3yo4nLYCEuPN3baqWsW"><td data-page-node-id="X9DUFAF0lW31E1i4v7E1iA"><code data-page-node-id="0W6eznfQwhqq8S2ijd9JR7">wz-</code></td><td class="num" data-page-node-id="yEU7sP5sOh9BOf7IaUCwG2">58</td><td data-page-node-id="jcfU9nURe0jm0ohjSaNpzG">Wizard-/Onboarding-Stepper (wrap, stepper, step-dot, submit …)</td></tr>
+    <tr data-page-node-id="ePRKDNS8ggyN3is5jPMljb"><td data-page-node-id="XZr5DAEOyzvguIofrsyYEe"><code data-page-node-id="0Sr7iBQm82NabWcJ9CiyPQ">verification-</code></td><td class="num" data-page-node-id="5wjjk8YiaH0GWxsgvUYYcM">25</td><td data-page-node-id="S5DT3Gt8GW0ZVSjPqVZUHB">Verifizierungs-Gate</td></tr>
+    <tr data-page-node-id="J5KZeIYERf8jQlgvxb6CcD"><td data-page-node-id="9FqTHCZtcB8w2mMkby7H7R"><code data-page-node-id="0CwzzBuSnu0CoQZqsD6Mwt">ov-</code></td><td class="num" data-page-node-id="I0YFTAfev4rg1mVVgn041L">23</td><td data-page-node-id="y1V4iGWRq0QbHwdGpgpbDW">Overview-Karten (card, icon, text, wide)</td></tr>
+    <tr data-page-node-id="DmvAbYxReSAFI3fDQEAn2N"><td data-page-node-id="wZaFUgQz80gaiIGN1pWmyH"><code data-page-node-id="xn10gAyynJi45lFxzAVzOc">job-</code></td><td class="num" data-page-node-id="BLmy0zqmnNSTEaEV85yOc4">22</td><td data-page-node-id="IpiyGJm6QGTmr24MstSGnQ">Auftragslisten (row, card, card-side, tabs, type-icon)</td></tr>
+    <tr data-page-node-id="XaS0gEzsXYVYAVO97lcN5Q"><td data-page-node-id="uxhtxd703dMAZSYx83FnwT"><code data-page-node-id="OrUzWyVWonAKd2YTuVZjyq">qa-</code></td><td class="num" data-page-node-id="RWvJfue8XxxflE8CW5DQmZ">15</td><td data-page-node-id="RHoDwszoTDPUon740zCxT1">Q&amp;A-Bereich (row, card, icon, arrow)</td></tr>
+    <tr data-page-node-id="cvGsCk2pBu5zDr94hz2Ff8"><td data-page-node-id="NPMRbZFva5RLCekTIXPWvr"><code data-page-node-id="hgVydB4BpmRckLJLoY6OyX">request-</code></td><td class="num" data-page-node-id="0MRCeE4BOCFMc5EOup6ypD">13</td><td data-page-node-id="YoJGjddgK1SGcCcI20WM3n">Anfragekarten (card, bubble, grid, main)</td></tr>
+    <tr data-page-node-id="G9PWL4uWRNWJjokEEVwJAW"><td data-page-node-id="cfrwn8LyNtnaZRcaRHHYEW"><code data-page-node-id="wD2L8yxzOZaM1FiYuuk6y7">role-</code> / <code data-page-node-id="A8f50aKC89zcQx39TYq9QU">role2-</code></td><td class="num" data-page-node-id="ksQYgvopIxDH9bVq6YH2E0">20</td><td data-page-node-id="dvUH0BIwM8gLL3D37Rk1ce">Rollenauswahl, zwei Fassungen nebeneinander</td></tr>
+    <tr data-page-node-id="GN4q5EFr7GxWBeGCLbOdgg"><td data-page-node-id="NCH3icUMnsrb9Y9HdfIBq0"><code data-page-node-id="thlvvs2jGUYY7OwCfvQbfT">topbar-</code></td><td class="num" data-page-node-id="DJkk7xZdLKzkFsJA3BLz8Y">11</td><td data-page-node-id="eJrCV5hTukXfeS77ahiCjG">alte Kopfleiste (<code data-page-node-id="hWtmmHHJ6Cvi0iBN6kLQ4u">topbar-v3</code>)</td></tr>
+    <tr data-page-node-id="VmPbwA96m4fJcRiW3bUCbp"><td data-page-node-id="NNF0qg8ytuxxlb4YZkfvvQ"><code data-page-node-id="EWcym8jbXGoGyHFcwiL009">secure-</code>, <code data-page-node-id="xPYxUlF74hvhtUKIqDkGkU">dash-</code></td><td class="num" data-page-node-id="70LrekAf0yPasIim5zjedr">12</td><td data-page-node-id="TBUkcfl7wOQpFkza11sRRX">ältere Dashboard- und Sicherheitsfassungen</td></tr>
+  </table>
+  <div class="callout ok" data-page-node-id="2xqLSSytEFp5U3iMSl4z9s">
+    <svg viewBox="0 0 24 24" data-page-node-id="yOLHJLdUIu7R620s71XSYv"><path d="M20 6 9 17l-5-5" data-page-node-id="q6j8xOfWBr9LdV0ZEpC2wV"/></svg>
+    <div data-page-node-id="7Bj1y7NqbyznAuyFsfhKw1"><b data-page-node-id="L9pHJ82KeyZBYATQ954kKS">Das ist die belastbarste Zahl im ganzen Bericht — sie hängt an keiner Route</b>
+      Ich habe <code data-page-node-id="0zjmrVW3LgdsEQf6HvmG3S">wz-wrap</code>, <code data-page-node-id="tlKSTxCIc8mqTvoLfk4Wkx">wz-stepper</code>, <code data-page-node-id="d7fwrLKzCIKtEq5lgTfc21">role-card</code>, <code data-page-node-id="KFrwf1IeGNEXyT8F0n4DIX">ov-card</code>,
+      <code data-page-node-id="3siGCIAbrbxuiwH81Up7aX">qa-card</code>, <code data-page-node-id="T8S29NCDGMG8M5tHSEWOHG">job-card-side</code>, <code data-page-node-id="NXQnnshF5XMfr9wF5svYMc">verification-card</code>, <code data-page-node-id="shIsUuQAHHrFtHlzax1lgc">topbar-v3</code>,
+      <code data-page-node-id="HvfSf7RK6FAQC1fuMExGvd">dash-page</code>, <code data-page-node-id="KmDvaCHNTRhp7ZtgYNJUCU">secure-card</code>, <code data-page-node-id="FwYV1BuBaD8ZTlbkyjT08s">request-bubble</code> einzeln in allen
+      <code data-page-node-id="knVlHax2ZkWVOcpjhklbVZ">.tsx</code>- und <code data-page-node-id="PbJWaxjufbmslMmG4jbNk1">.ts</code>-Dateien gesucht: <b data-page-node-id="5XLXBciqgZ57krT9y3DGaG">kein einziger Treffer</b>.
+      Dynamisch zusammengesetzte Klassennamen gibt es nur an 4 Stellen.</div>
+  </div>
+
+  <!-- 4 -->
+  <h2 data-page-node-id="3idFsBcDYBPsfQtwC6NwyU"><span class="no" data-page-node-id="rMnawkQHaEHsj2mqCJEWxD">4</span> Die Designprüfung ist ein Feigenblatt</h2>
+  <p class="sub" data-page-node-id="IziSsxBgAbCfFBej1ilWrz">
+    <code data-page-node-id="ryeS5In7yO8Dbk7v6pjpnR">scripts/eh-design-check.mjs</code> verbietet Literalfarben, dekorative Effekte, zu kleine Schrift.
+    In <code data-page-node-id="HOSKivHZyETdEcc6xppVJs">design/design-debt.json</code> stehen die <b data-page-node-id="p4MdraJ0GGm9Zpcyi8zoLk">tolerierten</b> Verstöße — 67 Dateien, 3585 Stück.
+    Diese Datei ist der eigentliche Befund:
+  </p>
+  <table class="data" data-page-node-id="sZdDyCOrYLcAc1ZP5NjC2J">
+    <tr data-page-node-id="SxveYY5d0ogHW3d8Nv0APG"><th data-page-node-id="25FIauwsrYhO4mW18s9fWr">Datei</th><th style="text-align:right" data-page-node-id="dfyr1oxVDExc64yLEkDCcS">geduldet</th><th data-page-node-id="wKBznNkZnyxC5Gygze4ZLw">Anteil</th></tr>
+    <tr data-page-node-id="naW0f4ygC2oQEVZSkc1TH8"><td data-page-node-id="55rjEz08fj7HhmRLQlTZUh"><code data-page-node-id="cfQt2E78iskbaT1MaSUmzR">src/app/design-system.css</code></td><td class="num bad" data-page-node-id="eDi5YZS5lABkr54v5Og6nD">1011</td><td data-page-node-id="zrDtpG4emCokaJfA1BKIcU"><div class="bar" data-page-node-id="E3TXAxdaBOVQY0PFyh3V2K"><i style="width:100%" data-page-node-id="cZa5jlhMsATuMo3ugCTx2w"></i></div></td></tr>
+    <tr data-page-node-id="y1cGqkeJInERtSAamN8WjW"><td data-page-node-id="sF3qcJrENT0e9M6ETwXQ15"><code data-page-node-id="hH0RvxYNmNH725JBoGTsxN">src/app/globals.css</code></td><td class="num bad" data-page-node-id="DzNPHP01FPrmMgPdqpnz8X">828</td><td data-page-node-id="B6rd2tvXIZdVViJGr9OcwG"><div class="bar" data-page-node-id="ovTQuftrX3ikxQqpBDJQpY"><i style="width:82%" data-page-node-id="1b79WdyVXOupuxWFskXAE5"></i></div></td></tr>
+    <tr data-page-node-id="oDxf7hQ8cKyboIU1P15S1K"><td data-page-node-id="Mfko02bIMczmCnfhJaGgwM"><code data-page-node-id="bwNhemlZAGx4K4BrS1t90p">src/components/marketing/marketing.module.css</code></td><td class="num" data-page-node-id="4LkVgPuU7g2SmUGXICg7Y9">359</td><td data-page-node-id="m0m51t3pVAYtTg1Ym4Qvmf"><div class="bar" data-page-node-id="nVYWHkY8FK6Nc4fYgxVhwZ"><i style="width:36%" data-page-node-id="8E9WA9JJUwKlv8Dc4RTacE"></i></div></td></tr>
+    <tr data-page-node-id="6GrXm9rj8YcWRFLa3XTDHt"><td data-page-node-id="I1LaXGHDBvCgceNxbUlVzM"><code data-page-node-id="f08bmG5cbARLfu4b1OTf2j">src/components/icons.tsx</code></td><td class="num" data-page-node-id="hJBrS4R173PUIyWZGfwQcJ">179</td><td data-page-node-id="L9bWO9YuCX4aj0lJbBevPG"><div class="bar" data-page-node-id="X8JjXGv82vED3JiV8ttYmT"><i style="width:18%" data-page-node-id="sCHekBciIgV63cZkpHcDPL"></i></div></td></tr>
+    <tr data-page-node-id="QiM9FGZH5zbfEHHWJneng6"><td data-page-node-id="fhFsBFoaYHGHk1gbyYCD9G">übrige 63 Dateien</td><td class="num" data-page-node-id="EfR2He6UWhdL52eALQD01y">1208</td><td data-page-node-id="531mnaObyJrvXCTPOgO9Pl"><div class="bar" data-page-node-id="q4L0tUAtmd8kqZDmdBMY7v"><i style="width:60%" data-page-node-id="DI0HMcFYBZcGdWhVH7FKRx"></i></div></td></tr>
+    <tr data-page-node-id="x6d5d8RXbReyWlfKFGVORI"><td data-page-node-id="fxt80N9Aw9mWIhey1ylRSh"><b data-page-node-id="hVHf5DmHWb5z9Mgh2zYpxm">Summe</b></td><td class="num bad" data-page-node-id="bVojBej98x3DyanaqK9mBU"><b data-page-node-id="MrfhBjBbgGYdrgZDE7DLNt">3585</b></td><td data-page-node-id="nck5kblwvMz9qBdtcHGVRo"></td></tr>
+  </table>
+  <p class="sub" style="margin-top:10px" data-page-node-id="l4mQnueWdSTt557h4bhqgk">
+    Die Prüfung greift also nur bei <b data-page-node-id="PAqzEO8dAE4dSDjXyzMb9A">neuem</b> Code. Die beiden größten App-Dateien sind mit 1839 Verstößen
+    vollständig außer Kraft gesetzt — <b data-page-node-id="dLpMaaHRQ1E3dIAAo85d5y">die Datei, die das Designsystem sein soll, ist sein größter Verletzer.</b>
+  </p>
+  <div class="callout warn" data-page-node-id="plnFK9OBun2P0A6RgwlTit">
+    <svg viewBox="0 0 24 24" data-page-node-id="WUKab1er4wh4wyrDUKQyDX"><path d="M12 3v6M12 15v.01" data-page-node-id="clYFRVcwfJYwMn0aDkRhSs"/><path d="M10.3 4.3 2.6 18a2 2 0 0 0 1.7 3h15.4a2 2 0 0 0 1.7-3L13.7 4.3a2 2 0 0 0-3.4 0z" data-page-node-id="tR0oTYD73HKZXr5BSxAyE6"/></svg>
+    <div data-page-node-id="eSxmaEBoDm5UuuWDVBvqf0"><b data-page-node-id="LDIeGo9aFURtPhFdvx9gxv">Und ein Loch in der Prüfung</b>
+      Verbote: <code data-page-node-id="yHd6zA3dO1Nf8BugcSxGnd">rounded-full</code>, <code data-page-node-id="AekI0nIsSga4HPraBxAxT8">shadow-xl</code>, <code data-page-node-id="VjxedDsbvJ0UMMKYnvNZ1k">gradient(</code>,
+      <code data-page-node-id="eXYx1l4i8lm9dE3Donx4fW">backdrop-filter: blur</code>. Aber <code data-page-node-id="YFABohLOLW1tsqpaEeIU03">design-system.css:19</code> schreibt
+      <code data-page-node-id="O2NTddfKuIvWEjYiJ8S9PB">border-radius:999px</code> — dasselbe in reinem CSS. Die Regel sucht die <b data-page-node-id="PcINMhZD26MlDCFShifKXm">Tailwind-Klasse</b>,
+      nicht den CSS-Wert. Der eigene Button des Designsystems umgeht damit genau das Verbot, das für ihn gedacht war.
+      Dieselbe Lücke in <code data-page-node-id="iFuAR52SLrbWJ6By2dboAv">globals.css</code>, <code data-page-node-id="Ml9serAIERyLiRaTknbHzX">provider-workspace</code>, <code data-page-node-id="VFg2YGduHQfGWZMscGZGA7">admin</code>,
+      <code data-page-node-id="3Ed6LAMHQKw3HiKIJLAMWR">messages</code>, <code data-page-node-id="6aOj7wDewga5g3GWPCsXQ5">sale</code>.</div>
+  </div>
+
+  <!-- 5 -->
+  <h2 data-page-node-id="6N2AXpZTFBKBYoSCv3okMo"><span class="no" data-page-node-id="FTYnxetzINJGzamUzE77xA">5</span> Tailwind: 3,7 % Nutzung — und die Korrektur meiner ersten Zahl</h2>
+  <div class="callout warn" data-page-node-id="jn7mYie0hSDSEZc23y1qYU">
+    <svg viewBox="0 0 24 24" data-page-node-id="BTdCvvna4rfoR4HaDr8Quj"><path d="M12 3v6M12 15v.01" data-page-node-id="1v4AAN2dOonC5Mg9BZumtw"/><path d="M10.3 4.3 2.6 18a2 2 0 0 0 1.7 3h15.4a2 2 0 0 0 1.7-3L13.7 4.3a2 2 0 0 0-3.4 0z" data-page-node-id="UoH1Bq0BXlGHQMboXeJf4p"/></svg>
+    <div data-page-node-id="7CczWHKTL8JmvfofQYCvdF"><b data-page-node-id="ZqDLibUDndQdQGkuZivQ5O">Korrektur</b>
+      In der ersten Fassung stand, aus Tailwind kämen 1582 Regeln und 1507 seien auf <code data-page-node-id="IFMooEACrD8h8iuUliFqvH">/app</code> ungenutzt.
+      Das war falsch gezählt: der betreffende Build-Chunk enthält <b data-page-node-id="wkSn7aIZdsM40ErL5IdZjE">Tailwind UND <code data-page-node-id="CwHKzf9IpG8m8UHYBBPgJ0">globals.css</code>
+      zusammen</b> (erkennbar an <code data-page-node-id="L6R8OcwWn8XoVpVF3CYAn8">.job-row small</code> im selben Chunk). Eine Trennung nach Chunk ist
+      damit unmöglich; ich habe regelweise nachgezählt.</div>
+  </div>
+  <p class="sub" data-page-node-id="b82lmKPGEqDDelE7kYikFP">
+    Regelweise gezählt tragen nur <b data-page-node-id="J5VLB4iGDpqcq9tDW7JwaL">268</b> tote Regeln die Tailwind-Markierung <code data-page-node-id="CCCF5oQixussWxpjcLDHtm">--tw-</code>
+    oder haben Reset-Form. Das ist eine <b data-page-node-id="RXORKgHvIgrAzuVsz83BFi">Untergrenze</b>: Utilities wie <code data-page-node-id="YZeRYA0IdtVz5NTPPWU3S3">.flex</code>,
+    <code data-page-node-id="B490u2BWLElEMhfbyy5rVa">.truncate</code>, <code data-page-node-id="TNwIfmGSWu9LFCzsMT0DCr">.sr-only</code>, <code data-page-node-id="BzBZCfnR1SJ4DWXGiI9pbt">.mx-auto</code> setzen kein <code data-page-node-id="0XIYBthsfeKAz3y4XDMQfU">--tw-</code>
+    und lassen sich von eigenem CSS nicht sicher trennen. Die ehrliche Aussage lautet deshalb:
+    <b data-page-node-id="yEOMIFB3ayPRPEQaEdavJB">von den 4449 toten Regeln stammen mindestens 268 aus Tailwind; wie viele genau, ist ohne
+    Source-Maps nicht bestimmbar.</b>
+  </p>
+  <p class="sub" data-page-node-id="aLCozYJbryEtZFKAOtD0d3">Unabhängig davon bleibt die Nutzungsfrage eindeutig — und das ist der Punkt:</p>
+  <table class="data" data-page-node-id="OAhvZx3kzE0rClIc1U3nZn">
+    <tr data-page-node-id="AA9u2kcENwZWMlJMvD8w6l"><th data-page-node-id="HYKZz5DLdLeSE4KMu9FFaf">Frage</th><th style="text-align:right" data-page-node-id="6QVIC1WwZxzjZiddCFeTm5">Zahl</th></tr>
+    <tr data-page-node-id="giMfiELHdddj919sKlVgpR"><td data-page-node-id="60CJjJUoLhqgAkHSGf9bWX">TSX-Dateien im Projekt</td><td class="num" data-page-node-id="ANnFgvM8mhBGRB015D1eVB">218</td></tr>
+    <tr data-page-node-id="sCMzwitQhFjw6ZEHrVqEsc"><td data-page-node-id="w74gM0X5GhoqlfCVgb6xdf">davon mit Tailwind-Utilities im <code data-page-node-id="38ONTNkg3m58VyZ8s0eJry">className</code></td><td class="num bad" data-page-node-id="nPo15BSkFGFZvxs17rxv8s">8</td></tr>
+    <tr data-page-node-id="wnqqKVeQnInHVnfYNclBeO"><td data-page-node-id="qp3QrGx59zCJNPEQQc4KS1">davon echte Nutzung (eine einzige Seite)</td><td class="num bad" data-page-node-id="rbJGDNGBFpiE5wF0gckxJ9">1</td></tr>
+    <tr data-page-node-id="slc0GovMOGs995oZJPNwsp"><td data-page-node-id="ldOYgcvG9ADeF1VFmfUaBq"><code data-page-node-id="gvD3AWRFxOm8G4MvZODqNh">@apply</code> in CSS</td><td class="num" data-page-node-id="gannc0lddwpHBqW4NbySSi">3</td></tr>
+    <tr data-page-node-id="kykl3DzPQBIGhXzjjIIT17"><td data-page-node-id="nHQ23sMCecFJEs34Cw66zc"><code data-page-node-id="E4G6IHvwRWypuvRkWF6OoA">tailwind.config.*</code></td><td class="num" data-page-node-id="dGDjhCQt5F6GePpXPVkWfq">existiert nicht</td></tr>
+  </table>
+  <p class="sub" style="margin-top:10px" data-page-node-id="T29xmpoRGNuqz2djDE36Bz">
+    Ein komplettes Utility-Framework wird auf jeder Seite ausgeliefert, damit
+    <code data-page-node-id="OL9ILHjTsmaZiv9q7TxvNz">src/app/admin/crm/page.tsx</code> bequem ist. Dazu kommen <b data-page-node-id="hbV1kbztK5dzQUYOILDqgL">904 identische Regelkörper</b>
+    → <b data-page-node-id="IjglWcGgi3omDOE5fhWCQC">1230 doppelte Regeln</b> durch Kopieren.
+  </p>
+
+  <!-- 6 -->
+  <h2 data-page-node-id="W857Dxw5MA5HWEjZZuCJ8Z"><span class="no" data-page-node-id="1KFvp63NPSJMCX5Aw3xG2C">6</span> Kein gemeinsames Vokabular — 120 Schriftgrößen, 395 Abstände</h2>
+  <table class="data" data-page-node-id="GRVgE91DEGyKpKykqWgmZo">
+    <tr data-page-node-id="bZIcVfyYsfnOQI9thxa2hV"><th data-page-node-id="Q1YpD5CxUXBN3GWTiLsKMF">Eigenschaft</th><th style="text-align:right" data-page-node-id="4MNGJfqiC7k42LMNLdU38v">verschiedene Werte</th><th data-page-node-id="WZ3semrego07i9aIYtcFbF">häufigste</th></tr>
+    <tr data-page-node-id="xSndsNcvpZo1FBNQ2EkNpC"><td data-page-node-id="Fa3UDVL4mbD7DM5wE3GxI6"><code data-page-node-id="ioyomLUgnXWfdLPAXikHUB">font-size</code></td><td class="num bad" data-page-node-id="73iPCuCtOAANeFUUAs0eIU">120</td><td data-page-node-id="ZtMfAAnSSfV7rRO6465Qy5">Token <code data-page-node-id="eVC09AxwyHVY9BSNO1UfcE">--eh-font-meta</code> (163×), <code data-page-node-id="v6KmlnGh9h3v01GsFou2DZ">--eh-font-label</code> (138×), 13px (97×), <b data-page-node-id="CgH0VaS0fS4pSDZbrGspAT">9px (88×)</b></td></tr>
+    <tr data-page-node-id="rKNDSNeVNsaTjECDImBrf9"><td data-page-node-id="NDGnjKvh9MO8LeCUCFr0yh"><code data-page-node-id="LmV2b4hySV8uth8SD20Ot5">padding</code></td><td class="num bad" data-page-node-id="GZRD4bGrw0FDkr0gpw1DzH">395</td><td data-page-node-id="saaI82usr8oS0MlvOH2BEl">0 (77×), 24px (42×), 16px (38×), 14px (30×)</td></tr>
+    <tr data-page-node-id="GNGmNiiUpjbGfN0EXK8R44"><td data-page-node-id="tATViJRaBe9XzmB07UGEmf"><code data-page-node-id="jRv6bSgL3R7isBRk07i9k0">border</code></td><td class="num bad" data-page-node-id="6Th6aFHBaxXqkI3RaYLSnq">107</td><td data-page-node-id="JB9DpBdjx6nqylOCOhMcnC">0 (89×), <code data-page-node-id="qA5Ep5b3sBHAyUfoN1mfZC">1px solid var(--eh-color-line)</code> (82×), <code data-page-node-id="j4lPZsEvcv6EcbG9nlOXUi">var(--eh-border)</code> (40×)</td></tr>
+    <tr data-page-node-id="88clvoGdw2qA752F9RKbRU"><td data-page-node-id="hrhwhq4XMS8HmiYFjd2TSv"><code data-page-node-id="1Ou5g0kJZJxBfRr16hCipM">box-shadow</code></td><td class="num bad" data-page-node-id="6jfQjLObm9hWIIgOF6PN8g">94</td><td data-page-node-id="nRCyH082BXOyDKt2qMKpnx"><code data-page-node-id="BotU5EiIPf0ARBtzyviChx">none</code> (37×) und 93 Einzelwerte</td></tr>
+    <tr data-page-node-id="5hvYm88JvLhEUVciZQBGw0"><td data-page-node-id="7gNa1hqDWgH9vXikhHobEi"><code data-page-node-id="p5qB4khu4AclVRSx5cBRLi">gap</code></td><td class="num bad" data-page-node-id="LHpuukUZ3ExJcAvA2XHd1Z">71</td><td data-page-node-id="tBOpCbkTiZ8fhKCVxo2U3M">12px (129×), 10px (114×), 8px (103×), 16px (81×)</td></tr>
+    <tr data-page-node-id="AIMrhRcFv5FOGiTknYWHIx"><td data-page-node-id="qAIDs4VBFzlBEFjne2AkvJ"><code data-page-node-id="vLe0vrzJvl8dRjP2UeYzFr">border-radius</code></td><td class="num bad" data-page-node-id="DYroEu7QuIaV685fQnan6T">39</td><td data-page-node-id="WyH4zzRtySI7xoBhaMgNsi">Token (151×), 50 % (71×), Token (64×), 12px (58×)</td></tr>
+    <tr data-page-node-id="kCx5jjtXAxX7fxqWMcxxA5"><td data-page-node-id="5HZf39cg5GjHBkYzDM0WHi"><code data-page-node-id="3DZNOblGFMKlNv1D7X1Mrj">font-weight</code></td><td class="num bad" data-page-node-id="pGLFkeRnINiXYWEpCIT79P">31</td><td data-page-node-id="bEMpx8vW9vinhQCh7QIai6">650 (125×), 800 (78×), 700 (77×) — inkl. 520, 535, 570, 590, 620, 680, 720, 750, 760, 790, 850</td></tr>
+  </table>
+  <p class="sub" style="margin-top:10px" data-page-node-id="BlRVIy4P5rIuPA0GZ3DHIX">
+    <code data-page-node-id="rG389GgIWzUR0JSW5vDWtO">9px</code> kommt <b data-page-node-id="Y5Gkgu1eP2afvlAOEwnKFf">88-mal</b> vor. Echte Werkzeuge haben 4–6 Schriftgrößen, nicht 120.
+    Und: <code data-page-node-id="BpEUkZSGINqmXkqMGfGZFt">globals.css</code> ist <b data-page-node-id="HTElA36w0YxyQyBdQv5Ds6">ungeschichtet</b> (nur zwei kleine <code data-page-node-id="fNAQewuNsWgC6F7wDBpB64">@layer base</code>-Blöcke),
+    gewinnt also gegen jede geschichtete Datei. <b data-page-node-id="TKWXucjl1yiH9gz1AagvB1">73 Selektoren</b> sind in zwei oder mehr Dateien definiert,
+    darunter <code data-page-node-id="yz1N4oOAS6DKnr7GPkMJeP">.btn</code> mit völlig verschiedenen Werten (18px/54px/800 gegen 999px/42px/650).
+    Dazu <b data-page-node-id="3fA0qA7GI5RtDlRE7WzgwG">44× <code data-page-node-id="j69PejraZauqLxAPpGXRwp">!important</code></b>, davon 33 in <code data-page-node-id="W1W4JAYV6FRo8AXXHHoFZi">design-system.css</code>.
+  </p>
+
+  <!-- Korrektur -->
+  <h2 data-page-node-id="RKOBZYkPt8xTix08c1WpPQ"><span class="no" data-page-node-id="TlI5D2VBdiLeYW5vPWit7q">!</span> Zwei Dinge, die ich in der ersten Fassung falsch hatte</h2>
+  <div class="callout warn" data-page-node-id="HaOmN3WL9lsH4KRfrUIgGN">
+    <svg viewBox="0 0 24 24" data-page-node-id="L85gH6eorPf2mQL7PbTl8J"><path d="M12 3v6M12 15v.01" data-page-node-id="F11ZAq9iBPUxMK158TZGgd"/><path d="M10.3 4.3 2.6 18a2 2 0 0 0 1.7 3h15.4a2 2 0 0 0 1.7-3L13.7 4.3a2 2 0 0 0-3.4 0z" data-page-node-id="w09dzDAPNhwUixrYttXhTA"/></svg>
+    <div data-page-node-id="NLWsLPIu5NJlQAvvA71n6C">
+      <b data-page-node-id="A6r7UWa8sKFpTtBVKnCNpA">1. Ich habe den alten Live-Build gemessen, nicht <code data-page-node-id="myHEt9W1BCPzrO2YdtFRoY">main</code>.</b>
+      Konkret nachgewiesen an der mobilen Navigation:
+      <span class="liveonly" data-page-node-id="FVLAnv3VVGhN0B0CVw7hGx">Live 36eaa7c</span> <code data-page-node-id="du4ES4rK6ZvsQ1tm5DDJrO">.bottom-nav a{…font-size:10px;color:#69736d}</code> —
+      <span class="fixed" data-page-node-id="7vK9kChyklARDTeNzFmkep">main a91a44d</span> <code data-page-node-id="T2XND5TiDMCtILCwd057jG">.bottom-nav a{…font-size:var(--eh-font-meta)}</code> = 13px.
+      Der 10px-Fehler <b data-page-node-id="BvPlWA64tjTSeCGPwKQ79U">ist in <code data-page-node-id="Qf8ahDJKiePJSvEWBaKiTW">main</code> bereits behoben</b>, nur nicht ausgeliefert.
+      Alle Aussagen dieser Seite über das <em data-page-node-id="Jz91kybHAL3clxqXSXGzPD">Aussehen</em> gelten deshalb für den Live-Stand;
+      die Strukturzahlen aus den Quelldateien gelten für <code data-page-node-id="Qn29j6zXfNHpjg0C9kpeZa">HEAD</code>.
+    </div>
+  </div>
+  <div class="callout warn" data-page-node-id="u88S8SSLVoS5YFEUUWAQzk">
+    <svg viewBox="0 0 24 24" data-page-node-id="CoMk5G1xY4iMF9l7liTOsp"><path d="M12 3v6M12 15v.01" data-page-node-id="1Wv1wr3gdqulSKG3Su7XQb"/><path d="M10.3 4.3 2.6 18a2 2 0 0 0 1.7 3h15.4a2 2 0 0 0 1.7-3L13.7 4.3a2 2 0 0 0-3.4 0z" data-page-node-id="yBT89vnWOFezrfG5a51afv"/></svg>
+    <div data-page-node-id="BaCJl0ZkYNbku742G96Y6l">
+      <b data-page-node-id="ToH35ggYSbzMVTBne5sB88">2. Meine Tailwind-Zahl war um rund das Fünffache zu hoch</b> — Begründung in Abschnitt 5.
+      Die Korrektur macht die Gesamtaussage nicht kleiner, aber sie macht sie belastbar.
+    </div>
+  </div>
+
+  <!-- Plan -->
+  <h2 data-page-node-id="ZLxABu0REp4NrNYAFMLwEL"><span class="no" data-page-node-id="VDaOFQSCQM26mYLfLuXWeM">→</span> Was ich der Reihe nach tun würde</h2>
+  <p class="sub" data-page-node-id="wplKe1YaxPQwMM4fFMv1Ow">Jeder Schritt ist einzeln prüfbar. Die ersten beiden ändern <b data-page-node-id="Z7u7RNiZH5X8FKEt3lg6u0">kein Pixel</b>.</p>
+
+  <ol class="plan" data-page-node-id="bEfCzF0NEPaV7rdMAr2ufi">
+    <li data-page-node-id="f8GvnK8QHuzjA6LjAvYGTO"><b data-page-node-id="xuF9TzxVA2HVyaLjm36yB2">Tote Regeln unter Quarantäne stellen, nicht löschen</b>
+      <p data-page-node-id="JrVEj1nFtZP3JFJjHvOyHM">Die nie aktiven Regeln in eine <code data-page-node-id="lOZ4Y3YEweTGZoVr0FESCh">legacy.css</code> verschieben, geladen nur über
+      <code data-page-node-id="eJYdwcFJ5ZAPkfrfdfcHnJ">@layer legacy</code>. Effekt: die aktiven Dateien schrumpfen um ~78 %, das Aussehen ändert sich
+      nicht — weil die Regeln ja nie greifen.</p>
+      <span class="risk" data-page-node-id="TocuNj46pxSp9UofTA2JQ8">Risiko: Die Messung deckt 78 Routen, Desktop und Handy ab, aber keine Hover-Zustände,
+      Dialoge und abgemeldeten Varianten. Deshalb Quarantäne statt Löschen, und endgültig entfernen erst nach
+      einem Release. Vorher Jeremy fragen.</span></li>
+
+    <li data-page-node-id="7LDrCoTXgs6yF4v8gpKFSW"><b data-page-node-id="69zJPs1PEd6uTYrqmoZE3m">Die toten Generationen aus dem Code entfernen</b>
+      <p data-page-node-id="Avoj0uOyTChvwMzs8xiZw2"><code data-page-node-id="8aog7ByGom1udHq6Kmz0Ds">wz-</code>, <code data-page-node-id="iHgatPeJEGqjXq6GEJ8Ilq">pdx-</code>, <code data-page-node-id="biy2fbsF4CbO7MR0Lh5pRN">ov-</code>, <code data-page-node-id="2C1cPyxxPgUHxNPayThPKe">qa-</code>, <code data-page-node-id="xfGWDcU2FeYY0YDpYvh6VM">job-</code>,
+      <code data-page-node-id="eIfbjJHjF4n7j9hKdHljnu">request-</code>, <code data-page-node-id="ys2p8bi1SlF99QZ9Dcw3Uk">dash-</code>, <code data-page-node-id="3Gl0ByQ9b003iu1TFQY2Zf">role-</code>, <code data-page-node-id="PQvnSTND0jvaK1hk20e4Z6">verification-</code>,
+      <code data-page-node-id="ZxQelIXv28FjHuRJgK0d35">secure-</code>, <code data-page-node-id="XUjjPky3tXzWnsjesanfaP">topbar-v3</code> — verifiziert ohne jede Referenz. Der ungefährlichste Teil
+      und der, der die Dateien lesbar macht.</p>
+      <span class="risk" data-page-node-id="UmCCwy33rORvzfYtKaoCgG">Regel: erst Archiv, dann Papierkorb. Nie endgültig löschen.</span></li>
+
+    <li data-page-node-id="vTw8865ZTxs9LIci3iINeN"><b data-page-node-id="DkVXKfBktpcmIlsXZ1mRtT">Die eine Schicht festlegen und die Doppel-Definitionen auflösen</b>
+      <p data-page-node-id="snAHdVZ2uoObJDADSjkh2S"><code data-page-node-id="dNhZVAbxPh6BnCm3BLQvqu">globals.css</code> in <code data-page-node-id="pfQiQHagJgB28IwH7dwuSf">@layer legacy</code> einsperren, damit
+      <code data-page-node-id="AWRwN87ooMMnMXEyqgIkjX">design-system.css</code> und die Module gewinnen. 73 doppelte Selektoren und 44
+      <code data-page-node-id="QlCcGpFEaDWVYqwp6rLkBs">!important</code> auflösen. Das ist der Schritt, der <b data-page-node-id="D30SghTQ8TwVLGjFHD5sYb">das Aussehen ändert</b> —
+      deshalb erst nach der Entscheidung A/B/C.</p></li>
+
+    <li data-page-node-id="OcMcvB4det6q44OBFmaDYX"><b data-page-node-id="gg5f7pWlgrKjzTP5J8C1UZ">Tailwind entscheiden: entfernen oder bewusst behalten</b>
+      <p data-page-node-id="Uzd2MkwX7MdMFxQuEgF0jl">Entweder die eine Admin-Seite auf Module umstellen und <code data-page-node-id="DfG6ZsssSQt80SFyzQHdFi">@import 'tailwindcss'</code> streichen.
+      Oder bewusst behalten und im Designsystem dokumentieren, dass Utilities erlaubt sind.
+      Beides ist in Ordnung. Der aktuelle Zustand — Framework da, kaum benutzt, nirgends dokumentiert —
+      ist der einzige schlechte.</p></li>
+
+    <li data-page-node-id="6twkgrHKQEoNI73YctepC5"><b data-page-node-id="HWAbVUWDekb0Ol6A2omDbB">Ein Vokabular durchsetzen: 6 Schriftgrößen, 4 Abstände, 3 Radien</b>
+      <p data-page-node-id="K86n9dzkmcqzgrcTRyCQF3">Die 120 <code data-page-node-id="oquGAIppXyS9YB94qGWMBJ">font-size</code>-Werte auf die vorhandenen Tokens abbilden. Das lässt die
+      9px-Texte verschwinden — und ist der einzige Schritt, der in jeder A/B/C-Variante richtig ist.</p>
+      <span class="risk" data-page-node-id="Fu5yW3CaqlbQp0OtH8jgrq">Der Ratschet in <code data-page-node-id="Ljb2pBtz5749o0PqQDD84d">design/design-debt.json</code> darf nur sinken, das ist erlaubt.
+      Versiegeln erst nach Jeremys Freigabe.</span></li>
+
+    <li data-page-node-id="Ye5x65UdsA6WMnlpQukO56"><b data-page-node-id="speo92URIjzQrvSilvytEJ">Zuletzt das Loch in der Prüfung schließen</b>
+      <p data-page-node-id="zxwXkJQi4zahOQ2sdrPQ48"><code data-page-node-id="vzTGEND5S9RN0sg05cvMTF">border-radius:999px|50%</code> und Glow-Schatten in die <code data-page-node-id="sgqIefkAOrN22UD0w9LBqL">decorative-effect</code>-Regel
+      aufnehmen. <b data-page-node-id="jvtunZItjx6OQ5zlIbCRDj">Reihenfolge zwingend:</b> erst aufräumen, dann die Regel schärfen — sonst steht alles rot.</p></li>
+  </ol>
+
+  <div class="callout ok" style="margin-top:26px" data-page-node-id="Yaok9PZpzBaMRF08gzo5Y5">
+    <svg viewBox="0 0 24 24" data-page-node-id="93ysBD9PWA7lQZ2bExw2Y8"><path d="M20 6 9 17l-5-5" data-page-node-id="0eY52gtZ80JGWyrZGOaiGE"/></svg>
+    <div data-page-node-id="uj1LEtNcWxJBbIFUkzbnfg"><b data-page-node-id="XF5LRQwndEn7lUCxVri7R3">Das Gute daran</b>
+      Schritt 1 und 2 ändern <b data-page-node-id="wh5sk6EO9r4a2rc49MFr5I">nichts am Aussehen</b> und machen trotzdem rund drei Viertel des CSS weg.
+      Danach ist überhaupt erst vorhersagbar, was eine Designänderung bewirkt. Ohne diesen Schnitt wird
+      jede der drei Richtungen A/B/C gegen dieselbe Wand laufen — man baut etwas Neues, und 5697 alte Regeln
+      reden mit.</div>
+  </div>
+
+  <footer data-page-node-id="MsQWtrZCkvDXjcAXWUzBxM">
+    <b data-page-node-id="MAQEGCzSXMzgDOZW9BZiA1">Was aus den Quelldateien kommt (routeunabhängig, gilt für <code data-page-node-id="IbBypNcHLjDFoeCcLK7iva">HEAD</code>):</b>
+    6 CSS-Dateien mit 5793 Regeln · 3585 geduldete Verstöße in 67 Dateien · 606 von 1046 Klassennamen ohne
+    Code-Referenz · 73 Selektoren in 2+ Dateien · 44× <code data-page-node-id="M3kuPfMJ6ZQpKpVro0FNbe">!important</code> · 904 identische Regelkörper
+    (1230 doppelte Regeln) · 120 <code data-page-node-id="PSEJNtD00ZKjr6BDCs6xOG">font-size</code>-Werte, <code data-page-node-id="PSZ7ReKZ0PAH26rMuWIkXu">9px</code> 88×.
+    <br data-page-node-id="IiLGACw7WZgNgcHAyJLCgU"><br data-page-node-id="HuQsNU7UBDvtLSD3qw3SBo">
+    <b data-page-node-id="9wi0aADHtIILAGvZyh236I">Was aus der Messung an der laufenden Seite kommt:</b> 5697 Regeln, 1248 aktiv (22 %), 4449 tot (78 %),
+    268 davon nachweislich Tailwind. Tote Regel-Präfixe einzeln ausgezählt.
+    <br data-page-node-id="yqwHFPx0lGTcRyYFehvCcG"><br data-page-node-id="fSJGMpn1FjtrvpPSKDpRxB">
+    <b data-page-node-id="0BF8uyffGKDv710tBmKVN2">Nicht belegt und deshalb nicht behauptet:</b> eine exakte Trennung zwischen Tailwind-Utilities und
+    eigenem CSS (ohne Source-Maps nicht möglich), sowie das Verhalten von Hover-, Fokus- und Dialogzuständen.
+  </footer>
+
+</div>
+</body>
+</html>

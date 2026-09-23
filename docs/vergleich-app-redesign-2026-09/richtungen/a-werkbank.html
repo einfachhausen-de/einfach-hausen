@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="de" data-page-node-id="h0aQatu38v52dRyKD4Ayxv">
+<head data-page-node-id="061DZcH5bEvSNmjD0FxN4m">
+<meta charset="utf-8" data-page-node-id="Mgt6f7iX4GFgkCGq7dUfk9">
+<meta name="viewport" content="width=device-width, initial-scale=1" data-page-node-id="hLOMY6qGQ0AZOJDpxjrChE">
+<title>Richtung A — Werkbank</title>
+<style>
+  :root{
+    --ink:#10222a; --sec:#4b5b60; --mut:#8b979b; --line:#e4e2dc; --paper:#faf8f4;
+    --panel:#ffffff; --petrol:#105258; --terra:#a84d29; --ok:#236344; --sand:#ecdfc9;
+    --rail:#f2efe9; --chip:#f0ede7;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{background:var(--paper);color:var(--ink);
+       font:13.5px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif;
+       -webkit-font-smoothing:antialiased}
+  .app{display:grid;grid-template-columns:216px minmax(0,1fr);min-height:1000px}
+
+  .rail{background:var(--rail);border-right:1px solid var(--line);padding:12px 10px;display:flex;flex-direction:column;gap:2px}
+  .brand{display:flex;align-items:center;gap:8px;padding:6px 8px 14px}
+  .brand b{font-size:13px;font-weight:700;letter-spacing:-.01em}
+  .brand span{font-size:10px;color:var(--mut);display:block;font-weight:500}
+  .navlabel{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);padding:12px 8px 5px}
+  .navitem{display:flex;align-items:center;gap:9px;padding:7px 8px;border-radius:6px;color:var(--sec);
+           font-size:13px;font-weight:550;text-decoration:none;position:relative}
+  .navitem svg{width:15px;height:15px;flex:none;stroke:currentColor;fill:none;stroke-width:1.6}
+  .navitem[aria-current="page"]{background:var(--panel);color:var(--ink);font-weight:650;box-shadow:0 1px 0 var(--line)}
+  .navitem[aria-current="page"]::before{content:"";position:absolute;left:-10px;top:6px;bottom:6px;width:2px;background:var(--petrol);border-radius:2px}
+  .navitem .badge{margin-left:auto;font-size:10.5px;font-weight:700;background:var(--terra);color:#fff;border-radius:9px;padding:1px 6px}
+  .navitem.hot{color:var(--terra)}
+  .railfoot{margin-top:auto;border-top:1px solid var(--line);padding-top:10px}
+  .who{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:6px}
+  .who .av{width:24px;height:24px;border-radius:50%;background:var(--petrol);color:#fff;font-size:10px;font-weight:700;
+           display:flex;align-items:center;justify-content:center;flex:none}
+  .who b{display:block;font-size:12px;font-weight:600}
+  .who span{display:block;font-size:10.5px;color:var(--mut)}
+
+  .main{display:flex;flex-direction:column;min-width:0}
+  .top{height:52px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px;padding:0 18px;background:var(--panel)}
+  .crumbs{font-size:12.5px;color:var(--mut);display:flex;align-items:center;gap:6px}
+  .crumbs b{color:var(--ink);font-weight:600}
+  .search{margin-left:auto;display:flex;align-items:center;gap:7px;background:var(--paper);border:1px solid var(--line);
+          border-radius:6px;padding:5px 9px;width:230px;color:var(--mut);font-size:12.5px}
+  .search svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.7;flex:none}
+  .kbd{margin-left:auto;font-size:10.5px;border:1px solid var(--line);border-radius:4px;padding:1px 5px;color:var(--mut)}
+  .iconbtn{width:30px;height:30px;border:1px solid var(--line);background:var(--panel);border-radius:6px;
+           display:flex;align-items:center;justify-content:center;color:var(--sec);position:relative}
+  .iconbtn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.6}
+  .iconbtn i{position:absolute;top:-4px;right:-4px;background:var(--terra);color:#fff;font-size:9.5px;font-weight:700;
+             font-style:normal;border-radius:8px;padding:1px 4.5px}
+
+  .content{padding:16px 18px 24px;display:grid;grid-template-columns:minmax(0,1fr) 268px;gap:16px;align-items:start}
+  .head{display:flex;align-items:flex-end;gap:12px;margin-bottom:14px}
+  .head h1{margin:0;font-size:19px;font-weight:650;letter-spacing:-.015em}
+  .head p{margin:3px 0 0;color:var(--sec);font-size:12.5px}
+  .head .addr{font-size:11.5px;color:var(--mut)}
+  .head .spacer{flex:1}
+  .btn{height:30px;display:inline-flex;align-items:center;gap:6px;padding:0 11px;border-radius:6px;
+       border:1px solid var(--line);background:var(--panel);color:var(--ink);font-size:12.5px;font-weight:600}
+  .btn.primary{background:var(--petrol);border-color:var(--petrol);color:#fff}
+  .btn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.7}
+
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--line);border-radius:8px;
+         background:var(--panel);overflow:hidden;margin-bottom:16px}
+  .stat{padding:9px 12px;border-right:1px solid var(--line)}
+  .stat:last-child{border-right:0}
+  .stat span{display:block;font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mut)}
+  .stat b{display:block;font-size:18px;font-weight:650;margin-top:3px;letter-spacing:-.01em}
+  .stat em{font-style:normal;font-size:11.5px;color:var(--sec)}
+  .stat.warn b{color:var(--terra)}
+
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden;margin-bottom:14px}
+  .cardhead{display:flex;align-items:center;gap:10px;padding:10px 13px;border-bottom:1px solid var(--line)}
+  .cardhead h2,.cardhead h3{margin:0;font-size:13.5px;font-weight:650}
+  .cardhead a{margin-left:auto;font-size:12px;color:var(--petrol);text-decoration:none;font-weight:600}
+  .cardhead .n{font-size:10.5px;font-weight:700;color:var(--mut);background:var(--chip);border-radius:9px;padding:1px 6px}
+
+  .rows{list-style:none;margin:0;padding:0}
+  .rows li{display:flex;align-items:center;gap:11px;padding:9px 13px;border-bottom:1px solid var(--line)}
+  .rows li:last-child{border-bottom:0}
+  .rows .ic{width:26px;height:26px;border-radius:6px;background:var(--chip);display:flex;align-items:center;justify-content:center;flex:none}
+  .rows .ic svg{width:14px;height:14px;stroke:var(--sec);fill:none;stroke-width:1.7}
+  .rows .tx{min-width:0;flex:1}
+  .rows .tx b{display:block;font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .rows .tx span{display:block;font-size:11.5px;color:var(--mut)}
+  .rows .rt{font-size:11.5px;color:var(--sec);text-align:right;white-space:nowrap}
+  .chip{display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;
+        padding:2px 7px;border-radius:20px;border:1px solid var(--line);color:var(--sec);background:var(--chip)}
+  .chip.warn{color:var(--terra);border-color:color-mix(in srgb,var(--terra) 35%,transparent);background:color-mix(in srgb,var(--terra) 10%,transparent)}
+  .chip.ok{color:var(--ok);border-color:color-mix(in srgb,var(--ok) 35%,transparent);background:color-mix(in srgb,var(--ok) 10%,transparent)}
+  .chip.acc{color:var(--petrol);border-color:color-mix(in srgb,var(--petrol) 35%,transparent);background:color-mix(in srgb,var(--petrol) 9%,transparent)}
+
+  .aside .card{margin-bottom:12px}
+  .steps{list-style:none;margin:0;padding:6px 0}
+  .steps li{display:flex;gap:9px;padding:7px 13px;align-items:flex-start}
+  .steps .box{width:15px;height:15px;border:1.5px solid var(--line);border-radius:4px;flex:none;margin-top:1px}
+  .steps .box.on{background:var(--petrol);border-color:var(--petrol);position:relative}
+  .steps .box.on::after{content:"";position:absolute;left:4px;top:1px;width:4px;height:8px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(42deg)}
+  .steps b{display:block;font-size:12.5px;font-weight:600}
+  .steps b.done{text-decoration:line-through;color:var(--mut);font-weight:500}
+  .steps span{display:block;font-size:11px;color:var(--mut)}
+  .kv{list-style:none;margin:0;padding:8px 13px 11px}
+  .kv li{display:flex;font-size:12.5px;padding:4px 0;border-bottom:1px dashed var(--line)}
+  .kv li:last-child{border-bottom:0}
+  .kv span{color:var(--mut)}
+  .kv b{margin-left:auto;font-weight:600}
+  .meter{height:4px;background:var(--chip);border-radius:3px;margin:2px 13px 12px;overflow:hidden}
+  .meter i{display:block;height:100%;width:68%;background:var(--petrol);border-radius:3px}
+  .appt{padding:11px 13px}
+  .appt b{display:block;font-size:13px;font-weight:650}
+  .appt span{display:block;font-size:11.5px;color:var(--mut);margin-top:2px}
+  .appt .when{margin-top:9px;font-size:12.5px;font-weight:600;color:var(--petrol)}
+</style>
+</head>
+<body data-page-node-id="1CFj3e2Hp6dutvNtztW1w6">
+<div class="app" data-page-node-id="cjHIkLCm4JP0SwFTwkDRsa">
+
+  <!-- ============ RAIL ============ -->
+  <aside class="rail" data-page-node-id="Z3BMmwezyLShyaSys0uQRB">
+    <div class="brand" data-page-node-id="FSsOG950RR6xoanKsCZeUx">
+      <svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true" data-page-node-id="WkGGTYLCpmM6F3vN1H5v1H"><path d="M3 11.2 12 4l9 7.2" fill="none" stroke="#105258" stroke-width="1.8" stroke-linecap="round" data-page-node-id="q5eWkOsAJk2Hy23GT0mSX6"/><path d="M5.5 10.4V20h13v-9.6" fill="none" stroke="#105258" stroke-width="1.8" stroke-linejoin="round" data-page-node-id="5M6tLNNfS1zCjgMCMWbBm7"/></svg>
+      <div data-page-node-id="gzfaUxAhySxgWr1LL7IicZ"><b data-page-node-id="B7xOwhHDsaTvHDRMAFeqsR">einfachhausen</b><span data-page-node-id="qtFwK7UWMLzEwPhWt8EuLa">Hausakte</span></div>
+    </div>
+
+    <div class="navlabel" data-page-node-id="sInKinOEWgoCP8m4DmErV0">Bereiche</div>
+    <a class="navitem" aria-current="page" href="#" data-page-node-id="5T9454waPy19zKuK7c9HrK">
+      <svg viewBox="0 0 24 24" data-page-node-id="B9DCVUwRa1JI2k5K8ZhQb6"><path d="M3 11.2 12 4l9 7.2V20H3z" data-page-node-id="mMA36gpXfFFGutDYzYXBTE"/></svg>Übersicht</a>
+    <a class="navitem" href="#" data-page-node-id="po4OlTzBX984h5CMfrdzNk">
+      <svg viewBox="0 0 24 24" data-page-node-id="2OGcv76xUv4ewdRARQFeI7"><path d="M5 3h9l5 5v13H5z" data-page-node-id="1h4yKSHrMqNlNprSk3LjP8"/><path d="M14 3v5h5" data-page-node-id="GZxFDNLf7rAYMFvu4H7s6y"/></svg>Hausakte</a>
+    <a class="navitem" href="#" data-page-node-id="zJcpmYCxW0hKuFs9GGnSuC">
+      <svg viewBox="0 0 24 24" data-page-node-id="SqXz96CyKjAhfnYDYa0sPs"><path d="M9 5h10M9 12h10M9 19h10" data-page-node-id="VVbWecw6JP1vU2fO6PSqQB"/><path d="M4 5h.01M4 12h.01M4 19h.01" data-page-node-id="ovA2Bp8bwXRWDFpioy0rZ7"/></svg>Aufträge
+      <span class="badge" data-page-node-id="ajmilC10GLSBApBR3B5C4B">1</span></a>
+    <a class="navitem" href="#" data-page-node-id="XrfEfpqLRuxhlGrvcI6Yir">
+      <svg viewBox="0 0 24 24" data-page-node-id="gH8wzdsC8tFOtCrhXStiBe"><rect x="3" y="5" width="18" height="16" rx="2" data-page-node-id="DLhaL22YF8FFbzZDSO4PQm"/><path d="M3 10h18M8 3v4M16 3v4" data-page-node-id="pahw5ANhbvapckf688VMUC"/></svg>Termine</a>
+    <a class="navitem" href="#" data-page-node-id="BkohRHfRyUvjTcxUqtTifb">
+      <svg viewBox="0 0 24 24" data-page-node-id="Mt3IIw25VUyUux9IHGgID7"><path d="M6 3h12v18l-6-4-6 4z" data-page-node-id="OfE9MLJJfmcb9eL4kHDO9D"/></svg>Verträge &amp; Tarife
+      <span class="badge" data-page-node-id="bUFZ4Bo7pfyn8znnBQBgkh">2</span></a>
+    <a class="navitem" href="#" data-page-node-id="pAwIIdi3lLEH9ajUwCthSU">
+      <svg viewBox="0 0 24 24" data-page-node-id="Ohk4VxTxcFXSq9gHzeb2IB"><path d="M12 3v3M21 12h-3M12 21v-3M3 12h3" data-page-node-id="WupwS7sYOZnZ6CBOXVA7ON"/><circle cx="12" cy="12" r="4" data-page-node-id="WlhzxQBuWnwXPkE45SCAPV"/></svg>Handwerker</a>
+    <a class="navitem" href="#" data-page-node-id="mEbGTN89CEcE5ROTFBQi9F">
+      <svg viewBox="0 0 24 24" data-page-node-id="1eJGzLHUI4FantWunCtlLB"><path d="M4 5h16v11H8l-4 4z" data-page-node-id="TdnXmfqk0zyEkJaJKdg7CR"/></svg>Nachrichten</a>
+
+    <div class="navlabel" data-page-node-id="AcrnL2SMXKGU7KGCPvynlz">Haus</div>
+    <a class="navitem" href="#" data-page-node-id="larWjNv6DgTTE607y0svDo">
+      <svg viewBox="0 0 24 24" data-page-node-id="DfkxUuHuqxjpcRCJyXBqn5"><circle cx="12" cy="12" r="8" data-page-node-id="uh1Rpj6YOKKGnvkjhz4PJL"/><path d="M12 8v8M8 12h8" data-page-node-id="q9A94i3GyIlPDrFpHqiLsO"/></svg>Zählerstände</a>
+    <a class="navitem" href="#" data-page-node-id="qUmW3JLE01nBDWGuXJLdRb">
+      <svg viewBox="0 0 24 24" data-page-node-id="Pmt16BO1J7XOs45gyYdpyz"><path d="M12 3l8 4v6c0 5-3.5 7.5-8 8-4.5-.5-8-3-8-8V7z" data-page-node-id="TvHaqepIDIjwcZ3x7tRcg3"/></svg>Versicherung</a>
+    <a class="navitem hot" href="#" data-page-node-id="3Y7PuXzbrrQ2bySZpZFAh7">
+      <svg viewBox="0 0 24 24" data-page-node-id="mHgtNgMoqAt6IYAq8x13Q8"><path d="M12 3v6M12 15v.01" data-page-node-id="zeB8HSZamvPpR5HU6JE2jV"/><path d="M10.3 4.3 2.6 18a2 2 0 0 0 1.7 3h15.4a2 2 0 0 0 1.7-3L13.7 4.3a2 2 0 0 0-3.4 0z" data-page-node-id="iS48M4G1x60ZIA2BfGHzCd"/></svg>Hilfe im Notfall</a>
+
+    <div class="railfoot" data-page-node-id="RIlFlhrVf7ABbU66XaV3Dk">
+      <a class="navitem" href="#" data-page-node-id="IaOw6TvASH6d9gy3YRWtst">
+        <svg viewBox="0 0 24 24" data-page-node-id="1Jc1RhNj8WwsfOYh3Qg8za"><circle cx="12" cy="12" r="3" data-page-node-id="edGps5HAELRr0oqzq6he7T"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M18.4 5.6 17 7M7 17l-1.4 1.4" data-page-node-id="GjSPp9FuyCXyyCqNC1Kl8Y"/></svg>Einstellungen</a>
+      <div class="who" data-page-node-id="50hjSDfChsV3imjk76QFH4">
+        <span class="av" data-page-node-id="tb7KDQ2gjHmBkuCcas8ejW">OB</span>
+        <div data-page-node-id="B9AGezCbCCgLxlXl72qN2D"><b data-page-node-id="vtvdeYZEkQ72IbnWMYqbzA">Olivia Berger</b><span data-page-node-id="6Rs9oFscHPgd3hmhH4gwoN">Eigentümerin</span></div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <div class="main" data-page-node-id="h1AcHkC10d9gvg5bbmZJ6j">
+
+    <div class="top" data-page-node-id="ChHMwxH5rTw8NDP2LSJM5F">
+      <div class="crumbs" data-page-node-id="R0M1DgoqCBYiJ3LjpL6rk2">Hausakte <span data-page-node-id="UbtU6oEBYUJfZ95yg0xfuL">›</span> <b data-page-node-id="mi6IYb0w1UFxRX0aUxSX4H">Übersicht</b></div>
+      <div class="search" data-page-node-id="3f7GKD7Cg8z1D1jWkSztwr">
+        <svg viewBox="0 0 24 24" data-page-node-id="7CkWUSEcsLItHmL9xgC4Ed"><circle cx="11" cy="11" r="7" data-page-node-id="eDWBgxhyB94KIBm2gBIWTH"/><path d="m20 20-3.5-3.5" data-page-node-id="sZv1PzMo6SJJ1i8IHeiLhb"/></svg>
+        Suchen …<span class="kbd" data-page-node-id="P4Z0lsfIHCEnlAN0L3g2Cr">⌘K</span>
+      </div>
+      <span class="iconbtn" data-page-node-id="kWH91jrH53oSwlWH1rgVaB"><svg viewBox="0 0 24 24" data-page-node-id="1IFlWTUBiM2qiBA6ki4YXJ"><path d="M18 15V10a6 6 0 1 0-12 0v5l-2 3h16z" data-page-node-id="hpJdAYqyCXGNGFEbEOqBOZ"/><path d="M10 21h4" data-page-node-id="hBMMgrdWFtFzEXf3ZpMhsL"/></svg><i data-page-node-id="9M9nZLVqocsDbScGEOENRX">2</i></span>
+      <span class="iconbtn" data-page-node-id="wFeXlmxULGSECdmeu5CN4y"><svg viewBox="0 0 24 24" data-page-node-id="zbCuOiiQdfctOKnvYiAU5n"><path d="M4 7h16M4 12h16M4 17h16" data-page-node-id="8CWcZDeAa25HwtSLGKHKRp"/></svg></span>
+    </div>
+
+    <div class="content" data-page-node-id="a8oY0AHRaVWPB7mymMQD3H">
+      <!-- linke Spalte -->
+      <div data-page-node-id="T5WhHBR0iAwEE7tbsKGk69">
+        <div class="head" data-page-node-id="xWCWAJdkZufu0Ll3sRwNkK">
+          <div data-page-node-id="HWAPQjSsDniRh2owGAPawY">
+            <h1 data-page-node-id="GQEJ9M8YnE6A2W18EUhJKm">Lindenweg 12</h1>
+            <p data-page-node-id="2WJdKmtBOUBdoJYRu2DzWg">34117 Kassel · Baujahr 1978 · 142 m² <span class="addr" data-page-node-id="OF5Xj63xJ9M3refefYeFRB">· Olivia &amp; Malte Berger</span></p>
+          </div>
+          <span class="spacer" data-page-node-id="lSVIaf9hGIpCYiGuUeXHAQ"></span>
+          <button class="btn" data-page-node-id="rcxNpU7MOjfhHJLcZTUfUg"><svg viewBox="0 0 24 24" data-page-node-id="zAgWezelCNVvmBujuZ1VgO"><path d="M12 5v14M5 12h14" data-page-node-id="4E2snN5LZuPPl5XH1UUjVn"/></svg>Dokument</button>
+          <button class="btn primary" data-page-node-id="WOLSzCZ7OMxQNS03H99Ms9"><svg viewBox="0 0 24 24" data-page-node-id="IfWNSvZV5CVMHrRTwzkIFI"><path d="M12 5v14M5 12h14" data-page-node-id="oBpBi4giihYUhF695Z7zlQ"/></svg>Auftrag</button>
+        </div>
+
+        <div class="stats" data-page-node-id="HmL2MmZzhfOZley0JJw8bN">
+          <div class="stat warn" data-page-node-id="xbarizPOoBQ3NfMtDwAL9D"><span data-page-node-id="YfG0S7YyNonbdOedgYRszE">Wartet auf dich</span><b data-page-node-id="M4LfSVttDzc0xTQMyjHyw9">2</b><em data-page-node-id="YeYDE1y0ecamJMYGx3Dk5h">Entscheidungen</em></div>
+          <div class="stat" data-page-node-id="rLENLH2Pf5O38BWp5ROgfJ"><span data-page-node-id="7ljzWYy3slQIs9cH12x1XG">Termine</span><b data-page-node-id="RzMmpjxUtwS4150smBFN9j">1</b><em data-page-node-id="r0IP2CD2mI2otNYWdnJ11N">Do, 18.09. · 09:30</em></div>
+          <div class="stat" data-page-node-id="LJ8d80jKKLVRCwqwHxSv5Q"><span data-page-node-id="JqBYsXDf1ADU2TFpUkhcjr">Dokumente</span><b data-page-node-id="uA5e8KPBBf32ecj0WYmJTC">14</b><em data-page-node-id="v7lFNnTVWuNAFa9RGZDHwm">4 neu diese Woche</em></div>
+          <div class="stat" data-page-node-id="BlQ5fnWsjLNPa4BiCxttHW"><span data-page-node-id="CGut6ujVpYTPkgzl7qcwZd">Aufträge</span><b data-page-node-id="VeEltC2rP5vjNw0ALH4SyP">1</b><em data-page-node-id="H71NoPo7D8AbEi5zBmFXEY">in Arbeit</em></div>
+        </div>
+
+        <div class="card" data-page-node-id="SVShoue1oGcaMmC4qo1gW5">
+          <div class="cardhead" data-page-node-id="V0krR68XnNJTreIjRvr935"><h2 data-page-node-id="ENC93VlCtR1hdxEjxxAKQg">Wartet auf dich</h2><span class="n" data-page-node-id="99NHHgd2wasuYxuTafg2l1">2</span><a href="#" data-page-node-id="3fl6nmbBRiOegsoJ8ztbKj">Alle ansehen</a></div>
+          <ul class="rows" data-page-node-id="xRxZOvIdddD1Wt05B7kE68">
+            <li data-page-node-id="0cmb616rPSAHp0EW2k0OTh">
+              <span class="ic" data-page-node-id="BnE514VHLGRvPpN4AWH8fi"><svg viewBox="0 0 24 24" data-page-node-id="5VqfC4CdjUeuhGugoB5TF6"><path d="M12 3v6M12 15v.01" data-page-node-id="U1BUpKtpYJCcZ9kJVK6o3B"/><path d="M10.3 4.3 2.6 18a2 2 0 0 0 1.7 3h15.4a2 2 0 0 0 1.7-3L13.7 4.3a2 2 0 0 0-3.4 0z" data-page-node-id="HOQ55xHHmqVLnTChA6zVKi"/></svg></span>
+              <span class="tx" data-page-node-id="aAK3ipsyysHXg2Q4TMlPcG"><b data-page-node-id="1IdApg9nf3RtvlU9983b0l">Angebot Heizungspumpe freigeben</b><span data-page-node-id="HxUQd7LykSsu2LFP7uGwZF">Kessler Haustechnik · 1.240 €</span></span>
+              <span class="chip warn" data-page-node-id="HLbBJyF10AIdbWOSY7cQRp">Frist 19.09.</span>
+            </li>
+            <li data-page-node-id="xhJXo57EP4dWkBSaMzYJkD">
+              <span class="ic" data-page-node-id="VlDj0cmWVNcbhWicSoLtXi"><svg viewBox="0 0 24 24" data-page-node-id="28EE5bLsieqVlcM9gPFTe1"><rect x="3" y="5" width="18" height="16" rx="2" data-page-node-id="OTn5zbad4ZublK227P53nW"/><path d="M3 10h18M8 3v4M16 3v4" data-page-node-id="Dul3VI1KJBxeLJpGYFDhEB"/></svg></span>
+              <span class="tx" data-page-node-id="SRMYxgwD5xDEQDaSCgQPZp"><b data-page-node-id="2Jrve3ahOezTx3NJqz0yi4">Termin mit Schornsteinfeger bestätigen</b><span data-page-node-id="Fbfi6346RV2lDPzFkT266v">Donnerstag, 18.09. um 09:30</span></span>
+              <span class="chip acc" data-page-node-id="7DvmKCCD2s7i6PPy6zMxpp">Bestätigen</span>
+            </li>
+          </ul>
+        </div>
+
+        <div class="card" data-page-node-id="lpRcPiBVf5olXwMwWeR7vL">
+          <div class="cardhead" data-page-node-id="OGAHGM7gRJWWH94RAQuzTF"><h2 data-page-node-id="GK063ODmxzP6JkUxK0rWNO">Hausakte</h2><a href="#" data-page-node-id="iCXDwbeW0701zOEhd3KtgZ">Öffnen</a></div>
+          <ul class="rows" data-page-node-id="XEbDDJ2IzKoAUobkYugT9m">
+            <li data-page-node-id="XH9sXex0jgDq8Ds9GRTHCc">
+              <span class="ic" data-page-node-id="vNGpGiu0CfxhHNegfkZ254"><svg viewBox="0 0 24 24" data-page-node-id="nbSKifohb1gCTkTlCh2daY"><path d="M5 3h9l5 5v13H5z" data-page-node-id="FbCGddaNG1moqkUUQjgwtR"/><path d="M14 3v5h5" data-page-node-id="HHZEROZdeV1lEYaUK51I0Z"/></svg></span>
+              <span class="tx" data-page-node-id="l3Itm7FXE4wBcGe6EnjGGe"><b data-page-node-id="2rxgIDJf7DjveoC8OOHDYq">Rechnung Heizungspumpe</b><span data-page-node-id="ou5g3EFKEpmqMx6x37AyQ3">Kessler Haustechnik · PDF, 214 KB</span></span>
+              <span class="rt" data-page-node-id="2lZrC6UchlusPIGUutbsof">14.09.</span>
+            </li>
+            <li data-page-node-id="2wOtEK1d1pPyIo5Aeojpte">
+              <span class="ic" data-page-node-id="XTwQHxwf7f2MvIVscn7D06"><svg viewBox="0 0 24 24" data-page-node-id="6NvT1hobG4Yy2fAyfVKFMj"><path d="M4 4h16v16H4z" data-page-node-id="B5C5SECxEDhWuHjXZZAerx"/><path d="M4 10h16M10 10v10" data-page-node-id="JMGVEih3yGtKQUdDG2ROxG"/></svg></span>
+              <span class="tx" data-page-node-id="eduf6X6MLkyhyAGAMY1rYk"><b data-page-node-id="lgPNFtKtXniQMNGLpzzCuX">Grundriss Erdgeschoss</b><span data-page-node-id="NT0DujGCMCIKBhvS4y8NtE">Bestandsplan · PDF, 1,8 MB</span></span>
+              <span class="rt" data-page-node-id="lnWdg5dg4QOC8AwEgWj60r">11.09.</span>
+            </li>
+            <li data-page-node-id="z2RUS9HcBWIX8DE5dlOxlG">
+              <span class="ic" data-page-node-id="P7YP2OEcYqXe9CP2rgm1Bb"><svg viewBox="0 0 24 24" data-page-node-id="MaXxSArjPhLrzLvDz2wDVA"><path d="M12 3l8 4v6c0 5-3.5 7.5-8 8-4.5-.5-8-3-8-8V7z" data-page-node-id="qRJnVsw74ECGeouYCQ3WMA"/></svg></span>
+              <span class="tx" data-page-node-id="umrvAoEryS3u7sRJF4HM5D"><b data-page-node-id="9VJORw4FSX1NltSDPiFXxo">Wohngebäudeversicherung 2026</b><span data-page-node-id="z5CnH3xLqJfb5353BerrzE">Police · läuft bis 31.12.2026</span></span>
+              <span class="rt" data-page-node-id="jp6NiDG6EidxfNiE4VyVZb">02.09.</span>
+            </li>
+            <li data-page-node-id="5sbRiKfhRvC0X2c9Fromsd">
+              <span class="ic" data-page-node-id="MfR2J5J4v4YjldLI48o2Og"><svg viewBox="0 0 24 24" data-page-node-id="qOHEG9wK51YaJKKzDIROLU"><path d="M6 3h12v18l-6-4-6 4z" data-page-node-id="E22vL63VHj28BEsfb1XUpC"/></svg></span>
+              <span class="tx" data-page-node-id="eC8DHv5BAsxmHB5vonONdO"><b data-page-node-id="1G29uLwEA3DbYDxCGktbyZ">Wartungsvertrag Heizung</b><span data-page-node-id="tQ05FOG0qs5u4kq3UTnX86">2 Termine pro Jahr · bis 2028</span></span>
+              <span class="rt" data-page-node-id="biBQTvD3osn963Vfw8JeYq">28.08.</span>
+            </li>
+          </ul>
+        </div>
+
+        <div class="card" data-page-node-id="eMQp0Hwxa4bwH0a5TSEFzU">
+          <div class="cardhead" data-page-node-id="bzwYQObeiBZkPU688qiNz7"><h2 data-page-node-id="bxuuigEGPnFtyvXAXrj3w9">Zuletzt passiert</h2></div>
+          <ul class="rows" data-page-node-id="ml0jORFe6ABvG3gKx6S50K">
+            <li data-page-node-id="Wb6ddHhZjThnExaBv4OsGK">
+              <span class="ic" data-page-node-id="iDW5YeCYSBHyicQETELuZm"><svg viewBox="0 0 24 24" data-page-node-id="RSJBPya9on4pPVCQFAHBcG"><path d="M20 6 9 17l-5-5" data-page-node-id="quzx6rEFwRzoy0646Zz9Ai"/></svg></span>
+              <span class="tx" data-page-node-id="CHH9yPCWGM1CRwV5lLC936"><b data-page-node-id="bDUeEWoVscOmTc2DtHIz1D">Auftrag angenommen</b><span data-page-node-id="60JIkIpPiUHLHwO4R4qNa6">Kessler Haustechnik hat den Pumpentausch übernommen</span></span>
+              <span class="rt" data-page-node-id="cHEg3H9HAkxvDs7amGIgiv">15.09. · 18:40</span>
+            </li>
+            <li data-page-node-id="2UEWFaXzxy5tNrEZzgjIvY">
+              <span class="ic" data-page-node-id="hoGWBmRb3cy2lCEX59ESzX"><svg viewBox="0 0 24 24" data-page-node-id="FhAxOwFCzxKsb1XLDdbGEQ"><path d="M4 5h16v11H8l-4 4z" data-page-node-id="QDODmxV7hKktnFZWU2v3B7"/></svg></span>
+              <span class="tx" data-page-node-id="ZZaF6p5qqGDpmzJrWHq3D3"><b data-page-node-id="RFNifwRvp6ACFbH9BqLd0d">Nachricht von Kessler Haustechnik</b><span data-page-node-id="a53I66n6eqgYP3JkAKoupe">„Wir kommen Donnerstag zwischen 8 und 10."</span></span>
+              <span class="rt" data-page-node-id="IPhhHS1dDhomkwrDCO7kBZ">15.09. · 09:12</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- rechte Spalte -->
+      <aside class="aside" data-page-node-id="zPO4bhqEaoDJMFr3YBTavJ">
+        <div class="card" data-page-node-id="1AB0VzyQw9KNw4uBbvjRpQ">
+          <div class="cardhead" data-page-node-id="IbXl13uQFAVDmAEP3HTK93"><h3 data-page-node-id="OhePWw5sKu58qDD0ECMluk">Nächste Schritte</h3><span class="n" data-page-node-id="fQY7Z1Dr5lTuwcguCCUjor">1/3</span></div>
+          <ul class="steps" data-page-node-id="TkIL6TcEQJl6Vz93QwUhT8">
+            <li data-page-node-id="5AeJ6oHHjvkpPLPlBkJwkx"><span class="box on" data-page-node-id="tkLsoqzI1OwtsK4PXxnBfa"></span><span data-page-node-id="zMuLXPLoJLfDJmGkReEnEW"><b class="done" data-page-node-id="ZEWHSgrWLaCstySArxZ0yf">Zählerstände eingetragen</b><span data-page-node-id="4PBWSIFncdgmTCshihDKMh">12.09. erledigt</span></span></li>
+            <li data-page-node-id="N65jPBobtEZ1ISJ20yGNiz"><span class="box" data-page-node-id="Jo4xTptbDcIkhZf3ylJW1o"></span><span data-page-node-id="McnO4uoGhdrJu6coRuT13W"><b data-page-node-id="JpLgWewHyulwaquNcr7Dns">Wartungsvertrag prüfen</b><span data-page-node-id="cjnmCmmFrFxo57FHDxTGik">läuft 2028 aus</span></span></li>
+            <li data-page-node-id="DIgAVfExIC5IDbfZ2cA07t"><span class="box" data-page-node-id="8MZzBtQj6mHV4xRuISi2Xc"></span><span data-page-node-id="fJeiO0bxKANXjkH342Ma3K"><b data-page-node-id="lVQRBM7BHk6DAH7F6aoFgG">Versicherung aktualisieren</b><span data-page-node-id="kGScL3sZQhnS5htppcYN4W">Wert 2019 zuletzt angepasst</span></span></li>
+          </ul>
+        </div>
+
+        <div class="card" data-page-node-id="YwoWJocNTLjMSUHPCJbHOm">
+          <div class="cardhead" data-page-node-id="ZS8nhzoxBevHHqSbRI5vl6"><h3 data-page-node-id="6xOL6chXnu1Lv2twkQlJCD">Vollständigkeit</h3><b style="margin-left:auto;font-size:12.5px" data-page-node-id="hsFWkxw9gAbTqCvvFnJ0PU">68 %</b></div>
+          <div class="meter" data-page-node-id="rZ1eg2mEkIECiuUe0PYze5"><i data-page-node-id="R5wtrt0E4a7LUswMDrItDW"></i></div>
+          <ul class="kv" data-page-node-id="WQpz2d4t8CnWsEXqMTtHFD">
+            <li data-page-node-id="W7aJ66rCqpDgMl9TUwDRfJ"><span data-page-node-id="ktdlEnhGTGknnKJDC507HA">Gebäude &amp; Grundstück</span><b data-page-node-id="jCBOrX7B25ZsrYaaCb6cQD">vollständig</b></li>
+            <li data-page-node-id="EC1jV0pZg7Ej4GrvcoGVr4"><span data-page-node-id="gxLArLE2CIJqeRJOEQQ32s">Technik</span><b data-page-node-id="gkLGQICxr5wqyTMQe2nGtr">4 von 6</b></li>
+            <li data-page-node-id="TmTu6HqYIFOZR239CNzDeK"><span data-page-node-id="GIhq5TPSF4pP4eJv2XdPDJ">Verträge</span><b data-page-node-id="TBJCQuq42WkfUqCstk1YtZ">3 von 5</b></li>
+            <li data-page-node-id="I9FDroApIFDwIGzUQIMaTn"><span data-page-node-id="VE2XwNFkfFvyBo2CN0kytQ">Rechnungen</span><b data-page-node-id="PdIRckBwFBOHb6lmeVbRhT">seit 2024</b></li>
+          </ul>
+        </div>
+
+        <div class="card" data-page-node-id="stwMeuTMtMJCS9l3SNS70z">
+          <div class="cardhead" data-page-node-id="4NCGW5kjmWVNcJpDqU7fmE"><h3 data-page-node-id="rOjTF1CmH8tW7fpvDXan3H">Nächster Termin</h3></div>
+          <div class="appt" data-page-node-id="O3nklOGZ36IQFK7OaaW8yF">
+            <b data-page-node-id="oVY5kSOegrCZdPXWMwYU21">Schornsteinfeger</b>
+            <span data-page-node-id="GYYSjITrTFf38IJM8BvsUB">Bezirksschornsteinfeger Weber<br data-page-node-id="4MVhApGp17YmV4M1CdNbyp">Lindenweg 12 · Zugang Keller</span>
+            <div class="when" data-page-node-id="yUjq255HpRVVJYMqApjtBR">Do, 18.09. · 09:30</div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</div>
+</body>
+</html>

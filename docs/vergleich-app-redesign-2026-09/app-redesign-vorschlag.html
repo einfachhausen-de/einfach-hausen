@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="de" data-page-node-id="1XSAGM0Yddam5TPTceXaGm">
+<head data-page-node-id="HtFTfv1CAGv02Z0ywRgfdW">
+<meta charset="utf-8" data-page-node-id="H45ycH8FgyZmhtUhK3dCpU">
+<meta name="viewport" content="width=device-width, initial-scale=1" data-page-node-id="gAra6zvRjg7VdxOv0mNndD">
+<title>einfachhausen — /app neu gebaut (Vorschlag)</title>
+<style>
+  :root{
+    --ink:#10222a; --sec:#4b5b60; --mut:#8b979b; --line:#e4e2dc; --paper:#faf8f4;
+    --panel:#ffffff; --petrol:#105258; --terra:#a84d29; --ok:#236344; --sand:#ecdfc9;
+    --rail:#f2efe9; --chip:#f0ede7;
+  }
+  html[data-theme="dark"]{
+    --ink:#e8eef0; --sec:#9aa8ad; --mut:#718086; --line:#28333a; --paper:#0e1418;
+    --panel:#141c21; --petrol:#4fb3ad; --terra:#e08a5e; --ok:#5cc08a; --sand:#2a2318;
+    --rail:#111a1f; --chip:#1d272d;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{background:var(--paper);color:var(--ink);
+       font:13.5px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif;
+       -webkit-font-smoothing:antialiased}
+
+  /* ---------- Kopf der Seite (Vergleich) ---------- */
+  .intro{padding:22px 24px 6px;border-bottom:1px solid var(--line)}
+  .intro h1{font-size:18px;margin:0 0 4px;font-weight:650;letter-spacing:-.01em}
+  .intro p{margin:0 0 12px;color:var(--sec);font-size:13px;max-width:820px}
+  .toggle{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden;margin-bottom:16px}
+  .toggle button{background:var(--panel);color:var(--sec);border:0;padding:6px 12px;font-size:12px;cursor:pointer;font-weight:600}
+  .toggle button[aria-pressed="true"]{background:var(--petrol);color:#fff}
+  .before{padding:0 24px 24px}
+  .before img{width:100%;max-width:900px;border:1px solid var(--line);border-radius:8px;display:block}
+  .before figcaption{color:var(--mut);font-size:12px;margin-top:6px}
+
+  /* ---------- Die neue App ---------- */
+  .app{display:grid;grid-template-columns:216px minmax(0,1fr);min-height:640px;border-top:1px solid var(--line)}
+
+  /* Rail */
+  .rail{background:var(--rail);border-right:1px solid var(--line);padding:12px 10px;display:flex;flex-direction:column;gap:2px}
+  .brand{display:flex;align-items:center;gap:8px;padding:6px 8px 14px}
+  .brand b{font-size:13px;font-weight:700;letter-spacing:-.01em}
+  .brand span{font-size:10px;color:var(--mut);display:block;font-weight:500}
+  .navlabel{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);padding:12px 8px 5px}
+  .navitem{display:flex;align-items:center;gap:9px;padding:7px 8px;border-radius:6px;color:var(--sec);
+           font-size:13px;font-weight:550;text-decoration:none;position:relative}
+  .navitem svg{width:15px;height:15px;flex:none;stroke:currentColor;fill:none;stroke-width:1.6}
+  .navitem[aria-current="page"]{background:var(--panel);color:var(--ink);font-weight:650;box-shadow:0 1px 0 var(--line)}
+  .navitem[aria-current="page"]::before{content:"";position:absolute;left:-10px;top:6px;bottom:6px;width:2px;background:var(--petrol);border-radius:2px}
+  .navitem .badge{margin-left:auto;font-size:10.5px;font-weight:700;background:var(--terra);color:#fff;border-radius:9px;padding:1px 6px}
+  .railfoot{margin-top:auto;border-top:1px solid var(--line);padding-top:10px}
+  .who{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:6px}
+  .who .av{width:24px;height:24px;border-radius:50%;background:var(--petrol);color:#fff;font-size:10px;font-weight:700;
+           display:flex;align-items:center;justify-content:center;flex:none}
+  .who div{min-width:0}
+  .who b{display:block;font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .who span{display:block;font-size:10.5px;color:var(--mut)}
+
+  /* Hauptbereich */
+  .main{display:flex;flex-direction:column;min-width:0}
+  .top{height:52px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px;padding:0 18px;background:var(--panel)}
+  .crumbs{font-size:12.5px;color:var(--mut);display:flex;align-items:center;gap:6px}
+  .crumbs b{color:var(--ink);font-weight:600}
+  .search{margin-left:auto;display:flex;align-items:center;gap:7px;background:var(--paper);border:1px solid var(--line);
+          border-radius:6px;padding:5px 9px;width:230px;color:var(--mut);font-size:12.5px}
+  .search svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.7;flex:none}
+  .kbd{margin-left:auto;font-size:10.5px;border:1px solid var(--line);border-radius:4px;padding:1px 5px;color:var(--mut)}
+  .iconbtn{width:30px;height:30px;border:1px solid var(--line);background:var(--panel);border-radius:6px;
+           display:flex;align-items:center;justify-content:center;color:var(--sec);position:relative;cursor:pointer}
+  .iconbtn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.6}
+  .iconbtn i{position:absolute;top:-4px;right:-4px;background:var(--terra);color:#fff;font-size:9.5px;font-weight:700;
+             font-style:normal;border-radius:8px;padding:1px 4.5px}
+
+  .content{padding:16px 18px 24px;display:grid;grid-template-columns:minmax(0,1fr) 268px;gap:16px;align-items:start}
+  .head{display:flex;align-items:flex-end;gap:12px;margin-bottom:14px}
+  .head h2{margin:0;font-size:19px;font-weight:650;letter-spacing:-.015em}
+  .head p{margin:3px 0 0;color:var(--sec);font-size:12.5px}
+  .head .addr{font-size:11.5px;color:var(--mut)}
+  .head .spacer{flex:1}
+  .btn{height:30px;display:inline-flex;align-items:center;gap:6px;padding:0 11px;border-radius:6px;
+       border:1px solid var(--line);background:var(--panel);color:var(--ink);font-size:12.5px;font-weight:600;cursor:pointer}
+  .btn.primary{background:var(--petrol);border-color:var(--petrol);color:#fff}
+  .btn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.7}
+
+  /* Kennzahlenleiste */
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--line);border-radius:8px;
+         background:var(--panel);overflow:hidden;margin-bottom:16px}
+  .stat{padding:9px 12px;border-right:1px solid var(--line);text-decoration:none;color:inherit}
+  .stat:last-child{border-right:0}
+  .stat span{display:block;font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mut)}
+  .stat b{display:block;font-size:18px;font-weight:650;margin-top:3px;letter-spacing:-.01em}
+  .stat em{font-style:normal;font-size:11.5px;color:var(--sec)}
+  .stat.warn b{color:var(--terra)}
+
+  /* Karten */
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden;margin-bottom:14px}
+  .cardhead{display:flex;align-items:center;gap:10px;padding:10px 13px;border-bottom:1px solid var(--line)}
+  .cardhead h3{margin:0;font-size:13.5px;font-weight:650}
+  .cardhead a{margin-left:auto;font-size:12px;color:var(--petrol);text-decoration:none;font-weight:600}
+
+  /* Zeilenliste */
+  .rows{list-style:none;margin:0;padding:0}
+  .rows li{display:flex;align-items:center;gap:11px;padding:9px 13px;border-bottom:1px solid var(--line)}
+  .rows li:last-child{border-bottom:0}
+  .rows li:hover{background:var(--paper)}
+  .rows .ic{width:26px;height:26px;border-radius:6px;background:var(--chip);display:flex;align-items:center;justify-content:center;flex:none}
+  .rows .ic svg{width:14px;height:14px;stroke:var(--sec);fill:none;stroke-width:1.7}
+  .rows .tx{min-width:0;flex:1}
+  .rows .tx b{display:block;font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .rows .tx span{display:block;font-size:11.5px;color:var(--mut)}
+  .rows .rt{font-size:11.5px;color:var(--sec);text-align:right;white-space:nowrap}
+  .chip{display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;
+        padding:2px 7px;border-radius:20px;border:1px solid var(--line);color:var(--sec);background:var(--chip)}
+  .chip.warn{color:var(--terra);border-color:color-mix(in srgb,var(--terra) 35%,transparent);background:color-mix(in srgb,var(--terra) 10%,transparent)}
+  .chip.ok{color:var(--ok);border-color:color-mix(in srgb,var(--ok) 35%,transparent);background:color-mix(in srgb,var(--ok) 10%,transparent)}
+  .chip.acc{color:var(--petrol);border-color:color-mix(in srgb,var(--petrol) 35%,transparent);background:color-mix(in srgb,var(--petrol) 9%,transparent)}
+
+  /* Rechte Spalte */
+  .aside .card{margin-bottom:12px}
+  .steps{list-style:none;margin:0;padding:6px 0}
+  .steps li{display:flex;gap:9px;padding:8px 13px;align-items:flex-start}
+  .steps .box{width:15px;height:15px;border:1.5px solid var(--line);border-radius:4px;flex:none;margin-top:1px}
+  .steps .box.on{background:var(--petrol);border-color:var(--petrol)}
+  .steps b{font-size:12.5px;font-weight:600;display:block}
+  .steps span{font-size:11.5px;color:var(--mut)}
+  .kv{display:grid;grid-template-columns:1fr auto;gap:4px 10px;padding:10px 13px;font-size:12.5px}
+  .kv dt{color:var(--sec)} .kv dd{margin:0;text-align:right;font-weight:600}
+  .kv dd.miss{color:var(--terra);font-weight:600}
+  .hint{font-size:11.5px;color:var(--mut);padding:0 13px 11px;margin:0}
+  .legend{padding:0 24px 40px;color:var(--mut);font-size:12px}
+  .legend b{color:var(--sec)}
+  @media (max-width:1100px){ .content{grid-template-columns:minmax(0,1fr)} .aside{display:none} }
+  @media (max-width:760px){ .app{grid-template-columns:1fr} .rail{display:none} }
+</style>
+</head>
+<body data-page-node-id="uSBNytitxyXYsntEgg7Yhf">
+
+<div class="intro" data-page-node-id="HUbcPhOHsq6F62pcfUN7xt">
+  <h1 data-page-node-id="M44bvI5Tp0C50f3kfbNID1">/app — neu gebaut, nicht umgefärbt</h1>
+  <p data-page-node-id="7eaDGjLkRzhvlKiHcmYMN2">Gleiche Seite, gleiche Inhalte, gleiche Marke. Geändert ist der <b data-page-node-id="yr4Mjj0ykOw1K7pqRjCYdC">Aufbau</b>: dichte Zeilen statt
+     luftiger Karten, eine Kennzahlenleiste statt vier Riesenkacheln, Seitenleiste als Werkzeug-Rail,
+     Statusfarben nur für Status. Mit Beispieldaten — der Demo-Zugang ist leer, ein echter Haushalt ist es nicht.</p>
+  <div class="toggle" role="group" aria-label="Darstellung" data-page-node-id="8y0j6CMTRyFkA4bFA462wN">
+    <button id="bHell" aria-pressed="true" data-page-node-id="yBkoy00TBeQeGawmOXwuV5">Hell</button>
+    <button id="bDunkel" aria-pressed="false" data-page-node-id="waScarl3VHQGhP6ofwPDzt">Dunkel</button>
+  </div>
+</div>
+
+<figure class="before" data-page-node-id="0yuzAdJulu8wA0qgUIJvYk">
+  <img src="app-ist-zustand/owner_app-desktop.png" alt="aktueller Stand" data-page-node-id="8LXYxB70iXZ9IfjBQ6AuTh">
+  <figcaption data-page-node-id="AEdCYHf057dcf18hHehpwp">So sieht /app heute aus — oben groß, unten drei Nullen und „Nicht erfasst“.</figcaption>
+</figure>
+
+<div class="app" data-page-node-id="i0AoKq3EwNKQNwfvdtVQZx">
+  <aside class="rail" data-page-node-id="b957LDwhjabGyrqigIADyS">
+    <div class="brand" data-page-node-id="17wW3R7Aup0ks2CZKglfm0">
+      <svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true" data-page-node-id="HgHiHq8ZydLAa2Y0JjPGQX"><path d="M3 10.4 11 3.6l8 6.8V19a1 1 0 0 1-1 1h-4.6v-5.2H8.6V20H4a1 1 0 0 1-1-1z" fill="none" stroke="#105258" stroke-width="1.7" stroke-linejoin="round" data-page-node-id="Sk0X6n85GrgvGD9vws6K3b"/></svg>
+      <div data-page-node-id="8bEw7tlbj4QTyAWO4uT2Zf"><b data-page-node-id="tAOYmicpnWs4zU4C0zyHiW">einfachhausen</b><span data-page-node-id="dI5C5KecEIkQUhKpIgrYMT">Digitale Hausakte</span></div>
+    </div>
+
+    <div class="navlabel" data-page-node-id="cjlY6e177WIFSBPHYRoXs1">Bereiche</div>
+    <a class="navitem" href="#" aria-current="page" data-page-node-id="ZJSLgEfNIldQnDE6X3lUIW">
+      <svg viewBox="0 0 24 24" data-page-node-id="a7P016CMFkQaX0bGt8C2af"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z" data-page-node-id="kxrHJBdNxVUt5U6OSKMkGF"/></svg>Start</a>
+    <a class="navitem" href="#" data-page-node-id="uUe9jAY9iLfo6qxGAd7mCK">
+      <svg viewBox="0 0 24 24" data-page-node-id="JWO2f63HeAUrTFFXpFx1R6"><path d="M4 5h16v14H4zM4 9h16M9 9v10" data-page-node-id="IgCgiCpEkmNIWVG9pNBsa8"/></svg>Hausakte</a>
+    <a class="navitem" href="#" data-page-node-id="cqV9WnkL5Cm90DaHKbEzoF">
+      <svg viewBox="0 0 24 24" data-page-node-id="M8htYoFn9R6vojFHe61MSS"><path d="M7 3h10v18H7zM10 8h4M10 12h4M10 16h2" data-page-node-id="g2x6kXAhFtqv2tHCZV48Cj"/></svg>Verträge &amp; Tarife<span class="badge" data-page-node-id="N6YCM52mdCQkkdammdT976">2</span></a>
+    <a class="navitem" href="#" data-page-node-id="3g5VwjppWD7cCTiUnetcB9">
+      <svg viewBox="0 0 24 24" data-page-node-id="wnHM4Ynw3ARmMNzCeUuA4b"><path d="M4 6h16v12H4zM8 6V4h8v2M8 11h8" data-page-node-id="Wm4lAXbhYrSQliWmPolMYX"/></svg>Aufträge</a>
+    <a class="navitem" href="#" data-page-node-id="kBFLdz3nMROwoRIqzRPLMY">
+      <svg viewBox="0 0 24 24" data-page-node-id="N67bPWUeXhll3KMJe6F3QD"><circle cx="9" cy="8" r="3.2" data-page-node-id="L6SjmZImBBfUIuh6AtuG6h"/><path d="M3.5 19c.6-3 2.9-4.6 5.5-4.6S14 16 14.6 19M17 9.5h4M19 7.5v4" data-page-node-id="2vkEGCj2oPdKBAA9cBBHKM"/></svg>Kontakte</a>
+    <a class="navitem" href="#" data-page-node-id="WxrvTIDsroqkfpMX6SzBXH">
+      <svg viewBox="0 0 24 24" data-page-node-id="ehrDMGYgP9rAxCk6bjZyBL"><rect x="3.5" y="5" width="17" height="15" rx="2" data-page-node-id="74BIY8wCULMiEp9yxOgmFx"/><path d="M3.5 10h17M8 3v4M16 3v4" data-page-node-id="FRfinRNvcPEYWmYFsmf9jZ"/></svg>Termine</a>
+
+    <div class="navlabel" data-page-node-id="1XZ0dNErKs45sPsMidfUDD">Zuhause</div>
+    <a class="navitem" href="#" data-page-node-id="t8WngFMs5j6vbWGAbrKeF7">
+      <svg viewBox="0 0 24 24" data-page-node-id="kEQQzBOLE7EcHdlZ7p2LPt"><path d="M4 4h11l5 5v11H4zM15 4v5h5" data-page-node-id="rVfBmczRiHhHBUE2KBeslT"/></svg>Dokumente</a>
+    <a class="navitem" href="#" data-page-node-id="vn6CCs8W4bzPO1zook02uM">
+      <svg viewBox="0 0 24 24" data-page-node-id="RUSJbUEcMwvyyM1MdTQdm0"><path d="M12 3v18M5 8h14M5 16h14" data-page-node-id="FsfKDv7zazcN4VOFogOJ56"/></svg>Jahresplan</a>
+    <a class="navitem" href="#" data-page-node-id="z1nFpHJ122grBxAnOB6y9l">
+      <svg viewBox="0 0 24 24" data-page-node-id="8TBglqppKu3xQXZhPJD793"><circle cx="12" cy="12" r="8.5" data-page-node-id="rgJfUGuMKEC9sspHni4sju"/><path d="M12 8v4.5l3 2" data-page-node-id="SaIr4kWxarzzxQ8zecRuDx"/></svg>Beratung</a>
+
+    <div class="railfoot" data-page-node-id="KOTSZhyuxfJOhfvbdD4Jgt">
+      <a class="navitem" href="#" style="color:var(--terra)" data-page-node-id="nckCHQ0vZD5ugTPGd578n6">
+        <svg viewBox="0 0 24 24" data-page-node-id="1jDc6cGuRcnELFvjrhrPDj"><path d="M12 4 3 20h18zM12 10v4M12 17h.01" data-page-node-id="JCWGbs000D039EMrg3ahIL"/></svg>Hilfe im Notfall</a>
+      <div class="who" data-page-node-id="IFsk0aij9REWH4AMnqSZGw">
+        <span class="av" data-page-node-id="rvcF5eERcYYaQKCj6vpww5">DK</span>
+        <div data-page-node-id="j938fqUwsdtsWsZwOPpxll"><b data-page-node-id="YTNe2ZdGVCEr6CfjG7gLOJ">Demo Kunde</b><span data-page-node-id="JyRQXx85TOZzf7g3tExwI5">Ahornweg 12</span></div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main" data-page-node-id="rS8OwQZCCxk593QpGIC25i">
+    <div class="top" data-page-node-id="JAW0RUKAaANUJYmTSzoJUc">
+      <div class="crumbs" data-page-node-id="4TewIVqFyUHa8wD61YhzVw">Hausakte <span data-page-node-id="fP7gGw8LXkZKpGHLsdGjdr">›</span> <b data-page-node-id="2mxagJMJmEtdtSi2oYZYU6">Übersicht</b></div>
+      <div class="search" data-page-node-id="L60i5gFw5xKYmfD79rvuvZ">
+        <svg viewBox="0 0 24 24" data-page-node-id="J6FlJR4SmrFP56vsPu1JGw"><circle cx="11" cy="11" r="6.5" data-page-node-id="FunrY7eoaPVNG83wMGcMPA"/><path d="m16 16 4.5 4.5" data-page-node-id="hdSA4J6xCq8Fo3m7Ft4JJd"/></svg>
+        Hausakte durchsuchen<span class="kbd" data-page-node-id="cfkxqIaWajIX3eCzsfNE3o">⌘K</span>
+      </div>
+      <div class="iconbtn" data-page-node-id="7Yqju9KWavCB1CqzfHGKUe"><svg viewBox="0 0 24 24" data-page-node-id="wOOJfYujHcdCJyG7ozSxbG"><path d="M6 9a6 6 0 0 1 12 0c0 4 1.5 5.5 1.5 5.5h-15S6 13 6 9M10.5 19a1.8 1.8 0 0 0 3 0" data-page-node-id="RHFNPiHitFZCtwvxVuXBF7"/></svg><i data-page-node-id="PIX6RlNA5tYxFpEQ0YZc8c">2</i></div>
+      <div class="iconbtn" data-page-node-id="9dsMn99kxczz3qNM3jKdjy"><svg viewBox="0 0 24 24" data-page-node-id="p2ekQE46yiFAcgLmzaXqWD"><path d="M4 6h16M4 12h16M4 18h10" data-page-node-id="B9LBQmeXUtslHmMX1YWoY7"/></svg></div>
+    </div>
+
+    <div class="content" data-page-node-id="BkFYtCguiRDrM49EQqX2B3">
+      <div data-page-node-id="IzKwQYkFOsWdGaERxKRbya">
+        <div class="head" data-page-node-id="QdtlixpeiEzSWCS5UZpfxu">
+          <div data-page-node-id="cjkN3JGjVqBhDdqitZ9o6M">
+            <h2 data-page-node-id="n1yqjx9ndNF7f98zA6UDLE">Dein Zuhause</h2>
+            <p data-page-node-id="l7rJfLKTuiyn36VQ20Uqiv">Ahornweg 12 · 86150 Augsburg <span class="addr" data-page-node-id="h7fwXpRZguJ3YOS0TvMmxO">· Hausakte zu 40 % erfasst</span></p>
+          </div>
+          <div class="spacer" data-page-node-id="KHPhmX45Wv7rt3ovezAfAQ"></div>
+          <button class="btn" data-page-node-id="DFlp1iEOeDl0NbR6f2qGMe"><svg viewBox="0 0 24 24" data-page-node-id="YtDykNiRjmwFwhPXn467p2"><path d="M12 5v14M5 12h14" data-page-node-id="dFK6bZVv3Vm6H98BFXQzvn"/></svg>Eintrag</button>
+          <button class="btn primary" data-page-node-id="SETkHFvuQXXT0k4m6A3JqR"><svg viewBox="0 0 24 24" data-page-node-id="yP71StysGg6rs8nBG7eTxJ"><path d="M4 12h16M12 4l8 8-8 8" data-page-node-id="oooFGvluaLrQ8WTOxZrsqY"/></svg>Hausmeister fragen</button>
+        </div>
+
+        <div class="stats" data-page-node-id="2nx7Z4U8qDH5oz7q3ZzAGg">
+          <a class="stat warn" href="#" data-page-node-id="IiosGtXZp25XFXuCwQb2OR"><span data-page-node-id="lJHSOBfnZeYpfEf2aq7S97">Offen</span><b data-page-node-id="ToMJsPkhBq819QiuXdRfPp">2</b><em data-page-node-id="A7DyfmHE61ZRcmsVdCJ2o7">Entscheidungen</em></a>
+          <a class="stat" href="#" data-page-node-id="zL56eEn1sMAAuBe2u1GRWf"><span data-page-node-id="wCEwEf6AYSnpn2tebMDGgX">Termine</span><b data-page-node-id="Y92AGoDO7GPrTD7PMdKqxl">1</b><em data-page-node-id="EkFH8FEQeyEh22ssyBMFgo">12. Okt · Heizung</em></a>
+          <a class="stat" href="#" data-page-node-id="FVWYX6gXCHq2agV6uM83kq"><span data-page-node-id="U6AyhchbdL0G6JlQleY3GW">Dokumente</span><b data-page-node-id="TpPlHWR04xlftKvfXnawEl">14</b><em data-page-node-id="ieYufhVEA0hogQVTHbLC0U">3 neu</em></a>
+          <a class="stat" href="#" data-page-node-id="yjTTyzhWohsF09wPB9pGJ1"><span data-page-node-id="z1kv4aD4ti9XVywB37DIgU">Aufträge</span><b data-page-node-id="O8R7haDYKkN9Bg7sIFP17K">1</b><em data-page-node-id="aQl7QjqwYldyU14auZ68E0">in Arbeit</em></a>
+        </div>
+
+        <div class="card" data-page-node-id="7fsRDTZgqzC5ZQzkPPfiPb">
+          <div class="cardhead" data-page-node-id="DR6yiFl9PGA0qmP0JoL8H9"><h3 data-page-node-id="ALlopqSpbTnj49rvkpCtjS">Wartet auf dich</h3><a href="#" data-page-node-id="m7P4bAzwGwLjggkca4OhNC">Alle Aufträge</a></div>
+          <ul class="rows" data-page-node-id="tECAv1InsnBNEKLv7GRC4d">
+            <li data-page-node-id="vIATgmEGvNOnDwsVmbhcQU">
+              <span class="ic" data-page-node-id="Hq6b5pxWepGjNBp10oyr74"><svg viewBox="0 0 24 24" data-page-node-id="PrLCgjLZJ17DEeF6LO0q7p"><path d="M4 6h16v12H4zM8 11h8" data-page-node-id="2lbR71GAy6jqwf988rtWa4"/></svg></span>
+              <span class="tx" data-page-node-id="TQlxDNUFPHtB2YjYgv9jQm"><b data-page-node-id="O50WpHTFNasaBHaWCUlNNC">Dachrinnenreinigung</b><span data-page-node-id="n3nLBOUBTPjAGtSICdYhHL">2 Angebote · Dachbau Alt GmbH, Spengler Mayer</span></span>
+              <span class="rt" data-page-node-id="03vdFKHXTSzxEbmS67DiCF"><span class="chip warn" data-page-node-id="yH00t7mYMZX3rC51IUDxgS">Entscheidung</span></span>
+            </li>
+            <li data-page-node-id="3HgjiurOv0wUIWQAHsxQYM">
+              <span class="ic" data-page-node-id="4moqsSHyFvJsxIzmdkoeVw"><svg viewBox="0 0 24 24" data-page-node-id="dAOJnxAqgFFeUNtI5aNjXv"><path d="M12 4v16M6 9h12" data-page-node-id="Cn0XT5Lx5Dv8sUiiSnGAjX"/></svg></span>
+              <span class="tx" data-page-node-id="mXeq0B6r5xH7tP6eg8eqJQ"><b data-page-node-id="xIxzhLKmUcRUQXgAnv2NzY">Heizungswartung</b><span data-page-node-id="Iwnc175Acg4chGhCBbLdv1">fällig seit 3 Tagen · Intervall 12 Monate</span></span>
+              <span class="rt" data-page-node-id="BfQELW5bdYBZ0x6FWmu2Jn"><span class="chip warn" data-page-node-id="KzGr4uAFUPrDGQEXKFOhCM">Überfällig</span></span>
+            </li>
+            <li data-page-node-id="VVJmDkmKXPmxJzJ2Pwhbx6">
+              <span class="ic" data-page-node-id="FkXjRgbjba9BkFpu6Y2M39"><svg viewBox="0 0 24 24" data-page-node-id="y42lp9Yzoy5JNdAzJsArR0"><path d="M5 12h14M13 6l6 6-6 6" data-page-node-id="DDwsKzKuhX0iIFrCOiByTI"/></svg></span>
+              <span class="tx" data-page-node-id="TSr7A24ZzUZw3GGpzWm9PQ"><b data-page-node-id="JIDISwix3TWEB8bdwPuiOl">Angebot Heizungstausch</b><span data-page-node-id="j3H4objTIrCQSUpby9RKv7">Sanitär Krüger · 8.400 € · läuft am 20.09. ab</span></span>
+              <span class="rt" data-page-node-id="FS42v2uCYeO0whIKXhF57d"><span class="chip acc" data-page-node-id="EJeacJmGUjCPq3LR61LQoA">Prüfen</span></span>
+            </li>
+          </ul>
+        </div>
+
+        <div class="card" data-page-node-id="xRxPFMJjWG4x55DRsW74va">
+          <div class="cardhead" data-page-node-id="7qESUPRtKLFMkgvOTqfHVw"><h3 data-page-node-id="ISNB7QLvFQfAMy7BNunoC7">Hausakte</h3><a href="#" data-page-node-id="sgDggYMoFD373CQ2w1JPUf">Öffnen</a></div>
+          <ul class="rows" data-page-node-id="QZ4H3HSLuhCItCIDh37POF">
+            <li data-page-node-id="4ZLdw1xHsPJPNy6C8yGJL8">
+              <span class="ic" data-page-node-id="zBfmglJ04IwFS8jJ4AVN0Z"><svg viewBox="0 0 24 24" data-page-node-id="iGG5Lj70rUdeePxNlKpm8O"><path d="M4 20V6l8-3 8 3v14z" data-page-node-id="2jD4AJf1JBFSLHEZg1DhSy"/></svg></span>
+              <span class="tx" data-page-node-id="YEcxbgcjARjcGC27DkkjIw"><b data-page-node-id="jHFLOFyOF8n7npi1YkGyoq">Hausprofil</b><span data-page-node-id="y951ajHQ4kz5NtHhMeU2pA">Einfamilienhaus · Baujahr 2001 · 160 m²</span></span>
+              <span class="rt" data-page-node-id="p08yNosCWDhPeAuzgCz5KS"><span class="chip ok" data-page-node-id="YOCe37CKup82rjFIqtf30g">Vollständig</span></span>
+            </li>
+            <li data-page-node-id="F78DBrTVc3WeMlmL6NxtTe">
+              <span class="ic" data-page-node-id="AA8Bem0FTQhUG8qicT0Aye"><svg viewBox="0 0 24 24" data-page-node-id="U138EtRlAgr92ifL6chafS"><path d="M12 4v16M4 12h16" data-page-node-id="AD5M2kpZuiIgxzI2nuJcdk"/></svg></span>
+              <span class="tx" data-page-node-id="qGezODmFEbU8HqmXFsSrwW"><b data-page-node-id="waVgzNUaeMOpT12OhTV5e7">Technik &amp; Geräte</b><span data-page-node-id="TB6MpCq0GPWBU9gzcNCfAp">Heizung, Lüftung, Photovoltaik — 4 Geräte</span></span>
+              <span class="rt" data-page-node-id="afKYZYuxCJTiG9VD76KJBi"><span class="chip" data-page-node-id="HjuRc9YvHp0vhCRRcwBqqd">Erfasst</span></span>
+            </li>
+            <li data-page-node-id="Bhtor4FvRsOjIqblrzu1gG">
+              <span class="ic" data-page-node-id="tOzADocGmc2108e57GZnKE"><svg viewBox="0 0 24 24" data-page-node-id="APp4Mlc2Rp51nQPGGOhFfi"><path d="M4 4h11l5 5v11H4z" data-page-node-id="c9gsGcQZYqcAPC50yLUf4q"/></svg></span>
+              <span class="tx" data-page-node-id="keNFDXzoGPnY2RlDVOglt2"><b data-page-node-id="TC18b1XvIO2TABbrqiH2S5">Dokumente &amp; Rechnungen</b><span data-page-node-id="DQJ5vmsydolWNKnWC7kAua">14 Nachweise · Garantien bis 2030 hinterlegt</span></span>
+              <span class="rt" data-page-node-id="2c7LDOK9q2YLzkFf6dcW6V"><span class="chip" data-page-node-id="FpkTdZhEQ9kNHHo68Bu183">Öffnen</span></span>
+            </li>
+          </ul>
+        </div>
+
+        <div class="card" data-page-node-id="8EN251vraOYEnTBPssgS79">
+          <div class="cardhead" data-page-node-id="CaQRXfknpyNjjnKHSfyCsi"><h3 data-page-node-id="yah0pSZ9AMaWdbCUNULikL">Zuletzt passiert</h3><a href="#" data-page-node-id="dulnYISS69FvHJzayBDlv3">Historie</a></div>
+          <ul class="rows" data-page-node-id="c0JDvzIOtEyl45NaKC5EGl">
+            <li data-page-node-id="bbJYjyy5kZyePFINupi1cP">
+              <span class="ic" data-page-node-id="9QzjqABY830zcXMiXJF5H9"><svg viewBox="0 0 24 24" data-page-node-id="vKpM2ScjFNBB2NUnp51c7V"><path d="M12 8v4l3 2" data-page-node-id="aQu8DVSbslPeI4TFQW3uYb"/><circle cx="12" cy="12" r="8" data-page-node-id="oaRGFu5HMLWiJ7lM54X5KA"/></svg></span>
+              <span class="tx" data-page-node-id="ymGB7smiZRXcLGoF3XviXf"><b data-page-node-id="ydI7tMiVXDUbdtSZONzMig">Dach erneuert</b><span data-page-node-id="ioflNnQlulVwdjF85aN133">Dachbau Alt GmbH · 18.500 €</span></span>
+              <span class="rt" data-page-node-id="JRGAXCd5HTQmlzk3gQwloS">12.06.2025</span>
+            </li>
+            <li data-page-node-id="loOOvUMuCTgbjqSQAAE4jr">
+              <span class="ic" data-page-node-id="ZyavQjCxxOvNmvwreSYME8"><svg viewBox="0 0 24 24" data-page-node-id="O57lXicxUlcjzeOq6AgONg"><path d="M5 12h14M13 6l6 6-6 6" data-page-node-id="YktKbHH8x5LMlYdllDUSPt"/></svg></span>
+              <span class="tx" data-page-node-id="KMFhEEjsOBZUCSwVAGWBu4"><b data-page-node-id="X69AyNCPwU0aNHESI0Qmto">Hausakte von Familie Bergmann übernommen</b><span data-page-node-id="mDqr9HwUaHcUgGUrp8JSt8">Vorbesitzer · 6 Dokumente übertragen</span></span>
+              <span class="rt" data-page-node-id="azMxLx7mGQ9Hq8xnz1HVFT">03.05.2025</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <aside class="aside" data-page-node-id="qfBoLzHyW9lhiGX4yJhB7R">
+        <div class="card" data-page-node-id="HJNKOyU7JxIJujbCTNEC3x">
+          <div class="cardhead" data-page-node-id="zFebhCAiZTExWaWFMIHSjp"><h3 data-page-node-id="yt4XUZJ5g5KZrqUdHxns5z">Nächste Schritte</h3></div>
+          <ul class="steps" data-page-node-id="aabshtYjplpJ5h9gbBfA2J">
+            <li data-page-node-id="L91oWhVHbmsiI4GGqeOI2S"><span class="box on" data-page-node-id="JDQqygubSqt08X2v63j2ce"></span><div data-page-node-id="h6Fo3NPqcCXnEk5tfToxzQ"><b data-page-node-id="mGvWaiqprtLlIT6EGgFTMH">Hausprofil ausgefüllt</b><span data-page-node-id="1MjDEAqz4fdU3ELY2tJCaL">Baujahr, Fläche, Grundstück</span></div></li>
+            <li data-page-node-id="mzSUtzNdveLhIgtR0HFnNB"><span class="box on" data-page-node-id="G00UIRoZmV5nfPcE06JI1z"></span><div data-page-node-id="47scJlMCOVptdrWfduUAFD"><b data-page-node-id="KS2IcFwvC22Qzlpm8dOs6A">Erste Historie eingetragen</b><span data-page-node-id="YFhPnGKCj1MTxsGPOHDGBx">Dach erneuert 2025</span></div></li>
+            <li data-page-node-id="Er1GnEz9xz2wUxes55bHdd"><span class="box" data-page-node-id="rFJ0D75EMKQVNtmLhe64Gq"></span><div data-page-node-id="MS7tx9FHJEZjQcZtLRIn9v"><b data-page-node-id="kosPLFfNE3CH6hVifyVl6D">Garantien hinterlegen</b><span data-page-node-id="D1jdYS5CBpxvPkqQNdKq34">2 Fristen laufen 2026 ab</span></div></li>
+            <li data-page-node-id="PyQOkSCr99hEfKnavXMChg"><span class="box" data-page-node-id="Hz1GIFrC6bzZocIvTLn2rw"></span><div data-page-node-id="vpuyPQ4zV2ZxYQ5PrVhHFf"><b data-page-node-id="PtTEna9vlyY2D0zZl1i7Hn">Wartungsplan bestätigen</b><span data-page-node-id="snznF8ca1upt9H8MoLpsOl">Heizung, Dachrinne, Rauchmelder</span></div></li>
+          </ul>
+          <p class="hint" data-page-node-id="Mn5j17NRadABozgrNnif2S">Jeder Schritt erhöht die Vollständigkeit deiner Hausakte.</p>
+        </div>
+
+        <div class="card" data-page-node-id="TsCWaUp3SKSt6YOMuLeNFr">
+          <div class="cardhead" data-page-node-id="Vz0v2LhBScE8wqppqALCHk"><h3 data-page-node-id="QDtXYQTgadHjGoYFiJpQNS">Vollständigkeit</h3></div>
+          <dl class="kv" data-page-node-id="sDKhVOWmL88BQoZgFUpONl">
+            <dt data-page-node-id="BnK7vTtDCxYdTCQyOrPpK5">Hausprofil</dt><dd data-page-node-id="GKrmKwWXMSaSdy4PZWpEaR">100 %</dd>
+            <dt data-page-node-id="7JZvtJaJX4wxgax3OTw5Z6">Historie</dt><dd data-page-node-id="clmFkGMLtP6xIhV3FE2Y5a">60 %</dd>
+            <dt data-page-node-id="FLczPcFegN9gDFRs20UvJe">Dokumente</dt><dd data-page-node-id="duXUiOrKrQruBAIp29lprM">45 %</dd>
+            <dt data-page-node-id="bsx7bhXgNTkEDh0V1zCxkD">Garantien</dt><dd class="miss" data-page-node-id="eLFZZeaKyWMUYADA5evJFM">fehlt</dd>
+          </dl>
+        </div>
+
+        <div class="card" data-page-node-id="G60CVovWh8mvqGKPqzmlWt">
+          <div class="cardhead" data-page-node-id="Cnetu4up2ZPvHgruv3zLJ7"><h3 data-page-node-id="bkTODlmGfIS8QOWtp2p5kM">Nächster Termin</h3></div>
+          <ul class="rows" data-page-node-id="z0XBT2yExIWgKiZt4fmHZW">
+            <li data-page-node-id="5ACr4Frb5c1DHitSxI2O3M">
+              <span class="ic" data-page-node-id="kvMElMBGHEx5GuqvVHGrSV"><svg viewBox="0 0 24 24" data-page-node-id="fs3d98n6ZPGeddpEUCbkqb"><rect x="4" y="5" width="16" height="15" rx="2" data-page-node-id="buEWO2t8wkY30bCy8w73eu"/><path d="M4 10h16M9 3v4M15 3v4" data-page-node-id="kYe4Z2Of4naMSt9uatEFWn"/></svg></span>
+              <span class="tx" data-page-node-id="oTCNOEgEQZ3cDn4H6zL9S6"><b data-page-node-id="bfj7cwI4gswBoR7JBWEVGq">Heizungswartung</b><span data-page-node-id="gC4rJjB1fiPwgbRsWeah8b">12. Okt · 09:00–11:00</span></span>
+            </li>
+          </ul>
+        </div>
+      </aside>
+    </div>
+  </div>
+</div>
+
+<p class="legend" data-page-node-id="uCfCAZsBEoaClEuxzCVFiZ"><b data-page-node-id="UWcQwIweMeUVqmSUMkNjIY">Was anders ist:</b> 52-px-Werkzeugleiste statt Marketingkopf · Kennzahlenleiste 44 px hoch statt vier Kacheln mit 90 px ·
+  Listenzeilen 38 px statt Karten mit Erklärtext · Statusfarben nur an Status · rechte Spalte trägt Arbeit statt Leere ·
+  gleiche Palette (Petrol, Sand, Terrakotta), gleiche Schrift.</p>
+
+<script>
+  const html=document.documentElement, a=document.getElementById('bHell'), b=document.getElementById('bDunkel');
+  const set=t=>{html.dataset.theme=t;a.setAttribute('aria-pressed',String(t==='light'));b.setAttribute('aria-pressed',String(t==='dark'));};
+  a.onclick=()=>set('light'); b.onclick=()=>set('dark');
+</script>
+</body>
+</html>

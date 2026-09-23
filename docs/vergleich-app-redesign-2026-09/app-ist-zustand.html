@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="de" data-page-node-id="iTRSt2lzHjr0KLuH2nC0uu">
+<head data-page-node-id="5zc9myk7YJRHalK6kgBMPu">
+<meta charset="utf-8" data-page-node-id="OoNH8cW9Hf74IewqgUvbIW">
+<meta name="viewport" content="width=device-width, initial-scale=1" data-page-node-id="bEJ2rw94aeZaXeE0yYWHlq">
+<title>einfachhausen — App-Seiten: Ist-Zustand</title>
+<style>
+  :root{
+    --bg:#0d1117; --panel:#161b22; --panel2:#1c2128; --line:#30363d;
+    --txt:#e6edf3; --dim:#8b949e; --bad:#f85149; --warn:#d29922; --ok:#3fb950; --acc:#58a6ff;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);
+       font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;padding:28px 24px 64px}
+  h1{font-size:22px;margin:0 0 6px}
+  h2{font-size:13px;margin:34px 0 12px;color:var(--dim);font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+  p.lead{margin:0 0 8px;color:var(--dim);max-width:900px}
+  .hint{color:var(--dim);font-size:13px;margin:0 0 18px}
+  table{border-collapse:collapse;font-size:13px;margin:0 0 8px;min-width:640px}
+  th,td{border:1px solid var(--line);padding:7px 11px;text-align:left}
+  th{background:var(--panel2);color:var(--dim);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.03em}
+  td.num{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+  .bad{color:var(--bad)} .warn{color:var(--warn)} .ok{color:var(--ok)}
+  .grid{display:grid;gap:14px}
+  .g6{grid-template-columns:repeat(6,1fr)}
+  .g4{grid-template-columns:repeat(4,1fr)}
+  .g3{grid-template-columns:repeat(3,1fr)}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  .card .cap{padding:6px 9px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11.5px;
+             color:var(--acc);border-bottom:1px solid var(--line);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .card img{width:100%;display:block;background:#fff}
+  .card.wide img{max-height:520px;object-fit:cover;object-position:top}
+  .find{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--warn);
+        border-radius:8px;padding:14px 16px;margin:0 0 12px;max-width:900px}
+  .find h3{margin:0 0 6px;font-size:15px}
+  .find p{margin:0;color:var(--dim);font-size:14px}
+  .find code{background:var(--panel2);padding:1px 5px;border-radius:4px;font-size:13px}
+</style>
+</head>
+<body data-page-node-id="9zQH5UJ5kFim5sWSsPmR6E">
+  <h1 data-page-node-id="1Vf1xzxrMRJAdobLDAtCAM">App-Seiten — Ist-Zustand</h1>
+  <p class="lead" data-page-node-id="sU5SsAGgE4YH3vlaTRehZ7">Live gerendert mit den öffentlichen Demo-Zugängen (Eigentümer <code data-page-node-id="r8aUkq5f7rEZwy3F8gmKPT">kunde</code>,
+     Handwerker <code data-page-node-id="cHBFBBCAqjWYr3XRK8rSiu">handwerker</code>), Desktop 1440 px und Telefon 390 × 844. 17 Routen,
+     dieselbe Sitzung, derselbe Browser.</p>
+  <p class="hint" data-page-node-id="Ybo7K9OCbUzWWWdjbr122H">Achtung: hier steht noch der <strong data-page-node-id="AkvpDFRoV6jn2oxB1MVfet">ausgelieferte</strong> Stand <code data-page-node-id="XwebutJaGbyFSwrAKrFszj">36eaa7c</code>.
+     Die Topbar-Beschriftungen (Bereich statt Seitentitel) sind darin noch die alten.</p>
+
+  <h2 data-page-node-id="BwWzDBi5XTttGLMJG70jyQ">Die eine Kennzahl: die App hat keine Schrift-Skala</h2>
+  <table data-page-node-id="rhdo9lIKhzNc3NvqWzbvwW">
+    <tr data-page-node-id="DOEMRVD8OpCUlGCPxnnVOg"><th data-page-node-id="PedMg0XA2zJxgb0N0Ej3pB">Seite</th><th data-page-node-id="r6LL7nXH3FJHSmHlt151ET">verschiedene Schriftgrößen</th><th data-page-node-id="n9ekhm5CPW79wbWEa48alU">Schriftgewichte</th><th data-page-node-id="4CTGaRCAmY84sSUZBxCf61">Textfarben</th><th data-page-node-id="KzCyAN0LoDjFcfnzhXfqFa">&ge; 32 px</th></tr>
+    <tr data-page-node-id="kERwLGiGPRZMolBSiC4u0Y"><td data-page-node-id="8sNUyHoPNILb7gkAwQIqxD">/app</td><td class="num bad" data-page-node-id="qMzuud5ZFnWCE0dUYSCNq7">12</td><td class="num bad" data-page-node-id="fSNCR1U3j2cUuXKh1IXa6y">8 (400 · 600 · 650 · 700 · 750 · 760 · 800 · 850)</td><td class="num warn" data-page-node-id="gD9StQiAiIwxZ9XEwWPUVm">8</td><td class="num" data-page-node-id="03M2okmWGHFgs26ZglV7UO">1</td></tr>
+    <tr data-page-node-id="fhR69qMlFlAYzfscU6XsBY"><td data-page-node-id="Tt8yPazrHpi1o6L0MIyJQe">/app/home</td><td class="num bad" data-page-node-id="h8oaohV2itZp51u8ZvEwJr">17</td><td class="num bad" data-page-node-id="uSpmYWchFPspCm1CDzqkCw">7</td><td class="num warn" data-page-node-id="R5kl7MjSOzkyNfmEVk0uh1">8</td><td class="num" data-page-node-id="TVjzqvJnM7grQ6Qc6skS35">4</td></tr>
+    <tr data-page-node-id="0ZZvA0vNzPbMWDv7qvLFuh"><td data-page-node-id="wXuvWGitrbYzZPM9ZdYo55">/app/contracts</td><td class="num bad" data-page-node-id="ha2GmhOj4bACdyHwDEgPfL">15</td><td class="num bad" data-page-node-id="vv3tJYutUiNytnFgWnWDZq">7</td><td class="num warn" data-page-node-id="rGh3eoCloZVJyaqEBQ4WNv">8</td><td class="num" data-page-node-id="kIyQLpsrnirIjP4eYdWcT1">1</td></tr>
+    <tr data-page-node-id="N3O9KGhiV3crg5Z6t5WX3S"><td data-page-node-id="HnTWrErOXo0Vvv7FTSGeG8">/pro</td><td class="num warn" data-page-node-id="xYSWXQsC30xpqrrqHb4oOg">10</td><td class="num warn" data-page-node-id="4zwTuAMd7y0Xx0bIo3uNkh">6</td><td class="num ok" data-page-node-id="HB7RxtrHjRGQD2Dv94w6Xf">5</td><td class="num" data-page-node-id="OPr1aeweqcX8xDMKkzJDKp">5</td></tr>
+    <tr data-page-node-id="RAOTnak6qlwRtJKhiovTuH"><td data-page-node-id="5My9FWoSc1B5czsErClUx6">/pro/orders</td><td class="num ok" data-page-node-id="FRRfzBDI6U9izV8tF3xvHE">7</td><td class="num warn" data-page-node-id="DTuNvtDC2em6U1YP63eE6d">5</td><td class="num ok" data-page-node-id="CnMrTKIuA16dha9kvowsee">4</td><td class="num" data-page-node-id="NHjDuAegZELPvivQWjHrjC">4</td></tr>
+  </table>
+  <p class="hint" data-page-node-id="Ic5xICUSy91oKX5E0spzjh">Ein übliches Produkt-Interface kommt mit <strong data-page-node-id="NqqrpNVC8BRDQOjEFJM7Ml">6–8 Größen und 2–3 Gewichten</strong> aus.
+     Hier stehen Werte wie 12 · 12,5 · 13 · 14,5 · 15 · 16 · 17 · 18 · 19 · 22 · 24 nebeneinander,
+     und die Gewichte 650 / 750 / 760 / 850 verraten, dass jeder Wert einzeln gesetzt wurde.
+     Deshalb wirkt nichts „falsch“ — und trotzdem nichts ruhig.</p>
+
+  <h2 data-page-node-id="q9Up5LCV9ou22UDgwh6cZZ">Eigentümer-App — Telefon</h2>
+  <div class="grid g6" data-page-node-id="OspSz7TezpEHBOzjspt2Ob">
+    <div class="card" data-page-node-id="qHqLDGWaYAnfhzP9GCXHRg"><div class="cap" data-page-node-id="ve3CHBXkiqHIs7CGu0eGKB">/app</div><img src="app-ist-zustand/owner_app-mobil.png" alt="/app" data-page-node-id="gQ1aU127i6jrcl8E8UjPkx"></div>
+    <div class="card" data-page-node-id="i5eDvWP8vUCzucCDuhjHXx"><div class="cap" data-page-node-id="NDJ8fQDp4irSIUyiNaSHBl">/app/home</div><img src="app-ist-zustand/owner_app_home-mobil.png" alt="/app/home" data-page-node-id="jeXN6YGpkBuDEAHcysbYe7"></div>
+    <div class="card" data-page-node-id="JUPoOC56aI6mHjVk0Aba5N"><div class="cap" data-page-node-id="c1AJlFHrr3o5xK9CAhA7K0">/app/home/history</div><img src="app-ist-zustand/owner_app_home_history-mobil.png" alt="history" data-page-node-id="6HDO5v3HwGCpg4A0HTkQYZ"></div>
+    <div class="card" data-page-node-id="rOcKuHNJN62eu7JYSoldCf"><div class="cap" data-page-node-id="t2IbzymtBdExs3jt4HQYoR">/app/documents</div><img src="app-ist-zustand/owner_app_documents-mobil.png" alt="documents" data-page-node-id="qY2AvU1TUx5fhRKk1U1cbe"></div>
+    <div class="card" data-page-node-id="DRZdKgwS2hjkQqNvCGubLF"><div class="cap" data-page-node-id="9VATOAvwMjAa6gUYE3HvcI">/app/jobs</div><img src="app-ist-zustand/owner_app_jobs-mobil.png" alt="jobs" data-page-node-id="uo0fpcpXvdRUQwWYk4egRr"></div>
+    <div class="card" data-page-node-id="q6v22kDsWDbBUJspEbdfg1"><div class="cap" data-page-node-id="plHbceMpswANOzuriIGyvZ">/app/contracts</div><img src="app-ist-zustand/owner_app_contracts-mobil.png" alt="contracts" data-page-node-id="mYvabPNuFt7Fne9ZlLC1HJ"></div>
+    <div class="card" data-page-node-id="KUiDBkW6Jqr3tNwRBiXtBN"><div class="cap" data-page-node-id="q37EXQpzhgpgNl0jFAf3Aq">/app/partners</div><img src="app-ist-zustand/owner_app_partners-mobil.png" alt="partners" data-page-node-id="hZEPPqxvkW9n4t3rMJaqJl"></div>
+    <div class="card" data-page-node-id="hC96yxGrp00MgEo9YJaaCS"><div class="cap" data-page-node-id="A8E89gFxz1FE9MRygSg27n">/app/messages</div><img src="app-ist-zustand/owner_app_messages-mobil.png" alt="messages" data-page-node-id="UvQCJxnQyRkc09Ez9lWQkj"></div>
+    <div class="card" data-page-node-id="AiNPg86wGxZVDzRef178Aw"><div class="cap" data-page-node-id="IKpntG4CCLvwqxKrseBSBo">/app/calendar</div><img src="app-ist-zustand/owner_app_calendar-mobil.png" alt="calendar" data-page-node-id="ttNwVZj9A7ep9BAVccYWAN"></div>
+    <div class="card" data-page-node-id="X02kY9UCqUZZTtwjkEnOxr"><div class="cap" data-page-node-id="egFRqp2R71fel1pv10mrCS">/app/year</div><img src="app-ist-zustand/owner_app_year-mobil.png" alt="year" data-page-node-id="9MJkhz9iz15V0FzTvE8lbP"></div>
+    <div class="card" data-page-node-id="znjBJqLJopfFr93RzuYT1Z"><div class="cap" data-page-node-id="NAknLIMb9sFQ6bNwlsDkC0">/app/profile</div><img src="app-ist-zustand/owner_app_profile-mobil.png" alt="profile" data-page-node-id="ol6ee42OND6xByhf5ZpTPi"></div>
+  </div>
+
+  <h2 data-page-node-id="KKfLglxqppNCT6diwLDb8g">Anbieter-App — Telefon</h2>
+  <div class="grid g6" data-page-node-id="WQxLVe0YBSbClz7X2ejzNy">
+    <div class="card" data-page-node-id="12fnheW2hSHiU2RyFTxZLO"><div class="cap" data-page-node-id="X0fUKgarkWZvuvBmwRLD04">/pro</div><img src="app-ist-zustand/pro_pro-mobil.png" alt="/pro" data-page-node-id="0ytByUW6PsgJR0RjCgF2os"></div>
+    <div class="card" data-page-node-id="jYUvbKyTAwtpm8ailBsh1i"><div class="cap" data-page-node-id="21KFmpG4I0XZwlpHKWxgz4">/pro/orders</div><img src="app-ist-zustand/pro_pro_orders-mobil.png" alt="orders" data-page-node-id="8BN54eegX3leReaEjSk7ox"></div>
+    <div class="card" data-page-node-id="pxZZFfTOpWe72EKVNT3z0H"><div class="cap" data-page-node-id="IHANRoBHNDLXgFYs2r0bNe">/pro/leads</div><img src="app-ist-zustand/pro_pro_leads-mobil.png" alt="leads" data-page-node-id="AGbBXK8ivUPQIwY45XTDiW"></div>
+    <div class="card" data-page-node-id="w5repB0YdeEW8TJ5eB9kZy"><div class="cap" data-page-node-id="AWaRANdAoeY90SBjnHzhA2">/pro/messages</div><img src="app-ist-zustand/pro_pro_messages-mobil.png" alt="messages" data-page-node-id="NNdjWkN6wlBvH7QBIJYd2S"></div>
+    <div class="card" data-page-node-id="YuxgupOgX0g0vYLOQsAbcc"><div class="cap" data-page-node-id="o34h9YpwJvMgcvWbd20mdn">/pro/team</div><img src="app-ist-zustand/pro_pro_team-mobil.png" alt="team" data-page-node-id="g5l3j1rhBMFHsGOXW68PBV"></div>
+    <div class="card" data-page-node-id="jwvDzHNAIustGBI8WdLMRu"><div class="cap" data-page-node-id="luA4QTXeCnOGzvwLm5gSym">/pro/profile</div><img src="app-ist-zustand/pro_pro_profile-mobil.png" alt="profile" data-page-node-id="5F604OKGQD3ahkWCOWB8Tx"></div>
+  </div>
+
+  <h2 data-page-node-id="WENs4gKYcoomdqSRZk73pY">Desktop — die vier Seiten, an denen es am deutlichsten wird</h2>
+  <div class="grid g3" data-page-node-id="RFGh7iGcx2SBfa5I43gaxT">
+    <div class="card wide" data-page-node-id="hr1MhGOioufqXWatpJGigU"><div class="cap" data-page-node-id="dYaCZhMtJz8blQlxs0dM6E">/app — 44 px Überschrift, rechte Spalte leer</div><img src="app-ist-zustand/owner_app-desktop.png" alt="/app" data-page-node-id="OT8XX5Vs3Qhx5GjhBMpoKA"></div>
+    <div class="card wide" data-page-node-id="m0czBLwXHnD6bUPvCMuEds"><div class="cap" data-page-node-id="LlEomUdPmrYtktLqRgmaHS">/app/home — „HIER IST PLATZ“, drei Nullen, vier × „Nicht erfasst“</div><img src="app-ist-zustand/owner_app_home-desktop.png" alt="/app/home" data-page-node-id="snPQmCaQrJ7fh6NtdWbpB5"></div>
+    <div class="card wide" data-page-node-id="9GprTOsF4z9EwDp779NSJa"><div class="cap" data-page-node-id="0c2KdMtwzV4HOTzysLc34i">/pro — Begrüßung als Seitenüberschrift, 4 KPI-Kacheln mit 0</div><img src="app-ist-zustand/pro_pro-desktop.png" alt="/pro" data-page-node-id="OGvBhQdLxiGWDWU8WbdaB4"></div>
+    <div class="card wide" data-page-node-id="dhVfonlGtUVOY1R715rBCi"><div class="cap" data-page-node-id="KkUcAAuAZBwzFMOz9NPMUl">/pro/orders — jede Sektion mit Erklärsatz, halbleere Raster</div><img src="app-ist-zustand/pro_pro_orders-desktop.png" alt="/pro/orders" data-page-node-id="a2UUeXAtCYlvslC7KoVh4t"></div>
+  </div>
+
+  <h2 data-page-node-id="WIwJ3T8noyCZuSXGYsRzS0">Was ich daraus ableite</h2>
+  <div class="find" data-page-node-id="W3vKJZEhil1IaFED4MWsti"><h3 data-page-node-id="gm2B6qyRpFBZsKfTmEInPJ">1. Marketing-Typografie in einem Werkzeug</h3>
+    <p data-page-node-id="IQhHRSEOKJZ5XmTSr96G3c">Jede App-Seite beginnt wie eine Landingpage: 43–44 px Überschrift, darüber ein gesperrtes
+       Versal-Eyebrow (<code data-page-node-id="JBCpZthrW6PfraAiDvjJW5">DIGITALE HAUSAKTE</code>, <code data-page-node-id="CydelvcBHICDPnMXej6fMh">ARBEIT</code>, <code data-page-node-id="pt2Ugs9I8CLgpEfh5B7WLo">DEMO-BETRIEB HEIZUNG &amp; SANITÄR</code>).
+       Auf <code data-page-node-id="ojRBVjCsAnukY6AN51rIVD">/pro</code> ist die Seitenüberschrift sogar eine Begrüßung: „Guten Abend, Demo.“
+       Ein Profi-Werkzeug titelt mit der Arbeit, nicht mit der Tageszeit.</p></div>
+  <div class="find" data-page-node-id="Ae7UBBHzx5MhTDGJLEul2Y"><h3 data-page-node-id="oBAGfwVDpjsqsETXzpBaeZ">2. Das Interface erklärt sich selbst</h3>
+    <p data-page-node-id="jSnFF92ZyPsUzKiSslDOLy">Unter fast jeder Sektionsüberschrift steht ein grauer Erklärsatz —
+       „Aufträge mit offenem nächsten Schritt, nach Aktualität sortiert.“,
+       „Übernommene Kontakte ohne Angebotsbedarf — der nächste Schritt ist das Gespräch.“
+       Das ist Spezifikationstext in der Oberfläche. Er nimmt Platz, erzeugt Rauschen und
+       liest sich wie eine Anleitung für jemanden, der das Produkt noch nicht kennt.</p></div>
+  <div class="find" data-page-node-id="uh1setJ8UQvITroqBUJ9ms"><h3 data-page-node-id="8u5brhGkxbldxCtmK25yiJ">3. Leerzustände als Platzhalter formuliert</h3>
+    <p data-page-node-id="1NtIGUsB5mXzHqkaY20jbP"><code data-page-node-id="IsY0tcZna5Ba1pUcykYV9Z">HIER IST PLATZ</code> als Eyebrow, vier Zellen „Nicht erfasst“, drei große Nullen,
+       <code data-page-node-id="lfKgGQZxmzND3jQqrBAzBy">0 freigegebene Kontakte</code>. Ein leerer Zustand muss führen, nicht leer aussehen —
+       und das Wort „Platz“ darf nie sichtbar sein.</p></div>
+  <div class="find" data-page-node-id="mi8NAy9sPhuZYe9Xme1xYq"><h3 data-page-node-id="lTF2rBnPvhfOFiSwFqTpDf">4. Raster ohne Füllung</h3>
+    <p data-page-node-id="zYoCyfLzywaY3ZnyVhEOOB">Zweispaltige Raster, in denen die rechte Spalte leer bleibt („Deine nächsten Termine“,
+       „Abgeschlossen · 1“), und 1192 px Inhaltsbreite in 1440 px Fenster — der rechte Rand
+       bleibt tot. Die Seite wirkt nicht aufgeräumt, sondern unfertig.</p></div>
+</body>
+</html>

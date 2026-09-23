@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Zwei offene Entscheidungen</title>
+<style>
+:root{
+  --paper:#faf8f4; --petrol:#105258; --deep:#0a3539; --ink:#10222a;
+  --sec:#4b5b60; --line:#e4e2dc; --sand:#ecdfc9; --terra:#a84d29; --white:#fff;
+  --page:#f2f0ea; --rail:#f7f5f0; --r-pan:10px; --r-pill:999px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--page);color:var(--ink);
+  font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,system-ui,sans-serif;}
+.doc{max-width:1180px;margin:0 auto;padding:32px 26px 80px}
+h1{font-size:26px;margin:0 0 6px;letter-spacing:-.02em}
+.lede{color:var(--sec);margin:0 0 26px;max-width:860px}
+h2{font-size:19px;margin:40px 0 4px;padding-top:18px;border-top:2px solid var(--line)}
+h2:first-of-type{border-top:0;padding-top:0;margin-top:26px}
+.frage{background:var(--white);border:1px solid var(--line);border-left:4px solid var(--terra);
+  border-radius:var(--r-pan);padding:12px 16px;margin:10px 0 18px;font-size:15px}
+.frage b{color:var(--terra)}
+.paar{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media(max-width:900px){.paar{grid-template-columns:1fr}}
+.opt{background:var(--white);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.opt > .kopfzeile{padding:10px 14px;border-bottom:1px solid var(--line);font-weight:700;font-size:14px;
+  display:flex;align-items:center;gap:8px}
+.opt > .kopfzeile span{background:var(--petrol);color:var(--white);border-radius:var(--r-pill);
+  font-size:11px;padding:2px 9px;font-weight:700}
+.opt.b > .kopfzeile span{background:var(--sec)}
+.mock{background:var(--white);padding:0}
+.mnav{display:flex;gap:2px;padding:8px 16px;border-bottom:1px solid var(--line);background:var(--paper)}
+.mnav span{padding:6px 11px;border-radius:var(--r-pill);font-size:12px;color:var(--sec)}
+.mnav span.on{background:var(--petrol);color:var(--white);font-weight:600}
+
+/* Kopfvarianten */
+.kopfA{padding:16px 20px 12px;border-bottom:1px solid var(--line)}
+.kopfA .eb{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--sec);font-weight:700}
+.kopfA h3{margin:6px 0 4px;font-size:28px;font-weight:800;letter-spacing:-.03em;line-height:1.06}
+.kopfA p{margin:0;color:var(--sec);font-size:14px}
+.kopfB{padding:16px 20px 12px;border-bottom:1px solid var(--line);display:flex;
+  align-items:baseline;justify-content:space-between;gap:12px}
+.kopfB h3{margin:0;font-size:20px;font-weight:600;letter-spacing:-.02em;line-height:1.12}
+.kopfB .ctx{margin:4px 0 0;color:var(--sec);font-size:14px}
+.kopfB .links{color:var(--sec);font-size:12.5px;white-space:nowrap}
+
+/* Kennzahlen */
+.kpi{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid var(--line)}
+.kpi div{padding:12px 16px;border-left:1px solid var(--line)}
+.kpi div:first-child{border-left:0}
+.kpi b{display:block;font-size:20px;font-weight:700;letter-spacing:-.02em;line-height:1.05}
+.kpi span{font-size:11px;color:var(--sec)}
+.kpi.fehlt{background:repeating-linear-gradient(45deg,#fdf4ec,#fdf4ec 8px,#faeadb 8px,#faeadb 16px);
+  padding:16px;text-align:center;color:var(--terra);font-size:13px;font-weight:600;display:block}
+.body{display:grid;grid-template-columns:minmax(0,1fr) 210px;gap:0}
+.body .links{padding:16px 20px}
+.body .rechts{padding:16px 14px;background:var(--rail);border-left:1px solid var(--line)}
+.empty{border:1px solid var(--line);border-radius:var(--r-pan);padding:14px 16px;background:var(--paper)}
+.empty b{display:block;font-size:15px;margin-bottom:4px}
+.empty p{margin:0;color:var(--sec);font-size:13px}
+.seitentitel{font-size:15px;font-weight:600;margin:0 0 10px}
+.rh{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--sec);font-weight:700;margin:0 0 6px}
+.rcard{background:var(--white);border:1px solid var(--line);border-radius:var(--r-pan);
+  padding:11px 12px;font-size:12.5px;color:var(--sec);margin-bottom:9px}
+.rcard b{display:block;color:var(--ink);font-size:13px;margin-bottom:3px}
+.note{font-size:13.5px;color:var(--sec);margin:12px 0 0}
+.note b{color:var(--ink)}
+</style>
+</head>
+<body>
+<div class="doc">
+
+<h1>Zwei Entscheidungen, die noch offen sind</h1>
+<p class="lede">Beide betreffen nur Aussehen, nicht Funktion. Oben siehst du jeweils die zwei
+Möglichkeiten nebeneinander — alles andere auf der Seite bleibt gleich.</p>
+
+<h2>1. Kennzahlen, wenn nichts da ist</h2>
+<div class="frage">Auf acht Seiten verschwinden die vier Kennzahlen, sobald die Akte leer ist.
+Auf der Startseite und im Partnerbereich stehen sie <b>immer</b>. Welche der beiden Arten soll für
+alle gelten?</div>
+
+<div class="paar">
+  <div class="opt">
+    <div class="kopfzeile"><span>A</span> immer zeigen</div>
+    <div class="mock">
+      <div class="mnav"><span class="on">Start</span><span>Hausakte</span><span>Verträge</span><span>Aufträge</span></div>
+      <div class="kpi">
+        <div><b>0</b><span>Aktive Verträge</span></div>
+        <div><b>0,00 €</b><span>pro Monat</span></div>
+        <div><b>0,00 €</b><span>pro Jahr</span></div>
+        <div><b>0</b><span>Fristen · 90 Tage</span></div>
+      </div>
+      <div class="body">
+        <div class="links">
+          <p class="seitentitel">Alle Verträge · 0</p>
+          <div class="empty"><b>Noch kein Vertrag erfasst</b>
+            <p>Trag deinen Strom-, DSL- oder Versicherungsvertrag ein.</p></div>
+        </div>
+        <div class="rechts">
+          <p class="rh">Kontext</p>
+          <div class="rcard"><b>Nächste Kündigungsfrist</b>Keine Frist in den nächsten 90 Tagen.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="opt b">
+    <div class="kopfzeile"><span>B</span> nur zeigen, wenn es Daten gibt (jetzt)</div>
+    <div class="mock">
+      <div class="mnav"><span class="on">Start</span><span>Hausakte</span><span>Verträge</span><span>Aufträge</span></div>
+      <div class="kpi fehlt">hier stehen keine Kennzahlen</div>
+      <div class="body">
+        <div class="links">
+          <p class="seitentitel">Alle Verträge · 0</p>
+          <div class="empty"><b>Noch kein Vertrag erfasst</b>
+            <p>Trag deinen Strom-, DSL- oder Versicherungsvertrag ein.</p></div>
+        </div>
+        <div class="rechts">
+          <p class="rh">Kontext</p>
+          <div class="rcard"><b>Nächste Kündigungsfrist</b>Keine Frist in den nächsten 90 Tagen.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<p class="note"><b>Was ich denke:</b> A ist ehrlicher — „0 Verträge" ist eine Aussage, und die
+Startseite macht es schon so. Vier Nullen neben „Noch kein Vertrag erfasst" sind allerdings
+doppelt gemoppelt. Beides ist vertretbar.</p>
+
+<h2>2. Der Kopf im Verwaltungsbereich</h2>
+<div class="frage">Die drei Verwaltungsseiten und die Mitteilungsseite tragen noch den
+<b>großen</b> Kopf mit Überzeile und Erklärtext — denselben Look, den der Partnerbereich gerade
+verloren hat. Soll er dort bleiben?</div>
+
+<div class="paar">
+  <div class="opt">
+    <div class="kopfzeile"><span>A</span> klein machen, wie überall sonst</div>
+    <div class="mock">
+      <div class="kopfB">
+        <div><h3>Operations</h3><p class="ctx">Betriebsverwaltung</p></div>
+        <span class="links">Arbeitsbereich →</span>
+      </div>
+      <div class="kpi">
+        <div><b>0 von 2</b><span>Aktive Feature-Flags</span></div>
+        <div><b>1</b><span>Zustellungen</span></div>
+        <div><b>0</b><span>Tote Briefe</span></div>
+        <div><b>0</b><span>Matching</span></div>
+      </div>
+      <div class="body">
+        <div class="links">
+          <p class="seitentitel">Lookup</p>
+          <div class="empty"><b>Noch keine Suche gestartet</b>
+            <p>E-Mail oder Name eingeben.</p></div>
+        </div>
+        <div class="rechts">
+          <p class="rh">Kontext</p>
+          <div class="rcard"><b>Zustellstatus</b>sent · 1 zugestellt</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="opt b">
+    <div class="kopfzeile"><span>B</span> so lassen (jetzt)</div>
+    <div class="mock">
+      <div class="kopfA">
+        <div class="eb">Betriebsverwaltung</div>
+        <h3>Operations</h3>
+        <p>Lookup, Zustellstatus, Matching-Trace, Flags.</p>
+      </div>
+      <div class="kpi">
+        <div><b>0 von 2</b><span>Aktive Feature-Flags</span></div>
+        <div><b>1</b><span>Zustellungen</span></div>
+        <div><b>0</b><span>Tote Briefe</span></div>
+        <div><b>0</b><span>Matching</span></div>
+      </div>
+      <div class="body">
+        <div class="links">
+          <p class="seitentitel">Lookup</p>
+          <div class="empty"><b>Noch keine Suche gestartet</b>
+            <p>E-Mail oder Name eingeben.</p></div>
+        </div>
+        <div class="rechts">
+          <p class="rh">Kontext</p>
+          <div class="rcard"><b>Zustellstatus</b>sent · 1 zugestellt</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<p class="note"><b>Was ich denke:</b> Die Verwaltung ist ein Werkzeug für dich, nicht eine Seite für
+Kunden — der große Kopf mit Erklärtext passt dort am wenigsten. Innerhalb von <b>/admin</b> ist B
+allerdings in sich stimmig, weil alle drei Seiten gleich aussehen.</p>
+
+</div>
+</body>
+</html>
