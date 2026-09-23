@@ -1,7 +1,7 @@
 import '@/components/werkbank-layout.css';
 import Link from 'next/link';
 import {
-  AlarmClock, ChevronRight, Droplets, FileSignature, FileText, Flame, ShieldCheck,
+  ChevronRight, Droplets, FileText, Flame, ShieldCheck,
   Smartphone, Thermometer, Trash2, Wifi, Wrench, Zap,
 } from 'lucide-react';
 import {
@@ -9,7 +9,6 @@ import {
   EHOwnerSection, EHSelect, EHStatus, EHText, EHTextarea,
 } from '@/design-system';
 import { WerkbankRahmen } from '@/components/werkbank-rahmen';
-import styles from '../../eigentuemer-start.module.css';
 import { euroExact } from '@/lib/format';
 import { VertraegeTabelle } from '@/components/homeowner/vertraege-tabelle';
 import { CompareRail } from '@/components/homeowner/compare-rail';
@@ -94,14 +93,19 @@ export default async function ContractsPreview({ searchParams }: { searchParams:
     .filter((entry) => entry.state === 'overdue' || entry.state === 'soon')
     .sort((a, b) => (a.deadline?.getTime() ?? 0) - (b.deadline?.getTime() ?? 0));
   const naechsteFrist = withDeadline[0];
-  const focus = naechsteFrist
+  const focus: { zahl: string; strong: string; sub: string; href: string; tone?: 'danger' | 'warn' } | null = naechsteFrist
     ? {
         zahl: naechsteFrist.state === 'overdue' ? '!' : String(deadlineDays(naechsteFrist.deadline) ?? 0),
         strong: naechsteFrist.state === 'overdue' ? 'Kündigungsfrist verpasst' : 'Tage bis zur nächsten Frist',
         sub: `${contractKindLabel(naechsteFrist.row.kind)} · ${naechsteFrist.row.provider} · ${formatDate(naechsteFrist.deadline)}`,
         href: '#vertraege',
+        tone: naechsteFrist.state === 'overdue' ? 'danger' : 'warn',
       }
     : null;
+  const sparsum = active.filter((row) => SAVINGS_KINDS.includes(row.kind as (typeof SAVINGS_KINDS)[number])).reduce((sum, row) => {
+    const e = estimateSavings({ kind: row.kind, yearlyCents: yearlyCents(row.cost_amount, row.cost_interval), postcode: '47055', householdSize: 3, hasLoyaltyBonus: false, switchWilling: true });
+    return sum + (e ? e.lowCents : 0);
+  }, 0);
 
   const comparisonRows = AFFILIATE_CATEGORIES.map((category) => ({
     category,
@@ -114,17 +118,6 @@ export default async function ContractsPreview({ searchParams }: { searchParams:
   for (const row of active) byKind.set(contractKindLabel(row.kind), (byKind.get(contractKindLabel(row.kind)) ?? 0) + (monthlyCents(row.cost_amount, row.cost_interval) ?? 0));
 
   return <WerkbankRahmen role="homeowner" active="/app/contracts" rail={<>
-    <p className="eh-werkbank-rail-h">Verträge im Blick</p>
-    <Link href="#vertraege" className={styles.railStat}>
-      <span className={styles.railStatIcon} aria-hidden="true"><FileSignature size={15} /></span>
-      <span className={styles.railStatLabel}>Aktive Verträge</span>
-      <strong className={styles.railStatValue}>{active.length}</strong>
-    </Link>
-    <Link href="#vertraege" className={styles.railStat}>
-      <span className={styles.railStatIcon} aria-hidden="true"><AlarmClock size={15} /></span>
-      <span className={styles.railStatLabel}>Fristen ≤ 90 Tage</span>
-      <strong className={styles.railStatValue} data-tone={withDeadline.length > 0 ? 'terra' : undefined}>{withDeadline.length}</strong>
-    </Link>
     <div className="eh-werkbank-karte">
       <h4>Kosten nach Art</h4>
       {Array.from(byKind.entries()).sort((a, b) => b[1] - a[1]).map(([kind, cents]) => (
@@ -137,27 +130,29 @@ export default async function ContractsPreview({ searchParams }: { searchParams:
       Öffentliches Schaufenster mit Beispielwerten — keine Anmeldung, keine Speicherung. Die echte Seite ist /app/contracts.
     </EHFormFeedback>
 
-    <header className="eh-werkbank-kopf">
-      <div className="eh-werkbank-kopf-copy">
-        <span>Hausakte · Vorschau</span>
-        <h1>Verträge &amp; Tarife</h1>
-        <span>{`${active.length} aktiv · ${euroExact(monthlyTotal)} pro Monat`}</span>
+    <div className="eh-vdash">
+      <div className="eh-vdash-kopf">
+        <div className="eh-vdash-title">
+          <h1>Verträge &amp; Tarife</h1>
+          <span>Hausakte-Vorschau · Stand {formatDate(new Date())}</span>
+        </div>
+        <div className="eh-vdash-kpis">
+          <Link href="#vertraege" className="eh-vdash-kpi"><b>{active.length}</b><small>Aktiv</small></Link>
+          <Link href="#vertraege" className="eh-vdash-kpi" {...(withDeadline.length > 0 ? { 'data-tone': withDeadline[0].state === 'overdue' ? 'danger' : 'warn' } : {})}><b>{withDeadline.length}</b><small>Fristen ≤ 90 Tage</small></Link>
+          <Link href="#vertraege" className="eh-vdash-kpi"><b>{euroExact(monthlyTotal)}</b><small>pro Monat</small></Link>
+          {sparsum > 0 && <Link href="#vergleiche" className="eh-vdash-kpi"><b>{euroExact(sparsum)}</b><small>Sparpotenzial / Jahr</small></Link>}
+          <Link href="#vertrag-anlegen" className="eh-werkbank-kopf-cta">+ Vertrag</Link>
+        </div>
       </div>
-      <div className="eh-werkbank-kopf-tools">
-        <Link href="#vertrag-anlegen" className="eh-werkbank-kopf-cta">+ Vertrag</Link>
-      </div>
-    </header>
 
-    {focus && (
-      <Link href={focus.href} className="eh-werkbank-fokus" aria-label={focus.sub}>
-        <span className="eh-werkbank-fokus-zahl">{focus.zahl}</span>
-        <span className="eh-werkbank-fokus-text">
-          <strong>{focus.strong}</strong>
-          <span>{focus.sub}</span>
-        </span>
-        <span className="eh-werkbank-fokus-pfeil" aria-hidden="true"><ChevronRight size={20} /></span>
-      </Link>
-    )}
+      {focus && (
+        <Link href={focus.href} className="eh-vdash-fokus" aria-label={focus.sub} {...(focus.tone ? { 'data-tone': focus.tone } : {})}>
+          <b>{focus.zahl}</b>
+          <span>{focus.strong} — {focus.sub}</span>
+          <ChevronRight size={16} aria-hidden="true" />
+        </Link>
+      )}
+    </div>
 
     <EHOwnerSection title={filterIsActive(filter) ? `Meine Verträge · ${visible.length} von ${CONTRACTS.length}` : `Meine Verträge · ${CONTRACTS.length}`} action={{ href: '#vertrag-anlegen', label: '+ Erfassen' }}>
       <div id="vertraege" />

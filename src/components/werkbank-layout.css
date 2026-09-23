@@ -29,6 +29,29 @@
   .eh-werkbank-kopf-tools { overflow-x:auto; max-width:100%; padding-bottom:2px; }
 }
 .eh-werkbank-tbl { min-width:0; max-width:100%; overflow-x:auto; }
+/* Dichtes Dashboard-Set (24.09., Betreiber: 'Kompakt-Dashboard, KPI-Streifen
+   oben; Kopf-Freiflaechen waren der Aergernis-Punkt): kompakter Kopf mit
+   KPI-Kacheln, einzeilige Fokuszeile, engere Tabellen-Zellen oben. */
+.eh-vdash { display:grid; gap:8px; }
+.eh-vdash-kopf { display:flex; align-items:center; gap:12px; flex-wrap:wrap; row-gap:8px; padding:10px 0; border-bottom:1px solid var(--eh-rule); }
+.eh-vdash-title { display:grid; gap:1px; margin-right:auto; min-width:0; }
+.eh-vdash-title h1 { margin:0; font-size:19px; font-weight:var(--eh-weight-bold); line-height:1.15; }
+.eh-vdash-title > span { font-size:var(--eh-font-meta); color:var(--eh-muted); }
+.eh-vdash-kpis { display:flex; flex-wrap:wrap; gap:7px; align-items:stretch; min-width:0; }
+.eh-vdash-kpi { display:grid; align-content:center; gap:1px; padding:6px 12px; border:1px solid var(--eh-color-line); border-radius:var(--eh-radius-control); background:var(--eh-color-white); text-decoration:none; min-width:88px; }
+.eh-vdash-kpi b { font-size:16px; font-weight:var(--eh-weight-bold); line-height:1.1; font-variant-numeric:tabular-nums; color:var(--eh-color-ink); }
+.eh-vdash-kpi small { font-size:var(--eh-font-meta); color:var(--eh-muted); white-space:nowrap; }
+.eh-vdash-kpi[data-tone="warn"] { border-color:#d9a441; background:#fdf6e6; }
+.eh-vdash-kpi[data-tone="warn"] b { color:#8a5a12; }
+.eh-vdash-kpi[data-tone="danger"] { border-color:#d9756b; background:#fdefed; }
+.eh-vdash-kpi[data-tone="danger"] b { color:#b42318; }
+.eh-vdash-fokus { display:flex; align-items:center; gap:10px; padding:8px 13px; border:1px solid var(--eh-rule); border-left:3px solid var(--eh-color-petrol); border-radius:var(--eh-radius-control); background:var(--eh-color-white); text-decoration:none; color:var(--eh-color-ink); font-size:var(--eh-font-label); }
+.eh-vdash-fokus:hover { background:var(--eh-color-paper); }
+.eh-vdash-fokus[data-tone="danger"] { border-left-color:#b42318; background:#fff9f8; }
+.eh-vdash-fokus b { font-variant-numeric:tabular-nums; font-weight:var(--eh-weight-bold); }
+.eh-vdash-fokus > span { flex:1 1 auto; min-width:0; overflow-wrap:anywhere; }
+.eh-vdash-fokus svg { flex:none; opacity:.5; }
+
 .eh-werkbank-kopf-cta { flex:none; display:inline-flex; align-items:center; gap:8px; background:var(--eh-color-petrol); color:var(--eh-color-white); border-radius:var(--eh-radius-control); padding:10px 18px; font-weight:var(--eh-weight-semibold); text-decoration:none; font-size:var(--eh-font-label); }
 .eh-werkbank-kopf-copy h1 { font-size:var(--eh-font-body); font-weight:var(--eh-weight-semibold); line-height:var(--eh-leading-tight); }
 .eh-werkbank-kopf-copy span { font-size:var(--eh-font-label); line-height:var(--eh-leading-normal); color:var(--eh-muted); }
@@ -102,22 +125,22 @@
    Hairlines, Toolbar aus Suche + Status-Umschalter + Spalten-Toggle,
    Sortierung ueber die Kopfzeile — alles URL-getrieben, kein JavaScript. */
 .eh-vtbl { border:1px solid var(--eh-color-line); border-radius:var(--eh-radius-panel); background:var(--eh-color-white); overflow-x:auto; }
-.eh-vtbl-tool { display:flex; flex-wrap:wrap; gap:10px; align-items:center; padding:14px 16px; border-bottom:1px solid var(--eh-rule); }
-.eh-vtbl-suche { position:relative; flex:1 1 280px; display:flex; align-items:center; gap:9px; border:1px solid var(--eh-color-line); border-radius:var(--eh-radius-pill); padding:0 14px; min-height:44px; background:var(--eh-color-white); }
+.eh-vtbl-tool { display:flex; flex-wrap:wrap; gap:8px; align-items:center; padding:10px 12px; border-bottom:1px solid var(--eh-rule); }
+.eh-vtbl-suche { position:relative; flex:1 1 240px; display:flex; align-items:center; gap:9px; border:1px solid var(--eh-color-line); border-radius:var(--eh-radius-pill); padding:0 13px; min-height:40px; background:var(--eh-color-white); }
 .eh-vtbl-suche svg { flex:none; opacity:.55; }
 .eh-vtbl-suche input { flex:1; border:0; outline:0; font:inherit; width:100%; background:transparent; padding:10px 0; color:var(--eh-color-ink); }
 .eh-vtbl-suche:focus-within { border-color:var(--eh-color-petrol); }
-.eh-vtbl-btn { display:inline-flex; align-items:center; gap:8px; min-height:44px; padding:8px 14px; border:1px solid var(--eh-color-line); border-radius:var(--eh-radius-control); background:var(--eh-color-white); color:var(--eh-color-ink); text-decoration:none; font-size:var(--eh-font-label); font-weight:var(--eh-weight-semibold); white-space:nowrap; }
+.eh-vtbl-btn { display:inline-flex; align-items:center; gap:8px; min-height:40px; padding:7px 12px; border:1px solid var(--eh-color-line); border-radius:var(--eh-radius-control); background:var(--eh-color-white); color:var(--eh-color-ink); text-decoration:none; font-size:var(--eh-font-label); font-weight:var(--eh-weight-semibold); white-space:nowrap; }
 .eh-vtbl-btn:hover { background:var(--eh-color-paper); border-color:var(--eh-color-petrol); }
 .eh-vtbl-treffer { margin:10px 16px 0; font-size:var(--eh-font-meta); }
 .eh-vtbl-treffer a { color:var(--eh-color-petrol); }
 .eh-vtbl-table { width:100%; border-collapse:collapse; min-width:640px; }
-.eh-vtbl-table th { text-align:left; font-size:var(--eh-font-meta); font-weight:var(--eh-weight-semibold); opacity:.66; padding:12px 16px 8px; border-bottom:1px solid var(--eh-rule); white-space:nowrap; }
+.eh-vtbl-table th { text-align:left; font-size:var(--eh-font-meta); font-weight:var(--eh-weight-semibold); opacity:.66; padding:9px 13px 5px; border-bottom:1px solid var(--eh-rule); white-space:nowrap; }
 .eh-vtbl-table th a, .eh-vtbl-sortlink { display:inline-flex; align-items:center; gap:6px; color:inherit; text-decoration:none; }
 .eh-vtbl-table th a:hover, .eh-vtbl-sortlink:hover { color:var(--eh-color-petrol); opacity:1; }
 .eh-vtbl-sort-idle { opacity:.28; }
 .eh-vtbl-table th.is-sorted a { color:var(--eh-color-petrol); opacity:1; }
-.eh-vtbl-table td { padding:13px 16px; vertical-align:top; }
+.eh-vtbl-table td { padding:9px 13px; vertical-align:top; }
 .eh-vtbl-table tbody tr + tr td { border-top:1px solid var(--eh-rule); }
 .eh-vtbl-table tbody tr:hover { background:var(--eh-color-paper); }
 .eh-vtbl-table tr[data-sel], .eh-vtbl-table tr[data-sel]:hover { background:var(--eh-color-paper); }
@@ -187,9 +210,9 @@
    Betreiber-Vorbild Startseite): CompareRail liefert die runden Pfeile,
    scroll-snap macht das Wischen griffig; Farbtone = Chips-Hues. */
 .eh-vergleich-slider { display:flex; flex-wrap:nowrap; gap:12px; padding:2px 2px 8px; scroll-snap-type:x proximity; }
-.eh-vergleich-karte { flex:0 0 clamp(258px, 29%, 330px); scroll-snap-align:start; display:flex; flex-direction:column; gap:8px; min-height:196px; padding:16px; border:1px solid var(--eh-color-line); border-radius:var(--eh-radius-panel); background:var(--eh-color-white); }
+.eh-vergleich-karte { flex:0 0 clamp(224px, 25%, 290px); scroll-snap-align:start; display:flex; flex-direction:column; gap:6px; padding:13px 14px; border:1px solid var(--eh-color-line); border-radius:var(--eh-radius-panel); background:var(--eh-color-white); }
 .eh-vergleich-karte:hover { border-color:var(--eh-karte-ink, var(--eh-color-petrol)); }
-.eh-vergleich-ic { flex:none; display:grid; place-items:center; width:38px; height:38px; border-radius:var(--eh-radius-control); background:var(--eh-karte-tint, var(--eh-color-paper)); color:var(--eh-karte-ink, var(--eh-color-petrol)); }
+.eh-vergleich-ic { flex:none; display:grid; place-items:center; width:32px; height:32px; border-radius:var(--eh-radius-control); background:var(--eh-karte-tint, var(--eh-color-paper)); color:var(--eh-karte-ink, var(--eh-color-petrol)); }
 .eh-vergleich-body { flex:1 1 auto; min-width:0; display:grid; gap:2px; }
 .eh-vergleich-body strong { font-size:var(--eh-font-label); font-weight:var(--eh-weight-semibold); }
 .eh-vergleich-body small { font-size:var(--eh-font-meta); color:var(--eh-color-secondary); overflow-wrap:anywhere; }

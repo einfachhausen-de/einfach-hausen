@@ -1,7 +1,7 @@
 import '@/components/werkbank-layout.css';
 import Link from 'next/link';
 import {
-  AlarmClock, ChevronRight, Droplets, FileSignature, FileText, Flame, ShieldCheck,
+  ChevronRight, Droplets, FileText, Flame, ShieldCheck,
   Smartphone, Thermometer, Trash2, Wifi, Wrench, Zap,
 } from 'lucide-react';
 import {
@@ -11,7 +11,6 @@ import {
 import { WerkbankRahmen } from '@/components/werkbank-rahmen';
 import { VertraegeTabelle } from '@/components/homeowner/vertraege-tabelle';
 import { CompareRail } from '@/components/homeowner/compare-rail';
-import styles from '../eigentuemer-start.module.css';
 import { requireUser } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { euroExact } from '@/lib/format';
@@ -88,12 +87,13 @@ export default async function Contracts({ searchParams }: { searchParams: Promis
     .sort((a, b) => (a.deadline?.getTime() ?? 0) - (b.deadline?.getTime() ?? 0));
   const naechsteFrist = withDeadline[0];
   const spaehrende = active.filter((row) => SAVINGS_KINDS.includes(row.kind as ContractKind));
-  const focus = naechsteFrist
+  const focus: { zahl: string; strong: string; sub: string; href: string; tone?: 'danger' | 'warn' } | null = naechsteFrist
     ? {
         zahl: naechsteFrist.state === 'overdue' ? '!' : String(deadlineDays(naechsteFrist.deadline) ?? 0),
         strong: naechsteFrist.state === 'overdue' ? 'Kündigungsfrist verpasst' : 'Tage bis zur nächsten Frist',
         sub: `${contractKindLabel(naechsteFrist.row.kind)} · ${naechsteFrist.row.provider} · ${formatDate(naechsteFrist.deadline)}`,
         href: `/app/contracts?vertrag=${naechsteFrist.row.id}`,
+        tone: naechsteFrist.state === 'overdue' ? 'danger' : 'warn',
       }
     : active.length > 0
       ? {
@@ -105,6 +105,10 @@ export default async function Contracts({ searchParams }: { searchParams: Promis
           href: '#vergleiche',
         }
       : null;
+  const sparsum = spaehrende.reduce((sum, row) => {
+    const e = estimateSavings({ kind: row.kind, yearlyCents: yearlyCents(row.cost_amount, row.cost_interval), postcode: profile?.postcode || '', householdSize: null, hasLoyaltyBonus: false, switchWilling: true });
+    return sum + (e ? e.lowCents : 0);
+  }, 0);
 
   const comparisonNotice = sp.hinweis ? COMPARISON_NOTICES[sp.hinweis] : undefined;
 
@@ -116,17 +120,6 @@ export default async function Contracts({ searchParams }: { searchParams: Promis
   }));
 
   return <WerkbankRahmen role="homeowner" active="/app/contracts" rail={<>
-    <p className="eh-werkbank-rail-h">Verträge im Blick</p>
-    <Link href="#vertraege" className={styles.railStat}>
-      <span className={styles.railStatIcon} aria-hidden="true"><FileSignature size={15} /></span>
-      <span className={styles.railStatLabel}>Aktive Verträge</span>
-      <strong className={styles.railStatValue}>{active.length}</strong>
-    </Link>
-    <Link href="#vertraege" className={styles.railStat}>
-      <span className={styles.railStatIcon} aria-hidden="true"><AlarmClock size={15} /></span>
-      <span className={styles.railStatLabel}>Fristen ≤ 90 Tage</span>
-      <strong className={styles.railStatValue} data-tone={withDeadline.length > 0 ? 'terra' : undefined}>{withDeadline.length}</strong>
-    </Link>
     <div className="eh-werkbank-karte">
       <h4>Kosten nach Art</h4>
       {(() => {
@@ -141,30 +134,32 @@ export default async function Contracts({ searchParams }: { searchParams: Promis
     </div>
   </>}>
 
-    <header className="eh-werkbank-kopf">
-      <div className="eh-werkbank-kopf-copy">
-        <span>Hausakte</span>
-        <h1>Verträge &amp; Tarife</h1>
-        <span>{`${active.length} aktiv · ${euroExact(monthlyTotal)} pro Monat`}</span>
+    <div className="eh-vdash">
+      <div className="eh-vdash-kopf">
+        <div className="eh-vdash-title">
+          <h1>Verträge &amp; Tarife</h1>
+          <span>Hausakte · Stand {formatDate(new Date())}</span>
+        </div>
+        <div className="eh-vdash-kpis">
+          <Link href="#vertraege" className="eh-vdash-kpi"><b>{active.length}</b><small>Aktiv</small></Link>
+          <Link href="#vertraege" className="eh-vdash-kpi" {...(withDeadline.length > 0 ? { 'data-tone': withDeadline[0].state === 'overdue' ? 'danger' : 'warn' } : {})}><b>{withDeadline.length}</b><small>Fristen ≤ 90 Tage</small></Link>
+          <Link href="#vertraege" className="eh-vdash-kpi"><b>{euroExact(monthlyTotal)}</b><small>pro Monat</small></Link>
+          {sparsum > 0 && <Link href="#vergleiche" className="eh-vdash-kpi"><b>{euroExact(sparsum)}</b><small>Sparpotenzial / Jahr</small></Link>}
+          <Link href="#vertrag-anlegen" className="eh-werkbank-kopf-cta">+ Vertrag</Link>
+        </div>
       </div>
-      <div className="eh-werkbank-kopf-tools">
-        <Link href="#vertrag-anlegen" className="eh-werkbank-kopf-cta">+ Vertrag</Link>
-      </div>
-    </header>
 
     {saved && <EHFormFeedback kind="success">Gespeichert. Deine Hausakte ist aktuell.</EHFormFeedback>}
     {comparisonNotice && <EHFormFeedback kind="info">{comparisonNotice}</EHFormFeedback>}
 
-    {focus && (
-      <Link href={focus.href} className="eh-werkbank-fokus" aria-label={focus.sub}>
-        <span className="eh-werkbank-fokus-zahl">{focus.zahl}</span>
-        <span className="eh-werkbank-fokus-text">
-          <strong>{focus.strong}</strong>
-          <span>{focus.sub}</span>
-        </span>
-        <span className="eh-werkbank-fokus-pfeil" aria-hidden="true"><ChevronRight size={20} /></span>
-      </Link>
-    )}
+      {focus && (
+        <Link href={focus.href} className="eh-vdash-fokus" aria-label={focus.sub} {...(focus.tone ? { 'data-tone': focus.tone } : {})}>
+          <b>{focus.zahl}</b>
+          <span>{focus.strong} — {focus.sub}</span>
+          <ChevronRight size={16} aria-hidden="true" />
+        </Link>
+      )}
+    </div>
 
     <EHOwnerSection title={filterIsActive(filter) ? `Meine Verträge · ${visible.length} von ${contracts.length}` : `Meine Verträge · ${contracts.length}`} action={{ href: '#vertrag-anlegen', label: '+ Erfassen' }}>
       <div id="vertraege" />
