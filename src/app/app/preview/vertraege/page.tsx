@@ -81,19 +81,27 @@ export default async function ContractsPreview({ searchParams }: { searchParams:
     }
   } catch { /* nach Sandbox-Reset kann der Seed fehlen — dann greifen die Demo-Zeilen */ }
   if (CONTRACTS.length === 0) CONTRACTS = fixtureContracts();
+  const sparFor = (row: FristRow) => row.status === 'active' && SAVINGS_KINDS.includes(row.kind as (typeof SAVINGS_KINDS)[number])
+    ? estimateSavings({ kind: row.kind, yearlyCents: yearlyCents(row.cost_amount, row.cost_interval), postcode: '47055', householdSize: 3, hasLoyaltyBonus: false, switchWilling: true })?.highCents ?? null
+    : null;
+  const pool = CONTRACTS.map((row) => ({ ...row, sparCents: sparFor(row) }));
   const filter = parseContractFilter(sp);
-  const visible = applyContractFilter(CONTRACTS, filter);
+  const visible = applyContractFilter(pool, filter);
   const selectedId = Number(sp.vertrag);
   const selectedRow = Number.isFinite(selectedId) ? visible.find((r) => r.id === selectedId) ?? null : null;
   const active = CONTRACTS.filter((c) => c.status === 'active');
   const monthlyTotal = active.reduce((sum, c) => sum + (monthlyCents(c.cost_amount, c.cost_interval) ?? 0), 0);
+  const sparsum = active.filter((row) => SAVINGS_KINDS.includes(row.kind as (typeof SAVINGS_KINDS)[number])).reduce((sum, row) => {
+    const e = estimateSavings({ kind: row.kind, yearlyCents: yearlyCents(row.cost_amount, row.cost_interval), postcode: '47055', householdSize: 3, hasLoyaltyBonus: false, switchWilling: true });
+    return sum + (e ? e.lowCents : 0);
+  }, 0);
 
   const withDeadline = active
     .map((row) => ({ row, deadline: cancellationDeadline(row), state: deadlineState(cancellationDeadline(row)) }))
     .filter((entry) => entry.state === 'overdue' || entry.state === 'soon')
     .sort((a, b) => (a.deadline?.getTime() ?? 0) - (b.deadline?.getTime() ?? 0));
   const naechsteFrist = withDeadline[0];
-  const focus: { zahl: string; strong: string; sub: string; href: string; tone?: 'danger' | 'warn' } | null = naechsteFrist
+  const focus: { zahl: string; strong: string; sub: string; href: string; tone?: 'danger' | 'warn' | 'save' } | null = naechsteFrist
     ? {
         zahl: naechsteFrist.state === 'overdue' ? '!' : String(deadlineDays(naechsteFrist.deadline) ?? 0),
         strong: naechsteFrist.state === 'overdue' ? 'Kündigungsfrist verpasst' : 'Tage bis zur nächsten Frist',
@@ -101,11 +109,9 @@ export default async function ContractsPreview({ searchParams }: { searchParams:
         href: '#vertraege',
         tone: naechsteFrist.state === 'overdue' ? 'danger' : 'warn',
       }
-    : null;
-  const sparsum = active.filter((row) => SAVINGS_KINDS.includes(row.kind as (typeof SAVINGS_KINDS)[number])).reduce((sum, row) => {
-    const e = estimateSavings({ kind: row.kind, yearlyCents: yearlyCents(row.cost_amount, row.cost_interval), postcode: '47055', householdSize: 3, hasLoyaltyBonus: false, switchWilling: true });
-    return sum + (e ? e.lowCents : 0);
-  }, 0);
+    : sparsum > 0
+      ? { zahl: euroExact(sparsum), strong: 'mindestens pro Jahr möglich', sub: `${active.filter((r) => SAVINGS_KINDS.includes(r.kind as (typeof SAVINGS_KINDS)[number])).length} Verträge mit Spar-Check · Vergleiche ansehen`, href: '#vergleiche', tone: 'save' as const }
+      : null;
 
   const comparisonRows = AFFILIATE_CATEGORIES.map((category) => ({
     category,
@@ -140,7 +146,6 @@ export default async function ContractsPreview({ searchParams }: { searchParams:
           <Link href="#vertraege" className="eh-vdash-kpi"><b>{active.length}</b><small>Aktiv</small></Link>
           <Link href="#vertraege" className="eh-vdash-kpi" {...(withDeadline.length > 0 ? { 'data-tone': withDeadline[0].state === 'overdue' ? 'danger' : 'warn' } : {})}><b>{withDeadline.length}</b><small>Fristen ≤ 90 Tage</small></Link>
           <Link href="#vertraege" className="eh-vdash-kpi"><b>{euroExact(monthlyTotal)}</b><small>pro Monat</small></Link>
-          {sparsum > 0 && <Link href="#vergleiche" className="eh-vdash-kpi"><b>{euroExact(sparsum)}</b><small>Sparpotenzial / Jahr</small></Link>}
           <Link href="#vertrag-anlegen" className="eh-werkbank-kopf-cta">+ Vertrag</Link>
         </div>
       </div>
@@ -156,9 +161,12 @@ export default async function ContractsPreview({ searchParams }: { searchParams:
 
     <EHOwnerSection title={filterIsActive(filter) ? `Meine Verträge · ${visible.length} von ${CONTRACTS.length}` : `Meine Verträge · ${CONTRACTS.length}`} action={{ href: '#vertrag-anlegen', label: '+ Erfassen' }}>
       <div id="vertraege" />
-      <VertraegeTabelle base="/app/preview/vertraege" allRows={CONTRACTS} rows={visible} filter={filter} selectedId={selectedRow?.id ?? null} icons={KIND_ICONS}>
+      <VertraegeTabelle base="/app/preview/vertraege" allRows={pool} rows={visible} filter={filter} selectedId={selectedRow?.id ?? null} icons={KIND_ICONS}>
         {selectedRow && <PreviewDetail row={selectedRow} />}
       </VertraegeTabelle>
+      {pool.length > 0 && pool.length < 4 && (
+        <p className="eh-vdash-nudge">Je mehr Verträge du erfasst, desto genauer dein Spar-Check — auch Gas, Handy, Abo oder Versicherung gehören in die Hausakte.</p>
+      )}
     </EHOwnerSection>
 
     <EHOwnerSection title="Vergleichen & Tarife">
@@ -184,7 +192,7 @@ export default async function ContractsPreview({ searchParams }: { searchParams:
                 </p>
                 <span className="eh-vergleich-rechts">
                   {available
-                    ? <><EHStatus tone="success">Partner freigegeben</EHStatus><EHButton href="#vergleiche" variant="secondary" size="small" arrow>Jetzt vergleichen</EHButton></>
+                    ? <><EHStatus tone="success">Partner freigegeben</EHStatus><EHButton href="#vergleiche" size="small" arrow>Jetzt vergleichen</EHButton></>
                     : <EHStatus>Kein Partner freigegeben</EHStatus>}
                 </span>
               </article>

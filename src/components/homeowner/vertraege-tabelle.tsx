@@ -29,6 +29,9 @@ export type TabellenZeile = {
   cancellation_deadline: string | null;
   notice: string;
   status: string;
+  /** Obergrenze des Schaetzers in Cent, nur fuer aktive spaehrende Arten —
+   *  der Koeder in der Liste: 'bis zu X € /Jahr'. */
+  sparCents?: number | null;
 };
 
 const STATUS_CYCLE: ContractStatusFilter[] = ['alle', 'active', 'cancelled', 'expired'];
@@ -111,12 +114,13 @@ export function VertraegeTabelle({
             {!filter.kompakt && <th scope="col">Laufzeit bis</th>}
             {sortHead('frist', 'Frist')}
             <th scope="col" className="eh-vtbl-zahlen">{sortHeadInline(filter, base, 'kosten', 'Kosten')}</th>
+            {!filter.kompakt && <th scope="col">Spar-Check</th>}
             <th scope="col">Status</th>
           </tr>
         </thead>
         <tbody>
           {rows.length === 0 && (
-            <tr><td colSpan={filter.kompakt ? 4 : 6} className="eh-vtbl-leer">Kein Vertrag passt zu Filter oder Suche. <Link href={base}>Alle zeigen</Link></td></tr>
+            <tr><td colSpan={filter.kompakt ? 5 : 7} className="eh-vtbl-leer">Kein Vertrag passt zu Filter oder Suche. <Link href={base}>Alle zeigen</Link></td></tr>
           )}
           {rows.map((row) => {
             const Icon = icons[row.kind];
@@ -134,6 +138,13 @@ export function VertraegeTabelle({
                 <td className="eh-vtbl-zahlen eh-vtbl-kosten">
                   {row.cost_amount != null ? <><b>{euro(row.cost_amount)}</b><small>{INTERVAL_SHORT[row.cost_interval] ?? ''}</small></> : '—'}
                 </td>
+                {!filter.kompakt && (
+                  <td>
+                    {row.sparCents != null && row.sparCents > 0
+                      ? <span className="eh-vtbl-spar">bis zu {euro(row.sparCents)} /Jahr</span>
+                      : <span className="eh-vtbl-spar-leer">—</span>}
+                  </td>
+                )}
                 <td>
                   <span className="eh-vtbl-badge" data-tone={row.status === 'active' ? 'ok' : 'muted'}>
                     {row.status === 'active' ? 'Aktiv' : row.status === 'cancelled' ? 'Gekündigt' : 'Ausgelaufen'}

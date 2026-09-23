@@ -72,7 +72,13 @@ export default async function Contracts({ searchParams }: { searchParams: Promis
   const selectedId = Number(sp.vertrag ?? sp.contract);
   const profile = db.prepare('SELECT postcode FROM homeowner_profiles WHERE user_id=?').get(user.id) as { postcode?: string } | undefined;
 
-  const contracts = db.prepare(`SELECT * FROM house_contracts WHERE homeowner_id=? ORDER BY CASE status WHEN 'active' THEN 0 WHEN 'cancelled' THEN 1 ELSE 2 END, provider COLLATE NOCASE`).all(user.id) as ContractRow[];
+  const rows = db.prepare(`SELECT * FROM house_contracts WHERE homeowner_id=? ORDER BY CASE status WHEN 'active' THEN 0 WHEN 'cancelled' THEN 1 ELSE 2 END, provider COLLATE NOCASE`).all(user.id) as ContractRow[];
+  // Koeder pro Zeile: aktive spaehrende Arten bekommen ihre Spar-Obergrenze
+  // mit — die Tabelle verkauft den Klick, das Detail loest ihn ein.
+  const sparFor = (row: ContractRow) => row.status === 'active' && SAVINGS_KINDS.includes(row.kind as ContractKind)
+    ? estimateSavings({ kind: row.kind, yearlyCents: yearlyCents(row.cost_amount, row.cost_interval), postcode: profile?.postcode || '', householdSize: null, hasLoyaltyBonus: false, switchWilling: true })?.highCents ?? null
+    : null;
+  const contracts = rows.map((row) => ({ ...row, sparCents: sparFor(row) }));
   const filter = parseContractFilter(sp);
   const visible = applyContractFilter(contracts, filter);
   const selectedRow = Number.isFinite(selectedId) ? visible.find((r) => r.id === selectedId) ?? null : null;
@@ -87,7 +93,7 @@ export default async function Contracts({ searchParams }: { searchParams: Promis
     .sort((a, b) => (a.deadline?.getTime() ?? 0) - (b.deadline?.getTime() ?? 0));
   const naechsteFrist = withDeadline[0];
   const spaehrende = active.filter((row) => SAVINGS_KINDS.includes(row.kind as ContractKind));
-  const focus: { zahl: string; strong: string; sub: string; href: string; tone?: 'danger' | 'warn' } | null = naechsteFrist
+  const focus0: { zahl: string; strong: string; sub: string; href: string; tone?: 'danger' | 'warn' | 'save' } | null = naechsteFrist
     ? {
         zahl: naechsteFrist.state === 'overdue' ? '!' : String(deadlineDays(naechsteFrist.deadline) ?? 0),
         strong: naechsteFrist.state === 'overdue' ? 'Kündigungsfrist verpasst' : 'Tage bis zur nächsten Frist',
@@ -95,20 +101,24 @@ export default async function Contracts({ searchParams }: { searchParams: Promis
         href: `/app/contracts?vertrag=${naechsteFrist.row.id}`,
         tone: naechsteFrist.state === 'overdue' ? 'danger' : 'warn',
       }
-    : active.length > 0
-      ? {
-          zahl: String(spaehrende.length),
-          strong: 'Tarife prüfen',
-          sub: spaehrende.length > 0
-            ? `${spaehrende.length} ${spaehrende.length === 1 ? 'Vertrag' : 'Verträge'} mit Spar-Check · keine Frist in den nächsten 90 Tagen`
-            : 'Keine Frist in den nächsten 90 Tagen · erfasste Verträge sind ruhig',
-          href: '#vergleiche',
-        }
-      : null;
+    : null;
+  // Kein Fristendruck -> die Seite verkauft das Geld: Sparsumme wird zum
+  // Angebot mit sanftem CTA, nicht zur Mahnung.
   const sparsum = spaehrende.reduce((sum, row) => {
     const e = estimateSavings({ kind: row.kind, yearlyCents: yearlyCents(row.cost_amount, row.cost_interval), postcode: profile?.postcode || '', householdSize: null, hasLoyaltyBonus: false, switchWilling: true });
     return sum + (e ? e.lowCents : 0);
   }, 0);
+  const focus = focus0 ?? (sparsum > 0
+    ? {
+        zahl: euroExact(sparsum),
+        strong: 'mindestens pro Jahr möglich',
+        sub: `${spaehrende.length} ${spaehrende.length === 1 ? 'Vertrag' : 'Verträge'} mit Spar-Check · Vergleiche ansehen`,
+        href: '#vergleiche',
+        tone: 'save' as const,
+      }
+    : active.length > 0
+      ? { zahl: String(0), strong: 'Alles ruhig', sub: 'Keine Frist in den nächsten 90 Tagen · neue Verträge machen den Check genauer', href: '#vertrag-anlegen' }
+      : null);
 
   const comparisonNotice = sp.hinweis ? COMPARISON_NOTICES[sp.hinweis] : undefined;
 
@@ -144,7 +154,6 @@ export default async function Contracts({ searchParams }: { searchParams: Promis
           <Link href="#vertraege" className="eh-vdash-kpi"><b>{active.length}</b><small>Aktiv</small></Link>
           <Link href="#vertraege" className="eh-vdash-kpi" {...(withDeadline.length > 0 ? { 'data-tone': withDeadline[0].state === 'overdue' ? 'danger' : 'warn' } : {})}><b>{withDeadline.length}</b><small>Fristen ≤ 90 Tage</small></Link>
           <Link href="#vertraege" className="eh-vdash-kpi"><b>{euroExact(monthlyTotal)}</b><small>pro Monat</small></Link>
-          {sparsum > 0 && <Link href="#vergleiche" className="eh-vdash-kpi"><b>{euroExact(sparsum)}</b><small>Sparpotenzial / Jahr</small></Link>}
           <Link href="#vertrag-anlegen" className="eh-werkbank-kopf-cta">+ Vertrag</Link>
         </div>
       </div>
@@ -166,9 +175,14 @@ export default async function Contracts({ searchParams }: { searchParams: Promis
       {contracts.length === 0
         ? <EHEmptyState title="Noch kein Vertrag erfasst" text="Trag deinen Strom-, DSL- oder Versicherungsvertrag ein. Danach siehst du hier Kosten, Laufzeit und Kündigungsfrist – und ob sich ein Wechsel lohnt." action={<EHButton href="#vertrag-anlegen" variant="secondary">Vertrag erfassen</EHButton>} />
         : (
-          <VertraegeTabelle base="/app/contracts" allRows={contracts} rows={visible} filter={filter} selectedId={selectedRow?.id ?? null} icons={KIND_ICONS}>
-            {selectedRow && <VertragsDetail row={selectedRow} postcode={profile?.postcode} />}
-          </VertraegeTabelle>
+          <>
+            <VertraegeTabelle base="/app/contracts" allRows={contracts} rows={visible} filter={filter} selectedId={selectedRow?.id ?? null} icons={KIND_ICONS}>
+              {selectedRow && <VertragsDetail row={selectedRow} postcode={profile?.postcode} />}
+            </VertraegeTabelle>
+            {contracts.length > 0 && contracts.length < 4 && (
+              <p className="eh-vdash-nudge">Je mehr Verträge du erfasst, desto genauer dein Spar-Check — auch Gas, Handy, Abo oder Versicherung gehören in die Hausakte. <Link href="#vertrag-anlegen">Weitersammeln</Link></p>
+            )}
+          </>
         )}
     </EHOwnerSection>
 
@@ -195,7 +209,7 @@ export default async function Contracts({ searchParams }: { searchParams: Promis
                 </p>
                 <span className="eh-vergleich-rechts">
                   {availability.status === 'available'
-                    ? <><EHStatus tone="success">Partner freigegeben</EHStatus><EHButton href={`/api/affiliate/${category}`} variant="secondary" size="small" arrow>Jetzt vergleichen</EHButton></>
+                    ? <><EHStatus tone="success">Partner freigegeben</EHStatus><EHButton href={`/api/affiliate/${category}`} size="small" arrow>Jetzt vergleichen</EHButton></>
                     : availability.status === 'error'
                       ? <EHStatus tone="error">Konfiguration prüfen</EHStatus>
                       : <EHStatus>Kein Partner freigegeben</EHStatus>}
@@ -279,8 +293,9 @@ function VertragsDetail({ row, postcode }: { row: ContractRow; postcode?: string
             {estimate.reasons.slice(0, 3).map((reason, i) => <li key={i}>{reason}</li>)}
           </ul>
           {outbound?.status === 'available'
-            ? <EHButton href={outbound.entryHref} variant="secondary" size="small" arrow>{AFFILIATE_CATEGORY_ACTIONS[outbound.category]}</EHButton>
+            ? <EHButton href={outbound.entryHref} size="small" arrow>{AFFILIATE_CATEGORY_ACTIONS[outbound.category]}</EHButton>
             : <EHText muted>Ein Klick führt erst zum freigegebenen Partner, sobald einer für {contractKindLabel(row.kind).toLowerCase()} angebunden ist — deine Daten bleiben hier.</EHText>}
+          <EHText muted>Sieht dein Hausmanager anders? <Link href="/app/consultation">Kurz mit der KI gegenprüfen lassen</Link> — zwei Fragen, ohne Vertrag damit.</EHText>
         </div>
       )}
       <div className="eh-vertrag-aktionen">

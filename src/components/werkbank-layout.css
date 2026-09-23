@@ -206,6 +206,13 @@
   .eh-vertrag > summary { flex-wrap:wrap; }
   .eh-vertrag-rechts { margin-left:44px; }
 }
+.eh-vtbl-spar { display:inline-flex; align-items:center; border-radius:var(--eh-radius-pill); padding:2px 9px; background:#e5f5ea; color:#0b6b3a; font-size:var(--eh-font-meta); font-weight:var(--eh-weight-bold); white-space:nowrap; }
+.eh-vtbl-spar-leer { opacity:.3; }
+.eh-vdash-fokus[data-tone="save"] { border-left-color:#0b6b3a; background:#f4fbf6; }
+.eh-vdash-fokus[data-tone="save"] b { color:#0b6b3a; }
+.eh-vdash-nudge { margin:10px 2px 0; font-size:var(--eh-font-meta); color:var(--eh-muted); }
+.eh-vdash-nudge a { color:var(--eh-color-petrol); }
+
 /* Vergleich & Tarife als Karten nebeneinander im Chip-Slider (24.09.,
    Betreiber-Vorbild Startseite): CompareRail liefert die runden Pfeile,
    scroll-snap macht das Wischen griffig; Farbtone = Chips-Hues. */
