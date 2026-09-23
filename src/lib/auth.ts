@@ -79,7 +79,13 @@ export function sessionCookiePolicy() {
 }
 
 function cookieOptions(expires: Date) {
-  return { httpOnly: true, sameSite: 'lax' as const, secure: process.env.NODE_ENV === 'production' && process.env.E2E_INSECURE_COOKIES !== '1', path: '/', expires };
+  // Vorschau-Umgebungen (Arena-/IDE-iframe) laden die Seite cross-site —
+  // ein Lax-Cookie wird dort vom Browser verworfen, die App wirft trotz
+  // erfolgreichem Login zurueck auf /login. Mit SESSION_COOKIE_SAMESITE=none (nur
+  // ueber https sinnvoll) wird das Session-Cookie auf None+Secure gestellt;
+  // Standard bleibt bewusst Lax, die Sicherheits-Tests pruefen diesen Pfad.
+  const crossSite = process.env.SESSION_COOKIE_SAMESITE === 'none';
+  return { httpOnly: true, sameSite: crossSite ? ('none' as const) : ('lax' as const), secure: crossSite || (process.env.NODE_ENV === 'production' && process.env.E2E_INSECURE_COOKIES !== '1'), path: '/', expires };
 }
 
 // Lazily resolved so this module stays importable outside Next's request context.
