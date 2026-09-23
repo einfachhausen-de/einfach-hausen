@@ -32,6 +32,8 @@ export type ContractFilter = {
   kind: string | null;
   status: ContractStatusFilter;
   sort: ContractSort;
+  /** 'Nur das Wichtige': Art/Laufzeit-Spalten und Unterzeilen aus. */
+  kompakt: boolean;
 };
 
 const DEFAULTS = { status: 'alle' as ContractStatusFilter, sort: 'frist' as ContractSort };
@@ -41,11 +43,11 @@ export function parseContractFilter(sp: Record<string, string | undefined>): Con
   const kind = sp.art && sp.art !== 'alle' ? sp.art : null;
   const status = sp.status === 'active' || sp.status === 'cancelled' || sp.status === 'expired' ? sp.status : DEFAULTS.status;
   const sort = sp.sort === 'kosten' || sp.sort === 'name' ? sp.sort : DEFAULTS.sort;
-  return { q: raw, kind, status, sort };
+  return { q: raw, kind, status, sort, kompakt: sp.ansicht === 'kompakt' };
 }
 
 export function filterIsActive(f: ContractFilter): boolean {
-  return f.q !== '' || f.kind !== null || f.status !== DEFAULTS.status || f.sort !== DEFAULTS.sort;
+  return f.q !== '' || f.kind !== null || f.status !== DEFAULTS.status || f.sort !== DEFAULTS.sort || f.kompakt;
 }
 
 /** Link-Baustein: uebernehmt den aktuellen Filter, ersetzt einzelne Achsen. */
@@ -56,6 +58,7 @@ export function withContractQuery(f: ContractFilter, over?: Partial<ContractFilt
   if (next.kind) p.set('art', next.kind);
   if (next.status !== DEFAULTS.status) p.set('status', next.status);
   if (next.sort !== DEFAULTS.sort) p.set('sort', next.sort);
+  if (next.kompakt) p.set('ansicht', 'kompakt');
   const s = p.toString();
   return s ? `?${s}` : '';
 }

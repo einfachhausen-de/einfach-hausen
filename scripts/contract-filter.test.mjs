@@ -12,9 +12,9 @@ const ROWS = [
 ];
 
 test('parseContractFilter normalisiert und begrenzt die Eingaben', () => {
-  assert.deepEqual(parseContractFilter({}), { q: '', kind: null, status: 'alle', sort: 'frist' });
+  assert.deepEqual(parseContractFilter({}), { q: '', kind: null, status: 'alle', sort: 'frist', kompakt: false });
   assert.deepEqual(parseContractFilter({ q: '  Telekom   XL ', art: 'alle', status: 'quatsch', sort: 'kosten' }),
-    { q: 'Telekom XL', kind: null, status: 'alle', sort: 'kosten' });
+    { q: 'Telekom XL', kind: null, status: 'alle', sort: 'kosten', kompakt: false });
   assert.equal(parseContractFilter({ q: 'x'.repeat(200) }).q.length, 80);
 });
 

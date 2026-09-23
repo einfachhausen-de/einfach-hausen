@@ -98,6 +98,52 @@
 .eh-vertrag-filter button { min-height:44px; padding:8px 18px; border:1px solid var(--eh-color-petrol); border-radius:var(--eh-radius-control); background:var(--eh-color-petrol); color:var(--eh-color-white); font:inherit; cursor:pointer; }
 .eh-vertrag-filter input:focus-visible, .eh-vertrag-filter select:focus-visible, .eh-vertrag-filter button:focus-visible { outline:2px solid var(--eh-color-petrol); outline-offset:2px; }
 .eh-vertrag-treffer { margin:0 0 10px; font-size:var(--eh-font-meta); }
+/* Vertragstabelle (24.09., Betreiber-Vorbild): flache Zeilen mit feinen
+   Hairlines, Toolbar aus Suche + Status-Umschalter + Spalten-Toggle,
+   Sortierung ueber die Kopfzeile — alles URL-getrieben, kein JavaScript. */
+.eh-vtbl { border:1px solid var(--eh-color-line); border-radius:var(--eh-radius-panel); background:var(--eh-color-white); overflow-x:auto; }
+.eh-vtbl-tool { display:flex; flex-wrap:wrap; gap:10px; align-items:center; padding:14px 16px; border-bottom:1px solid var(--eh-rule); }
+.eh-vtbl-suche { position:relative; flex:1 1 280px; display:flex; align-items:center; gap:9px; border:1px solid var(--eh-color-line); border-radius:var(--eh-radius-pill); padding:0 14px; min-height:44px; background:var(--eh-color-white); }
+.eh-vtbl-suche svg { flex:none; opacity:.55; }
+.eh-vtbl-suche input { flex:1; border:0; outline:0; font:inherit; width:100%; background:transparent; padding:10px 0; color:var(--eh-color-ink); }
+.eh-vtbl-suche:focus-within { border-color:var(--eh-color-petrol); }
+.eh-vtbl-btn { display:inline-flex; align-items:center; gap:8px; min-height:44px; padding:8px 14px; border:1px solid var(--eh-color-line); border-radius:var(--eh-radius-control); background:var(--eh-color-white); color:var(--eh-color-ink); text-decoration:none; font-size:var(--eh-font-label); font-weight:var(--eh-weight-semibold); white-space:nowrap; }
+.eh-vtbl-btn:hover { background:var(--eh-color-paper); border-color:var(--eh-color-petrol); }
+.eh-vtbl-treffer { margin:10px 16px 0; font-size:var(--eh-font-meta); }
+.eh-vtbl-treffer a { color:var(--eh-color-petrol); }
+.eh-vtbl-table { width:100%; border-collapse:collapse; min-width:640px; }
+.eh-vtbl-table th { text-align:left; font-size:var(--eh-font-meta); font-weight:var(--eh-weight-semibold); opacity:.66; padding:12px 16px 8px; border-bottom:1px solid var(--eh-rule); white-space:nowrap; }
+.eh-vtbl-table th a, .eh-vtbl-sortlink { display:inline-flex; align-items:center; gap:6px; color:inherit; text-decoration:none; }
+.eh-vtbl-table th a:hover, .eh-vtbl-sortlink:hover { color:var(--eh-color-petrol); opacity:1; }
+.eh-vtbl-sort-idle { opacity:.28; }
+.eh-vtbl-table th.is-sorted a { color:var(--eh-color-petrol); opacity:1; }
+.eh-vtbl-table td { padding:13px 16px; vertical-align:top; }
+.eh-vtbl-table tbody tr + tr td { border-top:1px solid var(--eh-rule); }
+.eh-vtbl-table tbody tr:hover { background:var(--eh-color-paper); }
+.eh-vtbl-table tr[data-sel], .eh-vtbl-table tr[data-sel]:hover { background:var(--eh-color-paper); }
+.eh-vtbl-anbieter a { display:flex; align-items:center; gap:8px; color:inherit; text-decoration:none; }
+.eh-vtbl-anbieter a b { font-weight:var(--eh-weight-semibold); }
+.eh-vtbl-anbieter a:hover b { color:var(--eh-color-petrol); text-decoration:underline; text-underline-offset:3px; }
+.eh-vtbl-anbieter small { display:block; margin-top:3px; opacity:.62; font-size:var(--eh-font-meta); }
+.eh-vtbl-zahlen { text-align:right; font-variant-numeric:tabular-nums; }
+.eh-vtbl-kosten b { font-weight:var(--eh-weight-bold); }
+.eh-vtbl-kosten small { display:block; opacity:.62; font-size:var(--eh-font-meta); }
+.eh-vtbl-frist { font-size:var(--eh-font-label); white-space:nowrap; }
+.eh-vtbl-frist[data-tone="danger"] { color:#b42318; font-weight:var(--eh-weight-semibold); }
+.eh-vtbl-frist[data-tone="warn"] { color:#8a5a12; }
+.eh-vtbl-frist[data-tone="ok"] { opacity:.78; }
+.eh-vtbl-badge { display:inline-flex; align-items:center; border-radius:var(--eh-radius-pill); padding:3px 10px; font-size:var(--eh-font-meta); font-weight:var(--eh-weight-bold); white-space:nowrap; }
+.eh-vtbl-badge[data-tone="ok"] { background:#e3f4ea; color:#0b6b3a; }
+.eh-vtbl-badge[data-tone="warn"] { background:#fdf0d5; color:#8a5a12; }
+.eh-vtbl-badge[data-tone="danger"] { background:#fde8e6; color:#b42318; }
+.eh-vtbl-badge[data-tone="muted"] { background:var(--eh-color-paper); color:var(--eh-color-ink); opacity:.7; }
+.eh-vtbl-leer { text-align:center; padding:26px 16px; opacity:.7; }
+.eh-vtbl-leer a { color:var(--eh-color-petrol); }
+.eh-vtbl-detail { border-top:1px solid var(--eh-rule); padding:16px; background:var(--eh-color-white); }
+.eh-vertrag-detail-kopf { display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; margin:0 0 12px; }
+.eh-vertrag-detail-kopf span { font-size:var(--eh-font-meta); opacity:.72; }
+.eh-vertrag-detail-kopf a { margin-left:auto; font-size:var(--eh-font-label); color:var(--eh-color-petrol); text-decoration:none; }
+.eh-vertrag-detail-kopf a:hover { text-decoration:underline; }
 .eh-vertrag-treffer a { color:var(--eh-color-petrol); text-underline-offset:3px; }
 .eh-vertrag[open] { border-color:var(--eh-color-secondary); }
 .eh-vertrag > summary { display:flex; align-items:center; gap:12px; min-height:58px; padding:10px 16px; cursor:pointer; list-style:none; border-radius:var(--eh-radius-control); }

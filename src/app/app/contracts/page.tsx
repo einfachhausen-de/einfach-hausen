@@ -9,6 +9,7 @@ import {
   EHInput, EHOwnerSection, EHSelect, EHStatus, EHSubmitButton, EHText, EHTextarea, EHWorkflowForm,
 } from '@/design-system';
 import { WerkbankRahmen } from '@/components/werkbank-rahmen';
+import { VertraegeTabelle } from '@/components/homeowner/vertraege-tabelle';
 import styles from '../eigentuemer-start.module.css';
 import { requireUser } from '@/lib/auth';
 import { db } from '@/lib/db';
@@ -19,7 +20,7 @@ import {
   deadlineDays, deadlineState, estimateSavings, formatDate, monthlyCents, yearlyCents,
 } from '@/lib/contracts';
 import { addHouseContractAction, setHouseContractStatusAction, updateHouseContractAction } from '@/app/actions';
-import { applyContractFilter, contractKindCounts, filterIsActive, parseContractFilter, withContractQuery } from '@/lib/contract-filter';
+import { applyContractFilter, filterIsActive, parseContractFilter } from '@/lib/contract-filter';
 import {
   AFFILIATE_CATEGORIES, AFFILIATE_CATEGORY_ACTIONS, AFFILIATE_CATEGORY_HINTS,
   AFFILIATE_CATEGORY_LABELS, resolveAffiliate,
@@ -53,8 +54,6 @@ const KIND_ICONS = {
   heizung: Thermometer, wasser: Droplets, abfall: Trash2, wartung: Wrench, sonstiges: FileText,
 } as const;
 
-const FRIST_STATE = { overdue: 'overdue', soon: 'soon', planned: 'planned', unknown: 'unknown' } as const;
-
 function fristText(row: ContractRow): string {
   const deadline = cancellationDeadline(row);
   if (!deadline) return 'Keine Frist erfasst';
@@ -63,8 +62,6 @@ function fristText(row: ContractRow): string {
   if (days === 0) return 'Heute letzter Tag';
   return `Noch ${days} Tage · ${formatDate(deadline)}`;
 }
-
-const INTERVAL_SHORT: Record<string, string> = { month: '/Monat', quarter: '/Quartal', halfyear: '/Halbjahr', year: '/Jahr' };
 
 export default async function Contracts({ searchParams }: { searchParams: Promise<Record<string, string>> }) {
   const user = await requireUser('homeowner');
@@ -76,7 +73,7 @@ export default async function Contracts({ searchParams }: { searchParams: Promis
   const contracts = db.prepare(`SELECT * FROM house_contracts WHERE homeowner_id=? ORDER BY CASE status WHEN 'active' THEN 0 WHEN 'cancelled' THEN 1 ELSE 2 END, provider COLLATE NOCASE`).all(user.id) as ContractRow[];
   const filter = parseContractFilter(sp);
   const visible = applyContractFilter(contracts, filter);
-  const kindBuckets = contractKindCounts(contracts);
+  const selectedRow = Number.isFinite(selectedId) ? visible.find((r) => r.id === selectedId) ?? null : null;
   const active = contracts.filter((c) => c.status === 'active');
   const monthlyTotal = active.reduce((sum, c) => sum + (monthlyCents(c.cost_amount, c.cost_interval) ?? 0), 0);
 
@@ -93,7 +90,7 @@ export default async function Contracts({ searchParams }: { searchParams: Promis
         zahl: naechsteFrist.state === 'overdue' ? '!' : String(deadlineDays(naechsteFrist.deadline) ?? 0),
         strong: naechsteFrist.state === 'overdue' ? 'Kündigungsfrist verpasst' : 'Tage bis zur nächsten Frist',
         sub: `${contractKindLabel(naechsteFrist.row.kind)} · ${naechsteFrist.row.provider} · ${formatDate(naechsteFrist.deadline)}`,
-        href: `/app/contracts?vertrag=${naechsteFrist.row.id}#vertrag-${naechsteFrist.row.id}`,
+        href: `/app/contracts?vertrag=${naechsteFrist.row.id}`,
       }
     : active.length > 0
       ? {
@@ -168,130 +165,13 @@ export default async function Contracts({ searchParams }: { searchParams: Promis
 
     <EHOwnerSection title={filterIsActive(filter) ? `Meine Verträge · ${visible.length} von ${contracts.length}` : `Meine Verträge · ${contracts.length}`} action={{ href: '#vertrag-anlegen', label: '+ Erfassen' }}>
       <div id="vertraege" />
-      {contracts.length > 0 && (<>
-        <form action="/app/contracts" method="get" className="eh-vertrag-filter" role="search">
-          <input type="search" name="q" defaultValue={filter.q} placeholder="Anbieter, Tarif, Vertragsnummer oder Notiz" aria-label="Verträge durchsuchen" />
-          {filter.kind && <input type="hidden" name="art" value={filter.kind} />}
-          <label>Status
-            <select name="status" defaultValue={filter.status} aria-label="Nach Status filtern">
-              <option value="alle">Alle</option><option value="active">Aktiv</option><option value="cancelled">Gekündigt</option><option value="expired">Ausgelaufen</option>
-            </select>
-          </label>
-          <label>Sortieren
-            <select name="sort" defaultValue={filter.sort} aria-label="Sortierung">
-              <option value="frist">Nächste Frist</option><option value="kosten">Höchste Kosten</option><option value="name">Name A–Z</option>
-            </select>
-          </label>
-          <button type="submit">Übernehmen</button>
-        </form>
-        <nav className="eh-werkbank-chips" aria-label="Nach Vertragsart filtern">
-          <Link href={`/app/contracts${withContractQuery(filter, { kind: null })}`} className="eh-werkbank-chip" {...(!filter.kind ? { 'aria-current': 'page' as const } : {})}>Alle <span className="eh-werkbank-chip-n">{contracts.length}</span></Link>
-          {kindBuckets.map((b) => (
-            <Link key={b.kind} href={`/app/contracts${withContractQuery(filter, { kind: b.kind })}`} className="eh-werkbank-chip" {...(filter.kind === b.kind ? { 'aria-current': 'page' as const } : {})}>{b.label} <span className="eh-werkbank-chip-n">{b.count}</span></Link>
-          ))}
-        </nav>
-        {filterIsActive(filter) && <p className="eh-vertrag-treffer">{visible.length} von {contracts.length} Verträgen · <a href="/app/contracts">Filter zurücksetzen</a></p>}
-      </>)}
       {contracts.length === 0
         ? <EHEmptyState title="Noch kein Vertrag erfasst" text="Trag deinen Strom-, DSL- oder Versicherungsvertrag ein. Danach siehst du hier Kosten, Laufzeit und Kündigungsfrist – und ob sich ein Wechsel lohnt." action={<EHButton href="#vertrag-anlegen" variant="secondary">Vertrag erfassen</EHButton>} />
-        : visible.length === 0
-        ? <p className="eh-vertrag-treffer">Kein Vertrag passt zu Suchbegriff und Filter. <a href="/app/contracts">Alle Verträge zeigen</a></p>
-        : <div className="eh-vertrag-list">{visible.map((row) => {
-            const Icon = KIND_ICONS[row.kind as keyof typeof KIND_ICONS] ?? FileText;
-            const state = row.status === 'active' ? deadlineState(cancellationDeadline(row)) : 'unknown';
-            const end = currentTermEnd(row);
-            const estimate = row.status === 'active' && SAVINGS_KINDS.includes(row.kind as ContractKind)
-              ? estimateSavings({ kind: row.kind, yearlyCents: yearlyCents(row.cost_amount, row.cost_interval), postcode: profile?.postcode || '', householdSize: null, hasLoyaltyBonus: false, switchWilling: true })
-              : null;
-            const outbound = row.status === 'active' && estimate ? resolveAffiliate(row.kind, 'sparcheck') : null;
-            const offen = selectedId === row.id;
-            const fakten: [string, string][] = [
-              ['Art', contractKindLabel(row.kind)],
-              ...(row.tariff ? [['Tarif', row.tariff] as [string, string]] : []),
-              ...(row.contract_number ? [['Vertragsnummer', row.contract_number] as [string, string]] : []),
-              ...(row.started_at ? [['Beginn', formatDate(new Date(`${row.started_at.slice(0, 10)}T12:00:00`))] as [string, string]] : []),
-              ...(end ? [['Laufzeit bis', formatDate(end)] as [string, string]] : []),
-              ...(row.cancellation_days ? [['Kündigungsfrist', `${row.cancellation_days} Tage`] as [string, string]] : []),
-            ];
-            return (
-              <details key={row.id} id={`vertrag-${row.id}`} className="eh-vertrag" data-past={row.status !== 'active' || undefined} open={offen || undefined}>
-                <summary>
-                  <span className="eh-vertrag-ic" aria-hidden="true"><Icon size={16} /></span>
-                  <span className="eh-vertrag-body">
-                    <strong>{row.provider}</strong>
-                    <small>{row.notice || `Keine Notiz · Frist prüfen und ggf. ${fristText(row).toLowerCase()}`}</small>
-                  </span>
-                  <span className="eh-vertrag-rechts">
-                    {row.cost_amount != null && (
-                      <span className="eh-vertrag-cost"><b>{euroExact(row.cost_amount)}</b><small>{INTERVAL_SHORT[row.cost_interval] ?? ''}</small></span>
-                    )}
-                    <span className="eh-vertrag-frist" data-state={FRIST_STATE[state as keyof typeof FRIST_STATE]}>
-                      {row.status === 'active' ? fristText(row) : row.status === 'cancelled' ? 'Gekündigt' : 'Ausgelaufen'}
-                    </span>
-                  </span>
-                </summary>
-                <div className="eh-vertrag-fakten">
-                  {fakten.map(([label, value]) => (
-                    <span key={label} className="eh-vertrag-fakt"><small>{label}</small><b>{value}</b></span>
-                  ))}
-                  {row.document_path && (
-                    <span className="eh-vertrag-fakt"><small>Beleg</small><b>
-                      <a href={`/api/house-contracts/${row.id}/document`} target="_blank" rel="noreferrer">{row.document_title || 'Vertragsdokument'}</a>
-                    </b></span>
-                  )}
-                  {row.status === 'active' && !SAVINGS_KINDS.includes(row.kind as ContractKind) && (
-                    <span className="eh-vertrag-fakt"><small>Spar-Check</small><b>Für {contractKindLabel(row.kind).toLowerCase()} gibt es keine Vergleichsstrecke — der Vertrag bleibt reine Hausakte.</b></span>
-                  )}
-                </div>
-                {estimate && (
-                  <div className="eh-vertrag-spar">
-                    <span className="eh-vertrag-spar-zahl">
-                      <b>{euroExact(estimate.lowCents)} – {euroExact(estimate.highCents)}</b>
-                      <small>möglich pro Jahr · Schätzung {estimate.confidence}</small>
-                    </span>
-                    <ul className="eh-vertrag-spar-gruende">
-                      {estimate.reasons.slice(0, 3).map((reason, i) => <li key={i}>{reason}</li>)}
-                    </ul>
-                    {outbound?.status === 'available'
-                      ? <EHButton href={outbound.entryHref} variant="secondary" size="small" arrow>{AFFILIATE_CATEGORY_ACTIONS[outbound.category]}</EHButton>
-                      : <EHText muted>Ein Klick führt erst zum freigegebenen Partner, sobald einer für {contractKindLabel(row.kind).toLowerCase()} angebunden ist — deine Daten bleiben hier.</EHText>}
-                  </div>
-                )}
-                <div className="eh-vertrag-aktionen">
-                  <EHWorkflowForm action={setHouseContractStatusAction.bind(null, row.id, row.status === 'active' ? 'cancelled' : 'active')}>
-                    <EHSubmitButton pendingLabel="Wird geändert …">
-                      {row.status === 'active' ? 'Als gekündigt markieren' : 'Wieder als aktiv markieren'}
-                    </EHSubmitButton>
-                  </EHWorkflowForm>
-                  <details className="eh-vertrag-edit">
-                    <summary>Vertrag bearbeiten</summary>
-                    <EHWorkflowForm action={updateHouseContractAction}>
-                      <input type="hidden" name="id" value={row.id} />
-                      <EHFormSection title="Vertragsdaten"><EHFieldGrid>
-                        <EHField id={`kind-${row.id}`} label="Art"><EHSelect id={`kind-${row.id}`} name="kind" defaultValue={row.kind}>{CONTRACT_KIND_KEYS.map((k) => <option key={k} value={k}>{CONTRACT_KINDS[k]}</option>)}</EHSelect></EHField>
-                        <EHField id={`provider-${row.id}`} label="Anbieter" required><EHInput id={`provider-${row.id}`} name="provider" defaultValue={row.provider} required /></EHField>
-                        <EHField id={`tariff-${row.id}`} label="Tarif (steht auf deiner Rechnung)"><EHInput id={`tariff-${row.id}`} name="tariff" defaultValue={row.tariff} /></EHField>
-                        <EHField id={`number-${row.id}`} label="Vertragsnummer"><EHInput id={`number-${row.id}`} name="contractNumber" defaultValue={row.contract_number} /></EHField>
-                      </EHFieldGrid></EHFormSection>
-                      <EHFormSection title="Kosten"><EHFieldGrid>
-                        <EHField id={`cost-${row.id}`} label="Betrag €"><EHInput id={`cost-${row.id}`} name="cost" inputMode="decimal" defaultValue={row.cost_amount != null ? String(row.cost_amount / 100).replace('.', ',') : ''} /></EHField>
-                        <EHField id={`interval-${row.id}`} label="Zahlweise"><EHSelect id={`interval-${row.id}`} name="costInterval" defaultValue={row.cost_interval}>{COST_INTERVAL_KEYS.map((k) => <option key={k} value={k}>{COST_INTERVALS[k]}</option>)}</EHSelect></EHField>
-                      </EHFieldGrid></EHFormSection>
-                      <EHFormSection title="Laufzeit & Kündigung"><EHFieldGrid>
-                        <EHField id={`start-${row.id}`} label="Vertragsbeginn"><EHInput id={`start-${row.id}`} name="startedAt" type="date" defaultValue={row.started_at?.slice(0, 10) || ''} /></EHField>
-                        <EHField id={`term-${row.id}`} label="Laufzeit (Monate)"><EHInput id={`term-${row.id}`} name="termMonths" type="number" min="0" defaultValue={row.term_months ?? ''} /></EHField>
-                        <EHField id={`renewal-${row.id}`} label="Verlängerung (Monate)"><EHInput id={`renewal-${row.id}`} name="renewalMonths" type="number" min="0" defaultValue={row.renewal_months ?? 12} /></EHField>
-                        <EHField id={`days-${row.id}`} label="Kündigungsfrist (Tage)"><EHInput id={`days-${row.id}`} name="cancellationDays" type="number" min="0" defaultValue={row.cancellation_days ?? 30} /></EHField>
-                        <EHField id={`deadline-${row.id}`} label="Kündigen bis" hint="Leer lassen, um aus Vertragsbeginn, Laufzeit und Frist zu rechnen."><EHInput id={`deadline-${row.id}`} name="cancellationDeadline" type="date" defaultValue={row.cancellation_deadline?.slice(0, 10) || ''} aria-describedby={`deadline-${row.id}-hint`} /></EHField>
-                      </EHFieldGrid></EHFormSection>
-                      <EHFormSection title="Notiz"><EHField id={`notice-${row.id}`} label="Notiz"><EHTextarea id={`notice-${row.id}`} name="notice" rows={3} maxLength={2000} defaultValue={row.notice} /></EHField></EHFormSection>
-                      <EHSubmitButton pendingLabel="Wird gespeichert …">Änderungen speichern</EHSubmitButton>
-                    </EHWorkflowForm>
-                  </details>
-                </div>
-              </details>
-            );
-          })}</div>}
+        : (
+          <VertraegeTabelle base="/app/contracts" allRows={contracts} rows={visible} filter={filter} selectedId={selectedRow?.id ?? null} icons={KIND_ICONS}>
+            {selectedRow && <VertragsDetail row={selectedRow} postcode={profile?.postcode} />}
+          </VertraegeTabelle>
+        )}
     </EHOwnerSection>
 
     <EHOwnerSection title="Vergleichen & Tarife">
@@ -351,4 +231,90 @@ export default async function Contracts({ searchParams }: { searchParams: Promis
       </EHOwnerSection>
     </section>
   </WerkbankRahmen>;
+}
+
+/** Aufgeklappter Zustand eines Tabellen-Zeile: Fakten, Spar-Check, Bearbeiten
+ *  — die Inhalte der alten Karten, jetzt als Detailpanel unter der Tabelle. */
+function VertragsDetail({ row, postcode }: { row: ContractRow; postcode?: string }) {
+  const end = currentTermEnd(row);
+  const estimate = row.status === 'active' && SAVINGS_KINDS.includes(row.kind as ContractKind)
+    ? estimateSavings({ kind: row.kind, yearlyCents: yearlyCents(row.cost_amount, row.cost_interval), postcode: postcode || '', householdSize: null, hasLoyaltyBonus: false, switchWilling: true })
+    : null;
+  const outbound = row.status === 'active' && estimate ? resolveAffiliate(row.kind, 'sparcheck') : null;
+  const fakten: [string, string][] = [
+    ['Art', contractKindLabel(row.kind)],
+    ...(row.tariff ? [['Tarif', row.tariff] as [string, string]] : []),
+    ...(row.contract_number ? [['Vertragsnummer', row.contract_number] as [string, string]] : []),
+    ...(row.started_at ? [['Beginn', formatDate(new Date(`${row.started_at.slice(0, 10)}T12:00:00`))] as [string, string]] : []),
+    ...(end ? [['Laufzeit bis', formatDate(end)] as [string, string]] : []),
+    ...(row.cancellation_days ? [['Kündigungsfrist', `${row.cancellation_days} Tage`] as [string, string]] : []),
+  ];
+  return (
+    <div className="eh-vertrag-detail">
+      <p className="eh-vertrag-detail-kopf">
+        <strong>{row.provider}</strong>
+        <span>{row.status === 'active' ? fristText(row) : row.status === 'cancelled' ? 'Gekündigt' : 'Ausgelaufen'}</span>
+        <Link href="/app/contracts">Schließen</Link>
+      </p>
+      <div className="eh-vertrag-fakten">
+        {fakten.map(([label, value]) => (
+          <span key={label} className="eh-vertrag-fakt"><small>{label}</small><b>{value}</b></span>
+        ))}
+        {row.document_path && (
+          <span className="eh-vertrag-fakt"><small>Beleg</small><b>
+            <a href={`/api/house-contracts/${row.id}/document`} target="_blank" rel="noreferrer">{row.document_title || 'Vertragsdokument'}</a>
+          </b></span>
+        )}
+        {row.status === 'active' && !SAVINGS_KINDS.includes(row.kind as ContractKind) && (
+          <span className="eh-vertrag-fakt"><small>Spar-Check</small><b>Für {contractKindLabel(row.kind).toLowerCase()} gibt es keine Vergleichsstrecke — der Vertrag bleibt reine Hausakte.</b></span>
+        )}
+      </div>
+      {estimate && (
+        <div className="eh-vertrag-spar">
+          <span className="eh-vertrag-spar-zahl">
+            <b>{euroExact(estimate.lowCents)} – {euroExact(estimate.highCents)}</b>
+            <small>möglich pro Jahr · Schätzung {estimate.confidence}</small>
+          </span>
+          <ul className="eh-vertrag-spar-gruende">
+            {estimate.reasons.slice(0, 3).map((reason, i) => <li key={i}>{reason}</li>)}
+          </ul>
+          {outbound?.status === 'available'
+            ? <EHButton href={outbound.entryHref} variant="secondary" size="small" arrow>{AFFILIATE_CATEGORY_ACTIONS[outbound.category]}</EHButton>
+            : <EHText muted>Ein Klick führt erst zum freigegebenen Partner, sobald einer für {contractKindLabel(row.kind).toLowerCase()} angebunden ist — deine Daten bleiben hier.</EHText>}
+        </div>
+      )}
+      <div className="eh-vertrag-aktionen">
+        <EHWorkflowForm action={setHouseContractStatusAction.bind(null, row.id, row.status === 'active' ? 'cancelled' : 'active')}>
+          <EHSubmitButton pendingLabel="Wird geändert …">
+            {row.status === 'active' ? 'Als gekündigt markieren' : 'Wieder als aktiv markieren'}
+          </EHSubmitButton>
+        </EHWorkflowForm>
+        <details className="eh-vertrag-edit">
+          <summary>Vertrag bearbeiten</summary>
+          <EHWorkflowForm action={updateHouseContractAction}>
+            <input type="hidden" name="id" value={row.id} />
+            <EHFormSection title="Vertragsdaten"><EHFieldGrid>
+              <EHField id={`kind-${row.id}`} label="Art"><EHSelect id={`kind-${row.id}`} name="kind" defaultValue={row.kind}>{CONTRACT_KIND_KEYS.map((k) => <option key={k} value={k}>{CONTRACT_KINDS[k]}</option>)}</EHSelect></EHField>
+              <EHField id={`provider-${row.id}`} label="Anbieter" required><EHInput id={`provider-${row.id}`} name="provider" defaultValue={row.provider} required /></EHField>
+              <EHField id={`tariff-${row.id}`} label="Tarif (steht auf deiner Rechnung)"><EHInput id={`tariff-${row.id}`} name="tariff" defaultValue={row.tariff} /></EHField>
+              <EHField id={`number-${row.id}`} label="Vertragsnummer"><EHInput id={`number-${row.id}`} name="contractNumber" defaultValue={row.contract_number} /></EHField>
+            </EHFieldGrid></EHFormSection>
+            <EHFormSection title="Kosten"><EHFieldGrid>
+              <EHField id={`cost-${row.id}`} label="Betrag €"><EHInput id={`cost-${row.id}`} name="cost" inputMode="decimal" defaultValue={row.cost_amount != null ? String(row.cost_amount / 100).replace('.', ',') : ''} /></EHField>
+              <EHField id={`interval-${row.id}`} label="Zahlweise"><EHSelect id={`interval-${row.id}`} name="costInterval" defaultValue={row.cost_interval}>{COST_INTERVAL_KEYS.map((k) => <option key={k} value={k}>{COST_INTERVALS[k]}</option>)}</EHSelect></EHField>
+            </EHFieldGrid></EHFormSection>
+            <EHFormSection title="Laufzeit & Kündigung"><EHFieldGrid>
+              <EHField id={`start-${row.id}`} label="Vertragsbeginn"><EHInput id={`start-${row.id}`} name="startedAt" type="date" defaultValue={row.started_at?.slice(0, 10) || ''} /></EHField>
+              <EHField id={`term-${row.id}`} label="Laufzeit (Monate)"><EHInput id={`term-${row.id}`} name="termMonths" type="number" min="0" defaultValue={row.term_months ?? ''} /></EHField>
+              <EHField id={`renewal-${row.id}`} label="Verlängerung (Monate)"><EHInput id={`renewal-${row.id}`} name="renewalMonths" type="number" min="0" defaultValue={row.renewal_months ?? 12} /></EHField>
+              <EHField id={`days-${row.id}`} label="Kündigungsfrist (Tage)"><EHInput id={`days-${row.id}`} name="cancellationDays" type="number" min="0" defaultValue={row.cancellation_days ?? 30} /></EHField>
+              <EHField id={`deadline-${row.id}`} label="Kündigen bis" hint="Leer lassen, um aus Vertragsbeginn, Laufzeit und Frist zu rechnen."><EHInput id={`deadline-${row.id}`} name="cancellationDeadline" type="date" defaultValue={row.cancellation_deadline?.slice(0, 10) || ''} aria-describedby={`deadline-${row.id}-hint`} /></EHField>
+            </EHFieldGrid></EHFormSection>
+            <EHFormSection title="Notiz"><EHField id={`notice-${row.id}`} label="Notiz"><EHTextarea id={`notice-${row.id}`} name="notice" rows={3} maxLength={2000} defaultValue={row.notice} /></EHField></EHFormSection>
+            <EHSubmitButton pendingLabel="Wird gespeichert …">Änderungen speichern</EHSubmitButton>
+          </EHWorkflowForm>
+        </details>
+      </div>
+    </div>
+  );
 }
