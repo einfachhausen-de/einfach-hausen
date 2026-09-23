@@ -89,6 +89,16 @@
    Nur Tokens; der Frist-Zustand faerbt Rand+Schrift, nie die Flaeche. */
 .eh-vertrag-list { display:grid; gap:10px; }
 .eh-vertrag { border:1px solid var(--eh-color-line); border-radius:var(--eh-radius-control); background:var(--eh-color-white); }
+/* Vertrags-Filter (24.09.): Suche + Status/Sortierung als GET-Formular,
+   ohne JS bedienbar — laeuft damit auch in Vorschau-Panels ohne Cookies. */
+.eh-vertrag-filter { display:flex; flex-wrap:wrap; gap:10px; align-items:end; margin:0 0 14px; }
+.eh-vertrag-filter input[type=search] { flex:1 1 260px; min-height:44px; padding:10px 14px; border:1px solid var(--eh-color-line); border-radius:var(--eh-radius-control); font:inherit; background:var(--eh-color-white); color:var(--eh-color-ink); }
+.eh-vertrag-filter label { display:grid; gap:4px; font-size:var(--eh-font-meta); color:var(--eh-color-ink); }
+.eh-vertrag-filter select { min-height:44px; padding:8px 12px; border:1px solid var(--eh-color-line); border-radius:var(--eh-radius-control); font:inherit; background:var(--eh-color-white); color:var(--eh-color-ink); }
+.eh-vertrag-filter button { min-height:44px; padding:8px 18px; border:1px solid var(--eh-color-petrol); border-radius:var(--eh-radius-control); background:var(--eh-color-petrol); color:var(--eh-color-white); font:inherit; cursor:pointer; }
+.eh-vertrag-filter input:focus-visible, .eh-vertrag-filter select:focus-visible, .eh-vertrag-filter button:focus-visible { outline:2px solid var(--eh-color-petrol); outline-offset:2px; }
+.eh-vertrag-treffer { margin:0 0 10px; font-size:var(--eh-font-meta); }
+.eh-vertrag-treffer a { color:var(--eh-color-petrol); text-underline-offset:3px; }
 .eh-vertrag[open] { border-color:var(--eh-color-secondary); }
 .eh-vertrag > summary { display:flex; align-items:center; gap:12px; min-height:58px; padding:10px 16px; cursor:pointer; list-style:none; border-radius:var(--eh-radius-control); }
 .eh-vertrag > summary::-webkit-details-marker { display:none; }

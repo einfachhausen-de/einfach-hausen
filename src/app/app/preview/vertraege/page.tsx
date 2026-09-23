@@ -11,6 +11,8 @@ import {
 import { WerkbankRahmen } from '@/components/werkbank-rahmen';
 import styles from '../../eigentuemer-start.module.css';
 import { euroExact } from '@/lib/format';
+import { db } from '@/lib/db';
+import { applyContractFilter, contractKindCounts, filterIsActive, parseContractFilter, withContractQuery } from '@/lib/contract-filter';
 import {
   CONTRACT_KINDS, CONTRACT_KIND_KEYS, COST_INTERVALS, COST_INTERVAL_KEYS, SAVINGS_KINDS,
   contractKindLabel, currentTermEnd, cancellationDeadline, deadlineDays, deadlineState,
@@ -58,15 +60,31 @@ const KIND_ICONS = {
 
 const FRIST_STATE = { overdue: 'overdue', soon: 'soon', planned: 'planned', unknown: 'unknown' } as const;
 
-const CONTRACTS: FristRow[] = [
+function fixtureContracts(): FristRow[] {
+  return [
   { id: 901, kind: 'strom', provider: 'Stadtwerke Duisburg', tariff: 'Basis Strom 12', contract_number: 'SWD-4413902', cost_amount: 4190, cost_interval: 'month', started_at: '2025-10-01', term_months: 12, renewal_months: 12, cancellation_days: 0, cancellation_deadline: inDays(0), notice: 'Kündigen heute noch möglich — danach ein Jahr länger gebunden.', document_title: '', document_path: null, status: 'active' },
   { id: 902, kind: 'dsl', provider: 'Telekom', tariff: 'MagentaZuhause XL', contract_number: 'TK-77120931', cost_amount: 4495, cost_interval: 'month', started_at: '2024-10-31', term_months: 24, renewal_months: 12, cancellation_days: 30, cancellation_deadline: inDays(7), notice: 'Router-Miete enthalten; Wechsel prüfen.', document_title: '', document_path: null, status: 'active' },
   { id: 903, kind: 'versicherung', provider: 'HUK24', tariff: 'Hausrat Komfort', contract_number: 'HUK-90221', cost_amount: 12800, cost_interval: 'year', started_at: '2021-11-01', term_months: 12, renewal_months: 12, cancellation_days: 30, cancellation_deadline: inDays(39), notice: 'Wohnfläche nach Umbau anpassen.', document_title: '', document_path: null, status: 'active' },
   { id: 904, kind: 'mobilfunk', provider: 'O2', tariff: 'Mobile M', contract_number: 'O2-3110884', cost_amount: 2999, cost_interval: 'month', started_at: '2025-05-01', term_months: 24, renewal_months: 12, cancellation_days: 30, cancellation_deadline: inDays(221), notice: '', document_title: '', document_path: null, status: 'active' },
   { id: 905, kind: 'gas', provider: 'Fluxio Energie', tariff: 'Fluxio Fix 24', contract_number: 'FLX-55201', cost_amount: 6400, cost_interval: 'month', started_at: '2024-01-15', term_months: 24, renewal_months: 12, cancellation_days: 30, cancellation_deadline: inDays(-14), notice: 'Gekündigt zum Jahresende — Bestätigung liegt in der Hausakte.', document_title: '', document_path: null, status: 'cancelled' },
-];
+  ];
+}
 
-export default function ContractsPreview() {
+export default async function ContractsPreview({ searchParams }: { searchParams: Promise<Record<string, string>> }) {
+  const sp = await searchParams;
+  // Echte Demo-Datenbank vor festen Zeilen: wer im Seed etwas aendert, sieht
+  // es hier sofort (Betreiber-Wunsch 24.09.: 'richtige db, nicht nur cards').
+  let CONTRACTS: FristRow[] = [];
+  try {
+    const u = db.prepare(`SELECT id FROM users WHERE lower(email)=?`).get('kunde@demo.einfachhausen.de') as { id: number } | undefined;
+    if (u) {
+      CONTRACTS = db.prepare(`SELECT id, kind, provider, tariff, contract_number, cost_amount, cost_interval, started_at, term_months, renewal_months, cancellation_days, cancellation_deadline, notice, document_title, document_path, status FROM house_contracts WHERE homeowner_id=? ORDER BY CASE status WHEN 'active' THEN 0 WHEN 'cancelled' THEN 1 ELSE 2 END, provider COLLATE NOCASE`).all(u.id) as FristRow[];
+    }
+  } catch { /* nach Sandbox-Reset kann der Seed fehlen — dann greifen die Demo-Zeilen */ }
+  if (CONTRACTS.length === 0) CONTRACTS = fixtureContracts();
+  const filter = parseContractFilter(sp);
+  const visible = applyContractFilter(CONTRACTS, filter);
+  const kindBuckets = contractKindCounts(CONTRACTS);
   const active = CONTRACTS.filter((c) => c.status === 'active');
   const monthlyTotal = active.reduce((sum, c) => sum + (monthlyCents(c.cost_amount, c.cost_interval) ?? 0), 0);
 
@@ -140,9 +158,33 @@ export default function ContractsPreview() {
       </Link>
     )}
 
-    <EHOwnerSection title={`Meine Verträge · ${CONTRACTS.length}`} action={{ href: '#vertrag-anlegen', label: '+ Erfassen' }}>
+    <EHOwnerSection title={filterIsActive(filter) ? `Meine Verträge · ${visible.length} von ${CONTRACTS.length}` : `Meine Verträge · ${CONTRACTS.length}`} action={{ href: '#vertrag-anlegen', label: '+ Erfassen' }}>
       <div id="vertraege" />
-      <div className="eh-vertrag-list">{CONTRACTS.map((row) => {
+      <form action="/app/preview/vertraege" method="get" className="eh-vertrag-filter" role="search">
+        <input type="search" name="q" defaultValue={filter.q} placeholder="Anbieter, Tarif, Vertragsnummer oder Notiz" aria-label="Verträge durchsuchen" />
+        {filter.kind && <input type="hidden" name="art" value={filter.kind} />}
+        <label>Status
+          <select name="status" defaultValue={filter.status} aria-label="Nach Status filtern">
+            <option value="alle">Alle</option><option value="active">Aktiv</option><option value="cancelled">Gekündigt</option><option value="expired">Ausgelaufen</option>
+          </select>
+        </label>
+        <label>Sortieren
+          <select name="sort" defaultValue={filter.sort} aria-label="Sortierung">
+            <option value="frist">Nächste Frist</option><option value="kosten">Höchste Kosten</option><option value="name">Name A–Z</option>
+          </select>
+        </label>
+        <button type="submit">Übernehmen</button>
+      </form>
+      <nav className="eh-werkbank-chips" aria-label="Nach Vertragsart filtern">
+        <Link href={`/app/preview/vertraege${withContractQuery(filter, { kind: null })}`} className="eh-werkbank-chip" {...(!filter.kind ? { 'aria-current': 'page' as const } : {})}>Alle <span className="eh-werkbank-chip-n">{CONTRACTS.length}</span></Link>
+        {kindBuckets.map((b) => (
+          <Link key={b.kind} href={`/app/preview/vertraege${withContractQuery(filter, { kind: b.kind })}`} className="eh-werkbank-chip" {...(filter.kind === b.kind ? { 'aria-current': 'page' as const } : {})}>{b.label} <span className="eh-werkbank-chip-n">{b.count}</span></Link>
+        ))}
+      </nav>
+      {filterIsActive(filter) && <p className="eh-vertrag-treffer">{visible.length} von {CONTRACTS.length} Verträgen · <a href="/app/preview/vertraege">Filter zurücksetzen</a></p>}
+      {visible.length === 0
+        ? <p className="eh-vertrag-treffer">Kein Vertrag passt zu Suchbegriff und Filter. <a href="/app/preview/vertraege">Alle Verträge zeigen</a></p>
+        : <div className="eh-vertrag-list">{visible.map((row) => {
         const Icon = KIND_ICONS[row.kind as keyof typeof KIND_ICONS] ?? FileText;
         const state = row.status === 'active' ? deadlineState(cancellationDeadline(row)) : 'unknown';
         const end = currentTermEnd(row);
@@ -197,7 +239,7 @@ export default function ContractsPreview() {
             <EHText muted>Bearbeiten, Markieren und Belege sind der echten Hausakte vorbehalten.</EHText>
           </details>
         );
-      })}</div>
+      })}</div>}
     </EHOwnerSection>
 
     <EHOwnerSection title="Vergleichen & Tarife">

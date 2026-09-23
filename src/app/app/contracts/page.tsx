@@ -19,6 +19,7 @@ import {
   deadlineDays, deadlineState, estimateSavings, formatDate, monthlyCents, yearlyCents,
 } from '@/lib/contracts';
 import { addHouseContractAction, setHouseContractStatusAction, updateHouseContractAction } from '@/app/actions';
+import { applyContractFilter, contractKindCounts, filterIsActive, parseContractFilter, withContractQuery } from '@/lib/contract-filter';
 import {
   AFFILIATE_CATEGORIES, AFFILIATE_CATEGORY_ACTIONS, AFFILIATE_CATEGORY_HINTS,
   AFFILIATE_CATEGORY_LABELS, resolveAffiliate,
@@ -73,6 +74,9 @@ export default async function Contracts({ searchParams }: { searchParams: Promis
   const profile = db.prepare('SELECT postcode FROM homeowner_profiles WHERE user_id=?').get(user.id) as { postcode?: string } | undefined;
 
   const contracts = db.prepare(`SELECT * FROM house_contracts WHERE homeowner_id=? ORDER BY CASE status WHEN 'active' THEN 0 WHEN 'cancelled' THEN 1 ELSE 2 END, provider COLLATE NOCASE`).all(user.id) as ContractRow[];
+  const filter = parseContractFilter(sp);
+  const visible = applyContractFilter(contracts, filter);
+  const kindBuckets = contractKindCounts(contracts);
   const active = contracts.filter((c) => c.status === 'active');
   const monthlyTotal = active.reduce((sum, c) => sum + (monthlyCents(c.cost_amount, c.cost_interval) ?? 0), 0);
 
@@ -162,11 +166,37 @@ export default async function Contracts({ searchParams }: { searchParams: Promis
       </Link>
     )}
 
-    <EHOwnerSection title={`Meine Verträge · ${contracts.length}`} action={{ href: '#vertrag-anlegen', label: '+ Erfassen' }}>
+    <EHOwnerSection title={filterIsActive(filter) ? `Meine Verträge · ${visible.length} von ${contracts.length}` : `Meine Verträge · ${contracts.length}`} action={{ href: '#vertrag-anlegen', label: '+ Erfassen' }}>
       <div id="vertraege" />
+      {contracts.length > 0 && (<>
+        <form action="/app/contracts" method="get" className="eh-vertrag-filter" role="search">
+          <input type="search" name="q" defaultValue={filter.q} placeholder="Anbieter, Tarif, Vertragsnummer oder Notiz" aria-label="Verträge durchsuchen" />
+          {filter.kind && <input type="hidden" name="art" value={filter.kind} />}
+          <label>Status
+            <select name="status" defaultValue={filter.status} aria-label="Nach Status filtern">
+              <option value="alle">Alle</option><option value="active">Aktiv</option><option value="cancelled">Gekündigt</option><option value="expired">Ausgelaufen</option>
+            </select>
+          </label>
+          <label>Sortieren
+            <select name="sort" defaultValue={filter.sort} aria-label="Sortierung">
+              <option value="frist">Nächste Frist</option><option value="kosten">Höchste Kosten</option><option value="name">Name A–Z</option>
+            </select>
+          </label>
+          <button type="submit">Übernehmen</button>
+        </form>
+        <nav className="eh-werkbank-chips" aria-label="Nach Vertragsart filtern">
+          <Link href={`/app/contracts${withContractQuery(filter, { kind: null })}`} className="eh-werkbank-chip" {...(!filter.kind ? { 'aria-current': 'page' as const } : {})}>Alle <span className="eh-werkbank-chip-n">{contracts.length}</span></Link>
+          {kindBuckets.map((b) => (
+            <Link key={b.kind} href={`/app/contracts${withContractQuery(filter, { kind: b.kind })}`} className="eh-werkbank-chip" {...(filter.kind === b.kind ? { 'aria-current': 'page' as const } : {})}>{b.label} <span className="eh-werkbank-chip-n">{b.count}</span></Link>
+          ))}
+        </nav>
+        {filterIsActive(filter) && <p className="eh-vertrag-treffer">{visible.length} von {contracts.length} Verträgen · <a href="/app/contracts">Filter zurücksetzen</a></p>}
+      </>)}
       {contracts.length === 0
         ? <EHEmptyState title="Noch kein Vertrag erfasst" text="Trag deinen Strom-, DSL- oder Versicherungsvertrag ein. Danach siehst du hier Kosten, Laufzeit und Kündigungsfrist – und ob sich ein Wechsel lohnt." action={<EHButton href="#vertrag-anlegen" variant="secondary">Vertrag erfassen</EHButton>} />
-        : <div className="eh-vertrag-list">{contracts.map((row) => {
+        : visible.length === 0
+        ? <p className="eh-vertrag-treffer">Kein Vertrag passt zu Suchbegriff und Filter. <a href="/app/contracts">Alle Verträge zeigen</a></p>
+        : <div className="eh-vertrag-list">{visible.map((row) => {
             const Icon = KIND_ICONS[row.kind as keyof typeof KIND_ICONS] ?? FileText;
             const state = row.status === 'active' ? deadlineState(cancellationDeadline(row)) : 'unknown';
             const end = currentTermEnd(row);
