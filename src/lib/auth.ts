@@ -85,13 +85,14 @@ function cookieOptions(expires: Date) {
   // ueber https sinnvoll) wird das Session-Cookie auf None+Secure gestellt;
   // Standard bleibt bewusst Lax, die Sicherheits-Tests pruefen diesen Pfad.
   const crossSite = process.env.SESSION_COOKIE_SAMESITE === 'none';
-  // In einem iframe (Vorschau-Panel) verlangen moderne Browser zusaetzlich
-  // CHIPS ('partitioned') — ein reines SameSite=None ohne Partitioned-Attribut
-  // wird bei blockierten Drittanbieter-Cookies komplett verworfen: die App
-  // lieferte dann nur die Loading-Shell mit eingebettetem NEXT_REDIRECT auf
-  // /login (200, aber kein Inhalt) und warf Nutzer zurueck. Mit Partitioned
-  // gilt das Cookie als client-sitelich getrennt und wird akzeptiert.
-  return { httpOnly: true, sameSite: crossSite ? ('none' as const) : ('lax' as const), secure: crossSite || (process.env.NODE_ENV === 'production' && process.env.E2E_INSECURE_COOKIES !== '1'), ...(crossSite ? { partitioned: true } : {}), path: '/', expires };
+  // CHIPS ('partitioned') war hier zeitweise an — im Arena-Panel bewies der
+  // leere Cookie-Jar direkt NACH Set-Cookie das Gegenteil: Chrome verwarf den
+  // partitionierten Cookie in diesem Rahmen vollstaendig, das unpartitionierte
+  // None+Secure funktionierte dagegen (Voll-Render /app/contracts, 122 ms).
+  // Deshalb ist Partitioned jetzt Opt-in (SESSION_COOKIE_PARTITIONED=1) fuer
+  // Browser, die ohne CHIPS blocken — Standard im None+Secure-Pfad.
+  const partitioned = crossSite && process.env.SESSION_COOKIE_PARTITIONED === '1';
+  return { httpOnly: true, sameSite: crossSite ? ('none' as const) : ('lax' as const), secure: crossSite || (process.env.NODE_ENV === 'production' && process.env.E2E_INSECURE_COOKIES !== '1'), ...(partitioned ? { partitioned: true } : {}), path: '/', expires };
 }
 
 // Lazily resolved so this module stays importable outside Next's request context.
