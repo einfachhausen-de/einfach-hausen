@@ -2568,3 +2568,223 @@ a.ownerDashboardStatusItem:hover {
   .recordEvent { grid-template-columns:34px minmax(0,1fr); }
   .recordEventTime { grid-column:1 / -1; padding-top:0; }
 }
+
+/* Hausmanager · ChatGPT Optik & Verlauf */
+.assistantHeaderIcon {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--eh-radius-pill);
+  background: var(--eh-color-sand);
+  color: var(--eh-color-petrol);
+  display: grid;
+  place-items: center;
+  flex: none;
+}
+.assistantClose {
+  margin-left: auto;
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: var(--eh-radius-control);
+  background: transparent;
+  color: var(--eh-color-secondary);
+  cursor: pointer;
+  padding: 0;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.assistantClose:hover { background: var(--eh-color-paper); color: var(--eh-color-ink); }
+.assistantClose:focus-visible { outline: none; box-shadow: none; }
+
+.assistantVerlaufHead {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--eh-font-meta);
+  color: var(--eh-color-secondary);
+  padding: 2px 0;
+}
+.assistantBusy {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--eh-font-meta);
+  color: var(--eh-color-secondary);
+  margin: 4px 0;
+}
+.assistantBusyDot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--eh-radius-pill);
+  background: var(--eh-color-petrol);
+}
+
+.assistantMessageMeta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: var(--eh-font-meta);
+  color: var(--eh-color-secondary);
+}
+.assistantRoleUser { font-weight: var(--eh-weight-semibold); color: var(--eh-color-ink); }
+.assistantRoleAi { display: inline-flex; align-items: center; gap: 4px; font-weight: var(--eh-weight-semibold); color: var(--eh-color-petrol); }
+.assistantMetaTime { font-size: var(--eh-font-meta); color: var(--eh-color-secondary); display: inline-flex; align-items: center; gap: 4px; }
+
+.assistantMessageActions { display: flex; align-items: center; gap: 4px; margin-top: 4px; }
+
+.assistantSourcesHead {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--eh-font-meta);
+  font-weight: var(--eh-weight-medium);
+  color: var(--eh-color-secondary);
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+.assistantSourcesHead::-webkit-details-marker { display: none; }
+.assistantSourcesHint { font-weight: var(--eh-weight-regular); color: var(--eh-color-secondary); }
+.assistantSourceList { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.assistantSourceItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: var(--eh-radius-control);
+  text-decoration: none;
+  color: var(--eh-color-ink);
+  font-size: var(--eh-font-meta);
+  background: var(--eh-color-white);
+  border: 1px solid var(--eh-color-line);
+}
+.assistantSourceItem:hover { background: var(--eh-color-paper); }
+.assistantSourceIcon { flex: none; display: grid; place-items: center; color: var(--eh-color-petrol); }
+.assistantSourceMeta { flex: 1; min-width: 0; display: grid; gap: 1px; }
+.assistantSourceMeta strong { font-weight: var(--eh-weight-medium); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.assistantSourceMeta span { font-size: var(--eh-font-meta); color: var(--eh-color-secondary); }
+
+.assistantPromptPreviewItem { position: relative; display: inline-block; }
+.assistantPromptPreviewItem img {
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: var(--eh-radius-control);
+  border: 1px solid var(--eh-color-line);
+}
+.assistantPromptPreviewRemove {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 18px;
+  height: 18px;
+  border: 0;
+  border-radius: var(--eh-radius-pill);
+  background: var(--eh-color-deep);
+  color: var(--eh-color-white);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  padding: 0;
+}
+.assistantPromptToolsMenu {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 0;
+  z-index: 50;
+  width: 240px;
+  background: var(--eh-color-white);
+  border: 1px solid var(--eh-color-line);
+  border-radius: var(--eh-radius-panel);
+  box-shadow: var(--eh-shadow-panel);
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.assistantPromptToolsMenu button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: var(--eh-radius-control);
+  background: transparent;
+  color: var(--eh-color-ink);
+  font-size: var(--eh-font-label);
+  text-align: left;
+  cursor: pointer;
+  width: 100%;
+  transition: background 0.15s ease;
+}
+.assistantPromptToolsMenu button:hover { background: var(--eh-color-paper); }
+.assistantPromptToolsMenu button span { flex: 1; }
+.assistantPromptToolsMenu button small { font-size: var(--eh-font-meta); color: var(--eh-color-secondary); }
+.assistantPromptToolsMenu button:focus-visible { outline: none; box-shadow: none; }
+.assistantPromptSend {
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: var(--eh-radius-pill);
+  background: var(--eh-color-ink);
+  color: var(--eh-color-white);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  padding: 0;
+  transition: background 0.15s ease, opacity 0.15s ease;
+}
+.assistantPromptSend:hover:not(:disabled) { background: var(--eh-color-petrol); }
+.assistantPromptSend:disabled { opacity: 0.35; cursor: not-allowed; }
+.assistantPromptSend:focus-visible { outline: none; box-shadow: none; }
+.assistantPromptHint {
+  font-size: var(--eh-font-meta);
+  color: var(--eh-color-secondary);
+  margin: 6px 0 0;
+  text-align: center;
+  line-height: var(--eh-leading-normal);
+}
+.assistantPromptHint a { color: var(--eh-color-petrol); }
+
+/* 2026-09-23: Dicken Fokus-Rahmen in der App komplett raus */
+.scope :where(a, button, input, textarea, select, summary, [tabindex]):focus-visible,
+.scope :where(a, button, input, textarea, select, summary, [tabindex]):focus,
+.dialog :where(a, button, input, textarea, select, [tabindex]):focus-visible,
+.directoryWorkspace :where(a, button, input, select, summary, [tabindex]):focus-visible,
+.detailDisclosure summary:focus-visible,
+.workspaceCollapse:focus-visible,
+.fileInputNative:focus-visible,
+.activityRetry:focus-visible,
+.ownerDashboardComposer :global(.agent-composer > textarea:focus-visible) {
+  outline: none !important;
+  outline-offset: 0 !important;
+  box-shadow: none !important;
+}
+.assistantPromptBox:focus-within {
+  border-color: var(--eh-color-line) !important;
+  box-shadow: none !important;
+}
+.assistantPromptInput:focus,
+.assistantPromptInput:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+  border-color: transparent !important;
+}
+.assistantPromptInput { resize: none; }
+.searchField:focus-within,
+.contactDirectorySearch:focus-within,
+.ownerOrdersSearch:focus-within,
+.directorySearch input:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+.directorySearch input:focus,
+.directoryGroupSwitch select:focus,
+.directoryField input:focus,
+.directoryField select:focus {
+  outline: none !important;
+  box-shadow: none !important;
+  border-color: var(--eh-color-line) !important;
+}
