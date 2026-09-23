@@ -154,10 +154,9 @@ export default async function Contracts({ searchParams }: { searchParams: Promis
 
     <EHPromoBanner
       kicker="Neuer Vertrag"
-      icon={<Zap size={13} aria-hidden="true" />}
       title="Beleg her. Den Rest liest die KI."
       text="Hochladen, abfotografieren oder zwei Felder selbst ausfüllen — der Spar-Check startet danach von allein."
-      primary={{ href: '/app/contracts/anlegen', label: '+ Vertrag anlegen' }}
+      primary={{ href: '/app/contracts/anlegen', label: 'Vertrag erfassen' }}
       links={[
         { href: '/app/contracts/anlegen?weg=hochladen', label: 'Hochladen' },
         { href: '/app/contracts/anlegen?weg=scannen', label: 'Scannen' },

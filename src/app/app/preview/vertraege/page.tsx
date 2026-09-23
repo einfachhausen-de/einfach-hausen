@@ -143,7 +143,6 @@ export default async function ContractsPreview({ searchParams }: { searchParams:
 
     <EHPromoBanner
       kicker="Neuer Vertrag"
-      icon={<Zap size={13} aria-hidden="true" />}
       title="Beleg her. Den Rest liest die KI."
       text="So kommt ein Vertrag in die Hausakte. Hier nur Ansicht, ohne Speicherung."
       primary={{ href: '/app/preview/anlegen', label: 'So fühlt sich der Weg an' }}

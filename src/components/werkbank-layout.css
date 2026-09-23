@@ -216,20 +216,22 @@
 .eh-vdash-gespeichert a { align-self:center; }
 .eh-vdash-nudge a { color:var(--eh-color-petrol); }
 
-/* EHPromoBanner (src/components/eh-promo-banner.tsx): Wiederverwendbares
-   Werbebanner aus der Vertrags-Hausakte — Verlauf ueber Tokens, weisser
-   Primra-CTA, Direktwege als dezente Textlinks. */
-.eh-promo { --eh-promo-bg:linear-gradient(120deg,var(--eh-color-deep),var(--eh-color-petrol) 55%,var(--eh-color-success)); display:flex; flex-wrap:wrap; align-items:center; gap:18px; padding:18px 22px; border-radius:var(--eh-radius-panel); background:var(--eh-promo-bg); color:var(--eh-color-white); }
-.eh-promo-text { flex:1 1 300px; display:grid; gap:6px; }
-.eh-promo-kicker { display:inline-flex; align-items:center; gap:6px; font-size:var(--eh-font-meta); letter-spacing:var(--eh-track-wide); text-transform:uppercase; opacity:.85; }
-.eh-promo-text strong { font-size:var(--eh-font-h3); line-height:var(--eh-leading-tight); }
-.eh-promo-text p { margin:0; opacity:.85; line-height:var(--eh-leading-normal); }
-.eh-promo-cta { display:grid; gap:10px; justify-items:start; }
-.eh-promo-button { display:inline-flex; align-items:center; gap:8px; background:var(--eh-color-white); color:var(--eh-color-petrol); border-radius:var(--eh-radius-control); padding:10px 18px; font-weight:var(--eh-weight-semibold); text-decoration:none; font-size:var(--eh-font-label); }
-.eh-promo-button:hover { background:var(--eh-color-paper); }
-.eh-promo-links { display:flex; gap:14px; flex-wrap:wrap; font-size:var(--eh-font-label); }
-.eh-promo-links a { color:var(--eh-color-white); opacity:.85; text-decoration:none; }
-.eh-promo-links a:hover { opacity:1; text-decoration:underline; }
+/* EHPromoBanner (src/components/eh-promo-banner.tsx): redaktioneller
+   Einlade-Karton in Systemsprache — weiß wie .eh-vdash-fokus, Haarlinie plus
+   Petrol-Kante, Eyebrow, flacher System-Button, Direktwege mit Trennstrich. */
+.eh-promo { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; gap:20px 36px; padding:24px 28px; background:var(--eh-color-white); border:1px solid var(--eh-rule); border-left:3px solid var(--eh-color-petrol); border-radius:var(--eh-radius-panel); box-shadow:var(--eh-shadow-panel); color:var(--eh-color-ink); }
+.eh-promo-text { display:grid; gap:8px; min-width:0; }
+.eh-promo-kicker { display:inline-flex; align-items:center; gap:6px; font-size:var(--eh-font-eyebrow); font-weight:var(--eh-weight-semibold); letter-spacing:var(--eh-track-wide); text-transform:uppercase; color:var(--eh-color-petrol); }
+.eh-promo-title { margin:0; font-size:19px; font-weight:var(--eh-weight-bold); line-height:1.15; letter-spacing:var(--eh-track-normal); }
+.eh-promo-sub { margin:0; max-width:64ch; font-size:var(--eh-font-label); line-height:var(--eh-leading-normal); color:var(--eh-color-secondary); }
+.eh-promo-links { display:flex; flex-wrap:wrap; gap:2px 0; font-size:var(--eh-font-label); margin-top:2px; }
+.eh-promo-links a { color:var(--eh-color-secondary); text-decoration:none; padding:2px 14px; border-left:1px solid var(--eh-color-line); white-space:nowrap; }
+.eh-promo-links a:first-child { padding-left:0; border-left:0; }
+.eh-promo-links a:hover { color:var(--eh-color-petrol); text-decoration:underline; text-underline-offset:3px; }
+.eh-promo-button { display:inline-flex; align-items:center; justify-content:center; min-height:48px; padding:12px 22px; border-radius:var(--eh-radius-control); background:var(--eh-color-petrol); color:var(--eh-color-white); font-size:var(--eh-font-label); font-weight:var(--eh-weight-semibold); text-decoration:none; transition:background var(--eh-motion-duration) var(--eh-motion-ease); }
+.eh-promo-button:hover { background:var(--eh-color-deep); }
+.eh-promo-button:focus-visible { outline:2px solid var(--eh-color-focus); outline-offset:2px; }
+@media (max-width:720px) { .eh-promo { grid-template-columns:minmax(0,1fr); } .eh-promo-button { justify-self:start; } }
 
 /* Anlege-Funnel (24.09., Betreiber): Weg-Waehler-Karten + Werbebanner statt
    Unterformular. Karten sind die Buttons — grosse Klickflaeche, einer

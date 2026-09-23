@@ -2,16 +2,15 @@ import type { ReactNode } from 'react';
 import '@/components/werkbank-layout.css';
 
 /**
- * EHPromoBanner — das Werbebanner-Muster aus der Vertrags-Hausakte (24.09.,
- * Betreiber-Liebling): dunkler Markenverlauf, Kicker + Claim, ein Primär-CTA
- * und bis zu drei Direktwege. Ueberall einsetzbar, wo eine Seite jemanden
- * einladen soll, ohne zu schreien.
+ * EHPromoBanner — der redaktionelle Einlade-Karton der Werkbank: weiße
+ * Fläche, Haarlinie mit Petrol-Kante (wie .eh-vdash-fokus), Eyebrow-Zeile,
+ * kompakte Überschrift in Überschriftenskala, ein Primär-Button in
+ * Systemsprache und die Direktwege als ruhige Trennstrich-Leiste.
+ * Kein Rabattbanner: ein eindeutiger nächster Schritt, keine Farbexplosion.
  *
- * Anmerkung Designkern: packages/eh-design ist versiegelt (design-lock.json);
- * laut DESIGN.md darf ein Agent den Kern nicht selbst neu versiegeln. Dieses
- * Modul liegt bewusst im anwendbaren Layer und nutzt dieselben Tokens —
- * eine formale Aufnahme in den Kern erfolgt nur nach expliziter Freigabe
- * des Eigentuemmers ("Brand authority").
+ * Anmerkung Designkern: packages/eh-design ist versiegelt; laut DESIGN.md
+ * darf ein Agent den Kern nicht selbst nachversiegeln. Das Modul liegt im
+ * anwendbaren Layer und führt ausschließlich Design-Token.
  */
 export function EHPromoBanner({
   kicker, icon, title, text, primary, links,
@@ -24,20 +23,18 @@ export function EHPromoBanner({
   links?: { href: string; label: string }[];
 }) {
   return (
-    <aside className="eh-promo" aria-label={kicker ?? 'Angebot'}>
+    <aside className="eh-promo" aria-label={kicker ?? 'Hinweis'}>
       <div className="eh-promo-text">
         {kicker && <span className="eh-promo-kicker">{icon}{kicker}</span>}
-        <strong>{title}</strong>
-        {text && <p>{text}</p>}
-      </div>
-      <div className="eh-promo-cta">
-        <a className="eh-promo-button" href={primary.href}>{primary.label}</a>
+        <p className="eh-promo-title">{title}</p>
+        {text && <p className="eh-promo-sub">{text}</p>}
         {links && links.length > 0 && (
           <nav className="eh-promo-links" aria-label="Direkt zu einem Schritt">
             {links.map((link) => <a key={link.href} href={link.href}>{link.label}</a>)}
           </nav>
         )}
       </div>
+      <a className="eh-promo-button" href={primary.href}>{primary.label}</a>
     </aside>
   );
 }
