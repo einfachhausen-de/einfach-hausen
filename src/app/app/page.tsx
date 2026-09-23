@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { BarChart3, BatteryCharging, CalendarDays, ChevronRight, FileText, Flame, HousePlug, MessageCircle, ShieldCheck, Smartphone, Sun, Thermometer, Users, Wifi, Wrench, Zap } from 'lucide-react';
 import { WerkbankRahmen } from '@/components/werkbank-rahmen';
 import { CompareRail } from '@/components/homeowner/compare-rail';
-import { VerlaufZeitleiste } from '@/components/homeowner/verlauf-zeitleiste';
+import { VerlaufNaechstes, VerlaufZeitleiste } from '@/components/homeowner/verlauf-zeitleiste';
 import { SuggestionSlider } from '@/components/homeowner/suggestion-slider';
 import { EHButton, EHCallout, EHOwnerSection } from '@/design-system';
 import { requireUser } from '@/lib/auth';
@@ -135,11 +135,22 @@ export default async function Dashboard() {
     })
     .sort((a, b) => (b.iso ?? '').localeCompare(a.iso ?? ''));
   const naechsterTermin = upcomingHistory.find((job) => job.next_at);
-  const verlaufFuss = naechsterTermin
-    ? `Nächster Termin: ${shortDay(naechsterTermin.next_at)}${shortTime(naechsterTermin.next_at) ? `, ${shortTime(naechsterTermin.next_at)} Uhr` : ''} · ${naechsterTermin.title}`
+  // Der naechste Schritt fuehrt die Haus-Historie als eigene Zeile — die
+  // Karte selbst bleibt reiner Verlauf (Betreiber-Order 23.09., zweiter).
+  const verlaufNaechstes = naechsterTermin
+    ? {
+        label: 'Nächster Termin',
+        titel: naechsterTermin.title,
+        wann: `${shortDay(naechsterTermin.next_at)}${shortTime(naechsterTermin.next_at) ? `, ${shortTime(naechsterTermin.next_at)} Uhr` : ''}`,
+        href: `/app/jobs/${naechsterTermin.id}`,
+      }
     : offersCount > 0
-      ? `${offersCount} ${offersCount === 1 ? 'Entscheidung' : 'Entscheidungen'} offen – Angebote warten auf dich.`
-      : 'Kein Termin geplant. Sobald ein Betrieb zurueckmeldet, steht es hier.';
+      ? {
+          label: 'Offene Entscheidung',
+          titel: `${offersCount} ${offersCount === 1 ? 'Angebot' : 'Angebote'} warten auf dich`,
+          href: '/app/jobs',
+        }
+      : null;
 
   return (
     <WerkbankRahmen
@@ -243,7 +254,8 @@ export default async function Dashboard() {
       </EHOwnerSection>
 
       <EHOwnerSection title="Haus-Historie" action={{ href: '/app/jobs', label: 'Alle Vorgänge' }}>
-        <VerlaufZeitleiste eintraege={verlauf} fuss={verlaufFuss} stand={shortDay(new Date().toISOString())} />
+        {verlaufNaechstes && <VerlaufNaechstes {...verlaufNaechstes} />}
+        <VerlaufZeitleiste eintraege={verlauf} stand={shortDay(new Date().toISOString())} />
       </EHOwnerSection>
 
       <EHOwnerSection title="Vorschläge für dich" action={{ href: '/app/contracts', label: 'Alle Verträge' }}>

@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { BarChart3, BatteryCharging, CalendarDays, ChevronRight, FileText, Flame, HousePlug, MessageCircle, ShieldCheck, Smartphone, Sun, Thermometer, Users, Wifi, Wrench, Zap } from 'lucide-react';
 import { WerkbankRahmen } from '@/components/werkbank-rahmen';
 import { CompareRail } from '@/components/homeowner/compare-rail';
-import { VerlaufZeitleiste, type VerlaufEintrag } from '@/components/homeowner/verlauf-zeitleiste';
+import { VerlaufNaechstes, VerlaufZeitleiste, type VerlaufEintrag } from '@/components/homeowner/verlauf-zeitleiste';
 import { SuggestionSlider } from '@/components/homeowner/suggestion-slider';
 import { EHOwnerSection } from '@/design-system';
 import styles from '../eigentuemer-start.module.css';
@@ -126,7 +126,8 @@ export default function Preview() {
       </EHOwnerSection>
 
       <EHOwnerSection title="Haus-Historie" action={{ href: '/app/jobs', label: 'Alle Vorgänge' }}>
-        <VerlaufZeitleiste eintraege={VERLAUF} fuss="Nächster Termin: 26.09., 14:30 Uhr · Heizungswartung" stand="23.09.2026" />
+        <VerlaufNaechstes label="Nächster Termin" titel="Heizungswartung" wann="26.09., 14:30 Uhr" href="/app/jobs" />
+        <VerlaufZeitleiste eintraege={VERLAUF} stand="23.09.2026" />
       </EHOwnerSection>
 
       <EHOwnerSection title="Vorschläge für dich" action={{ href: '/app/contracts', label: 'Alle Verträge' }}>

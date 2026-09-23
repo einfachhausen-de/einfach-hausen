@@ -129,6 +129,16 @@
  * stellen. */
 
 .tlCard { border:1px solid var(--eh-color-line); border-radius:var(--eh-radius-control); background:var(--eh-color-white); padding:18px 22px; }
+/* 'Als naechstes'-Zeile: fuehrt die Haus-Historie, eigens Link und eigens
+   beschriftet (Termin bzw. offene Entscheidung) — nicht mehr Fuss der Karte. */
+.tlNext { display:flex; align-items:center; gap:10px; margin-bottom:12px; padding:12px 16px; border:1px solid var(--eh-color-line); border-radius:var(--eh-radius-control); background:var(--eh-color-white); text-decoration:none; color:inherit; }
+.tlNext:hover, .tlNext:focus-visible { background:var(--eh-color-paper); border-color:var(--eh-color-petrol); }
+.tlNextIcon { flex:none; display:grid; place-items:center; width:28px; height:28px; border-radius:var(--eh-radius-control); background:var(--eh-color-paper); color:var(--eh-color-petrol); }
+.tlNextLabel { flex:none; font-size:var(--eh-font-meta); font-weight:var(--eh-weight-semibold); text-transform:uppercase; letter-spacing:var(--eh-track-wide); color:var(--eh-color-secondary); }
+.tlNextTitel { font-size:var(--eh-font-label); font-weight:var(--eh-weight-medium); overflow-wrap:anywhere; }
+.tlNextWhen { margin-left:auto; padding-left:14px; font-size:var(--eh-font-meta); color:var(--eh-color-secondary); font-variant-numeric:tabular-nums; }
+.tlNextChev { flex:none; color:var(--eh-color-secondary); }
+.tlNext:hover .tlNextChev { color:var(--eh-color-petrol); }
 
 .tlHead { display:flex; align-items:flex-start; gap:12px; }
 .tlIcon { flex:none; display:grid; place-items:center; width:36px; height:36px; border-radius:var(--eh-radius-control); background:var(--eh-color-paper); color:var(--eh-color-petrol); }
@@ -173,8 +183,6 @@
 .tlWhen { margin-left:auto; font-size:var(--eh-font-meta); color:var(--eh-color-secondary); font-variant-numeric:tabular-nums; flex:none; }
 .tlZusatz { flex:1 1 100%; margin:1px 0 0 27px; font-size:var(--eh-font-meta); color:var(--eh-color-secondary); }
 
-.tlTrenn { display:block; margin:16px 0 12px; border-top:1px solid var(--eh-color-line); }
-.tlFuss { margin:0; font-size:var(--eh-font-label); color:var(--eh-color-secondary); }
 .tlLeer { margin:12px 0 0; font-size:var(--eh-font-meta); color:var(--eh-color-secondary); }
 
 /* ── Rechte Schiene: flache Kennzahlen-Karten ─────────────────────────── */

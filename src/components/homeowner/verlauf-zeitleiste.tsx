@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { ChevronDown, History } from "lucide-react";
+import { CalendarClock, ChevronDown, ChevronRight, History } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import styles from "@/app/app/eigentuemer-start.module.css";
 
@@ -13,7 +13,8 @@ import styles from "@/app/app/eigentuemer-start.module.css";
  * kein Termin-Status, damit die Karte eindeutig „Historie" ist und nicht wie
  * eine Termin-Erinnerung wirkt (Betreiber-Order 23.09.: 'Historie oder
  * Termin?'). Vorgaenge erscheinen ausschliesslich in der Liste darunter,
- * der Termin nur in der eindeutig beschrifteten Fusszeile. Zwei Gruppen:
+ * der naechste Schritt steht als eigene 'Als naechstes'-Zeile ueber der
+ * Karte (VerlaufNaechstes), nicht mehr als Fuss in ihr. Zwei Gruppen:
  * „Anstehend“ (gefuellte Petrol-Punkte) und „Vergangen“ (hohle graue Punkte,
  * blassere Schrift) — damit auf einen Blick erkennbar ist, was noch laeuft
  * und was erledigt ist (Betreiber-Nachschurf 23.09.). Ueber MAX_SICHTBAR
@@ -41,9 +42,8 @@ export type VerlaufEintrag = {
 const MAX_SICHTBAR = 5;
 
 /** Bilanz-Kopf: wie viele Vorgaenge, wie davon offen; `stand` = Kurzdatum. */
-export function VerlaufZeitleiste({ eintraege, fuss, stand }: {
+export function VerlaufZeitleiste({ eintraege, stand }: {
   eintraege: readonly VerlaufEintrag[];
-  fuss?: string;
   stand?: string;
 }) {
   const [alle, setAlle] = useState(false);
@@ -123,14 +123,30 @@ export function VerlaufZeitleiste({ eintraege, fuss, stand }: {
               )}
             </div>
           )}
-          {fuss && (
-            <>
-              <span className={styles.tlTrenn} aria-hidden="true" />
-              <p className={styles.tlFuss}>{fuss}</p>
-            </>
-          )}
         </CollapsibleContent>
       </Collapsible>
     </div>
+  );
+}
+
+/**
+ * 'Als naechstes'-Zeile ueber der Verlaufs-Karte (Betreiber-Order 23.09.):
+ * der naechste Schritt (Termin oder offene Entscheidung) fuehrt die Historie,
+ * statt in ihr unteruzutauchen. Eigener Link, eigene Beschriftung.
+ */
+export function VerlaufNaechstes({ label, titel, wann, href }: {
+  label: string;
+  titel: string;
+  wann?: string;
+  href: string;
+}) {
+  return (
+    <Link className={styles.tlNext} href={href}>
+      <span className={styles.tlNextIcon} aria-hidden="true"><CalendarClock size={16} /></span>
+      <span className={styles.tlNextLabel}>{label}</span>
+      <strong className={styles.tlNextTitel}>{titel}</strong>
+      {wann && <span className={styles.tlNextWhen}>{wann}</span>}
+      <ChevronRight className={styles.tlNextChev} size={16} aria-hidden="true" />
+    </Link>
   );
 }
