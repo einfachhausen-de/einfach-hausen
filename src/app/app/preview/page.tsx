@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { BarChart3, BatteryCharging, CalendarDays, ChevronRight, FileText, Flame, HousePlug, MessageCircle, ShieldCheck, Smartphone, Sun, Thermometer, Users, Wifi, Wrench, Zap } from 'lucide-react';
 import { WerkbankRahmen } from '@/components/werkbank-rahmen';
 import { CompareRail } from '@/components/homeowner/compare-rail';
+import { VerlaufZeitleiste, type VerlaufEintrag } from '@/components/homeowner/verlauf-zeitleiste';
 import { SuggestionSlider } from '@/components/homeowner/suggestion-slider';
 import { EHOwnerSection } from '@/design-system';
 import styles from '../eigentuemer-start.module.css';
@@ -31,23 +32,15 @@ const RAIL = [
   { href: '/app/calendar', label: 'Termine', value: 2, icon: CalendarDays, tone: 'terra' },
 ] as const;
 
-const UPCOMING = [
-  { id: 9003, title: 'Badarmatur tropft', status: 'In Arbeit', when: '24.09.', time: '10:00' },
-  { id: 9007, title: 'Heizungswartung', status: 'Angebote da', when: '26.09.', time: '14:30' },
-] as const;
-
-const PAST = [
-  { id: 9005, title: 'Thermostate tauschen', status: 'Abgeschlossen', when: '18.09.' },
-  { id: 9006, title: 'Dachrinne reinigen', status: 'Abgeschlossen', when: '12.09.' },
-  { id: 9008, title: 'Rasen mähen', status: 'Abgeschlossen', when: '05.09.' },
-] as const;
-
-function tone(status: string): 'ok' | 'info' | 'warn' | 'neutral' {
-  if (status === 'Abgeschlossen' || status === 'Erledigt') return 'ok';
-  if (status === 'In Arbeit') return 'info';
-  if (status === 'Angebote da') return 'warn';
-  return 'neutral';
-}
+// Haus-Historie der Vorschau: eine absteigende Zeitleiste nach dem
+// Live-Muster (VerlaufZeitleiste), Demo-Werte wie auf den Screenshots.
+const VERLAUF: readonly VerlaufEintrag[] = [
+  { id: 'u9007', titel: 'Heizungswartung', status: 'Angebote da', ton: 'warn', datum: '26.09.', iso: '2026-09-26T14:30', zusatz: 'Termin 26.09., 14:30 Uhr', href: '/app/jobs' },
+  { id: 'u9003', titel: 'Badarmatur tropft', status: 'In Arbeit', ton: 'info', datum: '24.09.', iso: '2026-09-24T10:00', zusatz: 'Termin 24.09., 10:00 Uhr', href: '/app/jobs' },
+  { id: 'p9005', titel: 'Thermostate tauschen', status: 'Abgeschlossen', ton: 'ok', datum: '18.09.', iso: '2026-09-18', href: '/app/jobs' },
+  { id: 'p9006', titel: 'Dachrinne reinigen', status: 'Abgeschlossen', ton: 'ok', datum: '12.09.', iso: '2026-09-12', href: '/app/jobs' },
+  { id: 'p9008', titel: 'Rasen mähen', status: 'Abgeschlossen', ton: 'ok', datum: '05.09.', iso: '2026-09-05', href: '/app/jobs' },
+];
 
 export default function Preview() {
   const address = 'Fixturestraße 1, 46325 Borken';
@@ -130,58 +123,7 @@ export default function Preview() {
       </EHOwnerSection>
 
       <EHOwnerSection title="Haus-Historie" action={{ href: '/app/jobs', label: 'Alle Vorgänge' }}>
-        <div className={styles.historyCols}>
-          <div className={styles.historyPanel}>
-            <div className={styles.historyPanelHead}>
-              <span className={styles.historyPanelTitle}>Anstehendes</span>
-              <span className={styles.historyPanelCount}>{UPCOMING.length}</span>
-            </div>
-            <ol className={styles.historyList} aria-label="Anstehendes">
-              {UPCOMING.map((job) => (
-                <li key={job.id}>
-                  <Link href="/app/jobs" className={styles.historyRow}>
-                    <span className={styles.historyRowMain}>
-                      <span className={styles.historyRowTitle}>{job.title}</span>
-                      <span className={styles.historyRowMeta}>
-                        <span className={styles.historyRowStatus} data-tone={tone(job.status)}>{job.status}</span>
-                      </span>
-                    </span>
-                    <time className={styles.historyRowWhen} dateTime={job.when}>
-                      <span className={styles.historyRowDate}>{job.when}</span>
-                      <span className={styles.historyRowTime}>{job.time} Uhr</span>
-                    </time>
-                    <ChevronRight size={16} className={styles.historyRowChevron} aria-hidden="true" />
-                  </Link>
-                </li>
-              ))}
-            </ol>
-          </div>
-
-          <div className={styles.historyPanel}>
-            <div className={styles.historyPanelHead}>
-              <span className={styles.historyPanelTitle}>Vergangenes</span>
-              <span className={styles.historyPanelCount}>{PAST.length}</span>
-            </div>
-            <ol className={styles.historyList} aria-label="Vergangenes">
-              {PAST.map((job) => (
-                <li key={job.id}>
-                  <Link href="/app/jobs" className={styles.historyRow}>
-                    <span className={styles.historyRowMain}>
-                      <span className={styles.historyRowTitle}>{job.title}</span>
-                      <span className={styles.historyRowMeta}>
-                        <span className={styles.historyRowStatus} data-tone={tone(job.status)}>{job.status}</span>
-                      </span>
-                    </span>
-                    <time className={styles.historyRowWhen} dateTime={job.when}>
-                      <span className={styles.historyRowDate}>{job.when}</span>
-                    </time>
-                    <ChevronRight size={16} className={styles.historyRowChevron} aria-hidden="true" />
-                  </Link>
-                </li>
-              ))}
-            </ol>
-          </div>
-        </div>
+        <VerlaufZeitleiste eintraege={VERLAUF} fuss="Nächster Termin: 26.09., 14:30 Uhr · Heizungswartung" />
       </EHOwnerSection>
 
       <EHOwnerSection title="Vorschläge für dich" action={{ href: '/app/contracts', label: 'Alle Verträge' }}>

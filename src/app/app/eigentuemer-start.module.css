@@ -120,92 +120,52 @@
 .railScroll :global(.eh-werkbank-chip) { flex: none; }
 .railControls { display: flex; gap: 8px; margin-left: auto; }
 
-/* ── Haus-Historie: zwei Spalten, mobil Anstehendes zuerst ──────────────
- * Die Reihenfolge im Markup ist Anstehendes, Vergangenes. Auf breiten
- * Schirmen dreht `order` sie auf Vergangenes links / Anstehendes rechts;
- * auf dem Telefon gilt wieder die Markup-Reihenfolge. */
+/* ── Haus-Historie: Zeitleisten-Karte ─────────────────────────────────
+ * Betreiber-Order 2026-09-23, Muster nach der 21st.dev-Incident-Karte (adaptiert,
+ * nicht kopiert — hauseigene Token, Ton ueber data-tone, keine Tailwind-Utils):
+ * Kopf mit Symbol (sofortige Erkennung), neuestem Vorgang und Statusplakette;
+ * darunter die Zeitleiste an einer durchgehenden Linie, der neueste Punkt in
+ * Petrol. Aufgeklappt im Ruhezustand, ueber die Zeile „Zeitleiste“ schmal zu
+ * stellen. */
 
-.historyCols {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
-  align-items: start;
-}
+.tlCard { border:1px solid var(--eh-color-line); border-radius:var(--eh-radius-control); background:var(--eh-color-white); padding:14px 16px; }
 
-.historyCols > * { min-width: 0; }
-.historyCols > :nth-child(1) { order: 2; }
-.historyCols > :nth-child(2) { order: 1; }
+.tlHead { display:flex; align-items:flex-start; gap:10px; }
+.tlIcon { flex:none; display:grid; place-items:center; width:32px; height:32px; border-radius:var(--eh-radius-control); background:var(--eh-color-paper); color:var(--eh-color-petrol); }
+.tlHeadCopy { flex:1 1 auto; min-width:0; display:grid; gap:2px; }
+.tlHeadTitel { font-size:var(--eh-font-label); font-weight:var(--eh-weight-semibold); line-height:var(--eh-leading-tight); overflow-wrap:anywhere; }
+.tlHeadMeta { display:flex; flex-wrap:wrap; align-items:center; gap:6px; font-size:var(--eh-font-meta); color:var(--eh-color-secondary); }
+.tlHeadMeta [data-tone='warn'] { color:var(--eh-color-terra); }
+.tlHeadMeta [data-tone='ok'] { color:var(--eh-color-success); }
+.tlHeadMeta [data-tone='info'] { color:var(--eh-color-petrol); }
+.tlHeadCount { margin-left:auto; font-variant-numeric:tabular-nums; }
 
-.historyPanel { display: grid; gap: 8px; align-content: start; }
+.tlBadge { flex:none; padding:2px 8px; border:1px solid var(--eh-color-line); border-radius:var(--eh-radius-pill); background:var(--eh-color-paper); font-size:var(--eh-font-meta); font-weight:var(--eh-weight-semibold); color:var(--eh-color-secondary); }
+.tlBadge[data-tone='warn'] { color:var(--eh-color-terra); }
+.tlBadge[data-tone='ok'] { color:var(--eh-color-success); }
+.tlBadge[data-tone='info'] { color:var(--eh-color-petrol); }
 
-.historyPanelHead { display: flex; align-items: center; gap: 8px; }
+.tlToggle { display:inline-flex; align-items:center; gap:6px; margin-top:8px; padding:6px 0; border:0; background:transparent; font-size:var(--eh-font-meta); font-weight:var(--eh-weight-semibold); color:var(--eh-color-secondary); cursor:pointer }
+.tlToggle:hover { color:var(--eh-color-petrol); }
+.tlChevron { transition:transform .2s ease; }
+.tlToggle[data-state='open'] .tlChevron { transform:rotate(180deg); }
 
-.historyPanelTitle {
-  font-size: var(--eh-font-meta);
-  font-weight: var(--eh-weight-bold);
-  letter-spacing: var(--eh-track-wide);
-  text-transform: uppercase;
-  color: var(--eh-color-secondary);
-}
+.tlList { position:relative; list-style:none; margin:12px 0 0; padding:0; display:grid; gap:12px; }
+.tlList::before { content:''; position:absolute; left:6px; top:6px; bottom:6px; width:1px; background:var(--eh-color-line); }
+.tlItem { position:relative; display:flex; gap:12px; }
+.tlDot { z-index:1; flex:none; width:13px; height:13px; margin-top:3px; border:1px solid var(--eh-color-line); border-radius:var(--eh-radius-pill); background:var(--eh-color-white); display:grid; place-items:center; }
+.tlDot::after { content:''; width:5px; height:5px; border-radius:var(--eh-radius-pill); background:var(--eh-color-secondary); }
+.tlDot[data-neuest]::after { background:var(--eh-color-petrol); }
+.tlBody { flex:1 1 auto; min-width:0; display:grid; gap:2px; }
+.tlMeta { display:flex; align-items:center; gap:8px; }
+.tlWhen { font-size:var(--eh-font-meta); color:var(--eh-color-secondary); font-variant-numeric:tabular-nums; }
+.tlTitel { color:inherit; text-decoration:none; font-size:var(--eh-font-label); font-weight:var(--eh-weight-medium); line-height:var(--eh-leading-tight); overflow-wrap:anywhere; }
+.tlTitel:hover { color:var(--eh-color-petrol); }
+.tlZusatz { font-size:var(--eh-font-meta); color:var(--eh-color-secondary); }
 
-.historyPanelCount {
-  margin-left: auto;
-  font-size: var(--eh-font-meta);
-  font-variant-numeric: tabular-nums;
-  color: var(--eh-color-secondary);
-}
-
-.historyList { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
-
-.historyRow {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  min-height: 44px;
-  padding: 12px 14px;
-  border: 1px solid var(--eh-color-line);
-  border-radius: var(--eh-radius-control);
-  background: var(--eh-color-white);
-  color: inherit;
-  text-decoration: none;
-}
-
-.historyRow:hover { background: var(--eh-color-paper); }
-
-.historyRowMain { flex: 1; min-width: 0; display: grid; gap: 2px; }
-
-.historyRowTitle {
-  font-size: var(--eh-font-label);
-  font-weight: var(--eh-weight-medium);
-  line-height: var(--eh-leading-tight);
-  overflow-wrap: anywhere;
-}
-
-.historyRowMeta { font-size: var(--eh-font-meta); color: var(--eh-color-secondary); }
-
-.historyRowStatus { font-weight: var(--eh-weight-semibold); }
-.historyRowStatus[data-tone='warn'] { color: var(--eh-color-terra); }
-.historyRowStatus[data-tone='ok'] { color: var(--eh-color-success); }
-.historyRowStatus[data-tone='info'] { color: var(--eh-color-petrol); }
-
-.historyRowWhen { display: grid; gap: 2px; text-align: right; font-variant-numeric: tabular-nums; flex: none; }
-.historyRowDate { font-size: var(--eh-font-label); font-weight: var(--eh-weight-semibold); }
-.historyRowTime { font-size: var(--eh-font-meta); color: var(--eh-color-secondary); }
-.historyRowChevron { color: var(--eh-color-secondary); flex: none; }
-
-.historyColEmpty {
-  margin: 0;
-  padding: 14px;
-  border: 1px dashed var(--eh-color-line);
-  border-radius: var(--eh-radius-control);
-  font-size: var(--eh-font-meta);
-  color: var(--eh-color-secondary);
-}
-
-@media (max-width: 900px) {
-  .historyCols { grid-template-columns: minmax(0, 1fr); }
-  .historyCols > * { order: 0; }
-}
+.tlTrenn { display:block; margin:12px 0 10px; border-top:1px solid var(--eh-color-line); }
+.tlFuss { margin:0; font-size:var(--eh-font-meta); color:var(--eh-color-secondary); }
+.tlLeer { margin:10px 0 0; font-size:var(--eh-font-meta); color:var(--eh-color-secondary); }
 
 /* ── Rechte Schiene: flache Kennzahlen-Karten ─────────────────────────── */
 

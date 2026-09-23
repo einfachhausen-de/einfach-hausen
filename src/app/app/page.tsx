@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { BarChart3, BatteryCharging, CalendarDays, ChevronRight, FileText, Flame, HousePlug, MessageCircle, ShieldCheck, Smartphone, Sun, Thermometer, Users, Wifi, Wrench, Zap } from 'lucide-react';
 import { WerkbankRahmen } from '@/components/werkbank-rahmen';
 import { CompareRail } from '@/components/homeowner/compare-rail';
+import { VerlaufZeitleiste } from '@/components/homeowner/verlauf-zeitleiste';
 import { SuggestionSlider } from '@/components/homeowner/suggestion-slider';
 import { EHButton, EHCallout, EHOwnerSection } from '@/design-system';
 import { requireUser } from '@/lib/auth';
@@ -112,6 +113,33 @@ export default async function Dashboard() {
     ORDER BY datetime(updated_at) DESC LIMIT 6
   `).all(user.id) as HistoryRow[];
 
+  // Haus-Historie als Zeitleiste (Muster 21st.dev, Betreiber-Order 23.09.):
+  // Anstehendes und Vergangenes in einer absteigenden Liste; der Fuss zeigt
+  // den naechsten Termin oder den naechsten offenen Schritt.
+  const verlauf = [...upcomingHistory, ...pastHistory]
+    .map((job) => {
+      const meta = jobStatus(job.status);
+      const when = job.next_at ?? job.shown_at;
+      const zeit = job.next_at ? shortTime(job.next_at) : null;
+      return {
+        id: String(job.id),
+        titel: job.title,
+        status: meta.label,
+        ton: meta.tone,
+        datum: shortDay(when),
+        iso: when ? String(when).slice(0, 10) : undefined,
+        zusatz: job.next_at ? (zeit ? `Termin ${shortDay(job.next_at)}, ${zeit} Uhr` : `Termin ${shortDay(job.next_at)}`) : undefined,
+        href: `/app/jobs/${job.id}`,
+      };
+    })
+    .sort((a, b) => (b.iso ?? '').localeCompare(a.iso ?? ''));
+  const naechsterTermin = upcomingHistory.find((job) => job.next_at);
+  const verlaufFuss = naechsterTermin
+    ? `Nächster Termin: ${shortDay(naechsterTermin.next_at)}${shortTime(naechsterTermin.next_at) ? `, ${shortTime(naechsterTermin.next_at)} Uhr` : ''} · ${naechsterTermin.title}`
+    : offersCount > 0
+      ? `${offersCount} ${offersCount === 1 ? 'Entscheidung' : 'Entscheidungen'} offen – Angebote warten auf dich.`
+      : 'Kein Termin geplant. Sobald ein Betrieb zurueckmeldet, steht es hier.';
+
   return (
     <WerkbankRahmen
       role="homeowner"
@@ -214,76 +242,7 @@ export default async function Dashboard() {
       </EHOwnerSection>
 
       <EHOwnerSection title="Haus-Historie" action={{ href: '/app/jobs', label: 'Alle Vorgänge' }}>
-        <div className={styles.historyCols}>
-          {/* Reihenfolge im Markup: Anstehendes zuerst (mobil). Auf breiten
-              Schirmen dreht das Modul die Spalten auf Vergangenes links. */}
-          <div className={styles.historyPanel}>
-            <div className={styles.historyPanelHead}>
-              <span className={styles.historyPanelTitle}>Anstehendes</span>
-              {upcomingHistory.length > 0 && <span className={styles.historyPanelCount}>{upcomingHistory.length}</span>}
-            </div>
-            {upcomingHistory.length > 0 ? (
-              <ol className={styles.historyList} aria-label="Anstehendes">
-                {upcomingHistory.map((job) => {
-                  const meta = jobStatus(job.status);
-                  const when = job.next_at ?? job.shown_at;
-                  const time = shortTime(job.next_at);
-                  return (
-                    <li key={job.id}>
-                      <Link href={`/app/jobs/${job.id}`} className={styles.historyRow}>
-                        <span className={styles.historyRowMain}>
-                          <span className={styles.historyRowTitle}>{job.title}</span>
-                          <span className={styles.historyRowMeta}>
-                            <span className={styles.historyRowStatus} data-tone={meta.tone}>{meta.label}</span>
-                          </span>
-                        </span>
-                        <time className={styles.historyRowWhen} dateTime={when}>
-                          <span className={styles.historyRowDate}>{shortDay(when)}</span>
-                          {time && <span className={styles.historyRowTime}>{time} Uhr</span>}
-                        </time>
-                        <ChevronRight size={16} className={styles.historyRowChevron} aria-hidden="true" />
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ol>
-            ) : (
-              <p className={styles.historyColEmpty}>Aktuell nichts anstehend.</p>
-            )}
-          </div>
-
-          <div className={styles.historyPanel}>
-            <div className={styles.historyPanelHead}>
-              <span className={styles.historyPanelTitle}>Vergangenes</span>
-              {pastHistory.length > 0 && <span className={styles.historyPanelCount}>{pastHistory.length}</span>}
-            </div>
-            {pastHistory.length > 0 ? (
-              <ol className={styles.historyList} aria-label="Vergangenes">
-                {pastHistory.map((job) => {
-                  const meta = jobStatus(job.status);
-                  return (
-                    <li key={job.id}>
-                      <Link href={`/app/jobs/${job.id}`} className={styles.historyRow}>
-                        <span className={styles.historyRowMain}>
-                          <span className={styles.historyRowTitle}>{job.title}</span>
-                          <span className={styles.historyRowMeta}>
-                            <span className={styles.historyRowStatus} data-tone={meta.tone}>{meta.label}</span>
-                          </span>
-                        </span>
-                        <time className={styles.historyRowWhen} dateTime={job.shown_at}>
-                          <span className={styles.historyRowDate}>{shortDay(job.shown_at)}</span>
-                        </time>
-                        <ChevronRight size={16} className={styles.historyRowChevron} aria-hidden="true" />
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ol>
-            ) : (
-              <p className={styles.historyColEmpty}>Noch keine abgeschlossenen Vorgänge.</p>
-            )}
-          </div>
-        </div>
+        <VerlaufZeitleiste eintraege={verlauf} fuss={verlaufFuss} />
       </EHOwnerSection>
 
       <EHOwnerSection title="Vorschläge für dich" action={{ href: '/app/contracts', label: 'Alle Verträge' }}>
