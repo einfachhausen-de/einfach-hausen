@@ -5,7 +5,7 @@ import {
   Smartphone, Thermometer, Trash2, Wifi, Wrench, Zap,
 } from 'lucide-react';
 import {
-  EHButton, EHEmptyState, EHField, EHFieldGrid, EHFileInput, EHFormFeedback, EHFormSection,
+  EHButton, EHEmptyState, EHField, EHFieldGrid, EHFormFeedback, EHFormSection,
   EHInput, EHOwnerSection, EHSelect, EHStatus, EHSubmitButton, EHText, EHTextarea, EHWorkflowForm,
 } from '@/design-system';
 import { WerkbankRahmen } from '@/components/werkbank-rahmen';
@@ -19,7 +19,7 @@ import {
   type ContractKind, cancellationDeadline, contractKindLabel, currentTermEnd,
   deadlineDays, deadlineState, estimateSavings, formatDate, monthlyCents, yearlyCents,
 } from '@/lib/contracts';
-import { addHouseContractAction, setHouseContractStatusAction, updateHouseContractAction } from '@/app/actions';
+import { setHouseContractStatusAction, updateHouseContractAction } from '@/app/actions';
 import { applyContractFilter, filterIsActive, parseContractFilter } from '@/lib/contract-filter';
 import {
   AFFILIATE_CATEGORIES, AFFILIATE_CATEGORY_ACTIONS, AFFILIATE_CATEGORY_HINTS,
@@ -117,7 +117,7 @@ export default async function Contracts({ searchParams }: { searchParams: Promis
         tone: 'save' as const,
       }
     : active.length > 0
-      ? { zahl: String(0), strong: 'Alles ruhig', sub: 'Keine Frist in den nächsten 90 Tagen · neue Verträge machen den Check genauer', href: '#vertrag-anlegen' }
+      ? { zahl: String(0), strong: 'Alles ruhig', sub: 'Keine Frist in den nächsten 90 Tagen · neue Verträge machen den Check genauer', href: '/app/contracts/anlegen' }
       : null);
 
   const comparisonNotice = sp.hinweis ? COMPARISON_NOTICES[sp.hinweis] : undefined;
@@ -161,14 +161,14 @@ export default async function Contracts({ searchParams }: { searchParams: Promis
           <Link href="#vertraege" className="eh-vdash-kpi"><b>{active.length}</b><small>Aktiv</small></Link>
           <Link href="#vertraege" className="eh-vdash-kpi" {...(withDeadline.length > 0 ? { 'data-tone': withDeadline[0].state === 'overdue' ? 'danger' : 'warn' } : {})}><b>{withDeadline.length}</b><small>Fristen ≤ 90 Tage</small></Link>
           <Link href="#vertraege" className="eh-vdash-kpi"><b>{euroExact(monthlyTotal)}</b><small>pro Monat</small></Link>
-          <Link href="#vertrag-anlegen" className="eh-werkbank-kopf-cta">+ Vertrag</Link>
+          <Link href="/app/contracts/anlegen" className="eh-werkbank-kopf-cta">+ Vertrag</Link>
         </div>
       </div>
 
     {saved && (
       <div className="eh-vdash-gespeichert">
         <EHFormFeedback kind="success">Geschafft. Der Vertrag ist ab sofort im Spar-Check dabei.</EHFormFeedback>
-        <Link href="#vertrag-anlegen" className="eh-werkbank-kopf-cta">Noch einen? Dauert 20 Sekunden</Link>
+        <Link href="/app/contracts/anlegen" className="eh-werkbank-kopf-cta">Noch einen? Dauert 20 Sekunden</Link>
       </div>
     )}
     {comparisonNotice && <EHFormFeedback kind="info">{comparisonNotice}</EHFormFeedback>}
@@ -182,18 +182,18 @@ export default async function Contracts({ searchParams }: { searchParams: Promis
       )}
     </div>
 
-    <EHOwnerSection title={filterIsActive(filter) ? `Meine Verträge · ${visible.length} von ${contracts.length}` : `Meine Verträge · ${contracts.length}`} action={{ href: '#vertrag-anlegen', label: '+ Erfassen' }}>
+    <EHOwnerSection title={filterIsActive(filter) ? `Meine Verträge · ${visible.length} von ${contracts.length}` : `Meine Verträge · ${contracts.length}`} action={{ href: '/app/contracts/anlegen', label: '+ Erfassen' }}>
       <div id="vertraege" />
       <EHText muted>Alles, was dein Haus laufend kostet. Wir prüfen jeden erfassten Vertrag automatisch auf Sparpotenzial — du musst nur noch vergleichen.</EHText>
       {contracts.length === 0
-        ? <EHEmptyState title="Noch kein Vertrag erfasst" text="Trag deinen Strom-, DSL- oder Versicherungsvertrag ein. Danach siehst du hier Kosten, Laufzeit und Kündigungsfrist – und ob sich ein Wechsel lohnt." action={<EHButton href="#vertrag-anlegen" variant="secondary">Vertrag erfassen</EHButton>} />
+        ? <EHEmptyState title="Noch kein Vertrag erfasst" text="Trag deinen Strom-, DSL- oder Versicherungsvertrag ein. Danach siehst du hier Kosten, Laufzeit und Kündigungsfrist – und ob sich ein Wechsel lohnt." action={<EHButton href="/app/contracts/anlegen">Jetzt Vertrag anlegen</EHButton>} />
         : (
           <>
             <VertraegeTabelle base="/app/contracts" allRows={contracts} rows={visible} filter={filter} selectedId={selectedRow?.id ?? null} icons={KIND_ICONS}>
               {selectedRow && <VertragsDetail row={selectedRow} postcode={profile?.postcode} />}
             </VertraegeTabelle>
             {contracts.length > 0 && contracts.length < 4 && (
-              <p className="eh-vdash-nudge">Je mehr Verträge du erfasst, desto genauer dein Spar-Check — auch Gas, Handy, Abo oder Versicherung gehören in die Hausakte. <Link href="#vertrag-anlegen">Weitersammeln</Link></p>
+              <p className="eh-vdash-nudge">Je mehr Verträge du erfasst, desto genauer dein Spar-Check — auch Gas, Handy, Abo oder Versicherung gehören in die Hausakte. <Link href="/app/contracts/anlegen">Weitersammeln</Link></p>
             )}
           </>
         )}
@@ -237,32 +237,21 @@ export default async function Contracts({ searchParams }: { searchParams: Promis
     </EHOwnerSection>
 
     <section id="vertrag-anlegen" aria-label="Vertrag anlegen">
-      <EHOwnerSection title="Neuer Vertrag">
-        <EHWorkflowForm action={addHouseContractAction}>
-          <EHFormSection title="Was kostet dich der Vertrag?" description="Nur der Anbieter ist Pflicht. Rest gern spaeter — Fristen und Ersparnis rechnen wir aus dem, was fehlt, so gut es geht.">
-            <EHFieldGrid>
-              <EHField id="new-kind" label="Was ist es?"><EHSelect id="new-kind" name="kind" defaultValue="strom">{CONTRACT_KIND_KEYS.map((k) => <option key={k} value={k}>{CONTRACT_KINDS[k]}</option>)}</EHSelect></EHField>
-              <EHField id="new-provider" label="Anbieter" required><EHInput id="new-provider" name="provider" required placeholder="z. B. Stadtwerke Musterstadt" /></EHField>
-              <EHField id="new-cost" label="Betrag (€)"><EHInput id="new-cost" name="cost" inputMode="decimal" placeholder="89,90" /></EHField>
-              <EHField id="new-interval" label="Zahlweise"><EHSelect id="new-interval" name="costInterval" defaultValue="month">{COST_INTERVAL_KEYS.map((k) => <option key={k} value={k}>{COST_INTERVALS[k]}</option>)}</EHSelect></EHField>
-            </EHFieldGrid>
-            <details className="eh-vertrag-edit">
-              <summary>Mehr angeben (optional)</summary>
-              <EHFieldGrid>
-                <EHField id="new-tariff" label="Tarif (steht auf deiner Rechnung)"><EHInput id="new-tariff" name="tariff" placeholder="z. B. Basisstrom 12" /></EHField>
-                <EHField id="new-number" label="Vertragsnummer"><EHInput id="new-number" name="contractNumber" /></EHField>
-              </EHFieldGrid>
-              <EHFieldGrid>
-                <EHField id="new-start" label="Vertragsbeginn"><EHInput id="new-start" name="startedAt" type="date" /></EHField>
-                <EHField id="new-days" label="Kündigungsfrist (Tage)"><EHInput id="new-days" name="cancellationDays" type="number" min="0" placeholder="30" /></EHField>
-              </EHFieldGrid>
-              <div className="eh-werkbank-filefield"><EHField id="new-doc" label="Rechnung abfotografieren" hint="Wir lesen Betrag und Frist heraus — du kannst alles auch abtippen."><EHFileInput id="new-doc" name="document" accept="application/pdf,image/*" /></EHField></div>
-              <EHField id="new-notice" label="Notiz"><EHTextarea id="new-notice" name="notice" rows={2} maxLength={2000} placeholder="z. B. Router inklusive, Kündigung nur schriftlich" /></EHField>
-            </details>
-            <EHSubmitButton pendingLabel="Vertrag wird gespeichert …">Vertrag speichern</EHSubmitButton>
-          </EHFormSection>
-        </EHWorkflowForm>
-      </EHOwnerSection>
+      <div className="eh-vertrag-ads">
+        <div className="eh-vertrag-ads-text">
+          <span className="eh-vertrag-ads-kicker"><Zap size={13} aria-hidden="true" /> Neuer Vertrag</span>
+          <strong>Beleg her. Den Rest liest die KI.</strong>
+          <small>Hochladen, abfotografieren oder zwei Felder selbst ausfüllen — der Spar-Check startet danach von allein.</small>
+        </div>
+        <div className="eh-vertrag-ads-cta">
+          <Link href="/app/contracts/anlegen" className="eh-werkbank-kopf-cta">+ Vertrag anlegen</Link>
+          <nav className="eh-vertrag-ads-links" aria-label="Direkt zu einem Weg">
+            <Link href="/app/contracts/anlegen?weg=hochladen">Hochladen</Link>
+            <Link href="/app/contracts/anlegen?weg=scannen">Scannen</Link>
+            <Link href="/app/contracts/anlegen?weg=manuell">Selbst eintragen</Link>
+          </nav>
+        </div>
+      </div>
     </section>
   </WerkbankRahmen>;
 }

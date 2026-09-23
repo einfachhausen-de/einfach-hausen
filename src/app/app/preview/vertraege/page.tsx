@@ -5,8 +5,7 @@ import {
   Smartphone, Thermometer, Trash2, Wifi, Wrench, Zap,
 } from 'lucide-react';
 import {
-  EHButton, EHField, EHFieldGrid, EHFormFeedback, EHFormSection, EHInput,
-  EHOwnerSection, EHSelect, EHStatus, EHText,
+  EHButton, EHFormFeedback, EHOwnerSection, EHStatus, EHText,
 } from '@/design-system';
 import { WerkbankRahmen } from '@/components/werkbank-rahmen';
 import { euroExact } from '@/lib/format';
@@ -15,8 +14,7 @@ import { CompareRail } from '@/components/homeowner/compare-rail';
 import { db } from '@/lib/db';
 import { applyContractFilter, filterIsActive, parseContractFilter } from '@/lib/contract-filter';
 import {
-  CONTRACT_KINDS, CONTRACT_KIND_KEYS, COST_INTERVALS, COST_INTERVAL_KEYS, SAVINGS_KINDS,
-  contractKindLabel, currentTermEnd, cancellationDeadline, deadlineDays, deadlineState,
+  SAVINGS_KINDS, contractKindLabel, currentTermEnd, cancellationDeadline, deadlineDays, deadlineState,
   estimateSavings, formatDate, monthlyCents, yearlyCents,
 } from '@/lib/contracts';
 import { AFFILIATE_CATEGORIES, AFFILIATE_CATEGORY_HINTS, AFFILIATE_CATEGORY_LABELS } from '@/lib/affiliate';
@@ -152,7 +150,7 @@ export default async function ContractsPreview({ searchParams }: { searchParams:
           <Link href="#vertraege" className="eh-vdash-kpi"><b>{active.length}</b><small>Aktiv</small></Link>
           <Link href="#vertraege" className="eh-vdash-kpi" {...(withDeadline.length > 0 ? { 'data-tone': withDeadline[0].state === 'overdue' ? 'danger' : 'warn' } : {})}><b>{withDeadline.length}</b><small>Fristen ≤ 90 Tage</small></Link>
           <Link href="#vertraege" className="eh-vdash-kpi"><b>{euroExact(monthlyTotal)}</b><small>pro Monat</small></Link>
-          <Link href="#vertrag-anlegen" className="eh-werkbank-kopf-cta">+ Vertrag</Link>
+          <Link href="/app/preview/anlegen" className="eh-werkbank-kopf-cta">+ Vertrag</Link>
         </div>
       </div>
 
@@ -165,7 +163,7 @@ export default async function ContractsPreview({ searchParams }: { searchParams:
       )}
     </div>
 
-    <EHOwnerSection title={filterIsActive(filter) ? `Meine Verträge · ${visible.length} von ${CONTRACTS.length}` : `Meine Verträge · ${CONTRACTS.length}`} action={{ href: '#vertrag-anlegen', label: '+ Erfassen' }}>
+    <EHOwnerSection title={filterIsActive(filter) ? `Meine Verträge · ${visible.length} von ${CONTRACTS.length}` : `Meine Verträge · ${CONTRACTS.length}`} action={{ href: '/app/preview/anlegen', label: '+ Erfassen' }}>
       <div id="vertraege" />
       <EHText muted>Alles, was dein Haus laufend kostet. Wir prüfen jeden erfassten Vertrag automatisch auf Sparpotenzial — du musst nur noch vergleichen.</EHText>
       <VertraegeTabelle base="/app/preview/vertraege" allRows={pool} rows={visible} filter={filter} selectedId={selectedRow?.id ?? null} icons={KIND_ICONS}>
@@ -211,18 +209,22 @@ export default async function ContractsPreview({ searchParams }: { searchParams:
       </CompareRail>
     </EHOwnerSection>
 
-    <section id="vertrag-anlegen" aria-label="Vertrag anlegen (Vorschau)">
-      <EHOwnerSection title="Neuer Vertrag">
-        <EHFormSection title="Was kostet dich der Vertrag?" description="Nur der Anbieter ist Pflicht. Rest gern später — Fristen und Ersparnis rechnen wir aus dem, was fehlt, so gut es geht.">
-          <EHFieldGrid>
-            <EHField id="pv-kind" label="Was ist es?"><EHSelect id="pv-kind" name="kind" defaultValue="strom" disabled>{CONTRACT_KIND_KEYS.map((k) => <option key={k} value={k}>{CONTRACT_KINDS[k]}</option>)}</EHSelect></EHField>
-            <EHField id="pv-provider" label="Anbieter" required><EHInput id="pv-provider" name="provider" placeholder="z. B. Stadtwerke Musterstadt" disabled /></EHField>
-            <EHField id="pv-cost" label="Betrag (€)"><EHInput id="pv-cost" name="cost" inputMode="decimal" placeholder="89,90" disabled /></EHField>
-            <EHField id="pv-interval" label="Zahlweise"><EHSelect id="pv-interval" name="costInterval" defaultValue="month" disabled>{COST_INTERVAL_KEYS.map((k) => <option key={k} value={k}>{COST_INTERVALS[k]}</option>)}</EHSelect></EHField>
-          </EHFieldGrid>
-          <EHText muted>In der Vorschau ohne Speicherung — in der echten Hausakte landet der Vertrag mit zwei Klicks hier.</EHText>
-        </EHFormSection>
-      </EHOwnerSection>
+    <section id="vertrag-anlegen" aria-label="Vertrag anlegen">
+      <div className="eh-vertrag-ads">
+        <div className="eh-vertrag-ads-text">
+          <span className="eh-vertrag-ads-kicker"><Zap size={13} aria-hidden="true" /> Neuer Vertrag</span>
+          <strong>Beleg her. Den Rest liest die KI.</strong>
+          <small>Hochladen, abfotografieren oder zwei Felder selbst ausfüllen — so kommt ein Vertrag in die Hausakte. Hier nur Ansicht, ohne Speicherung.</small>
+        </div>
+        <div className="eh-vertrag-ads-cta">
+          <Link href="/app/preview/anlegen" className="eh-werkbank-kopf-cta">So fühlt sich der Weg an</Link>
+          <nav className="eh-vertrag-ads-links" aria-label="Direkt zu einem Weg">
+            <Link href="/app/preview/anlegen?weg=hochladen">Hochladen</Link>
+            <Link href="/app/preview/anlegen?weg=scannen">Scannen</Link>
+            <Link href="/app/preview/anlegen?weg=manuell">Selbst eintragen</Link>
+          </nav>
+        </div>
+      </div>
     </section>
   </WerkbankRahmen>;
 }

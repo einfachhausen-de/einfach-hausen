@@ -1166,6 +1166,25 @@ export async function addHouseContractAction(fd:FormData){
   revalidatePath('/app/contracts'); redirect('/app/contracts?saved=1');
 }
 
+// Weg 'hochladen'/'scannen' aus dem Anlege-Funnel: erst das Dokument, die
+// Felder folgen spaeter. Die Dokumenten-KI liest Art, Frist und Titel heraus
+// und macht den Beleg im KI-Berater beantwortbar — Kostenfuellung uebernimmt
+// sie bewusst nicht (dafuer gibt es keine Freigabe), darum oeffnet die
+// Weiterleitung direkt das Detailformular des neuen Vertrags.
+export async function addContractUploadAction(fd:FormData){
+  const user=await requireUser('homeowner'); const property=primaryProperty(user.id);
+  const scan=String(fd.get('weg')??'')==='scannen';
+  const document=fd.get('document');
+  if(!(document instanceof File)||!document.size) redirect(`/app/contracts/anlegen?weg=${scan?'scannen':'hochladen'}&fehler=datei`);
+  const stored=await savePrivateFile(document,'house-contracts');
+  const kindRaw=text(fd,'kind'); const kind=isContractKind(kindRaw)?kindRaw:'sonstiges';
+  const provider=text(fd,'provider')||'Anbieter steht im Dokument';
+  const inserted=db.prepare(`INSERT INTO house_contracts(homeowner_id,property_id,kind,provider,document_title,document_path,notice) VALUES(?,?,?,?,?,?,?)`)
+    .run(user.id,property?.id??null,kind,provider,text(fd,'documentTitle')||document.name,stored,'Beleg hochgeladen — die KI prüft das Dokument. Trag einmal den Monatsbetrag ein, dann rechnet der Spar-Check.');
+  if(stored)enqueueDocumentIntelligence({homeownerId:user.id,sourceType:'contract_document',sourceId:Number(inserted.lastInsertRowid),storedPath:stored,originalName:text(fd,'documentTitle')||document.name,mimeType:document.type});
+  revalidatePath('/app/contracts'); redirect(`/app/contracts?vertrag=${Number(inserted.lastInsertRowid)}`);
+}
+
 export async function updateHouseContractAction(fd:FormData){
   const user=await requireUser('homeowner'); const id=int(fd,'id'); if(!id)return;
   if(!ownHouseContract(id,user.id))return;
