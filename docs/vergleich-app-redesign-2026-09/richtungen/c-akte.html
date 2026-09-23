@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="de" data-page-node-id="sTjA4nBtkqgrEYKx3AMVEq">
+<head data-page-node-id="w0lUQL02y7BA7dko4ovlA5">
+<meta charset="utf-8" data-page-node-id="ILQUtftPJbNb2Phr8ucv2a">
+<meta name="viewport" content="width=device-width, initial-scale=1" data-page-node-id="yiKuJBqHR34EXnSybKH8Gj">
+<title>Richtung C — Akte</title>
+<style>
+  :root{
+    --ink:#12232b; --sec:#53656b; --mut:#8b989c; --line:#e3e1da; --line2:#eeecE6;
+    --paper:#faf9f6; --panel:#ffffff; --petrol:#105258; --terra:#a84d29; --ok:#236344;
+    --sand:#ecdfc9; --rail:#f4f2ed;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{background:var(--paper);color:var(--ink);
+       font:13.5px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif;
+       -webkit-font-smoothing:antialiased}
+  .app{display:grid;grid-template-columns:244px minmax(0,1fr) 306px;min-height:1000px}
+
+  /* ---------- Ordnerbaum ---------- */
+  .tree{background:var(--rail);border-right:1px solid var(--line);padding:14px 12px;display:flex;flex-direction:column}
+  .brand{display:flex;align-items:center;gap:9px;padding:4px 6px 16px}
+  .brand svg{width:22px;height:22px;stroke:var(--petrol);fill:none;stroke-width:1.8}
+  .brand b{font-size:13px;font-weight:700}
+  .brand span{display:block;font-size:10.5px;color:var(--mut)}
+  .tl{font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--mut);padding:12px 6px 6px}
+  .node{display:flex;align-items:center;gap:8px;padding:6px 7px;border-radius:6px;font-size:12.5px;color:var(--sec);font-weight:550;text-decoration:none}
+  .node svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.7;flex:none}
+  .node.on{background:var(--panel);color:var(--ink);font-weight:650;box-shadow:inset 0 0 0 1px var(--line)}
+  .node .c{margin-left:auto;font-size:10.5px;color:var(--mut);font-weight:600}
+  .sub{padding-left:22px}
+  .tree .foot{margin-top:auto;padding-top:12px;border-top:1px solid var(--line)}
+  .warnrow{display:flex;gap:9px;align-items:flex-start;padding:9px 8px;border-radius:8px;
+           background:color-mix(in srgb,var(--terra) 8%,transparent)}
+  .warnrow svg{width:14px;height:14px;stroke:var(--terra);fill:none;stroke-width:1.9;flex:none;margin-top:2px}
+  .warnrow b{display:block;font-size:12px;font-weight:650;color:var(--terra)}
+  .warnrow span{display:block;font-size:11px;color:var(--sec)}
+
+  /* ---------- Mitte ---------- */
+  .mid{min-width:0;display:flex;flex-direction:column}
+  .bar{height:56px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:4px;padding:0 18px;background:var(--panel)}
+  .tab{font-size:13px;font-weight:600;color:var(--mut);padding:7px 12px;border-radius:7px;text-decoration:none}
+  .tab[aria-selected="true"]{background:var(--paper);color:var(--ink);box-shadow:inset 0 0 0 1px var(--line)}
+  .bar .sp{margin-left:auto;display:flex;align-items:center;gap:7px}
+  .filter{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--sec);border:1px solid var(--line);
+          border-radius:6px;padding:5px 9px;background:var(--panel);font-weight:600}
+  .filter svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:1.9}
+
+  .sheet{padding:22px 24px 40px;overflow:hidden}
+  .sheet .title{display:flex;align-items:baseline;gap:10px;margin-bottom:18px}
+  .sheet .title h1{margin:0;font-size:17px;font-weight:650;letter-spacing:-.012em}
+  .sheet .title span{font-size:12px;color:var(--mut)}
+
+  /* Zeitachse */
+  .year{display:flex;align-items:center;gap:12px;margin:0 0 12px}
+  .year b{font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--mut)}
+  .year i{flex:1;height:1px;background:var(--line)}
+
+  .tl-list{list-style:none;margin:0 0 22px;padding:0 0 0 4px;position:relative}
+  .tl-list::before{content:"";position:absolute;left:20px;top:8px;bottom:8px;width:1px;background:var(--line)}
+  .tl-list li{display:flex;gap:14px;padding:0 0 14px;position:relative}
+  .tl-list .mk{width:33px;height:33px;border-radius:9px;background:var(--panel);border:1px solid var(--line);
+               display:flex;align-items:center;justify-content:center;flex:none;position:relative;z-index:1}
+  .tl-list .mk svg{width:15px;height:15px;stroke:var(--petrol);fill:none;stroke-width:1.7}
+  .tl-list .mk.terra svg{stroke:var(--terra)}
+  .tl-list .mk.ok svg{stroke:var(--ok)}
+  .tl-list .body{min-width:0;flex:1;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:11px 13px}
+  .tl-list .body .r1{display:flex;align-items:center;gap:9px}
+  .tl-list .body b{font-size:13.5px;font-weight:640;letter-spacing:-.005em}
+  .tl-list .body .when{margin-left:auto;font-size:11.5px;color:var(--mut);white-space:nowrap}
+  .tl-list .body p{margin:4px 0 0;font-size:12.5px;color:var(--sec)}
+  .tag{display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
+       padding:2px 7px;border-radius:5px;background:var(--paper);color:var(--mut);box-shadow:inset 0 0 0 1px var(--line)}
+  .tag.rech{color:var(--petrol);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--petrol) 30%,transparent)}
+  .tag.auf{color:var(--terra);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--terra) 30%,transparent)}
+  .tag.ver{color:var(--ok);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--ok) 30%,transparent)}
+  .actions{display:flex;gap:7px;margin-top:10px}
+  .actions a{font-size:12px;font-weight:600;color:var(--petrol);text-decoration:none;padding:4px 9px;border-radius:6px;
+             box-shadow:inset 0 0 0 1px var(--line);background:var(--paper)}
+  .actions a.solid{background:var(--petrol);color:#fff;box-shadow:none}
+
+  /* ---------- Vorschau ---------- */
+  .prev{border-left:1px solid var(--line);background:var(--rail);padding:16px 14px;display:flex;flex-direction:column;gap:12px}
+  .prevhead{display:flex;align-items:center;gap:8px}
+  .prevhead b{font-size:12.5px;font-weight:650}
+  .prevhead .x{margin-left:auto;color:var(--mut);font-size:14px}
+  .paper{background:#fff;border:1px solid var(--line);border-radius:4px;padding:22px 18px;flex:1;
+         box-shadow:0 1px 2px rgba(16,34,42,.05);font-size:11px;line-height:1.55;color:#3c4a4f}
+  .paper .ph{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:1.5px solid #12232b;padding-bottom:9px;margin-bottom:12px}
+  .paper .ph b{font-size:12.5px;font-weight:750;color:#12232b;letter-spacing:-.01em}
+  .paper .ph span{font-size:10px;color:#7c8a8e;text-align:right;display:block}
+  .paper table{width:100%;border-collapse:collapse;margin-top:10px}
+  .paper td{padding:4px 0;vertical-align:top}
+  .paper td:last-child{text-align:right;white-space:nowrap}
+  .paper .tot{border-top:1px solid #12232b;margin-top:8px;padding-top:6px;font-weight:700;color:#12232b}
+  .paper .meta{font-size:10px;color:#7c8a8e;margin-top:14px;border-top:1px dashed #d8d6d0;padding-top:8px}
+  .prevfoot{display:flex;gap:7px}
+  .prevfoot a{flex:1;text-align:center;font-size:12.5px;font-weight:640;text-decoration:none;padding:9px 0;border-radius:7px;
+              background:var(--panel);box-shadow:inset 0 0 0 1px var(--line);color:var(--ink)}
+  .prevfoot a.solid{background:var(--petrol);color:#fff;box-shadow:none}
+  .meta-list{list-style:none;margin:0;padding:0}
+  .meta-list li{display:flex;font-size:12px;padding:5px 0;border-bottom:1px solid var(--line)}
+  .meta-list li:last-child{border-bottom:0}
+  .meta-list span{color:var(--mut)}
+  .meta-list b{margin-left:auto;font-weight:600}
+</style>
+</head>
+<body data-page-node-id="vEZipo6vfzoiw8vcM8bkRG">
+<div class="app" data-page-node-id="nZ8rWGeAMSr8SvORmNkrsG">
+
+  <!-- ============ ORDNERBAUM ============ -->
+  <aside class="tree" data-page-node-id="GcLdHNiciPtPqJF8EFKak1">
+    <div class="brand" data-page-node-id="peQwvHln1XbqLBT7dVhmnV">
+      <svg viewBox="0 0 24 24" data-page-node-id="QTMDPXugVMljSKuuiCj09C"><path d="M3 11.2 12 4l9 7.2V20H3z" data-page-node-id="qrBYX9zijPYT9uKulPXwQn"/><path d="M9 20v-6h6v6" data-page-node-id="3Qx8mdhiwFPRju6fu7LnxZ"/></svg>
+      <div data-page-node-id="J0WGflh9cqDPlvPwP8O65C"><b data-page-node-id="iRyvJFIBKPArfpPAoOHpqQ">Lindenweg 12</b><span data-page-node-id="VuGHw1U9ubpuKmVw5HuGit">Hausakte · 34117 Kassel</span></div>
+    </div>
+
+    <div class="tl" data-page-node-id="aJDKe3ds5pxVBu0liQcBa2">Akte</div>
+    <a class="node on" href="#" data-page-node-id="aKJe4Qg8DMF0Cv5krBx4E5"><svg viewBox="0 0 24 24" data-page-node-id="mOAwyG38UjHEuATwMiPLwS"><path d="M4 5h16M4 12h16M4 19h16" data-page-node-id="2tmdPe2OEQOS7WqC0H22Wq"/></svg>Alle Einträge<span class="c" data-page-node-id="JVTPGG2D7RD6KMrEukiK4D">47</span></a>
+    <a class="node" href="#" data-page-node-id="0LCnYjJefe9e075ddT9GlA"><svg viewBox="0 0 24 24" data-page-node-id="Sn3D8jjhmf4JGzM7aF4oie"><path d="M3 11.2 12 4l9 7.2V20H3z" data-page-node-id="ACCcxFYyRVTSRVk7xqPlDk"/></svg>Gebäude<span class="c" data-page-node-id="TkWMvzgvnmabxBoRXrKYZ1">9</span></a>
+    <a class="node" href="#" data-page-node-id="su8QEOFCPCfNgJ5tOBtFUB"><svg viewBox="0 0 24 24" data-page-node-id="CnBnPjCPJP1ACRwZMTYY60"><circle cx="12" cy="12" r="4" data-page-node-id="ZRc5Z8T88MOJ28ezloeMBB"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3" data-page-node-id="0hugcFTYwYuknXAM1VodH2"/></svg>Technik<span class="c" data-page-node-id="NOegugz00RQWQuHHVqptuf">11</span></a>
+    <a class="node" href="#" data-page-node-id="xCCEnMs8iPYpVwIjFXlTeJ"><svg viewBox="0 0 24 24" data-page-node-id="qLQz0rfzuSWa26Hm2uDIvc"><path d="M6 3h12v18l-6-4-6 4z" data-page-node-id="BlPkzrwUFk5nqlnTHgSwVY"/></svg>Verträge<span class="c" data-page-node-id="JPkcK3Z7JRbTAOBX5keWkd">5</span></a>
+    <a class="node" href="#" data-page-node-id="ILbw0LAJ3eVEx6kD3GYBNH"><svg viewBox="0 0 24 24" data-page-node-id="eXf692zfEZXWmWZXCIGQJc"><path d="M5 3h9l5 5v13H5z" data-page-node-id="HVerOhXOPoMuFc1Mbi2fPQ"/><path d="M14 3v5h5" data-page-node-id="bWh3u5Qo1EqgwOYFnUWANu"/></svg>Rechnungen<span class="c" data-page-node-id="rsHorMlsMFD2ZOT0R5rwLE">14</span></a>
+    <a class="node" href="#" data-page-node-id="5WNxbCgyFMPUhDKaKLBb12"><svg viewBox="0 0 24 24" data-page-node-id="zSjvdgqGZ7P9K69LPcjc9p"><path d="M12 3l8 4v6c0 5-3.5 7.5-8 8-4.5-.5-8-3-8-8V7z" data-page-node-id="zVfhbhtiK6PThEiwp7WCBF"/></svg>Versicherung<span class="c" data-page-node-id="DL03IoDKejiOH4hReP1WUB">3</span></a>
+    <a class="node" href="#" data-page-node-id="ERJzmZF3cgmr0gKMCMx1ZX"><svg viewBox="0 0 24 24" data-page-node-id="vFNQoaCjYnX8gX5DgW9Bwm"><path d="M4 4h16v16H4z" data-page-node-id="S0cjsu72hLfaCIqF8aN8Xz"/><path d="M4 10h16M10 10v10" data-page-node-id="wiuajQWwXGb9rj1KfDW8Rd"/></svg>Pläne<span class="c" data-page-node-id="oWm5EsCbfupeSY22h4Z3ui">4</span></a>
+    <a class="node" href="#" data-page-node-id="tsOoFBTSvFvalnV7J2RGa7"><svg viewBox="0 0 24 24" data-page-node-id="4MiODBCxPN3dYztrEvSA5S"><path d="M3 6h18v14H3z" data-page-node-id="sC9bEVIWW0sCjYH8R95fhQ"/><path d="M3 10h18" data-page-node-id="1Ygoqe6trZlqnZtcUFN2tL"/></svg>Behörden<span class="c" data-page-node-id="gUD0vC0Vb8ekkuCfE6VFFK">1</span></a>
+
+    <div class="tl" data-page-node-id="hM7n45mO1HILZAD6xWRnij">Offen</div>
+    <a class="node" href="#" data-page-node-id="qRm9AL82vflz78CPNxd1Xt"><svg viewBox="0 0 24 24" data-page-node-id="EXqOBPfVSxTuvTddCIjKsJ"><circle cx="12" cy="12" r="9" data-page-node-id="7Ib9wPXUXB7pD2oadtX0kV"/><path d="M12 7v5l3 2" data-page-node-id="uRhDEpGFDh71r1iwU6YnuB"/></svg>Wartet auf dich<span class="c" data-page-node-id="KazIAeWka5sztqH4QTiEyt">2</span></a>
+    <a class="node" href="#" data-page-node-id="YhuqQzjb3psgMHrv4qsn7B"><svg viewBox="0 0 24 24" data-page-node-id="2iC5t6lRoUXx3WmwRvgdL2"><path d="M9 5h10M9 12h10M9 19h10M4 5h.01M4 12h.01M4 19h.01" data-page-node-id="kU7jG02hzkZNuTtNTpqhnJ"/></svg>Aufträge<span class="c" data-page-node-id="NeL9mBhCssSLo6N6fWB842">1</span></a>
+    <a class="node" href="#" data-page-node-id="3WUhFQLhZWWcSMVLpApSRV"><svg viewBox="0 0 24 24" data-page-node-id="Z52nM4DJv7ymDyqL8aC8WL"><rect x="3" y="5" width="18" height="16" rx="2" data-page-node-id="vR7U1c1bqX0mSbYZnCpw2y"/><path d="M3 10h18M8 3v4M16 3v4" data-page-node-id="PKRspr3xrGUbgrAXI6dLKB"/></svg>Termine<span class="c" data-page-node-id="uvIBirW2kZ5v7HqQzHMdST">1</span></a>
+
+    <div class="foot" data-page-node-id="JDZyUDL4kdTdaMjo7kO0La">
+      <div class="warnrow" data-page-node-id="AWIhDTcVoohB09atbNLdfS">
+        <svg viewBox="0 0 24 24" data-page-node-id="GMr7WtA0HYBsIyPSTbC8uF"><path d="M12 3v6M12 15v.01" data-page-node-id="dxoWTURRGhiZZ1cqEtp5Rb"/><path d="M10.3 4.3 2.6 18a2 2 0 0 0 1.7 3h15.4a2 2 0 0 0 1.7-3L13.7 4.3a2 2 0 0 0-3.4 0z" data-page-node-id="02sX45vnXGhRdU0INpOJqw"/></svg>
+        <div data-page-node-id="GRAOPv5x4QaFxCeU3bpU6n"><b data-page-node-id="OzfvYHsncQmAoP5unzvvor">Angebot läuft ab</b><span data-page-node-id="NndJ9AXMRDQVtRz5Q0hynr">Heizungspumpe · Frist 19.09.</span></div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ============ MITTE ============ -->
+  <div class="mid" data-page-node-id="JLEoKCvyZvTu89UbGhDp2S">
+    <div class="bar" data-page-node-id="cagWjeAVeTc61OGhfizm0A">
+      <a class="tab" aria-selected="true" href="#" data-page-node-id="i0XRsLwsCPu56xS69PkVRc">Alle</a>
+      <a class="tab" href="#" data-page-node-id="QJ1CPOP7Z7MCZL2A0xPJoh">Dokumente</a>
+      <a class="tab" href="#" data-page-node-id="zwvnkRLFVods7rNxfETB38">Termine</a>
+      <a class="tab" href="#" data-page-node-id="xavvJg7NiTfCBkqWZZ7sTi">Aufträge</a>
+      <a class="tab" href="#" data-page-node-id="BLu4vhr9SKBW65lNxikNx6">Rechnungen</a>
+      <span class="sp" data-page-node-id="Nn2avsorQS8BZGugAC28B2">
+        <span class="filter" data-page-node-id="d2A2pcUECZAYEDIKG53r5M"><svg viewBox="0 0 24 24" data-page-node-id="CVyDLMtic674kBDMhTO9mP"><path d="M3 5h18l-7 8v6l-4 2v-8z" data-page-node-id="JljzDfRSPjBQdcWtxPC3D7"/></svg>2026</span>
+        <span class="filter" data-page-node-id="mEM9E6WoLt7ByerwG3NufN"><svg viewBox="0 0 24 24" data-page-node-id="1gAa5y5ytE2LNHebk2og8Y"><circle cx="11" cy="11" r="7" data-page-node-id="QYDowNp54jcEUZG8ywXfsf"/><path d="m20 20-3.5-3.5" data-page-node-id="XxV7AU0Cynr41Kw1FBlkKT"/></svg>Suchen</span>
+      </span>
+    </div>
+
+    <div class="sheet" data-page-node-id="iEouZ6jbXnwNHdbHVKBWQ8">
+      <div class="title" data-page-node-id="oIOrMHBbktM8OzbzU2HRDM"><h1 data-page-node-id="0yCav8B8waff4Bh85cRGsp">Alle Einträge</h1><span data-page-node-id="d9h7wPdcvT1qx7xfR2oOTG">47 Vorgänge · zuletzt aktualisiert heute 18:40</span></div>
+
+      <div class="year" data-page-node-id="RtGmIsyYQuE7RbJ9vVaqu9"><b data-page-node-id="3BCQohShs7FCSfMJXYQgJD">2026</b><i data-page-node-id="9rBNI16wJ14pr3kgrGpcbg"></i></div>
+      <ul class="tl-list" data-page-node-id="BJmT7SySHlucjnpaksMDdC">
+        <li data-page-node-id="M2ET2kOovzuoPeWD7m1NYq">
+          <span class="mk ok" data-page-node-id="QF8ymG6Ly3q1qITCjNpew0"><svg viewBox="0 0 24 24" data-page-node-id="607NsLNO3RFDJOarshV3ty"><path d="M20 6 9 17l-5-5" data-page-node-id="1Xl6GMync1fVHpEzt67daW"/></svg></span>
+          <div class="body" data-page-node-id="mGB5seuLF2Bc5X5SKDAIJe">
+            <div class="r1" data-page-node-id="kYWAFzNIUDr8y5JFWOq7wu"><b data-page-node-id="kpY1JwH3FmJG1QoXvst25V">Auftrag angenommen</b><span class="tag auf" data-page-node-id="KDCtCtl1aich59hAO0vS5z">Auftrag</span><span class="when" data-page-node-id="VnVmyIsvuLsc5lLXvuMWN5">15.09. · 18:40</span></div>
+            <p data-page-node-id="GTfeFStx7OLAajtBjsiTpE">Kessler Haustechnik übernimmt den Tausch der Heizungspumpe. Termin Donnerstag, 18.09.</p>
+          </div>
+        </li>
+        <li data-page-node-id="ptyuVXk6opHjTfuumKxxdK">
+          <span class="mk terra" data-page-node-id="DOFWZnI3b2bt4aHVmYjktx"><svg viewBox="0 0 24 24" data-page-node-id="1BRPcA2cdXauoZspHPhIjC"><path d="M5 3h9l5 5v13H5z" data-page-node-id="LZ5MDtRSXTUgDrgUEHXOmk"/><path d="M14 3v5h5" data-page-node-id="MGHYOkYYStpHmGDo9dEkCC"/></svg></span>
+          <div class="body" data-page-node-id="1KGMDDhkUW1hegyz3XTq9C">
+            <div class="r1" data-page-node-id="vJx6VbRdmDaLRIfhapMq0L"><b data-page-node-id="J33JWJy5z15H5ZrEpOTHKU">Rechnung Heizungspumpe</b><span class="tag rech" data-page-node-id="DkUq7oDuAjX0kKYKP7AVWn">Rechnung</span><span class="when" data-page-node-id="8m062HN3edQx3Ouj7daB8D">14.09. · 16:22</span></div>
+            <p data-page-node-id="jouGKJ7yfMjN68FRzYX12r">Kessler Haustechnik · 1.240,00 € · Frist 19.09.2026 — wartet auf deine Freigabe.</p>
+            <div class="actions" data-page-node-id="WsonPewMEQAsKjpextOdUe"><a class="solid" href="#" data-page-node-id="JHlHPhC4VmRSBOXbeAVuHI">Freigeben</a><a href="#" data-page-node-id="1M9ioX4xGGmO9KUQDjj0O9">Prüfen</a><a href="#" data-page-node-id="dxBfsqpkeDev4X7XQspycM">Ablehnen</a></div>
+          </div>
+        </li>
+        <li data-page-node-id="NUZM3H99NlcikFYqe5xUS7">
+          <span class="mk" data-page-node-id="LL9xXMOX6yCcb3X6n6VrjD"><svg viewBox="0 0 24 24" data-page-node-id="avALI38vGq563NsMMQxPE0"><path d="M4 4h16v16H4z" data-page-node-id="Hw51EXqknbDKsGvYaPT6eU"/><path d="M4 10h16M10 10v10" data-page-node-id="uSoRvD2OLvsBPtMbbXVBVM"/></svg></span>
+          <div class="body" data-page-node-id="9Dm5LjzlJlil2iteb9MHwA">
+            <div class="r1" data-page-node-id="HGGSXDImhnKCdTC7TwLeSg"><b data-page-node-id="gBh8lk9k7i7xk6pQLH34FQ">Grundriss Erdgeschoss</b><span class="tag" data-page-node-id="TFcN1ixAiaxRy1nGAJKseQ">Plan</span><span class="when" data-page-node-id="MmCQKc1LjlJaaS7dgoAw8f">11.09. · 10:05</span></div>
+            <p data-page-node-id="4xkhmNKBypSO5X1tvwDD8v">Bestandsplan, 1,8 MB. Von Malte Berger hochgeladen.</p>
+          </div>
+        </li>
+        <li data-page-node-id="dxphsCo1MEcAM4jsxhSKYj">
+          <span class="mk ok" data-page-node-id="5BbCwYZVDUHIvN8Q8T7PG9"><svg viewBox="0 0 24 24" data-page-node-id="Ppi8MeOh9R6C3SEaQ2P2F4"><circle cx="12" cy="12" r="8" data-page-node-id="5GgvG0YE01gDEAEzP5N7EV"/><path d="M12 8v8M8 12h8" data-page-node-id="Z4eDCJOQIwXHPUUejooEKC"/></svg></span>
+          <div class="body" data-page-node-id="P7uIlTptA4GEpwDncPuQa4">
+            <div class="r1" data-page-node-id="KQ3GrmHXMxWveqG5fLdRRU"><b data-page-node-id="rhGiwQjbb9TIAbKCP7qQWU">Zählerstände eingetragen</b><span class="tag ver" data-page-node-id="fr5WSwD56Avp1v9UVKpNH4">Nachweis</span><span class="when" data-page-node-id="Ek32pksPD2yG8PExMvqfWB">12.09. · 08:30</span></div>
+            <p data-page-node-id="shoFOoUwDmvn44ftciiGrJ">Strom 24.180 kWh · Gas 9.640 m³ · Wasser 148 m³. Abgleich mit Vorjahr: +4 %.</p>
+          </div>
+        </li>
+        <li data-page-node-id="ol3RypIt8eHIznaoNELpYA">
+          <span class="mk" data-page-node-id="CLUaRvJm2UI57QdSrNhA5x"><svg viewBox="0 0 24 24" data-page-node-id="24qd8mAV3Y2g1AV1nLhEjy"><path d="M12 3l8 4v6c0 5-3.5 7.5-8 8-4.5-.5-8-3-8-8V7z" data-page-node-id="oEU5ce1hTjFWCWerFKoK6t"/></svg></span>
+          <div class="body" data-page-node-id="wi0L15KCEoskbJ4IXvnMMv">
+            <div class="r1" data-page-node-id="90vmW3OwI2ILJCbT19tETf"><b data-page-node-id="EK3Po0wUNmjrFe4DGIPdKN">Wohngebäudeversicherung 2026</b><span class="tag ver" data-page-node-id="WDbFEH9ZBeoDRmCfRGRstZ">Vertrag</span><span class="when" data-page-node-id="vzAWzPOJDjpcfRFod76moB">02.09. · 12:10</span></div>
+            <p data-page-node-id="UbRyVO0b6gPG1HAWphz9Su">Police läuft bis 31.12.2026. Versicherungssumme zuletzt 2019 angepasst.</p>
+          </div>
+        </li>
+        <li data-page-node-id="Lz83CNngPME2c4xhhx9Bjq">
+          <span class="mk" data-page-node-id="P1F7P4HTOZSte560q0JiQv"><svg viewBox="0 0 24 24" data-page-node-id="yPDWuOw3S9eRAFYJb41tL6"><path d="M6 3h12v18l-6-4-6 4z" data-page-node-id="w6WnBGMw5ARh46Sd7ncQmN"/></svg></span>
+          <div class="body" data-page-node-id="pBKNHgCGhweIZVwnnWmTQe">
+            <div class="r1" data-page-node-id="cQdZu7Ao4CZATdOx69G4rl"><b data-page-node-id="ZcnbiSsiXCDZGHqCtTiIn9">Wartungsvertrag Heizung</b><span class="tag ver" data-page-node-id="Aot0g93ujRyIe4G2OQZAch">Vertrag</span><span class="when" data-page-node-id="gcHgDMBELjbknXwlP5c7KW">28.08. · 09:44</span></div>
+            <p data-page-node-id="gDz0EEWhLFlZ1HhwzAbZYN">Zwei Wartungen pro Jahr · läuft bis 2028 · Kessler Haustechnik.</p>
+          </div>
+        </li>
+      </ul>
+
+      <div class="year" data-page-node-id="JS7chHAdt1FSB3sDyCKPxK"><b data-page-node-id="pi8ilRyKQIXcFfu75QpjB0">2025</b><i data-page-node-id="UqNSaqBXQfa33sadDk8zrl"></i></div>
+      <ul class="tl-list" data-page-node-id="cbhOzkYYQtGm4V1wL82m3P">
+        <li data-page-node-id="fJDdWS60xeXsdmdTqEdF9U">
+          <span class="mk" data-page-node-id="73XUsWgCKrONdEXsBRDyiY"><svg viewBox="0 0 24 24" data-page-node-id="9xwUyrXkbWRc0pdNlhKt3d"><path d="M5 3h9l5 5v13H5z" data-page-node-id="xIi7q2VaQItRwmr2oznI7x"/><path d="M14 3v5h5" data-page-node-id="stX0PHTl4wZh0C7bEJIpKE"/></svg></span>
+          <div class="body" data-page-node-id="G9dtbW6vZzhpzeE1GBYjJj">
+            <div class="r1" data-page-node-id="t9uEczL0YsfHAB7Kq8AhoY"><b data-page-node-id="KPPdsZGXHzgFsWwMm16UBY">Schornsteinfeger-Bescheid</b><span class="tag" data-page-node-id="NLhCnZap8HJUpUvE5yd1MX">Behörde</span><span class="when" data-page-node-id="tkIY6tlE0iivRAVDzrE4fp">04.11. · 11:02</span></div>
+            <p data-page-node-id="nfBsEm1JqGDmGVUq83jkdY">Keine Mängel festgestellt. Nächste Prüfung 2026.</p>
+          </div>
+        </li>
+        <li data-page-node-id="xrNfhEOHpcFa1nX4CMyDgz">
+          <span class="mk" data-page-node-id="JlE7UcaLZBMdlMBKCmWEkr"><svg viewBox="0 0 24 24" data-page-node-id="BC3WfvZHmJmM8OaQXvbbaP"><path d="M12 3v6M12 15v.01" data-page-node-id="pSwk9HJ8p4c2YnoaiKNt33"/><path d="M10.3 4.3 2.6 18a2 2 0 0 0 1.7 3h15.4a2 2 0 0 0 1.7-3L13.7 4.3a2 2 0 0 0-3.4 0z" data-page-node-id="QB4POHWYN4LEX6du5HxAdT"/></svg></span>
+          <div class="body" data-page-node-id="AP3GCM7ns47bUnQu1eVx64">
+            <div class="r1" data-page-node-id="98ZOH8ttRC8qwad4NNxVhm"><b data-page-node-id="St5R2Jv0GEeoixyCqbyI48">Heizungsausfall behoben</b><span class="tag auf" data-page-node-id="y8MJfGAz4y8Mv1WsFGBya6">Auftrag</span><span class="when" data-page-node-id="G9uv2A2CW4lpxDMyhaOhza">17.02. · 07:15</span></div>
+            <p data-page-node-id="jZNpR8rT20imNiHdkFVboN">Notdienst, Austausch der Umwälzpumpe. Kosten 890,00 €.</p>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ============ VORSCHAU ============ -->
+  <aside class="prev" data-page-node-id="yXSiA1cTAqyIQQALhLFqCo">
+    <div class="prevhead" data-page-node-id="EBmdJ38bKmRNG9OTdSFqyL">
+      <b data-page-node-id="9dLBrNp54vcXRVh9907UQv">Vorschau</b><span class="x" data-page-node-id="Ss7FIXHMMoitG9fWHKcpvz">✕</span>
+    </div>
+
+    <div class="paper" data-page-node-id="A0fMZZ0njMfKqBco1H1325">
+      <div class="ph" data-page-node-id="me2UsbDh59U1mDDyLDZCil">
+        <div data-page-node-id="ABBGH1qSak6POX4ap4NEVY">
+          <b data-page-node-id="qAYkAcItee1xY3Lh1CK98v">Kessler Haustechnik GmbH</b>
+          <span data-page-node-id="JTFEW4eFwS9qAt11ERNW6I">Werkstattstraße 8<br data-page-node-id="EOcwXNfr6vWQEOnKwhNEKd">34117 Kassel</span>
+        </div>
+        <span data-page-node-id="B6QE9hUywvqcbnfG1xtRom">Rechnung 2026-1483<br data-page-node-id="7dTPclAnHRaFbh6mGDTOZP">14.09.2026</span>
+      </div>
+      <div style="font-size:10px;color:#7c8a8e" data-page-node-id="mm9H0J38vsZSyOR9aBxZ4f">Rechnung an</div>
+      <div style="font-weight:650;color:#12232b;margin-bottom:8px" data-page-node-id="Ov0V0OXrtJdFkj2aZrB3Qf">O. Berger · Lindenweg 12</div>
+      <table data-page-node-id="5hw031cch4bUgw5dZGygRi">
+        <tr data-page-node-id="yQe7kNv6z5OYBuJETBvCLD"><td data-page-node-id="ZBtvpDr8TxzShVQrFAHI2U">Hocheffizienzpumpe Wilo</td><td data-page-node-id="cAbGmQ8CPDlJkED7DXmQAn">640,00 €</td></tr>
+        <tr data-page-node-id="tSe4UAIsAsJmuDGmAPX0Mh"><td data-page-node-id="rEa350LCJVtL7RdNIPxTqa">Montage &amp; Inbetriebnahme</td><td data-page-node-id="WUccsFtB2fNNcVP8sCsuNF">420,00 €</td></tr>
+        <tr data-page-node-id="wzaDSbF6oOXAJozKwYVq9N"><td data-page-node-id="Ww4YuPPLRtteLg13cpxXQ4">Anfahrt</td><td data-page-node-id="FoKVQJakcXGMCKYIN63oFq">60,00 €</td></tr>
+        <tr data-page-node-id="fQ5anDJXO3ksiKtVhgAMPn"><td data-page-node-id="ItQlhGlHP0Zp0aHCthmlKN">Entsorgung Altpumpe</td><td data-page-node-id="i0yivv2ERWrx99GripAaAo">120,00 €</td></tr>
+      </table>
+      <div class="tot" style="display:flex" data-page-node-id="6v0vB7I41Agl3gCPd71Sfh"><span style="flex:1" data-page-node-id="gcN8MJ5kHNkFUBdxIikhzp">Gesamt</span><span data-page-node-id="DJxKJSMMdmLh8ewFfbY3P9">1.240,00 €</span></div>
+      <div class="meta" data-page-node-id="csFzvOXB2WeQQB2ksEZVbh">Zahlungsziel 19.09.2026 · USt-IdNr. DE 218 445 901<br data-page-node-id="CkI4Vht0mv0BNJzjpW2SzR">IBAN DE12 5205 0353 0001 2345 67</div>
+    </div>
+
+    <ul class="meta-list" data-page-node-id="ZGzMFlQH6KHlCaQQCiGXoo">
+      <li data-page-node-id="89yDjqr3CtT0nIwFZe32SO"><span data-page-node-id="NLabqFJtsRUvixJpukWxnQ">Abgelegt in</span><b data-page-node-id="VdsaUv84JnrYK6XkkrwHUD">Rechnungen</b></li>
+      <li data-page-node-id="sN1smXvJa1C34n2Ucm6GAr"><span data-page-node-id="GZ3VOh6I3Amxk3fJDAo9LE">Hochgeladen von</span><b data-page-node-id="CxWV7fDCA1CaX1ZxkP5n6l">Kessler Haustechnik</b></li>
+      <li data-page-node-id="hkgLjOzWCeXIeIn6ZtCmh3"><span data-page-node-id="KtgA6PT0eyVnlUEgrZYlqS">Größe</span><b data-page-node-id="V2riiNIX54HKRqERXPlCnR">214 KB · PDF</b></li>
+      <li data-page-node-id="4vJWnLXgRAWeEEpIkIEshR"><span data-page-node-id="ZJZJqFTX8lE56oG9FSP7NY">Status</span><b style="color:#a84d29" data-page-node-id="4Vxqb1ITJzqPhiq047pnx9">wartet auf Freigabe</b></li>
+    </ul>
+
+    <div class="prevfoot" data-page-node-id="5WEgmDRvyITlDXwDYH4f1H">
+      <a class="solid" href="#" data-page-node-id="3BgFw9L7O326z3xuWqYfh8">Freigeben</a>
+      <a href="#" data-page-node-id="5awwIl1eISe3WMxkSEC8NM">Öffnen</a>
+    </div>
+  </aside>
+</div>
+</body>
+</html>

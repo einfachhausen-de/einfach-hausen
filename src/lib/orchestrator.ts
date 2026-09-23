@@ -49,6 +49,15 @@ export function appendJobEvent(jobId:number,body:string,metadata:Record<string,u
   if(thread)addAgentMessage(thread.id,'event',body,metadata);
 }
 
+export function recordHausmeisterDocumentUpload(userId:number,input:{documentId:number;name:string;question?:string;reply:string}){
+  const threadId=getThread(userId,'app');
+  const question=(input.question||'').trim();
+  const body=question||`Dokument hochgeladen: ${input.name}`;
+  addAgentMessage(threadId,'user',body,{documentId:input.documentId,documentName:input.name,houseDocument:true});
+  addAgentMessage(threadId,'assistant',input.reply,{assistantOnly:true,documentId:input.documentId,documentProcessed:true});
+  return {threadId,reply:input.reply};
+}
+
 async function dispatchJob(jobId:number,homeownerId:number,service:ServiceRow,jobPostcode:string,jobGeo:{lat:number;lon:number}|null,requestKind:HausmeisterIntent|'emergency'='service'){
   const partners=db.prepare(`SELECT p.*,c.status contract_status,c.insurance_verified,c.qualification_verified,c.contract_verified,c.quality_standard_verified,c.customer_discount_bps,c.response_target_minutes,pref.accepts_normal_jobs,pref.accepts_short_notice,pref.accepts_consultation,pref.accepts_emergencies,pref.emergency_mode,pref.emergency_markup_bps,pref.emergency_start,pref.emergency_end,pref.emergency_days,pref.updated_at pref_updated_at,
       (SELECT AVG((julianday(d2.responded_at)-julianday(d2.sent_at))*1440.0) FROM job_dispatches d2 WHERE d2.provider_id=p.user_id AND d2.responded_at IS NOT NULL AND d2.sent_at>=datetime('now','-90 days')) average_response_minutes,

@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Richtung A auf dem Handy — Werkbank</title>
+<style>
+  :root{
+    --ink:#10222a; --sec:#4b5b60; --mut:#7d898d; --line:#e4e2dc; --paper:#faf8f4;
+    --panel:#ffffff; --petrol:#105258; --terra:#a84d29; --ok:#236344; --chip:#f0ede7;
+
+    /* Vier Schriftgrößen. Nicht mehr. Keine unter 15px. */
+    --t1:28px;   /* die eine Zahl, um die es auf dem Bildschirm geht */
+    --t2:20px;   /* Abschnittstitel, Kennzahl */
+    --t3:17px;   /* Zeilentitel, Fließtext */
+    --t4:15px;   /* Zweitzeile, Metadaten, Beschriftungen */
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:#e9e7e1}
+  body{font:var(--t4)/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif;color:var(--ink);
+       -webkit-font-smoothing:antialiased}
+  .phone{width:390px;height:844px;background:var(--paper);position:relative;overflow:hidden;display:flex;flex-direction:column}
+
+  /* Kopfzeile: Titel in Zeilengröße — kein Marketing-Header, kein Satz zum Erklären */
+  .top{height:56px;flex:none;border-bottom:1px solid var(--line);background:var(--panel);
+       display:flex;align-items:center;gap:10px;padding:0 12px 0 16px}
+  .top .t{min-width:0;flex:1}
+  .top .t b{display:block;font-size:var(--t3);font-weight:660;letter-spacing:-.015em;
+            white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .top .t span{display:block;font-size:var(--t4);color:var(--mut)}
+  .ico{width:44px;height:44px;border-radius:11px;border:1px solid var(--line);background:var(--panel);
+       display:flex;align-items:center;justify-content:center;color:var(--sec);position:relative;flex:none}
+  .ico svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.7}
+  .ico i{position:absolute;top:-4px;right:-4px;background:var(--terra);color:#fff;font-size:var(--t4);font-weight:700;
+         font-style:normal;border-radius:11px;min-width:22px;line-height:22px;text-align:center;
+         box-shadow:0 0 0 2px var(--panel)}
+
+  .scroll{flex:1;overflow:hidden;padding:10px 16px 0}
+
+  .fokus{display:flex;align-items:center;gap:14px;background:var(--panel);border:1px solid var(--line);
+         border-radius:12px;padding:14px 16px;margin-bottom:12px;text-decoration:none;color:inherit;min-height:80px}
+  .fokus > b{font-size:var(--t1);font-weight:650;letter-spacing:-.03em;line-height:1;color:var(--terra)}
+  .fokus .t{flex:1;min-width:0}
+  .fokus .t b{display:block;font-size:var(--t3);font-weight:640;color:var(--ink);letter-spacing:-.01em}
+  .fokus .t span{display:block;font-size:var(--t4);color:var(--sec);margin-top:2px}
+  .fokus .go{width:44px;height:44px;border-radius:50%;background:var(--petrol);color:#fff;flex:none;
+             display:flex;align-items:center;justify-content:center}
+  .fokus .go svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2}
+
+  .kennzahlen{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);
+              border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-bottom:12px}
+  .kennzahlen div{background:var(--panel);padding:12px 14px;min-height:76px}
+  .kennzahlen span{display:block;font-size:var(--t4);color:var(--mut)}
+  .kennzahlen b{display:block;font-size:var(--t2);font-weight:650;letter-spacing:-.02em;margin-top:2px}
+
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-bottom:12px}
+  .cardhead{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--line);min-height:48px}
+  .cardhead h2{margin:0;font-size:var(--t3);font-weight:650;letter-spacing:-.01em}
+  .cardhead .n{font-size:var(--t4);font-weight:700;color:var(--sec);background:var(--chip);border-radius:11px;
+               min-width:24px;line-height:24px;text-align:center}
+  .cardhead a{margin-left:auto;font-size:var(--t4);color:var(--petrol);text-decoration:none;font-weight:620;
+              display:flex;align-items:center;min-height:44px;padding:0 2px}
+
+  .rows{list-style:none;margin:0;padding:0}
+  .rows li{border-bottom:1px solid var(--line)}
+  .rows li:last-child{border-bottom:0}
+  .rows a{display:flex;align-items:center;gap:13px;padding:12px 16px;min-height:68px;
+          text-decoration:none;color:inherit}
+  .rows .tx{min-width:0;flex:1}
+  .rows .tx b{display:block;font-size:var(--t3);font-weight:620;line-height:1.3}
+  .rows .tx span{display:block;font-size:var(--t4);color:var(--mut);margin-top:2px}
+  .chip{display:inline-block;font-size:var(--t4);font-weight:650;padding:5px 10px;border-radius:9px;white-space:nowrap}
+  .chip.warn{color:var(--terra);background:color-mix(in srgb,var(--terra) 10%,transparent)}
+  .chip.acc{color:var(--petrol);background:color-mix(in srgb,var(--petrol) 10%,transparent)}
+
+  /* Untere Leiste: vier Bereiche statt fünf. Die Zahl steht NEBEN der Beschriftung,
+     nicht in einer dritten Rasterzeile — sonst bricht die Leiste um. */
+  .tabbar{flex:none;border-top:1px solid var(--line);background:var(--panel);
+          display:grid;grid-template-columns:repeat(4,1fr);padding-bottom:20px}
+  .tab{display:grid;grid-template-rows:24px auto;justify-items:center;align-content:center;gap:4px;
+       padding:9px 2px 6px;text-decoration:none;color:var(--sec);min-height:56px}
+  .tab svg{width:23px;height:23px;stroke:currentColor;fill:none;stroke-width:1.7}
+  .tab .lb{display:flex;align-items:center;gap:5px;font-size:var(--t4);font-weight:550;line-height:1.1;white-space:nowrap}
+  .tab[aria-current="page"]{color:var(--petrol)}
+  .tab[aria-current="page"] .lb{font-weight:680}
+  .bdg{background:var(--terra);color:#fff;font-size:var(--t4);font-weight:700;border-radius:10px;
+       min-width:20px;line-height:20px;text-align:center;font-style:normal}
+  .home-ind{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);width:130px;height:5px;
+            border-radius:3px;background:#1c2129;opacity:.85}
+</style>
+</head>
+<body>
+<div class="phone">
+
+  <div class="top">
+    <div class="t"><b>Lindenweg 12</b><span>Olivia Berger</span></div>
+    <span class="ico"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></span>
+    <span class="ico"><svg viewBox="0 0 24 24"><path d="M18 15V10a6 6 0 1 0-12 0v5l-2 3h16z"/><path d="M10 21h4"/></svg><i>2</i></span>
+  </div>
+
+  <div class="scroll">
+    <a class="fokus" href="#">
+      <b>2</b>
+      <span class="t"><b>Warten auf dich</b><span>Entscheidungen offen</span></span>
+      <span class="go"><svg viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg></span>
+    </a>
+
+    <div class="kennzahlen">
+      <div><span>Termine</span><b>1</b></div>
+      <div><span>Dokumente</span><b>14</b></div>
+      <div><span>Aufträge</span><b>1</b></div>
+    </div>
+
+    <div class="card">
+      <div class="cardhead"><h2>Wartet auf dich</h2><span class="n">2</span></div>
+      <ul class="rows">
+        <li><a href="#">
+          <span class="tx"><b>Angebot Heizungspumpe</b><span>Kessler · 1.240 €</span></span>
+          <span class="chip warn">Frist 19.09.</span>
+        </a></li>
+        <li><a href="#">
+          <span class="tx"><b>Termin bestätigen</b><span>Schornsteinfeger · Do 09:30</span></span>
+          <span class="chip acc">Bestätigen</span>
+        </a></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="cardhead"><h2>Hausakte</h2><a href="#">Alle 14</a></div>
+      <ul class="rows">
+        <li><a href="#">
+          <span class="tx"><b>Rechnung Heizungspumpe</b><span>14.09. · PDF, 214 KB</span></span>
+        </a></li>
+        <li><a href="#">
+          <span class="tx"><b>Grundriss Erdgeschoss</b><span>11.09. · PDF, 1,8 MB</span></span>
+        </a></li>
+        <li><a href="#">
+          <span class="tx"><b>Zählerstände</b><span>12.09. · Strom, Gas, Wasser</span></span>
+        </a></li>
+      </ul>
+    </div>
+  </div>
+
+  <nav class="tabbar">
+    <a class="tab" aria-current="page" href="#"><svg viewBox="0 0 24 24"><path d="M3 11.2 12 4l9 7.2V20H3z"/></svg><span class="lb">Start</span></a>
+    <a class="tab" href="#"><svg viewBox="0 0 24 24"><path d="M5 3h9l5 5v13H5z"/><path d="M14 3v5h5"/></svg><span class="lb">Akte</span></a>
+    <a class="tab" href="#"><svg viewBox="0 0 24 24"><path d="M9 5h10M9 12h10M9 19h10M4 5h.01M4 12h.01M4 19h.01"/></svg><span class="lb">Aufträge<i class="bdg">1</i></span></a>
+    <a class="tab" href="#"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg><span class="lb">Mehr</span></a>
+  </nav>
+  <span class="home-ind"></span>
+</div>
+</body>
+</html>

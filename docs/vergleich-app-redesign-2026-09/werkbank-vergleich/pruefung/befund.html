@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="de" data-page-node-id="UPHFu62KVqv7BYrWWbUUdt">
+<head data-page-node-id="nv2TLSsb2CrYxCDqEO3U6u">
+<meta charset="utf-8" data-page-node-id="gx6MIckowRo9ZkK8iixT9U">
+<title>Prüfbericht — vergleich.html</title>
+<style>
+  :root{
+    --paper:#faf8f4; --petrol:#105258; --deep:#0a3539; --ink:#10222a;
+    --sec:#4b5b60; --line:#e4e2dc; --sand:#ecdfc9; --terra:#a84d29;
+    --white:#fff; --ok:#236344; --warn:#a86a1f; --bad:#a13232;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);
+    font:15px/1.6 Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif}
+  .wrap{max-width:1080px;margin:0 auto;padding:40px 28px 96px}
+  h1{font-size:30px;letter-spacing:-.02em;margin:0 0 8px}
+  .lede{color:var(--sec);margin:0 0 6px;max-width:820px}
+  .kasten{background:var(--white);border:1px solid var(--line);border-radius:8px;padding:18px 20px;margin:22px 0}
+  .kasten.warn{border-left:4px solid var(--warn)}
+  .kasten.bad{border-left:4px solid var(--bad)}
+  .kasten.ok{border-left:4px solid var(--ok)}
+  h2{font-size:20px;letter-spacing:-.01em;margin:38px 0 4px;padding-top:22px;border-top:1px solid var(--line)}
+  h3{font-size:15px;margin:22px 0 6px}
+  p{margin:8px 0}
+  .nr{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:999px;
+    background:var(--petrol);color:#fff;font-size:13px;font-weight:600;margin-right:9px;vertical-align:2px}
+  .zahl{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0}
+  .zahl div{background:var(--white);border:1px solid var(--line);border-radius:8px;padding:12px 16px;min-width:150px}
+  .zahl b{display:block;font-size:24px;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+  .zahl span{color:var(--sec);font-size:13px}
+  table{border-collapse:collapse;width:100%;margin:14px 0;font-size:14px}
+  th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{background:var(--paper);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--sec)}
+  td.ja{color:var(--ok);font-weight:600}
+  td.nein{color:var(--bad);font-weight:600}
+  code{background:#f2f0ea;border:1px solid var(--line);border-radius:4px;padding:1px 5px;font-size:13px;
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+  figure{margin:16px 0}
+  .bild{position:relative;display:block;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--white)}
+  .bild img{display:block;width:100%}
+  .marke{position:absolute;border:2px solid var(--bad);border-radius:3px;
+    box-shadow:0 0 0 3px rgba(161,50,50,.16);pointer-events:none}
+  .marke::after{content:attr(data-n);position:absolute;top:-11px;left:-2px;background:var(--bad);color:#fff;
+    font-size:11px;font-weight:700;line-height:1;padding:3px 6px;border-radius:3px}
+  figcaption{color:var(--sec);font-size:13px;margin-top:7px}
+  .liste{margin:10px 0;padding-left:20px}
+  .liste li{margin:6px 0}
+  .klein{font-size:13px;color:var(--sec)}
+  .zwei{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:760px){.zwei{grid-template-columns:1fr}}
+</style>
+</head>
+<body data-page-node-id="XF98UnHel0r5zNMObywhxR">
+<div class="wrap" data-page-node-id="ppXXMOwyItENPp0Gkki13q">
+
+  <h1 data-page-node-id="XqW3RTM92676duLjFZBgDS">Prüfbericht — <code data-page-node-id="8Qhj6HDv653frD2Mxx51HN">vergleich.html</code></h1>
+  <p class="lede" data-page-node-id="HfWEcse1Oj5MTtFM3u7D8z">Die Soll-Vorschau wurde gegen die Sicherung, gegen das Designsystem und im echten Browser geprüft.
+  Jeder Befund hat eine Messung oder ein Bild als Beleg. Keine Behauptung ohne Nachweis.</p>
+
+  <div class="kasten bad" data-page-node-id="DERbRwcGuzdcKDNazPdgoD">
+    <b data-page-node-id="nAR7SePUeLt1RIhwU6ejaI">Der Hauptbefund:</b> Die Ist-Spalte ist <b data-page-node-id="23pGJtbavSMnEFlOrUu389">veraltet</b>. Alle sechs Aufnahmen stammen von <b data-page-node-id="PtEGes9atEztLUUTJ69KNV">01:49</b>,
+    die zehn Commits von heute liefen zwischen <b data-page-node-id="FDYTzgzrSl88lI8dMRRtb6">11:26 und 13:32</b>. Die Seite vergleicht also gegen einen
+    Zustand, den es seit über elf Stunden nicht mehr gibt.
+  </div>
+
+  <div class="zahl" data-page-node-id="FhstCVdFegpMiuVj2kUWG8">
+    <div data-page-node-id="Y63KxrsNzgjjTYOFQh1C18"><b data-page-node-id="6YhJjzqLjJGiRzuSgaXNgY">6</b><span data-page-node-id="TuhkIQ3VaKMVY4jVWQRtEE">Ist-Aufnahmen, alle von 01:49</span></div>
+    <div data-page-node-id="FBCqPfLq6ZFt4kL6ukZNfa"><b data-page-node-id="NDXXuBTATerFQnRyOAiPuf">10</b><span data-page-node-id="3lA6GuP9zbA4dOR3MwG81i">Commits seither (11:26–13:32)</span></div>
+    <div data-page-node-id="bjTPhfqaJ0gadiGCANj7p2"><b data-page-node-id="4cDBal0ECUOg3rJn2Ha5GC">2</b><span data-page-node-id="rLLPJDAzd2mvW15z2mDR6k">davon byte-gleich / falsche Seite</span></div>
+    <div data-page-node-id="lKr7FIMHregTQF1VQavDvc"><b data-page-node-id="joMXWftHt2g3Rb1R5eH4e2">87</b><span data-page-node-id="G8f8LC98E4lKKlAfdpitik">Verstöße gegen das eigene Designgesetz</span></div>
+  </div>
+
+  <h2 data-page-node-id="J3Cn2jN1kPoYMHc0HkbDSX"><span class="nr" data-page-node-id="8eA254LEUf3QUtIdBdzzuo">1</span>Die Kopfleiste im Ist-Bild ist kaputt — und das ist echt</h2>
+  <p data-page-node-id="BFH8DXV8JckMv6hqkQMjLu">Das ist die Stelle, die dir aufgefallen ist. Die Hauptmenüpunkte schieben sich über den Nutzerblock,
+  der Hauptbereich ist leer. Das war der Stand <b data-page-node-id="qsR5b0CE3Eqb5WdKcKdzkC">vor</b> <code data-page-node-id="1deYFsRY4VuSC7B6nSKlRP">8f20654</code> (02:05), der das Hauptmenü
+  in eine eigene Zeile holte.</p>
+  <figure data-page-node-id="9fPZZBuUf2eC2S8Qc8Trhc">
+    <span class="bild" data-page-node-id="hZ5q6jomOmL7fk3yvhqxNF">
+      <img src="../ist/app/owner_app__desktop.png" alt="Ist-Aufnahme der Startseite" data-page-node-id="l5ZFBaM7pU5CRO4OtLfFGk">
+      <span class="marke" data-n="1" style="left:18%;top:1.5%;width:52%;height:9%" data-page-node-id="lZPf5Eumr7vMTg2wg1xZFw"></span>
+      <span class="marke" data-n="2" style="left:18%;top:8%;width:62%;height:3.5%" data-page-node-id="ObKtM2mXBKiS2Kv56CINwA"></span>
+      <span class="marke" data-n="3" style="left:62%;top:20%;width:22%;height:30%" data-page-node-id="VnFKnAXyInFJqmJqPh21kh"></span>
+    </span>
+    <figcaption data-page-node-id="r0LH7NWTbYuLWAyQ1AhCgO"><b data-page-node-id="eLMw2PkByPTSChLf8GyhfR">1</b> Menü und Nutzerblock liegen übereinander. <b data-page-node-id="GLnC1VLPbAfrHgIpltPsTB">2</b> Hauptbereich ohne Inhalt.
+    <b data-page-node-id="vcm7Ki8ErhJEGtdC8lXeNt">3</b> Rechte Spalte: Beschriftungen und Text überlappen sich.</figcaption>
+  </figure>
+  <div class="kasten warn" data-page-node-id="Je8hXWTpQzdNiFhyVcGEqF">
+    Diese Aufnahme ist nicht „zerstört" — sie zeigt korrekt einen echten, kaputten Zustand. Nur ist dieser
+    Zustand <b data-page-node-id="KfjyVJplXIrNG3OZikLeNh">elf Stunden alt</b>. Genau deshalb wirkt die Vorschau falsch.
+  </div>
+
+  <h2 data-page-node-id="ELrcj6AWfebB4UbCXt5yfQ"><span class="nr" data-page-node-id="e4czY6bBvkexLTSf32kTC4">2</span>Zwei Ist-Aufnahmen zeigen die falsche Seite</h2>
+  <p data-page-node-id="gpjgZy6xbEjH3xB1Glf0dM">Belegt über Prüfsummen: zwei Bildpaare sind <b data-page-node-id="mX7OLZq2HZ4PnVrasvTWJA">byte-identisch</b>.</p>
+  <table data-page-node-id="IjxMT2HyoHWG0QGEGh2eAs">
+    <tr data-page-node-id="uIU2tC7fB4O1QYe0yLahoP"><th data-page-node-id="BePvjz84VpvpiCcrmg4OFz">Paar</th><th data-page-node-id="Bl7dp5eXbjSlglRFLab2PX">Größe</th><th data-page-node-id="gOBRlMcOWFFyJwRp1Jtxsx">Bedeutung</th></tr>
+    <tr data-page-node-id="FBVKQa1if1vXoamyxHWdJc"><td data-page-node-id="rBTbe3908MEbKEf0tYlsp1"><code data-page-node-id="GhGJOnIAxnYwENwMZ14Xub">admin_admin__desktop.png</code> = <code data-page-node-id="RqQlTkMS3TCoVQ2tdc6GRD">admin_admin_ops__desktop.png</code></td><td class="nein" data-page-node-id="hHldxTYspJkNcW2kN8Ft3D">42 KB</td>
+        <td data-page-node-id="XUdlMqmYViWKydCETlhUUr">Beide zeigen die <b data-page-node-id="fM1Z1kO0IRIhzakhBiCQKc">Anmeldeseite</b>, nicht die Verwaltung</td></tr>
+    <tr data-page-node-id="YQrEbq7sb7kAVyVdJjzOFp"><td data-page-node-id="xnCd54vqDYRqKrUmfuMvjl"><code data-page-node-id="opovoiB2Lgso1mCK6LdS2h">owner_app_messages__desktop.png</code> = <code data-page-node-id="CN0uNBF3fMTnDy3p0M8ZdF">owner_app_partners__desktop.png</code></td><td data-page-node-id="pKFXPlXOTfQodpiTiGRAIU">116 KB</td>
+        <td data-page-node-id="ACkMTnamaobiMMqMgGWnUQ">Eine der beiden Seiten wurde nie aufgenommen</td></tr>
+  </table>
+  <figure data-page-node-id="O4CmcqGX7ncIwfXf09CLzA">
+    <span class="bild" data-page-node-id="2scMlTevxEXRKb9dqRSfIn">
+      <img src="../ist/app/admin_admin__desktop.png" alt="Ist-Aufnahme der Verwaltung" data-page-node-id="kRkWdaTq6RAw5if8rGD7B6">
+      <span class="marke" data-n="1" style="left:20%;top:32%;width:60%;height:24%" data-page-node-id="BPFxMbnD5KiW9jRPyXGPKx"></span>
+    </span>
+    <figcaption data-page-node-id="nT64kn6k5nkVFka94YXQrQ">Die „Ist"-Aufnahme der Verwaltung ist ein <b data-page-node-id="EFnFYFnwoZMrrA2UeDvnO4">Anmeldeformular</b> — samt der fetten
+    Überschrift, die inzwischen auf 600 korrigiert ist (<code data-page-node-id="ThGfKAzSAPblXaWO8Dt72r">20b41fa</code>).</figcaption>
+  </figure>
+
+  <h2 data-page-node-id="MXv9mXoDfFPSAbXGGEcDd8"><span class="nr" data-page-node-id="0WDM9393NAGG3zARQpwBV2">3</span>Der Entwurf nutzt nicht die Tokens, die er behauptet</h2>
+  <p data-page-node-id="ziac9GAw6ELlEuAIOxAMp7">Über der Vorschau steht: „darunter ein HTML-Entwurf mit den <b data-page-node-id="moDJRKHomTom8NWNTvth00">richtigen Tokens</b> und Icons."
+  Zwei Tokens stimmen nicht:</p>
+  <table data-page-node-id="fUeC8s6W1tTPcbFQHsSzXX">
+    <tr data-page-node-id="ertuCgsTQ9z3h5a4v3Upit"><th data-page-node-id="HS2p238l1lDdxo1dTxXto0">Entwurf</th><th data-page-node-id="QVCKlz6XtIIa2GuBR6qABq">Designsystem</th><th data-page-node-id="H2HeomqjyRGVyTw8Vln2tB">Urteil</th></tr>
+    <tr data-page-node-id="4pIFeWExO1HwElPt18kG2e"><td data-page-node-id="wqZRrTuZVaeDvXYUWhzPf2"><code data-page-node-id="ooMr1B28gWfUIoXu6bIJ3R">--r-pan: 10px</code></td><td data-page-node-id="1TrHM0xCrx5e9ZpGXWFRSS"><code data-page-node-id="zgI14llb1c49O6rMdAGSqd">--eh-radius-panel: 0.5rem</code> = 8px</td><td class="nein" data-page-node-id="Gjczj6OAsrmNPANU3EFtre">weicht ab</td></tr>
+    <tr data-page-node-id="15093Z9tiiM0chxGT2R4nz"><td data-page-node-id="eRvhjQTB6hDB7LaquAwwsL"><code data-page-node-id="LGtk5SiPHFZ7tN8U4JH07b">--shadow-card: 0 1px 2px …, 0 4px 12px …</code></td><td data-page-node-id="ozGqvnZnoQcCAPUJHx7414"><code data-page-node-id="c7R1VrimHdyZpAcLHVDs4d">--eh-shadow-card: 0 2px 10px …</code></td><td class="nein" data-page-node-id="9GHkKxEjrTyUpyBDmYKI8H">weicht ab</td></tr>
+    <tr data-page-node-id="vH7tAHRZF4sX1DYHjQfplE"><td data-page-node-id="nsLCJpHvbOwPn7DEDKeVmm"><code data-page-node-id="fkf4R3EOXRm9gZr3aW21LB">--rail: #f7f5f0</code></td><td data-page-node-id="R9d9rLEBce7AscfdbQhWfL">existiert nicht</td><td class="nein" data-page-node-id="jOk4BnDU8re5cWodk6DA2D">erfunden</td></tr>
+    <tr data-page-node-id="82FnX8ZrwYwzCNhgZC58AM"><td data-page-node-id="MncQvTCD0uSOCenyGvPvew"><code data-page-node-id="oiPTQcEKEX4DrIsen07BIW">--page: #f2f0ea</code></td><td data-page-node-id="S3YhGFCbHyv6E0sEXZrz2f">existiert nicht</td><td class="nein" data-page-node-id="AHZ9uh4Mit9B5W5gBATmsD">erfunden</td></tr>
+    <tr data-page-node-id="27VBMTfnDVc3oZ4kq55EVL"><td data-page-node-id="mHwDgXbktBfslSRadiJtQG"><code data-page-node-id="DpBZb4C4xC4wL5MAMcUuFZ">--paper #faf8f4</code>, <code data-page-node-id="jlLvHPicA8aITGzC72brAc">--petrol #105258</code>, <code data-page-node-id="gjaXhxQB8WSGVT2GfCJkWO">--ink #10222a</code>, <code data-page-node-id="aMuMqTYxLfr9qC4OhDGM9Z">--line #e4e2dc</code></td><td data-page-node-id="MbUZG8WjygzjotlwzTUCMF">identisch</td><td class="ja" data-page-node-id="EeoC59EydLnBDG7x4MHomp">stimmt</td></tr>
+  </table>
+  <p class="klein" data-page-node-id="0j2JeQ3y81rPNQ6mEqJFKJ">Geprüft wurden alle 17 Tokens des Entwurfs gegen <code data-page-node-id="xzyS83UGt8VFyjiq21Mdvj">packages/eh-design/src/tokens.css</code>.</p>
+
+  <h2 data-page-node-id="pShnQhsyPOPKGLF6Z3k0Tw"><span class="nr" data-page-node-id="GdWT4npHQ9aQnCPzt3EFKX">4</span>Der Entwurf rendert in einer anderen Schriftart als die App</h2>
+  <table data-page-node-id="GLoN9zE3PiXhrBIbqd28uO">
+    <tr data-page-node-id="HBevewCs7Vq5IDElzBzSnH"><th data-page-node-id="MXX3zcurBVYcI1baoD2c9w"></th><th data-page-node-id="QpM4OpmFrSXSwUtjnGSu6e">Schriftfamilie</th><th data-page-node-id="QTK4F8iqWXrvCAtvOJxwA3">Grundgröße</th></tr>
+    <tr data-page-node-id="8pXjFSWwxFksWZRFLmNPGR"><td data-page-node-id="E9FHOl3Xd6OTDp41yG6Kwu">Entwurf</td><td data-page-node-id="BwwFrAjU8JL2Mu7YfZq2GO"><code data-page-node-id="xe7rjImMAKknVLQ35IBiMA">-apple-system, BlinkMacSystemFont, "Segoe UI", …</code></td><td data-page-node-id="9hVbKVwuunEV7wYTpk16EA">14 px</td></tr>
+    <tr data-page-node-id="yvltFG0hruBpXXrHeUr5sH"><td data-page-node-id="tAm0dhDxIk9eUuexAktaAk">App</td><td data-page-node-id="uaXdbUFuEvplqKNeQj2sHJ"><code data-page-node-id="aQFovYlRgYRPJ3DxgbCRtm">Inter</code> (<code data-page-node-id="FBn2bCDt70Eu8yM9K60fMx">--eh-font-family</code>)</td><td data-page-node-id="4qInlfwWVbyuenVXnmm1XQ">17 px (<code data-page-node-id="85q0jKgMpUGP0mYOfot6CL">--eh-font-body</code>)</td></tr>
+  </table>
+  <p data-page-node-id="syahXipMm04CR7LNE153iP">Der Entwurf fällt auf die Systemschrift zurück, die App nutzt Inter. Eine Vorschau in einer anderen
+  Schrift kann die App nie treffen — das ist die Ursache des Eindrucks „verschiedene Schriftarten".</p>
+
+  <h2 data-page-node-id="aJ2BPCm8gK83DZBNrAUmhI"><span class="nr" data-page-node-id="hGwQvYgNtuYpFrwdOwkLOQ">5</span>Die Kopfleiste der Verwaltung ist vertauscht</h2>
+  <p data-page-node-id="O6sMA0FEWzL8NBHTfTEaGd">Im Entwurf steht oben fett <b data-page-node-id="nWwWXpk8u1xtwkElapDOxN">„Verwaltung"</b> und darunter klein „einfach hausen". Bei allen anderen
+  fünf Entwürfen ist es umgekehrt: erst der Name, darunter der Zusammenhang.</p>
+  <div class="zwei" data-page-node-id="PrvPFtOps13DFdvvQXVqJZ">
+    <figure data-page-node-id="BYl7JaIE6FAzunW1tsc1Dy">
+      <span class="bild" data-page-node-id="4jaylJBdC16UFGg7MfQpLz"><img src="bilder/marke-0.png" alt="Markenblock Startseite" data-page-node-id="zYJFN5Vemiu0Mmuko9X51A"></span>
+      <figcaption data-page-node-id="yAjDIliCkVGLi8mf64GBbf">Start: „einfach hausen" fett, „Fixturestraße 1" klein — <b data-page-node-id="gnEgk7QHhM4YS2oBmTNt37">richtig</b></figcaption>
+    </figure>
+    <figure data-page-node-id="A5uUvLrn6p6E9DIXb1oTLg">
+      <span class="bild" data-page-node-id="nBUqeIq8cfNINN2zVPUQxD">
+        <img src="bilder/marke-5.png" alt="Markenblock Verwaltung" data-page-node-id="pRF865CXJrXAtWHfC4ODSs">
+        <span class="marke" data-n="1" style="left:26%;top:12%;width:66%;height:34%" data-page-node-id="cakVWhx500AAVHWhQHtwAb"></span>
+        <span class="marke" data-n="2" style="left:26%;top:60%;width:52%;height:32%" data-page-node-id="gT68Pl0sFsoetofhn2wzJp"></span>
+      </span>
+      <figcaption data-page-node-id="sYgAkw7m6SJJav757kbUQL">Verwaltung: <b data-page-node-id="p79zFjWmiBaEth7xEnAm3K">1</b> „Verwaltung" fett, <b data-page-node-id="d14CBAdsiPXr7UF5AmPvOi">2</b> „einfach hausen" klein — <b data-page-node-id="UFrUbPcyEV2V8vdzc1SlUx">vertauscht</b></figcaption>
+    </figure>
+  </div>
+
+  <h2 data-page-node-id="8Ss2aHGnE5dRmYtTpFEGJR"><span class="nr" data-page-node-id="3cbGFZVUzeGLhZdYSBSIXF">6</span>87 Verstöße gegen das projekteigene Designgesetz</h2>
+  <p data-page-node-id="E8gVgAXl6tmO4ghod2CWLg">Die Prüfung <code data-page-node-id="kIsUITA84fWRy0FMzXlHQb">scripts/eh-design-check.mjs</code> auf die Vorschauseite angewendet:</p>
+  <div class="zahl" data-page-node-id="uHmzYEaQJyUAldwpnZd6wY">
+    <div data-page-node-id="1WvqLhZa7rgDnZ5oVdwpTt"><b data-page-node-id="HkDx17HAyUW2yHvmKrsXvh">51</b><span data-page-node-id="4ThcDspcAZN5GW4LuD10HC">zu kleine Schriftgrößen</span></div>
+    <div data-page-node-id="ndTnD8oVD07TtoLQiS2eKw"><b data-page-node-id="KoCXy5FWBkaJ7ZNfkpJ9ao">36</b><span data-page-node-id="D3ozp6zWO80kgF0n5w6q7W">Rohfarben statt Tokens</span></div>
+  </div>
+  <p data-page-node-id="X6bZUYE83CX3hbuC3w4Wna">Die Schriftgrößen reichen bis <b data-page-node-id="HWVL6aDJuGZdueWEXYaaDi">9,5 px</b> hinunter (9,5 / 10 / 10,5 / 11 / 11,5 / 12 / 12,5 px).
+  Die kleinste Stufe des Designsystems ist <code data-page-node-id="0MOJx3CXqnt1ZToyk0BnlV">--eh-font-meta</code> = <b data-page-node-id="6aP797QwrJMyAxIGXYjOFY">13 px</b>. Die Vorschau
+  unterschreitet sie 51-mal.</p>
+  <p class="klein" data-page-node-id="5PxkquI86FgYN1XEjmhYFP">Das ist derselbe Maßstab, den die App selbst erfüllen muss. Die Vorschau würde ihn nicht bestehen.</p>
+
+  <h2 data-page-node-id="t2pdkz8HcCujpL8R1YYIUb"><span class="nr" data-page-node-id="pxGPMpgHVQ0Q0gdCm3HDuC">7</span>Im schmalen Fenster läuft die Seite über</h2>
+  <table data-page-node-id="bHzaikiEg1oZdQUqNjKW72">
+    <tr data-page-node-id="gDPK9F9UC2DWcD20HN1YQa"><th data-page-node-id="fuJd5GRVFHBcZZo5AvGhzB">Fensterbreite</th><th data-page-node-id="Ilmwy9nBAig6dzgmpxPGDH">Ergebnis</th></tr>
+    <tr data-page-node-id="LB4IT4SCeBX4iL4ozLsUJU"><td data-page-node-id="mr3GYFZrfEtUw0dMAGzk4C">1440 px</td><td class="ja" data-page-node-id="e1OkJ8bdjpHTh8SlOkevqO">sauber</td></tr>
+    <tr data-page-node-id="pTfwIIc99c4ms8OuWc2aht"><td data-page-node-id="Sa0kJkrxmPyqwZOIKZQE1o">1120 px</td><td class="ja" data-page-node-id="mXgcHoBL5ryqKERno2FgUY">sauber</td></tr>
+    <tr data-page-node-id="iCyAFJWGaAZyzWX4WErtso"><td data-page-node-id="pX8vH5NCHD3BF339BYYHfq">1024 px</td><td class="ja" data-page-node-id="OiToQGtc1Q3ReUmJdtc6Us">sauber</td></tr>
+    <tr data-page-node-id="Kw80QvP98Vj9eQlnv3cQ3k"><td data-page-node-id="L1BZmNs5cMSTKKYLDDse3m">900 px</td><td class="nein" data-page-node-id="SKJEvK95Zi8UKycBIaVoLc">Tabelle schiebt sich unter die rechte Spalte, Text wird abgeschnitten</td></tr>
+    <tr data-page-node-id="thAtbdK9IW0kIAD9iVzBD3"><td data-page-node-id="7cDFhPGHFXRFrq6cTAMk5Y">390 px</td><td class="nein" data-page-node-id="cbY44tplYPL0ZWxDMVlsNd">Seite 471 px breit bei 390 px — 217 Elemente ragen heraus</td></tr>
+  </table>
+
+  <h2 data-page-node-id="GnT2p1jPSKnKnPTJAuWi93"><span class="nr" data-page-node-id="V0Jpd7ePiXXeBrsA93Mo6Z">8</span>Kleinigkeit</h2>
+  <p data-page-node-id="osz5cKmFz9SL81rgtXQoaD">Nach dem Namen in der Kopfleiste steht ein <code data-page-node-id="lxaVAj7Yeu4tSa9CIXRbGU">▾</code>-Zeichen („Dropdown"), zu dem es kein Menü gibt.
+  Es erscheint in allen sechs Entwürfen und wirkt wie ein verirrtes Zeichen.</p>
+
+  <h2 data-page-node-id="gbqafEiL0NAFZFUFRV11Ua">Was ich <em data-page-node-id="48EjxsF8WYYuHQC0bresXE">nicht</em> gefunden habe</h2>
+  <div class="kasten ok" data-page-node-id="8pZhABybJ3375SxeIVlWCu">
+    <ul class="liste" data-page-node-id="IdoHoVMqDKqElPg56XUBdT">
+      <li data-page-node-id="4it6giAABlqp9ELsRAvJE3"><b data-page-node-id="v1naIC2B9HiFXss83n7Q6q">Struktur:</b> alle Tags geschlossen (<code data-page-node-id="QSCE7e1LDxMsXVuS1Mm4Ga">div</code> 194/194, <code data-page-node-id="pKn2bSgRfxvrbLq7vLa6EA">main</code> 6/6, <code data-page-node-id="z3UnRc7G7ZfSRuWFjZvjgL">table</code> 3/3).</li>
+      <li data-page-node-id="HwMyopkAXr4f3CFHTxpPHX"><b data-page-node-id="LJXcXBDJdkY5CtA0eKzNV9">Bilder:</b> alle 7 Verweise zeigen auf vorhandene Dateien, keins fehlt.</li>
+      <li data-page-node-id="rQ30LUsFDNZOzIhjzu6eZB"><b data-page-node-id="32TVmjWsQapu9RGaKCCLUv">Klassen:</b> 74 definiert, 73 benutzt — keine einzige Klasse ohne Stil.</li>
+      <li data-page-node-id="MXXpS3LqvlzcZYl3UUt35y"><b data-page-node-id="vcCKEfjcj1qlFuvLBJmt6F">Tokens:</b> keine undefinierte Variable, keine definierte Variable ohne Verwendung.</li>
+      <li data-page-node-id="qQ6ixyruIrokhl5GgQlwee"><b data-page-node-id="nsuJAKTryJwur1ye1DH4T2">Kontrast:</b> kein Text unterhalb der WCAG-Grenze.</li>
+      <li data-page-node-id="X5bqRUsFhevWzMFwGScqrs"><b data-page-node-id="pggz1TgUhqf9CBC9TgQ4CG">Maßstab:</b> Ist-Bild 1324 px und Entwurfsrahmen 1324 px — die beiden sind vergleichbar.</li>
+    </ul>
+  </div>
+
+  <div class="kasten" data-page-node-id="KEtyVUUUhqYRbEvIMOFFGz">
+    <b data-page-node-id="slmMO5taFMH3NxtEHaBVd1">Grenze der Prüfung — ehrlich gesagt:</b> „Alle optischen Fehler" heißt hier
+    <b data-page-node-id="6JP2vPxQ1xMY8EbFCZjsWZ">alle Fehler, die diese sechs Prüfungen finden können</b>: Struktur, Verweise, Klassen, Tokens,
+    berechnete Stile im Browser, Kontrast und Überlauf bei fünf Fensterbreiten.
+    Was sie <b data-page-node-id="IBYvFSxtovHCHParFjB30K">nicht</b> finden: eine falsche Entscheidung, die formal korrekt ist — etwa ein
+    Abstand, der stimmt, aber nicht gefällt. Dafür brauche ich dein Auge.
+  </div>
+
+</div>
+</body>
+</html>

@@ -8,6 +8,7 @@ process.env.DATABASE_PATH=path.join(tmp,'test.db');
 process.env.PRIVATE_ROOT=path.join(tmp,'private');
 const {db}=await import('../src/lib/db.ts');
 const mod=await import('../src/lib/document-intelligence.ts');
+const {recordHausmeisterDocumentUpload}=await import('../src/lib/orchestrator.ts');
 const owner=(name)=>Number(db.prepare("INSERT INTO users(email,password_hash,role,first_name,last_name) VALUES(?,'x','homeowner',?,'Test')").run(name+'@doc.example',name).lastInsertRowid);
 const a=owner('Anna'),b=owner('Ben');
 
@@ -40,6 +41,30 @@ test('queue is idempotent per source and owner search never crosses tenants',()=
  db.prepare("UPDATE document_intelligence_jobs SET status='done',document_kind='insurance',search_text='Geheim Police' WHERE homeowner_id=?").run(b);
  const found=mod.searchIntelligentDocuments(a,'Wo ist die Rechnung zur Heizung?');
  assert.equal(found.length,1);assert.match(found[0].title,/Heizung/);assert.doesNotMatch(JSON.stringify(found),/Geheim/);
+});
+
+test('chat document upload records the owner message and assistant result without cloud AI',()=>{
+ const before=db.prepare('SELECT COUNT(*) c FROM assistant_messages').get().c;
+ const result=recordHausmeisterDocumentUpload(a,{documentId:4711,name:'Heizungsrechnung.pdf',reply:'Dokument erkannt und gespeichert.'});
+ assert.ok(result.threadId>0);
+ const rows=db.prepare('SELECT role,body,metadata_json FROM assistant_messages WHERE thread_id=? ORDER BY id').all(result.threadId);
+ assert.equal(rows.length,2);
+ assert.equal(rows[0].role,'user');
+ assert.match(rows[0].body,/Heizungsrechnung/);
+ assert.equal(JSON.parse(rows[0].metadata_json).houseDocument,true);
+ assert.equal(rows[1].role,'assistant');
+ assert.equal(JSON.parse(rows[1].metadata_json).documentProcessed,true);
+ assert.equal(db.prepare('SELECT COUNT(*) c FROM assistant_messages').get().c,before+2);
+});
+
+test('all owner AI chat surfaces expose the document-upload entry',()=>{
+ const full=fs.readFileSync(path.join(process.cwd(),'src/components/homeowner/homeowner-hausmeister-composer.tsx'),'utf8');
+ const compact=fs.readFileSync(path.join(process.cwd(),'src/components/house-assistant.tsx'),'utf8');
+ const action=fs.readFileSync(path.join(process.cwd(),'src/app/actions.ts'),'utf8');
+ assert.match(full,/name=\"document\"/);
+ assert.match(full,/application\/pdf,image\/\*/);
+ assert.match(compact,/\/app\/hausmeister#hausmeister-composer/);
+ assert.match(action,/storeAssistantDocument/);
 });
 
 test.after(()=>{db.close();fs.rmSync(tmp,{recursive:true,force:true})});

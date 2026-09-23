@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Richtung C auf dem Handy — Akte</title>
+<style>
+  :root{
+    --ink:#12232b; --sec:#53656b; --mut:#7c898d; --line:#e3e1da; --paper:#faf9f6;
+    --panel:#ffffff; --petrol:#105258; --terra:#a84d29; --ok:#236344; --sand:#ecdfc9; --rail:#f1efea;
+
+    /* Vier Schriftgrößen. Nicht mehr. Keine unter 15px. */
+    --t1:28px;   /* der Betrag — die eine Zahl */
+    --t2:20px;   /* Kopfzeile */
+    --t3:17px;   /* Vorgangstitel */
+    --t4:15px;   /* Datum, Tag, Jahr, Beschriftungen */
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:#e9e7e1}
+  body{font:var(--t4)/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif;color:var(--ink);
+       -webkit-font-smoothing:antialiased}
+  .phone{width:390px;height:844px;background:var(--paper);position:relative;overflow:hidden;display:flex;flex-direction:column}
+
+  /* Kopf: Titel + Ordner als waagerechte Chips statt Baum. Die Chipreihe scrollt seitlich. */
+  .head{flex:none;background:var(--panel);border-bottom:1px solid var(--line)}
+  .head .r1{display:flex;align-items:center;gap:10px;padding:10px 12px 8px 16px}
+  .head .r1 .t{flex:1;min-width:0}
+  .head .r1 b{display:block;font-size:var(--t2);font-weight:650;letter-spacing:-.022em}
+  .head .r1 span{display:block;font-size:var(--t4);color:var(--mut)}
+  .head .r1 .ico{width:44px;height:44px;border-radius:11px;border:1px solid var(--line);flex:none;
+        display:flex;align-items:center;justify-content:center;color:var(--sec)}
+  .head .r1 .ico svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.8}
+
+  .chips{display:flex;gap:8px;padding:0 16px 10px;overflow:hidden}
+  .chip{flex:none;font-size:var(--t4);font-weight:600;min-height:44px;display:flex;align-items:center;gap:6px;
+        padding:0 14px;border-radius:22px;background:var(--rail);color:var(--sec);white-space:nowrap;
+        text-decoration:none}
+  .chip.on{background:var(--petrol);color:#fff}
+  .chip .c{font-size:var(--t4);opacity:.8}
+
+  .scroll{flex:1;overflow:hidden;padding:14px 16px 0}
+
+  .year{display:flex;align-items:center;gap:12px;margin:0 0 8px}
+  .year b{font-size:var(--t4);font-weight:700;letter-spacing:.08em;color:var(--mut)}
+  .year i{flex:1;height:1px;background:var(--line)}
+
+  .tl{list-style:none;margin:0 0 16px;padding:0;position:relative}
+  .tl::before{content:"";position:absolute;left:17px;top:14px;bottom:14px;width:1px;background:var(--line)}
+  .tl li{display:flex;gap:14px;padding:0 0 12px;position:relative}
+  .tl .mk{width:35px;height:35px;border-radius:10px;background:var(--panel);border:1px solid var(--line);flex:none;
+          display:flex;align-items:center;justify-content:center;position:relative;z-index:1}
+  .tl .mk svg{width:17px;height:17px;stroke:var(--petrol);fill:none;stroke-width:1.7}
+  .tl .mk.terra svg{stroke:var(--terra)}
+  .tl .mk.ok svg{stroke:var(--ok)}
+  .tl .body{min-width:0;flex:1;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:11px 14px}
+  /* Titel und Etikett in EINER Zeile — das Datum gehört in den Text, nicht an den Rand.
+     Sonst rutscht es in eine zweite Zeile und jeder Vorgang wird 30px höher. */
+  .tl .body .r1{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+  .tl .body b{font-size:var(--t3);font-weight:640;line-height:1.3}
+  .tl .body p{margin:4px 0 0;font-size:var(--t4);color:var(--sec)}
+  .tl .body p .when{color:var(--mut)}
+  .tag{display:inline-block;font-size:var(--t4);font-weight:650;padding:3px 9px;border-radius:8px;
+       background:var(--rail);color:var(--mut)}
+  .tag.rech{color:var(--petrol);background:color-mix(in srgb,var(--petrol) 10%,transparent)}
+  .tag.auf{color:var(--terra);background:color-mix(in srgb,var(--terra) 11%,transparent)}
+  .tag.ver{color:var(--ok);background:color-mix(in srgb,var(--ok) 11%,transparent)}
+  .actions{display:flex;gap:9px;margin-top:9px}
+  .actions a{font-size:var(--t4);font-weight:620;color:var(--petrol);text-decoration:none;
+             min-height:44px;display:flex;align-items:center;padding:0 16px;border-radius:10px;
+             background:var(--paper);box-shadow:inset 0 0 0 1px var(--line)}
+  .actions a.solid{background:var(--petrol);color:#fff;box-shadow:none}
+
+  /* Vorschau als Blatt von unten */
+  .sheet{flex:none;background:var(--panel);border-top:1px solid var(--line);border-radius:16px 16px 0 0;
+         padding:8px 16px 20px;margin-top:-16px;position:relative;z-index:2}
+  .grab{width:40px;height:4px;border-radius:2px;background:var(--line);margin:0 auto 10px}
+  .prev{display:flex;align-items:center;gap:13px;text-decoration:none;color:inherit;min-height:64px}
+  .prev .pg{width:38px;height:46px;border:1px solid var(--line);border-radius:4px;background:#fff;flex:none;
+        display:flex;align-items:center;justify-content:center}
+  .prev .pg svg{width:17px;height:17px;stroke:var(--petrol);fill:none;stroke-width:1.7}
+  .prev .tx{flex:1;min-width:0}
+  .prev .tx b{display:block;font-size:var(--t3);font-weight:640}
+  .prev .tx span{display:block;font-size:var(--t4);color:var(--mut);margin-top:2px}
+  .prev .amt{font-size:var(--t1);font-weight:650;letter-spacing:-.03em;white-space:nowrap}
+  .home-ind{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);width:130px;height:5px;
+            border-radius:3px;background:#1c2129;opacity:.85}
+</style>
+</head>
+<body>
+<div class="phone">
+
+  <div class="head">
+    <div class="r1">
+      <div class="t"><b>Lindenweg 12</b><span>Hausakte · 47 Vorgänge</span></div>
+      <span class="ico"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></span>
+    </div>
+    <div class="chips">
+      <a class="chip on" href="#">Alle<span class="c">47</span></a>
+      <a class="chip" href="#">Rechnungen<span class="c">14</span></a>
+      <a class="chip" href="#">Technik<span class="c">11</span></a>
+      <a class="chip" href="#">Verträge<span class="c">5</span></a>
+    </div>
+  </div>
+
+  <div class="scroll">
+    <div class="year"><b>2026</b><i></i></div>
+    <ul class="tl">
+      <li>
+        <span class="mk ok"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></span>
+        <div class="body">
+          <div class="r1"><b>Auftrag angenommen</b><span class="tag auf">Auftrag</span></div>
+          <p><span class="when">15.09.</span> Kessler Haustechnik tauscht die Heizungspumpe. Termin Donnerstag, 18.09.</p>
+        </div>
+      </li>
+      <li>
+        <span class="mk terra"><svg viewBox="0 0 24 24"><path d="M5 3h9l5 5v13H5z"/><path d="M14 3v5h5"/></svg></span>
+        <div class="body">
+          <div class="r1"><b>Rechnung 2026-1483</b><span class="tag rech">Offen</span></div>
+          <p><span class="when">14.09.</span> Kessler Haustechnik · 1.240,00 € · wartet auf deine Freigabe.</p>
+          <div class="actions"><a class="solid" href="#">Freigeben</a><a href="#">Prüfen</a></div>
+        </div>
+      </li>
+      <li>
+        <span class="mk"><svg viewBox="0 0 24 24"><path d="M4 4h16v16H4z"/><path d="M4 10h16M10 10v10"/></svg></span>
+        <div class="body">
+          <div class="r1"><b>Grundriss EG</b><span class="tag">Plan</span></div>
+          <p><span class="when">11.09.</span> Bestandsplan, 1,8 MB.</p>
+        </div>
+      </li>
+      <li>
+        <span class="mk ok"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 8v8M8 12h8"/></svg></span>
+        <div class="body">
+          <div class="r1"><b>Zählerstände</b><span class="tag ver">Nachweis</span></div>
+          <p><span class="when">12.09.</span> Strom, Gas und Wasser erfasst.</p>
+        </div>
+      </li>
+      <li>
+        <span class="mk"><svg viewBox="0 0 24 24"><path d="M12 3l8 4v6c0 5-3.5 7.5-8 8-4.5-.5-8-3-8-8V7z"/></svg></span>
+        <div class="body">
+          <div class="r1"><b>Gebäudeversicherung</b><span class="tag ver">Vertrag</span></div>
+          <p><span class="when">02.09.</span> Läuft bis 31.12.2026.</p>
+        </div>
+      </li>
+    </ul>
+  </div>
+
+  <div class="sheet">
+    <div class="grab"></div>
+    <a class="prev" href="#">
+      <span class="pg"><svg viewBox="0 0 24 24"><path d="M5 3h9l5 5v13H5z"/><path d="M14 3v5h5"/></svg></span>
+      <span class="tx"><b>Rechnung 2026-1483</b><span>Kessler Haustechnik · PDF</span></span>
+      <span class="amt">1.240 €</span>
+    </a>
+  </div>
+  <span class="home-ind"></span>
+</div>
+</body>
+</html>

@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="de" data-page-node-id="xB3HmuIMnh1aPvRqmc8ggc">
+<head data-page-node-id="7jdcJuhBtMNUCyAlwqxGcq">
+<meta charset="utf-8" data-page-node-id="cphbqrJZqHZjEsEq77Czmz">
+<meta name="viewport" content="width=device-width, initial-scale=1" data-page-node-id="TRQ4DeHrRgvOsdQaiMI2Ck">
+<title>einfachhausen — Design-Vergleich: live vs. main</title>
+<style>
+  :root{
+    --bg:#0d1117; --panel:#161b22; --panel2:#1c2128; --line:#30363d;
+    --txt:#e6edf3; --dim:#8b949e; --ok:#3fb950; --bad:#f85149; --warn:#d29922; --acc:#58a6ff;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);
+       font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;padding:28px 24px 60px}
+  h1{font-size:23px;margin:0 0 6px}
+  h2{font-size:15px;margin:0 0 10px;color:var(--dim);font-weight:600;letter-spacing:.02em;text-transform:uppercase}
+  p.lead{margin:0 0 22px;color:var(--dim);max-width:860px}
+  .facts{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 26px}
+  .fact{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:11px 14px;min-width:210px}
+  .fact b{display:block;font-size:12px;color:var(--dim);font-weight:600;text-transform:uppercase;letter-spacing:.03em;margin-bottom:3px}
+  .fact span{font-size:15px}
+  .fact.ok span{color:var(--ok)} .fact.bad span{color:var(--bad)} .fact.warn span{color:var(--warn)}
+  .row{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 16px 18px;margin:0 0 16px}
+  .rowhead{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+  .route{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:15px;color:var(--acc)}
+  .verdict{font-size:13px;color:var(--dim)}
+  .verdict b{color:var(--ok)}
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .col{background:var(--panel2);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  .colheader{padding:8px 11px;font-size:12px;letter-spacing:.03em;text-transform:uppercase;font-weight:700;
+             border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+  .live .colheader{color:var(--bad)} .neu .colheader{color:var(--ok)}
+  .colheader em{font-style:normal;color:var(--dim);font-weight:500;text-transform:none;letter-spacing:0}
+  .shot{height:400px;overflow:hidden;background:#fff}
+  .shot img{width:100%;display:block}
+  .num{padding:8px 11px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;color:var(--dim);
+       border-top:1px solid var(--line)}
+  .num b{color:var(--txt)}
+  .note{margin-top:26px;padding:14px 16px;background:#1c2128;border:1px solid var(--line);border-left:3px solid var(--warn);
+        border-radius:8px;color:var(--dim);max-width:860px;font-size:14px}
+  .note b{color:var(--txt)}
+</style>
+</head>
+<body data-page-node-id="wjbU26VMAhqiLhUm7yGKhY">
+  <h1 data-page-node-id="4tHpAiEb2m6xl3l5RJWnWF">Design-Vergleich — live gegen main</h1>
+  <p class="lead" data-page-node-id="2BXCy5IF9o2IVAF5W358td">Dieselben Routen, dasselbe Gerät (390 × 844), derselbe Browser. Links der Stand, den du
+     gerade auf einfachhausen.de siehst. Rechts der Stand, der seit 23:06 auf <code data-page-node-id="1hn2226aBIssKvuJu07goV">main</code> liegt —
+     <strong data-page-node-id="zGXAUskewJEPgbK9SMNVDh">noch nicht ausgeliefert</strong>.</p>
+
+  <div class="facts" data-page-node-id="17SorGWtAHMFU3HXG7wJ6Q">
+    <div class="fact" data-page-node-id="qynB2yHmbxxp7B0NMNTxdY"><b data-page-node-id="dN0cEH4Biaoklfsf4gaWuX">live läuft</b><span data-page-node-id="YxbVay7r1etKM0GzGE6TPV">36eaa7c (Deploy 21:12)</span></div>
+    <div class="fact" data-page-node-id="hLCkGNII20WrEumEo9JC9P"><b data-page-node-id="17YtynhskGSTjAhLH8zqPN">main steht auf</b><span data-page-node-id="XF406KY7vxDWTOpkpFwQbF">a91a44d (PR #115 gemergt 23:06)</span></div>
+    <div class="fact ok" data-page-node-id="JW8KvnwX5AqMVFuUN5aWyC"><b data-page-node-id="qA2EsSDRZGIUFPo6H3Ak7J">H1 mobil</b><span data-page-node-id="rjuInsCABKxv4c45KOkUpq">44 px → 32 px</span></div>
+    <div class="fact ok" data-page-node-id="nzycsY14jkongN3SmlCWd2"><b data-page-node-id="3GhI29iEj5LdK6cThIJEnN">Nav-Beschriftung</b><span data-page-node-id="TnRgSF9FAP8KUDLFQpjXxX">10 px → 13 px</span></div>
+    <div class="fact bad" data-page-node-id="s4Rg7mvXv0AnPeo4xOfdhd"><b data-page-node-id="5tNMjrhIS0ElCNdobvSwqN">Deploy</b><span data-page-node-id="tptFw8XNaROEkTJ3mMqman">blockiert: main ist rot</span></div>
+  </div>
+
+  <div class="row" data-page-node-id="rSiHPNnPHHrF62TPIIs7fZ">
+    <div class="rowhead" data-page-node-id="Wx1xFJCzJ1vAbhmAFX2hDk"><span class="route" data-page-node-id="UR6OGLuNG6xDsqqKY7sLfP">/leistungen/heizung</span>
+      <span class="verdict" data-page-node-id="CsyItx8iAdc2S2p3AuKrzs">Hero war <b data-page-node-id="Vt7jPOkYYGGtJiIoNOALFC">ein Drittel des Bildschirms</b> — jetzt ein Sechstel</span></div>
+    <div class="cols" data-page-node-id="mkHtjggoZNDOqk7o8RMemN">
+      <div class="col live" data-page-node-id="hEElUCXmDN11nUBcLHCxDK">
+        <div class="colheader" data-page-node-id="W1mOTlY6CCVqKEPR7oEbe4">live <em data-page-node-id="K5JCfQQORJefJzI8CQlvwD">36eaa7c</em></div>
+        <div class="shot" data-page-node-id="ILEVn2MozzBf8HeYDr5W3s"><img src="design-vorher-nachher/live-_leistungen_heizung.png" alt="live /leistungen/heizung" data-page-node-id="nq9jF42CTvgbFB3eDWx7wa"></div>
+        <div class="num" data-page-node-id="lpCuxCLYZfGc04oU4D4DjA">44 px · <b data-page-node-id="paPOiQaVEwpeDQbkHRTDaF">6 Zeilen</b> · 277 px · <b data-page-node-id="AKiQflBdDBiBOWBeznZxey">33 %</b> der Viewporthöhe</div>
+      </div>
+      <div class="col neu" data-page-node-id="DRhPvkLKR7EKVElJFLNX34">
+        <div class="colheader" data-page-node-id="JmaXMB3bOplCTM2Y4mtl6w">main <em data-page-node-id="t971MeJW4zmRNZGaXuHJBS">a91a44d</em></div>
+        <div class="shot" data-page-node-id="BMkdFWRu0aDVR4bJPuMkkU"><img src="design-vorher-nachher/neu-_leistungen_heizung.png" alt="main /leistungen/heizung" data-page-node-id="1uOC7aDTDItEbFELjZFvcG"></div>
+        <div class="num" data-page-node-id="IW1iixFNU7EFKsqcGYfx2G">32 px · <b data-page-node-id="BSIKHYrRKA3hnft3IyHrqc">4 Zeilen</b> · 134 px · <b data-page-node-id="iPLKIYFAlxO5clpBqErtBu">16 %</b> der Viewporthöhe</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row" data-page-node-id="JaPzaDLQZfNFwrBPGd2X9F">
+    <div class="rowhead" data-page-node-id="6URNE4RzD1jR1yOiIlE9JO"><span class="route" data-page-node-id="rg8H9bpO9HGXB0aHFD5MrX">/partner</span>
+      <span class="verdict" data-page-node-id="io217sYyhjPORQlLfAsjt8">fünf Zeilen mit einsamer Restzeile → vier saubere Zeilen</span></div>
+    <div class="cols" data-page-node-id="bSoiQYhCsqSjMzl9r6wLvp">
+      <div class="col live" data-page-node-id="DrO0T6IWqtCJDWX4yWx8sJ">
+        <div class="colheader" data-page-node-id="WkTTiw6yAI4AiGumQhLu5q">live <em data-page-node-id="jOf8oJyoAh5KfrQkCAD4vC">36eaa7c</em></div>
+        <div class="shot" data-page-node-id="STSARGBdFRpi8DhR8PfPUC"><img src="design-vorher-nachher/live-_partner.png" alt="live /partner" data-page-node-id="oIfEPkMAhoq5g3eBQ2umOh"></div>
+        <div class="num" data-page-node-id="uwvcVStHfQ0DZPWpgJfJ3p">44 px · <b data-page-node-id="wl2NbpF64QYC2ZTqjVCMAP">5 Zeilen</b> · 231 px · <b data-page-node-id="4wCOJVU3zJUiTeF0RyhS0u">27 %</b> der Viewporthöhe</div>
+      </div>
+      <div class="col neu" data-page-node-id="8XVyThGfoAaCFc0UNa1vDN">
+        <div class="colheader" data-page-node-id="yBIrFsgoulWziqjBQ1nf1o">main <em data-page-node-id="MMtNSfNgmIB5GHfSd12BcE">a91a44d</em></div>
+        <div class="shot" data-page-node-id="vu4hc8V5A2gZ6eECrtPw0b"><img src="design-vorher-nachher/neu-_partner.png" alt="main /partner" data-page-node-id="WmLslInza7jziEKZbpAST9"></div>
+        <div class="num" data-page-node-id="LtauPxtEBNrtOOlgmbvStb">32 px · <b data-page-node-id="OD4ugIdsC5QSOwnkTkH9lS">4 Zeilen</b> · 134 px · <b data-page-node-id="Mbm4JE4aSzt37b4gGfXGdN">16 %</b> der Viewporthöhe</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row" data-page-node-id="25OmTDQOUhGXXl4lq8hAmd">
+    <div class="rowhead" data-page-node-id="Qc1Ga8l2GQliAa43iSxT24"><span class="route" data-page-node-id="P1unCJ5QzYC1fgyTFzhsNX">/hilfe</span>
+      <span class="verdict" data-page-node-id="GJP5RuJWTAHwai5ofTlXgb">vier Zeilen mit einem Wort allein in der letzten → drei Zeilen</span></div>
+    <div class="cols" data-page-node-id="sarJ3WDQdttHHydu2ekuSk">
+      <div class="col live" data-page-node-id="PbyWTrNGd6HoqO2eEWcwPa">
+        <div class="colheader" data-page-node-id="yTAVUDl0TORGGF0p1KjgIZ">live <em data-page-node-id="4BNnuEaj1SmSK8p8AAgJ5H">36eaa7c</em></div>
+        <div class="shot" data-page-node-id="SsHsDqxJrohRjdP3ql81f7"><img src="design-vorher-nachher/live-_hilfe.png" alt="live /hilfe" data-page-node-id="JD0WM63vjlc4Lx6NdYIESf"></div>
+        <div class="num" data-page-node-id="JbmPVBngKhH5McHNSFmL9R">44 px · <b data-page-node-id="qMA7gZKw0ciV2sJllm2HPV">4 Zeilen</b> · 185 px · <b data-page-node-id="rfDh3SHjzDOeQv8gK9EVhU">22 %</b> der Viewporthöhe</div>
+      </div>
+      <div class="col neu" data-page-node-id="FTYnBLT3u50DUmS4U0JkBS">
+        <div class="colheader" data-page-node-id="CwqHFyVzCkbKQ1RzdMAWir">main <em data-page-node-id="U2HP8R2iZLgwWhTBR3eplN">a91a44d</em></div>
+        <div class="shot" data-page-node-id="F1U7LmG7ICACoKbs3T4xiS"><img src="design-vorher-nachher/neu-_hilfe.png" alt="main /hilfe" data-page-node-id="AH7vIFgskZIbCqOtNBWeSf"></div>
+        <div class="num" data-page-node-id="eHVErHq8hgFojGCPWdniER">32 px · <b data-page-node-id="dIBh5ZZJaOR4PCfb1ovBoS">3 Zeilen</b> · 101 px · <b data-page-node-id="x6RIGno5ZRc8iZeFTa8aIV">12 %</b> der Viewporthöhe</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row" data-page-node-id="NSLLgMHqW7Tbu0AXvzg2KW">
+    <div class="rowhead" data-page-node-id="DhAgzQ5QwtLQypuCWV7NUx"><span class="route" data-page-node-id="VFZ04AD9vhzERO1MPmFHGI">/</span>
+      <span class="verdict" data-page-node-id="IfYDZFoN0KGo3PCRHFIfEt">Startseite: <em data-page-node-id="xeckOOWXfpbbhrYKdlKgmh">unverändert</em> — sie hing nie an der Untergrenze</span></div>
+    <div class="cols" data-page-node-id="m8lAtgHCarE974rwnApB4Z">
+      <div class="col live" data-page-node-id="JDq0FyCgW90t8xAyVMFPUF">
+        <div class="colheader" data-page-node-id="mZIec9ILUPSqMvZWEPEh1v">live <em data-page-node-id="0bPDYEqQUPYByhEAsVxFv2">36eaa7c</em></div>
+        <div class="shot" data-page-node-id="EVt3YRuvUxlxqbaGdNhvT4"><img src="design-vorher-nachher/live-_.png" alt="live Startseite" data-page-node-id="zgeqCuZy8XsENE5uxqzJ2I"></div>
+        <div class="num" data-page-node-id="8ruOCFQ1DkXyuatNnCNYqy">56 px · 5 Zeilen · 166 px · 20 %</div>
+      </div>
+      <div class="col neu" data-page-node-id="FovgVmwp05zDHPI4YpPzSG">
+        <div class="colheader" data-page-node-id="qNC9XEzk1T2HwfIMDiWGcv">main <em data-page-node-id="k2shWY9gdtFOPjiGWS6hcE">a91a44d</em></div>
+        <div class="shot" data-page-node-id="7pLmiw8w7nIvEC4df5uDk1"><img src="design-vorher-nachher/neu-_.png" alt="main Startseite" data-page-node-id="t2XKeO3DtZ9Jt8k9Wnov0f"></div>
+        <div class="num" data-page-node-id="KvgjGqp7N1BSu8WhNZrUBl">56 px · 5 Zeilen · 166 px · 20 %</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="note" data-page-node-id="7xeXSlhRVUC55TsX3FXiG2">
+    <b data-page-node-id="9f3rNfKWxgfPn9CySBq9qZ">Warum du das nicht siehst:</b> Der Deploy ist manuell. Die Änderung liegt seit 23:06 auf
+    <code data-page-node-id="IvaPs4ZFVe6v3IhtPtiad1">main</code>, der letzte Deploy war 21:12. Die mobile Hauptnavigation im Bewohner-Bereich ist
+    ebenfalls betroffen: live stehen dort <code data-page-node-id="gVwhLYiAD6pH496WxNNwf5">font-size:10px</code> und eine Glas-Optik, die Symbole
+    liegen 8 px aus der Flucht, weil „Ansprechpartner" zweizeilig umbricht. Auf <code data-page-node-id="BwdO2De9nY68bKKse4F5sx">main</code> sind es
+    13 px, echte Innenabstände und eine gemeinsame Symbolzeile.<br data-page-node-id="lkNYs5ObA7IhVomJBBPPFR"><br data-page-node-id="uqsrWPVtyIk1CHNcce8hr7">
+    <b data-page-node-id="STrjVzTxtEInHMCp68kNCN">Und:</b> <code data-page-node-id="1MiQLQVLvck5bV4aHIHtYZ">main</code> ist gerade rot — der Schritt „Architecture acceptance" bricht in
+    <code data-page-node-id="vPZG5GtDnCGpbSrjsN7Xbr">scripts/e2e-architecture.mjs:188</code> ab. Solange das nicht geklärt ist, ist ein Deploy nicht
+    sauber abgesichert.
+  </div>
+</body>
+</html>

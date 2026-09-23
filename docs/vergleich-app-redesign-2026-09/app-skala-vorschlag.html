@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="de" data-page-node-id="D3sgCVL9IJfSKz0imezOvW">
+<head data-page-node-id="Mjp7CIkCmFQrtoyvBtRgjQ">
+<meta charset="utf-8" data-page-node-id="1LNOHttIBVYiIUlWsEvLRB">
+<meta name="viewport" content="width=device-width, initial-scale=1" data-page-node-id="nbh3sIUR3PrN4vCrPC70EQ">
+<title>einfachhausen — Vorschlag: Schrift-Skala für die App</title>
+<style>
+  :root{
+    --bg:#0d1117; --panel:#161b22; --panel2:#1c2128; --line:#30363d;
+    --txt:#e6edf3; --dim:#8b949e; --bad:#f85149; --warn:#d29922; --ok:#3fb950; --acc:#58a6ff;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);
+       font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;padding:28px 24px 64px}
+  h1{font-size:22px;margin:0 0 6px}
+  h2{font-size:13px;margin:36px 0 12px;color:var(--dim);font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+  p.lead{margin:0 0 20px;color:var(--dim);max-width:900px}
+  code{background:var(--panel2);padding:1px 5px;border-radius:4px;font-size:13px}
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:0 0 10px;max-width:1000px}
+  .kpi{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+  .kpi b{display:block;font-size:28px;line-height:1.1;color:var(--bad);font-weight:700}
+  .kpi span{display:block;font-size:12px;color:var(--dim);text-transform:uppercase;letter-spacing:.04em;margin-top:6px}
+  .kpi em{display:block;font-style:normal;font-size:13px;color:var(--dim);margin-top:8px}
+  .kpi.ok b{color:var(--ok)}
+  table{border-collapse:collapse;font-size:13.5px;margin:0 0 10px;min-width:680px}
+  th,td{border:1px solid var(--line);padding:8px 12px;text-align:left;vertical-align:top}
+  th{background:var(--panel2);color:var(--dim);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.03em}
+  td.num,th.num{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+  .pair{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:0 0 18px}
+  .col{background:var(--panel2);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  .colheader{padding:8px 11px;font-size:12px;letter-spacing:.03em;text-transform:uppercase;font-weight:700;
+             border-bottom:1px solid var(--line);display:flex;justify-content:space-between}
+  .vor .colheader{color:var(--bad)} .nach .colheader{color:var(--ok)}
+  .colheader em{font-style:normal;color:var(--dim);font-weight:500;text-transform:none}
+  .col img{width:100%;display:block;background:#fff;max-height:560px;object-fit:cover;object-position:top}
+  .note{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--warn);
+        border-radius:8px;padding:14px 16px;margin:0 0 14px;max-width:900px;color:var(--dim);font-size:14px}
+  .note b{color:var(--txt)}
+  .plan{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px 18px;max-width:900px}
+  .plan ol{margin:0;padding-left:20px}
+  .plan li{margin:0 0 10px}
+  .plan b{color:var(--txt)}
+  .pill{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
+        padding:2px 7px;border-radius:20px;border:1px solid var(--line);color:var(--dim);margin-right:6px}
+</style>
+</head>
+<body data-page-node-id="gpGDfoT5RAHtKUXd5DNFEo">
+  <h1 data-page-node-id="U4h17CfzLmzxQ3gwfSgQII">Schrift-Skala für die App — Vorschlag</h1>
+  <p class="lead" data-page-node-id="nhAVkqnCywCf2fiZWZjF4j">Nicht geraten: die Werte unten sind aus den fünf CSS-Dateien der App ausgezählt,
+     die Bilder sind deine echten Seiten mit einer injizierten Skala (kein Mockup, keine Attrappe).
+     Der Arbeitsbaum wurde dafür nicht angefasst.</p>
+
+  <h2 data-page-node-id="bC3hGBUQxurh9A2zx6yTwm">Warum es nicht „pro“ wirkt — die Zahlen</h2>
+  <div class="kpis" data-page-node-id="6NhL3Q3FjPa7c9vqowbJFB">
+    <div class="kpi" data-page-node-id="iIptnbAgp3GwP6pC7fUQ9i"><b data-page-node-id="P9tjimfO5110KC5aAgLNkT">1042</b><span data-page-node-id="5E69n5SRtNvHqLcgZzZNrc">feste Schriftgrößen im App-CSS</span><em data-page-node-id="xl5pJ25hmHRkHUHdUKWZLg">938 davon in px, 104 nur als Token</em></div>
+    <div class="kpi" data-page-node-id="XYGNk4ieb56MxU8KRjorp5"><b data-page-node-id="nULJSEXPK5NJmj6sF1oqvK">51</b><span data-page-node-id="jPf2I9VBOyCSG3Cmmit8j0">verschiedene px-Größen</span><em data-page-node-id="MyIpUOG4Gda1UT0DAW2bap">zwischen 12 und 16 px allein elf</em></div>
+    <div class="kpi" data-page-node-id="XncotCDDdVmpD6WTsEivbW"><b data-page-node-id="CpAjTDjqe1SF7urcsk86Fs">30</b><span data-page-node-id="jjWi40KXsXhlVGyrUmKRsI">verschiedene Schriftgewichte</span><em data-page-node-id="FPAWXijykHrRMQR3kU2GTS">520 · 535 · 570 · 590 · 620 · 650 · 680 · 750 · 760 · 790 …</em></div>
+    <div class="kpi ok" data-page-node-id="F6HaNNurqGcibYcQF57VxD"><b data-page-node-id="cGC8CtfBcI435aHQ1lzODO">8 + 3</b><span data-page-node-id="P7F3Ry6zTZckeBFiF0jX5D">das Ziel</span><em data-page-node-id="74Mki8XUX2fe0x6KdEWiTZ">8 Größen, 3 Gewichte — wie in jedem Werkzeug</em></div>
+  </div>
+  <table data-page-node-id="JEGjHVBABv6bt0npdVyWbG">
+    <tr data-page-node-id="1FkjdzbG8oMu5ZLp1P28ye"><th data-page-node-id="cAaobSm0BVIlOD8M68ERwB">Datei</th><th class="num" data-page-node-id="xLuK0nT8jAGH9XWZ9CEANt">font-size</th><th class="num" data-page-node-id="c3SSHgiks3Ap86iZ3YF8XV">davon Token</th><th class="num" data-page-node-id="dDCLQlacHQDsynrQLn4F6z">Gewichte</th></tr>
+    <tr data-page-node-id="quMTcDyFY5F8NrqeqQ1yoE"><td data-page-node-id="WLbGRxUAa7jRGAWUlTIKLh"><code data-page-node-id="Aj4Z5ZH56OwCeaoGic3Fxg">src/app/design-system.css</code></td><td class="num" data-page-node-id="SFJeCuOqJ4C1tGDY4tDGAM">509</td><td class="num bad" data-page-node-id="qSvcvsqMsBz7BxNvSFeMd3">0</td><td class="num bad" data-page-node-id="VvATvmokMLDsIq3FS3BZ0H">25</td></tr>
+    <tr data-page-node-id="hwxy4XjlGSNk3q0MLHK25J"><td data-page-node-id="Ek7IbwGfnSC8LLcojR7y7e"><code data-page-node-id="IWDjSxwb5FA8Amc3r0Iujp">src/app/globals.css</code></td><td class="num" data-page-node-id="WEjFhKyexmANDgIuGXpU8Y">342</td><td class="num bad" data-page-node-id="24gg7uf9e16kOzJRM2kHFO">1</td><td class="num" data-page-node-id="eGWtKXjQmAcECatd25TWC7">10</td></tr>
+    <tr data-page-node-id="sEAPF3cUJqmfuiGxHzJiBW"><td data-page-node-id="zHcir29j4i7boX1ElPkAP0"><code data-page-node-id="FCM7jd7DoLdYQRc4Dc2qwQ">packages/eh-design/src/styles.module.css</code></td><td class="num" data-page-node-id="5NsapFEYBIbTrxW8gi3R0l">272</td><td class="num" data-page-node-id="CY4ftsEAOztp6adHstaFkm">160</td><td class="num" data-page-node-id="dp0UBXcPYFUP99oB2EfLKW">11</td></tr>
+    <tr data-page-node-id="tEwsQlo6HOlk1zBeOfhy9M"><td data-page-node-id="tkcY5e7fLEGe2ScvdUgevb"><code data-page-node-id="x5KE5uWdm2Q0OlEoWbCCgL">src/app/pro/provider-workspace.module.css</code></td><td class="num" data-page-node-id="p2Hzy4rT4MU3pipZpCceXg">69</td><td class="num" data-page-node-id="bQCqO7PZ6kzFhNcjE7YRuj">25</td><td class="num" data-page-node-id="cIClCAuOXZYeqUIkJ5G4PX">7</td></tr>
+    <tr data-page-node-id="crkYtgL5kGD7MEufzi5l4H"><td data-page-node-id="FRlINHFEL34cOfvRMB6Qjy"><code data-page-node-id="iye7YNWfpIpVuK08S0toVS">src/app/app/homeowner.module.css</code></td><td class="num" data-page-node-id="Clf1FM7uFQLtNzAHUr7F3H">60</td><td class="num" data-page-node-id="aHzATKSNmX6DjQK2HHUARy">24</td><td class="num" data-page-node-id="5HKVBRzIq2AAFweWOOodX0">7</td></tr>
+  </table>
+  <p class="lead" data-page-node-id="H4gn8ABtc2fNhlGR41Eej1"><strong data-page-node-id="2MhI0kNeHe1CHsobVmWqps">Das ist der ganze Grund.</strong> Kein Geschmacksproblem, sondern 1042 Einzelentscheidungen,
+     die nie zu einer Skala zusammengeführt wurden. Ein Browser-Override kann das nicht reparieren —
+     er hat die Zahl der Größen nur von 12 auf 10 gesenkt. Der Rest steckt in den Komponenten.</p>
+
+  <h2 data-page-node-id="GsVPgwcCX2shnhWHOWRkYD">So sieht der Vorschlag aus</h2>
+  <table data-page-node-id="HSHrnt18NQWcasXaAoFzgR">
+    <tr data-page-node-id="VwIbupb3jvsnEFf16lDV5D"><th data-page-node-id="H7tyQT5bVPe09dPve5j7xv">Rolle</th><th class="num" data-page-node-id="EzDlT70OmR8gw4YIttJmEv">Größe</th><th class="num" data-page-node-id="PZnKFVEVZKIW6sK9d0T59V">Gewicht</th><th data-page-node-id="wd53SFVxbft4aVjUvmEyNu">wo</th></tr>
+    <tr data-page-node-id="mltyBE52967lx2bRAukmkt"><td data-page-node-id="XlRoyrrUABgQ6YPB6yIgXe">Seitentitel</td><td class="num" data-page-node-id="6wYRrFWRk6wXgr2xrpAgDR">22 px</td><td class="num" data-page-node-id="C2JeX4GAGyeZ5fOYGbnAlB">700</td><td data-page-node-id="f3OMJiYhjbYVuGdrzE3AD6">eine H1 je Seite, benannt nach der Arbeit</td></tr>
+    <tr data-page-node-id="ERqfvZTY8m25QC077rabLF"><td data-page-node-id="X7J3mNBQXIWdlWrsCXsjx8">Sektionsüberschrift</td><td class="num" data-page-node-id="quidoADvBuAvxSdsN2eWAq">17 px</td><td class="num" data-page-node-id="JjfpYcCSnrW4mHzMVysAPL">600</td><td data-page-node-id="uDdaPh78AAJBdcF3x5gCcp">Karten und Abschnitte</td></tr>
+    <tr data-page-node-id="gfuGXzIwkLsHQpU3bskg84"><td data-page-node-id="MP6Hn8Dt4ncym13h1h2vBV">Kennzahl</td><td class="num" data-page-node-id="rOX6raREGsFbhI3cyBJK5f">26 px</td><td class="num" data-page-node-id="Psplu3xgPBIJcGwQ3uWhno">700</td><td data-page-node-id="w09eBUSSBHa0d8XejnDmbG">Zahlen in Kacheln</td></tr>
+    <tr data-page-node-id="wacZT04tT3JOEfnnVO0Ofd"><td data-page-node-id="WawnmmKJGNyp4KIoCAzDFD">Fließtext</td><td class="num" data-page-node-id="CMEQSflLq7suOh7bKGPkQL">15 px</td><td class="num" data-page-node-id="KB5jzPDaiMkwmosfCnP6RA">400</td><td data-page-node-id="Y4gUHUJtF2fMY5ioXiW7Bq">Standard</td></tr>
+    <tr data-page-node-id="sGkPqnPGlihxmF6wamxepE"><td data-page-node-id="12Ep1HdXa72W6Vg7v8w6uq">Metazeile</td><td class="num" data-page-node-id="xqjNQyAqUYp4etmyqAbE3Y">13 px</td><td class="num" data-page-node-id="TGmAl2tMCx0HDlXLvBeJdR">400</td><td data-page-node-id="ZCH81PWxldc06a0maaamJ4">Datum, Ort, Herkunft</td></tr>
+    <tr data-page-node-id="x1rcYXvNtG4YBC0zz5IMnD"><td data-page-node-id="aJboNIB3ylUgkGE1ERNvNk">Versal-Label</td><td class="num" data-page-node-id="FbkGSZczUDlUmvuAHAY7xU">12 px</td><td class="num" data-page-node-id="oK3GzT8IdjE0UTCjqnzpJm">600</td><td data-page-node-id="T9uAkLt42JoBMr79t0c8QG">Bereich, Status — gesperrt, sparsam</td></tr>
+  </table>
+
+  <h2 data-page-node-id="o1V43qEtNgX3fSz8kFsXEY">Vorher / Nachher — /pro</h2>
+  <div class="pair" data-page-node-id="XQhNM1yBxsKnuc1laJaYBC">
+    <div class="col vor" data-page-node-id="R2GbNwW4vbdJNruxrGmAfZ"><div class="colheader" data-page-node-id="5BrmNerUH9KBssZOfn9cRn">vorher <em data-page-node-id="jZxKwaAWeY8e1ygY0WuvGe">10 Größen · 6 Gewichte</em></div>
+      <img src="app-skala-vorschlag/_pro-vorher.png" alt="vorher" data-page-node-id="byqPzHzzXAlQDEAiAzutyA"></div>
+    <div class="col nach" data-page-node-id="MS1vZexfpF59mTKOOjQSna"><div class="colheader" data-page-node-id="HaCvqb1wY9PPehjFd7ko8C">Vorschlag <em data-page-node-id="lSww60s5aD8L8LT5kmsXTP">7 Größen · 3 Gewichte</em></div>
+      <img src="app-skala-vorschlag/_pro-nachher.png" alt="nachher" data-page-node-id="Qee1zi2yz8IYJJG6AJOtZN"></div>
+  </div>
+  <div class="note" data-page-node-id="WLBWlMiLK7a9uU89FXUkSd"><b data-page-node-id="FgXYk1WXdahDTXMTTTzn0z">Was sich ändert:</b> „Guten Abend, Demo.“ ist kein 43-px-Held mehr, sondern ein
+     22-px-Seitentitel. Die vier Kennzahlen lesen sich als Daten statt als Plakat. Das dunkelgrüne
+     „Als Nächstes“-Feld bekommt dadurch wieder das Gewicht, das ihm zusteht — vorher konkurrierte es
+     mit der Begrüßung.</div>
+
+  <h2 data-page-node-id="Ib1vcv0pY2mCfLz4FLFdGo">Vorher / Nachher — /app</h2>
+  <div class="pair" data-page-node-id="RMHsed9Ssjv67iUCTWpY91">
+    <div class="col vor" data-page-node-id="eBiJ7eVIB4MbOTNzTXx4Ng"><div class="colheader" data-page-node-id="uAK24AMDoEMbpH00TGnFW7">vorher <em data-page-node-id="OFvgSYDwxfzBpXq9qz79e1">12 Größen · 8 Gewichte</em></div>
+      <img src="app-skala-vorschlag/_app-vorher.png" alt="vorher" data-page-node-id="4V51ruDhoT4BIKmLI6d9S4"></div>
+    <div class="col nach" data-page-node-id="OKrIvTBTmAfv0Y9fYbAKi1"><div class="colheader" data-page-node-id="XuMtO6rRIoF2kvbFF5xKKE">Vorschlag <em data-page-node-id="o2xjW8qll0XXeJBoKDRAg2">10 Größen · 5 Gewichte</em></div>
+      <img src="app-skala-vorschlag/_app-nachher.png" alt="nachher" data-page-node-id="E0TiWQRyTqEQ7b1NfpzwCb"></div>
+  </div>
+
+  <h2 data-page-node-id="YcK8eED24wycs6OE8IDOqQ">Vorher / Nachher — /app/home</h2>
+  <div class="pair" data-page-node-id="XmcSHIr4Z5uR35DR8BvDrA">
+    <div class="col vor" data-page-node-id="vlJDje9xI0unOfw3Y0JnyW"><div class="colheader" data-page-node-id="2ceAmh173CGX5iCWbAwaXq">vorher <em data-page-node-id="EX2CrqfBkG7wK1tDoHPtJf">17 Größen · 7 Gewichte</em></div>
+      <img src="app-skala-vorschlag/_app_home-vorher.png" alt="vorher" data-page-node-id="NDin9FUg8GFYWgeMJEpGth"></div>
+    <div class="col nach" data-page-node-id="Mrz1eJySZadKan8DLRJ9zT"><div class="colheader" data-page-node-id="BZ22RlAKCflNG7XUFqCGME">Vorschlag <em data-page-node-id="hnkKf3VbN1ITNq1nimdOVK">14 Größen · 5 Gewichte</em></div>
+      <img src="app-skala-vorschlag/_app_home-nachher.png" alt="nachher" data-page-node-id="EGfgJoaP3On5c8EV1LhRda"></div>
+  </div>
+  <div class="note" data-page-node-id="6DMLe5UXYgoT9JJiRsFUpE"><b data-page-node-id="pMsM94pDk9PZtSlCIBGaOZ">Ehrlich dazu:</b> ein injizierter Stil ist eine Krücke. Er räumt die Gewichte auf und
+     holt die Überschriften herunter, aber die Zwischenwerte 12,5 · 14,5 · 15,5 · 23 bleiben stehen,
+     weil sie direkt in den Komponenten stehen. Genau deshalb muss es in den Quelltext — und genau
+     deshalb sieht man hier, wie viel es bringt und wie viel noch fehlt.</div>
+
+  <h2 data-page-node-id="kw3xj8ipj70nr4wTSisbMS">Reihenfolge, wenn du ja sagst</h2>
+  <div class="plan" data-page-node-id="zBrgfrkFBYo99GDTN1IpmF">
+    <ol data-page-node-id="zqMaH56YFJVNhVEGyvF4tr">
+      <li data-page-node-id="dG0tG6rKxt2CgjVESz9Ee2"><span class="pill" data-page-node-id="g0JWYZIla3r2bWYzU4ZNT9">1</span><b data-page-node-id="TVwPVZxQC1e6HEPrEaNmxS">Skala definieren</b> — acht Tokens in <code data-page-node-id="uqP4EbDjg5xySmoDnQ4eKY">tokens.json</code>,
+          <code data-page-node-id="hpTEftip4GsZCAHEAMHMqP">eh-design-generate.mjs</code>, dann <code data-page-node-id="ZDKSMke3dgVt6FTW7vpods">eh-design-check.mjs</code>.
+          Betrifft nur Marketing und <code data-page-node-id="GMzl11WQ3aKbqq2wpByjLC">eh-design</code>-Bausteine, noch nicht die App-Module.</li>
+      <li data-page-node-id="qHemGk0VX4zqSa2JLoExPP"><span class="pill" data-page-node-id="lBRHMl5Q2JF6EAH4QncR41">2</span><b data-page-node-id="rXu1HxOoAH65c4MMXBBoUA">Seitenkopf-Muster</b> — eine Komponente für Bereich · Titel · eine
+          Zeile Kontext. Ersetzt 38 einzelne Überschriften. Danach titelt <code data-page-node-id="SbjCIftAN7A1IHEbLHuwsu">/pro</code> mit „Anfragen“
+          statt mit der Tageszeit.</li>
+      <li data-page-node-id="M2o9EVuHRS162SLGTJtDd3"><span class="pill" data-page-node-id="cL21sS9K3mn3BGR9eWrgBO">3</span><b data-page-node-id="P2CbCm26jcE06OScEpWwYt">App-Module umstellen</b> — <code data-page-node-id="KVFs0zS6FYdLuFfGqYU21D">homeowner.module.css</code> und
+          <code data-page-node-id="DWOtvobfxl5coOpvzidEkf">provider-workspace.module.css</code>: die 129 Deklarationen auf Tokens ziehen.
+          Hier ist der sichtbare Sprung.</li>
+      <li data-page-node-id="QOjezr5SwgzDzHE4ythdRc"><span class="pill" data-page-node-id="AaP02YLAxx1x1OCOsyh6jC">4</span><b data-page-node-id="n1dHxh7iDCPUVdm0PiknR4">Erklärsätze und Leerzustände</b> — Spezifikationstext raus,
+          <code data-page-node-id="8T8QUIkOJm7cC4b4ro0jIk">HIER IST PLATZ</code> weg, Nullen ersetzen.</li>
+      <li data-page-node-id="zaCJBQM1ntffIu2QNgmyJ0"><span class="pill" data-page-node-id="LH1SXEvoSf8olbMLMwp15b">5</span><b data-page-node-id="2hkhFQTrOcPejFq6GkAtIE">design-system.css und globals.css</b> — 851 Deklarationen,
+          0 Tokens. Das ist der Altbestand; hier lohnt es, erst nach 1–4 zu messen, was übrig bleibt,
+          statt blind umzuschreiben.</li>
+    </ol>
+  </div>
+  <div class="note" style="border-left-color:#f85149" data-page-node-id="yrSyjlXahM4zjaiGCbMA8i">
+    <b data-page-node-id="GnkTfcNi3O8pCxCxUV3AHW">Zwei Dinge blockieren den Weg nach draußen, nicht den Umbau:</b>
+    <code data-page-node-id="RXsfVFIRvlJNvFZoJJ3tid">main</code> ist rot (Architektur-Schritt), und im selben Klon arbeitet gerade eine zweite
+    Sitzung an <code data-page-node-id="ohI0fCZr8kpAuCRSdtZNzF">error-reporting</code>. Ich würde Schritt 1–2 in einem eigenen Arbeitsbaum
+    bauen, damit sich nichts vermischt.
+  </div>
+</body>
+</html>

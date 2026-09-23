@@ -12,7 +12,7 @@ import { authMode, createSession, destroySession, requireUser, supabaseAdmin, es
 import { adminPasswordMatches, createAdminSession, destroyAdminSession, requireAdmin } from '@/lib/admin-auth';
 import { createNotification } from '@/lib/notifications';
 import { geocodePostcode } from '@/lib/geocode';
-import { answerHausmeisterQuestion, appendJobEvent, createEmergencyRequest, createHausmeisterRequest, redispatchOpenJobs, type HausmeisterIntent } from '@/lib/orchestrator';
+import { answerHausmeisterQuestion, appendJobEvent, createEmergencyRequest, createHausmeisterRequest, recordHausmeisterDocumentUpload, redispatchOpenJobs, type HausmeisterIntent } from '@/lib/orchestrator';
 import { canAccessProviderJob, getProviderContext, getProviderManagerIds } from '@/lib/provider';
 import { nextInvoiceNumber } from '@/lib/invoices';
 import { normalizeContactCategory } from '@/lib/contact-categories';
@@ -22,7 +22,7 @@ import { completeMaintenanceAndScheduleNext, ensureAssetMaintenance, ensureCompl
 import { createPropertyForOwner, primaryProperty, propertyOwnedBy, syncPropertyFromLegacyProfile } from '@/lib/properties';
 import { createBrokerMatches } from '@/lib/broker-matching';
 import { isContractKind, isCostInterval } from '@/lib/contracts';
-import { enqueueDocumentIntelligence } from '@/lib/document-intelligence';
+import { enqueueDocumentIntelligence, processDocumentIntelligenceSource } from '@/lib/document-intelligence';
 import { headers } from 'next/headers';
 import { checkRateLimit, consumeRateLimitAttempt, applyRateLimitLockout, rateLimitBlockedEvent, recordRateLimitFailure, recordRateLimitSuccess } from '@/lib/security/rate-limit';
 import { logAdminAudit, logSecurityEvent } from '@/lib/security/audit';
@@ -260,13 +260,55 @@ async function savePublicImageUpload(file: File | null) {
   return `/uploads/${name}`;
 }
 
+type AssistantDocumentUploadResult={ok:boolean;reply:string;documentId?:number};
+
+async function storeAssistantDocument(userId:number,document:File,description=''):Promise<AssistantDocumentUploadResult>{
+  let stored:string;
+  try{stored=await savePrivateFile(document,'house-documents');}
+  catch{
+    logSecurityEvent('security_validation_reject','hausmeister_document','invalid_document');
+    return {ok:false,reply:'Das Dokument konnte nicht sicher übernommen werden. Bitte nutze PDF oder ein Bild bis 12 MB.'};
+  }
+  const property=primaryProperty(userId);
+  const title=(document.name||'Dokument').slice(0,180);
+  const inserted=db.prepare(`INSERT INTO house_documents(homeowner_id,property_id,title,path,kind) VALUES(?,?,?,?,'other')`).run(userId,property?.id??null,title,stored);
+  const documentId=Number(inserted.lastInsertRowid);
+  enqueueDocumentIntelligence({homeownerId:userId,sourceType:'house_document',sourceId:documentId,storedPath:stored,originalName:title,mimeType:document.type});
+  const analysis=await processDocumentIntelligenceSource(userId,'house_document',documentId);
+  const labels:Record<string,string>={invoice:'Rechnung',offer:'Angebot',contract:'Vertrag',warranty:'Garantie',maintenance:'Wartungsunterlage',report:'Beleg oder Bericht',insurance:'Versicherungsunterlage',energy:'Energieunterlage',other:'Dokument'};
+  let reply:string;
+  if(analysis?.status==='done'){
+    const date=analysis.relevantDate?` Als relevantes Datum habe ich ${analysis.relevantDate.split('-').reverse().join('.')} erkannt – bitte kurz prüfen.`:'';
+    const excerpt=description&&analysis.searchText?analysis.searchText.replace(/\s+/g,' ').trim().slice(0,700):'';
+    const content=excerpt?` Aus dem Dokument konnte ich u. a. lesen: „${excerpt}${analysis.searchText.length>700?' …':''}“`:'';
+    reply=`Ich habe „${title}“ sicher in deiner Hausakte gespeichert und als ${labels[analysis.kind]||'Dokument'} erkannt.${date}${content} Du kannst mich weiter dazu fragen oder es unter „Dokumente“ öffnen.`;
+  }else if(analysis?.status==='review'){
+    reply=`Ich habe „${title}“ sicher in deiner Hausakte gespeichert. Die automatische Texterkennung oder Zuordnung war nicht eindeutig genug; das Dokument ist deshalb zur kurzen Prüfung markiert. Es geht dabei nichts verloren.`;
+  }else{
+    reply=`Ich habe „${title}“ sicher in deiner Hausakte gespeichert. Die automatische Auswertung konnte gerade nicht abgeschlossen werden und bleibt für die erneute Verarbeitung vorgemerkt.`;
+  }
+  recordHausmeisterDocumentUpload(userId,{documentId,name:title,question:description,reply});
+  revalidatePath('/app');revalidatePath('/app/hausmeister');revalidatePath('/app/documents');revalidatePath('/notifications');
+  return {ok:true,reply,documentId};
+}
+
 export async function sendHausmeisterAction(fd:FormData){
   const user=await requireUser('homeowner');
   const submitted=text(fd,'description');
-  if(submitted.length<4) redirect('/app/hausmeister?error=Schreib%20mir%20kurz,%20worum%20es%20bei%20deinem%20Haus%20geht');
-  const bounded=intakeDescriptionSchema.safeParse({description:submitted});
-  if(!bounded.success){ logSecurityEvent('security_validation_reject','hausmeister_intake','invalid_description'); redirect('/app/hausmeister?error=Beschreib%20es%20bitte%20k%C3%BCrzer'); }
-  const description=bounded.data.description;
+  const documentEntry=fd.get('document');
+  const document=documentEntry instanceof File&&documentEntry.size>0?documentEntry:null;
+  if(!document&&submitted.length<4) redirect('/app/hausmeister?error=Schreib%20mir%20kurz,%20worum%20es%20bei%20deinem%20Haus%20geht');
+  let description='';
+  if(submitted){
+    const bounded=intakeDescriptionSchema.safeParse({description:submitted});
+    if(!bounded.success){ logSecurityEvent('security_validation_reject','hausmeister_intake','invalid_description'); redirect('/app/hausmeister?error=Beschreib%20es%20bitte%20k%C3%BCrzer'); }
+    description=bounded.data.description;
+  }
+  if(document){
+    const uploaded=await storeAssistantDocument(user.id,document,description);
+    if(!uploaded.ok)redirect('/app/hausmeister?error=Das%20Dokument%20konnte%20nicht%20sicher%20%C3%BCbernommen%20werden.%20Bitte%20nutze%20PDF%20oder%20ein%20Bild%20bis%2012%20MB');
+    redirect(`/app/hausmeister?document=${uploaded.documentId}`);
+  }
   const photo=fd.get('photo'); const saved=await savePrivateMediaUpload(photo instanceof File?photo:null);
   const thread=db.prepare(`SELECT id FROM assistant_threads WHERE user_id=? AND channel='app' ORDER BY updated_at DESC LIMIT 1`).get(user.id) as {id:number}|undefined;
   const draft=thread?db.prepare('SELECT intent FROM assistant_drafts WHERE thread_id=?').get(thread.id) as {intent:HausmeisterIntent}|undefined:undefined;

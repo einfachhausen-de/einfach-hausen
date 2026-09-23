@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="de" data-page-node-id="nC1jjoVoqErUsqCYziRrnQ">
+<head data-page-node-id="CTQR0q2mvTRRGjsvt7eyGA">
+<meta charset="utf-8" data-page-node-id="XpeyW9WCX5evO0fPlvKSlG">
+<meta name="viewport" content="width=device-width, initial-scale=1" data-page-node-id="ZMiTSuL70wMhCMbmx3hTgV">
+<title>einfachhausen — drei Richtungen für die App-Seiten</title>
+<style>
+  :root{
+    --ink:#10222a; --sec:#4b5b60; --mut:#8b979b; --line:#e4e2dc; --paper:#faf8f4;
+    --panel:#ffffff; --petrol:#105258; --terra:#a84d29; --ok:#236344; --sand:#ecdfc9; --chip:#f0ede7;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{background:var(--paper);color:var(--ink);
+       font:14px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif;
+       -webkit-font-smoothing:antialiased}
+  .wrap{max-width:1220px;margin:0 auto;padding:34px 26px 70px}
+
+  header.top{border-bottom:1px solid var(--line);padding-bottom:22px;margin-bottom:26px}
+  header.top .kicker{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)}
+  header.top h1{margin:9px 0 8px;font-size:27px;font-weight:660;letter-spacing:-.024em;line-height:1.2}
+  header.top p{margin:0;color:var(--sec);font-size:14px;max-width:820px}
+  header.top .warn{margin-top:16px;display:flex;gap:11px;background:color-mix(in srgb,var(--terra) 8%,transparent);
+       border:1px solid color-mix(in srgb,var(--terra) 22%,transparent);border-radius:9px;padding:12px 14px;max-width:900px}
+  header.top .warn svg{width:16px;height:16px;stroke:var(--terra);fill:none;stroke-width:1.9;flex:none;margin-top:3px}
+  header.top .warn b{display:block;font-size:13px;font-weight:680;color:var(--terra)}
+  header.top .warn span{display:block;font-size:13px;color:var(--sec)}
+
+  .dir{margin-bottom:38px;border:1px solid var(--line);border-radius:12px;background:var(--panel);overflow:hidden}
+  .dir > .dh{display:flex;align-items:flex-start;gap:16px;padding:18px 20px;border-bottom:1px solid var(--line)}
+  .dir .letter{width:38px;height:38px;border-radius:10px;background:var(--chip);display:flex;align-items:center;justify-content:center;
+       font-size:16px;font-weight:750;color:var(--petrol);flex:none}
+  .dir .dh h2{margin:0;font-size:17px;font-weight:660;letter-spacing:-.014em}
+  .dir .dh .claim{margin:3px 0 0;font-size:13.5px;color:var(--sec)}
+  .dir .dh .badge{margin-left:auto;flex:none;font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;
+       padding:4px 9px;border-radius:20px;background:var(--chip);color:var(--sec)}
+  .dir .dh .badge.a{background:color-mix(in srgb,var(--petrol) 10%,transparent);color:var(--petrol)}
+  .dir .dh .badge.b{background:color-mix(in srgb,var(--ok) 10%,transparent);color:var(--ok)}
+  .dir .dh .badge.c{background:color-mix(in srgb,var(--terra) 10%,transparent);color:var(--terra)}
+
+  .shot{padding:18px 20px 6px;background:var(--paper)}
+  .shot img{width:100%;display:block;border:1px solid var(--line);border-radius:8px;background:#fff}
+
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:20px;padding:18px 20px 22px}
+  .cols h4{margin:0 0 8px;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mut)}
+  .cols ul{margin:0;padding-left:17px;font-size:13px;color:var(--sec)}
+  .cols li{margin-bottom:5px}
+  .cols li b{color:var(--ink);font-weight:620}
+  .cols .pro li::marker{color:var(--ok)}
+  .cols .con li::marker{color:var(--terra)}
+  .cols .effort{margin-top:12px;font-size:12.5px;color:var(--mut);border-top:1px dashed var(--line);padding-top:10px}
+  .cols .effort b{color:var(--ink);font-weight:620}
+
+  .matrix{border:1px solid var(--line);border-radius:12px;background:var(--panel);overflow:hidden;margin-bottom:30px}
+  .matrix h2{margin:0;padding:16px 20px;font-size:15px;font-weight:660;border-bottom:1px solid var(--line)}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{text-align:left;padding:10px 20px;border-bottom:1px solid var(--line)}
+  th{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);background:var(--paper)}
+  tr:last-child td{border-bottom:0}
+  td:first-child{color:var(--sec)}
+  td b{font-weight:640}
+  .yes{color:var(--ok);font-weight:700}
+  .no{color:var(--terra);font-weight:700}
+  .mid{color:var(--sec)}
+
+  footer.ask{border-top:1px solid var(--line);padding-top:22px}
+  footer.ask h2{margin:0 0 8px;font-size:16px;font-weight:660}
+  footer.ask p{margin:0 0 10px;color:var(--sec);font-size:13.5px;max-width:820px}
+  footer.ask code{background:var(--chip);padding:1.5px 5px;border-radius:4px;font-size:12.5px}
+</style>
+</head>
+<body data-page-node-id="ePjGgMpjL9kTJRevPKCiKi">
+<div class="wrap" data-page-node-id="yWp9dt4JUu3fjrzmVXgxIV">
+
+  <header class="top" data-page-node-id="6WBpR8JogZv6ToryCY5m5q">
+    <div class="kicker" data-page-node-id="yc0YGrDnnum67HxhQdokKG">einfachhausen · App-Seiten</div>
+    <h1 data-page-node-id="RKBwWEIHquBBKe7o0EZMbx">Drei Richtungen — dieselbe Seite, drei Gattungen</h1>
+    <p data-page-node-id="3CSgzzGizKS01uctDWjVxz">
+      Du hast gesagt: „das sieht nicht aus wie eine App". Das war richtig, und es war mein Fehler,
+      an Schriftgrößen zu drehen. Schriftgröße ist eine zweite Ableitung — die Gattung entscheidet.
+      Deshalb hier drei <em data-page-node-id="HzNc51IlmREqppyXa8GAI9">grundsätzlich verschiedene</em> Bauweisen derselben Seite
+      (<code data-page-node-id="RPRGOp02dLaLNbmNYpt9QA">/app</code>, Lindenweg 12, identische Daten), aus denen du <em data-page-node-id="KQTZY3s6DXjVtlm3TanDLi">zeigen</em> kannst,
+      statt dass ich weiter rate.
+    </p>
+    <div class="warn" data-page-node-id="fd8WA71A2paR9xtPaezF12">
+      <svg viewBox="0 0 24 24" data-page-node-id="sOcWLB1nHTPwu6IqaNQF6Z"><path d="M12 3v6M12 15v.01" data-page-node-id="zzZalCxA3Jk73ksAtlYnnf"/><path d="M10.3 4.3 2.6 18a2 2 0 0 0 1.7 3h15.4a2 2 0 0 0 1.7-3L13.7 4.3a2 2 0 0 0-3.4 0z" data-page-node-id="eZrZlVPP3v89RDFWRUphVJ"/></svg>
+      <div data-page-node-id="PpayLJ0DG1pJtGilWK4t1b">
+        <b data-page-node-id="OWjCkhw5yTIQPRFeEfAPfQ">Das ist noch kein Code im Repo — das sind drei Prototypen aus reinem HTML/CSS.</b>
+        <span data-page-node-id="un2Hd0wiApoLpxHhbpJWfR">Alle drei nutzen die echten Markenfarben (Petrol <code data-page-node-id="78Rii3eS3OhpNZuQguFAwi">#105258</code>, Sand <code data-page-node-id="6gnAGmnnktYb6Giwq4ytRW">#ecdfc9</code>, Terrakotta <code data-page-node-id="esaOkVnjTd4DpTgk4eUrWI">#a84d29</code>)
+        und die Systemschrift der App. Kein Marketingkopf, keine 44-px-Überschrift, kein Erklärtext-Block.</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============ A ============ -->
+  <section class="dir" data-page-node-id="BiMTlyW6pDGMFpvs40Njak">
+    <div class="dh" data-page-node-id="gBK7hWFyPQ210ipcZfqQyo">
+      <span class="letter" data-page-node-id="bqzR1ebf0FxwC1dDyEgD3k">A</span>
+      <div data-page-node-id="0njhLo0JqCIT8BLundarW2">
+        <h2 data-page-node-id="06O5JkkgV7kv65ZdD2KaBg">Werkbank</h2>
+        <p class="claim" data-page-node-id="u51hPd5MPNhixc8rcJnTbO">Aufgaben zuerst. Dichte Listen, viel Information pro Bildschirm, wenig Dekoration.</p>
+      </div>
+      <span class="badge a" data-page-node-id="sa5kryI3IL6lLL1qDD9Rpe">Arbeitsgerät</span>
+    </div>
+    <div class="shot" data-page-node-id="ROl4TlrI0NyrGCwnmPJH7Q"><img src="richtungen/a-werkbank.png" alt="Richtung A — Werkbank" data-page-node-id="vVMFzAfSLCyxplrk9eyvpc"></div>
+    <div class="cols" data-page-node-id="yoIrCgbByrZGcHYYZ5g9QE">
+      <div class="pro" data-page-node-id="0oPYflBIU4jf8NSgpdSYrk">
+        <h4 data-page-node-id="fPwAeapSRzSuS8CJ9MSBpT">Was sie gut macht</h4>
+        <ul data-page-node-id="1Bvq6NL2UdCjVY4DcMAQxU">
+          <li data-page-node-id="uqvd97gUZAPzUadSWlw1eX"><b data-page-node-id="Jg5G8n3NjXizg5mHxfvDVA">216-px-Leiste</b> mit allen Bereichen sichtbar — kein Verstecken hinter Menüs.</li>
+          <li data-page-node-id="TSk7ws6y4cMEUDxLeE0bJf"><b data-page-node-id="gSPgTE5Qyde92tgaWPRo0r">52-px-Werkzeugleiste</b> mit Suche und <code data-page-node-id="NfYwyTHM463PwHaSt2kQwf">⌘K</code>: fühlt sich an wie ein Werkzeug.</li>
+          <li data-page-node-id="MA1INGvaLbYPGcs5DgQsGO"><b data-page-node-id="t0i7hb8ClklNkXPZx4JZqG">Kennzahlenleiste</b> statt vier großer Kacheln — 44 px hoch statt 90 px.</li>
+          <li data-page-node-id="wBrTPqqteDG9Lmmc1AuNKX"><b data-page-node-id="MxoVURYZ0FH9DFDpJNVwob">Zeilen von 38 px</b>: du siehst 6 Vorgänge, nicht 2.</li>
+          <li data-page-node-id="SNnsiSUjQcQE0Uc5YYE36C">Rechte Spalte trägt Arbeit (nächste Schritte, Vollständigkeit), nicht Leere.</li>
+        </ul>
+      </div>
+      <div class="con" data-page-node-id="grRhP4uVCfgEC1mfiXb03F">
+        <h4 data-page-node-id="eUwHqMdmAAEJ2oijTxO9RI">Was sie kostet</h4>
+        <ul data-page-node-id="hJXvAhXRROzaUPz1FDD2KO">
+          <li data-page-node-id="GHlEs6wDudCOaxrA3UWEHe">Dichter — für Wenig-Nutzer auf dem Handy anspruchsvoller.</li>
+          <li data-page-node-id="tOD1d7jeWNuB1ug2kXnigb">Wirkt nüchterner, weniger „einladend".</li>
+          <li data-page-node-id="sNOwHYVUhsmSt3q4lGk2tr">Braucht mehr echte Daten, sonst sieht die Dichte leer aus.</li>
+        </ul>
+        <div class="effort" data-page-node-id="e9hUkHrkGCbQvxSrUhEnBy"><b data-page-node-id="yaodDSNIGpMvWIEMVFMCAy">Aufwand im Repo:</b> mittel-hoch — Leiste, Werkzeugleiste und Zeilenmuster
+        sind neue Komponenten in <code data-page-node-id="d9aAFHcBhTgErwqb9HNDJu">packages/eh-design</code>; die 38 bestehenden Seitenköpfe werden ersetzt.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ B ============ -->
+  <section class="dir" data-page-node-id="cfxj5U60I8qbfi3pyBzZwU">
+    <div class="dh" data-page-node-id="5ue47kn8mrShNwAzta4jua">
+      <span class="letter" data-page-node-id="nRYknz5PC1NWL24arq7S4k">B</span>
+      <div data-page-node-id="cZDfZ3tyCNM1lqZigeXVMV">
+        <h2 data-page-node-id="nHtM1jjCfHmmEljGuBURBY">Wohnzimmer</h2>
+        <p class="claim" data-page-node-id="AkKhDzCBH4N62LVhaZ4h1g">Ruhig und großzügig. Wenige, große Karten. Ein Ziel pro Karte.</p>
+      </div>
+      <span class="badge b" data-page-node-id="dg8aRui4Zln15IbKR6JaIg">Verbraucher-App</span>
+    </div>
+    <div class="shot" data-page-node-id="BnTSpnPXl2lxD0UndomgvQ"><img src="richtungen/b-wohnzimmer.png" alt="Richtung B — Wohnzimmer" data-page-node-id="8jVF6GSMuxDJmkA8JQSodN"></div>
+    <div class="cols" data-page-node-id="CEEvEuc8Bbk4GPlrmjczs2">
+      <div class="pro" data-page-node-id="Ozt1OOPoGhExr3jzYRgqka">
+        <h4 data-page-node-id="Ozji4o5vTVGrizNgEMZIUq">Was sie gut macht</h4>
+        <ul data-page-node-id="0sg3i1FcrVigUE90s05B1R">
+          <li data-page-node-id="xtDCEgGYVv5l45ha3AeFxy"><b data-page-node-id="BgCDRZesp62FzStQ3Lp4Xy">72-px-Icon-Leiste</b> — maximaler Platz für Inhalt, sehr aufgeräumt.</li>
+          <li data-page-node-id="X2IyhAKE7nwmJR1wTtK9vH"><b data-page-node-id="5hqyGbABwmeSebZcA891xv">Große Zahlen</b> (38 px) als Anker: man versteht den Zustand in zwei Sekunden.</li>
+          <li data-page-node-id="GNAHpHWC8TlK5eePfvC3qe"><b data-page-node-id="K3zZSknPc0NQOH3drSvO4J">Fortschrittsring</b> für die Vollständigkeit der Hausakte — das Kernversprechen wird sichtbar.</li>
+          <li data-page-node-id="qRWF4UPKYp0LAFQN6AU6Hd"><b data-page-node-id="D79hC4t3ANZFkEAyqQY915">Ein Ziel pro Karte</b>: keine Liste, an der man vorbeiscrollt.</li>
+          <li data-page-node-id="mVN94aH6puJNDUhSZeRG2P">Fühlt sich an wie eine gute App aus dem App Store — freundlich, nicht technisch.</li>
+        </ul>
+      </div>
+      <div class="con" data-page-node-id="hyM9wPtEcHIyqCTiNg8xPC">
+        <h4 data-page-node-id="lXoKhDDyhBGl6OPIqHSj8B">Was sie kostet</h4>
+        <ul data-page-node-id="X4Wgikpr2jqexiFaOu2puI">
+          <li data-page-node-id="hB1dZXMKTWgV9QlFakQn16"><b data-page-node-id="4OK7Z2DoeaWiCFofvT2JkL">Wenig Dichte:</b> man sieht nur 2 Vorgänge, muss für den Rest klicken.</li>
+          <li data-page-node-id="1SFLJUAtciI6O85GznFbGn">Große Karten verbrauchen Platz, ohne mehr zu sagen.</li>
+          <li data-page-node-id="V4zq6TwEEtPfh0aGMnaJk2">Wirkt eher wie ein Verbraucherprodukt als wie ein Verwaltungswerkzeug.</li>
+          <li data-page-node-id="LTMYH31qYPgIflZV1hDA5P">Die Icon-Leiste versteckt Bereiche hinter Symbolen — man muss sie lernen.</li>
+        </ul>
+        <div class="effort" data-page-node-id="DFFo4QYB0MZfUxYU15T8dA"><b data-page-node-id="DjU5dBXDC5cYBlbTIE5FYy">Aufwand im Repo:</b> mittel — wenig neue Struktur, aber die Kartenkomponenten
+        und der Fortschrittsring sind neu; die Palette braucht mehr Flächen-Token.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ C ============ -->
+  <section class="dir" data-page-node-id="OAycED6Fk8wdVN4Gg97RaN">
+    <div class="dh" data-page-node-id="4ZLxuoZtnG0VnjXT1Hrqu6">
+      <span class="letter" data-page-node-id="dFEhMCAROeXDabHGPUP03Z">C</span>
+      <div data-page-node-id="oIfWwpQEhAF8Zr3ODbjbqt">
+        <h2 data-page-node-id="bSZ5dz0P968VM5EkVHcsHh">Akte</h2>
+        <p class="claim" data-page-node-id="yzf65FX7wSpwIXTDe97Ctb">Das Haus als Lebenslauf. Ordnerbaum, Zeitachse, Dokumentenvorschau.</p>
+      </div>
+      <span class="badge c" data-page-node-id="K9JAfBTKr787FEGwvARC2C">Aktenwerkzeug</span>
+    </div>
+    <div class="shot" data-page-node-id="3770ywVn3TkbqLjU2Q8knz"><img src="richtungen/c-akte.png" alt="Richtung C — Akte" data-page-node-id="uqnYFUCRmQEBjpyuHqKc3I"></div>
+    <div class="cols" data-page-node-id="HHbG0TzEw3xxNDtjXYPSeL">
+      <div class="pro" data-page-node-id="HcknhuX7CpwPjqPWvnRqkH">
+        <h4 data-page-node-id="agRDM1SJD20aex0BDyt9X6">Was sie gut macht</h4>
+        <ul data-page-node-id="uWR5UgxxlJpBTU3YPf5NK9">
+          <li data-page-node-id="9yaL6AmUQrwBpbOtbAUucE"><b data-page-node-id="Zho5HIlrF1K5BTMjnPoNnG">Nimmt das Produkt beim Wort:</b> „digitale Hausakte" heißt Ordner, nicht Dashboard.</li>
+          <li data-page-node-id="MVn7mHxezf0BgzmSC3xWDl"><b data-page-node-id="EiYFunMWfUG9bzf8DDhITr">Zeitachse</b> erzählt die Geschichte des Hauses — 2026, 2025, …</li>
+          <li data-page-node-id="tTKbQSJEPgGPCRtYu9GraO"><b data-page-node-id="wrz88m2yHt2HsBNXcTvWoQ">Dokumentenvorschau rechts:</b> man sieht die Rechnung, ohne sie zu öffnen.</li>
+          <li data-page-node-id="3JZBzHNKoZetb3O7P8w4ZO"><b data-page-node-id="YONfmffH8CNeq3Go94BEfQ">Drei Spalten</b> wie ein echtes Archivprogramm. Sehr „pro".</li>
+          <li data-page-node-id="QcHZ5HPQrdj4PyAoWlogNw">Skaliert auf 50 Jahre Hausbesitz — der Bestand wächst nach unten, nicht in die Breite.</li>
+        </ul>
+      </div>
+      <div class="con" data-page-node-id="SZAWmH5ccsECQhh1X40qED">
+        <h4 data-page-node-id="vhXKGBTUjaSHwTrGhghf7H">Was sie kostet</h4>
+        <ul data-page-node-id="tzhXHYLUxO7bY7bxrGsWH8">
+          <li data-page-node-id="IKaBeGMniGat9UaQb5AOMM"><b data-page-node-id="0iHuSbfZCafA61DErCuUFi">Die schwierigste Variante</b> — drei Spalten müssen auf dem Handy kollabieren.</li>
+          <li data-page-node-id="krQdo9DHm7GowEcV9vOdl9">Für den Alltag („was muss ich tun?") ist sie indirekter als A.</li>
+          <li data-page-node-id="2sJERaHhoiysiKSQh741g1">Braucht eine echte Dokumentenvorschau (PDF-Renderer) — sonst fällt die rechte Spalte flach.</li>
+        </ul>
+        <div class="effort" data-page-node-id="MoORfQdsvKNji0SKsE6Y0D"><b data-page-node-id="qlzufNxpfmLk2h7LJvB98w">Aufwand im Repo:</b> hoch — neue Datenform (Vorgänge mit Zeitstempel und Ordner),
+        Vorschau-Infrastruktur, und die Navigation wird von 7 Punkten auf einen Baum umgebaut.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ Matrix ============ -->
+  <section class="matrix" data-page-node-id="lqP8FTEH06ZRDbXvamcFTK">
+    <h2 data-page-node-id="DUUogQX4QJTAeY5ABCRNeg">Der Vergleich in einer Tabelle</h2>
+    <table data-page-node-id="C1DPk4zEyF1zWW48GSpcRD">
+      <thead data-page-node-id="970kUfKs8HvNPhF3Kl9qMs">
+        <tr data-page-node-id="GqS1iaJcyBQLL8lG5mmIgV"><th data-page-node-id="GGPfhp57R18D93zIO06JLL">&nbsp;</th><th data-page-node-id="U6lV0NkLny29PAEqoRb8f9">A · Werkbank</th><th data-page-node-id="O0GseUYUBc9W6E24W6uCfp">B · Wohnzimmer</th><th data-page-node-id="yiRv4ldanlYm3LQfxhCwAO">C · Akte</th></tr>
+      </thead>
+      <tbody data-page-node-id="Y3J7zORvJUr6MzDY0nR7wm">
+        <tr data-page-node-id="BumaR5jiTbtWfu8mdviRFu"><td data-page-node-id="Qzw2boKtyLaE3cLH68mfHa">Sieht aus wie ein Werkzeug</td><td class="yes" data-page-node-id="ceLdM3Q94qLZFsbEjkd1dv">Ja</td><td class="mid" data-page-node-id="HHwLmG28Vt9H2v37KJynNI">Teils</td><td class="yes" data-page-node-id="8YMFHJwyiamL0LYm5Gwajr">Ja</td></tr>
+        <tr data-page-node-id="ykA97GkH3wUyJn9R9J3Rif"><td data-page-node-id="S5dWdTTOtkxCQTOB7jDhwh">Antwortet auf „was muss ich tun?"</td><td class="yes" data-page-node-id="jIh5hBMhAHHV2k1aaYdmmm">Sofort</td><td class="yes" data-page-node-id="By42zzNAWNsr1KSFVXtW5C">Sofort</td><td class="mid" data-page-node-id="AZoGfDg1RpO7umXtZFI1pE">Indirekt</td></tr>
+        <tr data-page-node-id="sqOtNBEZ96uxsp5LcG418J"><td data-page-node-id="1TEQbPT3P9JNal8P1pOXZH">Antwortet auf „was war da los?"</td><td class="mid" data-page-node-id="cYTBHXXs7fIqEWzOhkdE1m">Mittelmäßig</td><td class="no" data-page-node-id="QkA16broEmHruSwK78tRcg">Nein</td><td class="yes" data-page-node-id="u6nmsqjuy02PL9ecLpTgDf">Sehr gut</td></tr>
+        <tr data-page-node-id="NVW4W5MvhE3Kxw8sCts4TH"><td data-page-node-id="6s5HMo9nVhMWuwnKAtNM5L">Passt auf das Handy</td><td class="mid" data-page-node-id="1DtwgODkrJbuZzoigYG9Dt">Braucht Arbeit</td><td class="yes" data-page-node-id="iya8bApFSIW0tvYzS2otJE">Gut</td><td class="no" data-page-node-id="eBAtLsRmYPrUHGSMRXBjul">Schwierig</td></tr>
+        <tr data-page-node-id="uddRzmCNxo2oPFg4AKoDNX"><td data-page-node-id="CvMK0TLyFADeK1slaWsIYd">Vorgänge gleichzeitig sichtbar</td><td data-page-node-id="LdgJXkIRUMUDHp4KUjj9j4"><b data-page-node-id="0lF8I14hPNDH1ipmajsYTQ">6</b></td><td data-page-node-id="XcB5U9v8RDgecE0EfhUrKG"><b data-page-node-id="FquhvIMXnRBw4ouPJJCvgM">2</b></td><td data-page-node-id="WYbZEqIAFRNk4U8PaJN9It"><b data-page-node-id="PHja1GxXWeOxV2d6NKGOPb">7</b></td></tr>
+        <tr data-page-node-id="R67WUFc8pIROVt7S3gyMv2"><td data-page-node-id="Bp7ZJ16pWdIFG4KlPM0XR5">Neue Komponenten im Designsystem</td><td data-page-node-id="7j7Y744eL0DUObggvVhAh5">5</td><td data-page-node-id="51cg2Jw0BfPjuvDuC8kRzB">4</td><td data-page-node-id="b3lgmWLbySXkpdGNjsovGk">7</td></tr>
+        <tr data-page-node-id="3HVCrZtL5ooWQ0HqW3exLo"><td data-page-node-id="7CxO9M2GKvw06EXkGQr0B7">Passt zur „digitalen Hausakte"</td><td class="mid" data-page-node-id="gKE1kweSiHD9yTHwI6fG9c">Funktional</td><td class="mid" data-page-node-id="DG1bOs48Ru9gtkpOahEzDU">Weichgespült</td><td class="yes" data-page-node-id="G3IQcExMeL0I6vjeGL5WgC">Wörtlich</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <footer class="ask" data-page-node-id="ISTCm8ECFBOBMUIH5ubakH">
+    <h2 data-page-node-id="kCAZA6yix6C9FeoCXoU5IN">Was ich von dir brauche</h2>
+    <p data-page-node-id="bj2Y6FSqSKOsMupiAt1cHg">
+      <b data-page-node-id="MBctw2FDsIMxEAkfuSGULa">Eine Zahl: A, B oder C.</b> Oder eine Mischung, wenn dir etwas Konkretes fehlt —
+      z. B. „A, aber die Vollständigkeitskarte aus B" oder „C, aber die Ordnerliste als schmale Leiste".
+      Sobald du zeigst, geht es in <code data-page-node-id="0W8JxKhEm5YhGPDmIDUaxo">packages/eh-design</code> und wird echt.
+    </p>
+    <p data-page-node-id="bII48RbfoiMVE6lqFy3Fpd">
+      Wichtig für den Weg danach: <code data-page-node-id="sjAiGIOEcevYp7CU44WjeA">packages/eh-design/</code>, <code data-page-node-id="gzkfwzZvrfcdCMf1piptNm">homeowner.module.css</code>,
+      <code data-page-node-id="Z6ge21LhyJqU8qMk8jDJxV">provider-workspace.module.css</code>, <code data-page-node-id="fAQaiCXoSZHga1JEwUgyRk">globals.css</code> und <code data-page-node-id="E9CuadwpsArnkItanm8gsh">design-system.css</code>
+      stehen unter Design-Verschluss. Ein solcher Umbau läuft deshalb über einen Push auf
+      <code data-page-node-id="a6cr8t4vZjbyQPreFHrOE1">main</code> bzw. <code data-page-node-id="Ixb1qhgCwbczjUbo8KFAki">design/**</code> — <b data-page-node-id="JZFz34WTxgwqnOhLMG0OZS">nie</b> über einen Pull Request, sonst schlägt
+      die Design-Prüfung grundsätzlich fehl. Und <code data-page-node-id="Vqzgfk6pOM80wkHiCp5k25">eh-design-seal.mjs</code> läuft erst, wenn du es sagst.
+    </p>
+  </footer>
+
+</div>
+</body>
+</html>

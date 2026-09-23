@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>einfachhausen — /app auf dem Handy: Ist und drei Richtungen</title>
+<style>
+  :root{
+    --ink:#10222a; --sec:#4b5b60; --mut:#8b979b; --line:#e4e2dc; --paper:#faf8f4;
+    --panel:#ffffff; --petrol:#105258; --terra:#a84d29; --ok:#236344; --chip:#f0ede7;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{background:var(--paper);color:var(--ink);
+       font:14px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1240px;margin:0 auto;padding:34px 26px 70px}
+
+  header.top{border-bottom:1px solid var(--line);padding-bottom:22px;margin-bottom:28px}
+  header.top .kicker{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)}
+  header.top h1{margin:9px 0 10px;font-size:27px;font-weight:660;letter-spacing:-.024em;line-height:1.2}
+  header.top p{margin:0;color:var(--sec);font-size:14.5px;max-width:840px}
+
+  .frames{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;margin:26px 0 10px}
+  .frame{text-align:center}
+  .frame .tag{display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+        padding:3px 9px;border-radius:20px;margin-bottom:9px}
+  .frame.ist .tag{background:color-mix(in srgb,var(--terra) 12%,transparent);color:var(--terra)}
+  .frame.a .tag{background:color-mix(in srgb,var(--petrol) 12%,transparent);color:var(--petrol)}
+  .frame.b .tag{background:color-mix(in srgb,var(--ok) 12%,transparent);color:var(--ok)}
+  .frame.c .tag{background:color-mix(in srgb,var(--ink) 8%,transparent);color:var(--sec)}
+  .frame img{width:100%;display:block;border-radius:12px;border:1px solid var(--line);background:#e9e7e1}
+  .frame .cap{margin-top:9px;font-size:12.5px;color:var(--sec);line-height:1.45}
+
+  h2{font-size:17px;font-weight:660;letter-spacing:-.014em;margin:34px 0 6px;padding-top:20px;border-top:1px solid var(--line)}
+  h2 + .sub{margin:0 0 14px;color:var(--sec);font-size:13.5px;max-width:840px}
+
+  table.data{width:100%;border-collapse:collapse;font-size:13px;margin:14px 0 8px;
+        border:1px solid var(--line);border-radius:8px;overflow:hidden}
+  table.data th,table.data td{text-align:left;padding:9px 13px;border-bottom:1px solid var(--line)}
+  table.data th{font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--mut);background:var(--chip)}
+  table.data tr:last-child td{border-bottom:0}
+  table.data td.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+  table.data td b{font-weight:640}
+  .bad{color:var(--terra);font-weight:650} .good{color:var(--ok);font-weight:650}
+  code{background:var(--chip);padding:1.5px 5px;border-radius:4px;font-size:12.5px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+
+  .callout{display:flex;gap:12px;border-radius:9px;padding:13px 15px;margin:16px 0;font-size:13.5px}
+  .callout svg{width:17px;height:17px;flex:none;margin-top:3px;fill:none;stroke-width:1.9}
+  .callout b{display:block;margin-bottom:2px}
+  .callout.warn{background:color-mix(in srgb,var(--terra) 7%,transparent);border:1px solid color-mix(in srgb,var(--terra) 22%,transparent)}
+  .callout.warn svg{stroke:var(--terra)} .callout.warn b{color:var(--terra)}
+  .callout.info{background:color-mix(in srgb,var(--petrol) 6%,transparent);border:1px solid color-mix(in srgb,var(--petrol) 20%,transparent)}
+  .callout.info svg{stroke:var(--petrol)} .callout.info b{color:var(--petrol)}
+  .callout.ok{background:color-mix(in srgb,var(--ok) 7%,transparent);border:1px solid color-mix(in srgb,var(--ok) 22%,transparent)}
+  .callout.ok svg{stroke:var(--ok)} .callout.ok b{color:var(--ok)}
+
+  ul.tight{margin:10px 0;padding-left:19px;color:var(--sec);font-size:13.5px}
+  ul.tight li{margin-bottom:6px}
+  ul.tight b{color:var(--ink);font-weight:640}
+
+  footer{margin-top:40px;padding-top:20px;border-top:1px solid var(--line);color:var(--mut);font-size:12.5px}
+  footer b{color:var(--sec)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div class="kicker">einfachhausen · /app auf dem Handy · 390 × 844</div>
+    <h1>Das Telefon entscheidet — nicht der Geschmack</h1>
+    <p>
+      Meine drei Richtungen waren alle Desktop-Layouts. Eine Hausakte wird aber auf dem Handy benutzt.
+      Hier stehen sie neben deinem echten <code>/app</code> — und die Messung deckte etwas auf, das
+      gegen <b>meine eigenen</b> Vorschläge sprach. Ich habe sie daraufhin neu gebaut; unten stehen
+      beide Zahlen, vorher und nachher.
+    </p>
+  </header>
+
+  <div class="frames">
+    <div class="frame ist">
+      <span class="tag">Ist · live</span>
+      <img src="handy/ist-app.png" alt="Live /app auf dem Handy">
+      <div class="cap">32-px-Überschrift, zweizeiliger Erklärsatz, umbrechende Beschriftungen in der unteren Leiste.</div>
+    </div>
+    <div class="frame a">
+      <span class="tag">A · Werkbank</span>
+      <img src="richtungen/a-werkbank-handy.png" alt="Richtung A auf dem Handy">
+      <div class="cap">Dichte bleibt: vier Schriftgrößen, Zeilen ab 68 px, vier Bereiche in der Leiste statt fünf.</div>
+    </div>
+    <div class="frame b">
+      <span class="tag">B · Wohnzimmer</span>
+      <img src="richtungen/b-wohnzimmer-handy.png" alt="Richtung B auf dem Handy">
+      <div class="cap">Die größte Ruhe. Vier Schriftgrößen, jeder Eintrag ein Tippziel von 72 px Höhe.</div>
+    </div>
+    <div class="frame c">
+      <span class="tag">C · Akte</span>
+      <img src="richtungen/c-akte-handy.png" alt="Richtung C auf dem Handy">
+      <div class="cap">Ordnerbaum wird zur Chip-Reihe, Vorschau zum Blatt von unten — und alle fünf Vorgänge passen trotzdem.</div>
+    </div>
+  </div>
+
+  <h2>Was das Telefon am Ist-Zustand zeigt</h2>
+  <p class="sub">Gemessen an der laufenden Seite, 390 × 844, als angemeldeter Eigentümer.</p>
+  <table class="data">
+    <tr><th>Messung</th><th style="text-align:right">/app</th><th style="text-align:right">/app/home</th><th>Bedeutung</th></tr>
+    <tr><td>Seitenhöhe</td><td class="num">1948 px</td><td class="num bad">4045 px</td><td><b>2,3</b> bzw. <b>4,8</b> Bildschirme</td></tr>
+    <tr><td>Tippziele gesamt</td><td class="num">39</td><td class="num">59</td><td>Links und Knöpfe</td></tr>
+    <tr><td>davon <b>unter 44 × 44 px</b></td><td class="num bad">22</td><td class="num bad">31</td><td><b>56 %</b> bzw. <b>53 %</b> zu klein für einen Finger</td></tr>
+    <tr><td>Verschiedene Schriftgrößen auf einem Schirm</td><td class="num">6</td><td class="num">6</td><td>15 / 16 / 17 / 13 / 14 / <b>10 px</b></td></tr>
+    <tr><td>Überschrift <code>h1</code></td><td class="num bad">32 px / 760</td><td class="num bad">32 px / 760</td><td>Werbemittel-Größe auf einem Telefon</td></tr>
+  </table>
+  <div class="callout warn">
+    <svg viewBox="0 0 24 24"><path d="M12 3v6M12 15v.01"/><path d="M10.3 4.3 2.6 18a2 2 0 0 0 1.7 3h15.4a2 2 0 0 0 1.7-3L13.7 4.3a2 2 0 0 0-3.4 0z"/></svg>
+    <div><b>Die drei konkreten Telefon-Fehler</b>
+      <ul class="tight" style="margin-bottom:0">
+        <li><b>Mehr als die Hälfte aller Tippziele ist zu klein.</b> 22 von 39 auf <code>/app</code>,
+            31 von 59 auf <code>/app/home</code>. Apple sagt 44 px, Google 48 px. Das ist der Grund,
+            warum sich die App auf dem Handy „fummelig" anfühlt — nicht die Farbe.</li>
+        <li><b>32-px-Überschrift plus Erklärsatz.</b> „Dein Zuhause" in Werbegröße, darunter
+            „Offene Entscheidungen, nächste Termine und alles, was dein Haus braucht."
+            Eine App <em>erklärt sich nicht</em> — sie zeigt Zustand.</li>
+        <li><b>Die untere Leiste bricht um.</b> „Verträge &amp; Tarife" und „Aufträge &amp; Termine"
+            werden zweizeilig. Fünf Bereiche mit langen Namen passen nicht in 390 px.
+            Kurze Beschriftungen lösen das sofort.</li>
+      </ul>
+    </div>
+  </div>
+
+  <h2>Und was es an meinen Vorschlägen zeigte</h2>
+  <div class="callout warn">
+    <svg viewBox="0 0 24 24"><path d="M12 3v6M12 15v.01"/><path d="M10.3 4.3 2.6 18a2 2 0 0 0 1.7 3h15.4a2 2 0 0 0 1.7-3L13.7 4.3a2 2 0 0 0-3.4 0z"/></svg>
+    <div>
+      <b>Ich habe Desktop-Typografie in ein Telefon geschoben — und damit meinen eigenen Rat verletzt.</b>
+      Erster Durchgang meiner drei Handy-Mockups, mit derselben Methode gemessen:
+      <table class="data" style="margin-top:9px">
+        <tr><th>Vorschlag</th><th style="text-align:right">verschiedene Größen</th><th style="text-align:right">Werte unter 12 px</th></tr>
+        <tr><td>A · Werkbank</td><td class="num bad">10</td><td class="num bad">19</td></tr>
+        <tr><td>B · Wohnzimmer</td><td class="num bad">13</td><td class="num bad">10</td></tr>
+        <tr><td>C · Akte</td><td class="num bad">8</td><td class="num bad">18</td></tr>
+        <tr><td>dein echtes <code>/app</code> (Vergleich)</td><td class="num">6</td><td class="num">1</td></tr>
+      </table>
+      Ich habe 6 Schriftgrößen kritisiert und 8 bis 13 abgeliefert. <b>Meine Vorschläge waren an dieser
+      Stelle schlechter als das, was live steht.</b>
+    </div>
+  </div>
+
+  <h2>Also habe ich sie neu gebaut</h2>
+  <p class="sub">Vier Schriftgrößen, keine unter 15 px, jedes Tippziel mindestens 44 × 44 px, keine umbrechende
+     Beschriftung, nichts halb abgeschnitten.</p>
+  <table class="data">
+    <tr>
+      <th>Vorschlag</th>
+      <th style="text-align:right">Größen<br>vorher</th><th style="text-align:right">nachher</th>
+      <th style="text-align:right">unter 12 px<br>vorher</th><th style="text-align:right">nachher</th>
+      <th style="text-align:right">Tippziele<br>unter 44 px</th>
+    </tr>
+    <tr><td><b>A · Werkbank</b></td><td class="num bad">10</td><td class="num good">4</td>
+        <td class="num bad">19</td><td class="num good">0</td><td class="num good">0 von 11</td></tr>
+    <tr><td><b>B · Wohnzimmer</b></td><td class="num bad">13</td><td class="num good">4</td>
+        <td class="num bad">10</td><td class="num good">0</td><td class="num good">0 von 7</td></tr>
+    <tr><td><b>C · Akte</b></td><td class="num bad">8</td><td class="num good">4</td>
+        <td class="num bad">18</td><td class="num good">0</td><td class="num good">0 von 7</td></tr>
+  </table>
+  <p class="sub">Die vier Größen sind <b>28 / 20 / 17 / 15 px</b> — die eine Zahl, um die es auf dem Schirm geht ·
+     Abschnittstitel · Zeilentitel · alles Übrige. Was darunter lag, war entweder eine Beschriftung, die man auch
+     weglassen kann, oder ein Fehler.</p>
+
+  <div class="callout warn">
+    <svg viewBox="0 0 24 24"><path d="M12 3v6M12 15v.01"/><path d="M10.3 4.3 2.6 18a2 2 0 0 0 1.7 3h15.4a2 2 0 0 0 1.7-3L13.7 4.3a2 2 0 0 0-3.4 0z"/></svg>
+    <div><b>Drei Layoutfehler, die erst beim Nachmessen auffielen</b>
+      <ul class="tight" style="margin-bottom:0">
+        <li><b>Die Zähl-Blase brach die untere Leiste um.</b> In A stand die „1" in einer dritten Rasterzeile
+            der Tab-Leiste — damit rutschte die Beschriftung eine Zeile tiefer. Sie muss <em>neben</em> der
+            Beschriftung stehen, nicht darunter.</li>
+        <li><b>Die letzten Karten waren halb abgeschnitten.</b> In A, B und C. Ich hatte die Höhe nie gegen
+            die 844 px gerechnet. Auf dem Telefon ist die Höhe keine Frage des Geschmacks, sondern eine
+            Rechnung — und sie geht nicht auf, wenn man sie nicht macht.</li>
+        <li><b>Das Datum riss jede Zeile auf zwei Zeilen.</b> In C stand es mit <code>margin-left:auto</code>
+            am rechten Rand, rutschte aber unter den Titel, sobald der zu lang war. Jeder Vorgang wurde
+            dadurch rund 30 px höher. Datum gehört in den Text, nicht an den Rand.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="callout info">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8v.01"/></svg>
+    <div><b>Was hier weiterhin NICHT vergleichbar ist — damit ich es nicht falsch verkaufe</b>
+      Die Tippziel-Zahlen meiner Mockups (A: 11 Ziele, B: 7, C: 7) sind <b>nicht</b> mit den 39 des
+      echten <code>/app</code> vergleichbar. Meine Mockups sind statische Bilder mit wenigen Links,
+      die echte App ist eine Anwendung mit 39. Ich behaupte deshalb <b>nicht</b>, dass meine Vorschläge
+      weniger kleine Tippziele hätten — das wäre ein Messartefakt. Belegbar ist nur das eine: dass
+      <em>keines</em> meiner Ziele unter 44 px liegt und <em>22 von 39</em> im echten <code>/app</code> schon.</div>
+  </div>
+
+  <h2>Was daraus folgt</h2>
+  <table class="data">
+    <tr><th>Richtung</th><th>Überlebt das Telefon?</th><th>Was zu tun ist</th></tr>
+    <tr>
+      <td><b>B · Wohnzimmer</b></td>
+      <td class="good">Ja, fast unverändert</td>
+      <td>Karten stapeln sich von selbst, die untere Leiste hat ohnehin kurze Namen. Nach dem
+          Schrift-Durchgang braucht B am wenigsten. <b>Die geringste Arbeit — und sie ist jetzt erledigt.</b></td>
+    </tr>
+    <tr>
+      <td><b>A · Werkbank</b></td>
+      <td>Ja, mit Anpassung</td>
+      <td>Die Dichte ist der Punkt: Zeilen ab 68 px, Kennzahlen in drei Spalten, vier Bereiche in der
+          Leiste. Danach trägt es — aber A verliert auf dem Telefon genau das, was es auf dem Desktop
+          stark macht: gleichzeitig sichtbare Vorgänge.</td>
+    </tr>
+    <tr>
+      <td><b>C · Akte</b></td>
+      <td class="good">Ja — besser als gedacht</td>
+      <td>Der Ordnerbaum wird zur waagerechten Chip-Reihe, die Vorschau zum Blatt von unten. Alle fünf
+          Vorgänge passen vollständig über das Blatt. Bleibt die meiste Arbeit von den dreien.</td>
+    </tr>
+  </table>
+  <div class="callout ok">
+    <svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>
+    <div><b>Meine Empfehlung hat sich durch diese Messung verschoben</b>
+      Vorher hätte ich A gesagt, weil es am dichtesten ist. Auf dem Telefon ist <b>B</b> die Richtung,
+      die am wenigsten kaputtgeht — und <b>A</b> die, die den meisten Feinschliff braucht, weil ihre
+      ganze Idee Dichte ist und Dichte auf 390 px teuer wird.
+      Wenn du also schwankst: <b>B für das Gefühl, A für das Arbeiten</b> — und auf dem Handy ist das
+      Gefühl das, was zählt.</div>
+  </div>
+
+  <h2>Was ich von dir brauche</h2>
+  <p class="sub">
+    Eine Zahl — <b>A</b>, <b>B</b> oder <b>C</b>. Oder eine Mischung, zum Beispiel „B, aber die
+    Vorgangsliste aus C". Danach übersetze ich die gewählte Richtung in <code>packages/eh-design</code>:
+    die vier Schriftgrößen werden Tokens statt Zahlen, die Zeilenhöhen werden feste Werte, die untere
+    Leiste bekommt vier Bereiche. Das geht per Push auf <code>main</code>, nicht per Pull Request —
+    das Design-Tor lehnt geänderte geschützte Pfade in PRs grundsätzlich ab.
+  </p>
+  <p class="sub">
+    Was ich <b>nicht</b> tun werde, solange du nicht wählst: am Designkern siegeln, committen oder
+    deployen. Der laufende Prüflauf für PR #116 bleibt unberührt.
+  </p>
+
+  <footer>
+    <b>Erhebung.</b> Ist-Zustand: <code>einfachhausen.de/app</code> bei 390 × 844, <code>deviceScaleFactor 2</code>,
+    <code>isMobile</code>, iPhone-Kennung, angemeldet über die Eigentümer-Demo. Zusätzlich
+    <code>/app/home</code>, <code>/app/messages</code>. Die drei Richtungen sind eigenständige
+    HTML/CSS-Prototypen ohne Framework, im selben Maß gerendert.
+    <b>Stand:</b> Der Ist-Zustand ist der Live-Build <code>36eaa7c</code>, nicht <code>main</code>.
+    <br><br>
+    <b>Grenzen:</b> Nur der sichtbare Bildschirm wurde gemessen, keine Scroll-Zustände, keine Dialoge,
+    kein Tastatur-Zustand. Die Seitenhöhe ist die des Dokuments, nicht die der Nutzung.
+    Die Prototypen sind <b>keine</b> laufende App: Sie messen Typografie, Dichte und Passung, aber nicht
+    Ladezeit, Zustandswechsel oder Verhalten. Ein Mockup, das in vier Größen passt, beweist nicht, dass
+    die echte Seite in vier Größen passt — dafür müssen die Tokens in <code>packages/eh-design</code>
+    umgestellt werden, und das ist der nächste Schritt, nicht dieser.
+  </footer>
+
+</div>
+</body>
+</html>

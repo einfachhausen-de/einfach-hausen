@@ -633,10 +633,11 @@ await strictRetry(owner,()=>owner.getByRole('button',{name:'Überspringen'}).cli
 await Promise.all([owner.waitForURL('**/app?onboarding=done'),owner.waitForLoadState('load')]);
 if(await owner.getByText('Einrichtung unvollständig').count())throw new Error('Onboarding banner shown after completion');
 await assertNoOverflow(owner,'Mobile customer app');
-// Die Owner-Startseite ist die EHOwnerSection-Komposition ("Wartet auf dich",
-// "Hausakte", "Nächste Termine"). Die früheren Anker gehören zu EHOwnerComposer,
-// das keine Seite mehr rendert.
-await nav(owner, base+'/app'); await waitText(owner,'Wartet auf dich'); await waitText(owner,'Hausakte'); await waitText(owner,'Nächste Termine');
+// Die Owner-Startseite ist die Werkbank-Komposition (Fokus-Karte
+// "Warten auf dich", Schnellaktionen, "Haus-Historie",
+// "Vorschläge für dich"). Die früheren Anker ("Wartet auf dich",
+// "Hausakte", "Nächste Termine") gehören zur abgelösten Komposition.
+await nav(owner, base+'/app'); await waitText(owner,'Warten auf dich'); await waitText(owner,'Schnellaktionen'); await waitText(owner,'Haus-Historie'); await waitText(owner,'Vorschläge für dich');
 // Owner mobile navigation: derselbe Werkbank-Rahmen, also dieselbe Sidebar.
 // Der frueher hier gepruefte Notion-Drawer (.mobile-menu / .ehn-drawer) wird von
 // keiner Route mehr gerendert. Was bleiben muss: die Hausbereiche oben, die
@@ -694,17 +695,14 @@ await jobsMenu.getByText('Neuer Auftrag',{exact:true}).first().waitFor({timeout:
 await jobsMenu.getByText('Alle Aufträge',{exact:true}).first().waitFor({timeout:10000});
 await clickAndWaitUrl(ownerDesktop,jobsMenu.getByRole('menuitem',{name:'Alle Aufträge'}),/\/app\/jobs/);
 await nav(ownerDesktop, base+'/app');
-// 3b3) Bereichs-Flyout: Hover auf "Neuer Auftrag" öffnet daneben die
-// 12 Bereiche (Platzierung ist viewport-abhängig und wird per
-// Fixture-Probe auf 1320 + 1920 geprüft, nicht hier). Klick auf einen
+// 3b3) Neuer Auftrag + 12 Bereiche direkt im Menü (kein Hover-Submenü:
+// Radix-Sub schloss sich beim Anfahren, Klick hing). Klick auf einen
 // Bereich startet den Hausmeister mit passendem Thema.
 await headerMenu.getByRole('button',{name:'Aufträge'}).click();
 const jobsMenu2=ownerDesktop.getByRole('menu');
-await jobsMenu2.getByRole('menuitem',{name:'Neuer Auftrag'}).hover();
-const subMenu=ownerDesktop.locator('[data-slot="dropdown-menu-sub-content"]');
-await subMenu.getByText('Garten & Außen',{exact:true}).first().waitFor({timeout:10000});
-if(await subMenu.getByRole('menuitem').count()!==12)throw new Error('Area submenu must list exactly the 12 service areas');
-await clickAndWaitUrl(ownerDesktop,subMenu.getByRole('menuitem',{name:'Garten & Außen'}),/\/app\/hausmeister\?topic=garten-aussenbereich/);
+await jobsMenu2.getByText('Garten & Außen',{exact:true}).first().waitFor({timeout:10000});
+if(await jobsMenu2.locator('[data-testid^="bereich-"]').count()!==12)throw new Error('Area list must show exactly the 12 service areas');
+await clickAndWaitUrl(ownerDesktop,jobsMenu2.getByRole('menuitem',{name:'Garten & Außen'}),/\/app\/hausmeister\?topic=garten-aussenbereich/);
 await nav(ownerDesktop, base+'/app');
 // Direkt-Klick auf "Neuer Auftrag" navigiert ohne Umweg.
 await headerMenu.getByRole('button',{name:'Aufträge'}).click();
@@ -1010,14 +1008,13 @@ await waitText(buyer,'Sag, über welchen Weg wir dich am besten erreichen. Über
 await buyer.getByRole('button',{name:'Überspringen'}).click();
 await Promise.all([buyer.waitForURL('**/app?onboarding=done'),buyer.waitForLoadState('load')]);
 // Dieselben Anker wie fuer den Eigentuemer: die Startseite ist die
-// EHOwnerSection-Komposition, "Was möchtest du für dein Zuhause klären?" gehoert
-// zu EHOwnerComposer, das keine Seite mehr rendert.
-await waitText(buyer,'Wartet auf dich'); await waitText(buyer,'Hausakte'); await waitText(buyer,'Nächste Termine');
+// Werkbank-Komposition ("Warten auf dich", "Haus-Historie").
+await waitText(buyer,'Warten auf dich'); await waitText(buyer,'Haus-Historie'); await waitText(buyer,'Vorschläge für dich');
 if(await buyer.getByText('Einrichtung unvollständig').count())throw new Error('Onboarding banner still shown after completion');
 await nav(buyer, buyer.url()); if(await buyer.getByText('Einrichtung unvollständig').count())throw new Error('Onboarding state did not persist after reload');
 // 12) Hausakte kann kontrolliert übergeben werden, private Vorgänge bleiben beim bisherigen Eigentümer.
 await nav(owner, base+'/app/home/history'); await owner.getByLabel('E-Mail des Käufers').fill(buyerEmail); await clickAndWaitUrl(owner,owner.getByRole('button',{name:'Übergabe vorbereiten'}),/transfer=/); const transferToken=new URL(owner.url()).searchParams.get('transfer'); if(!transferToken)throw new Error('House transfer token missing');
-await nav(buyer, base+'/app'); await waitText(buyer,'Wartet auf dich'); await waitText(buyer,'Hausakte'); console.error('E2EDIAG buyer still authed before transfer accept');
+await nav(buyer, base+'/app'); await waitText(buyer,'Warten auf dich'); await waitText(buyer,'Haus-Historie'); console.error('E2EDIAG buyer still authed before transfer accept');
 await waitForDomStable(buyer,'#owner-main-content',1);
 const buyerCookies=await buyerCtx.cookies(base+'/'); console.error('E2EDIAG buyer cookies:',JSON.stringify(buyerCookies.map(c=>c.name)));
 await nav(buyer, base+`/transfer/${transferToken}`); await waitText(buyer,'Hausakte übernehmen');

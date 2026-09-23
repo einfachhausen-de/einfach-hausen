@@ -130,6 +130,11 @@
       "purpose": "Feature-Flags (T-0125/T-0139): Schluessel, Status, aktualisiert von",
       "retention": "short"
     },
+    "file_archive_state": {
+      "personal": true,
+      "purpose": "Hausakte-Backup in Nutzer-Cloud (BYOS): ausgelagerte Originale je Owner (Pfad, Provider, Referenz, Pruefsumme)",
+      "retention": "account"
+    },
     "homeowner_contacts": {
       "personal": true,
       "purpose": "Gespeicherte Kontakte des Homeowners (Persoenliches Hausbuch)",
@@ -384,6 +389,11 @@
       "personal": true,
       "purpose": "Tarifvergleich: Anbieter- und Tarifnamen als B2B-Referenzdaten (kein Nutzerbezug, bleibt erhalten)",
       "retention": "business"
+    },
+    "user_cloud_links": {
+      "personal": true,
+      "purpose": "Hausakte-Backup in Nutzer-Cloud (BYOS): Cloud-Verknuepfung je Owner (Provider, Auto-Restore)",
+      "retention": "account"
     },
     "user_settings": {
       "personal": true,
