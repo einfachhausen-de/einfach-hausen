@@ -57,4 +57,14 @@ test('chat document upload records the owner message and assistant result withou
  assert.equal(db.prepare('SELECT COUNT(*) c FROM assistant_messages').get().c,before+2);
 });
 
+test('all owner AI chat surfaces expose the document-upload entry',()=>{
+ const full=fs.readFileSync(path.join(process.cwd(),'src/components/homeowner/homeowner-hausmeister-composer.tsx'),'utf8');
+ const compact=fs.readFileSync(path.join(process.cwd(),'src/components/house-assistant.tsx'),'utf8');
+ const action=fs.readFileSync(path.join(process.cwd(),'src/app/actions.ts'),'utf8');
+ assert.match(full,/name=\"document\"/);
+ assert.match(full,/application\/pdf,image\/\*/);
+ assert.match(compact,/\/app\/hausmeister#hausmeister-composer/);
+ assert.match(action,/storeAssistantDocument/);
+});
+
 test.after(()=>{db.close();fs.rmSync(tmp,{recursive:true,force:true})});
