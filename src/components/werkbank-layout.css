@@ -235,19 +235,6 @@
 .eh-anlege-wechsel { display:flex; flex-wrap:wrap; gap:12px; align-items:center; margin:6px 2px 0; font-size:var(--eh-font-meta); color:var(--eh-muted); }
 .eh-anlege-wechsel a { display:inline-flex; gap:6px; align-items:center; color:var(--eh-color-petrol); text-decoration:none; }
 .eh-anlege-wechsel a:hover { text-decoration:underline; }
-/* Banner auf der Vertragsseite: ein Hingucker, drei Direktwege */
-.eh-vertrag-ads { display:flex; flex-wrap:wrap; align-items:center; gap:18px; padding:22px; border-radius:var(--eh-radius-panel); background:linear-gradient(120deg,#0d4448,#105258 55%,#1b8569); color:#fff; }
-.eh-vertrag-ads-text { flex:1 1 300px; display:grid; gap:6px; }
-.eh-vertrag-ads-kicker { display:inline-flex; align-items:center; gap:6px; font-size:var(--eh-font-meta); letter-spacing:.04em; text-transform:uppercase; opacity:.85; }
-.eh-vertrag-ads-text strong { font-size:20px; line-height:1.2; }
-.eh-vertrag-ads-text small { opacity:.85; }
-.eh-vertrag-ads-cta { display:grid; gap:10px; justify-items:start; }
-.eh-vertrag-ads-cta .eh-werkbank-kopf-cta { background:#fff; color:var(--eh-color-petrol); }
-.eh-vertrag-ads-cta .eh-werkbank-kopf-cta:hover { background:#eef6f5; }
-.eh-vertrag-ads-links { display:flex; gap:14px; font-size:var(--eh-font-label); flex-wrap:wrap; }
-.eh-vertrag-ads-links a { color:rgba(255,255,255,.85); text-decoration:none; }
-.eh-vertrag-ads-links a:hover { color:#fff; text-decoration:underline; }
-
 /* Vergleich & Tarife als Karten nebeneinander im Chip-Slider (24.09.,
    Betreiber-Vorbild Startseite): CompareRail liefert die runden Pfeile,
    scroll-snap macht das Wischen griffig; Farbtone = Chips-Hues. */

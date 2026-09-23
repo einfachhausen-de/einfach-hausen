@@ -12,6 +12,7 @@ import { WerkbankRahmen } from '@/components/werkbank-rahmen';
 import { VertraegeTabelle } from '@/components/homeowner/vertraege-tabelle';
 import { CompareRail } from '@/components/homeowner/compare-rail';
 import { requireUser } from '@/lib/auth';
+import { EHPromoBanner } from '@/components/eh-promo-banner';
 import { db } from '@/lib/db';
 import { euroExact } from '@/lib/format';
 import {
@@ -151,6 +152,19 @@ export default async function Contracts({ searchParams }: { searchParams: Promis
     </div>
   </>}>
 
+    <EHPromoBanner
+      kicker="Neuer Vertrag"
+      icon={<Zap size={13} aria-hidden="true" />}
+      title="Beleg her. Den Rest liest die KI."
+      text="Hochladen, abfotografieren oder zwei Felder selbst ausfüllen — der Spar-Check startet danach von allein."
+      primary={{ href: '/app/contracts/anlegen', label: '+ Vertrag anlegen' }}
+      links={[
+        { href: '/app/contracts/anlegen?weg=hochladen', label: 'Hochladen' },
+        { href: '/app/contracts/anlegen?weg=scannen', label: 'Scannen' },
+        { href: '/app/contracts/anlegen?weg=manuell', label: 'Selbst eintragen' },
+      ]}
+    />
+
     <div className="eh-vdash">
       <div className="eh-vdash-kopf">
         <div className="eh-vdash-title">
@@ -236,23 +250,6 @@ export default async function Contracts({ searchParams }: { searchParams: Promis
       </CompareRail>
     </EHOwnerSection>
 
-    <section id="vertrag-anlegen" aria-label="Vertrag anlegen">
-      <div className="eh-vertrag-ads">
-        <div className="eh-vertrag-ads-text">
-          <span className="eh-vertrag-ads-kicker"><Zap size={13} aria-hidden="true" /> Neuer Vertrag</span>
-          <strong>Beleg her. Den Rest liest die KI.</strong>
-          <small>Hochladen, abfotografieren oder zwei Felder selbst ausfüllen — der Spar-Check startet danach von allein.</small>
-        </div>
-        <div className="eh-vertrag-ads-cta">
-          <Link href="/app/contracts/anlegen" className="eh-werkbank-kopf-cta">+ Vertrag anlegen</Link>
-          <nav className="eh-vertrag-ads-links" aria-label="Direkt zu einem Weg">
-            <Link href="/app/contracts/anlegen?weg=hochladen">Hochladen</Link>
-            <Link href="/app/contracts/anlegen?weg=scannen">Scannen</Link>
-            <Link href="/app/contracts/anlegen?weg=manuell">Selbst eintragen</Link>
-          </nav>
-        </div>
-      </div>
-    </section>
   </WerkbankRahmen>;
 }
 
