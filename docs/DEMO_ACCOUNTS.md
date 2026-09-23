@@ -9,7 +9,9 @@
 Die Login-Seite zeigt die Demo-Box mit Ein-Klick-Buttons nur wenn Demo explizit an ist; Benutzernamen gehen auch per Hand (ohne `@` → Demo-Mapping).
 
 ## Technik
-- Direkt-Einstieg ohne Formular: `/login?demo=1` (Eigentümer) bzw. `/login?demo=handwerker` — leitet serverseitig auf
+- Direkt-Einstieg ohne Formular: `/login/demo` (Eigentümer) bzw. `/login/demo/handwerker` — Pfad statt Query
+  (Vorschau-Adressleisten übernehmen oft nur Pfade); alternativ `/login?demo=1`. Leitet serverseitig auf
+  `/api/auth/demo-start` (Eigentümer) bzw. `/login?demo=handwerker` — leitet serverseitig auf
   `/api/auth/demo-start` (Session via `createSession`, 303 nach `/app` bzw. `/pro`). Existiert nur bei
   `AUTH_MODE=local` + `DEMO_LOGIN_ENABLED=1`; Supabase-Setups bekommen 404.
 - Supabase-User `kunde@demo.einfachhausen.de` + `handwerker@demo.einfachhausen.de` (Passwort aus `DEMO_PASSWORD`, confirmed). Anlegen: `node scripts/seed-demo-users.mjs` (braucht Service-Key).
