@@ -57,6 +57,23 @@
 .eh-werkbank-chip:focus-visible { border-color:var(--eh-color-petrol); }
 .eh-werkbank-chip[aria-current="page"] { background:var(--eh-color-petrol); color:var(--eh-color-white); border-color:var(--eh-color-petrol); }
 .eh-werkbank-chip-n { font-variant-numeric:tabular-nums; }
+/* Farbige Vergleichs-Chips (Betreiber-Order 2026-09-23: mehr Farben in der
+   App): jede Kategorie traegt ihre eigene Nuance — Ton fuer Hintergrund,
+   Tinte fuer Schrift, Symbol und Rand. Das Markup entscheidet nur ueber die
+   Kategorie (data-hue); Zustand bleibt in aria-current (petrol), nicht in
+   einer Klasse. Die Tonwerte sind lokale Token dieser Datei. */
+.eh-werkbank-chip[data-hue="sonne"]  { --eh-chip-tint:#fff3d1; --eh-chip-ink:#7d5c00; }
+.eh-werkbank-chip[data-hue="himmel"] { --eh-chip-tint:#e8f1ff; --eh-chip-ink:#315f9e; }
+.eh-werkbank-chip[data-hue="veilchen"] { --eh-chip-tint:#efeaff; --eh-chip-ink:#5846a8; }
+.eh-werkbank-chip[data-hue="stahl"]  { --eh-chip-tint:#eef1f4; --eh-chip-ink:#43566b; }
+.eh-werkbank-chip[data-hue="rose"]   { --eh-chip-tint:#fdeaef; --eh-chip-ink:#9c3a5c; }
+.eh-werkbank-chip[data-hue="sand"]   { --eh-chip-tint:#f4ebdd; --eh-chip-ink:#8a6321; }
+.eh-werkbank-chip[data-hue="terra"]  { --eh-chip-tint:#f7e4da; --eh-chip-ink:#a84d29; }
+.eh-werkbank-chip[data-hue="blatt"]  { --eh-chip-tint:#eaf6e6; --eh-chip-ink:#2c6b37; }
+.eh-werkbank-chip[data-hue="petrol"] { --eh-chip-tint:#dcebec; --eh-chip-ink:#0d474d; }
+.eh-werkbank-chip[data-hue] { color:var(--eh-chip-ink); background:var(--eh-chip-tint); border-color:transparent; }
+.eh-werkbank-chip[data-hue]:hover, .eh-werkbank-chip[data-hue]:focus-visible { border-color:var(--eh-chip-ink); background:var(--eh-chip-tint); }
+
 .eh-werkbank-tbl small { display:block; color:var(--eh-muted); font-size:var(--eh-font-eyebrow); margin-top:2px; }
 /* Der versiegelte EHFileInput bringt eine eigene Mindestbreite mit. Ohne
    Klammer drueckt sie die Feldspalte ueber das Viewport; der Consumer

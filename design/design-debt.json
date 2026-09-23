@@ -1956,6 +1956,26 @@
     "small-type\u0000text-xs": 1,
     "state-class\u0000open": 1
   },
+  "src/components/werkbank-layout.css": {
+    "literal-color\u0000#fff3d1": 1,
+    "literal-color\u0000#7d5c00": 1,
+    "literal-color\u0000#e8f1ff": 1,
+    "literal-color\u0000#315f9e": 1,
+    "literal-color\u0000#efeaff": 1,
+    "literal-color\u0000#5846a8": 1,
+    "literal-color\u0000#eef1f4": 1,
+    "literal-color\u0000#43566b": 1,
+    "literal-color\u0000#fdeaef": 1,
+    "literal-color\u0000#9c3a5c": 1,
+    "literal-color\u0000#f4ebdd": 1,
+    "literal-color\u0000#8a6321": 1,
+    "literal-color\u0000#f7e4da": 1,
+    "literal-color\u0000#a84d29": 1,
+    "literal-color\u0000#eaf6e6": 1,
+    "literal-color\u0000#2c6b37": 1,
+    "literal-color\u0000#dcebec": 1,
+    "literal-color\u0000#0d474d": 1
+  },
   "src/config/design-tokens.ts": {
     "literal-color\u0000#0a3539": 1,
     "literal-color\u0000#0d474d": 1,

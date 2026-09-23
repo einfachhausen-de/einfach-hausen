@@ -13,15 +13,15 @@ import styles from '../eigentuemer-start.module.css';
  */
 
 const COMPARES = [
-  { href: '/app/contracts?tab=vergleichen#vergleich-strom', label: 'Strom', icon: Zap },
-  { href: '/app/contracts?tab=vergleichen#vergleich-gas', label: 'Gas', icon: Flame },
-  { href: '/app/contracts?tab=vergleichen#vergleich-dsl', label: 'Internet', icon: Wifi },
-  { href: '/app/contracts?tab=vergleichen#vergleich-versicherung', label: 'Versicherung', icon: ShieldCheck },
-  { href: '/app/contracts?tab=vergleichen#vergleich-mobilfunk', label: 'Mobilfunk', icon: Smartphone },
-  { href: '/app/contracts?tab=vergleichen', label: 'Photovoltaik', icon: Sun },
-  { href: '/app/contracts?tab=vergleichen', label: 'Heizung', icon: Thermometer },
-  { href: '/app/contracts?tab=vergleichen', label: 'Smart Home', icon: HousePlug },
-  { href: '/app/contracts?tab=vergleichen', label: 'Wallbox', icon: BatteryCharging },
+  { href: '/app/contracts?tab=vergleichen#vergleich-strom', label: 'Strom', icon: Zap, hue: 'sonne' },
+  { href: '/app/contracts?tab=vergleichen#vergleich-gas', label: 'Gas', icon: Flame, hue: 'himmel' },
+  { href: '/app/contracts?tab=vergleichen#vergleich-dsl', label: 'Internet', icon: Wifi, hue: 'veilchen' },
+  { href: '/app/contracts?tab=vergleichen#vergleich-versicherung', label: 'Versicherung', icon: ShieldCheck, hue: 'stahl' },
+  { href: '/app/contracts?tab=vergleichen#vergleich-mobilfunk', label: 'Mobilfunk', icon: Smartphone, hue: 'rose' },
+  { href: '/app/contracts?tab=vergleichen', label: 'Photovoltaik', icon: Sun, hue: 'sand' },
+  { href: '/app/contracts?tab=vergleichen', label: 'Heizung', icon: Thermometer, hue: 'terra' },
+  { href: '/app/contracts?tab=vergleichen', label: 'Smart Home', icon: HousePlug, hue: 'blatt' },
+  { href: '/app/contracts?tab=vergleichen', label: 'Wallbox', icon: BatteryCharging, hue: 'petrol' },
 ] as const;
 
 const RAIL = [
@@ -120,7 +120,7 @@ export default function Preview() {
         <CompareRail label="Verträge und Vergleiche">
           <nav className="eh-werkbank-chips" aria-label="Verträge und Vergleiche">
             {COMPARES.map((compare) => (
-              <Link key={compare.label} href={compare.href} className="eh-werkbank-chip">
+              <Link key={compare.label} href={compare.href} className="eh-werkbank-chip" data-hue={compare.hue}>
                 <compare.icon size={16} aria-hidden="true" />
                 {compare.label}
               </Link>
