@@ -18,18 +18,26 @@ type Message = { role: 'user' | 'assistant'; content: string };
  */
 export type AssistantStepState = 'done' | 'running' | 'failed' | 'pending';
 export type AssistantStep = { key: string; label: string; state: AssistantStepState; meta?: string; details?: string[] };
+export type AssistantSource = { title: string; href: string; domain: string };
 export type AssistantResponse = {
-  status: number; reply: string; links?: ToolResult['links']; provider?: string; steps?: AssistantStep[];
+  status: number; reply: string; links?: ToolResult['links']; sources?: AssistantSource[]; provider?: string; steps?: AssistantStep[];
   /** Angebote als Entscheidungskarten: der Chat zeigt sie unter der Antwort. */
   cards?: OfferCard[];
   quota?: ReturnType<typeof aiQuotaSnapshot> | { byok: boolean }; exhausted?: boolean; options?: string[];
 };
+function domainOf(href: string): string {
+  if (href.startsWith('/')) return 'einfachhausen.de';
+  try { return new URL(href).hostname.replace(/^www\./, ''); } catch { return href; }
+}
+function sourcesFromLinks(links?: ToolResult['links']): AssistantSource[] | undefined {
+  if (!links?.length) return undefined;
+  return links.map(l => ({ title: l.label, href: l.href, domain: domainOf(l.href) }));
+}
 const THEMA: Record<Capability, string> = {
   jobs: 'Aufträge', quotes: 'Angebote', contracts: 'Verträge', documents: 'Dokumente', contacts: 'Ansprechpartner',
-  calendar: 'Termine', house: 'Hausakte', maintenance: 'Pflege', next_actions: 'Nächste Schritte',
-  compare_quotes: 'Angebote vergleichen', house_check: 'Haus-Check', house_event: 'Haus-Ereignis',
-  find_provider: 'Betriebe finden',
+  calendar: 'Termine', house: 'Hausakte', maintenance: 'Pflege', find_provider: 'Betriebe finden',
   create_job: 'Auftrag anlegen', compare_tariffs: 'Tarife vergleichen', help: 'App-Hilfe', generative: 'Beratung', clarify: 'Rückfrage',
+  next_actions: 'Nächste Schritte', compare_quotes: 'Angebote vergleichen', house_check: 'Haus-Check', house_event: 'Haus-Ereignis',
 };
 // Diese Faehigkeiten schlagen in den eigenen Daten nach; die uebrigen erklaeren nur die App.
 const LIEST_DATEN: Capability[] = ['jobs', 'quotes', 'contracts', 'documents', 'contacts', 'calendar', 'house', 'maintenance'];
@@ -117,11 +125,11 @@ export async function answerAssistant(userId: number, rawMessages: unknown, sign
     const karten = capability === 'quotes' ? offerCards(userId) : [];
     melde({ key: 'antwort', label: 'Antwort zusammengestellt', state: 'done', meta: 'Ohne KI-Modell', details: [karten.length ? 'Offene Angebote stehen als Karte bereit.' : 'Diese Antwort verbraucht kein Kontingent.'] });
     const tool = executeAssistantTool(userId, capability, question);
-    if (!karten.length) return abschluss({ status: 200, ...tool, provider, quota: aiQuotaSnapshot(userId) });
+    if (!karten.length) return abschluss({ status: 200, ...tool, sources: sourcesFromLinks(tool.links), provider, quota: aiQuotaSnapshot(userId) });
     const vorgaenge = karten.length === 1 ? 'Ein Vorgang hat offene Angebote' : `${karten.length} Vorgänge haben offene Angebote`;
     return abschluss({
       status: 200, reply: `${vorgaenge}. Prüfe die Auswahl in der Karte – mit „Buchen“ bestätigst du ein Angebot, vorher passiert nichts.`,
-      links: tool.links, provider, quota: aiQuotaSnapshot(userId), cards: karten,
+      links: tool.links, sources: sourcesFromLinks(tool.links), provider, quota: aiQuotaSnapshot(userId), cards: karten,
     });
   }
   const gateway = generativeGateway(userId);

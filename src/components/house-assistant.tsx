@@ -7,7 +7,7 @@ import type {OfferCard} from '@/lib/offer-cards';
 const AUSFALL = 'Eine Antwort ist gerade nicht verfügbar. Bitte versuche es später erneut.';
 const IDLE_MS = 30000;
 
-type Ergebnisrahmen = {status?: number; reply?: string; steps?: EHActivityStep[]; cards?: OfferCard[]};
+type Ergebnisrahmen = {status?: number; reply?: string; steps?: EHActivityStep[]; cards?: OfferCard[]; sources?: Array<{title: string; href: string; domain: string}>; links?: Array<{label: string; href: string}>};
 
 /** Offene Angebote als Karte unter der Antwort; gebucht wird nur per Knopf. */
 function kartenknoten(karten?: OfferCard[]) {
@@ -36,9 +36,10 @@ function ergebnis(status: number, data: Ergebnisrahmen): EHAssistantResult {
   const reply = typeof data.reply === 'string' ? data.reply : AUSFALL;
   const steps = data.steps?.length ? {steps: data.steps} : {};
   const cards = kartenknoten(data.cards);
+  const sources = data.sources?.length ? data.sources : data.links?.length ? data.links.map(l => ({title: l.label, href: l.href, domain: l.href.startsWith('/') ? 'einfachhausen.de' : (() => { try { return new URL(l.href).hostname.replace(/^www\./,''); } catch { return l.href; }})()})) : undefined;
   if (status === 401) return {kind: 'login', reply, ...steps};
   if (status === 402) return {kind: 'quota', reply, ...steps};
-  return {kind: status >= 200 && status < 300 ? 'reply' : 'error', reply, ...steps, ...(cards ? {cards} : {})};
+  return {kind: status >= 200 && status < 300 ? 'reply' : 'error', reply, ...steps, ...(cards ? {cards} : {}), ...(sources ? {sources} : {})};
 }
 
 async function send(messages: EHAssistantMessage[], signal: AbortSignal, onStep?: (step: EHActivityStep) => void): Promise<EHAssistantResult> {

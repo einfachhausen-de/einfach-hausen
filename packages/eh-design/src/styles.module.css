@@ -779,9 +779,139 @@ summary.activityHead { cursor:pointer; list-style:none; }
 .assistantPanel .assistantActions { flex-direction:column;align-items:stretch; }
 .assistantPanel .assistantActions > a { text-align:center; }
 @media(max-width:1023.5px) { .assistantPanel,.assistantLauncher[data-placement="panel"] { display:none; } }
+/* Assistant · Aufwertung: Kopf, Welcome, Verlauf, Quellen */
+.assistantHeaderIcon { display:grid;place-items:center;flex:none;width:32px;height:32px;border-radius:var(--eh-radius-pill);background:var(--eh-color-petrol);color:var(--eh-color-white); }
+.assistantClose { display:grid;place-items:center;width:32px;height:32px;border:1px solid var(--eh-color-line);border-radius:var(--eh-radius-control);background:var(--eh-color-white);color:var(--eh-color-secondary);cursor:pointer; }
+.assistantClose:hover { border-color:var(--eh-color-petrol);color:var(--eh-color-petrol); }
+.assistantVerlaufHead { display:flex;align-items:center;gap:8px;padding:6px 2px 2px;font-size:11px;font-weight:var(--eh-weight-semibold);letter-spacing:.07em;text-transform:uppercase;color:var(--eh-color-secondary); }
+.assistantWelcome { display:grid;gap:14px;padding:18px;border:1px solid var(--eh-color-line);border-radius:var(--eh-radius-panel);background:var(--eh-color-white); }
+.assistantWelcomeHead { display:flex;align-items:center;gap:12px; }
+.assistantWelcomeIcon { display:grid;place-items:center;flex:none;width:36px;height:36px;border-radius:var(--eh-radius-control);background:var(--eh-color-petrol);color:var(--eh-color-white); }
+.assistantWelcome h3 { font-size:var(--eh-font-body);font-weight:var(--eh-weight-semibold);line-height:1.35;letter-spacing:-.015em;margin:0; }
+.assistantMessageMeta { display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px;font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--eh-color-secondary); }
+.assistantRoleUser { font-weight:var(--eh-weight-semibold);color:var(--eh-color-ink); }
+.assistantRoleAi { display:inline-flex;align-items:center;gap:6px;font-weight:var(--eh-weight-semibold);color:var(--eh-color-petrol); }
+.assistantMetaTime { display:inline-flex;align-items:center;gap:4px; }
+.assistantMessageActions { display:flex;align-items:center;gap:6px;margin-top:10px;flex-wrap:wrap; }
+.assistantActionBtn { display:inline-flex;align-items:center;gap:6px;min-height:30px;padding:5px 10px;border:1px solid var(--eh-color-line);border-radius:var(--eh-radius-control);background:var(--eh-color-paper);color:var(--eh-color-secondary);font:600 12px/1 var(--eh-font-family);cursor:pointer; }
+.assistantActionBtn:hover { border-color:var(--eh-color-petrol);color:var(--eh-color-petrol);background:var(--eh-color-white); }
+.assistantActionBtn[data-active="true"] { border-color:var(--eh-color-petrol);color:var(--eh-color-petrol);background:color-mix(in srgb, var(--eh-color-petrol) 10%, var(--eh-color-white)); }
+.assistantSources { margin-top:12px;border:1px solid var(--eh-color-line);border-radius:var(--eh-radius-control);background:var(--eh-color-paper);overflow:hidden; }
+.assistantSourcesHead { display:flex;align-items:center;gap:8px;min-height:36px;padding:8px 10px;font-size:12px;font-weight:var(--eh-weight-semibold);color:var(--eh-color-secondary);cursor:pointer;list-style:none; }
+.assistantSourcesHead::-webkit-details-marker { display:none; }
+.assistantSourcesHint { font-weight:var(--eh-weight-regular);color:var(--eh-color-secondary); }
+.assistantSourceList { list-style:none;margin:0;padding:6px;display:grid;gap:6px; }
+.assistantSourceItem { display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px solid var(--eh-color-line);border-radius:var(--eh-radius-control);background:var(--eh-color-white);color:var(--eh-color-ink);text-decoration:none; }
+.assistantSourceItem:hover { border-color:var(--eh-color-petrol); }
+.assistantSourceIcon { display:grid;place-items:center;flex:none;width:28px;height:28px;border-radius:var(--eh-radius-control);background:var(--eh-color-paper);color:var(--eh-color-petrol); }
+.assistantSourceMeta { flex:1;min-width:0; }
+.assistantSourceMeta strong { display:block;font-size:12px;font-weight:var(--eh-weight-semibold);line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+.assistantSourceMeta span { display:block;font-size:11px;color:var(--eh-color-secondary);line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+.assistantBusy { display:flex;align-items:center;gap:8px;font-size:var(--eh-font-meta);color:var(--eh-color-secondary); }
+.assistantBusyDot { width:8px;height:8px;border-radius:var(--eh-radius-pill);background:var(--eh-color-petrol);animation:assistantPulse 1.2s ease-in-out infinite; }
+@keyframes assistantPulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+/* Streaming-Antwort (Token-Adaption von streaming-response.tsx): Quellen und Feedback wie die Werkbank. */
+.streamingResponse { display:grid;gap:12px;padding:14px 16px;border:1px solid var(--eh-color-line);border-radius:var(--eh-radius-panel);background:var(--eh-color-white); }
+.streamingContent { font-size:var(--eh-font-input);line-height:var(--eh-leading-loose);white-space:pre-wrap;overflow-wrap:anywhere; }
+.streamingDot { display:inline-block;width:8px;height:8px;margin-left:6px;border-radius:var(--eh-radius-pill);background:var(--eh-color-petrol);animation:assistantPulse 1s ease-in-out infinite;vertical-align:middle; }
+.streamingActions { display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding-top:12px;border-top:1px solid var(--eh-color-line); }
+.streamingActionBtn { display:inline-flex;align-items:center;gap:6px;min-height:32px;padding:6px 10px;border:1px solid var(--eh-color-line);border-radius:var(--eh-radius-control);background:var(--eh-color-white);color:var(--eh-color-secondary);font:600 12px/1 var(--eh-font-family);cursor:pointer; }
+.streamingActionBtn:hover { border-color:var(--eh-color-petrol);color:var(--eh-color-petrol); }
+.streamingFeedback { display:inline-flex;align-items:center;gap:6px;margin-left:auto; }
+.streamingFeedbackBtn { display:grid;place-items:center;width:32px;height:32px;border:1px solid var(--eh-color-line);border-radius:var(--eh-radius-control);background:var(--eh-color-white);color:var(--eh-color-secondary);cursor:pointer; }
+.streamingFeedbackBtn:hover { border-color:var(--eh-color-petrol);color:var(--eh-color-petrol); }
+.streamingFeedbackBtn[data-active="true"] { border-color:var(--eh-color-petrol);color:var(--eh-color-petrol);background:color-mix(in srgb, var(--eh-color-petrol) 10%, var(--eh-color-white)); }
+.citationStack { display:inline-flex;align-items:center;gap:6px; }
+.citationStackIcons { display:inline-flex;gap:0; }
+.citationStackIcon { display:grid;place-items:center;width:22px;height:22px;margin-left:-6px;border:1px solid var(--eh-color-white);border-radius:var(--eh-radius-pill);background:var(--eh-color-paper);color:var(--eh-color-petrol); }
+.citationStackIcon:first-child { margin-left:0; }
+.citationStackExtra { font-size:var(--eh-font-meta);color:var(--eh-color-secondary);font-variant-numeric:tabular-nums; }
+.citationList { list-style:none;margin:0;padding:0;display:grid;gap:6px; }
+.citationItem { display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px solid var(--eh-color-line);border-radius:var(--eh-radius-control);background:var(--eh-color-white);color:var(--eh-color-ink);text-decoration:none; }
+.citationItem:hover { border-color:var(--eh-color-petrol);background:var(--eh-color-paper); }
+.citationIcon { display:grid;place-items:center;flex:none;width:28px;height:28px;border-radius:var(--eh-radius-control);background:var(--eh-color-paper);color:var(--eh-color-petrol); }
+.citationMeta { flex:1;min-width:0; }
+.citationMeta strong { display:block;font-size:12px;font-weight:var(--eh-weight-semibold);line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+.citationMeta span { display:block;font-size:11px;color:var(--eh-color-secondary);line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+.agentDisclosure { border:1px solid var(--eh-color-line);border-radius:var(--eh-radius-control);background:var(--eh-color-paper);overflow:hidden; }
+.agentDisclosureSummary { display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:36px;padding:8px 10px;font-size:12px;font-weight:var(--eh-weight-semibold);color:var(--eh-color-secondary);cursor:pointer;list-style:none; }
+.agentDisclosureSummary::-webkit-details-marker { display:none; }
+.agentDisclosureSummaryText { display:inline-flex;align-items:center;gap:8px; }
+.agentDisclosureChevron { transition:transform var(--eh-motion-duration) var(--eh-motion-ease); }
+.agentDisclosureChevron[data-open="true"] { transform:rotate(180deg); }
+.agentDisclosureBody { padding:6px;border-top:1px solid var(--eh-color-line);background:var(--eh-color-white); }
+.srOnly { position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap; }
 .assistantLauncher[data-placement="toolbar"] .assistantLauncherAvatar { display:none; }
 .assistantLauncher[data-placement="toolbar"] strong { font-size:14px; white-space:nowrap; }
 @media(max-width:600px) { .assistantLauncher[data-placement="toolbar"] { padding:8px; } }
+
+/* ── Hausmanager · ChatGPT ───────────────────────────────────────────────
+   Der rechte Bereich und das schwebende Fenster nutzen dieselbe Sprache:
+   zentrierter Titel, schwebende Eingabe mit 28px-Rundung, Nutzerblase
+   rechts, Assistent flach mit feinen Aktionen. Alles aus Tokens, kein
+   Hex im Markup. */
+.assistantWelcome { display:grid; gap:16px; padding:28px 18px 22px; text-align:center; border:0; background:transparent; }
+.assistantWelcomeHead { justify-content:center; }
+.assistantWelcomeIcon { display:none; }
+.assistantWelcome h3 { font-size:clamp(26px,3vw,32px); font-weight:700; letter-spacing:-.03em; line-height:1.1; }
+.assistantWelcome > .text { margin-inline:auto; }
+.assistantMessages { background:var(--eh-color-paper); }
+.assistantMessage { border:0; border-radius:18px; padding:12px 16px; font-size:var(--eh-font-input); line-height:1.6; }
+.assistantMessage[data-role="user"] { margin-left:auto; margin-right:0; max-width:78%; background:var(--eh-color-white); color:var(--eh-color-ink); border:1px solid var(--eh-color-line); border-radius:22px; }
+.assistantMessage[data-role="assistant"] { background:transparent; border:0; padding:4px 2px; border-radius:0; }
+.assistantMessageMeta { justify-content:flex-start; }
+.assistantMessage[data-role="user"] .assistantMessageMeta { justify-content:flex-end; }
+.assistantPanel { background:var(--eh-color-white); }
+.assistantPanel .assistantMessages { background:var(--eh-color-white); padding:20px 16px 12px; }
+.assistantPanel .assistantComposer { background:transparent; border-top:0; padding:12px 12px 14px; }
+.assistantComposer { background:transparent; border-top:0; padding:14px 16px 16px; }
+.assistantPromptBox { display:flex; flex-direction:column; gap:0; background:var(--eh-color-white); border:1px solid var(--eh-color-line); border-radius:28px; padding:8px; box-shadow:0 4px 24px rgba(16,34,42,.06), 0 1px 2px rgba(16,34,42,.04); transition:border-color var(--eh-motion-duration) var(--eh-motion-ease), box-shadow var(--eh-motion-duration) var(--eh-motion-ease); }
+.assistantPromptBox:focus-within { border-color:var(--eh-color-petrol); box-shadow:0 0 0 3px color-mix(in srgb, var(--eh-color-petrol) 12%, transparent), 0 8px 32px rgba(16,34,42,.08); }
+.assistantPromptInput { width:100%; min-height:52px; max-height:160px; resize:none; border:0; background:transparent; color:var(--eh-color-ink); font:400 var(--eh-font-input)/1.55 var(--eh-font-family); padding:10px 14px; outline:0; }
+.assistantPromptInput::placeholder { color:var(--eh-color-secondary); }
+.assistantPromptInput:focus { outline:0; }
+.assistantPromptPreview { display:flex; gap:8px; padding:4px 8px 0; flex-wrap:wrap; }
+.assistantPromptPreviewItem { position:relative; width:56px; height:56px; border-radius:14px; overflow:hidden; border:1px solid var(--eh-color-line); }
+.assistantPromptPreviewItem img { width:100%; height:100%; object-fit:cover; display:block; }
+.assistantPromptPreviewRemove { position:absolute; top:4px; right:4px; width:20px; height:20px; display:grid; place-items:center; border-radius:999px; background:rgba(16,34,42,.72); color:var(--eh-color-white); border:0; cursor:pointer; }
+.assistantPromptBar { display:flex; align-items:center; gap:8px; padding:6px 6px 2px; flex-wrap:wrap; }
+.assistantPromptLeft { display:flex; align-items:center; gap:6px; }
+.assistantPromptRight { margin-left:auto; display:flex; align-items:center; gap:8px; }
+.assistantPromptIconBtn { width:34px; height:34px; display:grid; place-items:center; border:0; border-radius:999px; background:transparent; color:var(--eh-color-secondary); cursor:pointer; }
+.assistantPromptIconBtn:hover { background:var(--eh-color-paper); color:var(--eh-color-ink); }
+.assistantPromptToolsBtn { display:inline-flex; align-items:center; gap:6px; min-height:34px; padding:6px 12px; border:1px solid transparent; border-radius:999px; background:transparent; color:var(--eh-color-secondary); font:500 13px/1 var(--eh-font-family); cursor:pointer; }
+.assistantPromptToolsBtn:hover { background:var(--eh-color-paper); color:var(--eh-color-ink); }
+.assistantPromptToolsBtn[data-active="true"] { background:color-mix(in srgb, var(--eh-color-petrol) 10%, var(--eh-color-white)); color:var(--eh-color-petrol); border-color:var(--eh-color-line); }
+.assistantPromptToolsBtn svg { width:16px; height:16px; }
+.assistantPromptSend { width:34px; height:34px; display:grid; place-items:center; border:0; border-radius:999px; background:var(--eh-color-ink); color:var(--eh-color-white); cursor:pointer; transition:background var(--eh-motion-duration) var(--eh-motion-ease), opacity var(--eh-motion-duration) var(--eh-motion-ease); }
+.assistantPromptSend:disabled { background:var(--eh-color-line); color:var(--eh-color-secondary); cursor:not-allowed; opacity:1; }
+.assistantPromptSend:hover:not(:disabled) { background:var(--eh-color-petrol); }
+.assistantPromptToolsMenu { position:absolute; bottom:calc(100% + 10px); left:0; min-width:220px; padding:8px; border:1px solid var(--eh-color-line); border-radius:14px; background:var(--eh-color-white); box-shadow:0 12px 40px rgba(16,34,42,.12), 0 2px 8px rgba(16,34,42,.06); z-index:5; }
+.assistantPromptToolsMenu button { width:100%; display:flex; align-items:center; gap:10px; padding:10px 12px; border:0; border-radius:10px; background:transparent; color:var(--eh-color-ink); font:500 13px/1.4 var(--eh-font-family); text-align:left; cursor:pointer; }
+.assistantPromptToolsMenu button:hover { background:var(--eh-color-paper); }
+.assistantPromptToolsMenu small { margin-left:auto; color:var(--eh-color-secondary); font-size:12px; }
+.assistantPromptHint { padding:6px 14px 0; font-size:11px; color:var(--eh-color-secondary); text-align:center; }
+.assistantDialog { background:var(--eh-color-white); }
+.assistantDialog .assistantMessages { background:var(--eh-color-white); }
+.assistantDialog .assistantComposer { background:transparent; border-top:0; }
+
+/* StreamingResponse · ChatGPT-fein: Inhalts-Poesie statt Karte */
+.streamingResponse { display:grid; gap:0; padding:0; border:0; background:transparent; border-radius:0; }
+.streamingContent { font-size:15px; line-height:1.7; color:var(--eh-color-ink); }
+.streamingContent :where(a) { color:var(--eh-color-petrol); text-decoration:underline; text-underline-offset:3px; }
+.streamingContent :where(code) { padding:1px 6px; border-radius:6px; background:var(--eh-color-paper); font-size:.9em; }
+.streamingContent :where(pre) { margin:12px 0; padding:14px; border:1px solid var(--eh-color-line); border-radius:12px; background:var(--eh-color-paper); overflow:auto; }
+.streamingActions { display:flex; align-items:center; gap:2px; padding-top:10px; }
+.streamingActionBtn { min-height:30px; padding:6px 10px; border:0; border-radius:999px; background:transparent; color:var(--eh-color-secondary); }
+.streamingActionBtn:hover { background:var(--eh-color-paper); color:var(--eh-color-ink); }
+.streamingFeedback { gap:2px; }
+.streamingFeedbackBtn { width:30px; height:30px; border:0; border-radius:999px; background:transparent; }
+.streamingFeedbackBtn:hover { background:var(--eh-color-paper); }
+.agentDisclosure { border:0; background:transparent; }
+.agentDisclosureSummary { background:var(--eh-color-paper); border:1px solid var(--eh-color-line); border-radius:999px; padding:6px 12px; gap:8px; }
+.agentDisclosureBody { background:transparent; border:0; padding:8px 0 0; }
+.citationList { gap:8px; }
+.citationItem { border-radius:14px; }
 
 
 /* Owner dashboard composition explicitly approved by the operator on 2026-09-11. */
@@ -2497,3 +2627,51 @@ a.ownerDashboardStatusItem:hover {
   .recordEvent { grid-template-columns:34px minmax(0,1fr); }
   .recordEventTime { grid-column:1 / -1; padding-top:0; }
 }
+
+/* 2026-09-23: Dicken Fokus-Rahmen in der App komplett raus – User-Wunsch.
+   Alle 3px-Outline/Box-Shadow Fokus-Ringe werden auf none gesetzt; die
+   Eingabe bleibt über border-color erkennbar, aber ohne fetten Außenring. */
+.scope :where(a, button, input, textarea, select, summary, [tabindex]):focus-visible,
+.scope :where(a, button, input, textarea, select, summary, [tabindex]):focus,
+.dialog :where(a, button, input, textarea, select, [tabindex]):focus-visible,
+.directoryWorkspace :where(a, button, input, select, summary, [tabindex]):focus-visible,
+.detailDisclosure summary:focus-visible,
+.workspaceCollapse:focus-visible,
+.fileInputNative:focus-visible,
+.activityRetry:focus-visible,
+.ownerDashboardComposer :global(.agent-composer > textarea:focus-visible) {
+  outline: none !important;
+  outline-offset: 0 !important;
+  box-shadow: none !important;
+}
+.assistantPromptBox:focus-within {
+  border-color: var(--eh-color-line) !important;
+  box-shadow: none !important;
+}
+.assistantPromptInput:focus,
+.assistantPromptInput:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+  border-color: transparent !important;
+}
+.assistantPromptInput { resize: none; }
+.searchField:focus-within {
+  outline: none !important;
+  box-shadow: none !important;
+  border-color: var(--eh-color-line) !important;
+}
+.contactDirectorySearch:focus-within,
+.ownerOrdersSearch:focus-within,
+.directorySearch input:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+.directorySearch input:focus,
+.directoryGroupSwitch select:focus,
+.directoryField input:focus,
+.directoryField select:focus {
+  outline: none !important;
+  box-shadow: none !important;
+  border-color: var(--eh-color-line) !important;
+}
+
