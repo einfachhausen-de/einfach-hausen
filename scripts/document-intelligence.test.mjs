@@ -63,7 +63,10 @@ test('all owner AI chat surfaces expose the document-upload entry',()=>{
  const action=fs.readFileSync(path.join(process.cwd(),'src/app/actions.ts'),'utf8');
  assert.match(full,/name=\"document\"/);
  assert.match(full,/application\/pdf,image\/\*/);
- assert.match(compact,/\/app\/hausmeister#hausmeister-composer/);
+ // Der Chat verlinkt nicht mehr auf den Hausmeister (dumpe Bruecke raus,
+ // Betreiber-Order 2026-09-23): sein Eingang ist der Plus-Knopf selbst.
+ assert.match(compact,/uploadAssistantChatDocumentAction/);
+ assert.doesNotMatch(compact,/hausmeister#hausmeister-composer/,'Der Sprunglink ist Betreiber-Order raus — der Plus-Knopf ist der Eingang');
  assert.match(action,/storeAssistantDocument/);
 });
 

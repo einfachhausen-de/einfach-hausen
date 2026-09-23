@@ -1,11 +1,8 @@
 "use client";
-import Link from 'next/link';
 import {usePathname} from 'next/navigation';
-import {FileText} from 'lucide-react';
 import {EHAssistant, EHRecommendation, type EHActivityStep, type EHAssistantMessage, type EHAssistantResult, type EHSendOptions} from '@/design-system';
 import {bookQuoteAction, saveAssistantChatPhotoAction, uploadAssistantChatDocumentAction} from '@/app/actions';
 import type {OfferCard} from '@/lib/offer-cards';
-import s from './shell.module.css';
 
 const AUSFALL = 'Eine Antwort ist gerade nicht verfügbar. Bitte versuche es später erneut.';
 const IDLE_MS = 30000;
@@ -121,12 +118,6 @@ export function HouseAssistant({placement = 'floating', open, onOpenChange, comp
   if (!path || path === '/app/onboarding' || path.startsWith('/app/onboarding/') || /^\/(login|register|auth|onboarding|pro|admin|ki-chat|checkout|pay|transfer|partner-invite|design-system)(\/|$)/.test(path)
       || /^\/(passport|receipt)(\/|$)/.test(path) || /^\/app\/invoices\//.test(path)
       || ['/impressum', '/datenschutz', '/app/hausmeister'].includes(path) || (path === '/app/messages' && placement !== 'toolbar')) return null;
-  return <>
-    <EHAssistant placement={placement} onSend={send} loginHref="/login" settingsHref="/app/settings"
-      aboveNavigation={path === '/app' || path.startsWith('/app/')} open={open} onOpenChange={onOpenChange} compact={compact} suggestions={suggestions} />
-    {isOwner && placement !== 'floating' && <Link className={s.menuItem} data-placement={placement}
-      href="/app/hausmeister#hausmeister-composer" title="Dokument im Hausmanager hochladen">
-      <FileText size={16} aria-hidden="true"/><span>Dokument</span>
-    </Link>}
-  </>;
+  return <EHAssistant placement={placement} onSend={send} loginHref="/login" settingsHref="/app/settings"
+    aboveNavigation={path === '/app' || path.startsWith('/app/')} open={open} onOpenChange={onOpenChange} compact={compact} suggestions={suggestions} />;
 }

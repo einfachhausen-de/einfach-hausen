@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useId, useState, type ReactNode } from 'react';
-import { PanelRight } from 'lucide-react';
+import { PanelRight, X } from 'lucide-react';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import {
   SidebarInset,
@@ -118,6 +118,11 @@ export function WerkbankShell({
   function railUmschalten() {
     railSetzen(!railZu);
   }
+  // Mobil faellt der rechte Bereich aus dem Raster; ein Symbol in der
+  // Kopfzeile holt denselben Bereich als Vollbild zurueck. Der Zustand gilt
+  // pro Ansicht (neue Shell-Instanz pro Route); Chat-Offenhaltung und
+  // Kontext bleiben wie am Desktop.
+  const [mobilRail, setMobilRail] = useState(false);
   /** Die Kachel im schmalen Streifen holt den Bereich zurueck und oeffnet den Chat. */
   function kiUmschalten(offen: boolean) {
     if (offen && railZu) railSetzen(false);
@@ -172,6 +177,14 @@ export function WerkbankShell({
                 unread={unread}
                 notices={notices}
               />
+              {(rail || hatKi) && (
+                <button type="button" className={s['wb-rail-mobil']} aria-controls={railId} aria-expanded={mobilRail}
+                  aria-label={mobilRail ? 'Überblick und Kundenberater schließen' : 'Überblick und Kundenberater öffnen'}
+                  title={mobilRail ? 'Überblick und Kundenberater schließen' : 'Überblick und Kundenberater öffnen'}
+                  onClick={() => setMobilRail(o => !o)}>
+                  <PanelRight size={16} aria-hidden="true" />
+                </button>
+              )}
               <Link
                 href={profileHref}
                 className={s.toolAvatar}
@@ -186,7 +199,14 @@ export function WerkbankShell({
             <main className={s['wb-main']}>{main}</main>
             {(rail || hatKi) && (
               <aside id={railId} aria-label={rail ? 'Kontext dieser Seite' : 'Kundenberater'} className={s['wb-rail']}
-                data-ki={hatKi && kiOffen ? 'offen' : undefined} data-zu={railZu || undefined}>
+                data-ki={hatKi && kiOffen ? 'offen' : undefined} data-zu={railZu || undefined}
+                data-mobil={mobilRail ? 'offen' : undefined}>
+                {mobilRail && (
+                  <button type="button" className={s['wb-rail-schliessen']} aria-label="Bereich schließen" title="Bereich schließen"
+                    onClick={() => setMobilRail(false)}>
+                    <X size={16} aria-hidden="true" />
+                  </button>
+                )}
                 {/* Griff am Rand des Bereiches, Gegenstueck zum Griff der
                     Seitenleiste: unsichtbarer Streifen, Linie beim Zeigen,
                     Ziehen-Symbol als Zeiger, Klick klappt ein oder aus. */}
