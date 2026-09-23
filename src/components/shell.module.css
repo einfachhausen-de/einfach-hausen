@@ -131,22 +131,21 @@
 .wb-rail[data-zu]>[data-eh-app]{position:sticky;bottom:8px;margin-top:auto;align-items:center}
 .wb-rail-auf{display:grid;place-items:center;flex:0 0 auto;width:36px;min-height:32px;padding:0;border:1px solid var(--eh-color-line);border-radius:var(--eh-radius-control);background:var(--eh-color-white);color:var(--eh-color-secondary);cursor:pointer}
 .wb-rail-auf:hover{border-color:var(--eh-color-petrol);color:var(--eh-color-petrol)}
-/* Mobil (ab dem Haltewinkel, ab dem der rechte Bereich verschwindet): Der
-   Zugang zum Bereich liegt als Symbol in der Kopfleiste neben dem Profil;
-   der Bereich selbst wird ein Vollbild-Uberlager mit denselben Inhalten.
-   Geoeffneter Chat fuellt es randlos (Bestellwert wie am Desktop). */
-.wb-rail-mobil{display:none}
-.wb-rail-schliessen{display:none}
+/* Mobil (ab dem Haltewinkel, ab dem der rechte Bereich entfiele): Der rechte
+   Bereich existiert hier nicht als Spalte - sein Ueberblick wandert in den
+   mittleren Bereich, der Kundenberater wird ein Vollbild-Uberlager, geoeffnet
+   ueber das KI-Symbol in der Kopfleiste (neben dem Profil). Der Chat fuellt
+   das Uberlager randlos; Schliessen leistet der Chat-Kopf selbst. */
+.wb-ki-mobil{display:none}
+.wb-kontext-mobil{display:none}
 @media(max-width:1023.5px){
-  .wb-rail-mobil{width:36px;min-height:32px;display:inline-grid;place-items:center;padding:0;border:1px solid var(--eh-color-line);border-radius:var(--eh-radius-control);background:var(--eh-color-white);color:var(--eh-color-secondary);cursor:pointer}
-  .wb-rail-mobil:hover{border-color:var(--eh-color-petrol);color:var(--eh-color-petrol)}
-  .wb-rail[data-mobil="offen"]{display:flex;position:fixed;inset:0;z-index:60;flex:1 1 auto;width:auto;max-width:none;padding:14px 14px calc(14px + env(safe-area-inset-bottom));gap:10px;background:var(--eh-color-paper);border-left:0;align-self:auto;overflow-y:auto}
-  .wb-rail[data-mobil="offen"]>.wb-rail-griff,.wb-rail[data-mobil="offen"]>.wb-rail-auf{display:none}
-  .wb-rail[data-mobil="offen"]>.wb-rail-schliessen{display:grid;place-items:center;position:sticky;top:0;margin-left:auto;width:36px;min-height:32px;padding:0;border:1px solid var(--eh-color-line);border-radius:var(--eh-radius-control);background:var(--eh-color-white);color:var(--eh-color-secondary);cursor:pointer;z-index:2}
-  .wb-rail[data-mobil="offen"]>.wb-rail-schliessen:hover{border-color:var(--eh-color-petrol);color:var(--eh-color-petrol)}
-  .wb-rail[data-mobil="offen"][data-zu]{flex:1 1 auto;width:auto;max-width:none;padding:14px 14px calc(14px + env(safe-area-inset-bottom));gap:10px;align-self:auto;position:fixed;inset:0;height:auto;top:auto;left:auto}
-  .wb-rail[data-mobil="offen"][data-zu]>.wb-rail-kontext{display:block}
-  .wb-rail[data-mobil="offen"][data-ki]{position:fixed;inset:0;top:auto;left:auto;height:auto;padding:0;gap:0;width:auto;max-width:none;flex:1 1 auto;overflow:hidden}
+  .wb-ki-mobil{width:36px;min-height:32px;display:inline-grid;place-items:center;padding:0;border:1px solid var(--eh-color-line);border-radius:var(--eh-radius-control);background:var(--eh-color-white);color:var(--eh-color-secondary);cursor:pointer}
+  .wb-ki-mobil:hover{border-color:var(--eh-color-petrol);color:var(--eh-color-petrol)}
+  .wb-ki-mobil[aria-expanded="true"]{background:var(--eh-color-petrol);border-color:var(--eh-color-petrol);color:var(--eh-color-white)}
+  .wb-kontext-mobil{display:block;margin-top:14px;padding-top:14px;border-top:1px solid var(--eh-color-line)}
+  .wb-rail[data-mobil="ki"]{display:flex;flex-direction:column;position:fixed;inset:0;z-index:60;flex:1 1 auto;width:auto;max-width:none;padding:0;gap:0;background:var(--eh-color-paper);border-left:0;align-self:auto;overflow:hidden}
+  .wb-rail[data-mobil="ki"]>.wb-rail-kontext,.wb-rail[data-mobil="ki"]>.wb-rail-griff,.wb-rail[data-mobil="ki"]>.wb-rail-auf{display:none}
+  .wb-rail[data-mobil="ki"]>[data-eh-app]{position:static;margin-top:0;flex:1 1 auto;display:flex;flex-direction:column;min-height:0;height:100%;background:var(--eh-color-white)}
 }
 /* 2026-09-23: Dicken Fokus-Rahmen in Werkbank raus - ohne Important (spaeter gewinnt) */
 .wb a:focus-visible,
