@@ -99,7 +99,10 @@
   display:flex; flex-direction:column; min-height:0; height:100%;
   background:var(--eh-color-white);
 }
-.wb-rail[data-ki] > [data-eh-app] .assistantPanel{
+/* Das Panel ist das section-Kind von [data-eh-app]. Ueber eine Klasse darf
+   hier nicht selektiert werden: Die stammt aus dem eh-design-CSS-Modul und
+   haengt im DOM mit anderem Hash — der Treffer wuerde ins Leere laufen. */
+.wb-rail[data-ki] > [data-eh-app] > section{
   flex:1 1 auto; height:100%; min-height:0;
   border:0; border-radius:0; border-left:0;
   display:flex; flex-direction:column;
