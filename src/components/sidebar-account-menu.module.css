@@ -1,7 +1,7 @@
 .accountMenu { position: relative; min-width: 0; }
 .accountButton { width: 100%; display: flex; align-items: center; gap: 12px; padding: 4px; border: 0; border-radius: var(--eh-shape-control); background: transparent; color: var(--eh-color-ink); cursor: pointer; text-align: left; }
 .accountButton:hover { background: var(--eh-color-paper); }
-.accountButton:focus-visible { outline: none; }
+.accountButton:focus-visible { outline: 3px solid var(--eh-color-focus); outline-offset: 2px; }
 .accountAvatar { flex: none; width: 40px; height: 40px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; background: var(--eh-color-petrol); color: var(--eh-color-white); font-size: var(--eh-font-label); font-weight: var(--eh-weight-bold); }
 .accountText { min-width: 0; display: block; }
 .accountText strong { display: block; font-size: var(--eh-font-label); font-weight: var(--eh-weight-semibold); overflow-wrap: anywhere; }

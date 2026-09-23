@@ -50,7 +50,7 @@
 .wb :global(.side-menu.ehn-drawer[data-open="1"]){visibility:visible}
 @media(max-width:1120px){.wb-side{position:static;height:auto;overflow-y:visible}}
 /* Tastatur-Navigation: sichtbarer Fokus-Ring im Werkbank-Rahmen */
-.wb a:focus-visible{outline:none}
+.wb a:focus-visible{outline:2px solid var(--eh-color-petrol);outline-offset:2px;border-radius:var(--eh-radius-control);z-index:10}
 .wb-tools a:focus-visible{border-radius:var(--eh-radius-pill)}
 .wb-side a:focus-visible{border-radius:var(--eh-radius-control);background-color:var(--eh-color-white)}
 
@@ -61,7 +61,7 @@
 .searchField{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--eh-color-line);color:var(--eh-color-secondary)}
 .searchField input{flex:1;min-width:0;border:0;outline:0;background:transparent;color:var(--eh-color-ink);font:var(--eh-font-body) var(--eh-font-family)}
 .searchField input:focus{box-shadow:none}
-.searchField:focus-within{border-color:var(--eh-color-line)}
+.searchField:focus-within{outline:3px solid var(--eh-color-focus);outline-offset:-3px}
 .searchField input:focus-visible{outline:none}
 .searchClose{border:1px solid var(--eh-color-line);border-radius:var(--eh-radius-control);background:var(--eh-color-paper);color:var(--eh-color-secondary);font:var(--eh-font-meta) var(--eh-font-family);padding:4px 8px;min-height:44px;min-width:44px;cursor:pointer}
 .searchPanel ul{list-style:none;margin:0;padding:6px;max-height:min(56vh,340px);overflow-y:auto}
@@ -77,27 +77,11 @@
 
 /* Rechter Bereich mit geoeffnetem Kundenberater: der Bereich schiebt sich
    auf, der mittlere Bereich wird schmaler - wie die Sidebar links. */
-.wb-rail[data-ki] > .wb-rail-kontext{ display:none; }
-.wb-rail[data-ki]{
-  padding:0; gap:0;
-  position:sticky; top:58px; height:calc(100vh - 58px);
-  align-self:start; overflow:hidden;
-  display:flex; flex-direction:column;
-  background:var(--eh-color-white);
-  flex-basis:400px; width:400px; max-width:400px;
-}
-.wb-rail[data-ki] > [data-eh-app]{
-  position:static; margin-top:0; flex:1 1 auto;
-  display:flex; flex-direction:column; min-height:0; height:100%;
-  background:var(--eh-color-white);
-}
-.wb-rail[data-ki] > [data-eh-app] .assistantPanel,
-.wb-rail[data-ki] > [data-eh-app] > section,
-.wb-rail[data-ki] > [data-eh-app] [data-assistant-panel]{
-  flex:1 1 auto; height:100%; min-height:0;
-  border:0; border-radius:0; border-left:0;
-  display:flex; flex-direction:column;
-}
+.wb-rail[data-ki]{flex-basis:400px;width:400px;max-width:400px}
+/* Der Kundenberater haengt am unteren Rand des rechten Bereiches - wie das
+   Kontomenue am unteren Rand der Seitenleiste: gleiche Flaeche wie der
+   Bereich, kein Verlassen der Spalte. */
+.wb-rail>[data-eh-app]{position:sticky;bottom:18px;margin-top:auto;z-index:1;background:var(--eh-color-paper)}
 @media(max-width:1180px) { .wb-rail[data-ki]{flex-basis:320px;width:320px;max-width:320px} }
 
 /* Griff am Rand des rechten Bereiches - das Gegenstueck zum Griff der
@@ -124,17 +108,3 @@
 @media(max-width:1120px){.wb-rail[data-zu]{position:static;height:auto;top:auto}}
 .wb-rail-auf{display:grid;place-items:center;flex:0 0 auto;width:36px;min-height:32px;padding:0;border:1px solid var(--eh-color-line);border-radius:var(--eh-radius-control);background:var(--eh-color-white);color:var(--eh-color-secondary);cursor:pointer}
 .wb-rail-auf:hover{border-color:var(--eh-color-petrol);color:var(--eh-color-petrol)}
-
-/* 2026-09-23: Dicken Fokus-Rahmen in Werkbank raus - ohne Important (spaeter gewinnt) */
-.wb a:focus-visible,
-.wb-tools a:focus-visible,
-.wb-side a:focus-visible,
-.searchField:focus-within {
-  outline: none;
-  outline-offset: 0;
-  box-shadow: none;
-  border-color: var(--eh-color-line);
-}
-.wb-side a:focus-visible { background-color: transparent; }
-.searchField:focus-within { outline: none; border-color: var(--eh-color-line); }
-.assistantLauncher:focus-visible { outline: none; box-shadow: none; }

@@ -18,28 +18,8 @@ type Message = { role: 'user' | 'assistant'; content: string };
  */
 export type AssistantStepState = 'done' | 'running' | 'failed' | 'pending';
 export type AssistantStep = { key: string; label: string; state: AssistantStepState; meta?: string; details?: string[] };
-export type AssistantSource = { id: string; title: string; href: string; domain: string };
-
-export function sourcesFromLinks(links?: Array<{ label: string; href: string }>): AssistantSource[] {
-  if (!links?.length) return [];
-  return links.map((l, i) => {
-    let domain = 'einfachhausen.de';
-    try {
-      if (l.href.startsWith('http')) {
-        domain = new URL(l.href).hostname.replace(/^www\./, '');
-      }
-    } catch { /* fallback */ }
-    return {
-      id: `source-${i}-${l.label}`,
-      title: l.label,
-      href: l.href,
-      domain,
-    };
-  });
-}
-
 export type AssistantResponse = {
-  status: number; reply: string; links?: ToolResult['links']; sources?: AssistantSource[]; provider?: string; steps?: AssistantStep[];
+  status: number; reply: string; links?: ToolResult['links']; provider?: string; steps?: AssistantStep[];
   /** Angebote als Entscheidungskarten: der Chat zeigt sie unter der Antwort. */
   cards?: OfferCard[];
   quota?: ReturnType<typeof aiQuotaSnapshot> | { byok: boolean }; exhausted?: boolean; options?: string[];
@@ -102,11 +82,7 @@ export async function answerAssistant(userId: number, rawMessages: unknown, sign
     if (bekannt < 0) steps.push(step); else steps[bekannt] = step;
     try { onStep?.(step); } catch { /* Ein geschlossener Kanal darf die Antwort nicht verhindern. */ }
   };
-  const abschluss = (response: Omit<AssistantResponse, 'steps'>): AssistantResponse => {
-    const sources = response.sources ?? sourcesFromLinks(response.links);
-    const base = sources.length ? { ...response, sources } : response;
-    return steps.length ? { ...base, steps } : base;
-  };
+  const abschluss = (response: Omit<AssistantResponse, 'steps'>): AssistantResponse => steps.length ? { ...response, steps } : response;
   try { requireAssistantOwner(userId); } catch { return { status: 403, reply: 'Der Hausmanager ist für dein Eigentümerkonto verfügbar.' }; }
   const history = assistantMessages(rawMessages);
   if (!history.length || history.at(-1)?.role !== 'user') return { status: 400, reply: 'Schreib mir kurz, worum es geht.' };
