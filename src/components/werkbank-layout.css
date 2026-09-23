@@ -211,6 +211,9 @@
 .eh-vdash-fokus[data-tone="save"] { border-left-color:#0b6b3a; background:#f4fbf6; }
 .eh-vdash-fokus[data-tone="save"] b { color:#0b6b3a; }
 .eh-vdash-nudge { margin:10px 2px 0; font-size:var(--eh-font-meta); color:var(--eh-muted); }
+.eh-vdash-gespeichert { display:flex; align-items:stretch; gap:10px; flex-wrap:wrap; }
+.eh-vdash-gespeichert > :first-child { flex:1 1 280px; }
+.eh-vdash-gespeichert a { align-self:center; }
 .eh-vdash-nudge a { color:var(--eh-color-petrol); }
 
 /* Vergleich & Tarife als Karten nebeneinander im Chip-Slider (24.09.,

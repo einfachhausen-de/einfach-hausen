@@ -4,12 +4,14 @@ import { BarChart3, BatteryCharging, CalendarDays, ChevronRight, FileText, Flame
 import { WerkbankRahmen } from '@/components/werkbank-rahmen';
 import { CompareRail } from '@/components/homeowner/compare-rail';
 import { VerlaufNaechstes, VerlaufZeitleiste } from '@/components/homeowner/verlauf-zeitleiste';
-import { SuggestionSlider } from '@/components/homeowner/suggestion-slider';
+import { SuggestionSlider, type Suggestion } from '@/components/homeowner/suggestion-slider';
 import { EHButton, EHCallout, EHOwnerSection } from '@/design-system';
 import { requireUser } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { ownerInstant } from '@/lib/owner-format';
 import { primaryProperty } from '@/lib/properties';
+import { SAVINGS_KINDS, contractKindLabel, estimateSavings, yearlyCents } from '@/lib/contracts';
+import { euroExact } from '@/lib/format';
 import styles from './eigentuemer-start.module.css';
 
 /**
@@ -89,6 +91,23 @@ export default async function Dashboard() {
   const firstDecision = db.prepare(`SELECT j.id FROM quotes q JOIN jobs j ON j.id=q.job_id WHERE j.homeowner_id=? AND q.status='pending' AND j.status='quoted' ORDER BY datetime(q.created_at) DESC LIMIT 1`).get(user.id) as { id: number } | undefined;
   const contactsCount = (db.prepare(`SELECT COUNT(DISTINCT q.provider_id) c FROM quotes q JOIN jobs j ON j.id=q.job_id WHERE j.homeowner_id=?`).get(user.id) as { c: number }).c;
   const appointmentsCount = (db.prepare(`SELECT COUNT(*) c FROM appointments WHERE homeowner_id=? AND datetime(start_at) >= datetime('now') AND status != 'cancelled'`).get(user.id) as { c: number }).c;
+  // (b) Trichter-Front: der ergiebigste Vertrags-Spar-Check erbt den ersten
+  // Slide der Vorschlaege — ohne neuen Block, ohne Zaun, ein Klick in die Liste.
+  let sparTeaser: Suggestion | null = null;
+  {
+    const rows = db.prepare(`SELECT id, kind, provider, cost_amount, cost_interval FROM house_contracts WHERE homeowner_id=? AND status='active'`).all(user.id) as { id: number; kind: string; provider: string; cost_amount: number | null; cost_interval: string }[];
+    if (rows.length === 0) {
+      sparTeaser = { id: 'vertraege-erfassen', title: 'Verträge erfassen, Spar-Check starten', text: 'Strom, Internet, Versicherung: nur den Anbieter eintragen, fertig. Wir prüfen automatisch, ob dein Tarif zu teuer ist.', cta: 'Jetzt ersten Vertrag anlegen', href: '/app/contracts#vertrag-anlegen', iconKey: 'sparen' };
+    } else {
+      const scored = rows
+        .filter((r) => (SAVINGS_KINDS as readonly string[]).includes(r.kind))
+        .map((r) => ({ r, e: estimateSavings({ kind: r.kind, yearlyCents: yearlyCents(r.cost_amount, r.cost_interval), postcode: profile?.postcode || '', householdSize: null, hasLoyaltyBonus: false, switchWilling: true }) }));
+      const best = scored.filter((x) => x.e).sort((a, b) => (b.e?.highCents ?? 0) - (a.e?.highCents ?? 0))[0];
+      if (best?.e) {
+        sparTeaser = { id: `spar-${best.r.id}`, title: `Spar-Check: ${contractKindLabel(best.r.kind)}`, text: `Bei ${best.r.provider} sind bis zu ${euroExact(best.e.highCents)} pro Jahr drin — die Rechnung dahinter liegt in deiner Hausakte.`, cta: 'Angebot ansehen', href: `/app/contracts?vertrag=${best.r.id}`, iconKey: 'sparen' };
+      }
+    }
+  }
 
   // Anstehendes: laufende und offene Vorgänge, nach nächstem Termin, sonst letzte Aktivität.
   const upcomingHistory = db.prepare(`
@@ -259,7 +278,7 @@ export default async function Dashboard() {
       </EHOwnerSection>
 
       <EHOwnerSection title="Vorschläge für dich" action={{ href: '/app/contracts', label: 'Alle Verträge' }}>
-        <SuggestionSlider />
+        <SuggestionSlider teaser={sparTeaser} />
       </EHOwnerSection>
       </div>
     </WerkbankRahmen>

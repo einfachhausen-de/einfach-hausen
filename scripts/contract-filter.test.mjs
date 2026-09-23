@@ -12,9 +12,9 @@ const ROWS = [
 ];
 
 test('parseContractFilter normalisiert und begrenzt die Eingaben', () => {
-  assert.deepEqual(parseContractFilter({}), { q: '', kind: null, status: 'alle', sort: 'frist', kompakt: false });
+  assert.deepEqual(parseContractFilter({}), { q: '', kind: null, status: 'alle', sort: 'frist', voll: false });
   assert.deepEqual(parseContractFilter({ q: '  Telekom   XL ', art: 'alle', status: 'quatsch', sort: 'kosten' }),
-    { q: 'Telekom XL', kind: null, status: 'alle', sort: 'kosten', kompakt: false });
+    { q: 'Telekom XL', kind: null, status: 'alle', sort: 'kosten', voll: false });
   assert.equal(parseContractFilter({ q: 'x'.repeat(200) }).q.length, 80);
 });
 
@@ -34,6 +34,13 @@ test('Sortierung: naechste Frist zuerst (Aktive vor Inaktiven), Kosten, Name', (
   assert.deepEqual(applyContractFilter(ROWS, parseContractFilter({})).map((r) => r.id), [2, 1, 3, 4]);
   assert.deepEqual(applyContractFilter(ROWS, parseContractFilter({ sort: 'kosten' })).map((r) => r.id), [4, 2, 1, 3]);
   assert.deepEqual(applyContractFilter(ROWS, parseContractFilter({ sort: 'name' })).map((r) => r.provider), ['Fluxio Energie', 'HUK24', 'Stadtwerke Duisburg', 'Telekom']);
+});
+
+test('ansicht=voll ist der einzige Spalten-Schalter und bleibt als Kontext erhalten', () => {
+  assert.equal(parseContractFilter({ ansicht: 'voll' }).voll, true);
+  assert.equal(parseContractFilter({ ansicht: 'kompakt' }).voll, false, 'alter Parameter ignoriert');
+  assert.equal(withContractQuery(parseContractFilter({ q: 'x' }), { voll: true }), '?q=x&ansicht=voll');
+  assert.equal(filterIsActive(parseContractFilter({ ansicht: 'voll' })), true);
 });
 
 test('withContractQuery uebernimmt den Kontext und laesst Defaults weg', () => {

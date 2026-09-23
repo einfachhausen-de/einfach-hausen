@@ -92,13 +92,13 @@ export function VertraegeTabelle({
           <input type="hidden" name="status" value={filter.status} />
           <input type="hidden" name="sort" value={filter.sort} />
           {filter.kind && <input type="hidden" name="art" value={filter.kind} />}
-          {filter.kompakt && <input type="hidden" name="ansicht" value="kompakt" />}
+          {filter.voll && <input type="hidden" name="ansicht" value="voll" />}
         </form>
         <Link className="eh-vtbl-btn" href={`${base}${withContractQuery(filter, { status: nextStatus })}`}>
           <ListFilter size={14} aria-hidden="true" /> Status: {STATUS_LABEL[filter.status]}
         </Link>
-        <Link className="eh-vtbl-btn" href={`${base}${withContractQuery(filter, { kompakt: !filter.kompakt })}`}>
-          <Table2 size={14} aria-hidden="true" /> {filter.kompakt ? 'Alle Spalten' : 'Nur das Wichtige'}
+        <Link className="eh-vtbl-btn" href={`${base}${withContractQuery(filter, { voll: !filter.voll })}`}>
+          <Table2 size={14} aria-hidden="true" /> {filter.voll ? 'Weniger Spalten' : 'Alle Spalten'}
         </Link>
       </div>
 
@@ -110,17 +110,17 @@ export function VertraegeTabelle({
         <thead>
           <tr>
             {sortHead('name', 'Anbieter')}
-            {!filter.kompakt && <th scope="col">Art</th>}
-            {!filter.kompakt && <th scope="col">Laufzeit bis</th>}
+            {filter.voll && <th scope="col">Art</th>}
+            {filter.voll && <th scope="col">Laufzeit bis</th>}
             {sortHead('frist', 'Frist')}
             <th scope="col" className="eh-vtbl-zahlen">{sortHeadInline(filter, base, 'kosten', 'Kosten')}</th>
-            {!filter.kompakt && <th scope="col">Spar-Check</th>}
+            <th scope="col">Spar-Check</th>
             <th scope="col">Status</th>
           </tr>
         </thead>
         <tbody>
           {rows.length === 0 && (
-            <tr><td colSpan={filter.kompakt ? 5 : 7} className="eh-vtbl-leer">Kein Vertrag passt zu Filter oder Suche. <Link href={base}>Alle zeigen</Link></td></tr>
+            <tr><td colSpan={filter.voll ? 7 : 5} className="eh-vtbl-leer">Kein Vertrag passt zu Filter oder Suche. <Link href={base}>Alle zeigen</Link></td></tr>
           )}
           {rows.map((row) => {
             const Icon = icons[row.kind];
@@ -130,21 +130,19 @@ export function VertraegeTabelle({
               <tr key={row.id} {...(selectedId === row.id ? { 'data-sel': 'true' } : {})}>
                 <td className="eh-vtbl-anbieter">
                   <Link href={detailHref(row.id)}>{Icon ? <Icon size={15} aria-hidden="true" /> : null}<b>{row.provider}</b></Link>
-                  {!filter.kompakt && (row.tariff || row.notice) && <small>{row.tariff || row.notice}</small>}
+                  {(row.tariff || row.notice) && <small>{row.tariff || row.notice}</small>}
                 </td>
-                {!filter.kompakt && <td>{contractKindLabel(row.kind)}</td>}
-                {!filter.kompakt && <td className="eh-vtbl-zahlen">{end ? formatDate(end) : '—'}</td>}
+                {filter.voll && <td>{contractKindLabel(row.kind)}</td>}
+                {filter.voll && <td className="eh-vtbl-zahlen">{end ? formatDate(end) : '—'}</td>}
                 <td className="eh-vtbl-frist" data-tone={frist.tone}>{frist.text}</td>
                 <td className="eh-vtbl-zahlen eh-vtbl-kosten">
                   {row.cost_amount != null ? <><b>{euro(row.cost_amount)}</b><small>{INTERVAL_SHORT[row.cost_interval] ?? ''}</small></> : '—'}
                 </td>
-                {!filter.kompakt && (
-                  <td>
-                    {row.sparCents != null && row.sparCents > 0
-                      ? <span className="eh-vtbl-spar">bis zu {euro(row.sparCents)} /Jahr</span>
-                      : <span className="eh-vtbl-spar-leer">—</span>}
-                  </td>
-                )}
+                <td>
+                  {row.sparCents != null && row.sparCents > 0
+                    ? <span className="eh-vtbl-spar">bis zu {euro(row.sparCents)} /Jahr</span>
+                    : <span className="eh-vtbl-spar-leer">—</span>}
+                </td>
                 <td>
                   <span className="eh-vtbl-badge" data-tone={row.status === 'active' ? 'ok' : 'muted'}>
                     {row.status === 'active' ? 'Aktiv' : row.status === 'cancelled' ? 'Gekündigt' : 'Ausgelaufen'}

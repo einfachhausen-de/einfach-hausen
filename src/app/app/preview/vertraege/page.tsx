@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import {
   EHButton, EHField, EHFieldGrid, EHFormFeedback, EHFormSection, EHInput,
-  EHOwnerSection, EHSelect, EHStatus, EHText, EHTextarea,
+  EHOwnerSection, EHSelect, EHStatus, EHText,
 } from '@/design-system';
 import { WerkbankRahmen } from '@/components/werkbank-rahmen';
 import { euroExact } from '@/lib/format';
@@ -113,6 +113,12 @@ export default async function ContractsPreview({ searchParams }: { searchParams:
       ? { zahl: euroExact(sparsum), strong: 'mindestens pro Jahr möglich', sub: `${active.filter((r) => SAVINGS_KINDS.includes(r.kind as (typeof SAVINGS_KINDS)[number])).length} Verträge mit Spar-Check · Vergleiche ansehen`, href: '#vergleiche', tone: 'save' as const }
       : null;
 
+  const sparByKind = new Map<string, number>();
+  for (const row of CONTRACTS) {
+    if (row.status !== 'active' || !SAVINGS_KINDS.includes(row.kind as (typeof SAVINGS_KINDS)[number])) continue;
+    const e = estimateSavings({ kind: row.kind, yearlyCents: yearlyCents(row.cost_amount, row.cost_interval), postcode: '47055', householdSize: 3, hasLoyaltyBonus: false, switchWilling: true });
+    if (e) sparByKind.set(row.kind, Math.max(sparByKind.get(row.kind) ?? 0, e.highCents));
+  }
   const comparisonRows = AFFILIATE_CATEGORIES.map((category) => ({
     category,
     contract: active.find((row) => row.kind === category) ?? null,
@@ -161,6 +167,7 @@ export default async function ContractsPreview({ searchParams }: { searchParams:
 
     <EHOwnerSection title={filterIsActive(filter) ? `Meine Verträge · ${visible.length} von ${CONTRACTS.length}` : `Meine Verträge · ${CONTRACTS.length}`} action={{ href: '#vertrag-anlegen', label: '+ Erfassen' }}>
       <div id="vertraege" />
+      <EHText muted>Alles, was dein Haus laufend kostet. Wir prüfen jeden erfassten Vertrag automatisch auf Sparpotenzial — du musst nur noch vergleichen.</EHText>
       <VertraegeTabelle base="/app/preview/vertraege" allRows={pool} rows={visible} filter={filter} selectedId={selectedRow?.id ?? null} icons={KIND_ICONS}>
         {selectedRow && <PreviewDetail row={selectedRow} />}
       </VertraegeTabelle>
@@ -183,11 +190,13 @@ export default async function ContractsPreview({ searchParams }: { searchParams:
                 <span className="eh-vergleich-ic" aria-hidden="true"><CatIcon size={18} /></span>
                 <span className="eh-vergleich-body">
                   <strong>{AFFILIATE_CATEGORY_LABELS[category]}</strong>
-                  <small>{AFFILIATE_CATEGORY_HINTS[category]}</small>
+                  <small>{contract
+                    ? `Bei deinen ${euroExact(monthlyCents(contract.cost_amount, contract.cost_interval) ?? yearly ?? 0)}/Monat bei ${contract.provider}${(sparByKind.get(category) ?? 0) > 0 ? ` sind bis zu ${euroExact(sparByKind.get(category)!)} pro Jahr drin` : ' — dein Tarif wirkt schon günstig'}`
+                    : AFFILIATE_CATEGORY_HINTS[category]}</small>
                 </span>
                 <p className="eh-vergleich-kontext">
                   {contract
-                    ? `In deiner Hausakte: ${contract.provider}${yearly != null ? ` · ${euroExact(yearly)} pro Jahr` : ''}${deadline ? ` · Frist ${formatDate(deadline)}` : ''}`
+                    ? deadline ? `Kündigen bis ${formatDate(deadline)}` : 'Keine Frist erfasst · jederzeit prüfbar'
                     : 'Noch kein Vertrag erfasst — der Vergleich nutzt später deine echten Kosten.'}
                 </p>
                 <span className="eh-vergleich-rechts">
@@ -204,17 +213,14 @@ export default async function ContractsPreview({ searchParams }: { searchParams:
 
     <section id="vertrag-anlegen" aria-label="Vertrag anlegen (Vorschau)">
       <EHOwnerSection title="Neuer Vertrag">
-        <EHFormSection title="Anbieter & Art" description="Pflicht ist nur der Anbieter. Laufzeit und Frist kannst du später ergänzen."><EHFieldGrid>
-          <EHField id="pv-kind" label="Art"><EHSelect id="pv-kind" name="kind" defaultValue="strom" disabled>{CONTRACT_KIND_KEYS.map((k) => <option key={k} value={k}>{CONTRACT_KINDS[k]}</option>)}</EHSelect></EHField>
-          <EHField id="pv-provider" label="Anbieter" required><EHInput id="pv-provider" name="provider" placeholder="z. B. Stadtwerke Musterstadt" disabled /></EHField>
-          <EHField id="pv-tariff" label="Tarif (steht auf deiner Rechnung)"><EHInput id="pv-tariff" name="tariff" placeholder="z. B. Basisstrom 12" disabled /></EHField>
-        </EHFieldGrid></EHFormSection>
-        <EHFormSection title="Kosten"><EHFieldGrid>
-          <EHField id="pv-cost" label="Betrag €"><EHInput id="pv-cost" name="cost" inputMode="decimal" placeholder="89,90" disabled /></EHField>
-          <EHField id="pv-interval" label="Zahlweise"><EHSelect id="pv-interval" name="costInterval" defaultValue="month" disabled>{COST_INTERVAL_KEYS.map((k) => <option key={k} value={k}>{COST_INTERVALS[k]}</option>)}</EHSelect></EHField>
-        </EHFieldGrid></EHFormSection>
-        <EHFormSection title="Beleg & Notiz">
-          <EHField id="pv-notice" label="Notiz"><EHTextarea id="pv-notice" name="notice" rows={3} placeholder="In der Vorschau ohne Speicherung — in der echten Hausakte landet der Vertrag hier." disabled /></EHField>
+        <EHFormSection title="Was kostet dich der Vertrag?" description="Nur der Anbieter ist Pflicht. Rest gern später — Fristen und Ersparnis rechnen wir aus dem, was fehlt, so gut es geht.">
+          <EHFieldGrid>
+            <EHField id="pv-kind" label="Was ist es?"><EHSelect id="pv-kind" name="kind" defaultValue="strom" disabled>{CONTRACT_KIND_KEYS.map((k) => <option key={k} value={k}>{CONTRACT_KINDS[k]}</option>)}</EHSelect></EHField>
+            <EHField id="pv-provider" label="Anbieter" required><EHInput id="pv-provider" name="provider" placeholder="z. B. Stadtwerke Musterstadt" disabled /></EHField>
+            <EHField id="pv-cost" label="Betrag (€)"><EHInput id="pv-cost" name="cost" inputMode="decimal" placeholder="89,90" disabled /></EHField>
+            <EHField id="pv-interval" label="Zahlweise"><EHSelect id="pv-interval" name="costInterval" defaultValue="month" disabled>{COST_INTERVAL_KEYS.map((k) => <option key={k} value={k}>{COST_INTERVALS[k]}</option>)}</EHSelect></EHField>
+          </EHFieldGrid>
+          <EHText muted>In der Vorschau ohne Speicherung — in der echten Hausakte landet der Vertrag mit zwei Klicks hier.</EHText>
         </EHFormSection>
       </EHOwnerSection>
     </section>
