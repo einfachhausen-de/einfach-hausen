@@ -183,16 +183,20 @@
   .eh-vertrag > summary { flex-wrap:wrap; }
   .eh-vertrag-rechts { margin-left:44px; }
 }
-/* Vergleichs-Reihen: Kategorie, Kontext aus der Hausakte, Partnerstatus */
-.eh-vergleich-list { display:grid; gap:10px; margin-top:14px; }
-.eh-vergleich-zeile { display:flex; align-items:center; gap:12px; min-height:58px; padding:10px 16px; border:1px solid var(--eh-color-line); border-radius:var(--eh-radius-control); background:var(--eh-color-white); }
-.eh-vergleich-ic { flex:none; display:grid; place-items:center; width:32px; height:32px; border-radius:var(--eh-radius-control); background:var(--eh-color-paper); color:var(--eh-color-petrol); }
+/* Vergleich & Tarife als Karten nebeneinander im Chip-Slider (24.09.,
+   Betreiber-Vorbild Startseite): CompareRail liefert die runden Pfeile,
+   scroll-snap macht das Wischen griffig; Farbtone = Chips-Hues. */
+.eh-vergleich-slider { display:flex; flex-wrap:nowrap; gap:12px; padding:2px 2px 8px; scroll-snap-type:x proximity; }
+.eh-vergleich-karte { flex:0 0 clamp(258px, 29%, 330px); scroll-snap-align:start; display:flex; flex-direction:column; gap:8px; min-height:196px; padding:16px; border:1px solid var(--eh-color-line); border-radius:var(--eh-radius-panel); background:var(--eh-color-white); }
+.eh-vergleich-karte:hover { border-color:var(--eh-karte-ink, var(--eh-color-petrol)); }
+.eh-vergleich-ic { flex:none; display:grid; place-items:center; width:38px; height:38px; border-radius:var(--eh-radius-control); background:var(--eh-karte-tint, var(--eh-color-paper)); color:var(--eh-karte-ink, var(--eh-color-petrol)); }
 .eh-vergleich-body { flex:1 1 auto; min-width:0; display:grid; gap:2px; }
 .eh-vergleich-body strong { font-size:var(--eh-font-label); font-weight:var(--eh-weight-semibold); }
 .eh-vergleich-body small { font-size:var(--eh-font-meta); color:var(--eh-color-secondary); overflow-wrap:anywhere; }
-.eh-vergleich-kontext { color:var(--eh-color-ink); }
-.eh-vergleich-rechts { margin-left:auto; display:flex; align-items:center; gap:12px; flex:none; }
-@media (max-width:640px) {
-  .eh-vergleich-zeile { flex-wrap:wrap; }
-  .eh-vergleich-rechts { margin-left:44px; }
-}
+.eh-vergleich-kontext { margin:0; font-size:var(--eh-font-meta); color:var(--eh-color-ink); opacity:.78; }
+.eh-vergleich-rechts { margin-top:auto; display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
+.eh-vergleich-karte[data-hue="sonne"]    { --eh-karte-ink:#94590a; --eh-karte-tint:#fdf3dc; }
+.eh-vergleich-karte[data-hue="himmel"]   { --eh-karte-ink:#0f62c4; --eh-karte-tint:#e3effc; }
+.eh-vergleich-karte[data-hue="veilchen"] { --eh-karte-ink:#6d33d6; --eh-karte-tint:#efe7fd; }
+.eh-vergleich-karte[data-hue="stahl"]    { --eh-karte-ink:#0e6f8a; --eh-karte-tint:#e0f0f5; }
+.eh-vergleich-karte[data-hue="rose"]     { --eh-karte-ink:#d0265f; --eh-karte-tint:#fdeaef; }

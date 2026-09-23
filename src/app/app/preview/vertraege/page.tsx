@@ -12,6 +12,7 @@ import { WerkbankRahmen } from '@/components/werkbank-rahmen';
 import styles from '../../eigentuemer-start.module.css';
 import { euroExact } from '@/lib/format';
 import { VertraegeTabelle } from '@/components/homeowner/vertraege-tabelle';
+import { CompareRail } from '@/components/homeowner/compare-rail';
 import { db } from '@/lib/db';
 import { applyContractFilter, filterIsActive, parseContractFilter } from '@/lib/contract-filter';
 import {
@@ -51,6 +52,8 @@ function fristText(row: FristRow): string {
   if (days === 0) return 'Heute letzter Tag';
   return `Noch ${days} Tage · ${formatDate(deadline)}`;
 }
+
+const VERGLEICH_HUES: Record<string, string> = { strom: 'sonne', gas: 'himmel', dsl: 'veilchen', mobilfunk: 'rose', versicherung: 'stahl' };
 
 const KIND_ICONS = {
   strom: Zap, gas: Flame, dsl: Wifi, mobilfunk: Smartphone, versicherung: ShieldCheck,
@@ -166,32 +169,34 @@ export default async function ContractsPreview({ searchParams }: { searchParams:
     <EHOwnerSection title="Vergleichen & Tarife">
       <div id="vergleiche" />
       <EHText muted>Wir zeigen keine eigenen Tarife und keine Rangliste. Der Vergleich läuft beim jeweiligen Partner, dort wird auch abgeschlossen. Deine Vertragsdaten bleiben in der Hausakte und werden nicht an den Partner übertragen.</EHText>
-      <div className="eh-vergleich-list">
-        {comparisonRows.map(({ category, contract, available }) => {
-          const yearly = contract ? yearlyCents(contract.cost_amount, contract.cost_interval) : null;
-          const deadline = contract ? cancellationDeadline(contract) : null;
-          const CatIcon = { strom: Zap, gas: Flame, dsl: Wifi, mobilfunk: Smartphone, versicherung: ShieldCheck }[category];
-          return (
-            <div key={category} id={`vergleich-${category}`} className="eh-vergleich-zeile">
-              <span className="eh-vergleich-ic" aria-hidden="true"><CatIcon size={16} /></span>
-              <span className="eh-vergleich-body">
-                <strong>{AFFILIATE_CATEGORY_LABELS[category]}</strong>
-                <small>{AFFILIATE_CATEGORY_HINTS[category]}</small>
-                <small className="eh-vergleich-kontext">
+      <CompareRail label="Vergleiche nebeneinander">
+        <div className="eh-vergleich-slider">
+          {comparisonRows.map(({ category, contract, available }) => {
+            const yearly = contract ? yearlyCents(contract.cost_amount, contract.cost_interval) : null;
+            const deadline = contract ? cancellationDeadline(contract) : null;
+            const CatIcon = { strom: Zap, gas: Flame, dsl: Wifi, mobilfunk: Smartphone, versicherung: ShieldCheck }[category];
+            return (
+              <article key={category} id={`vergleich-${category}`} className="eh-vergleich-karte" data-hue={VERGLEICH_HUES[category]}>
+                <span className="eh-vergleich-ic" aria-hidden="true"><CatIcon size={18} /></span>
+                <span className="eh-vergleich-body">
+                  <strong>{AFFILIATE_CATEGORY_LABELS[category]}</strong>
+                  <small>{AFFILIATE_CATEGORY_HINTS[category]}</small>
+                </span>
+                <p className="eh-vergleich-kontext">
                   {contract
-                    ? `Dein Vertrag: ${contract.provider}${yearly != null ? ` · ${euroExact(yearly)} pro Jahr` : ''}${deadline ? ` · Frist ${formatDate(deadline)}` : ''}`
+                    ? `In deiner Hausakte: ${contract.provider}${yearly != null ? ` · ${euroExact(yearly)} pro Jahr` : ''}${deadline ? ` · Frist ${formatDate(deadline)}` : ''}`
                     : 'Noch kein Vertrag erfasst — der Vergleich nutzt später deine echten Kosten.'}
-                </small>
-              </span>
-              <span className="eh-vergleich-rechts">
-                {available
-                  ? <><EHStatus tone="success">Partner freigegeben</EHStatus><EHButton href="#vergleiche" variant="secondary" size="small" arrow>Jetzt vergleichen</EHButton></>
-                  : <EHStatus>Kein Partner freigegeben</EHStatus>}
-              </span>
-            </div>
-          );
-        })}
-      </div>
+                </p>
+                <span className="eh-vergleich-rechts">
+                  {available
+                    ? <><EHStatus tone="success">Partner freigegeben</EHStatus><EHButton href="#vergleiche" variant="secondary" size="small" arrow>Jetzt vergleichen</EHButton></>
+                    : <EHStatus>Kein Partner freigegeben</EHStatus>}
+                </span>
+              </article>
+            );
+          })}
+        </div>
+      </CompareRail>
     </EHOwnerSection>
 
     <section id="vertrag-anlegen" aria-label="Vertrag anlegen (Vorschau)">
