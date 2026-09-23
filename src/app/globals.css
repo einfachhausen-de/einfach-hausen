@@ -398,7 +398,7 @@ html, body {
 /* =====================================================   einfachhausen – Design-System FINAL 100% (Bonus-Paket)
    Ueberschreibt vorherige Variablen mit finalen Werten
    ============================================================ */
-:root { --bg:#f4f7f7; --ink:#1c2129; --green:#105258; --green-soft:#eaf4ee; --muted:#5b6d73; --card:#ffffff; --line:#e6eeeb; --danger:#d0452e; --radius:18px; }
+:root { --bg:#f4f7f7; --ink:#1c2129; --green:#105258; --green-soft:#eaf4ee; --muted:#5b6d73; --card:#ffffff; --line:#e6eeeb; --danger:#d0452e; --radius:12px; }
 * { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
 html, body { height:100%; background:var(--bg); color:var(--ink); font-family:-apple-system,"SF Pro Text","Avenir Next",Helvetica,Arial,sans-serif; -webkit-font-smoothing:antialiased; overscroll-behavior:none; }
 /* Legacy anchor color must sit in @layer base: un-layered, it would override
@@ -464,7 +464,7 @@ button { -webkit-appearance:none; }
   --card:#ffffff;
   --line:rgba(28,33,41,.09);
   --muted:#57686b;
-  --radius:24px;
+  --radius:12px;
   --shadow-soft:0 10px 32px rgba(28,33,41,.065);
   --shadow-float:0 14px 38px rgba(28,33,41,.10);
 }
