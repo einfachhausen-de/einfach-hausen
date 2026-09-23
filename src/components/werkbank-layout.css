@@ -83,3 +83,60 @@
 .eh-werkbank-filefield :is(span, div) { max-width: 100%; }
 
 .eh-werkbank-tbl a { display:inline-flex; align-items:center; min-height:44px; color:inherit; text-decoration:none; font-weight:var(--eh-weight-semibold); }
+
+/* ── Verträge & Tarife: Kartenliste im Startseiten-Muster (23.09.) ──────
+   Je Vertrag eine Zeile, aufklappbar zu Fakten, Spar-Check und Bearbeiten.
+   Nur Tokens; der Frist-Zustand faerbt Rand+Schrift, nie die Flaeche. */
+.eh-vertrag-list { display:grid; gap:10px; }
+.eh-vertrag { border:1px solid var(--eh-color-line); border-radius:var(--eh-radius-control); background:var(--eh-color-white); }
+.eh-vertrag[open] { border-color:var(--eh-color-secondary); }
+.eh-vertrag > summary { display:flex; align-items:center; gap:12px; min-height:58px; padding:10px 16px; cursor:pointer; list-style:none; border-radius:var(--eh-radius-control); }
+.eh-vertrag > summary::-webkit-details-marker { display:none; }
+.eh-vertrag > summary:hover { background:var(--eh-color-paper); }
+.eh-vertrag-ic { flex:none; display:grid; place-items:center; width:32px; height:32px; border-radius:var(--eh-radius-control); background:var(--eh-color-paper); color:var(--eh-color-petrol); }
+.eh-vertrag-body { flex:1 1 auto; min-width:0; display:grid; gap:2px; }
+.eh-vertrag-body strong { font-size:var(--eh-font-label); font-weight:var(--eh-weight-semibold); line-height:var(--eh-leading-tight); overflow-wrap:anywhere; }
+.eh-vertrag-body small { font-size:var(--eh-font-meta); color:var(--eh-color-secondary); overflow-wrap:anywhere; }
+.eh-vertrag-rechts { margin-left:auto; display:flex; align-items:center; gap:14px; flex:none; }
+.eh-vertrag-cost { text-align:right; display:grid; gap:1px; }
+.eh-vertrag-cost b { font-size:var(--eh-font-label); font-variant-numeric:tabular-nums; }
+.eh-vertrag-cost small { font-size:var(--eh-font-meta); color:var(--eh-color-secondary); }
+.eh-vertrag-frist { padding:3px 11px; border:1px solid var(--eh-color-line); border-radius:var(--eh-radius-pill); background:var(--eh-color-paper); font-size:var(--eh-font-meta); font-weight:var(--eh-weight-semibold); color:var(--eh-color-secondary); white-space:nowrap; }
+.eh-vertrag-frist[data-state='soon'] { color:var(--eh-color-terra); border-color:var(--eh-color-terra); }
+.eh-vertrag-frist[data-state='overdue'] { color:var(--eh-color-error); border-color:var(--eh-color-error); }
+.eh-vertrag-frist[data-state='planned'] { color:var(--eh-color-petrol); }
+.eh-vertrag[data-past] > summary { background:transparent; }
+.eh-vertrag[data-past] .eh-vertrag-body strong { color:var(--eh-color-secondary); }
+.eh-vertrag[data-past] .eh-vertrag-ic { color:var(--eh-color-secondary); }
+.eh-vertrag-fakten { display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:10px 20px; padding:14px 16px; border-top:1px solid var(--eh-color-line); }
+.eh-vertrag-fakt { display:grid; gap:2px; min-width:0; }
+.eh-vertrag-fakt small { font-size:var(--eh-font-meta); color:var(--eh-color-secondary); text-transform:uppercase; letter-spacing:var(--eh-track-wide); }
+.eh-vertrag-fakt b { font-size:var(--eh-font-label); font-weight:var(--eh-weight-medium); overflow-wrap:anywhere; }
+.eh-vertrag-spar { display:grid; gap:10px; padding:14px 16px; border-top:1px solid var(--eh-color-line); background:var(--eh-color-paper); }
+.eh-vertrag-spar-zahl { display:flex; flex-wrap:wrap; align-items:baseline; gap:10px; }
+.eh-vertrag-spar-zahl b { font-size:var(--eh-font-body); font-variant-numeric:tabular-nums; color:var(--eh-color-petrol); }
+.eh-vertrag-spar-zahl small { font-size:var(--eh-font-meta); color:var(--eh-color-secondary); }
+.eh-vertrag-spar-gruende { margin:0; padding:0 0 0 18px; display:grid; gap:4px; font-size:var(--eh-font-meta); color:var(--eh-color-secondary); }
+.eh-vertrag-aktionen { display:flex; flex-wrap:wrap; align-items:flex-start; gap:12px; padding:12px 16px 14px; border-top:1px solid var(--eh-color-line); }
+.eh-vertrag-edit { width:100%; border:1px solid var(--eh-color-line); border-radius:var(--eh-radius-control); background:var(--eh-color-white); }
+.eh-vertrag-edit > summary { padding:8px 14px; cursor:pointer; font-size:var(--eh-font-meta); font-weight:var(--eh-weight-semibold); color:var(--eh-color-secondary); border-radius:var(--eh-radius-control); }
+.eh-vertrag-edit > summary:hover { color:var(--eh-color-petrol); }
+.eh-vertrag-edit[open] { margin-top:2px; }
+.eh-vertrag-edit > form, .eh-vertrag-edit > * + * { padding:0 14px 14px; }
+@media (max-width:640px) {
+  .eh-vertrag > summary { flex-wrap:wrap; }
+  .eh-vertrag-rechts { margin-left:44px; }
+}
+/* Vergleichs-Reihen: Kategorie, Kontext aus der Hausakte, Partnerstatus */
+.eh-vergleich-list { display:grid; gap:10px; margin-top:14px; }
+.eh-vergleich-zeile { display:flex; align-items:center; gap:12px; min-height:58px; padding:10px 16px; border:1px solid var(--eh-color-line); border-radius:var(--eh-radius-control); background:var(--eh-color-white); }
+.eh-vergleich-ic { flex:none; display:grid; place-items:center; width:32px; height:32px; border-radius:var(--eh-radius-control); background:var(--eh-color-paper); color:var(--eh-color-petrol); }
+.eh-vergleich-body { flex:1 1 auto; min-width:0; display:grid; gap:2px; }
+.eh-vergleich-body strong { font-size:var(--eh-font-label); font-weight:var(--eh-weight-semibold); }
+.eh-vergleich-body small { font-size:var(--eh-font-meta); color:var(--eh-color-secondary); overflow-wrap:anywhere; }
+.eh-vergleich-kontext { color:var(--eh-color-ink); }
+.eh-vergleich-rechts { margin-left:auto; display:flex; align-items:center; gap:12px; flex:none; }
+@media (max-width:640px) {
+  .eh-vergleich-zeile { flex-wrap:wrap; }
+  .eh-vergleich-rechts { margin-left:44px; }
+}

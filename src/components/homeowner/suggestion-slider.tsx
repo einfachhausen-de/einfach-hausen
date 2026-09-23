@@ -44,7 +44,7 @@ export const DASHBOARD_SUGGESTIONS: Suggestion[] = [
     title: 'Versicherungs-Check',
     text: 'Hausrat, Haftpflicht und Gebäude gegenprüfen – Lücken finden und doppelte Beiträge rechtzeitig vermeiden.',
     cta: 'Verträge vergleichen',
-    href: '/app/contracts?tab=vergleichen',
+    href: '/app/contracts#vergleiche',
     iconKey: 'versicherung',
   },
 ];

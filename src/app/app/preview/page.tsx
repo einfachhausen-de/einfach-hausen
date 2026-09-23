@@ -14,15 +14,15 @@ import styles from '../eigentuemer-start.module.css';
  */
 
 const COMPARES = [
-  { href: '/app/contracts?tab=vergleichen#vergleich-strom', label: 'Strom', icon: Zap, hue: 'sonne' },
-  { href: '/app/contracts?tab=vergleichen#vergleich-gas', label: 'Gas', icon: Flame, hue: 'himmel' },
-  { href: '/app/contracts?tab=vergleichen#vergleich-dsl', label: 'Internet', icon: Wifi, hue: 'veilchen' },
-  { href: '/app/contracts?tab=vergleichen#vergleich-versicherung', label: 'Versicherung', icon: ShieldCheck, hue: 'stahl' },
-  { href: '/app/contracts?tab=vergleichen#vergleich-mobilfunk', label: 'Mobilfunk', icon: Smartphone, hue: 'rose' },
-  { href: '/app/contracts?tab=vergleichen', label: 'Photovoltaik', icon: Sun, hue: 'sand' },
-  { href: '/app/contracts?tab=vergleichen', label: 'Heizung', icon: Thermometer, hue: 'terra' },
-  { href: '/app/contracts?tab=vergleichen', label: 'Smart Home', icon: HousePlug, hue: 'blatt' },
-  { href: '/app/contracts?tab=vergleichen', label: 'Wallbox', icon: BatteryCharging, hue: 'petrol' },
+  { href: '/app/contracts#vergleich-strom', label: 'Strom', icon: Zap, hue: 'sonne' },
+  { href: '/app/contracts#vergleich-gas', label: 'Gas', icon: Flame, hue: 'himmel' },
+  { href: '/app/contracts#vergleich-dsl', label: 'Internet', icon: Wifi, hue: 'veilchen' },
+  { href: '/app/contracts#vergleich-versicherung', label: 'Versicherung', icon: ShieldCheck, hue: 'stahl' },
+  { href: '/app/contracts#vergleich-mobilfunk', label: 'Mobilfunk', icon: Smartphone, hue: 'rose' },
+  { href: '/app/contracts#vergleiche', label: 'Photovoltaik', icon: Sun, hue: 'sand' },
+  { href: '/app/contracts#vergleiche', label: 'Heizung', icon: Thermometer, hue: 'terra' },
+  { href: '/app/contracts#vergleiche', label: 'Smart Home', icon: HousePlug, hue: 'blatt' },
+  { href: '/app/contracts#vergleiche', label: 'Wallbox', icon: BatteryCharging, hue: 'petrol' },
 ] as const;
 
 const RAIL = [
@@ -103,7 +103,7 @@ export default function Preview() {
               <small>Frage zu deinem Zuhause klären – mit Hausmanager oder Fachberatung sprechen.</small>
               <span className={styles.quickCardArrow}>Beratung starten <ChevronRight size={16} aria-hidden="true" /></span>
             </Link>
-            <Link href="/app/contracts?tab=vergleichen" className={styles.quickCard}>
+            <Link href="/app/contracts#vergleiche" className={styles.quickCard}>
               <span className={styles.quickIcon}><BarChart3 size={20} /></span>
               <strong>Tarife vergleichen</strong>
               <small>Versicherung, Energie oder Verträge prüfen – Tarife vergleichen und sparen.</small>
@@ -112,7 +112,7 @@ export default function Preview() {
           </div>
         </section>
 
-      <EHOwnerSection title="Verträge & Vergleiche" action={{ href: '/app/contracts?tab=vergleichen', label: 'Alle Vergleiche' }}>
+      <EHOwnerSection title="Verträge & Vergleiche" action={{ href: '/app/contracts#vergleiche', label: 'Alle Vergleiche' }}>
         <CompareRail label="Verträge und Vergleiche">
           <nav className="eh-werkbank-chips" aria-label="Verträge und Vergleiche">
             {COMPARES.map((compare) => (
