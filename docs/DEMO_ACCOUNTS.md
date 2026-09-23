@@ -31,3 +31,10 @@ Nur `DEMO_LOGIN_ENABLED=1` UND gesetztes `DEMO_PASSWORD` schalten Box/Mapping/Ad
 1. `DEMO_LOGIN_ENABLED` unset/`0` lassen bzw. entfernen (sofort wirksam nach Deploy, Default ist aus).
 2. Supabase-Demo-User deaktivieren/löschen.
 3. Löschen: `src/lib/demo-accounts.ts`, Login-Box + `?demo=`-Zweig in `src/app/login/page.tsx`, `src/app/api/auth/demo-start/`, Ausnahme in `src/lib/admin-auth.ts`, `scripts/seed-demo-users.mjs`, diese Datei.
+
+## Oeffentliches Schaufenster /app/preview/vertraege
+
+Vorschau der Verträge-Seite OHNE Login/Cookie (feste Demo-Zeilen, Fristen
+relativ zum Besuchstag, keine Server-Actions). Für Umgebungen, in denen der
+Browser im Vorschau-iframe Session-Cookies verwirft (Arena-Panel). Kann mit
+den Demo-Routen zusammen entfernt werden.
