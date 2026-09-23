@@ -192,7 +192,13 @@ export async function registerAction(fd: FormData): Promise<{ error: string } | 
 }
 
 export async function loginAction(fd: FormData): Promise<{ error: string } | { redirectTo: string }> {
-  const parsed = loginSchema.safeParse({ email: demoEmailFor(text(fd,'email')), password: String(fd.get('password') ?? '').trim() });
+  // Demo-Startknopf: DEMO_PASSWORD ist ein reines Server-ENV und im Client
+  // leer — das Formular schickt nur den Marker, das echte Passwort setzt die
+  // Serverseite ein. Wirkt ausschliesslich, solange der Kill-Switch
+  // DEMO_LOGIN_ENABLED=1 steht; echte Logins bleiben beim Vergleich.
+  const rawPw = String(fd.get('password') ?? '').trim();
+  const pw = fd.get('demo') === '1' && DEMO_LOGIN_ENABLED && DEMO_PASSWORD.length > 0 && !rawPw ? DEMO_PASSWORD : rawPw;
+  const parsed = loginSchema.safeParse({ email: demoEmailFor(text(fd,'email')), password: pw });
   if (parsed.success && DEMO_LOGIN_ENABLED && DEMO_PASSWORD.length > 0 && isDemoEmail(parsed.data.email) && parsed.data.password === DEMO_PASSWORD) {
     ensureLocalDemoAccounts();
     recordRateLimitSuccess('login', parsed.data.email);
