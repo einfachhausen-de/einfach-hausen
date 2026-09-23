@@ -207,17 +207,13 @@
   .historyCols > * { order: 0; }
 }
 
-/* ── Rechte Schiene: flache Kennzahlen-Karten ───────────────────────────
-   Im schmalen Rail (Desktop) eine Karte pro Zeile wie bisher; im mobilen
-   Mittelfeld (Uebernahme des Rail-Inhalts) stehen sie zu zweien nebeneinander. */
-
-.railStatGrid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; }
-@media (max-width: 1023.5px) { .railStatGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+/* ── Rechte Schiene: flache Kennzahlen-Karten ─────────────────────────── */
 
 .railStat {
   display: flex;
   align-items: center;
   gap: 10px;
+  margin-bottom: 10px;
   padding: 12px 14px;
   border: 1px solid var(--eh-color-line);
   border-radius: var(--eh-radius-control);

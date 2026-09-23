@@ -120,7 +120,6 @@ export default async function Dashboard() {
       rail={
         <>
           <p className="eh-werkbank-rail-h">Mein Zuhause im Überblick</p>
-          <div className={styles.railStatGrid}>
           <Link href="/app/jobs" className={styles.railStat}>
             <span className={styles.railStatIcon} aria-hidden="true"><Wrench size={15} /></span>
             <span className={styles.railStatLabel}>Aktuelle Aufträge</span>
@@ -141,7 +140,6 @@ export default async function Dashboard() {
             <span className={styles.railStatLabel}>Termine</span>
             <strong className={styles.railStatValue} data-tone={appointmentsCount > 0 ? 'terra' : undefined}>{appointmentsCount}</strong>
           </Link>
-          </div>
         </>
       }
     >

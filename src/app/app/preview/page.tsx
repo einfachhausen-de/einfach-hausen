@@ -67,11 +67,6 @@ export default function Preview() {
               <strong className={styles.railStatValue} data-tone={item.tone}>{item.value}</strong>
             </Link>
           ))}
-          <div className="eh-werkbank-karte">
-            <h4>Profil</h4>
-            <div className="eh-werkbank-bar"><i data-fill="three-quarter" /></div>
-            <div className="eh-werkbank-row"><span>Angaben</span><span>3 von 4</span></div>
-          </div>
         </>
       }
     >

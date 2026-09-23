@@ -70,9 +70,6 @@
     "raw-value\u0000background:\n      linear-gradient(180deg, rgba(237, 245, 241, 0.72) 0, transparent 190px),\n      var(--owner-bg)": 1,
     "raw-value\u0000box-shadow: 0 16px 38px rgba(14, 61, 51, 0.08)": 1
   },
-  "src/app/app/page.tsx": {
-    "unowned-style\u0000style={": 1
-  },
   "src/app/app/settings/account-forms.module.css": {
     "literal-color\u0000#d64541": 2,
     "literal-color\u0000#2f7650": 1,
