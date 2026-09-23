@@ -128,44 +128,46 @@
  * Petrol. Aufgeklappt im Ruhezustand, ueber die Zeile „Zeitleiste“ schmal zu
  * stellen. */
 
-.tlCard { border:1px solid var(--eh-color-line); border-radius:var(--eh-radius-control); background:var(--eh-color-white); padding:14px 16px; }
+.tlCard { border:1px solid var(--eh-color-line); border-radius:var(--eh-radius-control); background:var(--eh-color-white); padding:18px 22px; }
 
-.tlHead { display:flex; align-items:flex-start; gap:10px; }
-.tlIcon { flex:none; display:grid; place-items:center; width:32px; height:32px; border-radius:var(--eh-radius-control); background:var(--eh-color-paper); color:var(--eh-color-petrol); }
-.tlHeadCopy { flex:1 1 auto; min-width:0; display:grid; gap:2px; }
+.tlHead { display:flex; align-items:flex-start; gap:12px; }
+.tlIcon { flex:none; display:grid; place-items:center; width:36px; height:36px; border-radius:var(--eh-radius-control); background:var(--eh-color-paper); color:var(--eh-color-petrol); }
+.tlHeadCopy { flex:1 1 auto; min-width:0; display:grid; gap:3px; }
 .tlHeadTitel { font-size:var(--eh-font-label); font-weight:var(--eh-weight-semibold); line-height:var(--eh-leading-tight); overflow-wrap:anywhere; }
-.tlHeadMeta { display:flex; flex-wrap:wrap; align-items:center; gap:6px; font-size:var(--eh-font-meta); color:var(--eh-color-secondary); }
+.tlHeadMeta { display:flex; flex-wrap:wrap; align-items:center; gap:8px; font-size:var(--eh-font-meta); color:var(--eh-color-secondary); }
 .tlHeadMeta [data-tone='warn'] { color:var(--eh-color-terra); }
 .tlHeadMeta [data-tone='ok'] { color:var(--eh-color-success); }
 .tlHeadMeta [data-tone='info'] { color:var(--eh-color-petrol); }
 .tlHeadCount { margin-left:auto; font-variant-numeric:tabular-nums; }
 
-.tlBadge { flex:none; padding:2px 8px; border:1px solid var(--eh-color-line); border-radius:var(--eh-radius-pill); background:var(--eh-color-paper); font-size:var(--eh-font-meta); font-weight:var(--eh-weight-semibold); color:var(--eh-color-secondary); }
+.tlBadge { flex:none; padding:3px 11px; border:1px solid var(--eh-color-line); border-radius:var(--eh-radius-pill); background:var(--eh-color-paper); font-size:var(--eh-font-meta); font-weight:var(--eh-weight-semibold); color:var(--eh-color-secondary); }
 .tlBadge[data-tone='warn'] { color:var(--eh-color-terra); }
 .tlBadge[data-tone='ok'] { color:var(--eh-color-success); }
 .tlBadge[data-tone='info'] { color:var(--eh-color-petrol); }
 
-.tlToggle { display:inline-flex; align-items:center; gap:6px; margin-top:8px; padding:6px 0; border:0; background:transparent; font-size:var(--eh-font-meta); font-weight:var(--eh-weight-semibold); color:var(--eh-color-secondary); cursor:pointer }
+.tlToggle { display:inline-flex; align-items:center; gap:6px; margin-top:10px; padding:8px 0; border:0; background:transparent; font-size:var(--eh-font-meta); font-weight:var(--eh-weight-semibold); color:var(--eh-color-secondary); cursor:pointer }
 .tlToggle:hover { color:var(--eh-color-petrol); }
 .tlChevron { transition:transform .2s ease; }
 .tlToggle[data-state='open'] .tlChevron { transform:rotate(180deg); }
 
-.tlList { position:relative; list-style:none; margin:12px 0 0; padding:0; display:grid; gap:12px; }
-.tlList::before { content:''; position:absolute; left:6px; top:6px; bottom:6px; width:1px; background:var(--eh-color-line); }
-.tlItem { position:relative; display:flex; gap:12px; }
-.tlDot { z-index:1; flex:none; width:13px; height:13px; margin-top:3px; border:1px solid var(--eh-color-line); border-radius:var(--eh-radius-pill); background:var(--eh-color-white); display:grid; place-items:center; }
-.tlDot::after { content:''; width:5px; height:5px; border-radius:var(--eh-radius-pill); background:var(--eh-color-secondary); }
+/* Die Liste: grosse Punkte, luftige Zeilen, ein Klickfeld pro Eintrag.
+   Die Linie faengt unter dem Kopf an und laeuft bis zum letzten Punkt. */
+.tlList { position:relative; list-style:none; margin:16px 0 0; padding:2px 0 0; display:grid; gap:20px; }
+.tlList::before { content:''; position:absolute; left:8px; top:12px; bottom:16px; width:1px; background:var(--eh-color-line); }
+.tlItem { position:relative; }
+.tlRow { display:flex; align-items:center; gap:10px; min-height:44px; text-decoration:none; color:inherit; border-radius:var(--eh-radius-control); transition:background-color .12s ease; }
+.tlRow:hover { background:var(--eh-color-paper); }
+.tlDot { z-index:1; flex:none; width:17px; height:17px; border:1px solid var(--eh-color-line); border-radius:var(--eh-radius-pill); background:var(--eh-color-white); display:grid; place-items:center; }
+.tlDot::after { content:''; width:7px; height:7px; border-radius:var(--eh-radius-pill); background:var(--eh-color-secondary); }
 .tlDot[data-neuest]::after { background:var(--eh-color-petrol); }
-.tlBody { flex:1 1 auto; min-width:0; display:grid; gap:2px; }
-.tlMeta { display:flex; align-items:center; gap:8px; }
-.tlWhen { font-size:var(--eh-font-meta); color:var(--eh-color-secondary); font-variant-numeric:tabular-nums; }
-.tlTitel { color:inherit; text-decoration:none; font-size:var(--eh-font-label); font-weight:var(--eh-weight-medium); line-height:var(--eh-leading-tight); overflow-wrap:anywhere; }
-.tlTitel:hover { color:var(--eh-color-petrol); }
-.tlZusatz { font-size:var(--eh-font-meta); color:var(--eh-color-secondary); }
+.tlBody { flex:1 1 auto; min-width:0; display:flex; align-items:baseline; gap:6px 14px; flex-wrap:wrap; }
+.tlTitel { font-size:var(--eh-font-label); font-weight:var(--eh-weight-medium); line-height:var(--eh-leading-tight); overflow-wrap:anywhere; flex:1 1 180px; }
+.tlWhen { margin-left:auto; font-size:var(--eh-font-meta); color:var(--eh-color-secondary); font-variant-numeric:tabular-nums; flex:none; }
+.tlZusatz { flex:1 1 100%; margin:1px 0 0 27px; font-size:var(--eh-font-meta); color:var(--eh-color-secondary); }
 
-.tlTrenn { display:block; margin:12px 0 10px; border-top:1px solid var(--eh-color-line); }
-.tlFuss { margin:0; font-size:var(--eh-font-meta); color:var(--eh-color-secondary); }
-.tlLeer { margin:10px 0 0; font-size:var(--eh-font-meta); color:var(--eh-color-secondary); }
+.tlTrenn { display:block; margin:16px 0 12px; border-top:1px solid var(--eh-color-line); }
+.tlFuss { margin:0; font-size:var(--eh-font-label); color:var(--eh-color-secondary); }
+.tlLeer { margin:12px 0 0; font-size:var(--eh-font-meta); color:var(--eh-color-secondary); }
 
 /* ── Rechte Schiene: flache Kennzahlen-Karten ─────────────────────────── */
 

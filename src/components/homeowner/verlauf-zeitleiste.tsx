@@ -53,21 +53,25 @@ export function VerlaufZeitleiste({ eintraege, fuss }: {
           <ChevronDown className={styles.tlChevron} size={14} aria-hidden="true" />
         </CollapsibleTrigger>
         <CollapsibleContent>
+          {eintraege.length === 0 ? (
+            <p className={styles.tlLeer}>Noch keine Vorgänge. Sobald ein Auftrag läuft, erscheint er hier in der Zeitleiste.</p>
+          ) : (
           <ul className={styles.tlList} aria-label="Verlauf als Zeitleiste">
             {eintraege.map((eintrag, i) => (
               <li key={eintrag.id} className={styles.tlItem}>
-                <span className={styles.tlDot} data-neuest={i === 0 || undefined} aria-hidden="true" />
-                <span className={styles.tlBody}>
-                  <span className={styles.tlMeta}>
+                <Link className={styles.tlRow} href={eintrag.href}>
+                  <span className={styles.tlDot} data-neuest={i === 0 || undefined} aria-hidden="true" />
+                  <span className={styles.tlBody}>
+                    <strong className={styles.tlTitel}>{eintrag.titel}</strong>
                     <span className={styles.tlBadge} data-tone={eintrag.ton}>{eintrag.status}</span>
                     <time className={styles.tlWhen} dateTime={eintrag.iso}>{eintrag.datum}</time>
+                    {eintrag.zusatz && <span className={styles.tlZusatz}>{eintrag.zusatz}</span>}
                   </span>
-                  <Link className={styles.tlTitel} href={eintrag.href}>{eintrag.titel}</Link>
-                  {eintrag.zusatz && <span className={styles.tlZusatz}>{eintrag.zusatz}</span>}
-                </span>
+                </Link>
               </li>
             ))}
           </ul>
+          )}
           {fuss && (
             <>
               <span className={styles.tlTrenn} aria-hidden="true" />
