@@ -24,6 +24,8 @@ export type AssistantResponse = {
   /** Angebote als Entscheidungskarten: der Chat zeigt sie unter der Antwort. */
   cards?: OfferCard[];
   quota?: ReturnType<typeof aiQuotaSnapshot> | { byok: boolean }; exhausted?: boolean; options?: string[];
+  /** Follow-up-Vorschlaege nach der Antwort, regelbasiert aus der Faehigkeit. */
+  suggestions?: string[];
 };
 function domainOf(href: string): string {
   if (href.startsWith('/')) return 'einfachhausen.de';
@@ -41,6 +43,26 @@ const THEMA: Record<Capability, string> = {
 };
 // Diese Faehigkeiten schlagen in den eigenen Daten nach; die uebrigen erklaeren nur die App.
 const LIEST_DATEN: Capability[] = ['jobs', 'quotes', 'contracts', 'documents', 'contacts', 'calendar', 'house', 'maintenance'];
+// Follow-up-Vorschlaege je Faehigkeit: kurze Weiterfragen aus demselben
+// Themenfeld. Maximal drei, keine erfundenen Fakten, nichts ausgefuehrt.
+// Generative Beratung und Rueckfragen bleiben bewusst ohne Chips.
+const FOLGEN: Partial<Record<Capability, string[]>> = {
+  jobs: ['Was braucht eine Entscheidung?', 'Status eines Auftrags ansehen', 'Neuen Auftrag anlegen'],
+  quotes: ['Angebote nach Preis vergleichen', 'Nach Termin vergleichen', 'Wer ist der Anbieter?'],
+  compare_quotes: ['Angebote nach Preis vergleichen', 'Nach Bewertung vergleichen', 'Zum Auftrag'],
+  contracts: ['Welche Kündigungsfristen laufen?', 'Spar-Check starten', 'Vertragsdetails ansehen'],
+  compare_tariffs: ['Tarife nach Preis vergleichen', 'Kündigungsfrist prüfen', 'Zum Vertrag'],
+  documents: ['Rechnungen suchen', 'Verträge suchen', 'Welche Fristen habe ich?'],
+  contacts: ['Wer ist mein Elektriker?', 'Meine Ansprechpartner', 'Neuen Auftrag anlegen'],
+  calendar: ['Termine diese Woche', 'Nächste Wartung', 'Termin vorschlagen'],
+  house: ['Was fehlt in meiner Hausakte?', 'Hauspass öffnen', 'Dokumente suchen'],
+  house_check: ['Was fehlt in meiner Hausakte?', 'Lücken schließen', 'Dokumente hochladen'],
+  maintenance: ['Offene Wartungen', 'Wartung planen', 'Termin vorschlagen'],
+  create_job: ['Handwerker suchen', 'Termin vorschlagen', 'Auftrag ansehen'],
+  find_provider: ['Nach Bewertung sortieren', 'Direkt anfragen', 'Neuen Auftrag anlegen'],
+  next_actions: ['Details zum nächsten Schritt', 'Termin vorschlagen', 'Aufträge ansehen'],
+  help: ['Wie lade ich ein Dokument hoch?', 'Wo ändere ich meine Adresse?', 'Zu den Einstellungen'],
+};
 export function assistantMessages(raw: unknown): Message[] {
   if (!Array.isArray(raw)) return [];
   return raw.slice(-8).filter((v): v is Message => Boolean(v) && (v.role === 'user' || v.role === 'assistant') && typeof v.content === 'string')
@@ -125,11 +147,11 @@ export async function answerAssistant(userId: number, rawMessages: unknown, sign
     const karten = capability === 'quotes' ? offerCards(userId) : [];
     melde({ key: 'antwort', label: 'Antwort zusammengestellt', state: 'done', meta: 'Ohne KI-Modell', details: [karten.length ? 'Offene Angebote stehen als Karte bereit.' : 'Diese Antwort verbraucht kein Kontingent.'] });
     const tool = executeAssistantTool(userId, capability, question);
-    if (!karten.length) return abschluss({ status: 200, ...tool, sources: sourcesFromLinks(tool.links), provider, quota: aiQuotaSnapshot(userId) });
+    if (!karten.length) return abschluss({ status: 200, ...tool, sources: sourcesFromLinks(tool.links), provider, quota: aiQuotaSnapshot(userId), suggestions: FOLGEN[capability] });
     const vorgaenge = karten.length === 1 ? 'Ein Vorgang hat offene Angebote' : `${karten.length} Vorgänge haben offene Angebote`;
     return abschluss({
       status: 200, reply: `${vorgaenge}. Prüfe die Auswahl in der Karte – mit „Buchen“ bestätigst du ein Angebot, vorher passiert nichts.`,
-      links: tool.links, sources: sourcesFromLinks(tool.links), provider, quota: aiQuotaSnapshot(userId), cards: karten,
+      links: tool.links, sources: sourcesFromLinks(tool.links), provider, quota: aiQuotaSnapshot(userId), cards: karten, suggestions: FOLGEN.quotes,
     });
   }
   const gateway = generativeGateway(userId);
@@ -205,7 +227,7 @@ export async function answerAssistant(userId: number, rawMessages: unknown, sign
         ? [`Dein Modell: ${gateway.model}.`, 'Mit deinem eigenen Schlüssel formuliert.', 'Dein Freikontingent bleibt unberührt.']
         : [`Modell: ${gateway.model}.`, `Kontingent: ${quota.freemiumRemaining} von ${quota.freemiumAllowed} Aktionen frei.`, ...(quota.credits > 0 ? [`${quota.credits} ${quota.credits === 1 ? 'Zusatzaktion' : 'Zusatzaktionen'} verfügbar.`] : [])],
     });
-    return abschluss({ status: 200, reply: reply.trim().slice(0, 12000), provider: gateway.byok ? 'byok' : 'deepseek', quota: gateway.byok ? { byok: true } : quota });
+    return abschluss({ status: 200, reply: reply.trim().slice(0, 12000), provider: gateway.byok ? 'byok' : 'deepseek', quota: gateway.byok ? { byok: true } : quota, suggestions: FOLGEN[capability] });
   } catch {
     refund();
     if (timeout.aborted) {

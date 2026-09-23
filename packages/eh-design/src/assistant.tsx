@@ -8,7 +8,7 @@ import s from './styles.module.css';
 
 export type EHAssistantMessage = {role: 'user' | 'assistant'; content: string};
 export type EHSource = {title: string; href: string; domain?: string};
-export type EHAssistantResult = {reply: string; kind: 'reply' | 'login' | 'quota' | 'error'; steps?: EHActivityStep[]; cards?: ReactNode; sources?: EHSource[]};
+export type EHAssistantResult = {reply: string; kind: 'reply' | 'login' | 'quota' | 'error'; steps?: EHActivityStep[]; cards?: ReactNode; sources?: EHSource[]; suggestions?: string[]};
 
 /**
  * User-opened customer assistant; data access and account policy belong to the
@@ -23,13 +23,16 @@ export type EHAssistantResult = {reply: string; kind: 'reply' | 'login' | 'quota
  *   Aufrufer haelt Breite und Zustand (`open`/`onOpenChange`) und kann den
  *   mittleren Bereich mitschrumpfen lassen.
  */
-export function EHAssistant({onSend, loginHref, settingsHref, aboveNavigation = false, placement = 'floating', open, onOpenChange, compact = false}: {
+export function EHAssistant({onSend, loginHref, settingsHref, aboveNavigation = false, placement = 'floating', open, onOpenChange, compact = false, suggestions}: {
   /** `onStep` meldet die Schritte des Aufrufs, wenn der Aufrufer sie zeigen will. */
   onSend: (messages: EHAssistantMessage[], signal: AbortSignal, onStep?: (step: EHActivityStep) => void) => Promise<EHAssistantResult>;
   loginHref: string; settingsHref: string; aboveNavigation?: boolean; placement?: 'floating' | 'toolbar' | 'panel';
   open?: boolean; onOpenChange?: (open: boolean) => void;
   /** Schmaler Bereich: der Knopf zeigt nur die Kachel, die Beschriftung entfaellt. */
   compact?: boolean;
+  /** Startvorschlaege (aktuelle Seite + eigene Daten) fuer den leeren Verlauf;
+      erscheinen ueber dem Eingabefeld und verschwinden mit der 1. Nachricht. */
+  suggestions?: string[];
 }) {
   const id = useId();
   const dialog = useRef<HTMLDialogElement>(null);
@@ -43,6 +46,8 @@ export function EHAssistant({onSend, loginHref, settingsHref, aboveNavigation = 
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [selectedTool, setSelectedTool] = useState<string | null>(null);
   const [toolsOpen, setToolsOpen] = useState(false);
+  /** Follow-up-Vorschlaege der letzten Antwort; verschwinden beim Tippen. */
+  const [folgen, setFolgen] = useState<string[]>([]);
   const composerRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [notice, setNotice] = useState<EHAssistantResult | null>(null);
@@ -118,8 +123,9 @@ export function EHAssistant({onSend, loginHref, settingsHref, aboveNavigation = 
         if (istPanel && result.cards) setKarten(bisher => ({...bisher, [next.length]: result.cards}));
         if (istPanel && result.sources?.length) setQuellen(bisher => ({...bisher, [next.length]: result.sources!}));
         setMessages([...next, {role: 'assistant', content: result.reply}]); setInput(''); setImagePreview(null);
+        setFolgen((result.suggestions ?? []).slice(0, 3));
       }
-      else setNotice(result);
+      else { setNotice(result); setFolgen([]); }
     } catch {
       if (!controller.signal.aborted) setNotice({kind: 'error', reply: 'Die Verbindung ist gerade unterbrochen. Deine Frage bleibt im Eingabefeld. Du kannst es erneut versuchen.'});
     } finally {
@@ -246,8 +252,22 @@ export function EHAssistant({onSend, loginHref, settingsHref, aboveNavigation = 
     }
     e.target.value = '';
   };
+  // Vorschlaege ueber dem Eingabefeld: im leeren Verlauf die Startvorschlaege
+  // des Aufrufers, danach die Follow-ups der letzten Antwort. Klick uebernimmt
+  // den Text in die Eingabe; gesendet wird erst mit Enter.
+  const chips = (messages.length === 0 ? (suggestions ?? []) : folgen).slice(0, 3);
   const eingabe = (
     <form className={s.assistantComposer} onSubmit={send}>
+      {chips.length > 0 && (
+        <div className={s.assistantSuggestions} role="list" aria-label="Vorschläge">
+          {chips.map(chip => (
+            <button key={chip} type="button" role="listitem" className={s.assistantSuggestion}
+              onClick={() => { setInput(chip); setFolgen([]); composerRef.current?.focus(); }}>
+              {chip}
+            </button>
+          ))}
+        </div>
+      )}
       <div className={s.assistantPromptBox}>
         <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} hidden aria-hidden="true" tabIndex={-1} />
         {imagePreview && (
@@ -262,7 +282,7 @@ export function EHAssistant({onSend, loginHref, settingsHref, aboveNavigation = 
           ref={composerRef}
           id={id+'-question'}
           value={input}
-          onChange={e => setInput(e.target.value)}
+          onChange={e => { setInput(e.target.value); if (folgen.length) setFolgen([]); }}
           onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); const t = input.trim(); if (t) void sende(t, messages); } }}
           rows={1}
           maxLength={4000}

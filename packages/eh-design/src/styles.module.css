@@ -891,6 +891,11 @@ summary.activityHead { cursor:pointer; list-style:none; }
 .assistantPromptToolsMenu button:hover { background:var(--eh-color-paper); }
 .assistantPromptToolsMenu small { margin-left:auto; color:var(--eh-color-secondary); font-size:12px; }
 .assistantPromptHint { padding:6px 14px 0; font-size:11px; color:var(--eh-color-secondary); text-align:center; }
+.assistantSuggestions { display:flex; flex-wrap:wrap; gap:8px; animation:assistantChipIn var(--eh-motion-duration) var(--eh-motion-ease); }
+@keyframes assistantChipIn { from { opacity:0; } }
+@media (prefers-reduced-motion: reduce) { .assistantSuggestions { animation:none; } }
+.assistantSuggestion { display:inline-flex; align-items:center; min-height:34px; padding:6px 12px; border:1px solid var(--eh-color-line); border-radius:var(--eh-radius-control); background:var(--eh-color-white); color:var(--eh-color-petrol); font:600 var(--eh-font-meta)/1.4 var(--eh-font-family); cursor:pointer; transition:border-color var(--eh-motion-duration) var(--eh-motion-ease), background-color var(--eh-motion-duration) var(--eh-motion-ease); }
+.assistantSuggestion:hover { border-color:var(--eh-color-petrol); background:var(--eh-color-paper); }
 .assistantDialog { background:var(--eh-color-white); }
 .assistantDialog .assistantMessages { background:var(--eh-color-white); }
 .assistantDialog .assistantComposer { background:transparent; border-top:0; }

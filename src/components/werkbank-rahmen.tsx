@@ -91,6 +91,28 @@ export async function WerkbankRahmen({
   const userName = user ? `${user.first_name} ${user.last_name}` : 'Profil';
   const userSub = pro ? business || 'Partnerkonto' : 'Eigenheim-Konto';
 
+  // Startvorschlaege des Kundenberaters: aus der aktuellen Seite und den
+  // bereits geladenen Zahleri (keine extra Datenbankabfragen). Nur fuer
+  // Eigentuer; andere Seiten zeigen keine Chips. Maximal drei, echte Themen.
+  const kiVorschlaege: string[] = (() => {
+    if (pro) return [];
+    const p = active.split('?')[0];
+    if (p === '/app') return jobsCount > 0
+      ? ['Was läuft gerade bei meinen Aufträgen?', 'Was braucht meine Aufmerksamkeit?', 'Was fehlt in meiner Hausakte?']
+      : ['Was braucht meine Aufmerksamkeit?', 'Was fehlt in meiner Hausakte?', 'Ich brauche einen Handwerker'];
+    if (p === '/app/jobs') return jobsCount > 0
+      ? ['Was läuft gerade?', 'Was braucht eine Entscheidung?', 'Neuen Auftrag anlegen']
+      : ['Neuen Auftrag anlegen', 'Handwerker finden', 'Was fehlt in meiner Hausakte?'];
+    if (p.startsWith('/app/jobs/')) return ['Status dieses Auftrags', 'Angebote vergleichen', 'Termin vorschlagen'];
+    if (p === '/app/contracts') return ['Tarife sparen prüfen', 'Welche Kündigungsfristen laufen?', 'Verträge ansehen'];
+    if (p === '/app/home') return ['Was fehlt in meiner Hausakte?', 'Dokumente suchen', 'Hauspass öffnen'];
+    if (p === '/app/documents') return ['Rechnungen suchen', 'Verträge suchen', 'Dokument hochladen'];
+    if (p === '/app/calendar') return ['Termine diese Woche', 'Nächste Wartung', 'Termin vorschlagen'];
+    if (p === '/app/messages') return ['Was ist seit gestern neu?', 'Aufträge ansehen', 'Termine ansehen'];
+    if (p === '/app/partners') return ['Wer ist mein Elektriker?', 'Meine Ansprechpartner', 'Neuen Auftrag anlegen'];
+    return [];
+  })();
+
   const jar = await cookies();
   const defaultOpen = jar.get('sidebar_state')?.value !== 'false';
   // Rechter Bereich: derselbe Griff zum Ein- und Ausklappen wie links an der
@@ -123,6 +145,7 @@ export async function WerkbankRahmen({
     <EHScope app>
       <WerkbankShell
         role={role}
+        kiVorschlaege={kiVorschlaege}
         active={active}
         defaultOpen={defaultOpen}
         defaultRailOpen={defaultRailOpen}

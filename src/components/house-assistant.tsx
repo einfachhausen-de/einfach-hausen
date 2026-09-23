@@ -7,7 +7,7 @@ import type {OfferCard} from '@/lib/offer-cards';
 const AUSFALL = 'Eine Antwort ist gerade nicht verfügbar. Bitte versuche es später erneut.';
 const IDLE_MS = 30000;
 
-type Ergebnisrahmen = {status?: number; reply?: string; steps?: EHActivityStep[]; cards?: OfferCard[]; sources?: Array<{title: string; href: string; domain: string}>; links?: Array<{label: string; href: string}>};
+type Ergebnisrahmen = {status?: number; reply?: string; steps?: EHActivityStep[]; cards?: OfferCard[]; sources?: Array<{title: string; href: string; domain: string}>; links?: Array<{label: string; href: string}>; suggestions?: string[]};
 
 /** Offene Angebote als Karte unter der Antwort; gebucht wird nur per Knopf. */
 function kartenknoten(karten?: OfferCard[]) {
@@ -39,7 +39,8 @@ function ergebnis(status: number, data: Ergebnisrahmen): EHAssistantResult {
   const sources = data.sources?.length ? data.sources : data.links?.length ? data.links.map(l => ({title: l.label, href: l.href, domain: l.href.startsWith('/') ? 'einfachhausen.de' : (() => { try { return new URL(l.href).hostname.replace(/^www\./,''); } catch { return l.href; }})()})) : undefined;
   if (status === 401) return {kind: 'login', reply, ...steps};
   if (status === 402) return {kind: 'quota', reply, ...steps};
-  return {kind: status >= 200 && status < 300 ? 'reply' : 'error', reply, ...steps, ...(cards ? {cards} : {}), ...(sources ? {sources} : {})};
+  const vorschlaege = status >= 200 && status < 300 && data.suggestions?.length ? data.suggestions.slice(0, 3) : undefined;
+  return {kind: status >= 200 && status < 300 ? 'reply' : 'error', reply, ...steps, ...(cards ? {cards} : {}), ...(sources ? {sources} : {}), ...(vorschlaege ? {suggestions: vorschlaege} : {})};
 }
 
 async function send(messages: EHAssistantMessage[], signal: AbortSignal, onStep?: (step: EHActivityStep) => void): Promise<EHAssistantResult> {
@@ -78,12 +79,14 @@ async function send(messages: EHAssistantMessage[], signal: AbortSignal, onStep?
   }
 }
 
-export function HouseAssistant({placement = 'floating', open, onOpenChange, compact = false}: {
+export function HouseAssistant({placement = 'floating', open, onOpenChange, compact = false, suggestions}: {
   placement?: 'floating' | 'toolbar' | 'panel';
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   /** Der rechte Bereich ist eingeklappt: nur die Kachel bleibt sichtbar. */
   compact?: boolean;
+  /** Startvorschlaege (Seite + eigene Daten) fuer den leeren Verlauf. */
+  suggestions?: string[];
 }) {
   const path = usePathname();
   const isOwner = path === '/app' || path?.startsWith('/app/');
@@ -96,5 +99,5 @@ export function HouseAssistant({placement = 'floating', open, onOpenChange, comp
       || /^\/(passport|receipt)(\/|$)/.test(path) || /^\/app\/invoices\//.test(path)
       || ['/impressum', '/datenschutz', '/app/hausmeister'].includes(path) || (path === '/app/messages' && placement !== 'toolbar')) return null;
   return <EHAssistant placement={placement} onSend={send} loginHref="/login" settingsHref="/app/settings"
-    aboveNavigation={path === '/app' || path.startsWith('/app/')} open={open} onOpenChange={onOpenChange} compact={compact} />;
+    aboveNavigation={path === '/app' || path.startsWith('/app/')} open={open} onOpenChange={onOpenChange} compact={compact} suggestions={suggestions} />;
 }

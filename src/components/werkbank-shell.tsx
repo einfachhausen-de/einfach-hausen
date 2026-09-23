@@ -61,6 +61,7 @@ export function WerkbankShell({
   breadcrumb,
   main,
   rail,
+  kiVorschlaege,
 }: {
   role: 'homeowner' | 'provider';
   active: string;
@@ -86,6 +87,8 @@ export function WerkbankShell({
   main: ReactNode;
   rail?: ReactNode;
   defaultRailOpen?: boolean;
+  /** Startvorschlaege des Kundenberaters (Seite + eigene Daten). */
+  kiVorschlaege?: string[];
 }) {
   // Der Kundenberater sitzt als rechter Bereich im Fluss - wie die Sidebar
   // links: der Bereich schiebt sich auf, der mittlere Bereich wird schmaler.
@@ -198,7 +201,7 @@ export function WerkbankShell({
                   </button>
                 )}
                 {rail && <div className={s['wb-rail-kontext']}>{rail}</div>}
-                {hatKi && <HouseAssistant placement="panel" compact={railZu} open={kiOffen} onOpenChange={kiUmschalten} />}
+                {hatKi && <HouseAssistant placement="panel" compact={railZu} open={kiOffen} onOpenChange={kiUmschalten} suggestions={kiVorschlaege} />}
               </aside>
             )}
           </div>
