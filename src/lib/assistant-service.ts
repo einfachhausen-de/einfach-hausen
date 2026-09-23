@@ -40,9 +40,30 @@ const THEMA: Record<Capability, string> = {
   calendar: 'Termine', house: 'Hausakte', maintenance: 'Pflege', find_provider: 'Betriebe finden',
   create_job: 'Auftrag anlegen', compare_tariffs: 'Tarife vergleichen', help: 'App-Hilfe', generative: 'Beratung', clarify: 'Rückfrage',
   next_actions: 'Nächste Schritte', compare_quotes: 'Angebote vergleichen', house_check: 'Haus-Check', house_event: 'Haus-Ereignis',
+  search_house: 'Hausakte-Suche', create_report: 'Bericht',
 };
+// Chat-Tool-Buttons senden ihre ID mit; nur diese Allowlist wird serverseitig
+// ausgefuehrt. Unbekannte Werte werden verworfen, nie auf einen Funktionsnamen
+// umgeleitet.
+export const CHAT_TOOLS = {
+  create_job: 'create_job',
+  compare_tariffs: 'compare_tariffs',
+  compare_quotes: 'compare_quotes',
+  search_house: 'search_house',
+  create_report: 'create_report',
+} as const satisfies Record<string, Capability>;
+export type ChatToolId = keyof typeof CHAT_TOOLS;
+/** Pures Validierungs-Helfer fuer die /api/ki-Route: `undefined` = kein Tool
+ *  gesendet, `null` = unbekannter Wert (Route antwortet 400), sonst die ID. */
+export function kiChatToolFromBody(tool: unknown): ChatToolId | null | undefined {
+  if (tool === undefined) return undefined;
+  if (typeof tool !== 'string' || !Object.hasOwn(CHAT_TOOLS, tool)) return null;
+  return tool as ChatToolId;
+}
 // Diese Faehigkeiten schlagen in den eigenen Daten nach; die uebrigen erklaeren nur die App.
-const LIEST_DATEN: Capability[] = ['jobs', 'quotes', 'contracts', 'documents', 'contacts', 'calendar', 'house', 'maintenance'];
+// Alle, die wirklich eigene Daten lesen, muessen hier stehen: Nur dann zeigt der
+// Ablauf "Deine Daten gelesen" statt so zu tun, es waere nichts gelesen worden.
+const LIEST_DATEN: Capability[] = ['jobs', 'quotes', 'contracts', 'documents', 'contacts', 'calendar', 'house', 'maintenance', 'next_actions', 'compare_quotes', 'house_check', 'compare_tariffs', 'search_house'];
 // Follow-up-Vorschlaege je Faehigkeit: kurze Weiterfragen aus demselben
 // Themenfeld. Maximal drei, keine erfundenen Fakten, nichts ausgefuehrt.
 // Generative Beratung und Rueckfragen bleiben bewusst ohne Chips.
@@ -62,6 +83,8 @@ const FOLGEN: Partial<Record<Capability, string[]>> = {
   find_provider: ['Nach Bewertung sortieren', 'Direkt anfragen', 'Neuen Auftrag anlegen'],
   next_actions: ['Details zum nächsten Schritt', 'Termin vorschlagen', 'Aufträge ansehen'],
   help: ['Wie lade ich ein Dokument hoch?', 'Wo ändere ich meine Adresse?', 'Zu den Einstellungen'],
+  search_house: ['Dokument hochladen', 'Hauscheck starten', 'Hauspass öffnen'],
+  create_report: ['Nächste Schritte ansehen', 'Tarife sparen prüfen', 'Dokumente dazu suchen'],
 };
 export function assistantMessages(raw: unknown): Message[] {
   if (!Array.isArray(raw)) return [];
@@ -100,12 +123,34 @@ function relevantContext(userId: number, question: string) {
   const reply = executeAssistantTool(userId, capability, question).reply;
   return { text: reply.slice(0, 4000), thema: THEMA[capability], eintraege: reply.split('\n').filter(zeile => zeile.startsWith('• ')).length };
 }
+// Bericht: erst serverseitig die relevanten eigenen Daten mit den bestehenden
+// Tenant-sicheren Lesefunktionen einsammeln (begrenzt, nicht die komplette
+// Hausakte), dann darf generative Formulierung darauf aufsetzen.
+function reportContext(userId: number, question: string) {
+  const bereiche: Array<[Capability, string]> = [
+    ['jobs', 'Aufträge'], ['contracts', 'Verträge'], ['documents', 'Dokumente'],
+    ['house', 'Hausdaten'], ['maintenance', 'Pflege'], ['calendar', 'Termine'],
+  ];
+  const teile: string[] = [];
+  let text = '';
+  for (const [cap, label] of bereiche) {
+    let teil = '';
+    try { teil = executeAssistantTool(userId, cap, question).reply; } catch { continue; }
+    teil = teil.slice(0, 900);
+    if (!teil || /noch keine Einträge/.test(teil)) continue;
+    if (text && text.length + teil.length + label.length + 12 > 5000) break;
+    text += (text ? '\n' : '') + `## ${label}\n` + teil;
+    teile.push(label);
+  }
+  if (!text) return { text: '', thema: THEMA.create_report, eintraege: 0 };
+  return { text: text.slice(0, 5000), thema: THEMA.create_report, eintraege: text.split('\n').filter(zeile => zeile.startsWith('• ')).length };
+}
 /**
  * Beantwortet eine Frage des Eigentuemers. `onStep` meldet jeden Schritt
  * sofort; der Rueckgabewert traegt denselben Ablauf unter `steps`, damit ein
  * Aufruf ohne Streaming dieselbe Transparenz zeigen kann.
  */
-export async function answerAssistant(userId: number, rawMessages: unknown, signal?: AbortSignal, photoPath?: string | null, onStep?: (step: AssistantStep) => void): Promise<AssistantResponse> {
+export async function answerAssistant(userId: number, rawMessages: unknown, signal?: AbortSignal, photoPath?: string | null, onStep?: (step: AssistantStep) => void, tool?: ChatToolId | null): Promise<AssistantResponse> {
   const steps: AssistantStep[] = [];
   const melde = (step: AssistantStep) => {
     const bekannt = steps.findIndex(bisher => bisher.key === step.key);
@@ -122,7 +167,14 @@ export async function answerAssistant(userId: number, rawMessages: unknown, sign
   let provider: string;
   try {
     signal?.throwIfAborted();
-    if (photoPath) { capability = 'generative'; provider = 'image'; }
+    if (tool !== undefined && tool !== null) {
+      // Der Nutzer hat ein Werkzeug bewusst ausgewaehlt: die ID wird gegen die
+      // Allowlist geprueft und direkt ausgefuehrt. Laya/Jev sollen hier nicht
+      // noch raten, was der Button bedeutet – das spart Zeit und Kosten.
+      if (!Object.hasOwn(CHAT_TOOLS, tool)) return { status: 400, reply: 'Unbekanntes Werkzeug.' };
+      capability = CHAT_TOOLS[tool]; provider = 'tool';
+    }
+    else if (photoPath) { capability = 'generative'; provider = 'image'; }
     else if (explicitCapability(question)) { capability = explicitCapability(question)!; provider = 'local'; }
     else {
       // Two recent turns keep follow-up context small; no account metadata leaves for classification.
@@ -137,10 +189,10 @@ export async function answerAssistant(userId: number, rawMessages: unknown, sign
   structuredLog.info('internal', 'assistant routing', { provider, capability });
   melde({
     key: 'frage', label: 'Frage verstanden', state: 'done', meta: THEMA[capability],
-    details: [photoPath ? 'Deine Nachricht mit Foto wird ausgewertet.' : provider === 'local' ? 'Direkt erkannt, ohne Einstufung durch ein Modell.' : `Automatisch eingestuft (${provider}).`,
+    details: [photoPath ? 'Deine Nachricht mit Foto wird ausgewertet.' : provider === 'local' ? 'Direkt erkannt, ohne Einstufung durch ein Modell.' : provider === 'tool' ? 'Werkzeug von dir ausgewählt – kein Modell musste raten.' : `Automatisch eingestuft (${provider}).`,
       ...(capability === 'clarify' ? ['Deine Frage lässt mehrere Themen zu. Ich frage nach.'] : [])],
   });
-  if (capability !== 'generative') {
+  if (capability !== 'generative' && capability !== 'create_report') {
     if (LIEST_DATEN.includes(capability)) melde({ key: 'daten', label: 'Deine Daten gelesen', state: 'done', meta: THEMA[capability], details: ['Direkt in deinen eigenen Daten nachgeschlagen.', 'Nichts wurde an einen Anbieter übermittelt.'] });
     // Offene Angebote kommen als Karte: das guenstigste steht vorausgewaehlt,
     // gebucht wird erst mit dem Knopf und nie durch die Antwort selbst.
@@ -167,7 +219,7 @@ export async function answerAssistant(userId: number, rawMessages: unknown, sign
       return abschluss({ status: 422, reply: 'Dieses Medium kann ich hier noch nicht auswerten. Bitte beschreibe es kurz oder lade ein JPG-, PNG- oder WebP-Bild hoch. Es wurden keine KI-Credits verbraucht.' });
     }
   }
-  const context = relevantContext(userId, question);
+  const context = capability === 'create_report' ? reportContext(userId, question) : relevantContext(userId, question);
   const fotoDetails = image ? [`Foto mitgeschickt: ${image.mime}, ${Math.max(1, Math.round(image.data.length * 3 / 4096))} KB.`] : [];
   let usageId: number | null = null;
   if (!gateway.byok) {

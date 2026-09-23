@@ -2,8 +2,8 @@
 import Link from 'next/link';
 import {usePathname} from 'next/navigation';
 import {FileText} from 'lucide-react';
-import {EHAssistant, EHRecommendation, type EHActivityStep, type EHAssistantMessage, type EHAssistantResult} from '@/design-system';
-import {bookQuoteAction} from '@/app/actions';
+import {EHAssistant, EHRecommendation, type EHActivityStep, type EHAssistantMessage, type EHAssistantResult, type EHSendOptions} from '@/design-system';
+import {bookQuoteAction, saveAssistantChatPhotoAction, uploadAssistantChatDocumentAction} from '@/app/actions';
 import type {OfferCard} from '@/lib/offer-cards';
 import s from './shell.module.css';
 
@@ -46,7 +46,27 @@ function ergebnis(status: number, data: Ergebnisrahmen): EHAssistantResult {
   return {kind: status >= 200 && status < 300 ? 'reply' : 'error', reply, ...steps, ...(cards ? {cards} : {}), ...(sources ? {sources} : {}), ...(vorschlaege ? {suggestions: vorschlaege} : {})};
 }
 
-async function send(messages: EHAssistantMessage[], signal: AbortSignal, onStep?: (step: EHActivityStep) => void): Promise<EHAssistantResult> {
+async function send(messages: EHAssistantMessage[], signal: AbortSignal, onStep?: (step: EHActivityStep) => void, options?: EHSendOptions): Promise<EHAssistantResult> {
+  const anhang = options?.attachment ?? null;
+  // Dokument: durch die bestehende Hausakte-Upload-Pipeline (private Ablage,
+  // Texterkennung und Klassifizierung, Chat-Rueckmeldung) – kein /api/ki-Aufruf
+  // und kein belastetes Modell, die Antwort kommt direkt zurueck.
+  if (anhang?.kind === 'document') {
+    const beschreibung = messages.at(-1)?.content ?? '';
+    const ergebnis = await uploadAssistantChatDocumentAction(anhang.file, beschreibung);
+    if (!ergebnis.ok) return {kind: 'error', reply: ergebnis.reply};
+    return {kind: 'reply', reply: ergebnis.reply,
+      steps: [{key: 'dokument', label: 'Dokument gespeichert', state: 'done', meta: 'Hausakte', details: ['Private Ablage, Texterkennung und Zuordnung auf dem Server.', 'Kein Cloud-Modell aufgerufen, kein Kontingent belastet.']}],
+      suggestions: ['Frag mich zu dem Dokument', 'Dokumente ansehen', 'Hausakte durchsuchen']};
+  }
+  // Foto: erst über den bestehenden privaten Medienpfad ablegen; der Chat
+  // schickt danach nur den Pfad mit, keine Bilddaten im JSON.
+  let fotoPfad: string | null = null;
+  if (anhang?.kind === 'photo') {
+    const gesichert = await saveAssistantChatPhotoAction(anhang.file, messages.at(-1)?.content ?? '');
+    if (!gesichert.ok) return {kind: 'error', reply: gesichert.reply};
+    fotoPfad = gesichert.saved ?? null;
+  }
   // Wachhund statt fester Frist: solange Ereignisse kommen, darf der Aufruf
   // laufen. Erst 30 Sekunden Stille brechen ab.
   const abbruch = new AbortController();
@@ -56,7 +76,7 @@ async function send(messages: EHAssistantMessage[], signal: AbortSignal, onStep?
     const response = await fetch(`/api/ki${onStep ? '?stream=1' : ''}`, {
       method: 'POST',
       headers: {'Content-Type': 'application/json', ...(onStep ? {'Accept': 'text/event-stream'} : {})},
-      body: JSON.stringify({messages}),
+      body: JSON.stringify({messages, ...(options?.tool ? {tool: options.tool} : {}), ...(fotoPfad ? {photoPath: fotoPfad} : {})}),
       signal: AbortSignal.any([signal, abbruch.signal]),
     });
     if (onStep && response.ok && response.body && (response.headers.get('content-type') ?? '').includes('text/event-stream')) {

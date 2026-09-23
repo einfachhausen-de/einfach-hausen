@@ -73,6 +73,30 @@ export function executeAssistantTool(userId: number, capability: Capability, que
       return list('Hausakte',[...houses.map(r=>[r.address,r.postcode,r.property_type,r.build_year?'Baujahr '+r.build_year:null,r.living_area?r.living_area+' m²':null].filter(Boolean).map(text).join(' · ')),...assets.map(r=>text(r.name)+' · '+text(r.kind))],'/app/home');
     }
     case 'maintenance': return list('Pflege',result("SELECT title,due_date FROM maintenance_tasks WHERE homeowner_id=? AND status='open' ORDER BY due_date LIMIT 10",userId).map(r=>text(r.title)+' · fällig '+text(r.due_date)),'/app/year');
+    case 'search_house': {
+      // Ein Suchschritt ueber die gesamte eigene Hausakte: es buendeln nur die
+      // bereits vorhandenen Tenant-sicheren Lesefunktionen, keine neue Suche.
+      const terms=question.toLocaleLowerCase('de-DE').split(/[^\p{L}\p{N}]+/u).filter(v=>v.length>=3).slice(0,8);
+      const treffer:{label:string;zeile:string;href:string}[]=[];
+      const nimm=(label:string,zeile:string,href:string)=>{if(zeile&&treffer.length<12&&!treffer.some(v=>v.zeile===zeile))treffer.push({label,zeile,href})};
+      const suche=(hay:string,label:string,zeile:string,href:string)=>{if(terms.length===0||terms.some(t=>hay.toLocaleLowerCase('de-DE').includes(t)))nimm(label,zeile,href)};
+      for(const d of searchIntelligentDocuments(userId,question))nimm('Dokument',`${d.title} · ${d.kind}${d.relevantDate?` · relevantes Datum ${text(d.relevantDate)}`:''}`,d.href);
+      for(const r of result("SELECT c.kind,c.provider,c.tariff,c.document_title FROM house_contracts c WHERE c.homeowner_id=? ORDER BY c.updated_at DESC LIMIT 12",userId))suche(String(r.tariff)+' '+String(r.provider)+' '+String(r.document_title),'Vertrag',`${contractKindLabel(String(r.kind))} · ${text(r.provider)}${r.tariff?' · '+text(r.tariff):''}`,'/app/contracts');
+      for(const r of result("SELECT d.title,d.kind,p.business_name FROM documents d JOIN jobs j ON j.id=d.job_id LEFT JOIN provider_profiles p ON p.user_id=d.provider_id WHERE j.homeowner_id=? ORDER BY d.created_at DESC LIMIT 12",userId))suche(String(r.title)+' '+(r.business_name||''),'Dokument',`${text(r.title)}${r.business_name?' · '+text(r.business_name):''}`,'/app/documents');
+      for(const r of result("SELECT a.name,a.kind FROM house_assets a WHERE a.homeowner_id=? ORDER BY a.created_at DESC LIMIT 10",userId))suche(String(r.name),'Anlage',`${text(r.name)} · ${text(r.kind)}`,'/app/home');
+      for(const r of result("SELECT m.title,m.due_date FROM maintenance_tasks m WHERE m.homeowner_id=? AND m.status='open' ORDER BY m.due_date LIMIT 10",userId))suche(String(r.title),'Wartung',`${text(r.title)} · fällig ${text(r.due_date)}`,'/app/year');
+      for(const r of result("SELECT p.address,p.build_year,p.living_area FROM properties p WHERE EXISTS (SELECT 1 FROM property_ownerships o WHERE o.property_id=p.id AND o.homeowner_id=? AND o.active=1 AND o.ended_at IS NULL) LIMIT 5",userId))suche(String(r.address),'Hausdaten',[r.address,r.build_year?'Baujahr '+text(r.build_year):null,r.living_area?text(r.living_area)+' m²':null].filter(Boolean).join(' · '),'/app/home');
+      const contacts=createContactDirectoryStore(db).list(userId);
+      if(contacts.ok)for(const c of contacts.value.slice(0,10))suche(c.name+' '+(c.company||''),'Ansprechpartner',[c.name,c.company].filter(Boolean).map(text).join(' · '),'/app/partners');
+      if(!treffer.length)return {reply:'Ich habe in deiner Hausakte – Dokumente, Hausdaten, Verträge, Anlagen, Wartungen und Ansprechpartner – nichts zu „'+text(question).slice(0,80)+'“ gefunden. Du kannst ein Dokument hochladen oder den Hauscheck starten, der zeigt, was noch fehlt.',links:[{label:'Dokumente',href:'/app/documents'},{label:'Hauscheck',href:'/app/hausmeister'}]};
+      const sektionen=[...new Set(treffer.map(t=>t.label))];
+      return {reply:'Treffer in deiner Hausakte'+(terms.length?' zu „'+text(question).slice(0,60)+'“':'')+' ('+sektionen.join(', ')+'):\n'+treffer.map(t=>'• '+t.label+': '+t.zeile).join('\n')+'\nÖffne den Bereich, um alles im Detail zu sehen.',links:sektionen.map(label=>({label,href:treffer.find(t=>t.label===label)!.href}))};
+    }
+    case 'create_report': {
+      // Berichte laufen im Dienst ueber den Generativ-Pfad; hier nur der
+      // Fallback, falls jemand das Tool direkt ausfuehrt.
+      return {reply:'Für deinen Bericht sammle ich zuerst die passenden Einträge aus deiner Hausakte und formuliere daraus eine kurze Zusammenfassung. Schick die Frage einfach über den Hausmanager ab.',links:[{label:'Hausakte',href:'/app/home'},{label:'Aufträge',href:'/app/jobs'}]};
+    }
     case 'find_provider': return {reply:'Ich kann zuerst deine gespeicherten Ansprechpartner nutzen. Wenn dort niemand passt, startest du über den Hausmeister eine gezielte regionale Suche – ohne dass automatisch jemand beauftragt wird.',links:[{label:'Ansprechpartner',href:'/app/partners'},{label:'Passenden Handwerker suchen',href:`/app/hausmeister?draft=${encodeURIComponent(question)}`}]};
     case 'create_job': return prepareOwnerJobDraft(userId, question);
     case 'compare_tariffs': return compareOwnerTariffs(userId, question);

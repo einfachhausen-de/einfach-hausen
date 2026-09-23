@@ -8,6 +8,8 @@ export const CAPABILITIES = {
   calendar: 'Eigene vereinbarte Termine anzeigen',
   house: 'Gespeicherte Hausdaten und Anlagen anzeigen',
   maintenance: 'Pflege, Wartungen und fällige Aufgaben anzeigen',
+  search_house: 'Eigene Hausakte durchsuchen: Dokumente mit OCR-Text, Hausdaten, Verträge, Anlagen, Wartungen und Ansprechpartner in einem Schritt',
+  create_report: 'Aus eigenen Daten einen Bericht oder eine Zusammenfassung erstellen',
   next_actions: 'Was jetzt Aufmerksamkeit braucht: Fristen, Wartung, Termine, Angebote und nächste Schritte',
   compare_quotes: 'Eigene Handwerkerangebote eines Auftrags nach Preis, Termin, Entfernung und Bewertung gegenüberstellen',
   house_check: 'Hausakte auf fehlende Kernangaben und sinnvolle Ergänzungen prüfen',

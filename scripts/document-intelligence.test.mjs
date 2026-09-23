@@ -67,4 +67,44 @@ test('all owner AI chat surfaces expose the document-upload entry',()=>{
  assert.match(action,/storeAssistantDocument/);
 });
 
+test('assistant chat document upload runs the existing house-file pipeline tenant-safe',async()=>{
+ const {storeAssistantDocument}=await import('../src/lib/assistant-document-ingest.ts');
+ const file=new File([Buffer.from('%PDF-1.4 fake rechnung heating')],'Heizungsrechnung.pdf',{type:'application/pdf'});
+ const out=await storeAssistantDocument(a,file,'Meine neue Heizungsrechnung');
+ assert.equal(out.ok,true);
+ assert.match(out.reply,/Heizungsrechnung/);
+ assert.match(out.reply,/sicher in deiner Hausakte gespeichert/);
+ const row=db.prepare('SELECT homeowner_id,title,path,kind FROM house_documents WHERE id=?').get(out.documentId);
+ assert.equal(row.homeowner_id,a);
+ assert.equal(row.title,'Heizungsrechnung.pdf');
+ const stored=path.join(process.env.PRIVATE_ROOT,row.path);
+ assert.ok(fs.existsSync(stored),'file must live under the private root');
+ assert.ok(!out.reply.includes('Ben'));
+ const queue=db.prepare('SELECT status,homeowner_id FROM document_intelligence_jobs WHERE source_type=? AND source_id=?').get('house_document',out.documentId);
+ assert.ok(['done','review','failed'].includes(queue.status));
+ assert.equal(queue.homeowner_id,a);
+});
+test('assistant chat document upload rejects foreign and invalid files',async()=>{
+ const {storeAssistantDocument}=await import('../src/lib/assistant-document-ingest.ts');
+ const vorher=db.prepare('SELECT COUNT(*) c FROM house_documents WHERE homeowner_id=?').get(a).c;
+ const bogus=new File([Buffer.from('keine datei')],'evil.txt',{type:'text/plain'});
+ const out=await storeAssistantDocument(a,bogus,'');
+ assert.equal(out.ok,false);
+ assert.match(out.reply,/konnte nicht sicher übernommen/);
+ assert.equal(db.prepare('SELECT COUNT(*) c FROM house_documents WHERE homeowner_id=?').get(a).c,vorher);
+});
+
+test('chat tool click is wired end-to-end: package options, app body, route allowlist',()=>{
+ const pkg=fs.readFileSync(path.join(process.cwd(),'packages/eh-design/src/assistant.tsx'),'utf8');
+ const app=fs.readFileSync(path.join(process.cwd(),'src/components/house-assistant.tsx'),'utf8');
+ const route=fs.readFileSync(path.join(process.cwd(),'src/app/api/ki/route.ts'),'utf8');
+ const service=fs.readFileSync(path.join(process.cwd(),'src/lib/assistant-service.ts'),'utf8');
+ assert.match(pkg,/onSend\(next\.slice\(-12\), controller\.signal, istPanel \? schrittMerken : undefined, optionen\)/);
+ for(const id of ['create_job','compare_tariffs','compare_quotes','search_house','create_report'])assert.match(pkg,new RegExp(`id: '${id}'`));
+ assert.match(app,/\.\.\.\(options\?\.tool \? \{tool: options\.tool\} : \{\}\)/);
+ assert.match(route,/kiChatToolFromBody/);
+ assert.match(route,/status: 400/);
+ assert.match(service,/Object\.hasOwn\(CHAT_TOOLS, tool\)/);
+});
+
 test.after(()=>{db.close();fs.rmSync(tmp,{recursive:true,force:true})});

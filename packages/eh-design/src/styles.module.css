@@ -874,6 +874,9 @@ summary.activityHead { cursor:pointer; list-style:none; }
 .assistantPromptPreviewItem { position:relative; width:56px; height:56px; border-radius:14px; overflow:hidden; border:1px solid var(--eh-color-line); }
 .assistantPromptPreviewItem img { width:100%; height:100%; object-fit:cover; display:block; }
 .assistantPromptPreviewRemove { position:absolute; top:4px; right:4px; width:20px; height:20px; display:grid; place-items:center; border-radius:999px; background:rgba(16,34,42,.72); color:var(--eh-color-white); border:0; cursor:pointer; }
+.assistantPromptPreviewItem[data-doku="true"] { width:auto; height:auto; min-height:40px; max-width:220px; display:inline-flex; align-items:center; gap:8px; padding:8px 12px; overflow:hidden; }
+.assistantPromptPreviewDocIcon { display:grid; place-items:center; color:var(--eh-color-petrol); flex:none; }
+.assistantPromptPreviewName { font:var(--eh-font-meta)/1.3 var(--eh-font-family); color:var(--eh-color-ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .assistantPromptBar { display:flex; align-items:center; gap:8px; padding:6px 6px 2px; flex-wrap:wrap; }
 .assistantPromptLeft { display:flex; align-items:center; gap:6px; }
 .assistantPromptRight { margin-left:auto; display:flex; align-items:center; gap:8px; }

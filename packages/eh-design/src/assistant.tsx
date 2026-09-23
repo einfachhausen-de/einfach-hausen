@@ -1,6 +1,6 @@
 "use client";
 import {Fragment, useEffect, useId, useRef, useState, type FormEvent, type ReactNode} from 'react';
-import {ArrowUp, BookOpen, Check, ChevronsUpDown, ClipboardPlus, Clock, Copy, ExternalLink, FilePlus2, FolderSearch, History, Mic, Plus, Scale, Search, SlidersHorizontal, Sparkles, ThumbsDown, ThumbsUp, X} from 'lucide-react';
+import {ArrowUp, BookOpen, Camera, Check, ChevronsUpDown, ClipboardPlus, Clock, Copy, ExternalLink, FilePlus2, FileText, FileUp, FolderSearch, History, ListChecks, Mic, Plus, Scale, SlidersHorizontal, Sparkles, ThumbsDown, ThumbsUp, X} from 'lucide-react';
 import {motion, AnimatePresence} from 'motion/react';
 import {EHActivity, type EHActivityStep} from './blocks';
 import {EHButton, EHText} from './primitives';
@@ -9,6 +9,10 @@ import s from './styles.module.css';
 export type EHAssistantMessage = {role: 'user' | 'assistant'; content: string};
 export type EHSource = {title: string; href: string; domain?: string};
 export type EHAssistantResult = {reply: string; kind: 'reply' | 'login' | 'quota' | 'error'; steps?: EHActivityStep[]; cards?: ReactNode; sources?: EHSource[]; suggestions?: string[]};
+/** Anhang am Eingabefeld: `photo` ist ein Schaden-/Situationsbild,
+ *  `document` ein Hausdokument (PDF/Bild), das in die Hausakte wandert. */
+export type EHChatAttachment = {file: File; kind: 'photo' | 'document'};
+export type EHSendOptions = {tool?: string; attachment?: EHChatAttachment | null};
 
 /**
  * User-opened customer assistant; data access and account policy belong to the
@@ -24,8 +28,9 @@ export type EHAssistantResult = {reply: string; kind: 'reply' | 'login' | 'quota
  *   mittleren Bereich mitschrumpfen lassen.
  */
 export function EHAssistant({onSend, loginHref, settingsHref, aboveNavigation = false, placement = 'floating', open, onOpenChange, compact = false, suggestions}: {
-  /** `onStep` meldet die Schritte des Aufrufs, wenn der Aufrufer sie zeigen will. */
-  onSend: (messages: EHAssistantMessage[], signal: AbortSignal, onStep?: (step: EHActivityStep) => void) => Promise<EHAssistantResult>;
+  /** `onStep` meldet die Schritte des Aufrufs; `options` tragen ein bewusst
+      ausgewaehltes Tool und den Anhang (Foto/Dokument) an den Aufrufer. */
+  onSend: (messages: EHAssistantMessage[], signal: AbortSignal, onStep?: (step: EHActivityStep) => void, options?: EHSendOptions) => Promise<EHAssistantResult>;
   loginHref: string; settingsHref: string; aboveNavigation?: boolean; placement?: 'floating' | 'toolbar' | 'panel';
   open?: boolean; onOpenChange?: (open: boolean) => void;
   /** Schmaler Bereich: der Knopf zeigt nur die Kachel, die Beschriftung entfaellt. */
@@ -44,12 +49,14 @@ export function EHAssistant({onSend, loginHref, settingsHref, aboveNavigation = 
   const [input, setInput] = useState('');
   const [busy, setBusy] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  /** Anhang am Eingabefeld: Foto oder Dokument; Vorschau und Sende-Option. */
+  const [anhang, setAnhang] = useState<EHChatAttachment | null>(null);
+  const [anhangMenu, setAnhangMenu] = useState(false);
   const [selectedTool, setSelectedTool] = useState<string | null>(null);
   const [toolsOpen, setToolsOpen] = useState(false);
   /** Follow-up-Vorschlaege der letzten Antwort; verschwinden beim Tippen. */
   const [folgen, setFolgen] = useState<string[]>([]);
   const composerRef = useRef<HTMLTextAreaElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const [notice, setNotice] = useState<EHAssistantResult | null>(null);
   const [steps, setSteps] = useState<EHActivityStep[]>([]);
   // Empfehlungskarten haengen an der Antwort, zu der sie gehoeren - nicht am
@@ -64,11 +71,14 @@ export function EHAssistant({onSend, loginHref, settingsHref, aboveNavigation = 
   const [offenIntern, setOffenIntern] = useState(false);
   const istPanel = placement === 'panel';
   const offen = open ?? offenIntern;
+  // Die IDs sind die serverseitige Chat-Tool-Allowlist: ein Klick waehlt die
+  // Faehigkeit direkt aus, statt einem Modell das Erraten zu ueberlassen.
   const tools = [
-    {id: 'job', label: 'Auftrag erstellen', icon: ClipboardPlus, short: 'Auftrag'},
-    {id: 'compare', label: 'Anbieter vergleichen', icon: Scale, short: 'Vergleich'},
-    {id: 'houseFile', label: 'Hausakte durchsuchen', icon: FolderSearch, short: 'Hausakte'},
-    {id: 'report', label: 'Bericht erstellen', icon: FilePlus2, short: 'Bericht'},
+    {id: 'create_job', label: 'Auftrag erstellen', icon: ClipboardPlus, short: 'Auftrag', placeholder: 'Was soll gemacht werden?'},
+    {id: 'compare_tariffs', label: 'Tarife vergleichen', icon: Scale, short: 'Tarife', placeholder: 'Welchen Vertrag möchtest du vergleichen?'},
+    {id: 'compare_quotes', label: 'Handwerkerangebote vergleichen', icon: ListChecks, short: 'Angebote', placeholder: 'Welchen Auftrag oder welche Angebote möchtest du vergleichen?'},
+    {id: 'search_house', label: 'Hausakte durchsuchen', icon: FolderSearch, short: 'Hausakte', placeholder: 'Wonach suchst du in deiner Hausakte?'},
+    {id: 'create_report', label: 'Bericht erstellen', icon: FilePlus2, short: 'Bericht', placeholder: 'Worüber soll ich dir einen Bericht erstellen?'},
   ] as const;
   const activeTool = selectedTool ? tools.find(t => t.id === selectedTool) : null;
   useEffect(() => {
@@ -110,19 +120,26 @@ export function EHAssistant({onSend, loginHref, settingsHref, aboveNavigation = 
   async function sende(text: string, verlauf: EHAssistantMessage[]) {
     if (request.current) return;
     const controller = new AbortController(); request.current = controller;
-    const next: EHAssistantMessage[] = [...verlauf, {role: 'user', content: text}];
-    letzteFrage.current = {text, verlauf};
+    const inhalt = text || (anhang ? (anhang.kind === 'photo' ? 'Foto mitgesendet' : 'Dokument hochgeladen') : '');
+    if (!inhalt) return;
+    const next: EHAssistantMessage[] = [...verlauf, {role: 'user', content: inhalt}];
+    letzteFrage.current = {text: inhalt, verlauf};
     setBusy(true); setNotice(null); setSteps([]);
+    // Tool und Anhang reisen mit der konkreten Frage; erst nach einer
+    // gelungene Antwort wird der Modus zurueckgesetzt, damit eine
+    // Wiederholung denselben Kontext nimmt.
+    const optionen: EHSendOptions = {tool: selectedTool ?? undefined, attachment: anhang};
     try {
       // Der Bereich liest mit, was gerade passiert; schwebende Karte und
       // Werkzeugleiste bleiben unveraendert.
-      const result = await onSend(next.slice(-12), controller.signal, istPanel ? schrittMerken : undefined);
+      const result = await onSend(next.slice(-12), controller.signal, istPanel ? schrittMerken : undefined, optionen);
       if (controller.signal.aborted) return;
       if (istPanel && result.steps?.length) setSteps(result.steps);
       if (result.kind === 'reply') {
         if (istPanel && result.cards) setKarten(bisher => ({...bisher, [next.length]: result.cards}));
         if (istPanel && result.sources?.length) setQuellen(bisher => ({...bisher, [next.length]: result.sources!}));
-        setMessages([...next, {role: 'assistant', content: result.reply}]); setInput(''); setImagePreview(null);
+        setMessages([...next, {role: 'assistant', content: result.reply}]); setInput('');
+        setAnhang(null); setImagePreview(null); setSelectedTool(null);
         setFolgen((result.suggestions ?? []).slice(0, 3));
       }
       else { setNotice(result); setFolgen([]); }
@@ -241,17 +258,23 @@ export function EHAssistant({onSend, loginHref, settingsHref, aboveNavigation = 
     </div>
   );
 
-  const hasValue = input.trim().length > 0 || imagePreview;
-  const handlePlus = () => fileInputRef.current?.click();
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const hasValue = input.trim().length > 0 || anhang !== null;
+  const photoInputRef = useRef<HTMLInputElement>(null);
+  const dokumentInputRef = useRef<HTMLInputElement>(null);
+  const handlePlus = () => setAnhangMenu(o => !o);
+  const anhangNehmen = (e: React.ChangeEvent<HTMLInputElement>, kind: EHChatAttachment['kind']) => {
     const f = e.target.files?.[0];
-    if (f && f.type.startsWith('image/')) {
+    e.target.value = '';
+    setAnhangMenu(false);
+    if (!f) return;
+    setAnhang({file: f, kind});
+    if (kind === 'photo' && (f.type.startsWith('image/') || f.type === 'image/heic' || f.type === 'image/heif')) {
       const r = new FileReader();
       r.onloadend = () => setImagePreview(r.result as string);
       r.readAsDataURL(f);
     }
-    e.target.value = '';
   };
+  const anhangEntfernen = () => { setAnhang(null); setImagePreview(null); };
   // Vorschlaege ueber dem Eingabefeld: im leeren Verlauf die Startvorschlaege
   // des Aufrufers, danach die Follow-ups der letzten Antwort. Klick uebernimmt
   // den Text in die Eingabe; gesendet wird erst mit Enter.
@@ -269,12 +292,16 @@ export function EHAssistant({onSend, loginHref, settingsHref, aboveNavigation = 
         </div>
       )}
       <div className={s.assistantPromptBox}>
-        <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} hidden aria-hidden="true" tabIndex={-1} />
-        {imagePreview && (
+        <input ref={photoInputRef} type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" capture="environment" onChange={e => anhangNehmen(e, 'photo')} hidden aria-hidden="true" tabIndex={-1} />
+        <input ref={dokumentInputRef} type="file" accept="application/pdf,image/jpeg,image/png,image/webp,image/heic,image/heif" onChange={e => anhangNehmen(e, 'document')} hidden aria-hidden="true" tabIndex={-1} />
+        {anhang && (
           <div className={s.assistantPromptPreview}>
-            <span className={s.assistantPromptPreviewItem}>
-              <img src={imagePreview} alt="Anhang Vorschau" />
-              <button type="button" className={s.assistantPromptPreviewRemove} aria-label="Anhang entfernen" onClick={() => setImagePreview(null)}><X size={12} /></button>
+            <span className={s.assistantPromptPreviewItem} data-doku={anhang.kind === 'document' ? 'true' : undefined}>
+              {anhang.kind === 'photo' && imagePreview
+                ? <img src={imagePreview} alt="Foto-Vorschau" />
+                : <span aria-hidden="true" className={s.assistantPromptPreviewDocIcon}><FileText size={16} /></span>}
+              <span className={s.assistantPromptPreviewName}>{anhang.kind === 'photo' ? 'Foto' : anhang.file.name.slice(0, 32)}</span>
+              <button type="button" className={s.assistantPromptPreviewRemove} aria-label="Anhang entfernen" onClick={anhangEntfernen}><X size={12} /></button>
             </span>
           </div>
         )}
@@ -289,12 +316,20 @@ export function EHAssistant({onSend, loginHref, settingsHref, aboveNavigation = 
           required
           disabled={busy}
           aria-label="Nachricht"
-          placeholder="Nachricht…"
+          placeholder={activeTool?.placeholder ?? 'Nachricht…'}
           className={s.assistantPromptInput}
         />
         <div className={s.assistantPromptBar}>
           <div className={s.assistantPromptLeft} style={{position:'relative'}}>
-            <button type="button" onClick={handlePlus} className={s.assistantPromptIconBtn} aria-label="Bild anhängen"><Plus size={18} /></button>
+            <div style={{position:'relative'}}>
+              <button type="button" onClick={handlePlus} className={s.assistantPromptIconBtn} aria-label="Foto oder Datei hinzufügen" aria-haspopup="menu" aria-expanded={anhangMenu}><Plus size={18} /></button>
+              {anhangMenu && (
+                <div className={s.assistantPromptToolsMenu} role="menu" aria-label="Anhang hinzufügen">
+                  <button type="button" role="menuitem" onClick={() => { photoInputRef.current?.click(); setAnhangMenu(false); }}><Camera size={16} /> <span>Foto machen</span></button>
+                  <button type="button" role="menuitem" onClick={() => { dokumentInputRef.current?.click(); setAnhangMenu(false); }}><FileUp size={16} /> <span>Datei hochladen</span></button>
+                </div>
+              )}
+            </div>
             <div style={{position:'relative'}}>
               <button type="button" onClick={() => setToolsOpen(o => !o)} className={s.assistantPromptToolsBtn} aria-expanded={toolsOpen} aria-haspopup="menu"><SlidersHorizontal size={16} /> Tools</button>
               {toolsOpen && (

@@ -8,21 +8,22 @@ import Stripe from 'stripe';
 import { notFound, redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { db } from '@/lib/db';
-import { authMode, createSession, destroySession, requireUser, supabaseAdmin, establishSupabaseSession } from '@/lib/auth';
+import { authMode, createSession, destroySession, getCurrentUser, requireUser, supabaseAdmin, establishSupabaseSession } from '@/lib/auth';
 import { adminPasswordMatches, createAdminSession, destroyAdminSession, requireAdmin } from '@/lib/admin-auth';
 import { createNotification } from '@/lib/notifications';
 import { geocodePostcode } from '@/lib/geocode';
-import { answerHausmeisterQuestion, appendJobEvent, createEmergencyRequest, createHausmeisterRequest, recordHausmeisterDocumentUpload, redispatchOpenJobs, type HausmeisterIntent } from '@/lib/orchestrator';
+import { answerHausmeisterQuestion, appendJobEvent, createEmergencyRequest, createHausmeisterRequest, recordAssistantChatPhoto, redispatchOpenJobs, type HausmeisterIntent } from '@/lib/orchestrator';
 import { canAccessProviderJob, getProviderContext, getProviderManagerIds } from '@/lib/provider';
 import { nextInvoiceNumber } from '@/lib/invoices';
 import { normalizeContactCategory } from '@/lib/contact-categories';
 import { savePrivateMediaUpload } from '@/lib/intake-media';
-import { privateRoot } from '@/lib/security/private-files';
+import { savePrivateFile } from '@/lib/security/private-files';
+import { storeAssistantDocument } from '@/lib/assistant-document-ingest';
 import { completeMaintenanceAndScheduleNext, ensureAssetMaintenance, ensureCompletedWorkMaintenance, ensureMaintenanceTask } from '@/lib/maintenance';
 import { createPropertyForOwner, primaryProperty, propertyOwnedBy, syncPropertyFromLegacyProfile } from '@/lib/properties';
 import { createBrokerMatches } from '@/lib/broker-matching';
 import { isContractKind, isCostInterval } from '@/lib/contracts';
-import { enqueueDocumentIntelligence, processDocumentIntelligenceSource } from '@/lib/document-intelligence';
+import { enqueueDocumentIntelligence } from '@/lib/document-intelligence';
 import { headers } from 'next/headers';
 import { checkRateLimit, consumeRateLimitAttempt, applyRateLimitLockout, rateLimitBlockedEvent, recordRateLimitFailure, recordRateLimitSuccess } from '@/lib/security/rate-limit';
 import { logAdminAudit, logSecurityEvent } from '@/lib/security/audit';
@@ -260,36 +261,43 @@ async function savePublicImageUpload(file: File | null) {
   return `/uploads/${name}`;
 }
 
-type AssistantDocumentUploadResult={ok:boolean;reply:string;documentId?:number};
+/** KI-Chat: Dokument in die bestehende Hausakte-Upload-Pipeline geben
+ *  (private Ablage, OCR/Laya-Erkennung, Chat-Rueckmeldung). Kein Redirect:
+ *  die Antwort kommt zurueck in den Chatverlauf. */
+export async function uploadAssistantChatDocumentAction(file:File,description=''){
+  const user=await getCurrentUser();
+  if(!user)return {ok:false as const,reply:'Bitte melde dich an, um Dokumente hochzuladen.'};
+  if(user.role!=='homeowner')return {ok:false as const,reply:'Der Hausmanager ist für dein Eigentümerkonto verfügbar.'};
+  const gate=checkRateLimit('account_mutation',`u:${user.id}`);
+  if(!gate.allowed)return {ok:false as const,reply:'Du hast gerade sehr viele Aktionen ausgeführt. Bitte versuch es später erneut.'};
+  consumeRateLimitAttempt('account_mutation',`u:${user.id}`);
+  if(!(file instanceof File)||file.size===0)return {ok:false as const,reply:'Bitte wähle eine Datei aus.'};
+  const uploaded=await storeAssistantDocument(user.id,file,String(description||'').slice(0,2000));
+  if(uploaded.ok){revalidatePath('/app');revalidatePath('/app/hausmeister');revalidatePath('/app/documents');revalidatePath('/notifications');revalidatePath('/app/home');}
+  return uploaded;
+}
 
-async function storeAssistantDocument(userId:number,document:File,description=''):Promise<AssistantDocumentUploadResult>{
-  let stored:string;
-  try{stored=await savePrivateFile(document,'house-documents');}
+/** KI-Chat: Schaden-/Situationsfoto über den bestehenden privaten Medienpfad
+ *  ablegen und als Nutzer-Nachricht mit Foto im App-Verlauf merken. Der Chat
+ *  ruft danach /api/ki mit diesem Pfad auf; die Zugaenglichkeit prueft der
+ *  Dienst gegen den Owner. */
+export async function saveAssistantChatPhotoAction(file:File,caption=''){
+  const user=await getCurrentUser();
+  if(!user)return {ok:false as const,reply:'Bitte melde dich an, um Fotos zu senden.'};
+  if(user.role!=='homeowner')return {ok:false as const,reply:'Der Hausmanager ist für dein Eigentümerkonto verfügbar.'};
+  const gate=checkRateLimit('account_mutation',`u:${user.id}`);
+  if(!gate.allowed)return {ok:false as const,reply:'Du hast gerade sehr viele Aktionen ausgeführt. Bitte versuch es später erneut.'};
+  consumeRateLimitAttempt('account_mutation',`u:${user.id}`);
+  if(!(file instanceof File)||file.size===0)return {ok:false as const,reply:'Bitte wähle ein Foto aus.'};
+  let saved:string|null;
+  try{saved=await savePrivateMediaUpload(file)}
   catch{
-    logSecurityEvent('security_validation_reject','hausmeister_document','invalid_document');
-    return {ok:false,reply:'Das Dokument konnte nicht sicher übernommen werden. Bitte nutze PDF oder ein Bild bis 12 MB.'};
+    logSecurityEvent('security_validation_reject','ki_chat_photo','invalid_photo');
+    return {ok:false as const,reply:'Dieses Foto konnte nicht sicher übernommen werden. Bitte nutze JPG, PNG, WebP oder HEIC bis 8 MB.'};
   }
-  const property=primaryProperty(userId);
-  const title=(document.name||'Dokument').slice(0,180);
-  const inserted=db.prepare(`INSERT INTO house_documents(homeowner_id,property_id,title,path,kind) VALUES(?,?,?,?,'other')`).run(userId,property?.id??null,title,stored);
-  const documentId=Number(inserted.lastInsertRowid);
-  enqueueDocumentIntelligence({homeownerId:userId,sourceType:'house_document',sourceId:documentId,storedPath:stored,originalName:title,mimeType:document.type});
-  const analysis=await processDocumentIntelligenceSource(userId,'house_document',documentId);
-  const labels:Record<string,string>={invoice:'Rechnung',offer:'Angebot',contract:'Vertrag',warranty:'Garantie',maintenance:'Wartungsunterlage',report:'Beleg oder Bericht',insurance:'Versicherungsunterlage',energy:'Energieunterlage',other:'Dokument'};
-  let reply:string;
-  if(analysis?.status==='done'){
-    const date=analysis.relevantDate?` Als relevantes Datum habe ich ${analysis.relevantDate.split('-').reverse().join('.')} erkannt – bitte kurz prüfen.`:'';
-    const excerpt=description&&analysis.searchText?analysis.searchText.replace(/\s+/g,' ').trim().slice(0,700):'';
-    const content=excerpt?` Aus dem Dokument konnte ich u. a. lesen: „${excerpt}${analysis.searchText.length>700?' …':''}“`:'';
-    reply=`Ich habe „${title}“ sicher in deiner Hausakte gespeichert und als ${labels[analysis.kind]||'Dokument'} erkannt.${date}${content} Du kannst mich weiter dazu fragen oder es unter „Dokumente“ öffnen.`;
-  }else if(analysis?.status==='review'){
-    reply=`Ich habe „${title}“ sicher in deiner Hausakte gespeichert. Die automatische Texterkennung oder Zuordnung war nicht eindeutig genug; das Dokument ist deshalb zur kurzen Prüfung markiert. Es geht dabei nichts verloren.`;
-  }else{
-    reply=`Ich habe „${title}“ sicher in deiner Hausakte gespeichert. Die automatische Auswertung konnte gerade nicht abgeschlossen werden und bleibt für die erneute Verarbeitung vorgemerkt.`;
-  }
-  recordHausmeisterDocumentUpload(userId,{documentId,name:title,question:description,reply});
-  revalidatePath('/app');revalidatePath('/app/hausmeister');revalidatePath('/app/documents');revalidatePath('/notifications');
-  return {ok:true,reply,documentId};
+  if(!saved)return {ok:false as const,reply:'Bitte wähle ein Foto aus.'};
+  recordAssistantChatPhoto(user.id,String(caption||'').slice(0,4000),saved);
+  return {ok:true as const,saved};
 }
 
 export async function sendHausmeisterAction(fd:FormData){
@@ -880,15 +888,6 @@ export async function adminLoginAction(fd:FormData){
   await createAdminSession(); redirect('/admin');
 }
 export async function adminLogoutAction(){await destroyAdminSession();redirect('/admin/login');}
-
-async function savePrivateFile(file:File,subdir:string){
-  const ok=file.type==='application/pdf'||file.type.startsWith('image/');
-  if(!ok||file.size===0||file.size>12*1024*1024) throw new Error('Ungültige Datei');
-  const ext=(file.name.split('.').pop()||'bin').replace(/[^a-z0-9]/gi,'').slice(0,6)||'bin';
-  const name=`${Date.now()}-${randomUUID()}.${ext}`; const dir=path.join(privateRoot(),subdir);
-  await fs.mkdir(dir,{recursive:true}); await fs.writeFile(path.join(dir,name),Buffer.from(await file.arrayBuffer()),{mode:0o600});
-  return `${subdir}/${name}`;
-}
 
 export async function submitVerificationAction(fd:FormData){
   const user=await requireUser('provider'); const ctx=getProviderContext(user.id); if(!ctx?.isOwner)redirect('/pro/profile?verification=owner'); const file=fd.get('document');
