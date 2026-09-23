@@ -89,17 +89,6 @@ export default async function Dashboard() {
   const contactsCount = (db.prepare(`SELECT COUNT(DISTINCT q.provider_id) c FROM quotes q JOIN jobs j ON j.id=q.job_id WHERE j.homeowner_id=?`).get(user.id) as { c: number }).c;
   const appointmentsCount = (db.prepare(`SELECT COUNT(*) c FROM appointments WHERE homeowner_id=? AND datetime(start_at) >= datetime('now') AND status != 'cancelled'`).get(user.id) as { c: number }).c;
 
-  // Echte Profilvollstaendigkeit statt erfundener Balkenwerte: dieselben vier
-  // Angaben wie auf /app/profile, damit beide Seiten nicht auseinanderlaufen.
-  const profileFields = [
-    !!(user.first_name && user.last_name),
-    !!(user as { phone?: string }).phone,
-    !!profile?.address,
-    !!profile?.postcode,
-  ];
-  const profileFilled = profileFields.filter(Boolean).length;
-  const profilePct = Math.round(profileFilled / profileFields.length * 100);
-
   // Anstehendes: laufende und offene Vorgänge, nach nächstem Termin, sonst letzte Aktivität.
   const upcomingHistory = db.prepare(`
     SELECT j.id, j.title, j.status, j.updated_at AS shown_at,
@@ -131,6 +120,7 @@ export default async function Dashboard() {
       rail={
         <>
           <p className="eh-werkbank-rail-h">Mein Zuhause im Überblick</p>
+          <div className={styles.railStatGrid}>
           <Link href="/app/jobs" className={styles.railStat}>
             <span className={styles.railStatIcon} aria-hidden="true"><Wrench size={15} /></span>
             <span className={styles.railStatLabel}>Aktuelle Aufträge</span>
@@ -151,10 +141,6 @@ export default async function Dashboard() {
             <span className={styles.railStatLabel}>Termine</span>
             <strong className={styles.railStatValue} data-tone={appointmentsCount > 0 ? 'terra' : undefined}>{appointmentsCount}</strong>
           </Link>
-          <div className="eh-werkbank-karte">
-            <h4>Profil</h4>
-            <div className="eh-werkbank-bar"><i style={{ width: `${profilePct}%` }} /></div>
-            <div className="eh-werkbank-row"><span>Angaben</span><span>{profileFilled} von {profileFields.length}</span></div>
           </div>
         </>
       }
