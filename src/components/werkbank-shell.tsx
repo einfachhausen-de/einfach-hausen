@@ -2,7 +2,8 @@
 
 import Link from 'next/link';
 import { useId, useState, type ReactNode } from 'react';
-import { PanelRight, Sparkles } from 'lucide-react';
+import { PanelRight } from 'lucide-react';
+import { KiHausmeisterIcon } from '@/components/ki-hausmeister-icon';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import {
   SidebarInset,
@@ -185,7 +186,7 @@ export function WerkbankShell({
                     if (mobilKi && kiOffen) { setMobilKi(false); kiSetzen(false); }
                     else { setMobilKi(true); kiUmschalten(true); }
                   }}>
-                  <Sparkles size={16} aria-hidden="true" />
+                  <KiHausmeisterIcon size={21} />
                 </button>
               )}
               <Link
