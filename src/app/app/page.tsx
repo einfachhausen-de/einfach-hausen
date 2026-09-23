@@ -243,7 +243,7 @@ export default async function Dashboard() {
       </EHOwnerSection>
 
       <EHOwnerSection title="Haus-Historie" action={{ href: '/app/jobs', label: 'Alle Vorgänge' }}>
-        <VerlaufZeitleiste eintraege={verlauf} fuss={verlaufFuss} />
+        <VerlaufZeitleiste eintraege={verlauf} fuss={verlaufFuss} stand={shortDay(new Date().toISOString())} />
       </EHOwnerSection>
 
       <EHOwnerSection title="Vorschläge für dich" action={{ href: '/app/contracts', label: 'Alle Verträge' }}>

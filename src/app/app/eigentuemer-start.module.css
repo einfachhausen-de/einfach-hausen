@@ -135,10 +135,6 @@
 .tlHeadCopy { flex:1 1 auto; min-width:0; display:grid; gap:3px; }
 .tlHeadTitel { font-size:var(--eh-font-label); font-weight:var(--eh-weight-semibold); line-height:var(--eh-leading-tight); overflow-wrap:anywhere; }
 .tlHeadMeta { display:flex; flex-wrap:wrap; align-items:center; gap:8px; font-size:var(--eh-font-meta); color:var(--eh-color-secondary); }
-.tlHeadMeta [data-tone='warn'] { color:var(--eh-color-terra); }
-.tlHeadMeta [data-tone='ok'] { color:var(--eh-color-success); }
-.tlHeadMeta [data-tone='info'] { color:var(--eh-color-petrol); }
-.tlHeadCount { margin-left:auto; font-variant-numeric:tabular-nums; }
 
 .tlBadge { flex:none; padding:3px 11px; border:1px solid var(--eh-color-line); border-radius:var(--eh-radius-pill); background:var(--eh-color-paper); font-size:var(--eh-font-meta); font-weight:var(--eh-weight-semibold); color:var(--eh-color-secondary); }
 .tlBadge[data-tone='warn'] { color:var(--eh-color-terra); }

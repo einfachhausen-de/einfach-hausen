@@ -126,7 +126,7 @@ export default function Preview() {
       </EHOwnerSection>
 
       <EHOwnerSection title="Haus-Historie" action={{ href: '/app/jobs', label: 'Alle Vorgänge' }}>
-        <VerlaufZeitleiste eintraege={VERLAUF} fuss="Nächster Termin: 26.09., 14:30 Uhr · Heizungswartung" />
+        <VerlaufZeitleiste eintraege={VERLAUF} fuss="Nächster Termin: 26.09., 14:30 Uhr · Heizungswartung" stand="23.09.2026" />
       </EHOwnerSection>
 
       <EHOwnerSection title="Vorschläge für dich" action={{ href: '/app/contracts', label: 'Alle Verträge' }}>

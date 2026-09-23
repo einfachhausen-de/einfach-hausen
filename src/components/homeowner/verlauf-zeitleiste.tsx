@@ -8,8 +8,12 @@ import styles from "@/app/app/eigentuemer-start.module.css";
 
 /**
  * Verlauf-Zeitleiste — Haus-Historie als Karten-Muster nach der
- * Betreiber-Vorlage (21st.dev-incident-status-timeline, 23.09.). Kopf mit
- * Symbol, Statusplakette und Aufklapp-Zeile; darunter ZWEI Gruppen:
+ * Betreiber-Vorlage (21st.dev-incident-status-timeline, 23.09.). Der Kopf
+ * fuehrt NUR die Verlaufs-Bilanz (Anzahlen, Stand) — kein Einzelvorgang und
+ * kein Termin-Status, damit die Karte eindeutig „Historie" ist und nicht wie
+ * eine Termin-Erinnerung wirkt (Betreiber-Order 23.09.: 'Historie oder
+ * Termin?'). Vorgaenge erscheinen ausschliesslich in der Liste darunter,
+ * der Termin nur in der eindeutig beschrifteten Fusszeile. Zwei Gruppen:
  * „Anstehend“ (gefuellte Petrol-Punkte) und „Vergangen“ (hohle graue Punkte,
  * blassere Schrift) — damit auf einen Blick erkennbar ist, was noch laeuft
  * und was erledigt ist (Betreiber-Nachschurf 23.09.). Ueber MAX_SICHTBAR
@@ -36,9 +40,11 @@ export type VerlaufEintrag = {
 /** So viele Vorgaenge zeigt die Zeitleiste im Ruhezustand. */
 const MAX_SICHTBAR = 5;
 
-export function VerlaufZeitleiste({ eintraege, fuss }: {
+/** Bilanz-Kopf: wie viele Vorgaenge, wie davon offen; `stand` = Kurzdatum. */
+export function VerlaufZeitleiste({ eintraege, fuss, stand }: {
   eintraege: readonly VerlaufEintrag[];
   fuss?: string;
+  stand?: string;
 }) {
   const [alle, setAlle] = useState(false);
   const anstehend = eintraege.filter((e) => !e.vergangen);
@@ -64,21 +70,21 @@ export function VerlaufZeitleiste({ eintraege, fuss }: {
     </li>
   );
 
+  const offen = anstehend.length;
+  const vergangen = vergangene.length;
   return (
     <div className={styles.tlCard}>
       <Collapsible defaultOpen>
         <div className={styles.tlHead}>
           <span className={styles.tlIcon} aria-hidden="true"><History size={16} /></span>
           <span className={styles.tlHeadCopy}>
-            <strong className={styles.tlHeadTitel}>{eintraege[0] ? eintraege[0].titel : 'Noch kein Vorgang'}</strong>
+            <strong className={styles.tlHeadTitel}>{eintraege.length === 0 ? 'Noch kein Vorgang' : `${eintraege.length} Vorgänge im Verlauf`}</strong>
             <span className={styles.tlHeadMeta}>
-              {eintraege[0]
-                ? <>Zuletzt <span data-tone={eintraege[0].ton}>{eintraege[0].status}</span> · {eintraege[0].datum}</>
-                : 'Sobald du einen Auftrag anlegst, steht er hier'}
-              <span className={styles.tlHeadCount}>{eintraege.length} Vorgänge</span>
+              {eintraege.length === 0
+                ? 'Sobald du einen Auftrag anlegst, steht er hier'
+                : <>{offen} anstehend · {vergangen} vergangen{stand ? ` · Stand ${stand}` : ''}</>}
             </span>
           </span>
-          {eintraege[0] && <span className={styles.tlBadge} data-tone={eintraege[0].ton}>{eintraege[0].status}</span>}
         </div>
         <CollapsibleTrigger className={styles.tlToggle} aria-label="Zeitleiste ein- oder ausklappen">
           Zeitleiste
