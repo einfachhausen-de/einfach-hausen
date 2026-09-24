@@ -111,19 +111,21 @@ export function LexikonExplorer({ entries, categories, letters, featured }: Prop
               Jeder Eintrag beantwortet dieselben vier Fragen: Was ist das, was kostet es, wie läuft es ab – und betrifft es mein Haus?
             </p>
             <div className="flex flex-col gap-3">
-              <label className="flex h-14 items-center gap-3 rounded-pill bg-white px-5 shadow-card ring-1 ring-hairline focus-within:ring-2 focus-within:ring-brand">
+              <label className="flex h-14 min-w-0 items-center gap-3 rounded-pill bg-white px-5 shadow-card ring-1 ring-hairline focus-within:ring-2 focus-within:ring-brand">
                 <Search className="size-5 shrink-0 text-body" aria-hidden="true" />
-                <input
-                  ref={inputRef}
-                  type="search"
-                  value={query}
-                  onChange={(event) => setQuery(event.target.value)}
-                  placeholder="Begriff, Synonym oder Thema suchen …"
-                  aria-label="Lexikon durchsuchen"
-                  autoComplete="off"
-                  enterKeyHint="search"
-                  className="h-full min-w-0 flex-1 bg-transparent text-base text-ink outline-none placeholder:text-body [&::-webkit-search-cancel-button]:hidden"
-                />
+                <span className="flex h-full min-w-0 flex-1 items-center">
+                  <input
+                    ref={inputRef}
+                    type="search"
+                    value={query}
+                    onChange={(event) => setQuery(event.target.value)}
+                    placeholder="Begriff, Synonym oder Thema suchen …"
+                    aria-label="Lexikon durchsuchen"
+                    autoComplete="off"
+                    enterKeyHint="search"
+                    className="h-full w-full min-w-0 appearance-none overflow-hidden text-ellipsis whitespace-nowrap bg-transparent text-base text-ink outline-none placeholder:text-body [&::-webkit-search-cancel-button]:hidden [&::-webkit-search-decoration]:hidden"
+                  />
+                </span>
                 {query ? (
                   <button
                     type="button"

@@ -473,8 +473,11 @@ export function EHAssistant({onSend, loginHref, settingsHref, aboveNavigation = 
               <small>KI-Hilfe</small>
             </span>
             <ChevronsUpDown className={s.assistantLauncherChevron} size={16} aria-hidden="true" /></>
-        : <><img src="/brand/logo-full.png" alt="" width={64} height={42} />
-            <span><strong>{placement === 'toolbar' ? 'Hausmanager' : 'Frag deinen Hausmanager'}</strong>{placement !== 'toolbar' && <small>KI-Hilfe rund um dein Zuhause</small>}</span></>}
+        : placement === 'floating'
+          ? <><span className={s.assistantLauncherAvatar} aria-hidden="true"><Sparkles size={20} /></span>
+              <span className={s.assistantLauncherCopy}><strong>Frag deinen Hausmanager</strong><small>KI-Hilfe rund um dein Zuhause</small></span></>
+          : <><img src="/brand/logo-full.png" alt="" width={64} height={42} />
+              <span><strong>Hausmanager</strong></span></>}
     </button>}
 
     {/* Schwebend und Werkzeugleiste bleiben ein modaler Dialog - wie auf der

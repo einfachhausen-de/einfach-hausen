@@ -583,17 +583,6 @@ html,body { background:#f4f7f7; color:#1c2129; }
   --eh-success-border: #b8d9c5;
 }
 
-/* 404 im Brand-Layout (Inter/Teal, wash + dot grid) */
-.nf-shell { min-height:100dvh; display:grid; place-content:center; justify-items:center; text-align:center; padding:40px 24px; gap:0;
-  background:radial-gradient(800px 400px at 80% -10%, var(--eh-green-100), transparent 60%), var(--eh-bg); font-family:var(--font-marketing),ui-sans-serif,system-ui,sans-serif; }
-.nf-mark { margin-bottom:26px; }
-.nf-eyebrow { display:inline-flex; font-size:12px; font-weight:var(--eh-weight-bold); letter-spacing:.09em; color:var(--eh-green-700); background:var(--eh-green-50); border-radius:var(--eh-radius-pill); padding:6px 13px; }
-.nf-shell h1 { margin:16px 0 0; font-size:clamp(30px,4vw,44px); font-weight:var(--eh-weight-bold); letter-spacing:-.03em; color:var(--eh-text); }
-.nf-shell p { margin:12px 0 0; max-width:440px; color:var(--eh-text-secondary); font-size:15px; line-height:var(--eh-leading-loose); }
-.nf-actions { display:flex; gap:10px; margin-top:26px; flex-wrap:wrap; justify-content:center; }
-.nf-primary, .nf-ghost { min-height:50px; display:inline-flex; align-items:center; justify-content:center; border-radius:13px; padding:0 20px; font-size:15px; font-weight:var(--eh-weight-bold); font-family:inherit; cursor:pointer; text-decoration:none; }
-.nf-primary { background:var(--eh-green-700); color:var(--eh-surface); box-shadow:0 14px 30px -14px rgba(10,53,57,.55); }
-.nf-ghost { background:var(--eh-surface); color:var(--eh-text); border:1px solid var(--eh-border-strong); }
 @media (prefers-reduced-motion: no-preference) { html { scroll-behavior:smooth; } }
 /* Global interactions moved out of marketing.module.css (CSS-module purity, T-0006) */
 ::selection { background: var(--eh-green-100); }

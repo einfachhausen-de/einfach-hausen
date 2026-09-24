@@ -25,6 +25,7 @@ export function PageHero({
   title,
   text,
   actions,
+  notice,
   aside,
   children,
 }: {
@@ -32,6 +33,8 @@ export function PageHero({
   title: React.ReactNode;
   text: React.ReactNode;
   actions?: React.ReactNode;
+  /** Shown before the buttons, so a warning is read before the next step. */
+  notice?: React.ReactNode;
   aside?: React.ReactNode;
   children?: React.ReactNode;
 }) {
@@ -46,6 +49,7 @@ export function PageHero({
             {title}
           </h1>
           <p className="max-w-2xl text-pretty text-lg leading-relaxed text-body sm:text-xl">{text}</p>
+          {notice}
           {actions && <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:flex-wrap">{actions}</div>}
           {children}
         </Reveal>
@@ -271,7 +275,7 @@ export function ClosingCta({
     <section className="bg-white py-16 lg:py-24">
       <Container>
         <Reveal y={24}>
-          <div className="rounded-[2.5rem] bg-lime px-6 py-14 text-center sm:px-12 lg:py-20">
+          <div className={cn('bg-lime px-6 py-14 text-center sm:px-12 lg:py-20', houseEdgeClass)}>
             <div className="mx-auto flex max-w-3xl flex-col items-center gap-6">
               <h2 className="font-display text-balance text-4xl font-bold leading-[1.05] tracking-tight text-ink sm:text-5xl">{title}</h2>
               <p className="max-w-xl text-pretty text-lg text-ink/75">{text}</p>

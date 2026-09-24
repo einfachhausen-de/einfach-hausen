@@ -7,12 +7,7 @@
     justify-content: center;
     padding: 24px 16px;
     font-family: var(--font-marketing), Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    background: linear-gradient(
-      135deg,
-      color-mix(in srgb, var(--eh-color-sand) 82%, var(--eh-color-white)) 0%,
-      var(--eh-color-paper) 42%,
-      color-mix(in srgb, var(--eh-color-mist) 72%, var(--eh-color-petrol)) 100%
-    );
+    background: var(--eh-color-paper);
     color: var(--eh-color-deep);
     overflow-x: clip;
   }
@@ -23,8 +18,8 @@
     display: grid;
     grid-template-columns: minmax(0, 1fr);
     background: var(--eh-color-white);
-    border-radius: 24px;
-    box-shadow: 0 25px 50px color-mix(in srgb, var(--eh-color-deep) 18%, transparent);
+    border-radius: var(--eh-radius-card);
+    box-shadow: var(--eh-shadow-lift);
     overflow: hidden;
     transition: max-width 0.45s cubic-bezier(0.22, 1, 0.36, 1);
   }
@@ -70,9 +65,10 @@
     background: none;
     border: 0;
     padding: 0;
-    color: var(--eh-color-secondary);
+    color: var(--eh-color-petrol);
     font: inherit;
     font-size: 14px;
+    font-weight: var(--eh-weight-semibold);
     cursor: pointer;
   }
 
@@ -87,6 +83,7 @@
     min-height: 280px;
     overflow: hidden;
     background: var(--eh-color-deep);
+    clip-path: polygon(0 0, calc(100% - var(--eh-radius-cut)) 0, 100% var(--eh-radius-cut), 100% 100%, 0 100%);
   }
 
   .arena-hero-photo {
@@ -129,10 +126,10 @@
     align-items: center;
     min-height: 32px;
     padding: 6px 12px;
-    color: var(--eh-color-deep);
-    background: var(--eh-color-sand);
-    border: 0;
-    border-radius: 8px;
+    color: var(--eh-color-ink);
+    background: var(--eh-color-white);
+    border: 1px solid var(--eh-color-line);
+    border-radius: var(--eh-radius-pill);
     font: inherit;
     font-size: 13px;
     font-weight: var(--eh-weight-semibold);
@@ -181,8 +178,9 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .arena-loading-spinner {
-      animation-duration: 1.6s;
+    .arena-loading-spinner,
+    .arena-card {
+      animation: none;
     }
 
     .arena-card {
@@ -190,11 +188,22 @@
     }
   }
 
+  @media (prefers-reduced-motion: no-preference) {
+    .arena-card {
+      animation: arena-arrive 0.55s var(--eh-motion-ease) both;
+    }
+  }
+
+  @keyframes arena-arrive {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: none; }
+  }
+
   #login-card-container > h1 {
     margin: 0;
-    color: var(--eh-color-deep);
-    font-size: 32px;
-    font-weight: 400;
+    color: var(--eh-color-ink);
+    font-size: var(--eh-font-section);
+    font-weight: var(--eh-weight-bold);
     letter-spacing: -0.03em;
     line-height: 1.15;
   }
@@ -331,9 +340,10 @@
     gap: 8px;
     padding: 12px 16px;
     border: 0;
-    border-radius: 8px;
+    border-radius: var(--eh-radius-pill);
     font: inherit;
     font-size: 15px;
+    font-weight: var(--eh-weight-bold);
     cursor: pointer;
   }
 
@@ -348,12 +358,12 @@
   }
 
   .arena-submit {
-    color: var(--eh-color-white);
-    background: var(--eh-color-petrol);
+    color: var(--eh-color-ink);
+    background: var(--eh-color-lime);
   }
 
   .arena-submit:hover {
-    background: color-mix(in srgb, var(--eh-color-petrol) 88%, var(--eh-color-deep));
+    background: var(--eh-color-lime-strong);
   }
 
   .arena-submit:disabled,
@@ -444,7 +454,7 @@
       grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
       min-height: 720px;
       height: 720px;
-      border-radius: 40px;
+      border-radius: var(--eh-radius-card);
     }
 
     .arena-card--register {
@@ -484,13 +494,25 @@
       min-height: 0;
       align-self: stretch;
       margin: 16px;
-      border-radius: 32px;
+      border-radius: 0;
+      clip-path: polygon(0 0, calc(100% - var(--eh-radius-cut)) 0, 100% var(--eh-radius-cut), 100% 100%, 0 100%);
     }
   }
 
   @media (max-width: 1023px) {
+    /* Keep the form as the first screen. A centered, overflowing card was clipping the photo into a stray strip. */
+    .arena-auth {
+      align-items: flex-start;
+    }
+
+    .arena-main {
+      min-height: 100dvh;
+    }
+
     .arena-hero {
-      min-height: 320px;
+      min-height: 280px;
+      margin: 0 12px 12px;
+      clip-path: polygon(0 0, calc(100% - var(--eh-radius-cut)) 0, 100% var(--eh-radius-cut), 100% 100%, 0 100%);
     }
   }
 
@@ -500,7 +522,7 @@
     }
 
     .arena-card {
-      border-radius: 20px;
+      border-radius: var(--eh-radius-card);
     }
 
     .arena-main {

@@ -89,19 +89,20 @@ export function SiteHeader() {
 
   return (
     <>
-      <div className="hidden bg-ink text-white/80 md:block">
-        <div className="mx-auto flex h-9 max-w-7xl items-center justify-between px-5 text-meta sm:px-8">
-          <ul className="flex items-center gap-6">
-            {PROMISES.map((item) => (
-              <li key={item} className="flex items-center gap-1.5">
-                <BadgeCheck className="size-3.5 text-lime" aria-hidden="true" />
+      <div className="hidden h-9 overflow-hidden bg-ink text-white/80 md:block">
+        <div className="mx-auto flex h-9 max-w-7xl items-center justify-between gap-4 px-5 text-meta sm:px-8">
+          <ul className="flex min-w-0 items-center gap-4 xl:gap-6">
+            {PROMISES.map((item, index) => (
+              <li key={item} className={cn('flex items-center gap-1.5 whitespace-nowrap', index > 0 && 'hidden xl:flex')}>
+                <BadgeCheck className="size-3.5 shrink-0 text-lime" aria-hidden="true" />
                 {item}
               </li>
             ))}
           </ul>
-          <Link href="/partner" className="flex items-center gap-1.5 font-medium text-white hover:text-lime">
+          <Link href="/partner" className="flex shrink-0 items-center gap-1.5 whitespace-nowrap font-medium text-white hover:text-lime">
             <HardHat className="size-3.5" aria-hidden="true" />
-            Du bist Handwerker? Hier entlang
+            <span className="xl:hidden">Für Handwerker</span>
+            <span className="hidden xl:inline">Du bist Handwerker? Hier entlang</span>
             <ArrowRight className="size-3" aria-hidden="true" />
           </Link>
         </div>
