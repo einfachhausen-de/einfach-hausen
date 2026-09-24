@@ -1,8 +1,7 @@
 import '@/components/werkbank-layout.css';
-import Link from 'next/link';
 import { WerkbankRahmen } from '@/components/werkbank-rahmen';
 import { AngebotsListe } from '@/components/homeowner/angebote-liste';
-import { EHText } from '@/design-system';
+import { EHButton, EHText } from '@/design-system';
 import { db } from '@/lib/db';
 import { SAVINGS_KINDS, type ContractKind, cancellationDeadline, estimateSavings, yearlyCents } from '@/lib/contracts';
 import { AFFILIATE_CATEGORIES } from '@/lib/affiliate';
@@ -41,7 +40,7 @@ export default async function AngebotePreview({ searchParams }: { searchParams: 
 
   return <WerkbankRahmen role="homeowner" active="/app/preview/vertraege">
     <AngebotsListe base="/app/preview/angebote" sp={sp} alle={angebote} />
-    <p className="eh-ang-zurueck"><Link href="/app/preview/vertraege">← zurück zu Verträge &amp; Tarife</Link></p>
+    <EHButton href="/app/preview/vertraege" variant="secondary">zurück zu Verträge & Tarife</EHButton>
     <EHText muted>Kennenlern-Ansicht: echte Rechenlogik, feste Demo-Werte, keine Klicks nach draußen.</EHText>
   </WerkbankRahmen>;
 }

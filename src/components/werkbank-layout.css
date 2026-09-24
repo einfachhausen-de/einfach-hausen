@@ -251,4 +251,3 @@
 .eh-ang-treffer { margin:0; font-size:var(--eh-font-meta); color:var(--eh-color-secondary); }
 .eh-ang-leer { margin:0; padding:18px; border:1px dashed var(--eh-color-line); border-radius:var(--eh-radius-panel); font-size:var(--eh-font-label); color:var(--eh-color-secondary); }
 .eh-ang-liste { display:grid; gap:12px; margin:0; padding:0; list-style:none; }
-.eh-ang-zurueck { margin:0; font-size:var(--eh-font-meta); }
