@@ -28,8 +28,8 @@ export function ServiceDetailPage({ service }: { service: ServiceCategory }) {
 
       <PageHero
         eyebrow={`Leistungen · ${service.shortTitle}`}
-        title={`${service.title}: einfach anfangen, ohne das Gewerk kennen zu müssen.`}
-        text={`${service.description}. Beschreib, was du bemerkst oder vorhast. Wir helfen bei der Einordnung und zeigen den passenden nächsten Schritt — unverbindlich, bevor ein Auftrag entsteht.`}
+        title={service.title}
+        text={`${service.description}. Du musst das Gewerk nicht kennen. Beschreib, was du bemerkst oder vorhast — wir helfen bei der Einordnung, bevor ein Auftrag entsteht.`}
         actions={
           <>
             <ButtonLink href="/#anliegen" size="lg" arrow>
