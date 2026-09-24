@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import { Fragment, type ReactNode } from 'react';
 import { ArrowRight, ArrowUp, ChevronsUpDown, ListFilter, Search, Table2 } from 'lucide-react';
 import {
   cancellationDeadline, contractKindLabel, currentTermEnd, deadlineDays, deadlineState, formatDate,
@@ -60,24 +59,18 @@ function fristZelle(row: TabellenZeile): { text: string; tone: 'ok' | 'warn' | '
 }
 
 export function VertraegeTabelle({
-  base, allRows, rows, filter, selectedId, icons, detailFuer,
+  base, allRows, rows, filter, icons,
 }: {
   base: string;
   allRows: TabellenZeile[];
   rows: TabellenZeile[];
   filter: ContractFilter;
-  selectedId: number | null;
   icons: Partial<Record<string, LucideIcon>>;
-  /** Aufklapper-Inhalt: wird direkt unter der geklickten Zeile gerendert. */
-  detailFuer?: (row: TabellenZeile) => ReactNode;
 }) {
   const statusIdx = STATUS_CYCLE.indexOf(filter.status);
   const nextStatus = STATUS_CYCLE[(statusIdx + 1) % STATUS_CYCLE.length];
-  const detailHref = (id: number) => {
-    const q = new URLSearchParams(withContractQuery(filter).replace(/^\?/, ''));
-    q.set('vertrag', String(id));
-    return `${base}?${q.toString()}`;
-  };
+  /** Detail als eigene Route (Betreiber 24.09.: kein Aufklapper mehr). */
+  const detailHref = (id: number) => `${base}/${id}`;
   const sortHead = (key: ContractFilter['sort'], label: string, extra = '') => (
     <th scope="col" className={key === filter.sort ? 'is-sorted' : undefined} {...(key === filter.sort ? { 'aria-sort': 'ascending' as const } : {})}>
       <Link href={`${base}${withContractQuery(filter, { sort: key })}`}>
@@ -132,8 +125,7 @@ export function VertraegeTabelle({
             const frist = fristZelle(row);
             const end = currentTermEnd(row);
             return (
-              <Fragment key={row.id}>
-              <tr {...(selectedId === row.id ? { 'data-sel': 'true' } : {})}>
+              <tr key={row.id}>
                 <td className="eh-vtbl-anbieter">
                   <Link href={detailHref(row.id)}>{Icon ? <Icon size={15} aria-hidden="true" /> : null}<b>{row.provider}</b></Link>
                   {(row.tariff || row.notice) && <small>{row.tariff || row.notice}</small>}
@@ -155,12 +147,6 @@ export function VertraegeTabelle({
                   </span>
                 </td>
               </tr>
-              {row.id === selectedId && detailFuer && (
-                <tr className="eh-vtbl-detailrow">
-                  <td colSpan={filter.voll ? 7 : 5}><div className="eh-vtbl-detailkarte">{detailFuer(row)}</div></td>
-                </tr>
-              )}
-              </Fragment>
             );
           })}
         </tbody>

@@ -1,15 +1,14 @@
 import '@/components/werkbank-layout.css';
-import Link from 'next/link';
 import {
   Droplets, FileText, Flame, ShieldCheck,
   Smartphone, Thermometer, Trash2, Wifi, Wrench, Zap,
 } from 'lucide-react';
 import {
-  EHActionTiles, EHOfferCard, EHFormFeedback, EHOwnerSection, EHText,
+  EHActionTiles, EHOfferCard, EHFormFeedback, EHOwnerSection,
 } from '@/design-system';
 import { WerkbankRahmen } from '@/components/werkbank-rahmen';
 import { euroExact } from '@/lib/format';
-import { VertraegeTabelle, type TabellenZeile } from '@/components/homeowner/vertraege-tabelle';
+import { VertraegeTabelle } from '@/components/homeowner/vertraege-tabelle';
 import { VertraegeAnlegeWege } from '@/components/homeowner/anlege-wege';
 import { CompareRail } from '@/components/homeowner/compare-rail';
 import { baueAngebote, sortiereVorschlaege } from '@/lib/angebote';
@@ -17,8 +16,8 @@ import { PREVIEW_RECHNUNG, previewVertraege, type PreviewFristRow } from '@/lib/
 import { db } from '@/lib/db';
 import { applyContractFilter, filterIsActive, parseContractFilter } from '@/lib/contract-filter';
 import {
-  SAVINGS_KINDS, contractKindLabel, currentTermEnd, cancellationDeadline, deadlineDays,
-  estimateSavings, formatDate, monthlyCents, yearlyCents,
+  SAVINGS_KINDS, contractKindLabel, cancellationDeadline,
+  estimateSavings, monthlyCents, yearlyCents,
 } from '@/lib/contracts';
 import { AFFILIATE_CATEGORIES } from '@/lib/affiliate';
 
@@ -34,20 +33,10 @@ import { AFFILIATE_CATEGORIES } from '@/lib/affiliate';
  */
 
 
-function fristText(row: TabellenZeile): string {
-  const deadline = cancellationDeadline(row);
-  if (!deadline) return 'Keine Frist erfasst';
-  const days = deadlineDays(deadline) ?? 0;
-  if (days < 0) return `Frist verpasst · ${formatDate(deadline)}`;
-  if (days === 0) return 'Heute letzter Tag';
-  return `Noch ${days} Tage · ${formatDate(deadline)}`;
-}
-
 const KIND_ICONS = {
   strom: Zap, gas: Flame, dsl: Wifi, mobilfunk: Smartphone, versicherung: ShieldCheck,
   heizung: Thermometer, wasser: Droplets, abfall: Trash2, wartung: Wrench, sonstiges: FileText,
 } as const;
-
 
 export default async function ContractsPreview({ searchParams }: { searchParams: Promise<Record<string, string>> }) {
   const sp = await searchParams;
@@ -67,8 +56,6 @@ export default async function ContractsPreview({ searchParams }: { searchParams:
   const pool = CONTRACTS.map((row) => ({ ...row, sparCents: sparFor(row) }));
   const filter = parseContractFilter(sp);
   const visible = applyContractFilter(pool, filter);
-  const selectedId = Number(sp.vertrag);
-  const selectedRow = Number.isFinite(selectedId) ? visible.find((r) => r.id === selectedId) ?? null : null;
   const active = CONTRACTS.filter((c) => c.status === 'active');
 
   const sparByKind = new Map<string, number>();
@@ -138,7 +125,7 @@ export default async function ContractsPreview({ searchParams }: { searchParams:
 
     <EHOwnerSection title={filterIsActive(filter) ? `Meine Verträge · ${visible.length} von ${CONTRACTS.length}` : `Meine Verträge · ${CONTRACTS.length}`}>
       <div id="vertraege" />
-      <VertraegeTabelle base="/app/preview/vertraege" allRows={pool} rows={visible} filter={filter} selectedId={selectedRow?.id ?? null} icons={KIND_ICONS} detailFuer={(row) => <PreviewDetail row={row} />} />
+      <VertraegeTabelle base="/app/preview/vertraege" allRows={pool} rows={visible} filter={filter} icons={KIND_ICONS} />
       {pool.length > 0 && pool.length < 4 && (
         <p className="eh-vdash-nudge">Je mehr Verträge du erfasst, desto genauer dein Spar-Check — auch Gas, Handy, Abo oder Versicherung gehören in die Hausakte.</p>
       )}
@@ -164,46 +151,3 @@ export default async function ContractsPreview({ searchParams }: { searchParams:
 
 /** Detailpanel unter der Tabelle: Fakten + Spar-Check, ohne Formulare
  *  (die echte Hausakte bearbeiten — hier ist es das Schaufenster). */
-function PreviewDetail({ row }: { row: TabellenZeile }) {
-  const end = currentTermEnd(row);
-  const estimate = row.status === 'active' && SAVINGS_KINDS.includes(row.kind as (typeof SAVINGS_KINDS)[number])
-    ? estimateSavings({ kind: row.kind, yearlyCents: yearlyCents(row.cost_amount, row.cost_interval), postcode: PREVIEW_RECHNUNG.postcode, householdSize: PREVIEW_RECHNUNG.householdSize, hasLoyaltyBonus: false, switchWilling: true })
-    : null;
-  const fakten: [string, string][] = [
-    ['Art', contractKindLabel(row.kind)],
-    ...(row.tariff ? [['Tarif', row.tariff] as [string, string]] : []),
-    ...(row.contract_number ? [['Vertragsnummer', row.contract_number] as [string, string]] : []),
-    ...(row.started_at ? [['Beginn', formatDate(new Date(`${row.started_at.slice(0, 10)}T12:00:00`))] as [string, string]] : []),
-    ...(end ? [['Laufzeit bis', formatDate(end)] as [string, string]] : []),
-    ...(row.cancellation_days ? [['Kündigungsfrist', `${row.cancellation_days} Tage`] as [string, string]] : []),
-  ];
-  return (
-    <div className="eh-vertrag-detail">
-      <p className="eh-vertrag-detail-kopf">
-        <strong>{row.provider}</strong>
-        <span>{row.status === 'active' ? fristText(row) : row.status === 'cancelled' ? 'Gekündigt' : 'Ausgelaufen'}</span>
-        <Link href="/app/preview/vertraege">Schließen</Link>
-      </p>
-      <div className="eh-vertrag-fakten">
-        {fakten.map(([label, value]) => (
-          <span key={label} className="eh-vertrag-fakt"><small>{label}</small><b>{value}</b></span>
-        ))}
-        {row.status === 'active' && !SAVINGS_KINDS.includes(row.kind as (typeof SAVINGS_KINDS)[number]) && (
-          <span className="eh-vertrag-fakt"><small>Spar-Check</small><b>Für {contractKindLabel(row.kind).toLowerCase()} gibt es keine Vergleichsstrecke — der Vertrag bleibt reine Hausakte.</b></span>
-        )}
-      </div>
-      {estimate && (
-        <div className="eh-vertrag-spar">
-          <span className="eh-vertrag-spar-zahl">
-            <b>{euroExact(estimate.lowCents)} – {euroExact(estimate.highCents)}</b>
-            <small>möglich pro Jahr · Schätzung {estimate.confidence}</small>
-          </span>
-          <ul className="eh-vertrag-spar-gruende">
-            {estimate.reasons.slice(0, 3).map((reason, i) => <li key={i}>{reason}</li>)}
-          </ul>
-        </div>
-      )}
-      <EHText muted>Bearbeiten, Markieren und Belege sind der echten Hausakte vorbehalten.</EHText>
-    </div>
-  );
-}

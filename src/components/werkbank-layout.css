@@ -151,15 +151,6 @@
 .eh-vtbl-badge[data-tone="muted"] { background:var(--eh-color-paper); color:var(--eh-color-ink); opacity:.7; }
 .eh-vtbl-leer { text-align:center; padding:26px 16px; opacity:.7; }
 .eh-vtbl-leer a { color:var(--eh-color-petrol); }
-/* Aufklapper (Betreiber 24.09.: der losige Block unter der Tabelle wirkte
-   kaputt) — Detail als Karte direkt unter der geklickten Zeile. */
-.eh-vtbl-detailrow > td { padding:0; background:var(--eh-color-paper); }
-.eh-vtbl-detailkarte { margin:2px 12px 14px; border:1px solid var(--eh-color-line); border-radius:var(--eh-radius-panel); background:var(--eh-color-white); padding:14px 16px; }
-.eh-vertrag-detail { display:grid; gap:12px; }
-.eh-vertrag-detail-kopf { display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin:0; }
-.eh-vertrag-detail-kopf span { font-size:var(--eh-font-meta); color:var(--eh-color-secondary); }
-.eh-vertrag-detail-kopf a { margin-left:auto; display:inline-flex; align-items:center; border:1px solid var(--eh-color-line); border-radius:var(--eh-radius-pill); background:var(--eh-color-white); color:var(--eh-color-ink); font-size:var(--eh-font-meta); font-weight:var(--eh-weight-semibold); padding:6px 12px; text-decoration:none; transition:border-color var(--eh-motion-duration) var(--eh-motion-ease), background var(--eh-motion-duration) var(--eh-motion-ease); }
-.eh-vertrag-detail-kopf a:hover { border-color:var(--eh-color-petrol); background:var(--eh-color-paper); }
 .eh-vertrag-treffer a { color:var(--eh-color-petrol); text-underline-offset:3px; }
 .eh-vertrag[open] { border-color:var(--eh-color-secondary); }
 .eh-vertrag > summary { display:flex; align-items:center; gap:12px; min-height:58px; padding:10px 16px; cursor:pointer; list-style:none; border-radius:var(--eh-radius-control); }
@@ -180,8 +171,9 @@
 .eh-vertrag[data-past] > summary { background:transparent; }
 .eh-vertrag[data-past] .eh-vertrag-body strong { color:var(--eh-color-secondary); }
 .eh-vertrag[data-past] .eh-vertrag-ic { color:var(--eh-color-secondary); }
-/* Fakten als Kacheln — nicht als auseinandergezogenes Label-Gitter. */
-.eh-vertrag-fakten { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:8px; }
+/* Vertrags-Blatt (eigene Seite seit Betreiber 24.09. »ganz anders«): Fakten
+   als Kacheln — nicht als auseinandergezogenes Label-Gitter. */
+.eh-vertrag-fakten { display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:10px; }
 .eh-vertrag-fakt { display:grid; gap:2px; min-width:0; background:var(--eh-color-paper); border-radius:var(--eh-radius-control); padding:9px 11px; }
 .eh-vertrag-fakt small { font-size:var(--eh-font-meta); color:var(--eh-color-secondary); text-transform:uppercase; letter-spacing:var(--eh-track-wide); }
 .eh-vertrag-fakt b { font-size:var(--eh-font-label); font-weight:var(--eh-weight-medium); overflow-wrap:anywhere; }
