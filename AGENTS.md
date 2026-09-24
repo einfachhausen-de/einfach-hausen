@@ -972,3 +972,8 @@ Neue Bausteine gehören ausschließlich in das gemeinsame Designpaket und nicht 
 Die globale AppShell aus dem Owner-Dashboard-Auftrag bleibt erhalten. Keine route-spezifische Sidebar oder zweite Topbar bauen.
 
 Auftragszahlen und Zeilen müssen aus echten `jobs`, `quotes`, `appointments`, `provider_profiles` und `job_photos` stammen. Keine Mockdaten im Produkt.
+
+## V0-ROLLE + R1-REGEL (Operator-Order 2026-09-24, noch nicht gelauncht)
+
+- **Rollenteilung:** v0 macht Frontend, Design und Designsystem-Verbesserungen (Komposition, Bausteine, Beispiel-Motive, additive Tokens). Der lokale Subagent übernimmt anschließend Tests, Gates, Docs, Merge, Push und Verifikation. Kein Deploy ohne visuelle Jeremy-Abnahme.
+- **R1 (hart):** Keine erfundenen Menschen, Firmen, Namen oder Sterne-Bewertungen — weder im Bild (keine lesbaren Marken/Namensschilder auf Beispiel-Fotos) noch im Text. Beispiele immer sichtbar als Beispiel kennzeichnen (`ExampleNote`/„Beispielansicht"-Badge, nicht nur sr-only). Bildtext und Kartentext müssen zusammenpassen. Auftrag und Abnahme: `docs/agent-handoffs/v0-r1-fischer-briefing-20260924.md`; Befund: `docs/agent-handoffs/v0-frontend-audit-20260924.md`.
