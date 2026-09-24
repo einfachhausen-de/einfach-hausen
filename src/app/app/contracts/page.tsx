@@ -1,7 +1,7 @@
 import '@/components/werkbank-layout.css';
 import Link from 'next/link';
 import {
-  ChevronRight, Droplets, FileText, Flame, ShieldCheck,
+  Droplets, FileText, Flame, ShieldCheck,
   Smartphone, Thermometer, Trash2, Wifi, Wrench, Zap,
 } from 'lucide-react';
 import {
@@ -13,12 +13,14 @@ import { VertraegeTabelle } from '@/components/homeowner/vertraege-tabelle';
 import { CompareRail } from '@/components/homeowner/compare-rail';
 import { requireUser } from '@/lib/auth';
 import { EHPromoBanner } from '@/components/eh-promo-banner';
+import { AnlageMenue } from '@/components/homeowner/anlage-menue';
+import { VertraegeAnlegeWege } from '@/components/homeowner/anlege-wege';
 import { db } from '@/lib/db';
 import { euroExact } from '@/lib/format';
 import {
   CONTRACT_KIND_KEYS, CONTRACT_KINDS, COST_INTERVAL_KEYS, COST_INTERVALS, SAVINGS_KINDS,
   type ContractKind, cancellationDeadline, contractKindLabel, currentTermEnd,
-  deadlineDays, deadlineState, estimateSavings, formatDate, monthlyCents, yearlyCents,
+  deadlineDays, estimateSavings, formatDate, monthlyCents, yearlyCents,
 } from '@/lib/contracts';
 import { setHouseContractStatusAction, updateHouseContractAction } from '@/app/actions';
 import { applyContractFilter, filterIsActive, parseContractFilter } from '@/lib/contract-filter';
@@ -84,42 +86,6 @@ export default async function Contracts({ searchParams }: { searchParams: Promis
   const visible = applyContractFilter(contracts, filter);
   const selectedRow = Number.isFinite(selectedId) ? visible.find((r) => r.id === selectedId) ?? null : null;
   const active = contracts.filter((c) => c.status === 'active');
-  const monthlyTotal = active.reduce((sum, c) => sum + (monthlyCents(c.cost_amount, c.cost_interval) ?? 0), 0);
-
-  // Naechste Frist ueber alle aktiven Vertraege — sie fuehrt die Seite als
-  // Fokuszeile, genau wie auf der Startseite der naechste Schritt fuehrt.
-  const withDeadline = active
-    .map((row) => ({ row, deadline: cancellationDeadline(row), state: deadlineState(cancellationDeadline(row)) }))
-    .filter((entry) => entry.state === 'overdue' || entry.state === 'soon')
-    .sort((a, b) => (a.deadline?.getTime() ?? 0) - (b.deadline?.getTime() ?? 0));
-  const naechsteFrist = withDeadline[0];
-  const spaehrende = active.filter((row) => SAVINGS_KINDS.includes(row.kind as ContractKind));
-  const focus0: { zahl: string; strong: string; sub: string; href: string; tone?: 'danger' | 'warn' | 'save' } | null = naechsteFrist
-    ? {
-        zahl: naechsteFrist.state === 'overdue' ? '!' : String(deadlineDays(naechsteFrist.deadline) ?? 0),
-        strong: naechsteFrist.state === 'overdue' ? 'Kündigungsfrist verpasst' : 'Tage bis zur nächsten Frist',
-        sub: `${contractKindLabel(naechsteFrist.row.kind)} · ${naechsteFrist.row.provider} · ${formatDate(naechsteFrist.deadline)}`,
-        href: `/app/contracts?vertrag=${naechsteFrist.row.id}`,
-        tone: naechsteFrist.state === 'overdue' ? 'danger' : 'warn',
-      }
-    : null;
-  // Kein Fristendruck -> die Seite verkauft das Geld: Sparsumme wird zum
-  // Angebot mit sanftem CTA, nicht zur Mahnung.
-  const sparsum = spaehrende.reduce((sum, row) => {
-    const e = estimateSavings({ kind: row.kind, yearlyCents: yearlyCents(row.cost_amount, row.cost_interval), postcode: profile?.postcode || '', householdSize: null, hasLoyaltyBonus: false, switchWilling: true });
-    return sum + (e ? e.lowCents : 0);
-  }, 0);
-  const focus = focus0 ?? (sparsum > 0
-    ? {
-        zahl: euroExact(sparsum),
-        strong: 'mindestens pro Jahr möglich',
-        sub: `${spaehrende.length} ${spaehrende.length === 1 ? 'Vertrag' : 'Verträge'} mit Spar-Check · Vergleiche ansehen`,
-        href: '#vergleiche',
-        tone: 'save' as const,
-      }
-    : active.length > 0
-      ? { zahl: String(0), strong: 'Alles ruhig', sub: 'Keine Frist in den nächsten 90 Tagen · neue Verträge machen den Check genauer', href: '/app/contracts/anlegen' }
-      : null);
 
   const comparisonNotice = sp.hinweis ? COMPARISON_NOTICES[sp.hinweis] : undefined;
 
@@ -152,31 +118,15 @@ export default async function Contracts({ searchParams }: { searchParams: Promis
     </div>
   </>}>
 
+    <h1 className="eh-sr">Verträge &amp; Tarife</h1>
+
     <EHPromoBanner
       kicker="Neuer Vertrag"
       title="Beleg her. Den Rest liest die KI."
       text="Hochladen, abfotografieren oder zwei Felder selbst ausfüllen — der Spar-Check startet danach von allein."
-      primary={{ href: '/app/contracts/anlegen', label: 'Vertrag erfassen' }}
-      links={[
-        { href: '/app/contracts/anlegen?weg=hochladen', label: 'Hochladen' },
-        { href: '/app/contracts/anlegen?weg=scannen', label: 'Scannen' },
-        { href: '/app/contracts/anlegen?weg=manuell', label: 'Selbst eintragen' },
-      ]}
-    />
-
-    <div className="eh-vdash">
-      <div className="eh-vdash-kopf">
-        <div className="eh-vdash-title">
-          <h1>Verträge &amp; Tarife</h1>
-          <span>Hausakte · Stand {formatDate(new Date())}</span>
-        </div>
-        <div className="eh-vdash-kpis">
-          <Link href="#vertraege" className="eh-vdash-kpi"><b>{active.length}</b><small>Aktiv</small></Link>
-          <Link href="#vertraege" className="eh-vdash-kpi" {...(withDeadline.length > 0 ? { 'data-tone': withDeadline[0].state === 'overdue' ? 'danger' : 'warn' } : {})}><b>{withDeadline.length}</b><small>Fristen ≤ 90 Tage</small></Link>
-          <Link href="#vertraege" className="eh-vdash-kpi"><b>{euroExact(monthlyTotal)}</b><small>pro Monat</small></Link>
-          <Link href="/app/contracts/anlegen" className="eh-werkbank-kopf-cta">+ Vertrag</Link>
-        </div>
-      </div>
+    >
+      <AnlageMenue base="/app/contracts/anlegen" vergleichHref="#vergleiche" />
+    </EHPromoBanner>
 
     {saved && (
       <div className="eh-vdash-gespeichert">
@@ -186,18 +136,8 @@ export default async function Contracts({ searchParams }: { searchParams: Promis
     )}
     {comparisonNotice && <EHFormFeedback kind="info">{comparisonNotice}</EHFormFeedback>}
 
-      {focus && (
-        <Link href={focus.href} className="eh-vdash-fokus" aria-label={focus.sub} {...(focus.tone ? { 'data-tone': focus.tone } : {})}>
-          <b>{focus.zahl}</b>
-          <span>{focus.strong} — {focus.sub}</span>
-          <ChevronRight size={16} aria-hidden="true" />
-        </Link>
-      )}
-    </div>
-
-    <EHOwnerSection title={filterIsActive(filter) ? `Meine Verträge · ${visible.length} von ${contracts.length}` : `Meine Verträge · ${contracts.length}`} action={{ href: '/app/contracts/anlegen', label: '+ Erfassen' }}>
+    <EHOwnerSection title={filterIsActive(filter) ? `Meine Verträge · ${visible.length} von ${contracts.length}` : `Meine Verträge · ${contracts.length}`}>
       <div id="vertraege" />
-      <EHText muted>Alles, was dein Haus laufend kostet. Wir prüfen jeden erfassten Vertrag automatisch auf Sparpotenzial — du musst nur noch vergleichen.</EHText>
       {contracts.length === 0
         ? <EHEmptyState title="Noch kein Vertrag erfasst" text="Trag deinen Strom-, DSL- oder Versicherungsvertrag ein. Danach siehst du hier Kosten, Laufzeit und Kündigungsfrist – und ob sich ein Wechsel lohnt." action={<EHButton href="/app/contracts/anlegen">Jetzt Vertrag anlegen</EHButton>} />
         : (
@@ -247,6 +187,10 @@ export default async function Contracts({ searchParams }: { searchParams: Promis
           })}
         </div>
       </CompareRail>
+    </EHOwnerSection>
+
+    <EHOwnerSection title="Schnellaktionen">
+      <VertraegeAnlegeWege base="/app/contracts/anlegen" />
     </EHOwnerSection>
 
   </WerkbankRahmen>;
