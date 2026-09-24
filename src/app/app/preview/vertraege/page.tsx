@@ -121,11 +121,7 @@ export default async function ContractsPreview({ searchParams }: { searchParams:
       Öffentliches Schaufenster mit Beispielwerten — keine Anmeldung, keine Speicherung. Die echte Seite ist /app/contracts.
     </EHFormFeedback>
 
-    <EHPromoBanner
-      kicker="Neuer Vertrag"
-      title="Beleg her. Den Rest liest die KI."
-      text="So kommt ein Vertrag in die Hausakte. Hier nur Ansicht, ohne Speicherung."
-    >
+    <EHPromoBanner title="Neuen Vertrag erfassen" text="Ein Beleg genügt — Anbieter, Frist und Titel liest die KI; den Monatsbetrag trägst du.">
       <AnlageMenue base="/app/preview/anlegen" />
     </EHPromoBanner>
 

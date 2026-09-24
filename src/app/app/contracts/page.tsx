@@ -120,11 +120,7 @@ export default async function Contracts({ searchParams }: { searchParams: Promis
 
     <h1 className="eh-sr">Verträge &amp; Tarife</h1>
 
-    <EHPromoBanner
-      kicker="Neuer Vertrag"
-      title="Beleg her. Den Rest liest die KI."
-      text="Hochladen, abfotografieren oder zwei Felder selbst ausfüllen — der Spar-Check startet danach von allein."
-    >
+    <EHPromoBanner title="Neuen Vertrag erfassen" text="Ein Beleg genügt — Anbieter, Frist und Titel liest die KI; den Monatsbetrag trägst du.">
       <AnlageMenue base="/app/contracts/anlegen" />
     </EHPromoBanner>
 

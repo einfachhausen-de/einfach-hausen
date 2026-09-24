@@ -203,19 +203,18 @@
 .eh-vdash-gespeichert a { align-self:center; }
 .eh-vdash-nudge a { color:var(--eh-color-petrol); }
 
-/* EHPromoBanner (src/components/eh-promo-banner.tsx): redaktioneller
-   Einlade-Karton in Systemsprache — weiß wie .eh-vdash-fokus, Haarlinie plus
-   Petrol-Kante, Eyebrow, flacher System-Button, Direktwege mit Trennstrich. */
-.eh-promo { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; gap:20px 36px; padding:24px 28px; background:var(--eh-color-white); border:1px solid var(--eh-rule); border-left:3px solid var(--eh-color-petrol); border-radius:var(--eh-radius-panel); box-shadow:var(--eh-shadow-panel); color:var(--eh-color-ink); }
-.eh-promo-text { display:grid; gap:8px; min-width:0; }
-.eh-promo-kicker { display:inline-flex; align-items:center; gap:6px; font-size:var(--eh-font-eyebrow); font-weight:var(--eh-weight-semibold); letter-spacing:var(--eh-track-wide); text-transform:uppercase; color:var(--eh-color-petrol); }
-.eh-promo-title { margin:0; font-size:19px; font-weight:var(--eh-weight-bold); line-height:1.15; letter-spacing:var(--eh-track-normal); }
-.eh-promo-sub { margin:0; max-width:64ch; font-size:var(--eh-font-label); line-height:var(--eh-leading-normal); color:var(--eh-color-secondary); }
+/* EHPromoBanner (src/components/eh-promo-banner.tsx) v2 "ruhige Zeile":
+   ein Satz plus Knöpfe in weißer Fläche mit Haarlinie — flach, ohne Schatten,
+   ohne Randakzent. Buttons in der small-Variante des Systems (44px). */
+.eh-promo { display:flex; align-items:center; gap:14px 22px; flex-wrap:wrap; padding:14px 18px; background:var(--eh-color-white); border:1px solid var(--eh-rule); border-radius:var(--eh-radius-panel); }
+.eh-promo-line { flex:1 1 320px; display:flex; align-items:baseline; gap:10px; margin:0; min-width:0; }
+.eh-promo-line strong { font-size:var(--eh-font-body); font-weight:var(--eh-weight-semibold); line-height:var(--eh-leading-tight); color:var(--eh-color-ink); }
+.eh-promo-line span { font-size:var(--eh-font-label); line-height:var(--eh-leading-normal); color:var(--eh-color-secondary); }
 .eh-promo-cta { display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
-.eh-promo-button { display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:48px; padding:12px 22px; border:0; border-radius:var(--eh-radius-control); background:var(--eh-color-petrol); color:var(--eh-color-white); font-family:inherit; font-size:var(--eh-font-label); font-weight:var(--eh-weight-semibold); text-decoration:none; cursor:pointer; transition:background var(--eh-motion-duration) var(--eh-motion-ease); }
+.eh-promo-button { display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:44px; padding:10px 16px; border:0; border-radius:var(--eh-radius-control); background:var(--eh-color-petrol); color:var(--eh-color-white); font-family:inherit; font-size:var(--eh-font-label); font-weight:var(--eh-weight-semibold); text-decoration:none; cursor:pointer; transition:background var(--eh-motion-duration) var(--eh-motion-ease); }
 .eh-promo-button:hover, .eh-promo-button[aria-expanded="true"] { background:var(--eh-color-deep); }
 .eh-promo-button:focus-visible { outline:2px solid var(--eh-color-focus); outline-offset:2px; }
-.eh-promo-ghost { display:inline-flex; align-items:center; justify-content:center; min-height:48px; padding:12px 22px; border:1px solid var(--eh-color-line); border-radius:var(--eh-radius-control); background:var(--eh-color-white); color:var(--eh-color-ink); font-size:var(--eh-font-label); font-weight:var(--eh-weight-semibold); text-decoration:none; transition:border-color var(--eh-motion-duration) var(--eh-motion-ease), color var(--eh-motion-duration) var(--eh-motion-ease), background var(--eh-motion-duration) var(--eh-motion-ease); }
+.eh-promo-ghost { display:inline-flex; align-items:center; justify-content:center; min-height:44px; padding:10px 16px; border:1px solid var(--eh-color-line); border-radius:var(--eh-radius-control); background:var(--eh-color-white); color:var(--eh-color-ink); font-size:var(--eh-font-label); font-weight:var(--eh-weight-semibold); text-decoration:none; transition:border-color var(--eh-motion-duration) var(--eh-motion-ease), color var(--eh-motion-duration) var(--eh-motion-ease), background var(--eh-motion-duration) var(--eh-motion-ease); }
 .eh-promo-ghost:hover { border-color:var(--eh-color-petrol); color:var(--eh-color-petrol); background:var(--eh-color-paper); }
 .eh-promo-ghost-btn { gap:8px; border:1px solid var(--eh-color-line); font-family:inherit; font-size:var(--eh-font-label); font-weight:var(--eh-weight-semibold); cursor:pointer; }
 .eh-promo-ghost-btn[aria-expanded="true"] { border-color:var(--eh-color-petrol); color:var(--eh-color-petrol); background:var(--eh-color-paper); }
