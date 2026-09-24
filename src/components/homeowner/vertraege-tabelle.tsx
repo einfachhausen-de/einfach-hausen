@@ -1,17 +1,19 @@
 import Link from 'next/link';
-import { ArrowRight, ArrowUp, ChevronsUpDown, ListFilter, Search, Table2 } from 'lucide-react';
+import { ArrowUp, ChevronsUpDown, ListFilter, Table2 } from 'lucide-react';
 import {
   cancellationDeadline, contractKindLabel, currentTermEnd, deadlineDays, deadlineState, formatDate,
 } from '@/lib/contracts';
 import { filterIsActive, withContractQuery, type ContractFilter, type ContractStatusFilter } from '@/lib/contract-filter';
+import { TabellenSucheLive } from './tabellen-suche-live';
 import type { LucideIcon } from 'lucide-react';
 
 /**
  * Vertragstabelle nach dem Muster, das der Betreiber am 24.09. gezeigt hat:
  * flache Zeilen, feine Trennlinien, Toolbar mit Suchfeld, Status-UmSchalter
  * und Spalten-Toggle — unsere Farben, unsere Daten, keine externen Links.
- * Serverseitig gerendert: Filter und Sortierung leben ausschliesslich in
- * URL-Params, ein einziges Sortieren/Filtern braucht kein JavaScript.
+ * Sortierung/Status/Spalten leben serverseitig in URL-Params; die Suche
+ * filtert zusaetzlich live beim Eintippen (Client-Insel), Enter/ohne JS
+ * faellt immer noch auf den GET-Filter zurueck.
  */
 
 export type TabellenZeile = {
@@ -83,15 +85,7 @@ export function VertraegeTabelle({
   return (
     <div className="eh-vtbl">
       <div className="eh-vtbl-tool">
-        <form method="get" action={base} className="eh-vtbl-suche" role="search">
-          <Search size={15} aria-hidden="true" />
-          <input type="search" name="q" defaultValue={filter.q} placeholder="Anbieter, Tarif, Nummer oder Notiz filtern …" aria-label="Verträge filtern" />
-          <button type="submit" className="eh-vtbl-suche-btn" aria-label="Suchen"><ArrowRight size={14} aria-hidden="true" /></button>
-          <input type="hidden" name="status" value={filter.status} />
-          <input type="hidden" name="sort" value={filter.sort} />
-          {filter.kind && <input type="hidden" name="art" value={filter.kind} />}
-          {filter.voll && <input type="hidden" name="ansicht" value="voll" />}
-        </form>
+        <TabellenSucheLive base={base} defaultValue={filter.q} hidden={{ status: filter.status, sort: filter.sort, art: filter.kind ?? undefined, ansicht: filter.voll ? 'voll' : undefined }} />
         <Link className="eh-vtbl-btn" href={`${base}${withContractQuery(filter, { status: nextStatus })}`}>
           <ListFilter size={14} aria-hidden="true" /> Status: {STATUS_LABEL[filter.status]}
         </Link>

@@ -123,7 +123,7 @@ export default async function ContractsPreview({ searchParams }: { searchParams:
 
     <h1 className="eh-sr">Verträge &amp; Tarife</h1>
 
-    <EHOwnerSection title={filterIsActive(filter) ? `Meine Verträge · ${visible.length} von ${CONTRACTS.length}` : `Meine Verträge · ${CONTRACTS.length}`}>
+    <EHOwnerSection title={filterIsActive(filter) ? `Meine Verträge · ${visible.length} von ${CONTRACTS.length}` : `Meine Verträge · ${CONTRACTS.length}`} action={{ href: '/app/preview/angebote', label: 'Alle ansehen' }}>
       <div id="vertraege" />
       <VertraegeTabelle base="/app/preview/vertraege" allRows={pool} rows={visible} filter={filter} icons={KIND_ICONS} />
       {pool.length > 0 && pool.length < 4 && (

@@ -138,7 +138,7 @@ export default async function Contracts({ searchParams }: { searchParams: Promis
     )}
     {comparisonNotice && <EHFormFeedback kind="info">{comparisonNotice}</EHFormFeedback>}
 
-    <EHOwnerSection title={filterIsActive(filter) ? `Meine Verträge · ${visible.length} von ${contracts.length}` : `Meine Verträge · ${contracts.length}`}>
+    <EHOwnerSection title={filterIsActive(filter) ? `Meine Verträge · ${visible.length} von ${contracts.length}` : `Meine Verträge · ${contracts.length}`} action={{ href: '/app/angebote', label: 'Alle ansehen' }}>
       <div id="vertraege" />
       {contracts.length === 0
         ? <EHEmptyState title="Noch kein Vertrag erfasst" text="Trag deinen Strom-, DSL- oder Versicherungsvertrag ein. Danach siehst du hier Kosten, Laufzeit und Kündigungsfrist – und ob sich ein Wechsel lohnt." action={<EHButton href="/app/contracts/anlegen">Jetzt Vertrag anlegen</EHButton>} />
