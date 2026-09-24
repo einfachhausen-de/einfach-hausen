@@ -31,7 +31,9 @@
 .wb-side nav:first-child .wb-grp{margin-top:4px}
 .wb-side a{display:flex;align-items:center;gap:8px;padding:7px 10px;min-height:44px;border-radius:var(--eh-radius-control);color:var(--eh-color-secondary);text-decoration:none;font-size:var(--eh-font-label)}
 .wb-side a.wb-on{background:var(--eh-color-petrol);color:var(--eh-color-white);font-weight:var(--eh-weight-semibold)}
-.wb-main{padding:22px 26px;min-width:0;flex:1 1 auto;display:flex;flex-direction:column;gap:16px;background:var(--eh-color-white)}
+/* Betreiber 24.09.: Sektionen brauchen Luft nach unten — 16px liessen Tabelle
+   und naechsten Sektionstitel verschmelzen. */
+.wb-main{padding:22px 26px;min-width:0;flex:1 1 auto;display:flex;flex-direction:column;gap:32px;background:var(--eh-color-white)}
 .wb-content{display:flex;min-width:0;flex:1 1 auto;align-items:stretch}
 .wb-rail{padding:18px;min-width:0;flex:0 0 240px;width:240px;max-width:240px;box-sizing:border-box;background:var(--eh-color-paper);border-left:1px solid var(--eh-color-line);display:flex;flex-direction:column;gap:10px;transition:flex-basis .2s ease,width .2s ease,max-width .2s ease;position:relative}
 .wb-rail>[data-eh-app]{display:flex;flex-direction:column;gap:10px;flex:0 0 auto;min-height:0;background:transparent}

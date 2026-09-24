@@ -148,7 +148,6 @@ export default async function ContractsPreview({ searchParams }: { searchParams:
 
     <EHOwnerSection title="Angebote in deiner Nähe" action={{ href: '/app/preview/angebote', label: 'Alle ansehen' }}>
       <div id="vergleiche" />
-      <EHText muted>Wir zeigen keine eigenen Tarife und keine Rangliste. Der Vergleich läuft beim jeweiligen Partner, dort wird auch abgeschlossen. Deine Vertragsdaten bleiben in der Hausakte und werden nicht an den Partner übertragen.</EHText>
       <CompareRail label="Angebote nebeneinander">
         <div className="eh-vergleich-slider">
           {sortiereVorschlaege(angebote).map((a) => (
