@@ -97,13 +97,14 @@ export function LoginForm({
     setErrorMessage(null);
   };
 
-  async function doLogin(email: string, pw: string, targetRole?: Role) {
+  async function doLogin(email: string, pw: string, targetRole?: Role, demo = false) {
     setIsLoading(true);
     setErrorMessage(null);
     const loginRole = targetRole ?? role;
     const data = new FormData();
     data.set("email", demoEmailFor(email));
     data.set("password", pw);
+    if (demo) data.set("demo", "1");
     data.set("next", safeNextPath(nextPath, loginRole === "handwerker" ? "/pro" : "/app"));
     // Failed logins return { error } instead of redirecting back to /login.
     // That avoids a second App Router transition (NEXT_REDIRECT + skipped
@@ -123,7 +124,7 @@ export function LoginForm({
     setAuthMode("login");
     setErrorMessage(null);
     setIdentifier(demo.username);
-    setPassword(DEMO_PASSWORD);
+    if (DEMO_PASSWORD) setPassword(DEMO_PASSWORD);
   };
 
   // Explicit demo start: fills AND signs in. Only these clearly labelled
@@ -136,7 +137,7 @@ export function LoginForm({
     setErrorMessage(null);
     setIdentifier(demo.username);
     setPassword(DEMO_PASSWORD);
-    await doLogin(demo.email, DEMO_PASSWORD, targetRole);
+    await doLogin(demo.email, DEMO_PASSWORD, targetRole, true);
   };
 
   async function loginFormAction(fd: FormData) {

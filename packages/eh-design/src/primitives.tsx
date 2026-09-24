@@ -25,7 +25,7 @@ export function EHHeading({children, as: Tag = "h2", scale = "section"}: Childre
 export function EHText({children, size = "body", muted = false}: Children & {size?: "body" | "lead" | "meta"; muted?: boolean}) {
   return <p className={s.text} data-size={size} data-muted={muted || undefined}>{children}</p>;
 }
-type ButtonVisual = {children: ReactNode; variant?: "primary" | "secondary" | "quiet" | "on-dark" | "danger"; size?: "regular" | "small"; arrow?: boolean};
+type ButtonVisual = {children: ReactNode; variant?: "primary" | "secondary" | "quiet" | "on-dark" | "danger" | "outline"; size?: "regular" | "small"; arrow?: boolean};
 type ButtonNative = Omit<ButtonHTMLAttributes<HTMLButtonElement>, "style" | "className" | "children">;
 type AnchorNative = Omit<AnchorHTMLAttributes<HTMLAnchorElement>, "style" | "className" | "children" | "href">;
 export type EHButtonProps = ButtonVisual & ((ButtonNative & {href?: never}) | (AnchorNative & {href: string}));

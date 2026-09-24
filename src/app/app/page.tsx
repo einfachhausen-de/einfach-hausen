@@ -3,12 +3,15 @@ import Link from 'next/link';
 import { BarChart3, BatteryCharging, CalendarDays, ChevronRight, FileText, Flame, HousePlug, MessageCircle, ShieldCheck, Smartphone, Sun, Thermometer, Users, Wifi, Wrench, Zap } from 'lucide-react';
 import { WerkbankRahmen } from '@/components/werkbank-rahmen';
 import { CompareRail } from '@/components/homeowner/compare-rail';
-import { SuggestionSlider } from '@/components/homeowner/suggestion-slider';
+import { VerlaufNaechstes, VerlaufZeitleiste } from '@/components/homeowner/verlauf-zeitleiste';
+import { SuggestionSlider, type Suggestion } from '@/components/homeowner/suggestion-slider';
 import { EHButton, EHCallout, EHOwnerSection } from '@/design-system';
 import { requireUser } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { ownerInstant } from '@/lib/owner-format';
 import { primaryProperty } from '@/lib/properties';
+import { SAVINGS_KINDS, contractKindLabel, estimateSavings, yearlyCents } from '@/lib/contracts';
+import { euroExact } from '@/lib/format';
 import styles from './eigentuemer-start.module.css';
 
 /**
@@ -63,15 +66,15 @@ function jobStatus(status: string): { label: string; tone: 'neutral' | 'info' | 
 
 /** Die sechs Vergleiche als kleine Kacheln einer Reihe. */
 const COMPARES = [
-  { href: '/app/contracts?tab=vergleichen#vergleich-strom', label: 'Strom', icon: Zap },
-  { href: '/app/contracts?tab=vergleichen#vergleich-gas', label: 'Gas', icon: Flame },
-  { href: '/app/contracts?tab=vergleichen#vergleich-dsl', label: 'Internet', icon: Wifi },
-  { href: '/app/contracts?tab=vergleichen#vergleich-versicherung', label: 'Versicherung', icon: ShieldCheck },
-  { href: '/app/contracts?tab=vergleichen#vergleich-mobilfunk', label: 'Mobilfunk', icon: Smartphone },
-  { href: '/app/contracts?tab=vergleichen', label: 'Photovoltaik', icon: Sun },
-  { href: '/app/contracts?tab=vergleichen', label: 'Heizung', icon: Thermometer },
-  { href: '/app/contracts?tab=vergleichen', label: 'Smart Home', icon: HousePlug },
-  { href: '/app/contracts?tab=vergleichen', label: 'Wallbox', icon: BatteryCharging },
+  { href: '/app/contracts#vergleich-strom', label: 'Strom', icon: Zap, hue: 'sonne' },
+  { href: '/app/contracts#vergleich-gas', label: 'Gas', icon: Flame, hue: 'himmel' },
+  { href: '/app/contracts#vergleich-dsl', label: 'Internet', icon: Wifi, hue: 'veilchen' },
+  { href: '/app/contracts#vergleich-versicherung', label: 'Versicherung', icon: ShieldCheck, hue: 'stahl' },
+  { href: '/app/contracts#vergleich-mobilfunk', label: 'Mobilfunk', icon: Smartphone, hue: 'rose' },
+  { href: '/app/contracts#vergleiche', label: 'Photovoltaik', icon: Sun, hue: 'sand' },
+  { href: '/app/contracts#vergleiche', label: 'Heizung', icon: Thermometer, hue: 'terra' },
+  { href: '/app/contracts#vergleiche', label: 'Smart Home', icon: HousePlug, hue: 'blatt' },
+  { href: '/app/contracts#vergleiche', label: 'Wallbox', icon: BatteryCharging, hue: 'petrol' },
 ] as const;
 
 type HistoryRow = { id: number; title: string; status: string; shown_at: string; next_at: string | null };
@@ -88,17 +91,23 @@ export default async function Dashboard() {
   const firstDecision = db.prepare(`SELECT j.id FROM quotes q JOIN jobs j ON j.id=q.job_id WHERE j.homeowner_id=? AND q.status='pending' AND j.status='quoted' ORDER BY datetime(q.created_at) DESC LIMIT 1`).get(user.id) as { id: number } | undefined;
   const contactsCount = (db.prepare(`SELECT COUNT(DISTINCT q.provider_id) c FROM quotes q JOIN jobs j ON j.id=q.job_id WHERE j.homeowner_id=?`).get(user.id) as { c: number }).c;
   const appointmentsCount = (db.prepare(`SELECT COUNT(*) c FROM appointments WHERE homeowner_id=? AND datetime(start_at) >= datetime('now') AND status != 'cancelled'`).get(user.id) as { c: number }).c;
-
-  // Echte Profilvollstaendigkeit statt erfundener Balkenwerte: dieselben vier
-  // Angaben wie auf /app/profile, damit beide Seiten nicht auseinanderlaufen.
-  const profileFields = [
-    !!(user.first_name && user.last_name),
-    !!(user as { phone?: string }).phone,
-    !!profile?.address,
-    !!profile?.postcode,
-  ];
-  const profileFilled = profileFields.filter(Boolean).length;
-  const profilePct = Math.round(profileFilled / profileFields.length * 100);
+  // (b) Trichter-Front: der ergiebigste Vertrags-Spar-Check erbt den ersten
+  // Slide der Vorschlaege — ohne neuen Block, ohne Zaun, ein Klick in die Liste.
+  let sparTeaser: Suggestion | null = null;
+  {
+    const rows = db.prepare(`SELECT id, kind, provider, cost_amount, cost_interval FROM house_contracts WHERE homeowner_id=? AND status='active'`).all(user.id) as { id: number; kind: string; provider: string; cost_amount: number | null; cost_interval: string }[];
+    if (rows.length === 0) {
+      sparTeaser = { id: 'vertraege-erfassen', title: 'Verträge erfassen, Spar-Check starten', text: 'Strom, Internet, Versicherung: nur den Anbieter eintragen, fertig. Wir prüfen automatisch, ob dein Tarif zu teuer ist.', cta: 'Jetzt ersten Vertrag anlegen', href: '/app/contracts#vertrag-anlegen', iconKey: 'sparen' };
+    } else {
+      const scored = rows
+        .filter((r) => (SAVINGS_KINDS as readonly string[]).includes(r.kind))
+        .map((r) => ({ r, e: estimateSavings({ kind: r.kind, yearlyCents: yearlyCents(r.cost_amount, r.cost_interval), postcode: profile?.postcode || '', householdSize: null, hasLoyaltyBonus: false, switchWilling: true }) }));
+      const best = scored.filter((x) => x.e).sort((a, b) => (b.e?.highCents ?? 0) - (a.e?.highCents ?? 0))[0];
+      if (best?.e) {
+        sparTeaser = { id: `spar-${best.r.id}`, title: `Spar-Check: ${contractKindLabel(best.r.kind)}`, text: `Bei ${best.r.provider} sind bis zu ${euroExact(best.e.highCents)} pro Jahr drin — die Rechnung dahinter liegt in deiner Hausakte.`, cta: 'Angebot ansehen', href: `/app/contracts?vertrag=${best.r.id}`, iconKey: 'sparen' };
+      }
+    }
+  }
 
   // Anstehendes: laufende und offene Vorgänge, nach nächstem Termin, sonst letzte Aktivität.
   const upcomingHistory = db.prepare(`
@@ -120,8 +129,47 @@ export default async function Dashboard() {
     SELECT id, title, status, updated_at AS shown_at, NULL AS next_at
     FROM jobs
     WHERE homeowner_id=? AND status IN ('completed','done','cancelled')
-    ORDER BY datetime(updated_at) DESC LIMIT 6
+    ORDER BY datetime(updated_at) DESC LIMIT 18
   `).all(user.id) as HistoryRow[];
+
+  // Haus-Historie als Zeitleiste (Muster 21st.dev, Betreiber-Order 23.09.):
+  // Anstehendes und Vergangenes in einer absteigenden Liste; der Fuss zeigt
+  // den naechsten Termin oder den naechsten offenen Schritt.
+  const verlauf = [...upcomingHistory.map((job) => ({ ...job, past: false })), ...pastHistory.map((job) => ({ ...job, past: true }))]
+    .map((job) => {
+      const meta = jobStatus(job.status);
+      const when = job.next_at ?? job.shown_at;
+      const zeit = job.next_at ? shortTime(job.next_at) : null;
+      return {
+        id: String(job.id),
+        titel: job.title,
+        status: meta.label,
+        ton: meta.tone,
+        datum: shortDay(when),
+        iso: when ? String(when).slice(0, 10) : undefined,
+        zusatz: job.next_at ? (zeit ? `Termin ${shortDay(job.next_at)}, ${zeit} Uhr` : `Termin ${shortDay(job.next_at)}`) : undefined,
+        vergangen: job.past,
+        href: `/app/jobs/${job.id}`,
+      };
+    })
+    .sort((a, b) => (b.iso ?? '').localeCompare(a.iso ?? ''));
+  const naechsterTermin = upcomingHistory.find((job) => job.next_at);
+  // Der naechste Schritt fuehrt die Haus-Historie als eigene Zeile — die
+  // Karte selbst bleibt reiner Verlauf (Betreiber-Order 23.09., zweiter).
+  const verlaufNaechstes = naechsterTermin
+    ? {
+        label: 'Nächster Termin',
+        titel: naechsterTermin.title,
+        wann: `${shortDay(naechsterTermin.next_at)}${shortTime(naechsterTermin.next_at) ? `, ${shortTime(naechsterTermin.next_at)} Uhr` : ''}`,
+        href: `/app/jobs/${naechsterTermin.id}`,
+      }
+    : offersCount > 0
+      ? {
+          label: 'Offene Entscheidung',
+          titel: `${offersCount} ${offersCount === 1 ? 'Angebot' : 'Angebote'} warten auf dich`,
+          href: '/app/jobs',
+        }
+      : null;
 
   return (
     <WerkbankRahmen
@@ -151,11 +199,6 @@ export default async function Dashboard() {
             <span className={styles.railStatLabel}>Termine</span>
             <strong className={styles.railStatValue} data-tone={appointmentsCount > 0 ? 'terra' : undefined}>{appointmentsCount}</strong>
           </Link>
-          <div className="eh-werkbank-karte">
-            <h4>Profil</h4>
-            <div className="eh-werkbank-bar"><i style={{ width: `${profilePct}%` }} /></div>
-            <div className="eh-werkbank-row"><span>Angaben</span><span>{profileFilled} von {profileFields.length}</span></div>
-          </div>
         </>
       }
     >
@@ -207,7 +250,7 @@ export default async function Dashboard() {
               <small>Frage zu deinem Zuhause klären – mit Hausmanager oder Fachberatung sprechen.</small>
               <span className={styles.quickCardArrow}>Beratung starten <ChevronRight size={16} aria-hidden="true" /></span>
             </Link>
-            <Link href="/app/contracts?tab=vergleichen" className={styles.quickCard}>
+            <Link href="/app/contracts#vergleiche" className={styles.quickCard}>
               <span className={styles.quickIcon}><BarChart3 size={20} /></span>
               <strong>Tarife vergleichen</strong>
               <small>Versicherung, Energie oder Verträge prüfen – Tarife vergleichen und sparen.</small>
@@ -216,11 +259,11 @@ export default async function Dashboard() {
           </div>
         </section>
 
-      <EHOwnerSection title="Verträge & Vergleiche" action={{ href: '/app/contracts?tab=vergleichen', label: 'Alle Vergleiche' }}>
+      <EHOwnerSection title="Verträge & Vergleiche" action={{ href: '/app/angebote', label: 'Alle ansehen' }}>
         <CompareRail label="Verträge und Vergleiche">
           <nav className="eh-werkbank-chips" aria-label="Verträge und Vergleiche">
             {COMPARES.map((compare) => (
-              <Link key={compare.label} href={compare.href} className="eh-werkbank-chip">
+              <Link key={compare.label} href={compare.href} className="eh-werkbank-chip" data-hue={compare.hue}>
                 <compare.icon size={16} aria-hidden="true" />
                 {compare.label}
               </Link>
@@ -230,80 +273,12 @@ export default async function Dashboard() {
       </EHOwnerSection>
 
       <EHOwnerSection title="Haus-Historie" action={{ href: '/app/jobs', label: 'Alle Vorgänge' }}>
-        <div className={styles.historyCols}>
-          {/* Reihenfolge im Markup: Anstehendes zuerst (mobil). Auf breiten
-              Schirmen dreht das Modul die Spalten auf Vergangenes links. */}
-          <div className={styles.historyPanel}>
-            <div className={styles.historyPanelHead}>
-              <span className={styles.historyPanelTitle}>Anstehendes</span>
-              {upcomingHistory.length > 0 && <span className={styles.historyPanelCount}>{upcomingHistory.length}</span>}
-            </div>
-            {upcomingHistory.length > 0 ? (
-              <ol className={styles.historyList} aria-label="Anstehendes">
-                {upcomingHistory.map((job) => {
-                  const meta = jobStatus(job.status);
-                  const when = job.next_at ?? job.shown_at;
-                  const time = shortTime(job.next_at);
-                  return (
-                    <li key={job.id}>
-                      <Link href={`/app/jobs/${job.id}`} className={styles.historyRow}>
-                        <span className={styles.historyRowMain}>
-                          <span className={styles.historyRowTitle}>{job.title}</span>
-                          <span className={styles.historyRowMeta}>
-                            <span className={styles.historyRowStatus} data-tone={meta.tone}>{meta.label}</span>
-                          </span>
-                        </span>
-                        <time className={styles.historyRowWhen} dateTime={when}>
-                          <span className={styles.historyRowDate}>{shortDay(when)}</span>
-                          {time && <span className={styles.historyRowTime}>{time} Uhr</span>}
-                        </time>
-                        <ChevronRight size={16} className={styles.historyRowChevron} aria-hidden="true" />
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ol>
-            ) : (
-              <p className={styles.historyColEmpty}>Aktuell nichts anstehend.</p>
-            )}
-          </div>
-
-          <div className={styles.historyPanel}>
-            <div className={styles.historyPanelHead}>
-              <span className={styles.historyPanelTitle}>Vergangenes</span>
-              {pastHistory.length > 0 && <span className={styles.historyPanelCount}>{pastHistory.length}</span>}
-            </div>
-            {pastHistory.length > 0 ? (
-              <ol className={styles.historyList} aria-label="Vergangenes">
-                {pastHistory.map((job) => {
-                  const meta = jobStatus(job.status);
-                  return (
-                    <li key={job.id}>
-                      <Link href={`/app/jobs/${job.id}`} className={styles.historyRow}>
-                        <span className={styles.historyRowMain}>
-                          <span className={styles.historyRowTitle}>{job.title}</span>
-                          <span className={styles.historyRowMeta}>
-                            <span className={styles.historyRowStatus} data-tone={meta.tone}>{meta.label}</span>
-                          </span>
-                        </span>
-                        <time className={styles.historyRowWhen} dateTime={job.shown_at}>
-                          <span className={styles.historyRowDate}>{shortDay(job.shown_at)}</span>
-                        </time>
-                        <ChevronRight size={16} className={styles.historyRowChevron} aria-hidden="true" />
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ol>
-            ) : (
-              <p className={styles.historyColEmpty}>Noch keine abgeschlossenen Vorgänge.</p>
-            )}
-          </div>
-        </div>
+        {verlaufNaechstes && <VerlaufNaechstes {...verlaufNaechstes} />}
+        <VerlaufZeitleiste eintraege={verlauf} stand={shortDay(new Date().toISOString())} />
       </EHOwnerSection>
 
       <EHOwnerSection title="Vorschläge für dich" action={{ href: '/app/contracts', label: 'Alle Verträge' }}>
-        <SuggestionSlider />
+        <SuggestionSlider teaser={sparTeaser} />
       </EHOwnerSection>
       </div>
     </WerkbankRahmen>

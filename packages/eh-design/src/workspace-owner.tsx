@@ -7,7 +7,7 @@ export function EHOwnerPageHeader({ title, text, action, context }: { title: str
   return <header className={s.ownerPageHeader}><div>{context && <p className={s.ownerPageContext}>{context}</p>}<h1>{title}</h1><p>{text}</p></div>{action && <EHButton href={action.href}>{action.label}</EHButton>}</header>;
 }
 export function EHOwnerSection({ title, text, children, action }: { title: string; text?: string; children: ReactNode; action?: Action }) {
-  return <section className={s.ownerSection}><header><div><h2>{title}</h2>{text && <p>{text}</p>}</div>{action && <a href={action.href}>{action.label}<span aria-hidden="true"> →</span></a>}</header>{children}</section>;
+  return <section className={s.ownerSection}><header><div><h2>{title}</h2>{text && <p>{text}</p>}</div>{action && <a href={action.href}>{action.label}<span aria-hidden="true">→</span></a>}</header>{children}</section>;
 }
 export type EHOwnerRecord = { id: string; title: string; href: string; detail: string; meta?: string; status?: string; tone?: 'neutral' | 'info' | 'success' | 'warning' | 'error'; action?: string; media?: { src: string; alt: string } };
 export function EHOwnerRecords({ label, items }: { label: string; items: readonly EHOwnerRecord[] }) {

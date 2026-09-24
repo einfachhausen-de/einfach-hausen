@@ -49,6 +49,15 @@ export function appendJobEvent(jobId:number,body:string,metadata:Record<string,u
   if(thread)addAgentMessage(thread.id,'event',body,metadata);
 }
 
+/** KI-Chat: ein von der App abgelegtes Foto als Nutzer-Nachricht im App-
+ *  Verlauf merken, damit der KI-Dienst die Zugaenglichkeit gegen den Owner
+ *  pruefen kann (gleicher Pfad wie beim Hausmeister-Composer). */
+export function recordAssistantChatPhoto(userId:number,caption:string,storedPath:string){
+  const threadId=getThread(userId,'app');
+  addAgentMessage(threadId,'user',caption||'Foto mitgesendet',{photo:storedPath});
+  return {threadId};
+}
+
 export function recordHausmeisterDocumentUpload(userId:number,input:{documentId:number;name:string;question?:string;reply:string}){
   const threadId=getThread(userId,'app');
   const question=(input.question||'').trim();

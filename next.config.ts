@@ -69,12 +69,10 @@ const nextConfig: NextConfig = {
   },
   async headers(){
     return [
-      // Nur Dev: Turbopack benennt CSS-Chunks nach dem Pfad, nicht nach dem
-      // Inhalt. Ohne no-store kann ein Vorschauregler eine alte Fassung unter
-      // derselben Adresse ausliefern (Symptom: ungestylte Sektionen).
-      ...(isDev
-        ? [{source:'/_next/static/(.*)',headers:[{key:'Cache-Control',value:'no-store, max-age=0, must-revalidate'}]}]
-        : []),
+      // Kein eigenes Cache-Control auf /_next/static mehr: Das Override
+      // liess Next dev-seitig warnen und hielt Browser stattdessen auf alten
+      // Chunks fest (Betreiber 24.09., mehrfach »sieht alt aus«). Next dev
+      // liefert Chunks von itself ohne Cache aus; Produktion hasht Namen.
       {source:'/(.*)',headers:securityHeaders},
       {source:'/sw.js',headers:[{key:'Cache-Control',value:'no-cache, no-store, must-revalidate'}]},
       {source:'/manifest.webmanifest',headers:[{key:'Cache-Control',value:'no-cache, max-age=0, must-revalidate'}]},

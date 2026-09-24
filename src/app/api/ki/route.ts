@@ -4,7 +4,7 @@ import { applyRateLimitLockout, checkRateLimit, consumeRateLimitAttempt } from "
 import { aiQuotaSnapshot, grantAdCreditsOnce, AD_CREDIT_GRANT } from "@/lib/ai-engine";
 import { verifyAdReceipt } from "@/lib/ad-receipt";
 
-import { answerAssistant } from '@/lib/assistant-service';
+import { answerAssistant, kiChatToolFromBody } from '@/lib/assistant-service';
 const RATE_LIMITED = "Du hast gerade sehr viele Fragen gestellt. Bitte versuch es später erneut.";
 
 export async function POST(req: Request) {
@@ -26,15 +26,25 @@ export async function POST(req: Request) {
 
   let body: unknown;
   try { body = await req.json(); } catch { return NextResponse.json({ reply: "Ungültige Anfrage." }, { status: 400 }); }
-  const roh = (body as { messages?: unknown } | null)?.messages;
+  const rohes = body as { messages?: unknown; tool?: unknown; photoPath?: unknown } | null;
+  const roh = rohes?.messages;
   // Nur Fragen und Antworten erreichen das Modell; alles andere wird verworfen.
   const messages = Array.isArray(roh) ? roh.filter(m => Boolean(m) && typeof m === 'object' && (m.role === 'user' || m.role === 'assistant')) : [];
+  // Bewusst ausgewaehltener Chat-Tool-Button: strikte Allowlist, alles andere
+  // ist eine 400 – niemals ein Fallback auf einen Funktionsnamen.
+  const tool = kiChatToolFromBody(rohes?.tool);
+  if (tool === null) {
+    return NextResponse.json({ reply: "Unbekanntes Werkzeug." }, { status: 400 });
+  }
+  // Nur ein bereits serverseitig abgelegter privater Pfad (kleiner String,
+  // kein Binärinhalt); die Zugaenglichkeit prueft der Dienst gegen den Owner.
+  const photoPath = typeof rohes?.photoPath === 'string' && rohes.photoPath.length > 0 && rohes.photoPath.length <= 300 ? rohes.photoPath : null;
 
   // Mit ?stream=1 laeuft die Antwort als Ereignisstrom: jeder Schritt kommt
   // sofort, das Ergebnis am Ende. Ohne Streaming bleibt es beim gewohnten JSON.
   const streamWanted = new URL(req.url).searchParams.get("stream") === "1";
   if (!streamWanted) {
-    const result = await answerAssistant(user.id, messages, req.signal);
+    const result = await answerAssistant(user.id, messages, req.signal, photoPath, undefined, tool);
     const { status, ...response } = result;
     return NextResponse.json(response, { status, headers: { 'Cache-Control': 'no-store' } });
   }
@@ -48,7 +58,7 @@ export async function POST(req: Request) {
         catch { return false; } // Ein geschlossener Kanal beendet den Aufruf nicht.
       };
       try {
-        const result = await answerAssistant(user.id, messages, req.signal, null, step => { sende({ type: "step", step }); });
+        const result = await answerAssistant(user.id, messages, req.signal, photoPath, step => { sende({ type: "step", step }); }, tool);
         const { status, ...response } = result;
         sende({ type: "done", status, ...response });
       } catch {

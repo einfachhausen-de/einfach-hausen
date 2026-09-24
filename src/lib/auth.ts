@@ -79,7 +79,20 @@ export function sessionCookiePolicy() {
 }
 
 function cookieOptions(expires: Date) {
-  return { httpOnly: true, sameSite: 'lax' as const, secure: process.env.NODE_ENV === 'production' && process.env.E2E_INSECURE_COOKIES !== '1', path: '/', expires };
+  // Vorschau-Umgebungen (Arena-/IDE-iframe) laden die Seite cross-site —
+  // ein Lax-Cookie wird dort vom Browser verworfen, die App wirft trotz
+  // erfolgreichem Login zurueck auf /login. Mit SESSION_COOKIE_SAMESITE=none (nur
+  // ueber https sinnvoll) wird das Session-Cookie auf None+Secure gestellt;
+  // Standard bleibt bewusst Lax, die Sicherheits-Tests pruefen diesen Pfad.
+  const crossSite = process.env.SESSION_COOKIE_SAMESITE === 'none';
+  // CHIPS ('partitioned') war hier zeitweise an — im Arena-Panel bewies der
+  // leere Cookie-Jar direkt NACH Set-Cookie das Gegenteil: Chrome verwarf den
+  // partitionierten Cookie in diesem Rahmen vollstaendig, das unpartitionierte
+  // None+Secure funktionierte dagegen (Voll-Render /app/contracts, 122 ms).
+  // Deshalb ist Partitioned jetzt Opt-in (SESSION_COOKIE_PARTITIONED=1) fuer
+  // Browser, die ohne CHIPS blocken — Standard im None+Secure-Pfad.
+  const partitioned = crossSite && process.env.SESSION_COOKIE_PARTITIONED === '1';
+  return { httpOnly: true, sameSite: crossSite ? ('none' as const) : ('lax' as const), secure: crossSite || (process.env.NODE_ENV === 'production' && process.env.E2E_INSECURE_COOKIES !== '1'), ...(partitioned ? { partitioned: true } : {}), path: '/', expires };
 }
 
 // Lazily resolved so this module stays importable outside Next's request context.
@@ -182,8 +195,14 @@ export async function destroySession() {
 }
 
 async function loadCurrentUser(): Promise<CurrentUser | null> {
-  if (authMode() === 'local') return getLocalUser();
+  // Zuerst den Cookie-Speicher anfassen: Der Griff nach cookies() ist das
+  // Signal an Next, diese Route als Anfrage statt als Build-Prerender zu
+  // behandeln. Ohne ihn lief der lokale Modus im Produktions-Build in die
+  // authMode()-Sperre und riss das Prerendering ganzer Bereiche mit ab
+  // (Bau-Fehler 24.09.: »Local auth is disabled in production« auf
+  // /app/angebote). Supabase-Pfad liest den Store ohnehin — unverändert.
   const store = await jar();
+  if (authMode() === 'local') return getLocalUser();
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL || '';
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY || '';
   if (!supabaseUrl || !supabaseAnonKey || supabaseUrl.includes('your-project.supabase.co')) {

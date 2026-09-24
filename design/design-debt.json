@@ -70,9 +70,6 @@
     "raw-value\u0000background:\n      linear-gradient(180deg, rgba(237, 245, 241, 0.72) 0, transparent 190px),\n      var(--owner-bg)": 1,
     "raw-value\u0000box-shadow: 0 16px 38px rgba(14, 61, 51, 0.08)": 1
   },
-  "src/app/app/page.tsx": {
-    "unowned-style\u0000style={": 1
-  },
   "src/app/app/settings/account-forms.module.css": {
     "literal-color\u0000#d64541": 2,
     "literal-color\u0000#2f7650": 1,
@@ -1958,6 +1955,46 @@
   "src/components/ui/tooltip.tsx": {
     "small-type\u0000text-xs": 1,
     "state-class\u0000open": 1
+  },
+  "src/components/werkbank-layout.css": {
+    "literal-color\u0000#b42318": 3,
+    "literal-color\u0000#fff9f8": 1,
+    "literal-color\u0000#94590a": 1,
+    "literal-color\u0000#0f62c4": 1,
+    "literal-color\u0000#6d33d6": 1,
+    "literal-color\u0000#0e6f8a": 1,
+    "literal-color\u0000#d0265f": 1,
+    "literal-color\u0000#9a6414": 1,
+    "literal-color\u0000#b34a1d": 1,
+    "literal-color\u0000#177a35": 1,
+    "literal-color\u0000#0c5a63": 1,
+    "literal-color\u0000#8a5a12": 2,
+    "literal-color\u0000#e3f4ea": 1,
+    "literal-color\u0000#0b6b3a": 4,
+    "literal-color\u0000#fdf0d5": 1,
+    "literal-color\u0000#fde8e6": 1,
+    "literal-color\u0000#e5f5ea": 1,
+    "literal-color\u0000#f4fbf6": 1,
+    "literal-color\u0000#f2f8f7": 1,
+    "literal-color\u0000#ffffff": 1,
+    "literal-color\u0000#fff": 1,
+    "decorative-effect\u0000linear-gradient(": 1,
+    "raw-value\u0000border-left-color:#b42318": 1,
+    "raw-value\u0000background:#fff9f8": 1,
+    "raw-value\u0000color:#b42318": 2,
+    "raw-value\u0000color:#8a5a12": 2,
+    "raw-value\u0000background:#e3f4ea": 1,
+    "raw-value\u0000color:#0b6b3a": 3,
+    "raw-value\u0000background:#fdf0d5": 1,
+    "raw-value\u0000background:#fde8e6": 1,
+    "raw-value\u0000background:#e5f5ea": 1,
+    "raw-value\u0000border-left-color:#0b6b3a": 1,
+    "raw-value\u0000background:#f4fbf6": 1,
+    "raw-value\u0000font-size:21px": 1,
+    "raw-value\u0000background:linear-gradient(180deg,#f2f8f7,#ffffff 55%)": 1,
+    "raw-value\u0000color:#fff": 1,
+    "raw-value\u0000font-size:16px": 1,
+    "raw-value\u0000line-height:1.45": 1
   },
   "src/config/design-tokens.ts": {
     "literal-color\u0000#0a3539": 1,

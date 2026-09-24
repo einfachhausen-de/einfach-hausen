@@ -178,14 +178,14 @@ export function compareOwnerTariffs(userId: number, question: string): OwnerInte
     const entry = better[0];
     return {
       reply: `${contractKindLabel(entry.contract.kind)}: In der freigegebenen Partnerdatenbank liegt aktuell ein günstigerer Kandidat vor: ${clean(entry.offer.provider_name)} · ${clean(entry.offer.tariff_name)} · ${euroExact(entry.offer.annual_cents)} pro Jahr. Gegen deine hinterlegten Kosten sind das rechnerisch ${euroExact(entry.savingsAnnualCents!)} weniger pro Jahr. Das ist noch kein Abschluss; Verfügbarkeit und Tarifdetails prüfst du vor deiner Entscheidung im Vergleich.`,
-      links: [{ label: 'Tarifvergleich prüfen', href: `/app/contracts?tab=sparcheck&contract=${entry.contract.id}` }],
+      links: [{ label: 'Tarifvergleich prüfen', href: `/app/contracts?vertrag=${entry.contract.id}#vertrag-${entry.contract.id}` }],
     };
   }
   const availableWithoutPrice = opportunities[0];
   if (availableWithoutPrice && availableWithoutPrice.currentAnnualCents == null) {
     return {
       reply: `${contractKindLabel(availableWithoutPrice.contract.kind)}: Es gibt ein freigegebenes Partnerangebot, aber deine aktuellen Jahreskosten fehlen. Deshalb behaupte ich nicht, dass es günstiger ist. Ergänze erst den Betrag, dann kann ich sauber vergleichen.`,
-      links: [{ label: 'Vertrag ergänzen', href: `/app/contracts?tab=sparcheck&contract=${availableWithoutPrice.contract.id}` }],
+      links: [{ label: 'Vertrag ergänzen', href: `/app/contracts?vertrag=${availableWithoutPrice.contract.id}#vertrag-${availableWithoutPrice.contract.id}` }],
     };
   }
   const primary = contracts[0];
@@ -199,7 +199,7 @@ export function compareOwnerTariffs(userId: number, question: string): OwnerInte
     reply: availability.status === 'available'
       ? `Für ${contractKindLabel(primary.kind)} ist ein Vergleichspartner freigegeben, aber in unserer lokalen Partner-Angebotsdatenbank liegt gerade kein passender, verifizierter Preis vor. Deshalb nenne ich keinen erfundenen „besseren Tarif“.${estimateText}`
       : `Für ${contractKindLabel(primary.kind)} ist aktuell kein freigegebener Vergleichspartner mit nutzbaren Angebotsdaten aktiv. Dein bestehender Vertrag bleibt unverändert.${estimateText}`,
-    links: [{ label: 'Spar-Check öffnen', href: `/app/contracts?tab=sparcheck&contract=${primary.id}` }],
+    links: [{ label: 'Spar-Check öffnen', href: `/app/contracts?vertrag=${primary.id}#vertrag-${primary.id}` }],
   };
 }
 
@@ -339,7 +339,7 @@ function buildOwnerInsights(userId: number): OwnerInsight[] {
       fingerprint: `${deadline?.toISOString().slice(0, 10)}:${days < 0 ? 'overdue' : days <= 30 ? '30d' : '90d'}`,
       title: days < 0 ? 'Kündigungsfrist prüfen' : 'Vertrag rechtzeitig prüfen',
       body: `${contractKindLabel(contract.kind)} · ${clean(contract.provider)}: ${days < 0 ? 'Die hinterlegte Kündigungsfrist ist vorbei.' : `Noch ${days} Tage bis zur hinterlegten Kündigungsfrist.`}`,
-      href: `/app/contracts?tab=sparcheck&contract=${contract.id}`,
+      href: `/app/contracts?vertrag=${contract.id}#vertrag-${contract.id}`,
       priority: days < 0 || days <= 30 ? 1 : 3,
     });
   }
@@ -378,7 +378,7 @@ function buildOwnerInsights(userId: number): OwnerInsight[] {
       fingerprint: `${opportunity.offer.id}:${opportunity.currentAnnualCents}:${opportunity.offer.annual_cents}`,
       title: 'Tarifchance gefunden',
       body: `${contractKindLabel(opportunity.contract.kind)}: Ein freigegebenes Partnerangebot liegt rechnerisch ${euroExact(opportunity.savingsAnnualCents!)} pro Jahr unter deinen hinterlegten Kosten.`,
-      href: `/app/contracts?tab=sparcheck&contract=${opportunity.contract.id}`,
+      href: `/app/contracts?vertrag=${opportunity.contract.id}#vertrag-${opportunity.contract.id}`,
       priority: 3,
     });
   }

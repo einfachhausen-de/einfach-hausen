@@ -2,7 +2,12 @@
 :root {
   --eh-color-paper: #faf8f4;
   --eh-color-petrol: #105258;
+  --eh-color-petrol-soft: #e4f1ef;
   --eh-color-deep: #0a3539;
+  --eh-color-lime: #bef264;
+  --eh-color-lime-strong: #a3e635;
+  --eh-color-lime-soft: #f0fbd9;
+  --eh-color-terra-soft: #fbece5;
   --eh-color-ink: #10222a;
   --eh-color-secondary: #4b5b60;
   --eh-color-line: #e4e2dc;
@@ -43,6 +48,7 @@
   --eh-radius-control: 0.375rem;
   --eh-radius-panel: 0.5rem;
   --eh-radius-pill: 999px;
+  --eh-radius-card: clamp(1.25rem, 2vw, 2rem);
   --eh-radius-cut: clamp(1.5rem, 3vw, 3rem);
   --eh-shape-control: var(--eh-radius-control);
   --eh-shape-panel: var(--eh-radius-panel);
@@ -50,6 +56,7 @@
   --eh-shadow-none: none;
   --eh-shadow-panel: 0 1px 2px rgba(16, 34, 42, 0.06);
   --eh-shadow-card: 0 2px 10px rgba(16, 34, 42, 0.08);
+  --eh-shadow-lift: 0 28px 56px -28px rgba(16, 34, 42, 0.45);
   --eh-motion-duration: 180ms;
   --eh-motion-ease: cubic-bezier(0.2, 0.7, 0.2, 1);
 }

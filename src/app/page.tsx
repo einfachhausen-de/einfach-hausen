@@ -1,46 +1,55 @@
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { canonical } from '@/lib/seo';
-
-export const metadata: Metadata = { alternates: { canonical: canonical('/') } };
 import { getCurrentUser } from '@/lib/auth';
-import { MarketingShell } from '@/components/marketing/site-shell';
-import { StickyIntake } from '@/components/marketing/sticky-intake';
-import {
-  Benefits,
-  CategoriesCompact,
-  FinalCta,
-  HomeFaq,
-  HomeHero,
-  HowItWorks,
-  PilotBand,
-  ProblemMirror,
-  TheSwitch,
-  Trust,
-} from '@/components/marketing/home-sections';
+import { SiteShell } from '@/components/site/site-shell';
+import { Hero } from '@/components/site/home/hero';
+import { CategoryStrip } from '@/components/site/home/category-strip';
+import { AppBento } from '@/components/site/home/app-bento';
+import { SavingsCalculator } from '@/components/site/home/savings-calculator';
+import { TariffFeature } from '@/components/site/home/tariff-feature';
+import { CraftsmenFeature } from '@/components/site/home/craftsmen-feature';
+import { AiManagerFeature } from '@/components/site/home/ai-manager-feature';
+import { HowItWorks } from '@/components/site/home/how-it-works';
+import { Comparison } from '@/components/site/home/comparison';
+import { Promises } from '@/components/site/home/promises';
+import { PricingPromise } from '@/components/site/home/pricing-promise';
+import { HomeFaq } from '@/components/site/home/home-faq';
+import { FinalCta } from '@/components/site/home/final-cta';
+import { MobileCtaBar } from '@/components/site/home/mobile-cta-bar';
+
+export const metadata: Metadata = {
+  title: { absolute: 'Einfach Hausen · Die App fürs Eigenheim: Tarife, Handwerker & KI-Hausmanager' },
+  description:
+    'Tarife vergleichen und wechseln, Angebote geprüfter Handwerker vergleichen und speichern, digitale Hausakte und KI-Hausmanager. Kostenlos für Eigentümer.',
+  alternates: { canonical: canonical('/') },
+};
 
 /**
- * Public landing page. Dramaturgy (see docs/PRODUCT_POSITIONING.md):
- * hook (intake) → mirror the pain → the switch → how it works → what you get
- * → trust → breadth → pilot scarcity → objections → final intake.
+ * Dramaturgie: Versprechen + sofortige Handlung (Hero-Suche) → Verlustaversion (Sparrechner)
+ * → Produktbreite (Bento) → drei Kernnutzen im Detail → geringe Einstiegshürde → Vergleich
+ * → Risikoumkehr (Versprechen statt erfundener Bewertungen) → Preis-Transparenz → Einwände → Abschluss.
  */
 export default async function HomePage() {
   const user = await getCurrentUser();
   if (user) redirect(user.role === 'provider' ? '/pro' : '/app');
 
   return (
-    <MarketingShell footerIntake={false}>
-      <HomeHero />
-      <ProblemMirror />
-      <TheSwitch />
+    <SiteShell>
+      <Hero />
+      <CategoryStrip />
+      <SavingsCalculator />
+      <AppBento />
+      <TariffFeature />
+      <CraftsmenFeature />
+      <AiManagerFeature />
       <HowItWorks />
-      <Benefits />
-      <Trust />
-      <CategoriesCompact />
-      <PilotBand />
+      <Comparison />
+      <Promises />
+      <PricingPromise />
       <HomeFaq />
       <FinalCta />
-      <StickyIntake />
-    </MarketingShell>
+      <MobileCtaBar />
+    </SiteShell>
   );
 }

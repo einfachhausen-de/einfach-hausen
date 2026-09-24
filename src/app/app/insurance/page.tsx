@@ -77,7 +77,7 @@ export default async function InsuranceSupport({ searchParams }: { searchParams:
           id: 'weg-tarif',
           title: 'Tarif prüfen',
           detail: 'Deine Versicherungskosten vergleichen. Abgeschlossen wird beim Partner, nicht hier.',
-          href: '/app/contracts?tab=vergleichen',
+          href: '/app/contracts#vergleiche',
         },
         {
           id: 'weg-ansprechpartner',

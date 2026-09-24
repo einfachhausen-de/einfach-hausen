@@ -56,8 +56,8 @@ export const ownerAreas: readonly NavArea[] = [
     icon: FileSignature,
     owns: [],
     children: [
-      { href: '/app/contracts?tab=vertraege', label: 'Laufende Verträge' },
-      { href: '/app/contracts?tab=sparcheck', label: 'Spar-Check' },
+      { href: '/app/contracts#vertraege', label: 'Laufende Verträge' },
+      { href: '/app/angebote', label: 'Angebote' },
     ],
   },
   {

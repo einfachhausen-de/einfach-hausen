@@ -18,21 +18,74 @@ type Message = { role: 'user' | 'assistant'; content: string };
  */
 export type AssistantStepState = 'done' | 'running' | 'failed' | 'pending';
 export type AssistantStep = { key: string; label: string; state: AssistantStepState; meta?: string; details?: string[] };
+export type AssistantSource = { title: string; href: string; domain: string };
 export type AssistantResponse = {
-  status: number; reply: string; links?: ToolResult['links']; provider?: string; steps?: AssistantStep[];
+  status: number; reply: string; links?: ToolResult['links']; sources?: AssistantSource[]; provider?: string; steps?: AssistantStep[];
   /** Angebote als Entscheidungskarten: der Chat zeigt sie unter der Antwort. */
   cards?: OfferCard[];
   quota?: ReturnType<typeof aiQuotaSnapshot> | { byok: boolean }; exhausted?: boolean; options?: string[];
+  /** Follow-up-Vorschlaege nach der Antwort, regelbasiert aus der Faehigkeit. */
+  suggestions?: string[];
 };
+function domainOf(href: string): string {
+  if (href.startsWith('/')) return 'einfachhausen.de';
+  try { return new URL(href).hostname.replace(/^www\./, ''); } catch { return href; }
+}
+function sourcesFromLinks(links?: ToolResult['links']): AssistantSource[] | undefined {
+  if (!links?.length) return undefined;
+  return links.map(l => ({ title: l.label, href: l.href, domain: domainOf(l.href) }));
+}
 const THEMA: Record<Capability, string> = {
   jobs: 'Aufträge', quotes: 'Angebote', contracts: 'Verträge', documents: 'Dokumente', contacts: 'Ansprechpartner',
-  calendar: 'Termine', house: 'Hausakte', maintenance: 'Pflege', next_actions: 'Nächste Schritte',
-  compare_quotes: 'Angebote vergleichen', house_check: 'Haus-Check', house_event: 'Haus-Ereignis',
-  find_provider: 'Betriebe finden',
+  calendar: 'Termine', house: 'Hausakte', maintenance: 'Pflege', find_provider: 'Betriebe finden',
   create_job: 'Auftrag anlegen', compare_tariffs: 'Tarife vergleichen', help: 'App-Hilfe', generative: 'Beratung', clarify: 'Rückfrage',
+  next_actions: 'Nächste Schritte', compare_quotes: 'Angebote vergleichen', house_check: 'Haus-Check', house_event: 'Haus-Ereignis',
+  search_house: 'Hausakte-Suche', create_report: 'Bericht',
 };
+// Chat-Tool-Buttons senden ihre ID mit; nur diese Allowlist wird serverseitig
+// ausgefuehrt. Unbekannte Werte werden verworfen, nie auf einen Funktionsnamen
+// umgeleitet.
+export const CHAT_TOOLS = {
+  create_job: 'create_job',
+  compare_tariffs: 'compare_tariffs',
+  compare_quotes: 'compare_quotes',
+  search_house: 'search_house',
+  create_report: 'create_report',
+} as const satisfies Record<string, Capability>;
+export type ChatToolId = keyof typeof CHAT_TOOLS;
+/** Pures Validierungs-Helfer fuer die /api/ki-Route: `undefined` = kein Tool
+ *  gesendet, `null` = unbekannter Wert (Route antwortet 400), sonst die ID. */
+export function kiChatToolFromBody(tool: unknown): ChatToolId | null | undefined {
+  if (tool === undefined) return undefined;
+  if (typeof tool !== 'string' || !Object.hasOwn(CHAT_TOOLS, tool)) return null;
+  return tool as ChatToolId;
+}
 // Diese Faehigkeiten schlagen in den eigenen Daten nach; die uebrigen erklaeren nur die App.
-const LIEST_DATEN: Capability[] = ['jobs', 'quotes', 'contracts', 'documents', 'contacts', 'calendar', 'house', 'maintenance'];
+// Alle, die wirklich eigene Daten lesen, muessen hier stehen: Nur dann zeigt der
+// Ablauf "Deine Daten gelesen" statt so zu tun, es waere nichts gelesen worden.
+const LIEST_DATEN: Capability[] = ['jobs', 'quotes', 'contracts', 'documents', 'contacts', 'calendar', 'house', 'maintenance', 'next_actions', 'compare_quotes', 'house_check', 'compare_tariffs', 'search_house'];
+// Follow-up-Vorschlaege je Faehigkeit: kurze Weiterfragen aus demselben
+// Themenfeld. Maximal drei, keine erfundenen Fakten, nichts ausgefuehrt.
+// Generative Beratung und Rueckfragen bleiben bewusst ohne Chips.
+const FOLGEN: Partial<Record<Capability, string[]>> = {
+  jobs: ['Was braucht eine Entscheidung?', 'Status eines Auftrags ansehen', 'Neuen Auftrag anlegen'],
+  quotes: ['Angebote nach Preis vergleichen', 'Nach Termin vergleichen', 'Wer ist der Anbieter?'],
+  compare_quotes: ['Angebote nach Preis vergleichen', 'Nach Bewertung vergleichen', 'Zum Auftrag'],
+  contracts: ['Welche Kündigungsfristen laufen?', 'Spar-Check starten', 'Vertragsdetails ansehen'],
+  compare_tariffs: ['Tarife nach Preis vergleichen', 'Kündigungsfrist prüfen', 'Zum Vertrag'],
+  documents: ['Rechnungen suchen', 'Verträge suchen', 'Welche Fristen habe ich?'],
+  contacts: ['Wer ist mein Elektriker?', 'Meine Ansprechpartner', 'Neuen Auftrag anlegen'],
+  calendar: ['Termine diese Woche', 'Nächste Wartung', 'Termin vorschlagen'],
+  house: ['Was fehlt in meiner Hausakte?', 'Hauspass öffnen', 'Dokumente suchen'],
+  house_check: ['Was fehlt in meiner Hausakte?', 'Lücken schließen', 'Dokumente hochladen'],
+  maintenance: ['Offene Wartungen', 'Wartung planen', 'Termin vorschlagen'],
+  create_job: ['Handwerker suchen', 'Termin vorschlagen', 'Auftrag ansehen'],
+  find_provider: ['Nach Bewertung sortieren', 'Direkt anfragen', 'Neuen Auftrag anlegen'],
+  next_actions: ['Details zum nächsten Schritt', 'Termin vorschlagen', 'Aufträge ansehen'],
+  help: ['Wie lade ich ein Dokument hoch?', 'Wo ändere ich meine Adresse?', 'Zu den Einstellungen'],
+  search_house: ['Dokument hochladen', 'Hauscheck starten', 'Hauspass öffnen'],
+  create_report: ['Nächste Schritte ansehen', 'Tarife sparen prüfen', 'Dokumente dazu suchen'],
+};
 export function assistantMessages(raw: unknown): Message[] {
   if (!Array.isArray(raw)) return [];
   return raw.slice(-8).filter((v): v is Message => Boolean(v) && (v.role === 'user' || v.role === 'assistant') && typeof v.content === 'string')
@@ -70,12 +123,34 @@ function relevantContext(userId: number, question: string) {
   const reply = executeAssistantTool(userId, capability, question).reply;
   return { text: reply.slice(0, 4000), thema: THEMA[capability], eintraege: reply.split('\n').filter(zeile => zeile.startsWith('• ')).length };
 }
+// Bericht: erst serverseitig die relevanten eigenen Daten mit den bestehenden
+// Tenant-sicheren Lesefunktionen einsammeln (begrenzt, nicht die komplette
+// Hausakte), dann darf generative Formulierung darauf aufsetzen.
+function reportContext(userId: number, question: string) {
+  const bereiche: Array<[Capability, string]> = [
+    ['jobs', 'Aufträge'], ['contracts', 'Verträge'], ['documents', 'Dokumente'],
+    ['house', 'Hausdaten'], ['maintenance', 'Pflege'], ['calendar', 'Termine'],
+  ];
+  const teile: string[] = [];
+  let text = '';
+  for (const [cap, label] of bereiche) {
+    let teil = '';
+    try { teil = executeAssistantTool(userId, cap, question).reply; } catch { continue; }
+    teil = teil.slice(0, 900);
+    if (!teil || /noch keine Einträge/.test(teil)) continue;
+    if (text && text.length + teil.length + label.length + 12 > 5000) break;
+    text += (text ? '\n' : '') + `## ${label}\n` + teil;
+    teile.push(label);
+  }
+  if (!text) return { text: '', thema: THEMA.create_report, eintraege: 0 };
+  return { text: text.slice(0, 5000), thema: THEMA.create_report, eintraege: text.split('\n').filter(zeile => zeile.startsWith('• ')).length };
+}
 /**
  * Beantwortet eine Frage des Eigentuemers. `onStep` meldet jeden Schritt
  * sofort; der Rueckgabewert traegt denselben Ablauf unter `steps`, damit ein
  * Aufruf ohne Streaming dieselbe Transparenz zeigen kann.
  */
-export async function answerAssistant(userId: number, rawMessages: unknown, signal?: AbortSignal, photoPath?: string | null, onStep?: (step: AssistantStep) => void): Promise<AssistantResponse> {
+export async function answerAssistant(userId: number, rawMessages: unknown, signal?: AbortSignal, photoPath?: string | null, onStep?: (step: AssistantStep) => void, tool?: ChatToolId | null): Promise<AssistantResponse> {
   const steps: AssistantStep[] = [];
   const melde = (step: AssistantStep) => {
     const bekannt = steps.findIndex(bisher => bisher.key === step.key);
@@ -92,7 +167,14 @@ export async function answerAssistant(userId: number, rawMessages: unknown, sign
   let provider: string;
   try {
     signal?.throwIfAborted();
-    if (photoPath) { capability = 'generative'; provider = 'image'; }
+    if (tool !== undefined && tool !== null) {
+      // Der Nutzer hat ein Werkzeug bewusst ausgewaehlt: die ID wird gegen die
+      // Allowlist geprueft und direkt ausgefuehrt. Laya/Jev sollen hier nicht
+      // noch raten, was der Button bedeutet – das spart Zeit und Kosten.
+      if (!Object.hasOwn(CHAT_TOOLS, tool)) return { status: 400, reply: 'Unbekanntes Werkzeug.' };
+      capability = CHAT_TOOLS[tool]; provider = 'tool';
+    }
+    else if (photoPath) { capability = 'generative'; provider = 'image'; }
     else if (explicitCapability(question)) { capability = explicitCapability(question)!; provider = 'local'; }
     else {
       // Two recent turns keep follow-up context small; no account metadata leaves for classification.
@@ -107,21 +189,21 @@ export async function answerAssistant(userId: number, rawMessages: unknown, sign
   structuredLog.info('internal', 'assistant routing', { provider, capability });
   melde({
     key: 'frage', label: 'Frage verstanden', state: 'done', meta: THEMA[capability],
-    details: [photoPath ? 'Deine Nachricht mit Foto wird ausgewertet.' : provider === 'local' ? 'Direkt erkannt, ohne Einstufung durch ein Modell.' : `Automatisch eingestuft (${provider}).`,
+    details: [photoPath ? 'Deine Nachricht mit Foto wird ausgewertet.' : provider === 'local' ? 'Direkt erkannt, ohne Einstufung durch ein Modell.' : provider === 'tool' ? 'Werkzeug von dir ausgewählt – kein Modell musste raten.' : `Automatisch eingestuft (${provider}).`,
       ...(capability === 'clarify' ? ['Deine Frage lässt mehrere Themen zu. Ich frage nach.'] : [])],
   });
-  if (capability !== 'generative') {
+  if (capability !== 'generative' && capability !== 'create_report') {
     if (LIEST_DATEN.includes(capability)) melde({ key: 'daten', label: 'Deine Daten gelesen', state: 'done', meta: THEMA[capability], details: ['Direkt in deinen eigenen Daten nachgeschlagen.', 'Nichts wurde an einen Anbieter übermittelt.'] });
     // Offene Angebote kommen als Karte: das guenstigste steht vorausgewaehlt,
     // gebucht wird erst mit dem Knopf und nie durch die Antwort selbst.
     const karten = capability === 'quotes' ? offerCards(userId) : [];
     melde({ key: 'antwort', label: 'Antwort zusammengestellt', state: 'done', meta: 'Ohne KI-Modell', details: [karten.length ? 'Offene Angebote stehen als Karte bereit.' : 'Diese Antwort verbraucht kein Kontingent.'] });
     const tool = executeAssistantTool(userId, capability, question);
-    if (!karten.length) return abschluss({ status: 200, ...tool, provider, quota: aiQuotaSnapshot(userId) });
+    if (!karten.length) return abschluss({ status: 200, ...tool, sources: sourcesFromLinks(tool.links), provider, quota: aiQuotaSnapshot(userId), suggestions: FOLGEN[capability] });
     const vorgaenge = karten.length === 1 ? 'Ein Vorgang hat offene Angebote' : `${karten.length} Vorgänge haben offene Angebote`;
     return abschluss({
       status: 200, reply: `${vorgaenge}. Prüfe die Auswahl in der Karte – mit „Buchen“ bestätigst du ein Angebot, vorher passiert nichts.`,
-      links: tool.links, provider, quota: aiQuotaSnapshot(userId), cards: karten,
+      links: tool.links, sources: sourcesFromLinks(tool.links), provider, quota: aiQuotaSnapshot(userId), cards: karten, suggestions: FOLGEN.quotes,
     });
   }
   const gateway = generativeGateway(userId);
@@ -137,7 +219,7 @@ export async function answerAssistant(userId: number, rawMessages: unknown, sign
       return abschluss({ status: 422, reply: 'Dieses Medium kann ich hier noch nicht auswerten. Bitte beschreibe es kurz oder lade ein JPG-, PNG- oder WebP-Bild hoch. Es wurden keine KI-Credits verbraucht.' });
     }
   }
-  const context = relevantContext(userId, question);
+  const context = capability === 'create_report' ? reportContext(userId, question) : relevantContext(userId, question);
   const fotoDetails = image ? [`Foto mitgeschickt: ${image.mime}, ${Math.max(1, Math.round(image.data.length * 3 / 4096))} KB.`] : [];
   let usageId: number | null = null;
   if (!gateway.byok) {
@@ -197,7 +279,7 @@ export async function answerAssistant(userId: number, rawMessages: unknown, sign
         ? [`Dein Modell: ${gateway.model}.`, 'Mit deinem eigenen Schlüssel formuliert.', 'Dein Freikontingent bleibt unberührt.']
         : [`Modell: ${gateway.model}.`, `Kontingent: ${quota.freemiumRemaining} von ${quota.freemiumAllowed} Aktionen frei.`, ...(quota.credits > 0 ? [`${quota.credits} ${quota.credits === 1 ? 'Zusatzaktion' : 'Zusatzaktionen'} verfügbar.`] : [])],
     });
-    return abschluss({ status: 200, reply: reply.trim().slice(0, 12000), provider: gateway.byok ? 'byok' : 'deepseek', quota: gateway.byok ? { byok: true } : quota });
+    return abschluss({ status: 200, reply: reply.trim().slice(0, 12000), provider: gateway.byok ? 'byok' : 'deepseek', quota: gateway.byok ? { byok: true } : quota, suggestions: FOLGEN[capability] });
   } catch {
     refund();
     if (timeout.aborted) {
