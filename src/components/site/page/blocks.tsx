@@ -5,10 +5,13 @@
  * src/app/globals.css. Bewegung kommt aus der vorhandenen Motion-Schicht
  * (Reveal/Stagger): kurz, endlich, nur transform/opacity, reduced-motion zeigt
  * sofort den Endzustand, ohne JavaScript ist nichts versteckt.
+ *
+ * Abwechslung zwischen Seiten entsteht über Tonalität (cream/white/dark), Layout
+ * (split/center) und den Inhalt der Bildseite – nicht über neue Farben oder Stile.
  */
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowRight, ArrowUpRight, Info, type LucideIcon } from 'lucide-react';
+import { ArrowRight, ArrowUpRight, Check, Info, type LucideIcon } from 'lucide-react';
 import { Reveal, Stagger } from '@/components/marketing/motion';
 import { Container, Eyebrow, SectionHeading, cn, houseEdgeClass } from '@/design-system/site';
 
@@ -20,6 +23,48 @@ const sectionTone: Record<Tone, string> = {
   dark: 'bg-brand-deep text-white',
 };
 
+const heroTone: Record<Tone, string> = {
+  cream: 'bg-cream',
+  white: 'border-b border-hairline bg-white',
+  dark: 'bg-brand-deep',
+};
+
+/**
+ * Belegte Produktfakten für Eigentümer (Preise, Ablauf, Sicherheit). Nur dort einsetzen,
+ * wo das Angebot für Eigentümer gilt – nie auf Partnerseiten.
+ */
+export const OWNER_ASSURANCES = [
+  'Hauskonto dauerhaft kostenlos',
+  'Kein Auftrag ohne deine Bestätigung',
+  'Keine Provision auf deinen Auftrag',
+] as const;
+
+/** Entlastung direkt am Handlungsort: beantwortet „Was kostet mich das?“, bevor jemand zögert. */
+export function AssuranceList({
+  items,
+  tone = 'light',
+  align = 'left',
+  className,
+}: {
+  items: readonly string[];
+  tone?: 'light' | 'dark';
+  align?: 'left' | 'center';
+  className?: string;
+}) {
+  return (
+    <ul className={cn('flex flex-wrap gap-x-6 gap-y-2', align === 'center' && 'justify-center', className)}>
+      {items.map((item) => (
+        <li key={item} className={cn('flex items-center gap-2 text-sm font-semibold', tone === 'light' ? 'text-ink' : 'text-white/85')}>
+          <span className="grid size-5 shrink-0 place-items-center rounded-pill bg-lime text-ink" aria-hidden="true">
+            <Check className="size-3" strokeWidth={3} />
+          </span>
+          {item}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 export function PageHero({
   eyebrow,
   title,
@@ -28,6 +73,9 @@ export function PageHero({
   notice,
   aside,
   children,
+  tone = 'cream',
+  layout = 'split',
+  assurances,
 }: {
   eyebrow: string;
   title: React.ReactNode;
@@ -36,25 +84,45 @@ export function PageHero({
   /** Shown before the buttons, so a warning is read before the next step. */
   notice?: React.ReactNode;
   aside?: React.ReactNode;
+  /** Split: unter dem Text. Center: volle Breite unter dem Kopf (z. B. Einstiegskacheln). */
   children?: React.ReactNode;
+  tone?: Tone;
+  layout?: 'split' | 'center';
+  assurances?: readonly string[];
 }) {
+  const dark = tone === 'dark';
+  const centered = layout === 'center';
+  const split = Boolean(aside) && !centered;
+  const layoutClass = split ? 'items-center lg:grid-cols-[1.1fr_0.9fr] lg:gap-16' : centered ? 'gap-10 lg:gap-14' : 'max-w-5xl';
+
   return (
-    <section className="bg-cream">
-      <Container
-        className={cn('grid gap-12 py-14 lg:py-20', aside ? 'items-center lg:grid-cols-[1.1fr_0.9fr] lg:gap-16' : 'max-w-5xl')}
-      >
-        <Reveal y={16} className="flex flex-col gap-6">
-          <Eyebrow>{eyebrow}</Eyebrow>
-          <h1 className="font-display text-balance text-4xl font-bold leading-[1.05] tracking-tight text-ink sm:text-5xl lg:text-6xl">
+    <section className={heroTone[tone]}>
+      <Container className={cn('grid gap-12 py-14 lg:py-20', layoutClass)}>
+        <Reveal y={16} className={cn('flex flex-col gap-6', centered && 'mx-auto max-w-4xl items-center text-center')}>
+          <Eyebrow tone={dark ? 'dark' : 'light'}>{eyebrow}</Eyebrow>
+          <h1
+            className={cn(
+              'font-display text-balance text-4xl font-bold leading-[1.05] tracking-tight sm:text-5xl lg:text-6xl',
+              dark ? 'text-white' : 'text-ink',
+            )}
+          >
             {title}
           </h1>
-          <p className="max-w-2xl text-pretty text-lg leading-relaxed text-body sm:text-xl">{text}</p>
+          <p className={cn('max-w-2xl text-pretty text-lg leading-relaxed sm:text-xl', dark ? 'text-white/75' : 'text-body')}>{text}</p>
           {notice}
-          {actions && <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:flex-wrap">{actions}</div>}
-          {children}
+          {actions && <div className={cn('flex flex-col gap-3 pt-2 sm:flex-row sm:flex-wrap', centered && 'sm:justify-center')}>{actions}</div>}
+          {assurances && assurances.length > 0 && (
+            <AssuranceList items={assurances} tone={dark ? 'dark' : 'light'} align={centered ? 'center' : 'left'} className="pt-1" />
+          )}
+          {!centered && children}
         </Reveal>
+        {centered && children && (
+          <Reveal y={24} delay={0.1}>
+            {children}
+          </Reveal>
+        )}
         {aside && (
-          <Reveal y={24} delay={0.15}>
+          <Reveal y={24} delay={0.15} className={cn(centered && 'mx-auto w-full max-w-3xl')}>
             {aside}
           </Reveal>
         )}
@@ -89,43 +157,142 @@ export function Heading(props: React.ComponentProps<typeof SectionHeading>) {
   );
 }
 
-/** Beispielkarte für den Hero: klar als Beispiel gekennzeichnet, keine echten Kundendaten. */
+/**
+ * Aktenumschlag: Beispielkarte mit Hauskante und Registerlinien. Klar als Beispiel
+ * gekennzeichnet, keine echten Kundendaten. `dark` auf hellen Flächen, `light` auf dunklen.
+ */
 export function ExampleCard({
   label,
   title,
   rows,
   note,
+  tone = 'dark',
 }: {
   label: string;
   title: string;
   rows: ReadonlyArray<{ title: string; text: string }>;
   note?: string;
+  tone?: 'dark' | 'light';
 }) {
+  const dark = tone === 'dark';
   return (
-    <figure className="flex flex-col gap-5 rounded-card bg-white p-6 shadow-lift ring-1 ring-hairline sm:p-8">
-      <figcaption className="text-meta font-semibold uppercase tracking-wider text-brand">{label}</figcaption>
-      <p className="font-display text-2xl font-bold leading-snug text-ink">{title}</p>
-      <Stagger className="flex flex-col gap-3" y={12}>
+    <figure className={cn('flex flex-col gap-6 rounded-card p-7 sm:p-9', houseEdgeClass, dark ? 'bg-brand-deep text-white' : 'bg-white text-ink shadow-card')}>
+      <figcaption className={cn('flex items-center gap-3 pr-10 text-meta font-semibold uppercase tracking-wider', dark ? 'text-lime' : 'text-brand')}>
+        <span className={cn('h-0.5 w-6 shrink-0', dark ? 'bg-lime' : 'bg-brand')} aria-hidden="true" />
+        {label}
+      </figcaption>
+      <p className={cn('font-display text-2xl font-bold leading-snug sm:text-3xl', dark ? 'text-white' : 'text-ink')}>{title}</p>
+      <Stagger className={cn('flex flex-col border-t', dark ? 'border-white/15' : 'border-hairline')} y={12}>
         {rows.map((row, index) => (
-          <div key={row.title} className="flex gap-4 rounded-2xl bg-cream p-4">
-            <span
-              className="grid size-8 shrink-0 place-items-center rounded-xl bg-ink font-display text-sm font-bold text-lime"
-              aria-hidden="true"
-            >
-              {index + 1}
+          <div key={row.title} className={cn('grid grid-cols-[2.25rem_1fr] gap-3 border-b py-4', dark ? 'border-white/15' : 'border-hairline')}>
+            <span className={cn('font-display text-base font-bold tabular-nums', dark ? 'text-lime' : 'text-brand')} aria-hidden="true">
+              {String(index + 1).padStart(2, '0')}
             </span>
-            <div className="flex flex-col gap-0.5">
-              <p className="font-semibold text-ink">{row.title}</p>
-              <p className="text-sm leading-relaxed text-body">{row.text}</p>
+            <div className="flex flex-col gap-1">
+              <p className={cn('font-semibold', dark ? 'text-white' : 'text-ink')}>{row.title}</p>
+              <p className={cn('leading-relaxed', dark ? 'text-white/70' : 'text-body')}>{row.text}</p>
             </div>
           </div>
         ))}
       </Stagger>
-      {note && <p className="text-meta text-body">{note}</p>}
+      {note && <p className={cn('text-meta', dark ? 'text-white/65' : 'text-body')}>{note}</p>}
     </figure>
   );
 }
 
+/**
+ * Hero-Bild mit Hauskante und optionaler Notiz über dem Bild. Die Notiz ist kein Bedienelement
+ * und liegt bewusst außerhalb der geschnittenen Ecke. Illustrative Bildwelt bleibt gekennzeichnet.
+ */
+export function HeroPhoto({
+  src,
+  alt,
+  priority = true,
+  caption = 'Illustrative Bildwelt, keine Kundenaussage.',
+  tone = 'light',
+  badge,
+}: {
+  src: string;
+  alt: string;
+  priority?: boolean;
+  caption?: string | null;
+  tone?: 'light' | 'dark';
+  badge?: { label: string; title: string; icon?: LucideIcon };
+}) {
+  const BadgeIcon = badge?.icon ?? Check;
+  return (
+    <figure className="flex flex-col gap-3">
+      <div className="relative">
+        <div className={cn('relative aspect-[4/5] w-full overflow-hidden rounded-card sm:aspect-[6/5] lg:aspect-[4/5]', houseEdgeClass)}>
+          <Image src={src} alt={alt} fill priority={priority} sizes="(min-width: 1024px) 42vw, 100vw" className="object-cover" />
+        </div>
+        {badge && (
+          <div className="absolute -bottom-6 left-4 right-4 flex items-start gap-3 rounded-card bg-white p-4 shadow-lift ring-1 ring-hairline sm:left-6 sm:right-auto sm:max-w-sm sm:p-5">
+            <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-lime text-ink" aria-hidden="true">
+              <BadgeIcon className="size-5" />
+            </span>
+            <div className="flex min-w-0 flex-col gap-1">
+              <span className="text-meta font-semibold uppercase tracking-wider text-brand">{badge.label}</span>
+              <span className="font-display text-base font-bold leading-snug text-ink sm:text-lg">{badge.title}</span>
+            </div>
+          </div>
+        )}
+      </div>
+      {caption && <figcaption className={cn('text-meta', badge && 'pt-6', tone === 'dark' ? 'text-white/65' : 'text-body')}>{caption}</figcaption>}
+    </figure>
+  );
+}
+
+/**
+ * Einstieg nach Absicht statt nach Gewerk: drei große Kacheln statt zwölf Kategorien.
+ * Weniger Auswahl am Anfang, der erste Satz ist vorbereitet.
+ */
+export function IntentTiles({
+  items,
+}: {
+  items: ReadonlyArray<{ icon: LucideIcon; title: string; text: string; href: string; accent?: 'lime' | 'brand' | 'coral' }>;
+}) {
+  const accents = { lime: 'bg-lime text-ink', brand: 'bg-brand-soft text-brand', coral: 'bg-coral-soft text-coral' } as const;
+  return (
+    <Stagger className="grid gap-4 text-left md:grid-cols-3" y={20} gap={0.06}>
+      {items.map(({ icon: Icon, title, text, href, accent = 'lime' }) => (
+        <Link
+          key={href}
+          href={href}
+          className="group flex h-full flex-col gap-5 rounded-card bg-white p-6 shadow-card ring-1 ring-hairline transition-[box-shadow,translate] duration-200 hover:shadow-lift motion-safe:hover:-translate-y-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand sm:p-7"
+        >
+          <span className={cn('grid size-14 place-items-center rounded-2xl', accents[accent])} aria-hidden="true">
+            <Icon className="size-7" />
+          </span>
+          <div className="flex flex-col gap-2">
+            <h2 className="font-display text-2xl font-bold leading-tight text-ink">{title}</h2>
+            <p className="leading-relaxed text-body">{text}</p>
+          </div>
+          <span className="mt-auto inline-flex items-center gap-2 font-semibold text-brand transition-colors group-hover:text-ink">
+            Damit starten
+            <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
+          </span>
+        </Link>
+      ))}
+    </Stagger>
+  );
+}
+
+const STEP_BREAKPOINTS = {
+  md: {
+    item: 'md:flex-col md:gap-6',
+    line: 'md:left-15 md:top-6 md:-mt-px md:ml-0 md:h-0 md:w-[calc(100%_-_2.5rem)] md:border-l-0 md:border-t-2',
+    body: 'md:pt-0',
+  },
+  lg: {
+    item: 'lg:flex-col lg:gap-6',
+    line: 'lg:left-15 lg:top-6 lg:-mt-px lg:ml-0 lg:h-0 lg:w-[calc(100%_-_2.5rem)] lg:border-l-0 lg:border-t-2',
+    body: 'lg:pt-0',
+  },
+} as const;
+const STEP_COLUMNS: Record<number, string> = { 2: 'md:grid-cols-2 md:gap-8', 3: 'md:grid-cols-3 md:gap-8', 4: 'lg:grid-cols-4 lg:gap-8' };
+
+/** Ablauf als Weg: nummerierte Stationen mit Verbindungslinie statt gleichförmiger Karten. */
 export function StepList({
   steps,
   tone = 'light',
@@ -133,27 +300,38 @@ export function StepList({
   steps: ReadonlyArray<{ title: string; text: React.ReactNode }>;
   tone?: 'light' | 'dark';
 }) {
+  const dark = tone === 'dark';
+  const horizontal = steps.length >= 2 && steps.length <= 4;
+  const bp = steps.length === 4 ? STEP_BREAKPOINTS.lg : STEP_BREAKPOINTS.md;
+  const last = steps.length - 1;
+
   return (
-    <Stagger className="grid gap-5 md:grid-cols-3" y={20}>
+    <Stagger className={cn('grid gap-10', horizontal && STEP_COLUMNS[steps.length])} y={20}>
       {steps.map((step, index) => (
-        <div
-          key={step.title}
-          className={cn(
-            'flex h-full flex-col gap-4 rounded-card p-7',
-            tone === 'light' ? 'bg-cream' : 'bg-white/5 ring-1 ring-white/10',
+        <div key={step.title} className={cn('relative flex gap-5', horizontal && bp.item)}>
+          {index < last && (
+            <span
+              aria-hidden="true"
+              className={cn(
+                'absolute left-6 top-15 -ml-px h-[calc(100%_-_2rem)] border-l-2 border-dashed',
+                dark ? 'border-lime/40' : 'border-brand/30',
+                horizontal && bp.line,
+              )}
+            />
           )}
-        >
           <span
             className={cn(
-              'grid size-12 place-items-center rounded-2xl font-display text-lg font-bold',
-              tone === 'light' ? 'bg-ink text-lime' : 'bg-lime text-ink',
+              'grid size-12 shrink-0 place-items-center rounded-pill font-display text-lg font-bold tabular-nums',
+              dark ? 'bg-lime text-ink' : 'bg-ink text-lime',
             )}
             aria-hidden="true"
           >
             {String(index + 1).padStart(2, '0')}
           </span>
-          <h3 className={cn('font-display text-xl font-bold', tone === 'light' ? 'text-ink' : 'text-white')}>{step.title}</h3>
-          <p className={cn('leading-relaxed', tone === 'light' ? 'text-body' : 'text-white/75')}>{step.text}</p>
+          <div className={cn('flex flex-col gap-2 pt-2.5', horizontal && bp.body)}>
+            <h3 className={cn('font-display text-xl font-bold leading-snug', dark ? 'text-white' : 'text-ink')}>{step.title}</h3>
+            <p className={cn('max-w-md leading-relaxed', dark ? 'text-white/75' : 'text-body')}>{step.text}</p>
+          </div>
         </div>
       ))}
     </Stagger>
@@ -164,34 +342,54 @@ export function FeatureCards({
   items,
   tone = 'light',
   columns = 3,
+  variant = 'cards',
 }: {
   items: ReadonlyArray<{ title: string; text: React.ReactNode; icon?: LucideIcon }>;
   tone?: 'light' | 'dark';
   columns?: 2 | 3;
+  /** `register`: Registerlinien statt Kartenraster – für Prinzipien und Regeln. */
+  variant?: 'cards' | 'register';
 }) {
+  const dark = tone === 'dark';
+
+  if (variant === 'register') {
+    return (
+      <Stagger className={cn('grid gap-x-12', columns === 3 ? 'md:grid-cols-2 lg:grid-cols-3' : 'md:grid-cols-2')} y={16}>
+        {items.map(({ title, text, icon: Icon }, index) => (
+          <div key={title} className={cn('flex gap-5 border-t-2 py-7', dark ? 'border-white/15' : 'border-ink/10')}>
+            <span
+              className={cn('grid size-11 shrink-0 place-items-center rounded-xl', dark ? 'bg-lime text-ink' : 'bg-ink text-lime')}
+              aria-hidden="true"
+            >
+              {Icon ? <Icon className="size-5" /> : <span className="font-display text-base font-bold tabular-nums">{String(index + 1).padStart(2, '0')}</span>}
+            </span>
+            <div className="flex flex-col gap-2">
+              <h3 className={cn('font-display text-lg font-bold leading-snug', dark ? 'text-white' : 'text-ink')}>{title}</h3>
+              <p className={cn('leading-relaxed', dark ? 'text-white/75' : 'text-body')}>{text}</p>
+            </div>
+          </div>
+        ))}
+      </Stagger>
+    );
+  }
+
   return (
     <Stagger className={cn('grid gap-5', columns === 3 ? 'md:grid-cols-3' : 'md:grid-cols-2')} y={20}>
       {items.map(({ title, text, icon: Icon }) => (
         <div
           key={title}
-          className={cn(
-            'flex h-full flex-col gap-3 rounded-card p-7',
-            tone === 'light' ? 'bg-white ring-1 ring-hairline' : 'bg-white/5 ring-1 ring-white/10',
-          )}
+          className={cn('flex h-full flex-col gap-3 rounded-card p-7', dark ? 'bg-white/5 ring-1 ring-white/10' : 'bg-white ring-1 ring-hairline')}
         >
           {Icon && (
             <span
-              className={cn(
-                'mb-1 grid size-11 place-items-center rounded-xl',
-                tone === 'light' ? 'bg-brand-soft text-brand' : 'bg-lime/15 text-lime',
-              )}
+              className={cn('mb-2 grid size-12 place-items-center rounded-2xl', dark ? 'bg-lime text-ink' : 'bg-brand-soft text-brand')}
               aria-hidden="true"
             >
-              <Icon className="size-5" />
+              <Icon className="size-6" />
             </span>
           )}
-          <h3 className={cn('font-display text-lg font-bold leading-snug', tone === 'light' ? 'text-ink' : 'text-white')}>{title}</h3>
-          <p className={cn('leading-relaxed', tone === 'light' ? 'text-body' : 'text-white/75')}>{text}</p>
+          <h3 className={cn('font-display text-lg font-bold leading-snug', dark ? 'text-white' : 'text-ink')}>{title}</h3>
+          <p className={cn('leading-relaxed', dark ? 'text-white/75' : 'text-body')}>{text}</p>
         </div>
       ))}
     </Stagger>
@@ -201,31 +399,61 @@ export function FeatureCards({
 export function LinkCards({
   items,
   columns = 3,
+  variant = 'card',
 }: {
   items: ReadonlyArray<{ label?: string; title: string; text?: string; href: string; icon?: LucideIcon }>;
   columns?: 2 | 3 | 4;
+  /** `prompt`: Beispielsätze als Nachricht mit „Übernehmen“ – nimmt die Angst vor dem leeren Feld. */
+  variant?: 'card' | 'prompt';
 }) {
   const grid = { 2: 'sm:grid-cols-2', 3: 'sm:grid-cols-2 lg:grid-cols-3', 4: 'sm:grid-cols-2 lg:grid-cols-4' }[columns];
+
+  if (variant === 'prompt') {
+    return (
+      <Stagger className={cn('grid gap-4', grid)} y={16} gap={0.05}>
+        {items.map(({ label, title, text, href }) => (
+          <Link
+            key={href + title}
+            href={href}
+            className="group flex h-full flex-col gap-4 rounded-card rounded-bl-md bg-cream p-6 transition-colors hover:bg-lime-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+          >
+            {label && <span className="text-meta font-semibold uppercase tracking-wider text-brand">{label}</span>}
+            <p className="font-display text-xl font-bold leading-snug text-ink">{title}</p>
+            <span className="mt-auto inline-flex w-fit items-center gap-2 rounded-pill bg-white px-4 py-2 text-sm font-semibold text-ink ring-1 ring-hairline transition-colors group-hover:bg-ink group-hover:text-white group-hover:ring-ink">
+              {text ?? 'Übernehmen'}
+              <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
+            </span>
+          </Link>
+        ))}
+      </Stagger>
+    );
+  }
+
   return (
     <Stagger className={cn('grid gap-4', grid)} y={16} gap={0.05}>
       {items.map(({ label, title, text, href, icon: Icon }) => (
         <Link
           key={href + title}
           href={href}
-          className="group flex h-full flex-col gap-3 rounded-card bg-white p-6 ring-1 ring-hairline transition-shadow hover:shadow-lift focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+          className="group flex h-full flex-col gap-3 rounded-card bg-white p-6 ring-1 ring-hairline transition-[box-shadow,translate] duration-200 hover:shadow-lift motion-safe:hover:-translate-y-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
         >
-          <div className="flex items-start justify-between gap-4">
+          <div className="mb-1 flex items-start justify-between gap-4">
             {Icon ? (
-              <span className="grid size-11 place-items-center rounded-xl bg-cream text-brand transition-colors group-hover:bg-lime group-hover:text-ink" aria-hidden="true">
-                <Icon className="size-5" />
+              <span
+                className="grid size-12 place-items-center rounded-2xl bg-brand-soft text-brand transition-colors group-hover:bg-lime group-hover:text-ink"
+                aria-hidden="true"
+              >
+                <Icon className="size-6" />
               </span>
             ) : (
-              label && <span className="text-meta font-semibold uppercase tracking-wider text-brand">{label}</span>
+              label && <span className="pt-2 text-meta font-semibold uppercase tracking-wider text-brand">{label}</span>
             )}
-            <ArrowUpRight
-              className="size-5 shrink-0 text-body transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-ink"
+            <span
+              className="grid size-9 shrink-0 place-items-center rounded-pill bg-cream text-ink transition-colors group-hover:bg-ink group-hover:text-lime"
               aria-hidden="true"
-            />
+            >
+              <ArrowUpRight className="size-4" />
+            </span>
           </div>
           {Icon && label && <span className="text-meta font-semibold uppercase tracking-wider text-brand">{label}</span>}
           <h3 className="font-display text-lg font-bold leading-snug text-ink">{title}</h3>
@@ -260,39 +488,87 @@ export function HonestLimits({ title = 'Ehrlich eingeordnet', items }: { title?:
   );
 }
 
+/**
+ * Seitenabschluss. `points` macht daraus eine Entscheidungsfläche: links die Handlung,
+ * rechts die belegten Antworten auf die letzten Zweifel. `dark` für Seiten mit hellem Kopf.
+ */
 export function ClosingCta({
   title,
   text,
   primary,
   secondary,
+  tone = 'lime',
+  points,
 }: {
   title: string;
   text: string;
   primary: { href: string; label: string };
   secondary?: { href: string; label: string };
+  tone?: 'lime' | 'dark';
+  points?: readonly string[];
 }) {
+  const dark = tone === 'dark';
+  const split = Boolean(points && points.length > 0);
+
   return (
     <section className="bg-white py-16 lg:py-24">
       <Container>
         <Reveal y={24}>
-          <div className={cn('bg-lime px-6 py-14 text-center sm:px-12 lg:py-20', houseEdgeClass)}>
-            <div className="mx-auto flex max-w-3xl flex-col items-center gap-6">
-              <h2 className="font-display text-balance text-4xl font-bold leading-[1.05] tracking-tight text-ink sm:text-5xl">{title}</h2>
-              <p className="max-w-xl text-pretty text-lg text-ink/75">{text}</p>
-              <div className="flex flex-col items-center gap-3 sm:flex-row">
-                <Link
-                  href={primary.href}
-                  className="group inline-flex h-14 items-center justify-center gap-2 rounded-pill bg-ink px-7 text-base font-semibold text-white transition-colors hover:bg-brand-deep focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
-                >
-                  {primary.label}
-                  <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
-                </Link>
-                {secondary && (
-                  <Link href={secondary.href} className="inline-flex h-14 items-center gap-2 px-4 font-semibold text-ink hover:underline">
-                    {secondary.label} <ArrowRight className="size-4" aria-hidden="true" />
+          <div
+            className={cn(
+              'rounded-card px-6 py-14 sm:px-12 lg:py-20',
+              houseEdgeClass,
+              dark ? 'bg-brand-deep' : 'bg-lime',
+              split ? 'lg:px-16' : 'text-center',
+            )}
+          >
+            <div className={cn(split ? 'grid items-center gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:gap-16' : 'mx-auto flex max-w-3xl flex-col items-center')}>
+              <div className={cn('flex flex-col gap-6', split ? 'items-start' : 'items-center')}>
+                <h2 className={cn('font-display text-balance text-4xl font-bold leading-[1.05] tracking-tight sm:text-5xl', dark ? 'text-white' : 'text-ink')}>
+                  {title}
+                </h2>
+                <p className={cn('max-w-xl text-pretty text-lg', dark ? 'text-white/75' : 'text-ink/75')}>{text}</p>
+                <div className="flex flex-col items-center gap-3 sm:flex-row">
+                  <Link
+                    href={primary.href}
+                    className={cn(
+                      'group inline-flex h-14 items-center justify-center gap-2 rounded-pill px-7 text-base font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2',
+                      dark ? 'bg-lime text-ink hover:bg-lime-strong focus-visible:outline-lime' : 'bg-ink text-white hover:bg-brand-deep focus-visible:outline-ink',
+                    )}
+                  >
+                    {primary.label}
+                    <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
                   </Link>
-                )}
+                  {secondary && (
+                    <Link
+                      href={secondary.href}
+                      className={cn('inline-flex h-14 items-center gap-2 px-4 font-semibold hover:underline', dark ? 'text-white' : 'text-ink')}
+                    >
+                      {secondary.label} <ArrowRight className="size-4" aria-hidden="true" />
+                    </Link>
+                  )}
+                </div>
               </div>
+              {split && points && (
+                <ul
+                  className={cn(
+                    'flex flex-col divide-y rounded-card p-6 sm:p-8',
+                    dark ? 'divide-white/15 bg-white/5 ring-1 ring-white/10' : 'divide-hairline bg-white shadow-card',
+                  )}
+                >
+                  {points.map((point) => (
+                    <li key={point} className="flex items-center gap-4 py-4 first:pt-0 last:pb-0">
+                      <span
+                        className={cn('grid size-9 shrink-0 place-items-center rounded-pill', dark ? 'bg-lime text-ink' : 'bg-ink text-lime')}
+                        aria-hidden="true"
+                      >
+                        <Check className="size-4" strokeWidth={3} />
+                      </span>
+                      <span className={cn('font-display text-lg font-bold leading-snug', dark ? 'text-white' : 'text-ink')}>{point}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
           </div>
         </Reveal>
@@ -402,7 +678,7 @@ export function SituationCards({ items }: { items: ReadonlyArray<{ tag: string; 
   return (
     <Stagger className="grid gap-5 md:grid-cols-3" y={20}>
       {items.map((item) => (
-        <figure key={item.tag} className="flex h-full flex-col gap-4 rounded-card bg-cream p-7">
+        <figure key={item.tag} className="flex h-full flex-col gap-4 rounded-card rounded-bl-md bg-cream p-7">
           <figcaption className="text-meta font-semibold uppercase tracking-wider text-brand">{item.tag}</figcaption>
           <blockquote className="font-display text-xl font-bold leading-snug text-ink">{`„${item.text}“`}</blockquote>
         </figure>

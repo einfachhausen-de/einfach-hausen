@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { ArrowRight, BadgeCheck, CircleHelp, Hammer, MessagesSquare, Scale, ShieldCheck } from 'lucide-react';
 import { canonical } from '@/lib/seo';
 import { SiteShell } from '@/components/site/site-shell';
-import { ClosingCta, ExampleCard, FeatureCards, Heading, LinkCards, PageHero, Section } from '@/components/site/page/blocks';
+import { ClosingCta, ExampleCard, FeatureCards, Heading, LinkCards, OWNER_ASSURANCES, PageHero, Section } from '@/components/site/page/blocks';
 import { PageFaq } from '@/components/site/page/faq';
 import { Reveal, Stagger } from '@/components/marketing/motion';
 import { ButtonLink, HouseEdgeImage } from '@/design-system/site';
@@ -36,6 +36,8 @@ export default function Page() {
   return (
     <SiteShell>
       <PageHero
+        tone="white"
+        assurances={OWNER_ASSURANCES}
         eyebrow="So funktioniert Einfach Hausen"
         title="Ein Anliegen. Ein klarer nächster Schritt."
         text="Du musst noch nicht wissen, welcher Betrieb zuständig ist. Beschreibe, was an deinem Haus los ist. Wir helfen beim Einordnen – und du entscheidest, ob du erst eine Frage klären, einen Menschen sprechen oder etwas erledigen lassen möchtest."
@@ -80,18 +82,24 @@ export default function Page() {
 
       <Section tone="cream">
         <Heading eyebrow="Wenn du eine Arbeit organisieren möchtest" title="Vom ersten Satz zur bewussten Entscheidung." />
-        <ol className="flex flex-col gap-6">
+        <ol className="flex flex-col">
           {PROCESS.map((step, index) => (
-            <li key={step.title}>
-              <Reveal y={24} className="grid items-center gap-8 rounded-card bg-white p-6 ring-1 ring-hairline sm:p-10 lg:grid-cols-2 lg:gap-14">
-                <div className="flex flex-col gap-4">
-                  <span className="grid size-12 place-items-center rounded-2xl bg-ink font-display text-lg font-extrabold text-lime" aria-hidden="true">
-                    {String(index + 1).padStart(2, '0')}
-                  </span>
-                  <h3 className="font-display text-2xl font-extrabold leading-tight text-ink sm:text-3xl">{step.title}</h3>
-                  <p className="text-lg leading-relaxed text-body">{step.text}</p>
-                </div>
-                <ExampleCard {...step.example} />
+            <li key={step.title} className="relative grid gap-8 pb-16 pl-16 last:pb-0 lg:grid-cols-2 lg:items-start lg:gap-14 lg:pl-28">
+              {index < PROCESS.length - 1 && (
+                <span aria-hidden="true" className="absolute bottom-3 left-6 top-15 -ml-px border-l-2 border-dashed border-brand/30 lg:left-9 lg:top-21" />
+              )}
+              <span
+                className="absolute left-0 top-0 grid size-12 place-items-center rounded-pill bg-ink font-display text-lg font-bold tabular-nums text-lime lg:size-18 lg:text-2xl"
+                aria-hidden="true"
+              >
+                {String(index + 1).padStart(2, '0')}
+              </span>
+              <Reveal y={24} className="flex flex-col gap-4 pt-1.5 lg:pt-4">
+                <h3 className="font-display text-2xl font-bold leading-tight text-ink sm:text-3xl">{step.title}</h3>
+                <p className="max-w-xl text-lg leading-relaxed text-body">{step.text}</p>
+              </Reveal>
+              <Reveal y={24} delay={0.1}>
+                <ExampleCard {...step.example} tone={index % 2 === 1 ? 'dark' : 'light'} />
               </Reveal>
             </li>
           ))}
@@ -102,6 +110,7 @@ export default function Page() {
         <Heading tone="dark" eyebrow="Was dir Sicherheit gibt" title="Du weißt, worüber du entscheidest." />
         <FeatureCards
           tone="dark"
+          variant="register"
           items={[
             { icon: ShieldCheck, title: 'Kein Auftrag durch eine Frage.', text: 'Die erste Beschreibung hilft beim Einordnen. Die Beauftragung ist eine separate Entscheidung.' },
             { icon: Scale, title: 'Preis vor Zusage klären.', text: 'Prüfe das Angebot einschließlich Leistung, Material und möglicher Zusatzkosten mit dem Betrieb.' },
@@ -161,6 +170,7 @@ export default function Page() {
 
       <ClosingCta
         title="Du musst nicht alles wissen. Nur, was gerade los ist."
+        tone="dark"
         text="Beginne mit deinem Anliegen. Den nächsten Schritt entscheidest du danach."
         primary={{ href: '/register?role=homeowner', label: 'Kostenloses Hauskonto anlegen' }}
         secondary={{ href: '/leistungen', label: 'Leistungsbereiche ansehen' }}
