@@ -205,23 +205,7 @@
 
 .eh-vertrag-quick { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; }
 @media (max-width:720px) { .eh-vertrag-quick { grid-template-columns:minmax(0,1fr); } }
-/* Schnellaktionen-Kacheln (Betreiber 24.09., goldene Mitte): flache Kachel mit
-   Icon-Chip, Titel, Kurztext, Chevron — darunter das Aufklapp-Menue. */
-.eh-akt-row { display:flex; flex-wrap:wrap; gap:12px; }
-.eh-akt-wrap { position:relative; flex:1 1 240px; min-width:0; }
-.eh-akt-tile { display:flex; align-items:center; gap:12px; width:100%; padding:11px 14px; border:1px solid var(--eh-color-line); border-radius:var(--eh-radius-panel); background:var(--eh-color-white); color:var(--eh-color-ink); font-family:inherit; cursor:pointer; text-align:left; transition:border-color var(--eh-motion-duration) var(--eh-motion-ease), background var(--eh-motion-duration) var(--eh-motion-ease); }
-.eh-akt-tile:hover, .eh-akt-tile[aria-expanded="true"] { border-color:var(--eh-color-petrol); background:var(--eh-color-paper); }
-.eh-akt-tile:focus-visible { outline:2px solid var(--eh-color-focus); outline-offset:2px; }
-.eh-akt-ic { display:grid; place-items:center; width:34px; height:34px; flex:none; border-radius:var(--eh-radius-control); background:var(--eh-color-sand); color:var(--eh-color-petrol); }
-.eh-akt-tx { display:grid; gap:1px; flex:1 1 auto; min-width:0; }
-.eh-akt-tx strong { font-size:var(--eh-font-label); font-weight:var(--eh-weight-semibold); line-height:var(--eh-leading-tight); }
-.eh-akt-tx small { font-size:var(--eh-font-meta); line-height:var(--eh-leading-normal); color:var(--eh-color-secondary); }
-.eh-akt-tile > svg { flex:none; opacity:.45; }
-.eh-akt-menue { position:absolute; top:calc(100% + 6px); left:0; z-index:40; display:grid; gap:2px; min-width:min(280px,88vw); padding:8px; border:1px solid var(--eh-color-line); border-radius:var(--eh-radius-panel); background:var(--eh-color-white); box-shadow:var(--eh-shadow-card); }
-.eh-akt-menue[hidden] { display:none; }
-.eh-akt-menue a { display:flex; align-items:center; gap:10px; padding:9px 11px; border-radius:var(--eh-radius-control); color:var(--eh-color-ink); font-family:inherit; font-size:var(--eh-font-label); font-weight:var(--eh-weight-medium); text-decoration:none; }
-.eh-akt-menue a:hover { background:var(--eh-color-paper); color:var(--eh-color-petrol); }
-.eh-akt-menue svg { color:var(--eh-color-petrol); }
+.eh-akt-abstand { margin-bottom:22px; }
 .eh-sr { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; border:0; }
 
 /* Anlege-Funnel (24.09., Betreiber): Weg-Waehler-Karten + Werbebanner statt

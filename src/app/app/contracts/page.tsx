@@ -5,15 +5,12 @@ import {
   Smartphone, Thermometer, Trash2, Wifi, Wrench, Zap,
 } from 'lucide-react';
 import {
-  EHButton, EHEmptyState, EHField, EHFieldGrid, EHFormFeedback, EHFormSection,
-  EHInput, EHOwnerSection, EHSelect, EHStatus, EHSubmitButton, EHText, EHTextarea, EHWorkflowForm,
+  EHActionTiles, EHButton, EHEmptyState, EHField, EHFieldGrid, EHFormFeedback, EHFormSection, EHInput, EHOwnerSection, EHSelect, EHStatus, EHSubmitButton, EHText, EHTextarea, EHWorkflowForm,
 } from '@/design-system';
 import { WerkbankRahmen } from '@/components/werkbank-rahmen';
 import { VertraegeTabelle } from '@/components/homeowner/vertraege-tabelle';
 import { CompareRail } from '@/components/homeowner/compare-rail';
 import { requireUser } from '@/lib/auth';
-import styles from '../eigentuemer-start.module.css';
-import { AnlageMenue } from '@/components/homeowner/anlage-menue';
 import { VertraegeAnlegeWege } from '@/components/homeowner/anlege-wege';
 import { db } from '@/lib/db';
 import { euroExact } from '@/lib/format';
@@ -120,10 +117,37 @@ export default async function Contracts({ searchParams }: { searchParams: Promis
 
     <h1 className="eh-sr">Verträge &amp; Tarife</h1>
 
-    <section className={styles.quickSection} aria-label="Schnellaktionen">
-      <p className={styles.quickLabel}>Schnellaktionen</p>
-      <AnlageMenue base="/app/contracts/anlegen" />
-    </section>
+      <div className="eh-akt-abstand">
+        <EHActionTiles
+          ariaLabel="Schnellaktionen"
+          tiles={[
+            {
+              label: 'Vertrag erfassen',
+              hint: 'Beleg rein — die KI liest Anbieter, Frist, Titel',
+              icon: 'file-up',
+              menuLabel: 'Weg zum Vertrag auswählen',
+              items: [
+                { label: 'Hochladen', href: '/app/contracts/anlegen?weg=hochladen', icon: 'file-up' },
+                { label: 'Scannen', href: '/app/contracts/anlegen?weg=scannen', icon: 'camera' },
+                { label: 'Selbst eintragen', href: '/app/contracts/anlegen?weg=manuell', icon: 'pen' },
+              ],
+            },
+            {
+              label: 'Anbieter vergleichen',
+              hint: 'Fünf Kategorien, Vergleich beim Partner',
+              icon: 'compare',
+              menuLabel: 'Kategorie zum Vergleichen auswählen',
+              items: [
+                { label: 'Strom', href: '#vergleich-strom', icon: 'bolt' },
+                { label: 'Gas', href: '#vergleich-gas', icon: 'flame' },
+                { label: 'Internet & Festnetz', href: '#vergleich-dsl', icon: 'wifi' },
+                { label: 'Mobilfunk', href: '#vergleich-mobilfunk', icon: 'phone' },
+                { label: 'Versicherungen', href: '#vergleich-versicherung', icon: 'shield' },
+              ],
+            },
+          ]}
+        />
+      </div>
 
     {saved && (
       <div className="eh-vdash-gespeichert">

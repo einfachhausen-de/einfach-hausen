@@ -5,13 +5,11 @@ import {
   Smartphone, Thermometer, Trash2, Wifi, Wrench, Zap,
 } from 'lucide-react';
 import {
-  EHButton, EHFormFeedback, EHOwnerSection, EHStatus, EHText,
+  EHActionTiles, EHButton, EHFormFeedback, EHOwnerSection, EHStatus, EHText,
 } from '@/design-system';
 import { WerkbankRahmen } from '@/components/werkbank-rahmen';
 import { euroExact } from '@/lib/format';
 import { VertraegeTabelle } from '@/components/homeowner/vertraege-tabelle';
-import styles from '../../eigentuemer-start.module.css';
-import { AnlageMenue } from '@/components/homeowner/anlage-menue';
 import { VertraegeAnlegeWege } from '@/components/homeowner/anlege-wege';
 import { CompareRail } from '@/components/homeowner/compare-rail';
 import { db } from '@/lib/db';
@@ -121,10 +119,37 @@ export default async function ContractsPreview({ searchParams }: { searchParams:
       Öffentliches Schaufenster mit Beispielwerten — keine Anmeldung, keine Speicherung. Die echte Seite ist /app/contracts.
     </EHFormFeedback>
 
-    <section className={styles.quickSection} aria-label="Schnellaktionen">
-      <p className={styles.quickLabel}>Schnellaktionen</p>
-      <AnlageMenue base="/app/preview/anlegen" />
-    </section>
+      <div className="eh-akt-abstand">
+        <EHActionTiles
+          ariaLabel="Schnellaktionen"
+          tiles={[
+            {
+              label: 'Vertrag erfassen',
+              hint: 'Beleg rein — die KI liest Anbieter, Frist, Titel',
+              icon: 'file-up',
+              menuLabel: 'Weg zum Vertrag auswählen',
+              items: [
+                { label: 'Hochladen', href: '/app/preview/anlegen?weg=hochladen', icon: 'file-up' },
+                { label: 'Scannen', href: '/app/preview/anlegen?weg=scannen', icon: 'camera' },
+                { label: 'Selbst eintragen', href: '/app/preview/anlegen?weg=manuell', icon: 'pen' },
+              ],
+            },
+            {
+              label: 'Anbieter vergleichen',
+              hint: 'Fünf Kategorien, Vergleich beim Partner',
+              icon: 'compare',
+              menuLabel: 'Kategorie zum Vergleichen auswählen',
+              items: [
+                { label: 'Strom', href: '#vergleich-strom', icon: 'bolt' },
+                { label: 'Gas', href: '#vergleich-gas', icon: 'flame' },
+                { label: 'Internet & Festnetz', href: '#vergleich-dsl', icon: 'wifi' },
+                { label: 'Mobilfunk', href: '#vergleich-mobilfunk', icon: 'phone' },
+                { label: 'Versicherungen', href: '#vergleich-versicherung', icon: 'shield' },
+              ],
+            },
+          ]}
+        />
+      </div>
 
     <h1 className="eh-sr">Verträge &amp; Tarife</h1>
 

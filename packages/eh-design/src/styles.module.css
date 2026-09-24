@@ -2692,3 +2692,19 @@ a.ownerDashboardStatusItem:hover {
   border-color: var(--eh-color-line) !important;
 }
 
+/* EHActionTiles (Kern-Zuwachs, Betreiber-Freigabe 24.09.): flache
+   Aktionskacheln mit Aufklapp-Menue in Plus-Menue-Optik. */
+.actionRow { display: flex; flex-wrap: wrap; gap: 12px; }
+.actionWrap { position: relative; flex: 1 1 240px; min-width: 0; }
+.actionTile { display: flex; align-items: center; gap: 12px; width: 100%; padding: 11px 14px; border: 1px solid var(--eh-color-line); border-radius: var(--eh-radius-panel); background: var(--eh-color-white); color: var(--eh-color-ink); font-family: inherit; cursor: pointer; text-align: left; transition: border-color var(--eh-motion-duration) var(--eh-motion-ease), background var(--eh-motion-duration) var(--eh-motion-ease); }
+.actionTile:hover, .actionTile[aria-expanded="true"] { border-color: var(--eh-color-petrol); background: var(--eh-color-paper); }
+.actionTile:focus-visible { outline: 2px solid var(--eh-color-focus); outline-offset: 2px; }
+.actionIcon { display: grid; place-items: center; width: 34px; height: 34px; flex: none; border-radius: var(--eh-radius-control); background: var(--eh-color-sand); color: var(--eh-color-petrol); }
+.actionText { display: grid; gap: 1px; flex: 1 1 auto; min-width: 0; }
+.actionText strong { font-size: var(--eh-font-label); font-weight: var(--eh-weight-semibold); line-height: var(--eh-leading-tight); }
+.actionText small { font-size: var(--eh-font-meta); line-height: var(--eh-leading-normal); color: var(--eh-color-secondary); }
+.actionMenu { position: absolute; top: calc(100% + 6px); left: 0; z-index: 40; display: grid; gap: 2px; min-width: min(280px, 88vw); padding: 8px; border: 1px solid var(--eh-color-line); border-radius: var(--eh-radius-panel); background: var(--eh-color-white); box-shadow: var(--eh-shadow-card); }
+.actionMenu[hidden] { display: none; }
+.actionMenu a { display: flex; align-items: center; gap: 10px; padding: 9px 11px; border-radius: var(--eh-radius-control); color: var(--eh-color-ink); font-family: inherit; font-size: var(--eh-font-label); font-weight: var(--eh-weight-medium); text-decoration: none; }
+.actionMenu a:hover { background: var(--eh-color-paper); color: var(--eh-color-petrol); }
+.actionMenu a svg { color: var(--eh-color-petrol); }
