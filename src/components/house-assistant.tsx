@@ -119,5 +119,5 @@ export function HouseAssistant({placement = 'floating', open, onOpenChange, comp
       || /^\/(passport|receipt)(\/|$)/.test(path) || /^\/app\/invoices\//.test(path)
       || ['/impressum', '/datenschutz', '/app/hausmeister'].includes(path) || (path === '/app/messages' && placement !== 'toolbar')) return null;
   return <EHAssistant placement={placement} onSend={send} loginHref="/login" settingsHref="/app/settings"
-    aboveNavigation={path === '/app' || path.startsWith('/app/')} open={open} onOpenChange={onOpenChange} compact={compact} suggestions={suggestions} />;
+    aboveNavigation={path === '/' || path === '/app' || path.startsWith('/app/')} open={open} onOpenChange={onOpenChange} compact={compact} suggestions={suggestions} />;
 }
