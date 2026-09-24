@@ -7,6 +7,37 @@
 /* shadcn font-sans mapped to the brand Inter Variable (DESIGN.md contract). */
 @theme inline {
   --font-sans: var(--font-marketing), Inter, ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-display-face), var(--font-marketing), ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Public website 2026 palette: petrol brand, lime action, cream canvas, ink text, coral alerts. */
+@theme {
+  --color-ink: #0b1f24;
+  --color-body: #4a5c61;
+  --color-brand: #0e4f55;
+  --color-brand-deep: #082e33;
+  --color-brand-soft: #e4f1ef;
+  --color-lime: #bef264;
+  --color-lime-strong: #a3e635;
+  --color-lime-soft: #f0fbd9;
+  --color-save: #0f7a52;
+  --color-coral: #e4572e;
+  --color-coral-soft: #fdebe4;
+  --color-cream: #f7f5f0;
+  --color-hairline: #e6e3dc;
+
+  --animate-float: site-float 7s ease-in-out infinite;
+  --animate-float-slow: site-float 9s ease-in-out infinite;
+  --animate-marquee: site-marquee 40s linear infinite;
+
+  @keyframes site-float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+  @keyframes site-marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
 }
 
 @layer eh-legacy {

@@ -115,7 +115,7 @@ export function HouseAssistant({placement = 'floating', open, onOpenChange, comp
   if (placement === 'floating' && isOwner) return null;
   if (placement !== 'floating' && !isOwner) return null;
   // Do not compete with authentication, provider work, payments, print or existing chat.
-  if (!path || path === '/app/onboarding' || path.startsWith('/app/onboarding/') || /^\/(login|register|auth|onboarding|pro|admin|ki-chat|checkout|pay|transfer|partner-invite|design-system)(\/|$)/.test(path)
+  if (!path || path === '/app/onboarding' || path.startsWith('/app/onboarding/') || /^\/(login|register|auth|onboarding|pro|partner|admin|ki-chat|checkout|pay|transfer|partner-invite|design-system)(\/|$)/.test(path)
       || /^\/(passport|receipt)(\/|$)/.test(path) || /^\/app\/invoices\//.test(path)
       || ['/impressum', '/datenschutz', '/app/hausmeister'].includes(path) || (path === '/app/messages' && placement !== 'toolbar')) return null;
   return <EHAssistant placement={placement} onSend={send} loginHref="/login" settingsHref="/app/settings"
