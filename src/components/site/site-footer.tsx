@@ -61,7 +61,7 @@ export function SiteFooter() {
             </p>
             <Link
               href="/partner"
-              className="group flex max-w-sm items-center gap-4 rounded-2xl border border-white/10 bg-white/5 p-4 transition-colors hover:bg-white/10"
+              className="group flex max-w-sm items-center gap-4 rounded-2xl border border-white/10 bg-white/5 p-4 text-white transition-colors hover:bg-white/10"
             >
               <span className="grid size-10 place-items-center rounded-xl bg-lime text-ink">
                 <HardHat className="size-5" aria-hidden="true" />

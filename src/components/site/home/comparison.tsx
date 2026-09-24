@@ -51,7 +51,7 @@ export function Comparison() {
           eyebrow="Der Vergleich"
           title="Warum zehn Apps und drei Ordner, wenn eine App reicht?"
         />
-        <div className="overflow-x-auto rounded-card bg-white p-2 sm:p-4">
+        <div className="relative overflow-x-auto rounded-card bg-white p-2 sm:p-4">
           <table className="w-full min-w-[640px] border-separate border-spacing-0 text-sm">
             <caption className="sr-only">Funktionsvergleich zwischen Einfach Hausen und anderen Lösungen</caption>
             <thead>

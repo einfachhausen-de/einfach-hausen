@@ -34,7 +34,7 @@ export function ProHero({ trialDays, promise }: { trialDays: number; promise: st
           </div>
           <dl className="mt-4 grid grid-cols-2 gap-6 border-t border-white/15 pt-8 sm:grid-cols-4">
             {[
-              ['0 %', promise],
+              ['0 %', promise.replace(/^0\s?%\s*/, '')],
               ['100 %', 'deines Auftragswerts bleibt bei dir'],
               ['0 €', 'pro Anfrage oder Lead'],
               [`${trialDays} Tage`, 'bezahlte Tarife kostenlos testen'],

@@ -120,7 +120,7 @@
 .eh-vtbl-suche-btn { flex:none; display:inline-flex; align-items:center; justify-content:center; border:0; border-radius:var(--eh-radius-pill); background:var(--eh-color-petrol); color:var(--eh-color-white); width:28px; height:28px; cursor:pointer; transition:background var(--eh-motion-duration) var(--eh-motion-ease); }
 .eh-vtbl-suche-btn:hover { background:var(--eh-color-deep); }
 .eh-vtbl-suche input::-webkit-search-cancel-button, .eh-ang-suche input::-webkit-search-cancel-button { -webkit-appearance:none; appearance:none; }
-.eh-live-x { flex:none; display:inline-flex; align-items:center; justify-content:center; border:0; background:transparent; color:var(--eh-color-secondary); width:24px; height:24px; border-radius:50%; cursor:pointer; transition:background var(--eh-motion-duration) var(--eh-motion-ease), color var(--eh-motion-duration) var(--eh-motion-ease); }
+.eh-live-x { flex:none; display:inline-flex; align-items:center; justify-content:center; border:0; background:transparent; color:var(--eh-color-secondary); width:24px; height:24px; border-radius:var(--eh-radius-pill); cursor:pointer; transition:background var(--eh-motion-duration) var(--eh-motion-ease), color var(--eh-motion-duration) var(--eh-motion-ease); }
 .eh-live-x:hover { background:var(--eh-color-paper); color:var(--eh-color-ink); }
 .eh-vtbl-treffer[data-live], .eh-ang-treffer[data-live] { flex-basis:100%; margin:2px 4px 0; color:var(--eh-color-secondary); }
 .eh-live-reset { border:0; background:none; padding:0; font:inherit; color:var(--eh-color-petrol); cursor:pointer; }

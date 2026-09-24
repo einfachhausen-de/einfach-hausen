@@ -26,12 +26,17 @@ for (const slug of expectedSlugs) assert.match(catalog, new RegExp(`slug:\\s*['\
 assert.match(catalog, /SERVICE_PATHS/);
 assert.match(catalog, /getServiceCategory/);
 
-const shell = read('src/components/marketing/site-shell.tsx');
-assert.match(shell, /megaMenu/);
+// The public chrome (header with Leistungen megamenu + footer) is shared by the
+// homepage and every subpage; MarketingShell composes it.
+const marketingShell = read('src/components/marketing/site-shell.tsx');
+assert.match(marketingShell, /SiteHeader/);
+assert.match(marketingShell, /SiteFooter/);
+const shell = read('src/components/site/site-header.tsx') + read('src/components/site/site-footer.tsx');
+assert.match(shell, /MegaMenu/);
 assert.match(shell, /Alle Leistungen/);
 assert.match(shell, /Beratung/);
 assert.match(shell, /Notfall/);
-assert.match(shell, /Blog/);
+assert.match(shell, /\/blog/);
 assert.match(shell, /Lexikon/);
 assert.match(shell, /Sicherheit/);
 assert.match(shell, /Was steht bei dir an\?/);

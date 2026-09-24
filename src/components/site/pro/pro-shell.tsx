@@ -26,7 +26,7 @@ export function ProShell({ children }: { children: React.ReactNode }) {
           <p>© 2026 Einfach Hausen · Partnernetzwerk für regionale Betriebe</p>
           <nav aria-label="Rechtliches" className="flex flex-wrap gap-x-6 gap-y-2">
             {FOOTER_LINKS.map(([label, href]) => (
-              <Link key={href} href={href} className="hover:text-lime">
+              <Link key={href} href={href} className="text-white/70 transition-colors hover:text-lime">
                 {label}
               </Link>
             ))}

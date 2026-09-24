@@ -59,11 +59,13 @@ export function PartnerAppScreen() {
         <span className="grid size-9 place-items-center rounded-xl bg-brand-soft text-brand">
           <Calendar className="size-4" />
         </span>
-        <span className="flex-1 text-meta leading-snug">
-          <strong className="block text-sm">Heute, 9:00</strong>
-          Wartung · Familie Schneider
+        <span className="min-w-0 flex-1 text-meta leading-snug">
+          <span className="flex items-center justify-between gap-2">
+            <strong className="whitespace-nowrap text-sm">Heute, 9:00</strong>
+            <span className="rounded-pill bg-brand-soft px-2 py-0.5 text-meta font-semibold text-brand">Stammkunde</span>
+          </span>
+          <span className="block text-body">Wartung · Familie Schneider</span>
         </span>
-        <span className="rounded-pill bg-brand-soft px-2 py-0.5 text-meta font-semibold text-brand">Stammkunde</span>
       </div>
 
       <nav className="mt-auto grid grid-cols-4 border-t border-hairline bg-white px-2 pb-5 pt-2.5">

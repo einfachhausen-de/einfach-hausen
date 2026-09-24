@@ -27,7 +27,9 @@ export function Hero() {
             speichern. Und ein KI-Hausmanager, der an alles denkt, woran du nicht denken willst.
           </p>
 
-          <HeroSearch />
+          <div id="anliegen" className="scroll-mt-28">
+            <HeroSearch />
+          </div>
 
           <ul className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-white/85">
             {TRUST.map((item) => (

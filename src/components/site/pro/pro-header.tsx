@@ -41,7 +41,7 @@ export function ProHeader() {
             <ArrowLeft className="size-3.5" aria-hidden="true" />
             Für Eigentümer
           </Link>
-          <Link href="/login" className="rounded-pill px-4 py-2 text-sm font-semibold hover:bg-white/10">
+          <Link href="/login" className="rounded-pill px-4 py-2 text-sm font-semibold text-white hover:bg-white/10">
             Partner-Login
           </Link>
           <Link href="/register?role=provider" className={buttonClass('lime', 'md')}>
@@ -69,7 +69,7 @@ export function ProHeader() {
               key={item.href}
               href={item.href}
               onClick={() => setMenuOpen(false)}
-              className="rounded-2xl px-4 py-3 font-display text-lg font-bold hover:bg-white/10"
+              className="rounded-2xl px-4 py-3 font-display text-lg font-bold text-white hover:bg-white/10"
             >
               {item.label}
             </a>
