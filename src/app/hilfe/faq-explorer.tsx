@@ -1,41 +1,45 @@
-"use client";
+'use client';
 
-import { useMemo, useState } from "react";
-import { Plus } from "lucide-react";
-import styles from "@/components/marketing/mkt.module.css";
+import { useMemo, useState } from 'react';
+import { PageFaq } from '@/components/site/page/faq';
+import { cn } from '@/design-system/site';
 
 type Entry = { q: string; a: string; cat: string };
 
+const ALL = 'Alle';
+
 export function FaqExplorer({ entries }: { entries: ReadonlyArray<Entry> }) {
-  const [cat, setCat] = useState<string>("Alle");
-  const categories = useMemo(() => ["Alle", ...Array.from(new Set(entries.map((e) => e.cat)))], [entries]);
-  const filtered = useMemo(() => entries.filter((e) => cat === "Alle" || e.cat === cat), [entries, cat]);
+  const [category, setCategory] = useState<string>(ALL);
+  const categories = useMemo(() => [ALL, ...Array.from(new Set(entries.map((entry) => entry.cat)))], [entries]);
+  const filtered = useMemo(() => entries.filter((entry) => category === ALL || entry.cat === category), [entries, category]);
 
   return (
-    <div className={styles.stack}>
-      <div className={styles.chipRow} role="tablist" aria-label="Themen">
-        {categories.map((c) => (
-          <button
-            key={c}
-            type="button"
-            role="tab"
-            aria-selected={cat === c}
-            className={styles.chip}
-            style={cat === c ? { background: "var(--eh-teal-700)", color: "var(--eh-on-dark)", borderColor: "var(--eh-teal-700)" } : undefined}
-            onClick={() => setCat(c)}
-          >
-            {c}
-          </button>
-        ))}
+    <div className="flex flex-col gap-6">
+      <div className="flex flex-wrap gap-2" role="group" aria-label="Fragen nach Thema filtern">
+        {categories.map((item) => {
+          const count = item === ALL ? entries.length : entries.filter((entry) => entry.cat === item).length;
+          const expanded = category === item;
+          return (
+            <button
+              key={item}
+              type="button"
+              aria-pressed={expanded}
+              onClick={() => setCategory(item)}
+              className={cn(
+                'inline-flex h-10 items-center gap-2 rounded-pill px-4 text-sm font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand',
+                expanded ? 'bg-ink text-white' : 'bg-white text-ink ring-1 ring-hairline hover:ring-ink',
+              )}
+            >
+              {item}
+              <span className={cn('rounded-pill px-1.5 text-meta', expanded ? 'bg-white/15 text-white' : 'bg-cream text-body')}>{count}</span>
+            </button>
+          );
+        })}
       </div>
-      <div className={styles.faq} data-wide="true">
-        {filtered.map((entry) => (
-          <details className={styles.faqItem} key={entry.q}>
-            <summary>{entry.q}<Plus size={20} aria-hidden="true" /></summary>
-            <div><p>{entry.a}</p></div>
-          </details>
-        ))}
-      </div>
+      <p className="sr-only" aria-live="polite">
+        {`${filtered.length} Fragen im Thema ${category}`}
+      </p>
+      <PageFaq key={category} tone="white" items={filtered} />
     </div>
   );
 }

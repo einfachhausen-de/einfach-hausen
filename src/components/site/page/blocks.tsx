@@ -6,10 +6,11 @@
  * (Reveal/Stagger): kurz, endlich, nur transform/opacity, reduced-motion zeigt
  * sofort den Endzustand, ohne JavaScript ist nichts versteckt.
  */
+import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowRight, ArrowUpRight, Info, type LucideIcon } from 'lucide-react';
 import { Reveal, Stagger } from '@/components/marketing/motion';
-import { Container, Eyebrow, SectionHeading, cn } from '@/design-system/site';
+import { Container, Eyebrow, SectionHeading, cn, houseEdgeClass } from '@/design-system/site';
 
 type Tone = 'white' | 'cream' | 'dark';
 
@@ -41,7 +42,7 @@ export function PageHero({
       >
         <Reveal y={16} className="flex flex-col gap-6">
           <Eyebrow>{eyebrow}</Eyebrow>
-          <h1 className="font-display text-balance text-4xl font-extrabold leading-[1.05] tracking-tight text-ink sm:text-5xl lg:text-6xl">
+          <h1 className="font-display text-balance text-4xl font-bold leading-[1.05] tracking-tight text-ink sm:text-5xl lg:text-6xl">
             {title}
           </h1>
           <p className="max-w-2xl text-pretty text-lg leading-relaxed text-body sm:text-xl">{text}</p>
@@ -104,7 +105,7 @@ export function ExampleCard({
         {rows.map((row, index) => (
           <div key={row.title} className="flex gap-4 rounded-2xl bg-cream p-4">
             <span
-              className="grid size-8 shrink-0 place-items-center rounded-xl bg-ink font-display text-sm font-extrabold text-lime"
+              className="grid size-8 shrink-0 place-items-center rounded-xl bg-ink font-display text-sm font-bold text-lime"
               aria-hidden="true"
             >
               {index + 1}
@@ -140,7 +141,7 @@ export function StepList({
         >
           <span
             className={cn(
-              'grid size-12 place-items-center rounded-2xl font-display text-lg font-extrabold',
+              'grid size-12 place-items-center rounded-2xl font-display text-lg font-bold',
               tone === 'light' ? 'bg-ink text-lime' : 'bg-lime text-ink',
             )}
             aria-hidden="true"
@@ -240,7 +241,7 @@ export function HonestLimits({ title = 'Ehrlich eingeordnet', items }: { title?:
           <span className="grid size-11 place-items-center rounded-xl bg-ink text-lime" aria-hidden="true">
             <Info className="size-5" />
           </span>
-          <h3 className="font-display text-2xl font-extrabold leading-tight text-ink">{title}</h3>
+          <h3 className="font-display text-2xl font-bold leading-tight text-ink">{title}</h3>
           <p className="leading-relaxed text-body">Keine Versprechen, die wir nicht halten können. Damit du weißt, worauf du dich verlassen kannst.</p>
         </div>
         <ul className="flex flex-col divide-y divide-ink/10">
@@ -272,7 +273,7 @@ export function ClosingCta({
         <Reveal y={24}>
           <div className="rounded-[2.5rem] bg-lime px-6 py-14 text-center sm:px-12 lg:py-20">
             <div className="mx-auto flex max-w-3xl flex-col items-center gap-6">
-              <h2 className="font-display text-balance text-4xl font-extrabold leading-[1.05] tracking-tight text-ink sm:text-5xl">{title}</h2>
+              <h2 className="font-display text-balance text-4xl font-bold leading-[1.05] tracking-tight text-ink sm:text-5xl">{title}</h2>
               <p className="max-w-xl text-pretty text-lg text-ink/75">{text}</p>
               <div className="flex flex-col items-center gap-3 sm:flex-row">
                 <Link
@@ -293,6 +294,192 @@ export function ClosingCta({
         </Reveal>
       </Container>
     </section>
+  );
+}
+
+/** Sicherheits- und Hinweisflächen. `warn` nur für echte Gefahrenhinweise (Notruf). */
+export function AlertPanel({
+  tone = 'info',
+  icon: Icon = Info,
+  title,
+  children,
+}: {
+  tone?: 'info' | 'warn';
+  icon?: LucideIcon;
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div
+      role={tone === 'warn' ? 'note' : undefined}
+      className={cn('flex h-full gap-4 rounded-card p-6 sm:p-7', tone === 'warn' ? 'bg-coral-soft text-ink' : 'bg-white ring-1 ring-hairline')}
+    >
+      <span
+        className={cn('grid size-11 shrink-0 place-items-center rounded-xl', tone === 'warn' ? 'bg-coral text-white' : 'bg-brand-soft text-brand')}
+        aria-hidden="true"
+      >
+        <Icon className="size-5" />
+      </span>
+      <div className="flex flex-col gap-1.5">
+        <p className="font-display text-lg font-bold leading-snug text-ink">{title}</p>
+        <div className="leading-relaxed text-body">{children}</div>
+      </div>
+    </div>
+  );
+}
+
+/** Bild mit Hauskante neben Textinhalt. Illustrative Bildwelt wird sichtbar gekennzeichnet. */
+export function ImageSplit({
+  src,
+  alt,
+  reverse,
+  note = 'Illustrative Bildwelt, keine Kundenaussage.',
+  children,
+}: {
+  src: string;
+  alt: string;
+  reverse?: boolean;
+  note?: string | null;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
+      <Reveal y={24} className={cn('relative aspect-[4/5] w-full lg:aspect-[5/6]', reverse && 'lg:order-2')}>
+        <div className={cn('absolute inset-0 overflow-hidden rounded-card', houseEdgeClass)}>
+          <Image src={src} alt={alt} fill sizes="(min-width: 1024px) 45vw, 100vw" className="object-cover" />
+        </div>
+      </Reveal>
+      <div className="flex flex-col gap-6">
+        {children}
+        {note && <p className="text-meta text-body">{note}</p>}
+      </div>
+    </div>
+  );
+}
+
+/** Lesefläche für Rechtstexte und lange Artikel: ruhige Zeilenlänge, klare Zwischenüberschriften. */
+export function Prose({ children, className }: { children: React.ReactNode; className?: string }) {
+  return (
+    <div
+      className={cn(
+        'max-w-3xl text-lg leading-relaxed text-body',
+        '[&_h2]:mt-12 [&_h2]:font-display [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:leading-tight [&_h2]:text-ink first:[&_h2]:mt-0',
+        '[&_h3]:mt-8 [&_h3]:font-display [&_h3]:text-xl [&_h3]:font-bold [&_h3]:text-ink',
+        '[&_p]:mt-4 [&_ul]:mt-4 [&_ul]:flex [&_ul]:list-disc [&_ul]:flex-col [&_ul]:gap-2 [&_ul]:pl-6 [&_ol]:mt-4 [&_ol]:list-decimal [&_ol]:pl-6',
+        '[&_strong]:font-semibold [&_strong]:text-ink [&_address]:mt-4 [&_address]:not-italic',
+        '[&_a]:font-semibold [&_a]:text-brand [&_a]:underline [&_a]:underline-offset-4 hover:[&_a]:text-ink',
+        className,
+      )}
+    >
+      {children}
+    </div>
+  );
+}
+
+/** Kennzahlen-Leiste für klare Regeln (0 €, 0 %, …). Nur belegte Produktfakten, keine Marketingzahlen. */
+export function FactStrip({ items, tone = 'dark' }: { items: ReadonlyArray<{ value: string; label: string }>; tone?: 'light' | 'dark' }) {
+  return (
+    <Stagger className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4" y={16}>
+      {items.map((item) => (
+        <div
+          key={item.label}
+          className={cn('flex h-full flex-col gap-2 rounded-card p-7', tone === 'dark' ? 'bg-white/5 ring-1 ring-white/10' : 'bg-white ring-1 ring-hairline')}
+        >
+          <p className={cn('font-display text-5xl font-bold tracking-tight', tone === 'dark' ? 'text-lime' : 'text-brand')}>{item.value}</p>
+          <p className={cn('leading-relaxed', tone === 'dark' ? 'text-white/80' : 'text-body')}>{item.label}</p>
+        </div>
+      ))}
+    </Stagger>
+  );
+}
+
+/** Wiedererkennbare Alltagssituationen. Ausdrücklich keine Kundenzitate, daher ohne Namen und Porträts. */
+export function SituationCards({ items }: { items: ReadonlyArray<{ tag: string; text: string }> }) {
+  return (
+    <Stagger className="grid gap-5 md:grid-cols-3" y={20}>
+      {items.map((item) => (
+        <figure key={item.tag} className="flex h-full flex-col gap-4 rounded-card bg-cream p-7">
+          <figcaption className="text-meta font-semibold uppercase tracking-wider text-brand">{item.tag}</figcaption>
+          <blockquote className="font-display text-xl font-bold leading-snug text-ink">{`„${item.text}“`}</blockquote>
+        </figure>
+      ))}
+    </Stagger>
+  );
+}
+
+/** Kompakter Seitenkopf für Rechts- und Referenzseiten: ohne Bild, mit Stand-Angabe. */
+export function DocHero({ eyebrow, title, text, meta }: { eyebrow: string; title: React.ReactNode; text: React.ReactNode; meta?: string }) {
+  return (
+    <section className="bg-cream">
+      <Container className="flex max-w-5xl flex-col gap-5 py-12 lg:py-16">
+        <Reveal y={16} className="flex flex-col gap-5">
+          <Eyebrow>{eyebrow}</Eyebrow>
+          <h1 className="font-display text-balance text-4xl font-bold leading-[1.05] tracking-tight text-ink sm:text-5xl">{title}</h1>
+          <p className="max-w-3xl text-pretty text-lg leading-relaxed text-body">{text}</p>
+          {meta && <p className="text-meta font-semibold text-body">{meta}</p>}
+        </Reveal>
+      </Container>
+    </section>
+  );
+}
+
+/** Zweispaltiges Dokument-Layout: Sprungnavigation links (sticky), Inhalt rechts. */
+export function DocLayout({ toc, children }: { toc?: ReadonlyArray<{ id: string; label: string }>; children: React.ReactNode }) {
+  return (
+    <section className="bg-white py-14 lg:py-20">
+      <Container className={cn('grid gap-10', toc && 'lg:grid-cols-[240px_1fr] lg:gap-16')}>
+        {toc && (
+          <nav aria-label="Auf dieser Seite" className="hidden lg:block">
+            <div className="sticky top-28 flex flex-col gap-1 border-l border-hairline">
+              <p className="mb-2 pl-4 text-meta font-semibold uppercase tracking-wider text-body">Auf dieser Seite</p>
+              {toc.map((item) => (
+                <a
+                  key={item.id}
+                  href={`#${item.id}`}
+                  className="-ml-px border-l-2 border-transparent py-1.5 pl-4 text-sm text-body transition-colors hover:border-brand hover:text-ink"
+                >
+                  {item.label}
+                </a>
+              ))}
+            </div>
+          </nav>
+        )}
+        <div className="flex min-w-0 flex-col gap-6">{children}</div>
+      </Container>
+    </section>
+  );
+}
+
+/** Nummerierter Abschnitt innerhalb eines Dokuments. */
+export function DocBlock({ id, title, children }: { id?: string; title: string; children: React.ReactNode }) {
+  return (
+    <section id={id} aria-labelledby={id ? `${id}-title` : undefined} className="scroll-mt-28 rounded-card bg-cream p-6 sm:p-8">
+      <h2 id={id ? `${id}-title` : undefined} className="font-display text-xl font-bold leading-snug text-ink sm:text-2xl">
+        {title}
+      </h2>
+      <div className="mt-4 flex flex-col gap-4 leading-relaxed text-body [&_a]:font-semibold [&_a]:text-brand [&_a]:underline [&_a]:underline-offset-4 [&_strong]:font-semibold [&_strong]:text-ink [&_ul]:flex [&_ul]:list-disc [&_ul]:flex-col [&_ul]:gap-2 [&_ul]:pl-5">
+        {children}
+      </div>
+    </section>
+  );
+}
+
+/** Rechtliche Querverweise am Seitenende. */
+export function LegalNav({ items }: { items: ReadonlyArray<{ href: string; label: string }> }) {
+  return (
+    <nav aria-label="Rechtliche Angaben" className="flex flex-wrap items-center gap-3 border-t border-hairline pt-8">
+      <span className="text-meta font-semibold uppercase tracking-wider text-body">Weitere Angaben</span>
+      {items.map((item) => (
+        <Link
+          key={item.href}
+          href={item.href}
+          className="inline-flex h-10 items-center gap-1.5 rounded-pill border border-hairline bg-white px-4 text-sm font-semibold text-ink transition-colors hover:border-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+        >
+          {item.label}
+          <ArrowRight className="size-3.5" aria-hidden="true" />
+        </Link>
+      ))}
+    </nav>
   );
 }
 

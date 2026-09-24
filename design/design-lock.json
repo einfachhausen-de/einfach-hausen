@@ -5,7 +5,7 @@
     ".github/CODEOWNERS": "344048476ff047355aa71baf270bf7ebe41f418ad90195a32009424cc0670e79",
     ".github/workflows/eh-design.yml": "79881db9c76ed3111d37017ea987cb4561d0758d401a1f64a4e2e756183730e1",
     "DESIGN.md": "e0a99f14d17b1d58af1e41712cdbde604e0f70c95f48382def962286aa2ec7b6",
-    "design/design-debt.json": "90202830cd911219f04ec6d989a61339fff9f660360eec9a0def93900cf99da0",
+    "design/design-debt.json": "384a9b6c9cda65d7dd535c8ad6b1c8fbb5f2e765cde7b93365f4f2cac779de54",
     "design/design-policy.json": "17bcb937d49c87ce12d547c075f033362c71abc39a459e92731111f72dce0659",
     "packages/eh-design/assets/inter-variable.woff2": "0de3908cf5ef213ab1404cc5da94a976faaa886c3479a274a7d66ad80b37c64a",
     "packages/eh-design/assets/logo-full.png": "ca128f0ecfcffc93853f5271453f318be28ed4462850b06072c33afbeb1353cd",
@@ -65,6 +65,6 @@
     "src/components/marketing/ui.tsx": "3213ec900b29fc2c3955b6b1c78f120983a380fb6f10e81061c77b663131a238",
     "src/design-system/index.ts": "c5880f7f92770415c9a60609a9c6bd927e44217893bb16f81469b0231d2f9ab7",
     "src/design-system/site-faq.tsx": "6cbcc7b05efbb6b648159c629b064f9befa23e7c102ad91df9fd848125a0567a",
-    "src/design-system/site.tsx": "739b706b65ef0cd3ae940476a14e4a0ae5d815ca4e2b47d5a8d8c560a533ed9a"
+    "src/design-system/site.tsx": "373b7bd5573179b6910eedbebf353860aa473fe957e83db83a49b58bdf6bf588"
   }
 }

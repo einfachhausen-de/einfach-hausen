@@ -1,37 +1,12 @@
-import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowUpRight, BadgeCheck, CalendarDays, Heart, Phone, Star } from 'lucide-react';
+import { ArrowUpRight, BadgeCheck, CalendarDays, Heart, MapPin, Phone } from 'lucide-react';
 import { SERVICE_CATEGORIES } from '@/components/marketing/service-catalog';
-import { ButtonLink, CheckList, Container, ExampleNote, SectionHeading } from '@/design-system/site';
+import { ButtonLink, CheckList, Container, ExampleBadge, ExampleNote, SectionHeading, TradeAvatar } from '@/design-system/site';
 
 const OFFERS = [
-  {
-    src: '/images/site/avatar-heizung.png',
-    company: 'Bauer Haustechnik',
-    price: '189 €',
-    date: 'Do, 9:00',
-    rating: '4,9',
-    badge: 'Meine Empfehlung',
-    recommended: true,
-  },
-  {
-    src: '/images/site/avatar-elektro.png',
-    company: 'Wärme Kern',
-    price: '165 €',
-    date: 'Mo, 14:00',
-    rating: '4,7',
-    badge: 'Günstigstes Angebot',
-    recommended: false,
-  },
-  {
-    src: '/images/site/avatar-dach.png',
-    company: 'Heiztechnik Weber',
-    price: '210 €',
-    date: 'Morgen, 8:00',
-    rating: '4,8',
-    badge: 'Schnellster Termin',
-    recommended: false,
-  },
+  { company: 'Betrieb A', price: '189 €', date: 'Do, 9:00', distance: '3,1 km', badge: 'Meine Empfehlung', recommended: true },
+  { company: 'Betrieb B', price: '165 €', date: 'Mo, 14:00', distance: '5,4 km', badge: 'Günstigstes Angebot', recommended: false },
+  { company: 'Betrieb C', price: '210 €', date: 'Morgen, 8:00', distance: '7,8 km', badge: 'Schnellster Termin', recommended: false },
 ] as const;
 
 export function CraftsmenFeature() {
@@ -43,14 +18,14 @@ export function CraftsmenFeature() {
             <SectionHeading
               eyebrow="Handwerker finden"
               title="Angebote vergleichen wie Tarife. Den Besten behalten."
-              text="Beschreib, was los ist – in deinen Worten, mit Foto oder Sprachnachricht. Geprüfte Betriebe aus deiner Region machen dir Angebote, du vergleichst Preis, Termin und Bewertung auf einen Blick. Wer gut war, bleibt als fester Ansprechpartner in deiner App."
+              text="Beschreib, was los ist – in deinen Worten, mit Foto oder Sprachnachricht. Geprüfte Betriebe aus deiner Region machen dir Angebote, du vergleichst Preis, Termin und Entfernung auf einen Blick. Wer gut war, bleibt als fester Ansprechpartner in deiner App."
             />
             <CheckList
               items={[
                 'Nur persönlich geprüfte Betriebe – kein offener Lead-Marktplatz',
-                'Preis, Termin und Bewertung übersichtlich nebeneinander',
+                'Preis, Termin und Entfernung übersichtlich nebeneinander',
                 'Kein Auftrag ohne deine ausdrückliche Freigabe',
-                'Rechnung und Garantie landen automatisch in deiner Hausakte',
+                'Rechnung und Garantie legst du mit einem Klick in deiner Hausakte ab',
               ]}
             />
             <ButtonLink href="/register?role=homeowner" size="lg" arrow className="w-fit">
@@ -65,7 +40,7 @@ export function CraftsmenFeature() {
                   <p className="text-sm text-body">Heizungswartung · Gas-Brennwert</p>
                   <p className="font-display text-lg font-bold">3 Angebote für dich</p>
                 </div>
-                <span className="rounded-pill bg-white px-3 py-1 text-meta font-semibold text-body">Beispielansicht</span>
+                <ExampleBadge className="bg-white">Beispielansicht</ExampleBadge>
               </div>
               <ul className="flex flex-col gap-3">
                 {OFFERS.map((offer) => (
@@ -77,7 +52,7 @@ export function CraftsmenFeature() {
                         : 'flex items-center gap-4 rounded-2xl bg-white p-4'
                     }
                   >
-                    <Image src={offer.src} alt="" width={56} height={56} className="size-14 shrink-0 rounded-2xl object-cover" />
+                    <TradeAvatar trade="heizung" size="lg" />
                     <div className="min-w-0 flex-1">
                       <p
                         className={
@@ -94,8 +69,8 @@ export function CraftsmenFeature() {
                       </p>
                       <p className="flex flex-wrap items-center gap-x-3 text-meta text-body">
                         <span className="flex items-center gap-1">
-                          <Star className="size-3 fill-coral text-coral" aria-hidden="true" />
-                          <span className="font-semibold text-ink">{offer.rating}</span>
+                          <MapPin className="size-3" aria-hidden="true" />
+                          {offer.distance}
                         </span>
                         <span className="flex items-center gap-1">
                           <CalendarDays className="size-3" aria-hidden="true" />
@@ -103,7 +78,7 @@ export function CraftsmenFeature() {
                         </span>
                       </p>
                     </div>
-                    <p className="font-display text-xl font-extrabold">{offer.price}</p>
+                    <p className="font-display text-xl font-bold">{offer.price}</p>
                   </li>
                 ))}
               </ul>
@@ -114,14 +89,14 @@ export function CraftsmenFeature() {
                 <Heart className="size-5 fill-ink" aria-hidden="true" />
               </span>
               <p className="flex-1 text-sm leading-snug text-white/85">
-                <strong className="block text-base text-white">Bauer Haustechnik gespeichert</strong>
+                <strong className="block text-base text-white">Betrieb A gespeichert</strong>
                 Ab jetzt dein Ansprechpartner für Heizung – mit Nummer, Verlauf und Rechnungen.
               </p>
               <span className="hidden size-10 place-items-center rounded-pill bg-white/10 sm:grid" aria-hidden="true">
                 <Phone className="size-4" />
               </span>
             </div>
-            <ExampleNote>Beispielansicht mit illustrativen Betrieben, Preisen und Bewertungen.</ExampleNote>
+            <ExampleNote>Beispielansicht mit illustrativen Betrieben und Preisen. Echte Angebote siehst du nach deiner Anfrage.</ExampleNote>
           </div>
         </div>
 

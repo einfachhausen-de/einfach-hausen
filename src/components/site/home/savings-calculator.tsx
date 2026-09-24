@@ -78,7 +78,7 @@ export function SavingsCalculator() {
             <TrendingDown className="size-4 text-lime" aria-hidden="true" />
             Dein geschätztes Sparpotenzial
           </p>
-          <p className="mt-2 font-display text-6xl font-extrabold tracking-tight text-lime sm:text-7xl" aria-live="polite">
+          <p className="mt-2 font-display text-6xl font-bold tracking-tight text-lime sm:text-7xl" aria-live="polite">
             {euro.format(total)}
           </p>
           <p className="text-white/60">pro Jahr – jedes Jahr, in dem du nichts änderst.</p>
@@ -98,9 +98,16 @@ export function SavingsCalculator() {
             ))}
           </ul>
 
+          {heating === 'oel' && (
+            <p className="mt-4 text-sm text-white/70">
+              Heizung mit Öl oder Sonstigem: Den Heizanteil rechnen wir nicht pauschal – den prüfen wir mit deinen echten Unterlagen.
+              Strom, Versicherungen und Internet sind eingerechnet.
+            </p>
+          )}
+
           <div className="mt-8 rounded-2xl bg-white/5 p-4 text-sm text-white/80 ring-1 ring-white/10">
-            In 5 Jahren sind das <strong className="text-white">{euro.format(total * 5)}</strong>. Einfach Hausen prüft deine Verträge
-            automatisch und meldet sich, sobald es günstiger geht.
+            In 5 Jahren sind das <strong className="text-white">{euro.format(total * 5)}</strong>. Einfach Hausen behält deine Verträge
+            im Blick und meldet sich, sobald es günstiger geht – gewechselt wird nur mit deiner Freigabe.
           </div>
 
           <Link
@@ -111,7 +118,9 @@ export function SavingsCalculator() {
             <ArrowRight className="size-5 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
           </Link>
           <p className="mt-3 text-center text-meta text-white/50">
-            Unverbindliche Schätzung auf Basis typischer Verbräuche. Dein echtes Ergebnis hängt von Region, Verbrauch und Vertrag ab.
+            Unverbindliche Schätzung mit Richtwerten: typischer Stromverbrauch nach Haushaltsgröße und übliche Preisabstände
+            zwischen Grundversorgung bzw. Bestandsvertrag und Wettbewerbstarifen. Dein echtes Ergebnis hängt von Region, Verbrauch
+            und Vertrag ab.
           </p>
         </div>
       </Container>

@@ -7,12 +7,12 @@ const COLUMNS = ['Einfach Hausen', 'Vergleichsportale', 'Handwerkerportale', 'Or
 
 const ROWS: ReadonlyArray<{ label: string; marks: readonly [Mark, Mark, Mark, Mark] }> = [
   { label: 'Tarife vergleichen & wechseln', marks: ['yes', 'yes', 'no', 'no'] },
-  { label: 'Automatischer Spar-Alarm', marks: ['yes', 'partial', 'no', 'no'] },
+  { label: 'Spar-Alarm bei günstigeren Tarifen', marks: ['yes', 'partial', 'no', 'no'] },
   { label: 'Geprüfte Handwerker finden', marks: ['yes', 'no', 'yes', 'no'] },
   { label: 'Handwerker-Angebote vergleichen', marks: ['yes', 'no', 'partial', 'no'] },
   { label: 'Handwerker als Kontakt speichern', marks: ['yes', 'no', 'partial', 'partial'] },
   { label: 'Fester Ansprechpartner nach der Buchung', marks: ['yes', 'no', 'partial', 'no'] },
-  { label: 'KI-Hausmanager rund um die Uhr', marks: ['yes', 'no', 'no', 'no'] },
+  { label: 'KI-Hausmanager, immer erreichbar', marks: ['yes', 'no', 'no', 'no'] },
   { label: 'Digitale Hausakte & Garantien', marks: ['yes', 'no', 'no', 'partial'] },
   { label: 'Wartungs-Erinnerungen', marks: ['yes', 'no', 'no', 'no'] },
 ];

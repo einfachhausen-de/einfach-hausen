@@ -4,11 +4,10 @@ import { notFound } from 'next/navigation';
 import { ChevronRight } from 'lucide-react';
 import { breadcrumbJsonLd, canonical, ogImages, SITE_URL } from '@/lib/seo';
 import { LEXIKON_KATEGORIEN, eintraegeInKategorie, getKategorie, type LexikonKategorieSlug } from '@/lib/lexikon';
-import { MarketingShell } from '@/components/marketing/site-shell';
-import { CtaBand, LinkButton, Section } from '@/components/marketing/ui';
-import { Reveal, Stagger } from '@/components/marketing/motion';
-import { EntryGrid, KategorieBento, KategorieIcon } from '@/components/marketing/lexikon/lexikon-sections';
-import styles from '@/components/marketing/lexikon/lexikon.module.css';
+import { SiteShell } from '@/components/site/site-shell';
+import { ClosingCta, Heading, JsonLd, PageHero, Section } from '@/components/site/page/blocks';
+import { EntryGrid, KategorieBento, KategorieIcon } from '@/components/site/lexikon/lexikon-sections';
+import { ButtonLink } from '@/design-system/site';
 
 export const dynamic = 'force-static';
 export const dynamicParams = false;
@@ -47,44 +46,58 @@ export default async function Page({ params }: { params: Promise<{ kategorie: st
   };
 
   return (
-    <MarketingShell>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd([{ name: 'Start', path: '/' }, { name: 'Lexikon', path: '/lexikon' }, { name: kat.name, path: `/lexikon/kategorie/${kat.slug}` }])) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(list) }} />
+    <SiteShell>
+      <JsonLd data={breadcrumbJsonLd([{ name: 'Start', path: '/' }, { name: 'Lexikon', path: '/lexikon' }, { name: kat.name, path: `/lexikon/kategorie/${kat.slug}` }])} />
+      <JsonLd data={list} />
 
-      <header className={styles.dHero}>
-        <div className={styles.dHeroGrid}>
-          <Stagger className={styles.dHeroCopy} gap={0.08}>
-            <nav className={styles.crumbs} aria-label="Pfad">
-              <Link href="/lexikon">Lexikon</Link>
-              <ChevronRight size={14} aria-hidden="true" />
-              <span aria-current="page">{kat.name}</span>
-            </nav>
-            <span className={styles.catIcon}><KategorieIcon slug={kat.slug as LexikonKategorieSlug} /></span>
-            <h1>{kat.name}</h1>
-            <p className="lead" style={{ fontSize: 'var(--eh-lead)', lineHeight: 1.55, color: 'var(--eh-ink-soft)' }}>{kat.beschreibung}</p>
-            <div className={styles.heroMeta}>
-              <span>{entries.length} {entries.length === 1 ? 'Begriff' : 'Begriffe'}</span>
-              {pflicht > 0 && <span>{pflicht} davon mit Pflichtcharakter</span>}
-            </div>
-            <div className={styles.dHeroActions}>
-              <LinkButton href={kat.leistung.href}>{kat.leistung.label}</LinkButton>
-              <LinkButton href="/lexikon" secondary>Alle Bereiche</LinkButton>
-            </div>
-          </Stagger>
-        </div>
-      </header>
+      <PageHero
+        eyebrow={`Lexikon · ${entries.length} ${entries.length === 1 ? 'Begriff' : 'Begriffe'}`}
+        title={kat.name}
+        text={kat.beschreibung}
+        actions={
+          <>
+            <ButtonLink href={kat.leistung.href} size="lg" arrow>
+              {kat.leistung.label}
+            </ButtonLink>
+            <ButtonLink href="/lexikon" variant="outline" size="lg">
+              Alle Bereiche
+            </ButtonLink>
+          </>
+        }
+      >
+        <nav aria-label="Pfad" className="order-first flex items-center gap-3 text-sm text-body">
+          <span className="grid size-11 place-items-center rounded-xl bg-ink text-lime">
+            <KategorieIcon slug={kat.slug as LexikonKategorieSlug} />
+          </span>
+          <Link href="/lexikon" className="font-semibold hover:text-ink">
+            Lexikon
+          </Link>
+          <ChevronRight className="size-3.5" aria-hidden="true" />
+          <span aria-current="page">{kat.name}</span>
+        </nav>
+        {pflicht > 0 && (
+          <p className="text-sm font-semibold text-body">
+            <span className="mr-2 inline-block size-2 rounded-pill bg-coral align-middle" aria-hidden="true" />
+            {pflicht} davon mit Pflichtcharakter
+          </p>
+        )}
+      </PageHero>
 
-      <Section tone="surface" tight>
+      <Section>
         <EntryGrid entries={entries} />
       </Section>
 
-      <Section tone="soft" eyebrow="Weitere Bereiche" title="Was sonst noch zusammengehört.">
-        <KategorieBento exclude={kat.slug} />
+      <Section tone="cream">
+        <Heading eyebrow="Weitere Bereiche" title="Was sonst noch zusammengehört." />
+        <KategorieBento exclude={kat.slug as LexikonKategorieSlug} />
       </Section>
 
-      <Reveal>
-        <CtaBand title={`${kat.name}: aus Wissen wird ein Anliegen.`} text="Beschreib, was an deinem Haus ansteht. Einordnung, geprüfte Partner und Kostenrahmen kommen von uns — entscheiden tust du." />
-      </Reveal>
-    </MarketingShell>
+      <ClosingCta
+        title={`${kat.name}: aus Wissen wird ein Anliegen.`}
+        text="Beschreib, was an deinem Haus ansteht. Einordnung, geprüfte Partner und Kostenrahmen kommen von uns – entscheiden tust du."
+        primary={{ href: '/register?role=homeowner', label: 'Hauskonto kostenlos anlegen' }}
+        secondary={{ href: '/#anliegen', label: 'Anliegen beschreiben' }}
+      />
+    </SiteShell>
   );
 }

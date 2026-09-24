@@ -1345,19 +1345,8 @@
     "raw-value\u0000letter-spacing: -.01em": 1,
     "raw-value\u0000background: #1b8569": 1
   },
-  "src/app/hilfe/faq-explorer.tsx": {
-    "unowned-style\u0000style={": 1
-  },
   "src/app/layout.tsx": {
     "literal-color\u0000#ffffff": 1
-  },
-  "src/app/lexikon/[begriff]/page.tsx": {
-    "unowned-style\u0000style={": 7,
-    "raw-value\u0000lineHeight: 1.55": 1
-  },
-  "src/app/lexikon/kategorie/[kategorie]/page.tsx": {
-    "unowned-style\u0000style={": 1,
-    "raw-value\u0000lineHeight: 1.55": 1
   },
   "src/app/manifest.ts": {
     "literal-color\u0000#F4F7F7": 1,
@@ -1926,6 +1915,10 @@
   "src/components/sidebar-account-menu.module.css": {
     "raw-value\u0000border-radius: 50%": 1,
     "raw-value\u0000font-size: 1.25rem": 1
+  },
+  "src/components/site/lexikon/lexikon-detail.tsx": {
+    "unowned-style\u0000style={": 3,
+    "state-class\u0000current": 1
   },
   "src/components/ui/avatar.tsx": {
     "small-type\u0000text-xs": 1,

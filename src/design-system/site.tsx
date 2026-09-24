@@ -1,5 +1,5 @@
 /**
- * Designsystem 1.1 · Website-Baukasten (öffentliche Eigentümer- und Partnerseiten).
+ * Website-Baukasten zu Tokens 1.1.0 (öffentliche Eigentümer- und Partnerseiten).
  *
  * Kanonische Bausteine für die Website. Farben, Radien, Schatten und Schriftgrößen
  * kommen ausschließlich aus den Tokens in packages/eh-design/src/tokens.json, die in
@@ -10,7 +10,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { clsx, type ClassValue } from 'clsx';
 import { extendTailwindMerge } from 'tailwind-merge';
-import { ArrowRight, Check } from 'lucide-react';
+import { ArrowRight, Check, Flame, Home, PlugZap } from 'lucide-react';
 
 const twMerge = extendTailwindMerge({
   extend: {
@@ -70,7 +70,7 @@ export function SectionHeading({
       {eyebrow && <Eyebrow tone={tone}>{eyebrow}</Eyebrow>}
       <Tag
         className={cn(
-          'font-display text-balance text-3xl font-extrabold leading-[1.08] tracking-tight sm:text-4xl lg:text-5xl',
+          'font-display text-balance text-3xl font-bold leading-[1.08] tracking-tight sm:text-4xl lg:text-5xl',
           tone === 'light' ? 'text-ink' : 'text-white',
         )}
       >
@@ -157,7 +157,10 @@ export function HouseEdgeImage({
   );
 }
 
-/** Gerätehülle für illustrative App-Ansichten. Inhalt ist immer als Beispiel gekennzeichnet. */
+/**
+ * Gerätehülle für illustrative App-Ansichten. Die Beispiel-Kennzeichnung ist sichtbar
+ * (nicht nur für Screenreader), damit niemand die Ansicht für echte Kundendaten hält.
+ */
 export function PhoneFrame({ children, className, label = 'Beispielansicht der App' }: Children & { label?: string }) {
   return (
     <figure className={cn('relative w-[300px]', className)}>
@@ -167,8 +170,48 @@ export function PhoneFrame({ children, className, label = 'Beispielansicht der A
           {children}
         </div>
       </div>
-      <figcaption className="sr-only">{label}</figcaption>
+      <figcaption className="absolute -top-3 left-1/2 z-20 -translate-x-1/2 whitespace-nowrap rounded-pill bg-white px-3 py-1 text-meta font-semibold text-body shadow-card ring-1 ring-hairline">
+        {label}
+      </figcaption>
     </figure>
+  );
+}
+
+/** Sichtbares Beispiel-Etikett für illustrative Karten, Benachrichtigungen und Mockups. */
+export function ExampleBadge({ children = 'Beispiel', tone = 'light', className }: { children?: React.ReactNode; tone?: Tone; className?: string }) {
+  return (
+    <span
+      className={cn(
+        'inline-flex w-fit shrink-0 items-center rounded-pill px-2 py-0.5 text-meta font-semibold',
+        tone === 'light' ? 'bg-cream text-body ring-1 ring-hairline' : 'bg-white/10 text-white/75',
+        className,
+      )}
+    >
+      {children}
+    </span>
+  );
+}
+
+const TRADE_ICONS = { heizung: Flame, elektro: PlugZap, dach: Home } as const;
+const TRADE_LABELS = { heizung: 'Heizung', elektro: 'Elektro', dach: 'Dach' } as const;
+const TRADE_SIZES = { sm: 'size-7 [&_svg]:size-3.5', md: 'size-11 [&_svg]:size-5', lg: 'size-14 [&_svg]:size-6' } as const;
+
+export type Trade = keyof typeof TRADE_ICONS;
+
+/**
+ * Gesichtsloser Platzhalter für Handwerksbetriebe in Beispielansichten: Gewerk-Symbol statt
+ * Porträt. Keine erfundenen Gesichter, Namen oder Firmenlogos (DESIGN §2, Audit R1).
+ */
+export function TradeAvatar({ trade, size = 'md', className }: { trade: Trade; size?: keyof typeof TRADE_SIZES; className?: string }) {
+  const Icon = TRADE_ICONS[trade];
+  return (
+    <span
+      className={cn('grid shrink-0 place-items-center rounded-pill bg-brand-soft text-brand', TRADE_SIZES[size], className)}
+      role="img"
+      aria-label={`Betrieb für ${TRADE_LABELS[trade]}`}
+    >
+      <Icon aria-hidden="true" />
+    </span>
   );
 }
 

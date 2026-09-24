@@ -1,11 +1,17 @@
 import type { Metadata } from 'next';
+import { BookOpen, LibraryBig, MessagesSquare, ShieldCheck } from 'lucide-react';
 import { canonical, ogBlock } from '@/lib/seo';
-import { MarketingShell } from '@/components/marketing/site-shell';
-import { EHScope, EHSection, EHPageHero, EHServiceIndex, EHProse, EHClosing, EHButton, EHEyebrow, EHHeading, EHText } from '@/design-system';
-import { MiniContact } from '@/components/marketing/app-frames';
+import { SiteShell } from '@/components/site/site-shell';
+import { ClosingCta, ExampleCard, Heading, LinkCards, PageHero, Section } from '@/components/site/page/blocks';
+import { ButtonLink } from '@/design-system/site';
 import { FaqExplorer } from './faq-explorer';
 
-export const metadata: Metadata = { title: 'Hilfe & FAQ', description: 'Antworten zu Ablauf, Kosten, Ansprechpartnern, Hausakte und Partnern. Ehrlich und ohne Kleingedrucktes.' , alternates: { canonical: canonical('/hilfe') }, openGraph: ogBlock({ url: '/hilfe', title: 'Hilfe & FAQ · Einfach Hausen', description: 'Antworten zu Ablauf, Kosten, Ansprechpartnern, Hausakte und Partnern.', motiv: 'hilfe' }) };
+export const metadata: Metadata = {
+  title: 'Hilfe & FAQ',
+  description: 'Antworten zu Ablauf, Kosten, Ansprechpartnern, Hausakte und Partnern. Ehrlich und ohne Kleingedrucktes.',
+  alternates: { canonical: canonical('/hilfe') },
+  openGraph: ogBlock({ url: '/hilfe', title: 'Hilfe & FAQ · Einfach Hausen', description: 'Antworten zu Ablauf, Kosten, Ansprechpartnern, Hausakte und Partnern.', motiv: 'hilfe' }),
+};
 
 const faq = [
   { q: 'Löst eine normale Frage automatisch einen Auftrag aus?', a: 'Nein. Eine Frage bleibt eine Frage. Du entscheidest separat, ob du einen Ansprechpartner sprechen oder einen Auftrag organisieren lassen willst.', cat: 'Ablauf' },
@@ -18,46 +24,69 @@ const faq = [
   { q: 'Wie werden Partner ausgewählt?', a: 'Nach fachlicher Eignung, Region, Qualifikation, Verfügbarkeit, Kapazität, Kundenzufriedenheit und bestehenden Beziehungen. Ein Partner-Tarif kauft keine bessere Platzierung.', cat: 'Partner' },
   { q: 'Nimmt Einfach Hausen Provision vom Partner?', a: 'Nein. 0 % Auftragsprovision. Partnerumsatz entsteht über planbare Monatstarife.', cat: 'Partner' },
   { q: 'Kann ich einen vorgeschlagenen Partner ablehnen?', a: 'Ja, jederzeit und ohne Begründung. Dann schlagen wir einen anderen vor, sofern in deiner Region verfügbar.', cat: 'Partner' },
-  { q: 'Was ist die digitale Hausakte?', a: 'Sie bündelt Anlagen, Arbeiten, Dokumente, Garantien, Wartungen und Ansprechpartner langfristig an deinem Haus. Nach jedem Vorgang füllt sie sich automatisch.', cat: 'Hausakte' },
+  { q: 'Was ist die digitale Hausakte?', a: 'Sie bündelt Anlagen, Arbeiten, Dokumente, Garantien, Wartungen und Ansprechpartner langfristig an deinem Haus. Unterlagen aus abgeschlossenen Vorgängen findest du beim jeweiligen Vorgang wieder.', cat: 'Hausakte' },
   { q: 'Was passiert bei einem Eigentümerwechsel?', a: 'Hausbezogene Geschichte kann kontrolliert weitergegeben werden. Private Nachrichten, Zahlungen und nicht freigegebene Daten werden nicht übertragen.', cat: 'Hausakte' },
   { q: 'Wem gehören meine Daten?', a: 'Dir. Du kannst die Hausakte exportieren und dein Konto jederzeit löschen. Wir verkaufen keine Daten und geben nichts ohne deine Freigabe weiter.', cat: 'Hausakte' },
 ] as const;
 
 export default function Page() {
   return (
-    <MarketingShell>
-      <EHScope>
-        <EHPageHero
-          eyebrow="Hilfe & FAQ"
-          title="Klare Antworten, bevor du irgendetwas beauftragst."
-          text="Ablauf, Kosten, Partner, Hausakte. Wenn deine Frage fehlt, beschreib sie einfach als Anliegen. Auch eine Frage ist ein guter Start."
-          actions={<><EHButton href="/#anliegen" arrow>Frage als Anliegen stellen</EHButton><EHButton href="/kontakt" variant="secondary">Kontaktwege</EHButton></>}
-          media={<MiniContact />}
+    <SiteShell>
+      <PageHero
+        eyebrow="Hilfe & FAQ"
+        title="Klare Antworten, bevor du irgendetwas beauftragst."
+        text="Ablauf, Kosten, Partner, Hausakte. Wenn deine Frage fehlt, beschreib sie einfach als Anliegen. Auch eine Frage ist ein guter Start."
+        actions={
+          <>
+            <ButtonLink href="/#anliegen" size="lg" arrow>
+              Frage als Anliegen stellen
+            </ButtonLink>
+            <ButtonLink href="/kontakt" variant="outline" size="lg">
+              Kontaktwege
+            </ButtonLink>
+          </>
+        }
+        aside={
+          <ExampleCard
+            label="Am häufigsten gefragt"
+            title="Die drei Antworten, die fast alle suchen."
+            rows={[
+              { title: 'Kostet das etwas?', text: 'Nein. Das Hauskonto ist für Eigentümer kostenlos.' },
+              { title: 'Wird automatisch beauftragt?', text: 'Nein. Ohne deine Freigabe entsteht kein Auftrag.' },
+              { title: 'Wem gehören die Daten?', text: 'Dir. Export und Löschung jederzeit möglich.' },
+            ]}
+          />
+        }
+      />
+
+      <Section tone="cream" id="fragen">
+        <Heading eyebrow="Häufige Fragen" title="Was du über Einfach Hausen wissen solltest." text="Wähle ein Thema, um die Liste einzugrenzen." />
+        <FaqExplorer entries={faq} />
+      </Section>
+
+      <Section>
+        <Heading
+          eyebrow="Weiterführend"
+          title="Wenn du tiefer einsteigen willst."
+          text="Antworten, Sicherheit, Ratgeber und Kontakt bleiben bewusst getrennte Wege – damit du schnell dort landest, wo du hinwillst."
         />
-        <EHSection compact>
-          <EHEyebrow>Häufige Fragen</EHEyebrow>
-          <EHHeading>Was du über Einfach Hausen wissen solltest.</EHHeading>
-          {/* Ausnahme 05-WEB-03: FaqExplorer mit Kategoriefilter bleibt Bestand (EHFAQ hat keine Filterfunktion). */}
-          <FaqExplorer entries={faq} />
-        </EHSection>
-        <EHSection compact>
-          <EHEyebrow>Weiterführend</EHEyebrow>
-          <EHHeading>Wenn du tiefer einsteigen willst.</EHHeading>
-          <EHText size="lead">Antworten, Sicherheit, Ratgeber und Kontakt bleiben bewusst getrennte Wege — damit du schnell dort landest, wo du hinwillst.</EHText>
-          <EHServiceIndex items={[
-            { title: 'Sicherheit & Daten', text: 'Wie Partnerprüfung, Datenfreigaben und deine Entscheidungen geschützt werden.', href: '/sicherheit' },
-            { title: 'Ratgeber', text: 'Konkrete Themen rund um Wartung, Sanierung und Entscheidungen am Haus.', href: '/blog' },
-            { title: 'Lexikon', text: 'Begriffe kurz und verständlich nachschlagen, ohne Fachchinesisch.', href: '/lexikon' },
-            { title: 'Kontakt', text: 'Wenn du lieber direkt mit uns klären möchtest, was als Nächstes sinnvoll ist.', href: '/kontakt' },
-          ]} />
-        </EHSection>
-        <EHSection compact>
-          <EHProse>
-            <p><strong>Unser Anspruch.</strong> Verständlich bleiben. <mark>Bei jeder Frage, in jedem Schritt.</mark></p>
-          </EHProse>
-        </EHSection>
-        <EHClosing title="Deine konkrete Frage ist ein guter Startpunkt." text="Leg kostenlos ein Hauskonto an und beschreib dein Anliegen in normalen Worten. Ein Auftrag entsteht daraus nur, wenn du es willst." href="/register?role=homeowner" label="Hauskonto kostenlos anlegen" secondary={<EHButton href="/#anliegen" variant="secondary">Anliegen starten</EHButton>} />
-      </EHScope>
-    </MarketingShell>
+        <LinkCards
+          columns={4}
+          items={[
+            { icon: ShieldCheck, title: 'Sicherheit & Daten', text: 'Wie Partnerprüfung, Datenfreigaben und deine Entscheidungen geschützt werden.', href: '/sicherheit' },
+            { icon: BookOpen, title: 'Ratgeber', text: 'Konkrete Themen rund um Wartung, Sanierung und Entscheidungen am Haus.', href: '/blog' },
+            { icon: LibraryBig, title: 'Lexikon', text: 'Begriffe kurz und verständlich nachschlagen, ohne Fachchinesisch.', href: '/lexikon' },
+            { icon: MessagesSquare, title: 'Kontakt', text: 'Wenn du lieber direkt mit uns klären möchtest, was als Nächstes sinnvoll ist.', href: '/kontakt' },
+          ]}
+        />
+      </Section>
+
+      <ClosingCta
+        title="Deine konkrete Frage ist ein guter Startpunkt."
+        text="Leg kostenlos ein Hauskonto an und beschreib dein Anliegen in normalen Worten. Ein Auftrag entsteht daraus nur, wenn du es willst."
+        primary={{ href: '/register?role=homeowner', label: 'Hauskonto kostenlos anlegen' }}
+        secondary={{ href: '/#anliegen', label: 'Anliegen beschreiben' }}
+      />
+    </SiteShell>
   );
 }

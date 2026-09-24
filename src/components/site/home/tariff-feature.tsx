@@ -2,9 +2,9 @@ import { Camera, Check, FileSignature, MousePointerClick, ShieldCheck, Zap } fro
 import { ButtonLink, CheckList, Container, SectionHeading } from '@/design-system/site';
 
 const OFFERS = [
-  { name: 'Regio Strom Flex', detail: '12 Monate Preisgarantie · Ökostrom', price: '89,17 €', year: '1.070 €', save: '412 €', best: true },
-  { name: 'Stadtwerk Öko', detail: '24 Monate Preisgarantie', price: '93,17 €', year: '1.118 €', save: '364 €', best: false },
-  { name: 'Nordwind Energie', detail: 'Monatlich kündbar', price: '96,50 €', year: '1.158 €', save: '324 €', best: false },
+  { name: 'Ökostrom-Tarif A', detail: '12 Monate Preisgarantie · Ökostrom', price: '89,17 €', year: '1.070 €', save: '412 €', best: true },
+  { name: 'Ökostrom-Tarif B', detail: '24 Monate Preisgarantie', price: '93,17 €', year: '1.118 €', save: '364 €', best: false },
+  { name: 'Stromtarif C', detail: 'Monatlich kündbar', price: '96,50 €', year: '1.158 €', save: '324 €', best: false },
 ] as const;
 
 const STEPS = [
@@ -103,7 +103,7 @@ export function TariffFeature() {
           <CheckList
             items={[
               'Strom, Gas, Internet, Mobilfunk und Versicherungen an einem Ort',
-              'Automatischer Tarif-Check: Wir melden uns, wenn es günstiger geht',
+              'Laufender Tarif-Check: Wir melden uns, wenn es günstiger geht – du gibst frei',
               'Laufzeiten und Kündigungsfristen immer im Blick',
             ]}
           />

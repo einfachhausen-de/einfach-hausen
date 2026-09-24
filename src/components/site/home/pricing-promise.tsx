@@ -27,7 +27,7 @@ export function PricingPromise() {
           <div className="flex flex-col gap-8 p-8 sm:p-12 lg:p-14">
             <p className="text-sm font-semibold uppercase tracking-wider text-lime">Preise für Eigentümer</p>
             <div>
-              <p className="font-display text-8xl font-extrabold leading-none tracking-tighter sm:text-9xl">0 €</p>
+              <p className="font-display text-8xl font-bold leading-none tracking-tighter sm:text-9xl">0 €</p>
               <p className="mt-3 font-display text-2xl font-bold">Für immer. Ohne Haken.</p>
             </div>
             <CheckList
@@ -45,7 +45,7 @@ export function PricingPromise() {
             </ButtonLink>
           </div>
           <div className="flex flex-col gap-6 bg-white/5 p-8 sm:p-12 lg:p-14">
-            <h2 className="font-display text-3xl font-extrabold tracking-tight">„Und wie verdient ihr dann Geld?“</h2>
+            <h2 className="font-display text-3xl font-bold tracking-tight">„Und wie verdient ihr dann Geld?“</h2>
             <p className="text-white/70">Berechtigte Frage. Wir sind transparent:</p>
             <ul className="flex flex-col gap-4">
               {HOW_WE_EARN.map(({ icon: Icon, title, text }) => (
