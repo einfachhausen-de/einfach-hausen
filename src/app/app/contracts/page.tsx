@@ -1,7 +1,7 @@
 import '@/components/werkbank-layout.css';
 import Link from 'next/link';
 import {
-  Droplets, FileText, Flame, ShieldCheck,
+  BarChart3, ChevronRight, Droplets, FileText, FileUp, Flame, ShieldCheck,
   Smartphone, Thermometer, Trash2, Wifi, Wrench, Zap,
 } from 'lucide-react';
 import {
@@ -12,8 +12,7 @@ import { WerkbankRahmen } from '@/components/werkbank-rahmen';
 import { VertraegeTabelle } from '@/components/homeowner/vertraege-tabelle';
 import { CompareRail } from '@/components/homeowner/compare-rail';
 import { requireUser } from '@/lib/auth';
-import { EHPromoBanner } from '@/components/eh-promo-banner';
-import { AnlageMenue } from '@/components/homeowner/anlage-menue';
+import styles from '../eigentuemer-start.module.css';
 import { VertraegeAnlegeWege } from '@/components/homeowner/anlege-wege';
 import { db } from '@/lib/db';
 import { euroExact } from '@/lib/format';
@@ -120,9 +119,23 @@ export default async function Contracts({ searchParams }: { searchParams: Promis
 
     <h1 className="eh-sr">Verträge &amp; Tarife</h1>
 
-    <EHPromoBanner title="Neuen Vertrag erfassen" text="Ein Beleg genügt — Anbieter, Frist und Titel liest die KI; den Monatsbetrag trägst du.">
-      <AnlageMenue base="/app/contracts/anlegen" />
-    </EHPromoBanner>
+    <section className={styles.quickSection} aria-labelledby="quick-title">
+      <p id="quick-title" className={styles.quickLabel}>Schnellaktionen</p>
+      <div className="eh-vertrag-quick">
+        <Link href="/app/contracts/anlegen" className={`${styles.quickCard} ${styles.quickCardPrimary}`}>
+          <span className={styles.quickIcon}><FileUp size={20} /></span>
+          <strong>Vertrag erfassen</strong>
+          <small>Beleg hochladen, abfotografieren oder selbst eintragen &ndash; die KI liest Anbieter, Frist und Titel.</small>
+          <span className={styles.quickCardArrow}>Vertrag erfassen <ChevronRight size={16} aria-hidden="true" /></span>
+        </Link>
+        <Link href="#vergleiche" className={styles.quickCard}>
+          <span className={styles.quickIcon}><BarChart3 size={20} /></span>
+          <strong>Anbieter vergleichen</strong>
+          <small>Strom, Gas, Internet, Mobilfunk oder Versicherungen &ndash; dein Tarif gegen den Markt.</small>
+          <span className={styles.quickCardArrow}>Anbieter vergleichen <ChevronRight size={16} aria-hidden="true" /></span>
+        </Link>
+      </div>
+    </section>
 
     {saved && (
       <div className="eh-vdash-gespeichert">
@@ -185,7 +198,7 @@ export default async function Contracts({ searchParams }: { searchParams: Promis
       </CompareRail>
     </EHOwnerSection>
 
-    <EHOwnerSection title="Schnellaktionen">
+    <EHOwnerSection title="Vertrag hinzufügen">
       <VertraegeAnlegeWege base="/app/contracts/anlegen" />
     </EHOwnerSection>
 
