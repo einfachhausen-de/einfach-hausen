@@ -206,7 +206,7 @@ export function LoginForm({
       : "Als Handwerksbetrieb registrieren";
   const formText = authMode === "login"
     ? role === "kunde"
-      ? "Melde dich an, um Hausakte, Anliegen und Termine zu ��ffnen."
+      ? "Melde dich an, um Hausakte, Anliegen und Termine zu öffnen."
       : "Melde dich an, um Anfragen, Aufträge und Termine zu bearbeiten."
     : role === "kunde"
       ? "Dein Zugang zur Hausakte und zu allen nächsten Schritten rund um dein Zuhause."

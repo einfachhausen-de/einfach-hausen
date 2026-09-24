@@ -595,7 +595,7 @@ export async function createInvoiceAction(jobId:number,fd:FormData){
     const invoiceId=Number(result.lastInsertRowid); const insertItem=db.prepare(`INSERT INTO invoice_items(invoice_id,position,description,quantity,unit,unit_price_net,tax_rate_bps,line_net,line_tax,line_gross) VALUES(?,?,?,?,?,?,?,?,?,?)`); for(const item of calculated)insertItem.run(invoiceId,item.position,item.description,item.quantity,item.unit,item.unitPrice,item.taxBps,item.lineNet,item.lineTax,item.gross); return invoiceId;
   });
   const invoiceId=tx();
-  createNotification(row.homeowner_id,'Neue Rechnung',`${row.business_name} hat dir Rechnung ${invoiceNumber} f��r „${row.title}“ gesendet.`,`/app/invoices/${invoiceId}`,'invoice');
+  createNotification(row.homeowner_id,'Neue Rechnung',`${row.business_name} hat dir Rechnung ${invoiceNumber} für „${row.title}“ gesendet.`,`/app/invoices/${invoiceId}`,'invoice');
   appendJobEvent(jobId,`${row.business_name} hat Rechnung ${invoiceNumber} gesendet. Sie liegt jetzt in deiner Hausakte.`,{invoiceId,invoiceNumber,totalGross:total});
   revalidatePath(`/pro/jobs/${jobId}`);revalidatePath('/pro/orders');revalidatePath(`/app/jobs/${jobId}`);revalidatePath('/app/documents');revalidatePath('/notifications');
   redirect(`/pro/invoices/${invoiceId}?sent=1`);

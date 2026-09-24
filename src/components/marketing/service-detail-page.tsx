@@ -1,7 +1,14 @@
+import Link from 'next/link';
+import { ArrowUpRight } from 'lucide-react';
 import { breadcrumbJsonLd, canonical, SITE_URL } from '@/lib/seo';
-import { MarketingShell } from './site-shell';
-import type { ServiceCategory } from './service-catalog';
-import { EHScope, EHSection, EHPageHero, EHSplitStory, EHFeatureRows, EHSteps, EHCallout, EHFAQ, EHRelated, EHClosing, EHEyebrow, EHButton, EHText } from '@/design-system';
+import { SiteShell } from '@/components/site/site-shell';
+import { ClosingCta, Heading, HonestLimits, JsonLd, LinkCards, PageHero, Section, StepList } from '@/components/site/page/blocks';
+import { PageFaq } from '@/components/site/page/faq';
+import { Stagger } from './motion';
+import { SERVICE_CATEGORIES, type ServiceCategory } from './service-catalog';
+import { ButtonLink } from '@/design-system/site';
+
+const requestHref = (text: string) => '/register?role=homeowner&request=' + encodeURIComponent(text);
 
 export function ServiceDetailPage({ service }: { service: ServiceCategory }) {
   const servicePath = `/leistungen/${service.slug}`;
@@ -11,29 +18,98 @@ export function ServiceDetailPage({ service }: { service: ServiceCategory }) {
     provider: { '@type': 'HomeAndConstructionBusiness', '@id': `${SITE_URL}/leistungen#anbieter`, name: 'Einfach Hausen', url: canonical('/leistungen') },
     areaServed: 'Regionale Pilotgebiete in Deutschland — konkrete Verfügbarkeit hängt vom aktiven Partnernetz vor Ort ab',
   };
-  return <MarketingShell>
-    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd([{ name: 'Start', path: '/' }, { name: 'Leistungen', path: '/leistungen' }, { name: service.shortTitle, path: servicePath }])) }} />
-    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceJsonLd) }} />
-    <EHScope>
-      <EHPageHero eyebrow={`Leistungen · ${service.shortTitle}`} title={`${service.title}: einfach anfangen, ohne das Gewerk kennen zu müssen.`} text={`${service.description}. Beschreib, was du bemerkst oder vorhast. Wir helfen bei der Einordnung und zeigen den passenden nächsten Schritt — unverbindlich, bevor ein Auftrag entsteht.`} actions={<><EHButton href="/#anliegen" arrow>Anliegen beschreiben</EHButton><EHButton href="/leistungen" variant="secondary">Alle Leistungen</EHButton></>} />
-      <EHSection compact>
-        <EHSplitStory eyebrow="Typische Situationen" title="Damit kannst du zu uns kommen." text="Die Beispiele sind Orientierung. Wenn dein Fall anders klingt, beschreib ihn trotzdem in deinen Worten." media={<EHFeatureRows items={service.situations.map((situation) => ({ title: situation, text: 'Wir klären, welche Informationen und welcher Fachbereich dafür sinnvoll sind.' }))} />} />
-      </EHSection>
-      <EHSection compact>
-        <EHEyebrow>So läuft es</EHEyebrow>
-        <EHSteps items={service.steps.map((s) => ({ title: s.title, text: s.text }))} />
-      </EHSection>
-      <EHSection compact>
-        <EHCallout title="Ehrlich eingeordnet: Was wir versprechen — und was nicht.">
-          <ul>{service.limits.map((limit) => <li key={limit}><EHText>{limit}</EHText></li>)}</ul>
-        </EHCallout>
-      </EHSection>
-      {service.related.length > 0 && <EHSection compact><EHRelated items={service.related.map((item) => ({ title: item.label, href: item.href }))} /></EHSection>}
-      <EHSection compact>
-        <EHEyebrow>Häufige Fragen</EHEyebrow>
-        <EHFAQ items={service.faq.map((f) => ({ q: f.q, a: f.a }))} />
-      </EHSection>
-      <EHClosing title={service.cta} text="Kostenlos und unverbindlich starten. Wir ordnen ein, du entscheidest über jeden nächsten Schritt." href="/register?role=homeowner" label="Hauskonto kostenlos anlegen" secondary={<EHButton href="/#anliegen" variant="secondary">Anliegen starten</EHButton>} />
-    </EHScope>
-  </MarketingShell>;
+  const Icon = service.icon;
+  const others = SERVICE_CATEGORIES.filter((item) => item.slug !== service.slug).slice(0, 4);
+
+  return (
+    <SiteShell>
+      <JsonLd data={breadcrumbJsonLd([{ name: 'Start', path: '/' }, { name: 'Leistungen', path: '/leistungen' }, { name: service.shortTitle, path: servicePath }])} />
+      <JsonLd data={serviceJsonLd} />
+
+      <PageHero
+        eyebrow={`Leistungen · ${service.shortTitle}`}
+        title={`${service.title}: einfach anfangen, ohne das Gewerk kennen zu müssen.`}
+        text={`${service.description}. Beschreib, was du bemerkst oder vorhast. Wir helfen bei der Einordnung und zeigen den passenden nächsten Schritt — unverbindlich, bevor ein Auftrag entsteht.`}
+        actions={
+          <>
+            <ButtonLink href="/#anliegen" size="lg" arrow>
+              Anliegen beschreiben
+            </ButtonLink>
+            <ButtonLink href="/leistungen" variant="outline" size="lg">
+              Alle Leistungen
+            </ButtonLink>
+          </>
+        }
+        aside={
+          <div className="flex flex-col gap-5 rounded-card bg-white p-6 shadow-lift ring-1 ring-hairline sm:p-8">
+            <div className="flex items-center gap-4">
+              <span className="grid size-12 place-items-center rounded-2xl bg-lime text-ink" aria-hidden="true">
+                <Icon className="size-6" />
+              </span>
+              <div>
+                <p className="text-meta font-semibold uppercase tracking-wider text-brand">Typische Situationen</p>
+                <h2 className="font-display text-xl font-bold text-ink">Damit kannst du zu uns kommen.</h2>
+              </div>
+            </div>
+            <Stagger className="flex flex-col gap-2" y={12}>
+              {service.situations.map((situation) => (
+                <Link
+                  key={situation}
+                  href={requestHref(situation)}
+                  className="group flex items-start justify-between gap-4 rounded-2xl bg-cream p-4 transition-colors hover:bg-lime-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+                >
+                  <span className="flex flex-col gap-1">
+                    <span className="font-medium leading-snug text-ink">{situation}</span>
+                    <span className="text-meta font-semibold text-brand">Als Anliegen übernehmen</span>
+                  </span>
+                  <ArrowUpRight className="mt-0.5 size-4 shrink-0 text-body transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" aria-hidden="true" />
+                </Link>
+              ))}
+            </Stagger>
+            <p className="text-meta text-body">
+              Die Beispiele sind Orientierung. Wenn dein Fall anders klingt, beschreib ihn trotzdem in deinen Worten.
+            </p>
+          </div>
+        }
+      />
+
+      <Section>
+        <Heading eyebrow="So läuft es" title="Du beschreibst. Wir ordnen ein. Du entscheidest." />
+        <StepList steps={service.steps} />
+      </Section>
+
+      <Section tone="cream">
+        <HonestLimits title="Was wir versprechen — und was nicht." items={service.limits} />
+      </Section>
+
+      {service.related.length > 0 && (
+        <Section>
+          <Heading eyebrow="Weiterlesen" title="Passend zu diesem Bereich." />
+          <LinkCards items={service.related.map((item) => ({ label: 'Ratgeber', title: item.label, href: item.href }))} />
+        </Section>
+      )}
+
+      <Section tone={service.related.length > 0 ? 'cream' : 'white'}>
+        <div className="grid gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16">
+          <Heading eyebrow="Häufige Fragen" title={`Zu ${service.shortTitle}.`} />
+          <PageFaq items={service.faq} tone={service.related.length > 0 ? 'white' : 'cream'} />
+        </div>
+      </Section>
+
+      <Section tone="white">
+        <Heading eyebrow="Weitere Bereiche" title="Auch das organisieren wir für dich." />
+        <LinkCards
+          columns={4}
+          items={others.map((item) => ({ icon: item.icon, title: item.title, text: item.description, href: `/leistungen/${item.slug}` }))}
+        />
+      </Section>
+
+      <ClosingCta
+        title={service.cta}
+        text="Kostenlos und unverbindlich starten. Wir ordnen ein, du entscheidest über jeden nächsten Schritt."
+        primary={{ href: '/register?role=homeowner', label: 'Hauskonto kostenlos anlegen' }}
+        secondary={{ href: '/#anliegen', label: 'Anliegen starten' }}
+      />
+    </SiteShell>
+  );
 }

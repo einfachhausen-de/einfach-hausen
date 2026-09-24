@@ -1,6 +1,7 @@
-import { MarketingShell } from './site-shell';
-import { Steps } from './ui';
-import { EHScope, EHSection, EHPageHero, EHList, EHCallout, EHFAQ, EHClosing, EHButton, EHEyebrow, EHHeading, EHText } from '@/design-system';
+import { SiteShell } from '@/components/site/site-shell';
+import { ClosingCta, Heading, HonestLimits, PageHero, Section, StepList } from '@/components/site/page/blocks';
+import { PageFaq } from '@/components/site/page/faq';
+import { ButtonLink, CheckList } from '@/design-system/site';
 
 export type ProductStory = {
   eyebrow: string;
@@ -19,30 +20,56 @@ export type ProductStory = {
 };
 
 export function ProductStoryPage({ story, breadcrumb }: { story: ProductStory; breadcrumb?: React.ReactNode }) {
-  return <MarketingShell>
-    {breadcrumb}
-    <EHScope>
-    <EHPageHero eyebrow={story.eyebrow} title={story.title} text={story.text} actions={<><EHButton href={story.primaryHref} arrow>{story.primaryLabel}</EHButton><EHButton href="/so-funktionierts" variant="secondary">So funktioniert&apos;s</EHButton></>} />
-    <EHSection compact>
-      <EHEyebrow>Was du davon hast</EHEyebrow>
-      <EHHeading>{story.proofTitle}</EHHeading>
-      <EHText size="lead">{story.proofText}</EHText>
-      <EHList label={story.proofTitle} items={story.points.map((p, i) => ({ id: 'story-proof-' + i, title: p }))} />
-    </EHSection>
-    <EHSection compact>
-      <EHEyebrow>Ablauf</EHEyebrow>
-      <EHHeading>Klar getrennte Schritte.</EHHeading><Steps items={story.steps} /></EHSection>
-    <EHSection compact>
-      <EHEyebrow>Wichtig</EHEyebrow>
-      <EHHeading>Klare Grenzen statt falscher Versprechen.</EHHeading>
-      <EHCallout title="So ist es im Produkt"><EHList label="Grenzen" items={story.limits.map((l, i) => ({ id: "story-limit-" + i, title: l }))} /></EHCallout>
-    </EHSection>
-    <EHSection compact>
-      <EHEyebrow>Häufige Fragen</EHEyebrow>
-      <EHHeading>Zu {story.eyebrow}.</EHHeading>
-      <EHFAQ items={story.faq.map((f) => ({ q: f.q, a: f.a }))} />
-    </EHSection>
-    <EHClosing title={story.ctaTitle} text={story.ctaText} href={story.primaryHref} label={story.primaryLabel} secondary={<EHButton href="/#anliegen" variant="secondary">Anliegen starten</EHButton>} />
-    </EHScope>
-  </MarketingShell>;
+  return (
+    <SiteShell>
+      {breadcrumb}
+      <PageHero
+        eyebrow={story.eyebrow}
+        title={story.title}
+        text={story.text}
+        actions={
+          <>
+            <ButtonLink href={story.primaryHref} size="lg" arrow>
+              {story.primaryLabel}
+            </ButtonLink>
+            <ButtonLink href="/so-funktionierts" variant="outline" size="lg">
+              So funktioniert&apos;s
+            </ButtonLink>
+          </>
+        }
+        aside={
+          <div className="flex flex-col gap-6 rounded-card bg-ink p-7 text-white shadow-lift sm:p-9">
+            <p className="text-meta font-semibold uppercase tracking-wider text-lime">Was du davon hast</p>
+            <h2 className="font-display text-2xl font-extrabold leading-tight sm:text-3xl">{story.proofTitle}</h2>
+            <p className="leading-relaxed text-white/75">{story.proofText}</p>
+            <CheckList items={story.points} tone="dark" />
+          </div>
+        }
+      />
+
+      <Section>
+        <Heading eyebrow="Ablauf" title="Klar getrennte Schritte." />
+        <StepList steps={story.steps} />
+      </Section>
+
+      <Section tone="cream">
+        <Heading eyebrow="Wichtig" title="Klare Grenzen statt falscher Versprechen." />
+        <HonestLimits title="So ist es im Produkt" items={story.limits} />
+      </Section>
+
+      <Section>
+        <div className="grid gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16">
+          <Heading eyebrow="Häufige Fragen" title={`Zu ${story.eyebrow}.`} />
+          <PageFaq items={story.faq} />
+        </div>
+      </Section>
+
+      <ClosingCta
+        title={story.ctaTitle}
+        text={story.ctaText}
+        primary={{ href: story.primaryHref, label: story.primaryLabel }}
+        secondary={{ href: '/#anliegen', label: 'Anliegen starten' }}
+      />
+    </SiteShell>
+  );
 }
