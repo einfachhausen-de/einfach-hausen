@@ -12,7 +12,7 @@ Aufträge, Angebote, Vertragsanbieter/Kosten/Laufzeit/Kündigungsfrist, Dokument
 Handwerker finden/Auftrag erstellen/Tarifvergleich/Hilfe liefern den bestehenden Workflow als Einstieg. Sie verschicken, beauftragen, buchen und kündigen nichts.
 Jeder Datenzugriff prüft Eigentümerrolle und Eigentümerschaft; keine Dateipfade oder fremden Dokumente im Modellkontext.
 Freie Antworten und unterstützte privat hochgeladene JPG/PNG/WebP-Bilder verwenden DeepSeek bzw. ausdrücklich aktiviertes BYOK. Bildzugriff prüft die Verknüpfung zum eigenen Gespräch und die private Dateigrenze.
-PDF-OCR und automatische Dokumentkategorisierung gehören nicht zum Text-Router; es gibt hier keine vorgetäuschte PDF-Analyse. Bestehende Ablage bleibt unverändert.
+PDF-OCR und automatische Dokumentkategorisierung bleiben absichtlich außerhalb des Chat-Text-Routers in `document-intelligence.ts`. Sie verwenden denselben lokalen Laya-Dienst mit einer einzelnen begrenzten `document_kind`-Choice-Frage; normaler Dokumentinhalt wird dafür nicht an Jev oder einen generativen Cloud-Provider geschickt. Details: [LAYA_OWNER_INTELLIGENCE.md](LAYA_OWNER_INTELLIGENCE.md).
 
 ## Kosten
 Laya und deterministische Tools verbrauchen keine generativen Credits. Jev ist Betreiber-Overflow und ebenfalls kein Nutzer-Credit.
@@ -51,3 +51,12 @@ Nach Modell-Upgrade deutsche Evaluation wiederholen; erst danach Modellpfad änd
 Erste isolierte Modellmessung (16 deutsche Fragen): ungefähr 0.74–0.95 s je Frage auf OCI CPU; mehrere Fehler, darunter hohe Confidence bei Stromkosten→Tarifwechsel. Daher explizite Befehle plus konservative Rückfrage. Diese kleine Stichprobe ist kein allgemeiner Qualitäts- oder 10.000-Nutzer-Kapazitätsnachweis.
 ## Verbleibende Betreiberkonfiguration
 Bei Start dieser Welle waren weder Jev- noch DeepSeek-Schlüssel in der App-Umgebung vorhanden. Keine Konten aufgeladen, keine bezahlten Testaufrufe. Live-Status und Release-SHA stehen in NEXT_AGENT.md.
+
+## Messung am installierten Dienst
+2026-09-22, OCI CPU unter paralleler Build-Last: 18 isolierte Modellfragen, 11 rohe Entscheidungen korrekt, 8 mit Confidence >= 0.9, darunter 1 falsche. Latenz nach Warmup 1055–1377 ms. Der reine Modelllauf ist damit ausdrücklich kein bestandener Qualitätstest. Im kombinierten Router waren 17 explizite Befehle korrekt; die verbleibende unklare Frage wird durch die Confidence-Schwelle zur Rückfrage. Der erste kalte Request lag bei 3473 ms; der normale Router begrenzt die Wartezeit auf 3000 ms.
+Systemd-Start erreicht vorübergehend das 4-GiB-Limit (Speicherreclaim/Swap), aber keinen OOM/Neustart; resident nach Start ca. 1.9 GiB plus 0.7 GiB Swap. Diese Messung begründet keine Parallelkapazitätszusage. Health trennt `busy` (aktuelle Belegung) und `busy_rejections` (Zähler).
+
+## Produktionsnachweis der Dokument-Entscheidung
+Fix `786d560` erweitert den Laya-HTTP-Vertrag sicher von hart verdrahtetem `route` auf genau **eine** benannte Choice-Frage. Mehrfachfragen bleiben 400; Auth, Body-/State-/Criteria-Grenzen bleiben bestehen. Dokumentkontext wird clientseitig auf 4000 Zeichen begrenzt.
+
+Auf der ARM-OCI-VM wurde der echte Pfad mit Wegwerf-DB und privaten Temp-Dateien verifiziert: digitales PDF → `pdftotext` → Laya, PNG → Tesseract → Laya und iPhone-HEIC → `heif-convert` → Tesseract → Laya. Der Laya-`completed`-Zähler stieg für jeden Lauf exakt mit; Rechnung, Wartung und Garantie wurden korrekt klassifiziert. Garantie-/Gewährleistungs-Enddaten werden seit `77942d4` als prüfbare Erinnerungsdaten erkannt. Jev- und DeepSeek-Betreiberkeys waren beim Abschluss weiterhin nicht konfiguriert.
