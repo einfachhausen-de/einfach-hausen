@@ -184,7 +184,7 @@ function ServicesMegaMenu({ onNavigate }: { onNavigate: () => void }) {
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div className="flex flex-col gap-1">
               <p className="text-meta font-semibold uppercase tracking-wider text-brand">Alles rund ums Eigenheim</p>
-              <h2 className="font-display text-2xl font-extrabold tracking-tight text-ink">Was steht bei dir an?</h2>
+              <h2 className="font-display text-2xl font-bold tracking-tight text-ink">Was steht bei dir an?</h2>
             </div>
             <Link
               href="/leistungen"

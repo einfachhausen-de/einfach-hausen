@@ -8,7 +8,7 @@ export function FinalCta() {
       <Container>
         <div className="rounded-[2.5rem] bg-lime px-6 py-16 text-center sm:px-12 lg:py-24">
           <div className="mx-auto flex max-w-3xl flex-col items-center gap-6">
-            <h2 className="font-display text-balance text-4xl font-extrabold leading-[1.05] tracking-tight text-ink sm:text-6xl">
+            <h2 className="font-display text-balance text-4xl font-bold leading-[1.05] tracking-tight text-ink sm:text-6xl">
               Dein Haus kümmert sich ab heute um sich selbst.
             </h2>
             <p className="max-w-xl text-lg text-ink/75">

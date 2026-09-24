@@ -1,5 +1,5 @@
 import { Brain, CalendarCheck, FileSearch, Mic, Paperclip, Scale, Send, Sparkles } from 'lucide-react';
-import { ButtonLink, Container, SectionHeading } from '@/design-system/site';
+import { ButtonLink, Container, ExampleBadge, SectionHeading } from '@/design-system/site';
 
 const POWERS = [
   { icon: Brain, title: 'Kennt dein Haus', text: 'Baujahr, Heizung, Verträge, Handwerker – er weiß, wovon er spricht.' },
@@ -21,7 +21,7 @@ export function AiManagerFeature() {
                 Der Hausmeister, den du dir <span className="text-lime">immer gewünscht hast.</span>
               </>
             }
-            text="Tag und Nacht erreichbar, nie genervt, und er vergisst nichts. Frag ihn alles rund um dein Haus – er antwortet sofort und kümmert sich, wenn du willst."
+            text="Immer erreichbar, nie genervt, und er vergisst nichts. Frag ihn, was dein Haus, deine Verträge und Handwerker betrifft – ist er sich unsicher, fragt er nach. Und er kümmert sich nur, wenn du es freigibst."
           />
           <ul className="grid gap-4 sm:grid-cols-2">
             {POWERS.map(({ icon: Icon, title, text }) => (
@@ -46,9 +46,10 @@ export function AiManagerFeature() {
               <p className="font-semibold">Dein Hausmanager</p>
               <p className="flex items-center gap-1.5 text-meta text-save">
                 <span className="size-1.5 rounded-pill bg-save" aria-hidden="true" />
-                Online · kennt Musterweg 12
+                Online · kennt dein Haus
               </p>
             </div>
+            <ExampleBadge>Beispielgespräch</ExampleBadge>
           </div>
 
           <div className="flex flex-col gap-3 px-3 py-5 text-sm" aria-label="Beispielgespräch mit dem KI-Hausmanager">
@@ -69,7 +70,7 @@ export function AiManagerFeature() {
             </div>
             <p className="ml-auto max-w-[80%] rounded-2xl rounded-br-md bg-ink px-4 py-3 text-white">Ja, bitte für Donnerstag.</p>
             <p className="max-w-[88%] rounded-2xl rounded-bl-md bg-cream px-4 py-3">
-              Erledigt. Anfrage an <strong>Bautrocknung Sommer</strong> ist raus. Ich melde mich, sobald der Termin steht.
+              Erledigt. Deine Anfrage ist an <strong>2 geprüfte Fachbetriebe</strong> raus. Ich melde mich, sobald der Termin steht.
             </p>
           </div>
 

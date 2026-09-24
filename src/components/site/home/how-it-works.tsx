@@ -1,4 +1,4 @@
-import { Container, HouseEdgeImage, SectionHeading } from '@/design-system/site';
+import { Container, ExampleBadge, HouseEdgeImage, SectionHeading } from '@/design-system/site';
 
 const STEPS = [
   { title: 'Kostenlos registrieren', text: 'E-Mail, Passwort, fertig. Keine Kreditkarte, kein Abo, keine versteckten Kosten.', time: '30 Sek.' },
@@ -13,13 +13,16 @@ export function HowItWorks() {
         <div className="relative aspect-[4/5] lg:aspect-auto lg:h-full lg:min-h-[520px]">
           <HouseEdgeImage
             src="/images/site/craftsman-at-work.png"
-            alt="Ein Heizungstechniker wartet die Heizung, die Eigentümerin schaut entspannt zu"
+            alt="Heizungstechniker prüft mit einem Manometer den Druck an einer geöffneten Gastherme"
             sizes="(min-width: 1024px) 40vw, 100vw"
             className="absolute inset-0"
           />
           <div className="absolute bottom-5 left-5 right-5 rounded-2xl bg-white p-4 shadow-lift">
-            <p className="text-meta font-semibold uppercase tracking-wider text-brand">Heizungswartung · erledigt</p>
-            <p className="mt-1 text-sm text-ink">Rechnung, Protokoll und nächster Termin liegen automatisch in deiner Hausakte.</p>
+            <p className="flex items-center justify-between gap-2 text-meta font-semibold uppercase tracking-wider text-brand">
+              Heizungswartung · erledigt
+              <ExampleBadge className="normal-case tracking-normal" />
+            </p>
+            <p className="mt-1 text-sm text-ink">Rechnung, Protokoll und nächster Termin – mit einem Klick in deiner Hausakte.</p>
           </div>
         </div>
 
@@ -34,7 +37,7 @@ export function HowItWorks() {
                 {index < STEPS.length - 1 && (
                   <span className="absolute left-6 top-14 h-[calc(100%-3.5rem)] w-px bg-hairline" aria-hidden="true" />
                 )}
-                <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-ink font-display text-lg font-extrabold text-lime">
+                <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-ink font-display text-lg font-bold text-lime">
                   {index + 1}
                 </span>
                 <div className="flex flex-col gap-1.5 pt-1">

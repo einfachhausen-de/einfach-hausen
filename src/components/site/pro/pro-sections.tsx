@@ -2,7 +2,8 @@ import {
   BadgeCheck, BellRing, Calendar, Check, ClipboardCheck, FileCheck2, Handshake, Heart, Receipt, Repeat, ShieldCheck, Sparkles,
   Star, Target, ToggleRight, UserPlus, X,
 } from 'lucide-react';
-import { ButtonLink, Container, HouseEdgeImage, PhoneFrame, SectionHeading } from '@/design-system/site';
+import Link from 'next/link';
+import { ButtonLink, Container, ExampleBadge, HouseEdgeImage, PhoneFrame, SectionHeading } from '@/design-system/site';
 import { SiteFaq } from '@/design-system/site-faq';
 import { PartnerAppScreen } from './partner-app-screen';
 
@@ -15,7 +16,7 @@ export function ProHero({ trialDays, promise }: { trialDays: number; promise: st
             <BadgeCheck className="size-4 text-lime" aria-hidden="true" />
             Für Handwerks- und Servicebetriebe
           </p>
-          <h1 className="font-display text-balance text-5xl font-extrabold leading-[1.02] tracking-tight sm:text-6xl lg:text-7xl">
+          <h1 className="font-display text-balance text-5xl font-bold leading-[1.02] tracking-tight sm:text-6xl lg:text-7xl">
             Mehr Stammkunden.
             <br />
             <span className="text-lime">Null Provision.</span>
@@ -41,7 +42,7 @@ export function ProHero({ trialDays, promise }: { trialDays: number; promise: st
             ].map(([value, label]) => (
               <div key={label} className="flex flex-col-reverse gap-1">
                 <dt className="text-sm text-white/70">{label}</dt>
-                <dd className="font-display text-3xl font-extrabold text-white">{value}</dd>
+                <dd className="font-display text-3xl font-bold text-white">{value}</dd>
               </div>
             ))}
           </dl>
@@ -50,7 +51,7 @@ export function ProHero({ trialDays, promise }: { trialDays: number; promise: st
         <div className="relative hidden h-[700px] lg:block">
           <HouseEdgeImage
             src="/images/site/pro-workshop.png"
-            alt="Handwerksmeister mit Smartphone vor seinem Transporter"
+            alt="Handwerker greift in die geordneten Werkzeugregale seines Transporters vor einem Einfamilienhaus"
             sizes="(min-width: 1024px) 34vw, 0px"
             priority
             className="absolute inset-y-8 left-16 right-0"
@@ -58,13 +59,16 @@ export function ProHero({ trialDays, promise }: { trialDays: number; promise: st
           <PhoneFrame className="absolute bottom-0 left-0 z-10" label="Beispielansicht der Partner-App">
             <PartnerAppScreen />
           </PhoneFrame>
-          <div className="absolute right-6 top-20 z-20 flex w-64 items-center gap-3 rounded-2xl bg-white p-3.5 text-ink shadow-lift">
+          <div className="absolute right-6 top-20 z-20 flex w-72 items-center gap-3 rounded-2xl bg-white p-3.5 text-ink shadow-lift">
             <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-coral-soft text-coral">
               <Heart className="size-5 fill-coral" aria-hidden="true" />
             </span>
             <span className="text-meta leading-snug">
-              <strong className="block text-sm">Neuer Stammkunde</strong>
-              Familie Schneider hat dich als Ansprechpartner gespeichert
+              <span className="flex items-center justify-between gap-2">
+                <strong className="text-sm">Neuer Stammkunde</strong>
+                <ExampleBadge />
+              </span>
+              Ein Eigentümer hat dich als festen Ansprechpartner gespeichert
             </span>
           </div>
           <div className="absolute bottom-24 right-4 z-20 flex w-60 items-center gap-3 rounded-2xl bg-lime p-3.5 text-ink shadow-lift">
@@ -72,7 +76,10 @@ export function ProHero({ trialDays, promise }: { trialDays: number; promise: st
               <Repeat className="size-5" aria-hidden="true" />
             </span>
             <span className="text-meta leading-snug">
-              <strong className="block text-sm">Folgeauftrag</strong>
+              <span className="flex items-center justify-between gap-2">
+                <strong className="text-sm">Folgeauftrag</strong>
+                <ExampleBadge className="bg-white/60 ring-ink/10" />
+              </span>
               Jährliche Wartung direkt bei dir angefragt
             </span>
           </div>
@@ -188,7 +195,7 @@ export function ProSteps() {
                 <span className="grid size-12 place-items-center rounded-2xl bg-ink text-lime">
                   <Icon className="size-6" aria-hidden="true" />
                 </span>
-                <span className="font-display text-4xl font-extrabold text-sand" aria-hidden="true">
+                <span className="font-display text-4xl font-bold text-sand" aria-hidden="true">
                   0{index + 1}
                 </span>
               </span>
@@ -257,7 +264,11 @@ export function ProPricing({ plans, promise }: { plans: Plan[]; promise: string 
         {plans.length === 0 ? (
           <p className="mx-auto max-w-xl rounded-card bg-cream p-8 text-center text-body">
             Die aktuellen Partner-Tarife werden gerade aktualisiert. Registriere dich kostenlos – wir informieren dich vor jeder
-            Kostenpflicht.
+            Kostenpflicht. Alle Tarife mit Preisen findest du auf der{' '}
+            <Link href="/preise#betriebe" className="font-semibold text-brand underline underline-offset-4">
+              Preisseite
+            </Link>
+            .
           </p>
         ) : (
           <ul className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
@@ -277,7 +288,7 @@ export function ProPricing({ plans, promise }: { plans: Plan[]; promise: string 
                   )}
                   <div>
                     <h3 className="font-display text-xl font-bold">{plan.title}</h3>
-                    <p className="mt-3 font-display text-5xl font-extrabold tracking-tight">
+                    <p className="mt-3 font-display text-5xl font-bold tracking-tight">
                       {euro.format(plan.monthly_amount / 100)}
                       <span className={isFeatured ? 'text-base font-semibold text-white/70' : 'text-base font-semibold text-body'}> / Monat</span>
                     </p>
@@ -313,7 +324,10 @@ export function ProPricing({ plans, promise }: { plans: Plan[]; promise: string 
           </ul>
         )}
         <p className="text-center text-sm text-body">
-          Alle Preise zzgl. MwSt. Die Anfragegrenze ist keine Zusage über tatsächlich eingehende Aufträge.
+          Alle Preise zzgl. MwSt. Die Anfragegrenze ist keine Zusage über tatsächlich eingehende Aufträge.{' '}
+          <Link href="/preise#betriebe" className="font-semibold text-brand underline underline-offset-4">
+            Alle Preise im Überblick
+          </Link>
         </p>
       </Container>
     </section>
@@ -336,7 +350,7 @@ export function ProFinalCta() {
     <section className="py-20 lg:py-28">
       <Container>
         <div className="flex flex-col items-center gap-6 rounded-[2.5rem] bg-lime px-6 py-16 text-center text-ink sm:px-12 lg:py-20">
-          <h2 className="max-w-3xl font-display text-balance text-4xl font-extrabold leading-[1.05] tracking-tight sm:text-6xl">
+          <h2 className="max-w-3xl font-display text-balance text-4xl font-bold leading-[1.05] tracking-tight sm:text-6xl">
             Weniger akquirieren. Mehr arbeiten.
           </h2>
           <p className="max-w-xl text-lg text-ink/80">Starte kostenlos im Free-Tarif. Die aktive Vermittlung beginnt nach deiner Prüfung.</p>

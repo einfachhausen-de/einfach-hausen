@@ -8,7 +8,7 @@ const NAV = [
   { icon: Receipt, label: 'Rechnungen' },
 ] as const;
 
-/** Illustrative Ansicht der Partner-App (aria-hidden, im PhoneFrame als Beispiel gekennzeichnet). */
+/** Illustrative Ansicht der Partner-App (aria-hidden, im PhoneFrame sichtbar als Beispiel gekennzeichnet). */
 export function PartnerAppScreen() {
   return (
     <div className="flex h-full flex-col text-ink" aria-hidden="true">
@@ -21,7 +21,7 @@ export function PartnerAppScreen() {
       </div>
 
       <div className="px-5 pt-4">
-        <p className="text-meta text-body">Bauer Haustechnik</p>
+        <p className="text-meta text-body">Dein Betrieb</p>
         <p className="font-display text-lg font-bold leading-tight">2 neue Anfragen</p>
       </div>
 
@@ -31,7 +31,7 @@ export function PartnerAppScreen() {
           ['38', 'Stammkunden'],
         ].map(([value, label]) => (
           <div key={label} className="rounded-2xl bg-white p-3">
-            <p className="font-display text-xl font-extrabold">{value}</p>
+            <p className="font-display text-xl font-bold">{value}</p>
             <p className="text-meta text-body">{label}</p>
           </div>
         ))}
@@ -64,7 +64,7 @@ export function PartnerAppScreen() {
             <strong className="whitespace-nowrap text-sm">Heute, 9:00</strong>
             <span className="rounded-pill bg-brand-soft px-2 py-0.5 text-meta font-semibold text-brand">Stammkunde</span>
           </span>
-          <span className="block text-body">Wartung · Familie Schneider</span>
+          <span className="block text-body">Wartung · Einfamilienhaus</span>
         </span>
       </div>
 

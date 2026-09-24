@@ -1,6 +1,5 @@
-import Image from 'next/image';
 import { Check, Sparkles } from 'lucide-react';
-import { Container, HouseEdgeImage, PhoneFrame } from '@/design-system/site';
+import { Container, ExampleBadge, HouseEdgeImage, PhoneFrame, TradeAvatar } from '@/design-system/site';
 import { HeroSearch } from './hero-search';
 import { OwnerAppScreen } from './owner-app-screen';
 
@@ -16,7 +15,7 @@ export function Hero() {
             Dein persönlicher KI-Hausmanager ist da
           </p>
 
-          <h1 className="font-display text-balance text-5xl font-extrabold leading-[1.02] tracking-tight sm:text-6xl lg:text-7xl">
+          <h1 className="font-display text-balance text-5xl font-bold leading-[1.02] tracking-tight sm:text-6xl lg:text-7xl">
             Dein Haus.
             <br />
             <span className="text-lime">Alles in einer App.</span>
@@ -24,7 +23,7 @@ export function Hero() {
 
           <p className="max-w-xl text-pretty text-lg leading-relaxed text-white/80 sm:text-xl">
             Tarife vergleichen und wechseln. Angebote geprüfter Handwerker vergleichen und den Besten als festen Ansprechpartner
-            speichern. Und ein KI-Hausmanager, der an alles denkt, woran du nicht denken willst.
+            speichern. Und ein KI-Hausmanager, der mitdenkt und dich an das erinnert, woran du nicht denken willst.
           </p>
 
           <div id="anliegen" className="scroll-mt-28">
@@ -54,33 +53,33 @@ export function Hero() {
             <OwnerAppScreen />
           </PhoneFrame>
 
-          <div className="absolute right-6 top-20 z-20 flex w-64 items-center gap-3 rounded-2xl bg-white p-3.5 text-ink shadow-lift">
+          <div className="absolute right-6 top-20 z-20 flex w-72 items-center gap-3 rounded-2xl bg-white p-3.5 text-ink shadow-lift">
             <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-lime">
               <Check className="size-5" strokeWidth={3} aria-hidden="true" />
             </span>
             <span className="text-meta leading-snug">
-              <strong className="block text-sm">Wechsel vorbereitet</strong>
+              <span className="flex items-center justify-between gap-2">
+                <strong className="text-sm">Bereit zur Freigabe</strong>
+                <ExampleBadge />
+              </span>
               Neuer Stromtarif ab 01.11. <span className="font-semibold text-save">spart 34 € im Monat</span>
             </span>
           </div>
 
           <div className="absolute bottom-24 right-4 z-20 w-72 rounded-2xl bg-ink p-4 text-white shadow-lift ring-1 ring-white/10">
-            <p className="flex items-center gap-2 text-meta font-semibold text-lime">
-              <Sparkles className="size-3.5" aria-hidden="true" />
-              KI-Hausmanager
+            <p className="flex items-center justify-between gap-2 text-meta font-semibold text-lime">
+              <span className="flex items-center gap-2">
+                <Sparkles className="size-3.5" aria-hidden="true" />
+                KI-Hausmanager
+              </span>
+              <ExampleBadge tone="dark" />
             </p>
             <p className="mt-1.5 text-sm leading-snug text-white/90">
               „Deine Heizung ist 14 Jahre alt. Soll ich Angebote für eine Wartung einholen?“
             </p>
             <div className="mt-3 flex items-center gap-2">
-              <Image
-                src="/images/site/avatar-heizung.png"
-                alt=""
-                width={28}
-                height={28}
-                className="size-7 rounded-pill object-cover ring-2 ring-ink"
-              />
-              <span className="text-meta text-white/70">3 geprüfte Betriebe in der Nähe</span>
+              <TradeAvatar trade="heizung" size="sm" className="bg-white/10 text-lime" />
+              <span className="text-meta text-white/70">Geprüfte Heizungsbetriebe in deiner Nähe</span>
             </div>
           </div>
         </div>

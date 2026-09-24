@@ -41,7 +41,7 @@ export function PageHero({
       >
         <Reveal y={16} className="flex flex-col gap-6">
           <Eyebrow>{eyebrow}</Eyebrow>
-          <h1 className="font-display text-balance text-4xl font-extrabold leading-[1.05] tracking-tight text-ink sm:text-5xl lg:text-6xl">
+          <h1 className="font-display text-balance text-4xl font-bold leading-[1.05] tracking-tight text-ink sm:text-5xl lg:text-6xl">
             {title}
           </h1>
           <p className="max-w-2xl text-pretty text-lg leading-relaxed text-body sm:text-xl">{text}</p>
@@ -104,7 +104,7 @@ export function ExampleCard({
         {rows.map((row, index) => (
           <div key={row.title} className="flex gap-4 rounded-2xl bg-cream p-4">
             <span
-              className="grid size-8 shrink-0 place-items-center rounded-xl bg-ink font-display text-sm font-extrabold text-lime"
+              className="grid size-8 shrink-0 place-items-center rounded-xl bg-ink font-display text-sm font-bold text-lime"
               aria-hidden="true"
             >
               {index + 1}
@@ -140,7 +140,7 @@ export function StepList({
         >
           <span
             className={cn(
-              'grid size-12 place-items-center rounded-2xl font-display text-lg font-extrabold',
+              'grid size-12 place-items-center rounded-2xl font-display text-lg font-bold',
               tone === 'light' ? 'bg-ink text-lime' : 'bg-lime text-ink',
             )}
             aria-hidden="true"
@@ -240,7 +240,7 @@ export function HonestLimits({ title = 'Ehrlich eingeordnet', items }: { title?:
           <span className="grid size-11 place-items-center rounded-xl bg-ink text-lime" aria-hidden="true">
             <Info className="size-5" />
           </span>
-          <h3 className="font-display text-2xl font-extrabold leading-tight text-ink">{title}</h3>
+          <h3 className="font-display text-2xl font-bold leading-tight text-ink">{title}</h3>
           <p className="leading-relaxed text-body">Keine Versprechen, die wir nicht halten können. Damit du weißt, worauf du dich verlassen kannst.</p>
         </div>
         <ul className="flex flex-col divide-y divide-ink/10">
@@ -272,7 +272,7 @@ export function ClosingCta({
         <Reveal y={24}>
           <div className="rounded-[2.5rem] bg-lime px-6 py-14 text-center sm:px-12 lg:py-20">
             <div className="mx-auto flex max-w-3xl flex-col items-center gap-6">
-              <h2 className="font-display text-balance text-4xl font-extrabold leading-[1.05] tracking-tight text-ink sm:text-5xl">{title}</h2>
+              <h2 className="font-display text-balance text-4xl font-bold leading-[1.05] tracking-tight text-ink sm:text-5xl">{title}</h2>
               <p className="max-w-xl text-pretty text-lg text-ink/75">{text}</p>
               <div className="flex flex-col items-center gap-3 sm:flex-row">
                 <Link

@@ -1,13 +1,12 @@
-import Image from 'next/image';
 import { Bell, CalendarClock, FileText, Home, Sparkles, Wrench, Zap } from 'lucide-react';
-import { cn } from '@/design-system/site';
+import { cn, TradeAvatar, type Trade } from '@/design-system/site';
 
 const TASKS = [
   { title: 'Heizungswartung', meta: 'in 12 Tagen', dot: 'bg-coral' },
   { title: 'Rauchmelder prüfen', meta: 'November', dot: 'bg-lime-strong' },
 ] as const;
 
-const CONTACTS = ['/images/site/avatar-heizung.png', '/images/site/avatar-elektro.png', '/images/site/avatar-dach.png'] as const;
+const CONTACTS: readonly Trade[] = ['heizung', 'elektro', 'dach'];
 
 const NAV = [
   { icon: Home, label: 'Start' },
@@ -16,7 +15,7 @@ const NAV = [
   { icon: FileText, label: 'Hausakte' },
 ] as const;
 
-/** Illustrative Startansicht der Eigentümer-App (aria-hidden, im PhoneFrame als Beispiel gekennzeichnet). */
+/** Illustrative Startansicht der Eigentümer-App (aria-hidden, im PhoneFrame sichtbar als Beispiel gekennzeichnet). */
 export function OwnerAppScreen() {
   return (
     <div className="flex h-full flex-col text-ink" aria-hidden="true">
@@ -30,8 +29,8 @@ export function OwnerAppScreen() {
 
       <div className="flex items-center justify-between px-5 pt-4">
         <div>
-          <p className="text-meta text-body">Guten Morgen, Julia</p>
-          <p className="font-display text-lg font-bold leading-tight">Lindenweg 7</p>
+          <p className="text-meta text-body">Guten Morgen</p>
+          <p className="font-display text-lg font-bold leading-tight">Mein Haus</p>
         </div>
         <span className="relative grid size-9 place-items-center rounded-pill bg-white">
           <Bell className="size-4" />
@@ -44,7 +43,7 @@ export function OwnerAppScreen() {
           <Zap className="size-3.5 text-lime" />
           Sparpotenzial gefunden
         </p>
-        <p className="mt-1 font-display text-3xl font-extrabold">
+        <p className="mt-1 font-display text-3xl font-bold">
           412 €<span className="text-sm font-semibold text-white/70"> / Jahr</span>
         </p>
         <div className="mt-3 flex h-9 items-center justify-center rounded-pill bg-lime text-meta font-bold text-ink">Tarife ansehen</div>
@@ -69,8 +68,8 @@ export function OwnerAppScreen() {
       <div className="mx-4 mt-3 flex items-center justify-between rounded-3xl bg-white p-4">
         <p className="text-sm font-bold">Meine Handwerker</p>
         <div className="flex -space-x-2">
-          {CONTACTS.map((src) => (
-            <Image key={src} src={src} alt="" width={32} height={32} className="size-8 rounded-pill object-cover ring-2 ring-white" />
+          {CONTACTS.map((trade) => (
+            <TradeAvatar key={trade} trade={trade} size="sm" className="size-8 ring-2 ring-white" />
           ))}
         </div>
       </div>
