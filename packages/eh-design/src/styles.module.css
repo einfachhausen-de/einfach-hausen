@@ -55,6 +55,11 @@
 .button[data-size="small"] { padding: 10px 16px; min-height: 44px; }
 .button[data-variant="secondary"] { background: transparent; color: var(--eh-fg); border-color: var(--eh-fg); }
 .button[data-variant="secondary"]:hover { background: var(--eh-color-sand); color: var(--eh-color-ink); }
+/* Outline (Betreiber 24.09.): die feine Aktions-Pille wie im Sektionskopf —
+   weiss, feine Linie, Hover in Petrol/Papier. Leicht, nicht der dunkle
+   Sekundaer-Rand. */
+.button[data-variant="outline"] { background: var(--eh-color-white); color: var(--eh-color-ink); border-color: var(--eh-color-line); }
+.button[data-variant="outline"]:hover { border-color: var(--eh-color-petrol); background: var(--eh-color-paper); }
 .button[data-variant="quiet"] { background: transparent; color: var(--eh-fg); text-decoration: underline; text-underline-offset: 5px; }
 .button[data-variant="on-dark"] { background: var(--eh-color-paper); color: var(--eh-color-deep); }
 .button[data-variant="on-dark"]:hover { background: var(--eh-color-sand); }
