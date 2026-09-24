@@ -57,7 +57,7 @@ export const ownerAreas: readonly NavArea[] = [
     owns: [],
     children: [
       { href: '/app/contracts#vertraege', label: 'Laufende Verträge' },
-      { href: '/app/contracts#vergleiche', label: 'Vergleichen & Sparen' },
+      { href: '/app/angebote', label: 'Angebote' },
     ],
   },
   {

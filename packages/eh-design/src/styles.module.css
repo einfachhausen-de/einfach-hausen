@@ -2725,8 +2725,26 @@ a.ownerDashboardStatusItem:hover {
 .offerCta { display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px; border-radius: var(--eh-radius-control); background: var(--eh-color-petrol); color: var(--eh-color-white); font-size: var(--eh-font-meta); font-weight: var(--eh-weight-semibold); text-decoration: none; transition: background var(--eh-motion-duration) var(--eh-motion-ease); }
 .offerCta:hover { background: var(--eh-color-deep); }
 .offerNote { font-size: var(--eh-font-meta); color: var(--eh-color-secondary); }
-.offerCard[data-hue="sonne"] { --eh-offer-brand: #e08a2e; --eh-offer-ink: #94590a; }
-.offerCard[data-hue="himmel"] { --eh-offer-brand: #2f7fd1; --eh-offer-ink: #0f62c4; }
-.offerCard[data-hue="veilchen"] { --eh-offer-brand: #7a4fd8; --eh-offer-ink: #6d33d6; }
-.offerCard[data-hue="stahl"] { --eh-offer-brand: #14809c; --eh-offer-ink: #0e6f8a; }
-.offerCard[data-hue="rose"] { --eh-offer-brand: #d94a76; --eh-offer-ink: #d0265f; }
+.offerCard[data-hue="sonne"], .offerDeal[data-hue="sonne"] { --eh-offer-brand: #e08a2e; --eh-offer-ink: #94590a; }
+.offerCard[data-hue="himmel"], .offerDeal[data-hue="himmel"] { --eh-offer-brand: #2f7fd1; --eh-offer-ink: #0f62c4; }
+.offerCard[data-hue="veilchen"], .offerDeal[data-hue="veilchen"] { --eh-offer-brand: #7a4fd8; --eh-offer-ink: #6d33d6; }
+.offerCard[data-hue="stahl"], .offerDeal[data-hue="stahl"] { --eh-offer-brand: #14809c; --eh-offer-ink: #0e6f8a; }
+.offerCard[data-hue="rose"], .offerDeal[data-hue="rose"] { --eh-offer-brand: #d94a76; --eh-offer-ink: #d0265f; }
+
+/* EHOfferDeal — dieselbe Sprache, aber als liegende Zeile fuer Listen. */
+.offerDeal { position: relative; display: grid; grid-template-columns: 104px minmax(0, 1fr) auto; gap: 16px; align-items: center; padding: 14px 16px; border: 1px solid var(--eh-color-line); border-radius: var(--eh-radius-panel); background: var(--eh-color-white); }
+.offerDealHero { display: grid; place-items: center; align-self: stretch; min-height: 92px; border-radius: var(--eh-radius-control); background: var(--eh-offer-brand, var(--eh-color-petrol)); color: var(--eh-color-white); }
+.offerDealBody { display: grid; gap: 5px; min-width: 0; }
+.offerDealFlag { padding: 2px 9px; border-radius: var(--eh-radius-pill); background: color-mix(in srgb, var(--eh-color-success) 14%, var(--eh-color-white)); color: var(--eh-color-success); font-size: var(--eh-font-meta); font-weight: var(--eh-weight-semibold); }
+.offerDealSide { display: grid; gap: 8px; justify-items: end; align-content: center; }
+.offerDealFrist { padding: 4px 10px; border-radius: var(--eh-radius-pill); background: var(--eh-color-sand); color: var(--eh-color-ink); font-size: var(--eh-font-meta); font-weight: var(--eh-weight-medium); }
+.offerDealSpar { margin: 0; display: grid; gap: 1px; justify-items: end; text-align: right; }
+.offerDealSpar small { font-size: var(--eh-font-meta); color: var(--eh-color-secondary); }
+.offerDealSpar strong { font-size: var(--eh-font-body); font-weight: var(--eh-weight-bold); color: var(--eh-color-success); }
+@media (max-width: 760px) {
+  .offerDeal { grid-template-columns: 64px minmax(0, 1fr); }
+  .offerDealHero { min-height: 64px; }
+  .offerDealSide { grid-column: 1 / -1; grid-template-columns: minmax(0, 1fr) auto; justify-items: start; align-items: center; }
+  .offerDealSpar { justify-items: start; text-align: left; }
+  .offerDealFrist { justify-self: end; }
+}

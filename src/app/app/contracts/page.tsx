@@ -5,11 +5,12 @@ import {
   Smartphone, Thermometer, Trash2, Wifi, Wrench, Zap,
 } from 'lucide-react';
 import {
-  EHActionTiles, EHButton, EHEmptyState, EHField, EHFieldGrid, EHFormFeedback, EHFormSection, EHInput, EHOwnerSection, EHSelect, EHSubmitButton, EHText, EHTextarea, EHWorkflowForm,
+  EHActionTiles, EHButton, EHOfferCard, EHEmptyState, EHField, EHFieldGrid, EHFormFeedback, EHFormSection, EHInput, EHOwnerSection, EHSelect, EHSubmitButton, EHText, EHTextarea, EHWorkflowForm,
 } from '@/design-system';
 import { WerkbankRahmen } from '@/components/werkbank-rahmen';
 import { VertraegeTabelle } from '@/components/homeowner/vertraege-tabelle';
-import { AngebotsRail } from '@/components/homeowner/angebote-rail';
+import { CompareRail } from '@/components/homeowner/compare-rail';
+import { baueAngebote, sortiereVorschlaege } from '@/lib/angebote';
 import { requireUser } from '@/lib/auth';
 import { VertraegeAnlegeWege } from '@/components/homeowner/anlege-wege';
 import { db } from '@/lib/db';
@@ -21,10 +22,7 @@ import {
 } from '@/lib/contracts';
 import { setHouseContractStatusAction, updateHouseContractAction } from '@/app/actions';
 import { applyContractFilter, filterIsActive, parseContractFilter } from '@/lib/contract-filter';
-import {
-  AFFILIATE_CATEGORIES, AFFILIATE_CATEGORY_ACTIONS, AFFILIATE_CATEGORY_HINTS,
-  AFFILIATE_CATEGORY_LABELS, resolveAffiliate,
-} from '@/lib/affiliate';
+import { AFFILIATE_CATEGORIES, AFFILIATE_CATEGORY_ACTIONS, resolveAffiliate } from '@/lib/affiliate';
 
 /**
  * Verträge & Tarife — Umbau nach dem Muster der Startseite (23.09., Betreiber:
@@ -48,8 +46,6 @@ type ContractRow = {
   cancellation_deadline: string | null; notice: string; document_title: string;
   document_path: string | null; status: string;
 };
-
-const VERGLEICH_HUES: Record<string, string> = { strom: 'sonne', gas: 'himmel', dsl: 'veilchen', mobilfunk: 'rose', versicherung: 'stahl' };
 
 const KIND_ICONS = {
   strom: Zap, gas: Flame, dsl: Wifi, mobilfunk: Smartphone, versicherung: ShieldCheck,
@@ -94,11 +90,14 @@ export default async function Contracts({ searchParams }: { searchParams: Promis
     const e = estimateSavings({ kind: row.kind, yearlyCents: yearlyCents(row.cost_amount, row.cost_interval), postcode: profile?.postcode || '', householdSize: null, hasLoyaltyBonus: false, switchWilling: true });
     if (e) sparByKind.set(row.kind, Math.max(sparByKind.get(row.kind) ?? 0, e.highCents));
   }
-  const comparisonRows = AFFILIATE_CATEGORIES.map((category) => ({
-    category,
-    contract: active.find((row) => row.kind === category) ?? null,
-    availability: resolveAffiliate(category, 'vergleichsuebersicht'),
-  }));
+  const angebote = baueAngebote({
+    categories: AFFILIATE_CATEGORIES,
+    contractFuer: (k) => active.find((r) => r.kind === k) ?? null,
+    fristFuer: (k) => { const r = active.find((row) => row.kind === k); return r ? cancellationDeadline(r) : null; },
+    sparFuer: (k) => sparByKind.get(k) ?? 0,
+    statusFuer: (k) => resolveAffiliate(k, 'vergleichsuebersicht').status,
+    outbound: true,
+  });
 
   return <WerkbankRahmen role="homeowner" active="/app/contracts" rail={<>
     <div className="eh-werkbank-karte">
@@ -173,37 +172,16 @@ export default async function Contracts({ searchParams }: { searchParams: Promis
         )}
     </EHOwnerSection>
 
-    <EHOwnerSection title="Angebote in deiner Nähe">
+    <EHOwnerSection title="Angebote in deiner Nähe" action={{ href: '/app/angebote', label: 'Alle ansehen' }}>
       <div id="vergleiche" />
       <EHText muted>Wir zeigen keine eigenen Tarife und keine Rangliste. Der Vergleich läuft beim jeweiligen Partner, dort wird auch abgeschlossen. Deine Vertragsdaten bleiben in der Hausakte und werden nicht an den Partner übertragen.</EHText>
-      <AngebotsRail
-        cards={comparisonRows
-          .map((row, i) => ({ row, i, rang: (sparByKind.get(row.category) ?? 0) > 0 ? 0 : 1 }))
-          .sort((a, b) => a.rang - b.rang || a.i - b.i)
-          .map(({ row }) => {
-            const category = row.category;
-            const contract = row.contract;
-            const spar = sparByKind.get(category) ?? 0;
-            const yearly = contract ? yearlyCents(contract.cost_amount, contract.cost_interval) : null;
-            const monthly = contract ? monthlyCents(contract.cost_amount, contract.cost_interval) ?? yearly : null;
-            const deadline = contract ? cancellationDeadline(contract) : null;
-            return {
-              id: `vergleich-${category}`,
-              hue: VERGLEICH_HUES[category],
-              icon: ({strom: 'bolt', gas: 'flame', dsl: 'wifi', mobilfunk: 'phone', versicherung: 'shield'} as const)[category as 'strom' | 'gas' | 'dsl' | 'mobilfunk' | 'versicherung'],
-              title: AFFILIATE_CATEGORY_LABELS[category],
-              badge: spar > 0 ? `Bis zu ${euroExact(spar)} pro Jahr drin` : undefined,
-              brand: contract?.provider,
-              text: contract ? `Aktuell ${euroExact(monthly ?? 0)} pro Monat` : AFFILIATE_CATEGORY_HINTS[category],
-              meta: contract
-                ? [{ icon: 'clock' as const, label: deadline ? `Kündigen bis ${formatDate(deadline)}` : 'Keine Frist erfasst · jederzeit prüfbar' }]
-                : [{ label: 'Sobald du den Tarif erfasst, rechnen wir mit deinen echten Kosten' }],
-              action: row.availability.status === 'available' ? { href: `/api/affiliate/${category}`, label: 'Jetzt vergleichen' } : undefined,
-              note: row.availability.status === 'available' ? undefined : row.availability.status === 'error' ? 'Konfiguration prüfen' : 'Noch kein Partner freigeschaltet',
-              vorschlag: spar > 0,
-            };
-          })}
-      />
+      <CompareRail label="Angebote nebeneinander">
+        <div className="eh-vergleich-slider">
+          {sortiereVorschlaege(angebote).map((a) => (
+            <EHOfferCard key={a.category} id={a.id} hue={a.hue} icon={a.icon} title={a.title} badge={a.badge} brand={a.brand} text={a.text} meta={a.meta} action={a.action} note={a.note} />
+          ))}
+        </div>
+      </CompareRail>
     </EHOwnerSection>
 
     <EHOwnerSection title="Vertrag hinzufügen">

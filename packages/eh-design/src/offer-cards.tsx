@@ -39,14 +39,7 @@ export function EHOfferCard({id, hue, icon, title, badge, brand, text, meta, act
       </div>
       {(meta && meta.length > 0) || action || note ? (
         <div className={s.offerFoot}>
-          {meta && meta.length > 0 && (
-            <ul className={s.offerMeta}>
-              {meta.map((m, i) => {
-                const MetaIcon = m.icon ? EH_ICONS[m.icon] : null;
-                return <li key={i}>{MetaIcon && <MetaIcon size={13} />}<span>{m.label}</span></li>;
-              })}
-            </ul>
-          )}
+          {meta && meta.length > 0 && <EHOfferMeta items={meta} />}
           {action ? (
             <a className={s.offerCta} href={action.href}>
               {action.label}
@@ -57,6 +50,78 @@ export function EHOfferCard({id, hue, icon, title, badge, brand, text, meta, act
           ) : null}
         </div>
       ) : null}
+    </article>
+  );
+}
+
+/** Meta-Zeile mit Mini-Icons (Frist, Hinweis) — von Karte und Liste geteilt. */
+function EHOfferMeta({ items }: { items: { icon?: EHIconKey; label: string }[] }) {
+  return (
+    <ul className={s.offerMeta}>
+      {items.map((m, i) => {
+        const MetaIcon = m.icon ? EH_ICONS[m.icon] : null;
+        return <li key={i}>{MetaIcon && <MetaIcon size={13} />}<span>{m.label}</span></li>;
+      })}
+    </ul>
+  );
+}
+
+export type EHOfferDealProps = {
+  id?: string;
+  hue: string;
+  icon: EHIconKey;
+  title: string;
+  brand?: string;
+  text?: string;
+  /** 'bis zu X € pro Jahr' — der Grund, warum die Karte ueberhaupt vorn steht. */
+  spar?: string;
+  rate?: string;
+  /** Kurzfrist-Pille oben rechts (CHECK24: 'Endet in 7 Tagen'). */
+  frist?: string;
+  meta?: { icon?: 'clock'; label: string }[];
+  action?: { href: string; label: string };
+  note?: string;
+};
+
+/**
+ * EHOfferDeal — dieselbe Optik wie EHOfferCard, aber als liegende Zeile fuer
+ * Listen (Angebote-Seite, Betreiber-Vorbild CHECK24-Dealz 24.09.): links die
+ * markenfarbige Glyph-Flaeche, Mitte Titel + Chip + Text + Meta, rechts
+ * Kurzfrist-Pille, der Spar-Block in Erklaer-Gruen und darunter der Klick
+ * zum Partner. Der Kern waehlt keine Angebote aus — die Seite liefert die
+ * fertigen Texte.
+ */
+export function EHOfferDeal({ id, hue, icon, title, brand, text, spar, rate, frist, meta, action, note }: EHOfferDealProps) {
+  const Icon = EH_ICONS[icon];
+  return (
+    <article id={id} className={s.offerDeal} data-hue={hue}>
+      <div className={s.offerDealHero} aria-hidden="true"><Icon size={30} /></div>
+      <div className={s.offerDealBody}>
+        <p className={s.offerTitleRow}>
+          <strong>{title}</strong>
+          {brand && <span className={s.offerBrand}>{brand}</span>}
+          {spar && <span className={s.offerDealFlag}>Besser als dein Tarif</span>}
+        </p>
+        {text && <p className={s.offerText}>{text}</p>}
+        {meta && meta.length > 0 && <EHOfferMeta items={meta} />}
+      </div>
+      <div className={s.offerDealSide}>
+        {frist && <span className={s.offerDealFrist}>{frist}</span>}
+        {spar || rate ? (
+          <p className={s.offerDealSpar}>
+            <small>{spar ? 'Sparpotenzial bis' : 'Dein Tarif'}</small>
+            <strong>{spar ?? rate}</strong>
+          </p>
+        ) : null}
+        {action ? (
+          <a className={s.offerCta} href={action.href}>
+            {action.label}
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+          </a>
+        ) : note ? (
+          <span className={s.offerNote}>{note}</span>
+        ) : null}
+      </div>
     </article>
   );
 }

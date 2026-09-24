@@ -5,20 +5,22 @@ import {
   Smartphone, Thermometer, Trash2, Wifi, Wrench, Zap,
 } from 'lucide-react';
 import {
-  EHActionTiles, EHFormFeedback, EHOwnerSection, EHText,
+  EHActionTiles, EHOfferCard, EHFormFeedback, EHOwnerSection, EHText,
 } from '@/design-system';
 import { WerkbankRahmen } from '@/components/werkbank-rahmen';
 import { euroExact } from '@/lib/format';
 import { VertraegeTabelle } from '@/components/homeowner/vertraege-tabelle';
 import { VertraegeAnlegeWege } from '@/components/homeowner/anlege-wege';
-import { AngebotsRail } from '@/components/homeowner/angebote-rail';
+import { CompareRail } from '@/components/homeowner/compare-rail';
+import { baueAngebote, sortiereVorschlaege } from '@/lib/angebote';
+import { PREVIEW_RECHNUNG, previewVertraege, type PreviewFristRow } from '@/lib/preview-fixtures';
 import { db } from '@/lib/db';
 import { applyContractFilter, filterIsActive, parseContractFilter } from '@/lib/contract-filter';
 import {
   SAVINGS_KINDS, contractKindLabel, currentTermEnd, cancellationDeadline, deadlineDays,
   estimateSavings, formatDate, monthlyCents, yearlyCents,
 } from '@/lib/contracts';
-import { AFFILIATE_CATEGORIES, AFFILIATE_CATEGORY_HINTS, AFFILIATE_CATEGORY_LABELS } from '@/lib/affiliate';
+import { AFFILIATE_CATEGORIES } from '@/lib/affiliate';
 
 /**
  * Schaufenster «Verträge & Tarife» — dasselbe Layout wie /app/contracts
@@ -31,18 +33,8 @@ import { AFFILIATE_CATEGORIES, AFFILIATE_CATEGORY_HINTS, AFFILIATE_CATEGORY_LABE
  * aber bewusst ohne Formulare — Kennenlern-Hinweis oben.
  */
 
-type FristRow = {
-  id: number; kind: string; provider: string; tariff: string; contract_number: string;
-  cost_amount: number | null; cost_interval: string; started_at: string | null;
-  term_months: number | null; renewal_months: number | null; cancellation_days: number | null;
-  cancellation_deadline: string | null; notice: string; document_title: string;
-  document_path: string | null; status: string;
-};
 
-const iso = (d: Date) => d.toISOString().slice(0, 10);
-const inDays = (n: number) => iso(new Date(Date.now() + n * 86_400_000));
-
-function fristText(row: FristRow): string {
+function fristText(row: PreviewFristRow): string {
   const deadline = cancellationDeadline(row);
   if (!deadline) return 'Keine Frist erfasst';
   const days = deadlineDays(deadline) ?? 0;
@@ -51,37 +43,26 @@ function fristText(row: FristRow): string {
   return `Noch ${days} Tage · ${formatDate(deadline)}`;
 }
 
-const VERGLEICH_HUES: Record<string, string> = { strom: 'sonne', gas: 'himmel', dsl: 'veilchen', mobilfunk: 'rose', versicherung: 'stahl' };
-
 const KIND_ICONS = {
   strom: Zap, gas: Flame, dsl: Wifi, mobilfunk: Smartphone, versicherung: ShieldCheck,
   heizung: Thermometer, wasser: Droplets, abfall: Trash2, wartung: Wrench, sonstiges: FileText,
 } as const;
 
-function fixtureContracts(): FristRow[] {
-  return [
-  { id: 901, kind: 'strom', provider: 'Stadtwerke Duisburg', tariff: 'Basis Strom 12', contract_number: 'SWD-4413902', cost_amount: 4190, cost_interval: 'month', started_at: '2025-10-01', term_months: 12, renewal_months: 12, cancellation_days: 0, cancellation_deadline: inDays(0), notice: 'Kündigen heute noch möglich — danach ein Jahr länger gebunden.', document_title: '', document_path: null, status: 'active' },
-  { id: 902, kind: 'dsl', provider: 'Telekom', tariff: 'MagentaZuhause XL', contract_number: 'TK-77120931', cost_amount: 4495, cost_interval: 'month', started_at: '2024-10-31', term_months: 24, renewal_months: 12, cancellation_days: 30, cancellation_deadline: inDays(7), notice: 'Router-Miete enthalten; Wechsel prüfen.', document_title: '', document_path: null, status: 'active' },
-  { id: 903, kind: 'versicherung', provider: 'HUK24', tariff: 'Hausrat Komfort', contract_number: 'HUK-90221', cost_amount: 12800, cost_interval: 'year', started_at: '2021-11-01', term_months: 12, renewal_months: 12, cancellation_days: 30, cancellation_deadline: inDays(39), notice: 'Wohnfläche nach Umbau anpassen.', document_title: '', document_path: null, status: 'active' },
-  { id: 904, kind: 'mobilfunk', provider: 'O2', tariff: 'Mobile M', contract_number: 'O2-3110884', cost_amount: 2999, cost_interval: 'month', started_at: '2025-05-01', term_months: 24, renewal_months: 12, cancellation_days: 30, cancellation_deadline: inDays(221), notice: '', document_title: '', document_path: null, status: 'active' },
-  { id: 905, kind: 'gas', provider: 'Fluxio Energie', tariff: 'Fluxio Fix 24', contract_number: 'FLX-55201', cost_amount: 6400, cost_interval: 'month', started_at: '2024-01-15', term_months: 24, renewal_months: 12, cancellation_days: 30, cancellation_deadline: inDays(-14), notice: 'Gekündigt zum Jahresende — Bestätigung liegt in der Hausakte.', document_title: '', document_path: null, status: 'cancelled' },
-  ];
-}
 
 export default async function ContractsPreview({ searchParams }: { searchParams: Promise<Record<string, string>> }) {
   const sp = await searchParams;
   // Echte Demo-Datenbank vor festen Zeilen: wer im Seed etwas aendert, sieht
   // es hier sofort (Betreiber-Wunsch 24.09.: 'richtige db, nicht nur cards').
-  let CONTRACTS: FristRow[] = [];
+  let CONTRACTS: PreviewFristRow[] = [];
   try {
     const u = db.prepare(`SELECT id FROM users WHERE lower(email)=?`).get('kunde@demo.einfachhausen.de') as { id: number } | undefined;
     if (u) {
-      CONTRACTS = db.prepare(`SELECT id, kind, provider, tariff, contract_number, cost_amount, cost_interval, started_at, term_months, renewal_months, cancellation_days, cancellation_deadline, notice, document_title, document_path, status FROM house_contracts WHERE homeowner_id=? ORDER BY CASE status WHEN 'active' THEN 0 WHEN 'cancelled' THEN 1 ELSE 2 END, provider COLLATE NOCASE`).all(u.id) as FristRow[];
+      CONTRACTS = db.prepare(`SELECT id, kind, provider, tariff, contract_number, cost_amount, cost_interval, started_at, term_months, renewal_months, cancellation_days, cancellation_deadline, notice, document_title, document_path, status FROM house_contracts WHERE homeowner_id=? ORDER BY CASE status WHEN 'active' THEN 0 WHEN 'cancelled' THEN 1 ELSE 2 END, provider COLLATE NOCASE`).all(u.id) as PreviewFristRow[];
     }
   } catch { /* nach Sandbox-Reset kann der Seed fehlen — dann greifen die Demo-Zeilen */ }
-  if (CONTRACTS.length === 0) CONTRACTS = fixtureContracts();
-  const sparFor = (row: FristRow) => row.status === 'active' && SAVINGS_KINDS.includes(row.kind as (typeof SAVINGS_KINDS)[number])
-    ? estimateSavings({ kind: row.kind, yearlyCents: yearlyCents(row.cost_amount, row.cost_interval), postcode: '47055', householdSize: 3, hasLoyaltyBonus: false, switchWilling: true })?.highCents ?? null
+  if (CONTRACTS.length === 0) CONTRACTS = previewVertraege();
+  const sparFor = (row: PreviewFristRow) => row.status === 'active' && SAVINGS_KINDS.includes(row.kind as (typeof SAVINGS_KINDS)[number])
+    ? estimateSavings({ kind: row.kind, yearlyCents: yearlyCents(row.cost_amount, row.cost_interval), postcode: PREVIEW_RECHNUNG.postcode, householdSize: PREVIEW_RECHNUNG.householdSize, hasLoyaltyBonus: false, switchWilling: true })?.highCents ?? null
     : null;
   const pool = CONTRACTS.map((row) => ({ ...row, sparCents: sparFor(row) }));
   const filter = parseContractFilter(sp);
@@ -93,15 +74,17 @@ export default async function ContractsPreview({ searchParams }: { searchParams:
   const sparByKind = new Map<string, number>();
   for (const row of CONTRACTS) {
     if (row.status !== 'active' || !SAVINGS_KINDS.includes(row.kind as (typeof SAVINGS_KINDS)[number])) continue;
-    const e = estimateSavings({ kind: row.kind, yearlyCents: yearlyCents(row.cost_amount, row.cost_interval), postcode: '47055', householdSize: 3, hasLoyaltyBonus: false, switchWilling: true });
+    const e = estimateSavings({ kind: row.kind, yearlyCents: yearlyCents(row.cost_amount, row.cost_interval), postcode: PREVIEW_RECHNUNG.postcode, householdSize: PREVIEW_RECHNUNG.householdSize, hasLoyaltyBonus: false, switchWilling: true });
     if (e) sparByKind.set(row.kind, Math.max(sparByKind.get(row.kind) ?? 0, e.highCents));
   }
-  const comparisonRows = AFFILIATE_CATEGORIES.map((category) => ({
-    category,
-    contract: active.find((row) => row.kind === category) ?? null,
-    // In der Vorschau statisch: zwei Kategorien "freigegeben", Rest offen.
-    available: category === 'strom' || category === 'dsl',
-  }));
+  const angebote = baueAngebote({
+    categories: AFFILIATE_CATEGORIES,
+    contractFuer: (k) => active.find((r) => r.kind === k) ?? null,
+    fristFuer: (k) => { const r = active.find((row) => row.kind === k); return r ? cancellationDeadline(r) : null; },
+    sparFuer: (k) => sparByKind.get(k) ?? 0,
+    statusFuer: (k) => (k === 'strom' || k === 'dsl' ? 'available' : 'unavailable'),
+    outbound: false,
+  });
 
   const byKind = new Map<string, number>();
   for (const row of active) byKind.set(contractKindLabel(row.kind), (byKind.get(contractKindLabel(row.kind)) ?? 0) + (monthlyCents(row.cost_amount, row.cost_interval) ?? 0));
@@ -163,36 +146,16 @@ export default async function ContractsPreview({ searchParams }: { searchParams:
       )}
     </EHOwnerSection>
 
-    <EHOwnerSection title="Angebote in deiner Nähe">
+    <EHOwnerSection title="Angebote in deiner Nähe" action={{ href: '/app/preview/angebote', label: 'Alle ansehen' }}>
       <div id="vergleiche" />
       <EHText muted>Wir zeigen keine eigenen Tarife und keine Rangliste. Der Vergleich läuft beim jeweiligen Partner, dort wird auch abgeschlossen. Deine Vertragsdaten bleiben in der Hausakte und werden nicht an den Partner übertragen.</EHText>
-      <AngebotsRail
-        cards={comparisonRows
-          .map((row, i) => ({ row, i, rang: (sparByKind.get(row.category) ?? 0) > 0 ? 0 : 1 }))
-          .sort((a, b) => a.rang - b.rang || a.i - b.i)
-          .map(({ row }) => {
-            const category = row.category;
-            const contract = row.contract;
-            const spar = sparByKind.get(category) ?? 0;
-            const yearly = contract ? yearlyCents(contract.cost_amount, contract.cost_interval) : null;
-            const monthly = contract ? monthlyCents(contract.cost_amount, contract.cost_interval) ?? yearly : null;
-            const deadline = contract ? cancellationDeadline(contract) : null;
-            return {
-              id: `vergleich-${category}`,
-              hue: VERGLEICH_HUES[category],
-              icon: ({strom: 'bolt', gas: 'flame', dsl: 'wifi', mobilfunk: 'phone', versicherung: 'shield'} as const)[category as 'strom' | 'gas' | 'dsl' | 'mobilfunk' | 'versicherung'],
-              title: AFFILIATE_CATEGORY_LABELS[category],
-              badge: spar > 0 ? `Bis zu ${euroExact(spar)} pro Jahr drin` : undefined,
-              brand: contract?.provider,
-              text: contract ? `Aktuell ${euroExact(monthly ?? 0)} pro Monat` : AFFILIATE_CATEGORY_HINTS[category],
-              meta: contract
-                ? [{ icon: 'clock' as const, label: deadline ? `Kündigen bis ${formatDate(deadline)}` : 'Keine Frist erfasst · jederzeit prüfbar' }]
-                : [{ label: 'Sobald du den Tarif erfasst, rechnen wir mit deinen echten Kosten' }],
-              note: row.available ? 'Vergleich läuft in der echten Hausakte' : 'Kein Partner freigeschaltet',
-              vorschlag: spar > 0,
-            };
-          })}
-      />
+      <CompareRail label="Angebote nebeneinander">
+        <div className="eh-vergleich-slider">
+          {sortiereVorschlaege(angebote).map((a) => (
+            <EHOfferCard key={a.category} id={a.id} hue={a.hue} icon={a.icon} title={a.title} badge={a.badge} brand={a.brand} text={a.text} meta={a.meta} note={a.note} />
+          ))}
+        </div>
+      </CompareRail>
     </EHOwnerSection>
 
     <EHOwnerSection title="Vertrag hinzufügen">
@@ -204,10 +167,10 @@ export default async function ContractsPreview({ searchParams }: { searchParams:
 
 /** Detailpanel unter der Tabelle: Fakten + Spar-Check, ohne Formulare
  *  (die echte Hausakte bearbeiten — hier ist es das Schaufenster). */
-function PreviewDetail({ row }: { row: FristRow }) {
+function PreviewDetail({ row }: { row: PreviewFristRow }) {
   const end = currentTermEnd(row);
   const estimate = row.status === 'active' && SAVINGS_KINDS.includes(row.kind as (typeof SAVINGS_KINDS)[number])
-    ? estimateSavings({ kind: row.kind, yearlyCents: yearlyCents(row.cost_amount, row.cost_interval), postcode: '47055', householdSize: 3, hasLoyaltyBonus: false, switchWilling: true })
+    ? estimateSavings({ kind: row.kind, yearlyCents: yearlyCents(row.cost_amount, row.cost_interval), postcode: PREVIEW_RECHNUNG.postcode, householdSize: PREVIEW_RECHNUNG.householdSize, hasLoyaltyBonus: false, switchWilling: true })
     : null;
   const fakten: [string, string][] = [
     ['Art', contractKindLabel(row.kind)],
