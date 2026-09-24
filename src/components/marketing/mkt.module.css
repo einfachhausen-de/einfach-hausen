@@ -370,16 +370,20 @@
 /* Public state screens (root loading / error boundaries) */
 .statePage {
   min-height: 100dvh; display: flex; align-items: center; justify-content: center;
-  padding: var(--eh-gutter); background: var(--eh-canvas); color: var(--eh-ink); font-family: var(--eh-font);
+  padding: var(--eh-gutter); background: var(--eh-color-paper); color: var(--eh-color-ink); font-family: var(--font-marketing), ui-sans-serif, system-ui, sans-serif;
 }
 .stateCard {
   display: flex; flex-direction: column; align-items: flex-start; gap: 14px;
   width: 100%; max-width: 520px; padding: clamp(28px, 4vw, 40px);
-  background: var(--eh-surface); border: 1px solid var(--eh-line); border-radius: var(--eh-r-card-lg); box-shadow: var(--eh-shadow-md);
+  background: var(--eh-color-white); border: 1px solid var(--eh-color-line); border-radius: var(--eh-radius-card); box-shadow: var(--eh-shadow-lift);
 }
-.stateCard h1 { font-size: clamp(24px, 3vw, 30px); line-height: 1.15; letter-spacing: -0.02em; color: var(--eh-teal-900); margin: 0; }
-.stateCard p { color: var(--eh-ink-soft); margin: 0; }
-.stateMark { width: 44px; height: 44px; border-radius: 14px; display: flex; align-items: center; justify-content: center; background: var(--eh-teal-050); color: var(--eh-teal-700); }
+.stateCard h1 { font-size: clamp(24px, 3vw, 30px); line-height: 1.15; letter-spacing: -0.02em; color: var(--eh-color-ink); font-weight: var(--eh-weight-bold); margin: 0; }
+.stateCard p { color: var(--eh-color-secondary); margin: 0; }
+.stateMark { width: 44px; height: 44px; border-radius: 999px; display: flex; align-items: center; justify-content: center; background: var(--eh-color-lime); color: var(--eh-color-ink); }
+.stateCard .btnPrimary { background: var(--eh-color-lime); color: var(--eh-color-ink); border-color: transparent; border-radius: 999px; box-shadow: none; }
+.stateCard .btnPrimary:hover { background: var(--eh-color-lime-strong); }
+.stateCard .btnGhost { color: var(--eh-color-ink); border-radius: 999px; border-color: var(--eh-color-line); }
+.stateCard .btnGhost:hover { background: var(--eh-color-paper); border-color: var(--eh-color-ink); }
 @keyframes shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
 
 /* Utility */

@@ -13,6 +13,9 @@ v0 hat hier **nur Design/Frontend** angefasst. Keine Tests, kein Re-Seal, kein E
 - **Leistungs-Unterseiten:** Titel ist der Leistungsname, nicht mehr der vierzeilige Schablonensatz.
 - **ClosingCta:** `rounded-[2.5rem]` ersetzt durch die Hauskante (`houseEdgeClass`). G5 (übrige Radien) bleibt bei der Designautorität.
 - **929px:** Versprechenleiste bricht nicht mehr um (unter `xl` nur das erste Versprechen plus „Für Handwerker“). Login/Register: das Formular ist die erste Ansicht, das Foto beginnt darunter statt als angeschnittener Streifen.
+- **Hausmanager-Knopf:** auf der Website nur noch eine Lime-Ecke, nicht die breite Karte über Formular und Inhalt. Die Startseite hebt ihn nicht mehr an (dort gibt es keine untere App-Leiste). Werkbank und Werkzeugleiste unverändert.
+- **Fehler- und Ladezustand** der öffentlichen Seite: Papier, Lime, Kartenradius aus Tokens statt Teal-Karte.
+- **Leistungsseiten:** Hauskanten-Foto und der Satz, dass der Auftrag erst nach Bestätigung entsteht.
 
 ## Bewusst nicht Remotion
 
@@ -20,7 +23,7 @@ Remotion rendert Video. Eine Dauerschleife widerspricht DESIGN.md (keine permane
 
 ## Offen für den Subagenten
 
-1. `design:check` / Re-Seal, falls `src/components/auth-v2/auth-shell.css` oder `src/components/site/page/blocks.tsx` als geschützt gemeldet werden. Erwartet, kein Rückbau.
+1. `design:check` / Re-Seal, falls `src/components/auth-v2/auth-shell.css`, `src/components/site/page/blocks.tsx` oder `packages/eh-design/src/{assistant.tsx,styles.module.css,html.css}` als geschützt gemeldet werden. Erwartet, kein Rückbau. Der schwebende Knopf ist absichtlich nur noch die Lime-Ecke.
 2. `scripts/auth-edition-contract.mjs` sollte grün bleiben (Klassenfamilie `arena-`, IDs, keine Fremdklassen in TSX). Wenn rot: nur melden, nicht die Lime-Optik zurückdrehen.
 3. `tsc`, eslint der geänderten Pfade, `test:public-site`, `test:public-nav`.
 4. E2E-Anker 404: Heading „Das gibt es hier nicht.“, mindestens ein `a[href="/"]`, kein Overflow. Visuelle Baselines auf der OCI-VM aktualisieren, nicht lokal raten.

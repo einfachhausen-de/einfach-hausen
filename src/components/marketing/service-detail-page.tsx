@@ -6,7 +6,7 @@ import { ClosingCta, Heading, HonestLimits, JsonLd, LinkCards, PageHero, Section
 import { PageFaq } from '@/components/site/page/faq';
 import { Stagger } from './motion';
 import { SERVICE_CATEGORIES, type ServiceCategory } from './service-catalog';
-import { ButtonLink } from '@/design-system/site';
+import { ButtonLink, HouseEdgeImage } from '@/design-system/site';
 
 const requestHref = (text: string) => '/register?role=homeowner&request=' + encodeURIComponent(text);
 
@@ -72,6 +72,24 @@ export function ServiceDetailPage({ service }: { service: ServiceCategory }) {
           </div>
         }
       />
+
+      <Section>
+        <div className="grid items-center gap-8 lg:grid-cols-[1.15fr_0.85fr] lg:gap-16">
+          <HouseEdgeImage
+            src="/images/site/craftsman-at-work.png"
+            alt="Handwerker bei der Arbeit an einem Haus, ohne lesbare Marken oder Namen"
+            sizes="(min-width: 1024px) 42vw, 100vw"
+            className="min-h-72"
+          />
+          <div className="flex flex-col gap-4">
+            <p className="text-meta font-semibold uppercase tracking-wider text-brand">Vor Ort</p>
+            <h2 className="font-display text-3xl font-bold tracking-tight text-ink sm:text-4xl">Ein Betrieb aus der Region. Du entscheidest.</h2>
+            <p className="text-lg leading-relaxed text-body">
+              Wir suchen im aktiven Partnernetz. Ein Foto oder eine Beschreibung reicht zum Einordnen. Ein Auftrag entsteht erst, wenn du ihn ausdrücklich bestätigst.
+            </p>
+          </div>
+        </div>
+      </Section>
 
       <Section>
         <Heading eyebrow="So läuft es" title="Du beschreibst. Wir ordnen ein. Du entscheidest." />
