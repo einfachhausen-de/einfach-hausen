@@ -195,8 +195,14 @@ export async function destroySession() {
 }
 
 async function loadCurrentUser(): Promise<CurrentUser | null> {
-  if (authMode() === 'local') return getLocalUser();
+  // Zuerst den Cookie-Speicher anfassen: Der Griff nach cookies() ist das
+  // Signal an Next, diese Route als Anfrage statt als Build-Prerender zu
+  // behandeln. Ohne ihn lief der lokale Modus im Produktions-Build in die
+  // authMode()-Sperre und riss das Prerendering ganzer Bereiche mit ab
+  // (Bau-Fehler 24.09.: »Local auth is disabled in production« auf
+  // /app/angebote). Supabase-Pfad liest den Store ohnehin — unverändert.
   const store = await jar();
+  if (authMode() === 'local') return getLocalUser();
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL || '';
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY || '';
   if (!supabaseUrl || !supabaseAnonKey || supabaseUrl.includes('your-project.supabase.co')) {
