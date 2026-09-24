@@ -10,10 +10,10 @@
  * composeen, die Kachel entscheidet nur ueber Darstellung.
  */
 import {useEffect, useRef, useState, type ComponentType} from 'react';
-import {BarChart3, Camera, FileUp, Flame, PenLine, ShieldCheck, Smartphone, Wifi, Zap} from 'lucide-react';
+import {EH_ICONS, type EHIconKey} from './icons';
 import s from './styles.module.css';
 
-export type EHActionTileIcon = 'file-up'|'camera'|'pen'|'compare'|'bolt'|'flame'|'wifi'|'phone'|'shield';
+export type EHActionTileIcon = EHIconKey;
 export type EHActionTileMenuItem = {label: string; href: string; icon?: EHActionTileIcon};
 export type EHActionTile = {
   label: string;
@@ -23,10 +23,6 @@ export type EHActionTile = {
   items: EHActionTileMenuItem[];
 };
 
-const ICONS: Record<EHActionTileIcon, ComponentType<{ size?: number }>> = {
-  'file-up': FileUp, camera: Camera, pen: PenLine, compare: BarChart3,
-  bolt: Zap, flame: Flame, wifi: Wifi, phone: Smartphone, shield: ShieldCheck,
-};
 
 function Tile({tile}: {tile: EHActionTile}) {
   const [offen, setOffen] = useState(false);
@@ -39,7 +35,7 @@ function Tile({tile}: {tile: EHActionTile}) {
     document.addEventListener('keydown', aufTast);
     return () => { document.removeEventListener('mousedown', aufKlick); document.removeEventListener('keydown', aufTast); };
   }, [offen]);
-  const Icon = tile.icon ? ICONS[tile.icon] : null;
+  const Icon = tile.icon ? EH_ICONS[tile.icon] : null;
   return (
     <div className={s.actionWrap} ref={wrapRef}>
       <button type="button" className={s.actionTile} aria-haspopup="true" aria-expanded={offen} onClick={() => setOffen((o) => !o)}>
@@ -49,7 +45,7 @@ function Tile({tile}: {tile: EHActionTile}) {
       </button>
       <div className={s.actionMenu} role="menu" aria-label={tile.menuLabel ?? tile.label} hidden={!offen}>
         {tile.items.map((punkt) => {
-          const PunktIcon = punkt.icon ? ICONS[punkt.icon] : null;
+          const PunktIcon = punkt.icon ? EH_ICONS[punkt.icon] : null;
           return (
             <a key={punkt.href} role="menuitem" href={punkt.href} onClick={() => setOffen(false)}>
               {PunktIcon && <PunktIcon size={16} />}

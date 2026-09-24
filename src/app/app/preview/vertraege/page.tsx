@@ -5,7 +5,7 @@ import {
   Smartphone, Thermometer, Trash2, Wifi, Wrench, Zap,
 } from 'lucide-react';
 import {
-  EHActionTiles, EHButton, EHFormFeedback, EHOwnerSection, EHStatus, EHText,
+  EHActionTiles, EHOfferCard, EHFormFeedback, EHOwnerSection, EHText,
 } from '@/design-system';
 import { WerkbankRahmen } from '@/components/werkbank-rahmen';
 import { euroExact } from '@/lib/format';
@@ -163,37 +163,37 @@ export default async function ContractsPreview({ searchParams }: { searchParams:
       )}
     </EHOwnerSection>
 
-    <EHOwnerSection title="Vergleichen & Tarife">
+    <EHOwnerSection title="Angebote in deiner Nähe">
       <div id="vergleiche" />
       <EHText muted>Wir zeigen keine eigenen Tarife und keine Rangliste. Der Vergleich läuft beim jeweiligen Partner, dort wird auch abgeschlossen. Deine Vertragsdaten bleiben in der Hausakte und werden nicht an den Partner übertragen.</EHText>
-      <CompareRail label="Vergleiche nebeneinander">
+      <CompareRail label="Angebote nebeneinander">
         <div className="eh-vergleich-slider">
-          {comparisonRows.map(({ category, contract, available }) => {
-            const yearly = contract ? yearlyCents(contract.cost_amount, contract.cost_interval) : null;
-            const deadline = contract ? cancellationDeadline(contract) : null;
-            const CatIcon = { strom: Zap, gas: Flame, dsl: Wifi, mobilfunk: Smartphone, versicherung: ShieldCheck }[category];
-            return (
-              <article key={category} id={`vergleich-${category}`} className="eh-vergleich-karte" data-hue={VERGLEICH_HUES[category]}>
-                <span className="eh-vergleich-ic" aria-hidden="true"><CatIcon size={18} /></span>
-                <span className="eh-vergleich-body">
-                  <strong>{AFFILIATE_CATEGORY_LABELS[category]}</strong>
-                  <small>{contract
-                    ? `Bei deinen ${euroExact(monthlyCents(contract.cost_amount, contract.cost_interval) ?? yearly ?? 0)}/Monat bei ${contract.provider}${(sparByKind.get(category) ?? 0) > 0 ? ` sind bis zu ${euroExact(sparByKind.get(category)!)} pro Jahr drin` : ' — dein Tarif wirkt schon günstig'}`
-                    : AFFILIATE_CATEGORY_HINTS[category]}</small>
-                </span>
-                <p className="eh-vergleich-kontext">
-                  {contract
-                    ? deadline ? `Kündigen bis ${formatDate(deadline)}` : 'Keine Frist erfasst · jederzeit prüfbar'
-                    : 'Noch kein Vertrag erfasst — der Vergleich nutzt später deine echten Kosten.'}
-                </p>
-                <span className="eh-vergleich-rechts">
-                  {available
-                    ? <><EHStatus tone="success">Partner freigegeben</EHStatus><EHButton href="#vergleiche" size="small" arrow>Jetzt vergleichen</EHButton></>
-                    : <EHStatus>Kein Partner freigegeben</EHStatus>}
-                </span>
-              </article>
-            );
-          })}
+          {comparisonRows
+            .map((row, i) => ({row, i, spar: (sparByKind.get(row.category) ?? 0) > 0 ? 0 : 1}))
+            .sort((a, b) => a.spar - b.spar || a.i - b.i)
+            .map(({row}) => {
+              const {category, contract} = row;
+              const spar = sparByKind.get(category) ?? 0;
+              const yearly = contract ? yearlyCents(contract.cost_amount, contract.cost_interval) : null;
+              const monthly = contract ? monthlyCents(contract.cost_amount, contract.cost_interval) ?? yearly : null;
+              const deadline = contract ? cancellationDeadline(contract) : null;
+              return (
+                <EHOfferCard
+                  key={category}
+                  id={`vergleich-${category}`}
+                  hue={VERGLEICH_HUES[category]}
+                  icon={({strom: 'bolt', gas: 'flame', dsl: 'wifi', mobilfunk: 'phone', versicherung: 'shield'} as const)[category as 'strom' | 'gas' | 'dsl' | 'mobilfunk' | 'versicherung']}
+                  title={AFFILIATE_CATEGORY_LABELS[category]}
+                  badge={spar > 0 ? `Bis zu ${euroExact(spar)} pro Jahr drin` : undefined}
+                  brand={contract?.provider}
+                  text={contract ? `Aktuell ${euroExact(monthly ?? 0)} pro Monat` : AFFILIATE_CATEGORY_HINTS[category]}
+                  meta={contract
+                    ? [{icon: 'clock' as const, label: deadline ? `Kündigen bis ${formatDate(deadline)}` : 'Keine Frist erfasst · jederzeit prüfbar'}]
+                    : [{label: 'Sobald du den Tarif erfasst, rechnen wir mit deinen echten Kosten'}]}
+                  note={row.available ? 'Vergleich läuft in der echten Hausakte' : 'Kein Partner freigeschaltet'}
+                />
+              );
+            })}
         </div>
       </CompareRail>
     </EHOwnerSection>

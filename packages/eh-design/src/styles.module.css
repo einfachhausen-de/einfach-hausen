@@ -2708,3 +2708,25 @@ a.ownerDashboardStatusItem:hover {
 .actionMenu a { display: flex; align-items: center; gap: 10px; padding: 9px 11px; border-radius: var(--eh-radius-control); color: var(--eh-color-ink); font-family: inherit; font-size: var(--eh-font-label); font-weight: var(--eh-weight-medium); text-decoration: none; }
 .actionMenu a:hover { background: var(--eh-color-paper); color: var(--eh-color-petrol); }
 .actionMenu a svg { color: var(--eh-color-petrol); }
+
+/* EHOfferCard (Markt-Kachel im Wolt-Schema, Betreiber-Freigabe 24.09.). */
+.offerCard { display: flex; flex-direction: column; gap: 10px; width: 100%; min-width: 0; padding: 0 0 12px; border: 1px solid var(--eh-color-line); border-radius: var(--eh-radius-panel); background: var(--eh-color-white); overflow: hidden; }
+.offerHero { position: relative; display: grid; place-items: center; aspect-ratio: 16 / 9; background: var(--eh-offer-brand, var(--eh-color-petrol)); color: var(--eh-color-white); }
+.offerBadge { position: absolute; top: 10px; left: 10px; right: 10px; display: inline-flex; align-items: center; gap: 6px; width: fit-content; max-width: 100%; padding: 5px 11px; border-radius: var(--eh-radius-pill); background: color-mix(in srgb, var(--eh-color-ink) 76%, transparent); color: var(--eh-color-white); font-size: var(--eh-font-meta); font-weight: var(--eh-weight-semibold); line-height: 1.3; }
+.offerBody { display: grid; gap: 3px; padding: 0 14px; }
+.offerTitleRow { margin: 0; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.offerTitleRow strong { font-size: var(--eh-font-body); font-weight: var(--eh-weight-bold); line-height: var(--eh-leading-tight); color: var(--eh-color-ink); }
+.offerBrand { padding: 2px 9px; border-radius: var(--eh-radius-pill); background: var(--eh-color-sand); color: var(--eh-color-ink); font-size: var(--eh-font-meta); font-weight: var(--eh-weight-medium); }
+.offerText { margin: 0; font-size: var(--eh-font-label); line-height: var(--eh-leading-normal); color: var(--eh-color-secondary); overflow-wrap: anywhere; }
+.offerFoot { margin-top: auto; display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; padding: 10px 14px 0; border-top: 1px dashed var(--eh-color-line); }
+.offerMeta { display: flex; align-items: center; gap: 12px; margin: 0; padding: 0; list-style: none; flex-wrap: wrap; }
+.offerMeta li { display: inline-flex; align-items: center; gap: 5px; font-size: var(--eh-font-meta); color: var(--eh-color-secondary); line-height: 1.35; }
+.offerMeta svg { color: var(--eh-offer-ink, var(--eh-color-petrol)); flex: none; }
+.offerCta { display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px; border-radius: var(--eh-radius-control); background: var(--eh-color-petrol); color: var(--eh-color-white); font-size: var(--eh-font-meta); font-weight: var(--eh-weight-semibold); text-decoration: none; transition: background var(--eh-motion-duration) var(--eh-motion-ease); }
+.offerCta:hover { background: var(--eh-color-deep); }
+.offerNote { font-size: var(--eh-font-meta); color: var(--eh-color-secondary); }
+.offerCard[data-hue="sonne"] { --eh-offer-brand: #e08a2e; --eh-offer-ink: #94590a; }
+.offerCard[data-hue="himmel"] { --eh-offer-brand: #2f7fd1; --eh-offer-ink: #0f62c4; }
+.offerCard[data-hue="veilchen"] { --eh-offer-brand: #7a4fd8; --eh-offer-ink: #6d33d6; }
+.offerCard[data-hue="stahl"] { --eh-offer-brand: #14809c; --eh-offer-ink: #0e6f8a; }
+.offerCard[data-hue="rose"] { --eh-offer-brand: #d94a76; --eh-offer-ink: #d0265f; }

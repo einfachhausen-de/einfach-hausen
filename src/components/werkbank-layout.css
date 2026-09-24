@@ -227,20 +227,9 @@
 .eh-anlege-wechsel { display:flex; flex-wrap:wrap; gap:12px; align-items:center; margin:6px 2px 0; font-size:var(--eh-font-meta); color:var(--eh-muted); }
 .eh-anlege-wechsel a { display:inline-flex; gap:6px; align-items:center; color:var(--eh-color-petrol); text-decoration:none; }
 .eh-anlege-wechsel a:hover { text-decoration:underline; }
-/* Vergleich & Tarife als Karten nebeneinander im Chip-Slider (24.09.,
-   Betreiber-Vorbild Startseite): CompareRail liefert die runden Pfeile,
-   scroll-snap macht das Wischen griffig; Farbtone = Chips-Hues. */
-.eh-vergleich-slider { display:flex; flex-wrap:nowrap; gap:12px; padding:2px 2px 8px; scroll-snap-type:x proximity; }
-.eh-vergleich-karte { flex:0 0 clamp(224px, 25%, 290px); scroll-snap-align:start; display:flex; flex-direction:column; gap:6px; padding:13px 14px; border:1px solid var(--eh-color-line); border-radius:var(--eh-radius-panel); background:var(--eh-color-white); }
-.eh-vergleich-karte:hover { border-color:var(--eh-karte-ink, var(--eh-color-petrol)); }
-.eh-vergleich-ic { flex:none; display:grid; place-items:center; width:32px; height:32px; border-radius:var(--eh-radius-control); background:var(--eh-karte-tint, var(--eh-color-paper)); color:var(--eh-karte-ink, var(--eh-color-petrol)); }
-.eh-vergleich-body { flex:1 1 auto; min-width:0; display:grid; gap:2px; }
-.eh-vergleich-body strong { font-size:var(--eh-font-label); font-weight:var(--eh-weight-semibold); }
-.eh-vergleich-body small { font-size:var(--eh-font-meta); color:var(--eh-color-secondary); overflow-wrap:anywhere; }
-.eh-vergleich-kontext { margin:0; font-size:var(--eh-font-meta); color:var(--eh-color-ink); opacity:.78; }
-.eh-vergleich-rechts { margin-top:auto; display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
-.eh-vergleich-karte[data-hue="sonne"]    { --eh-karte-ink:#94590a; --eh-karte-tint:#fdf3dc; }
-.eh-vergleich-karte[data-hue="himmel"]   { --eh-karte-ink:#0f62c4; --eh-karte-tint:#e3effc; }
-.eh-vergleich-karte[data-hue="veilchen"] { --eh-karte-ink:#6d33d6; --eh-karte-tint:#efe7fd; }
-.eh-vergleich-karte[data-hue="stahl"]    { --eh-karte-ink:#0e6f8a; --eh-karte-tint:#e0f0f5; }
-.eh-vergleich-karte[data-hue="rose"]     { --eh-karte-ink:#d0265f; --eh-karte-tint:#fdeaef; }
+/* Schiebezeile fuer die Markt-Kacheln (Betreiber 24.09.: Angebote wie bei
+   Wolt). Optik der Karten lebt als EHOfferCard im versiegelten Designkern;
+   hier bleibt nur die Zeile selbst: seitlich schieben, einrasten, Breite. */
+.eh-vergleich-slider { display:flex; flex-wrap:nowrap; gap:12px; padding:2px 2px 8px; scroll-snap-type:x proximity; scrollbar-width:none; }
+.eh-vergleich-slider::-webkit-scrollbar { display:none; }
+.eh-vergleich-slider > * { flex:0 0 clamp(232px, 25%, 296px); scroll-snap-align:start; }
