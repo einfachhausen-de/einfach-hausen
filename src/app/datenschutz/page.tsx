@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { canonical } from '@/lib/seo';
-import { MarketingShell } from '@/components/marketing/site-shell';
-import { EHScope, EHSection, EHPageHero, EHPanel, EHButton, EHActions, EHEyebrow, EHHeading, EHText } from '@/design-system';
+import { SiteShell } from '@/components/site/site-shell';
+import { DocBlock, DocHero, DocLayout, LegalNav } from '@/components/site/page/blocks';
 
 // HINWEIS (intern, 2026-09-14): Diese Fassung beschreibt den tatsaechlichen
 // technischen Stand (selbst gehostete Infrastruktur, BYOK als Nutzerentscheidung,
@@ -109,38 +109,53 @@ const SECTIONS: { title: string; content: string[] }[] = [
   }
 ];
 
+const sectionId = (index: number) => `abschnitt-${index + 1}`;
+const LIST_MARKER = '· ';
+
+function SectionContent({ content }: { content: string[] }) {
+  const intro = content.filter((paragraph) => !paragraph.startsWith(LIST_MARKER));
+  const list = content.filter((paragraph) => paragraph.startsWith(LIST_MARKER));
+  if (list.length === 0) return content.map((paragraph) => <p key={paragraph.slice(0, 40)}>{paragraph}</p>);
+  const [lead, ...rest] = intro;
+  return (
+    <>
+      {lead && <p>{lead}</p>}
+      <ul>
+        {list.map((item) => (
+          <li key={item.slice(0, 40)}>{item.slice(LIST_MARKER.length)}</li>
+        ))}
+      </ul>
+      {rest.map((paragraph) => (
+        <p key={paragraph.slice(0, 40)}>{paragraph}</p>
+      ))}
+    </>
+  );
+}
+
 export default function Page() {
   return (
-    <MarketingShell>
-      <EHScope>
-      <EHPageHero
+    <SiteShell>
+      <DocHero
         eyebrow="Datenschutz"
-        title="Deine Hausdaten gehören dir. Punkt."
-        text="Wir behandeln Angaben zu deinem Zuhause, Rechnungen und Dokumenten mit höchster Vertraulichkeit. Keine Weitergabe ohne deine bewusste Freigabe."
+        title="Deine Hausdaten gehören dir."
+        text="Wir behandeln Angaben zu deinem Zuhause, Rechnungen und Dokumenten vertraulich. Keine Weitergabe ohne deine bewusste Freigabe. Hier steht, welche Daten wir verarbeiten, wo sie liegen und welche Rechte du hast."
+        meta="Datenschutzhinweise nach DSGVO"
       />
 
-      <EHSection compact>
-        <EHEyebrow>Transparenz</EHEyebrow>
-        <EHHeading>Datenschutzhinweise nach DSGVO.</EHHeading>
-        {SECTIONS.map((sec) => (
-          <EHPanel key={sec.title} title={sec.title}>
-            {sec.content.map((paragraph, index) => (
-              <EHText key={index}>{paragraph}</EHText>
-            ))}
-          </EHPanel>
+      <DocLayout toc={SECTIONS.map((section, index) => ({ id: sectionId(index), label: section.title.replace(/^\d+\.\s*/, '') }))}>
+        {SECTIONS.map((section, index) => (
+          <DocBlock key={section.title} id={sectionId(index)} title={section.title}>
+            <SectionContent content={section.content} />
+          </DocBlock>
         ))}
-      </EHSection>
-
-      <EHSection compact>
-        <EHEyebrow>Rechtliche Navigation</EHEyebrow>
-        <EHHeading>Weitere Angaben</EHHeading>
-        <EHActions>
-          <EHButton href="/impressum">Impressum</EHButton>
-          <EHButton href="/sicherheit" variant="secondary">Sicherheitsstandards</EHButton>
-          <EHButton href="/agb" variant="secondary">AGB</EHButton>
-        </EHActions>
-      </EHSection>
-    </EHScope>
-    </MarketingShell>
+        <LegalNav
+          items={[
+            { href: '/impressum', label: 'Impressum' },
+            { href: '/sicherheit', label: 'Sicherheitsstandards' },
+            { href: '/agb', label: 'AGB' },
+          ]}
+        />
+      </DocLayout>
+    </SiteShell>
   );
 }

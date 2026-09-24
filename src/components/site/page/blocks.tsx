@@ -376,6 +376,113 @@ export function Prose({ children, className }: { children: React.ReactNode; clas
   );
 }
 
+/** Kennzahlen-Leiste für klare Regeln (0 €, 0 %, …). Nur belegte Produktfakten, keine Marketingzahlen. */
+export function FactStrip({ items, tone = 'dark' }: { items: ReadonlyArray<{ value: string; label: string }>; tone?: 'light' | 'dark' }) {
+  return (
+    <Stagger className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4" y={16}>
+      {items.map((item) => (
+        <div
+          key={item.label}
+          className={cn('flex h-full flex-col gap-2 rounded-card p-7', tone === 'dark' ? 'bg-white/5 ring-1 ring-white/10' : 'bg-white ring-1 ring-hairline')}
+        >
+          <p className={cn('font-display text-5xl font-bold tracking-tight', tone === 'dark' ? 'text-lime' : 'text-brand')}>{item.value}</p>
+          <p className={cn('leading-relaxed', tone === 'dark' ? 'text-white/80' : 'text-body')}>{item.label}</p>
+        </div>
+      ))}
+    </Stagger>
+  );
+}
+
+/** Wiedererkennbare Alltagssituationen. Ausdrücklich keine Kundenzitate, daher ohne Namen und Porträts. */
+export function SituationCards({ items }: { items: ReadonlyArray<{ tag: string; text: string }> }) {
+  return (
+    <Stagger className="grid gap-5 md:grid-cols-3" y={20}>
+      {items.map((item) => (
+        <figure key={item.tag} className="flex h-full flex-col gap-4 rounded-card bg-cream p-7">
+          <figcaption className="text-meta font-semibold uppercase tracking-wider text-brand">{item.tag}</figcaption>
+          <blockquote className="font-display text-xl font-bold leading-snug text-ink">{`„${item.text}“`}</blockquote>
+        </figure>
+      ))}
+    </Stagger>
+  );
+}
+
+/** Kompakter Seitenkopf für Rechts- und Referenzseiten: ohne Bild, mit Stand-Angabe. */
+export function DocHero({ eyebrow, title, text, meta }: { eyebrow: string; title: React.ReactNode; text: React.ReactNode; meta?: string }) {
+  return (
+    <section className="bg-cream">
+      <Container className="flex max-w-5xl flex-col gap-5 py-12 lg:py-16">
+        <Reveal y={16} className="flex flex-col gap-5">
+          <Eyebrow>{eyebrow}</Eyebrow>
+          <h1 className="font-display text-balance text-4xl font-bold leading-[1.05] tracking-tight text-ink sm:text-5xl">{title}</h1>
+          <p className="max-w-3xl text-pretty text-lg leading-relaxed text-body">{text}</p>
+          {meta && <p className="text-meta font-semibold text-body">{meta}</p>}
+        </Reveal>
+      </Container>
+    </section>
+  );
+}
+
+/** Zweispaltiges Dokument-Layout: Sprungnavigation links (sticky), Inhalt rechts. */
+export function DocLayout({ toc, children }: { toc?: ReadonlyArray<{ id: string; label: string }>; children: React.ReactNode }) {
+  return (
+    <section className="bg-white py-14 lg:py-20">
+      <Container className={cn('grid gap-10', toc && 'lg:grid-cols-[240px_1fr] lg:gap-16')}>
+        {toc && (
+          <nav aria-label="Auf dieser Seite" className="hidden lg:block">
+            <div className="sticky top-28 flex flex-col gap-1 border-l border-hairline">
+              <p className="mb-2 pl-4 text-meta font-semibold uppercase tracking-wider text-body">Auf dieser Seite</p>
+              {toc.map((item) => (
+                <a
+                  key={item.id}
+                  href={`#${item.id}`}
+                  className="-ml-px border-l-2 border-transparent py-1.5 pl-4 text-sm text-body transition-colors hover:border-brand hover:text-ink"
+                >
+                  {item.label}
+                </a>
+              ))}
+            </div>
+          </nav>
+        )}
+        <div className="flex min-w-0 flex-col gap-6">{children}</div>
+      </Container>
+    </section>
+  );
+}
+
+/** Nummerierter Abschnitt innerhalb eines Dokuments. */
+export function DocBlock({ id, title, children }: { id?: string; title: string; children: React.ReactNode }) {
+  return (
+    <section id={id} aria-labelledby={id ? `${id}-title` : undefined} className="scroll-mt-28 rounded-card bg-cream p-6 sm:p-8">
+      <h2 id={id ? `${id}-title` : undefined} className="font-display text-xl font-bold leading-snug text-ink sm:text-2xl">
+        {title}
+      </h2>
+      <div className="mt-4 flex flex-col gap-4 leading-relaxed text-body [&_a]:font-semibold [&_a]:text-brand [&_a]:underline [&_a]:underline-offset-4 [&_strong]:font-semibold [&_strong]:text-ink [&_ul]:flex [&_ul]:list-disc [&_ul]:flex-col [&_ul]:gap-2 [&_ul]:pl-5">
+        {children}
+      </div>
+    </section>
+  );
+}
+
+/** Rechtliche Querverweise am Seitenende. */
+export function LegalNav({ items }: { items: ReadonlyArray<{ href: string; label: string }> }) {
+  return (
+    <nav aria-label="Rechtliche Angaben" className="flex flex-wrap items-center gap-3 border-t border-hairline pt-8">
+      <span className="text-meta font-semibold uppercase tracking-wider text-body">Weitere Angaben</span>
+      {items.map((item) => (
+        <Link
+          key={item.href}
+          href={item.href}
+          className="inline-flex h-10 items-center gap-1.5 rounded-pill border border-hairline bg-white px-4 text-sm font-semibold text-ink transition-colors hover:border-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+        >
+          {item.label}
+          <ArrowRight className="size-3.5" aria-hidden="true" />
+        </Link>
+      ))}
+    </nav>
+  );
+}
+
 export function JsonLd({ data }: { data: unknown }) {
   return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }} />;
 }
