@@ -7,6 +7,32 @@
 /* shadcn font-sans mapped to the brand Inter Variable (DESIGN.md contract). */
 @theme inline {
   --font-sans: var(--font-marketing), Inter, ui-sans-serif, system-ui, sans-serif;
+  /* Designsystem 1.1 · Website-Baukasten: Wortbild bleibt Inter, keine zweite Displayschrift. */
+  --font-display: var(--font-marketing), Inter, ui-sans-serif, system-ui, sans-serif;
+
+  /* Designsystem 1.1 · Website-Palette. Rohwerte leben ausschliesslich in packages/eh-design/src/tokens.json. */
+  --color-ink: var(--eh-color-ink);
+  --color-body: var(--eh-color-secondary);
+  --color-brand: var(--eh-color-petrol);
+  --color-brand-deep: var(--eh-color-deep);
+  --color-brand-soft: var(--eh-color-petrol-soft);
+  --color-lime: var(--eh-color-lime);
+  --color-lime-strong: var(--eh-color-lime-strong);
+  --color-lime-soft: var(--eh-color-lime-soft);
+  --color-save: var(--eh-color-success);
+  --color-coral: var(--eh-color-terra);
+  --color-coral-soft: var(--eh-color-terra-soft);
+  --color-cream: var(--eh-color-paper);
+  --color-sand: var(--eh-color-sand);
+  --color-hairline: var(--eh-color-line);
+
+  --radius-pill: var(--eh-radius-pill);
+  --radius-card: var(--eh-radius-card);
+  --radius-cut: var(--eh-radius-cut);
+  --shadow-card: var(--eh-shadow-card);
+  --shadow-lift: var(--eh-shadow-lift);
+  --text-meta: var(--eh-font-meta);
+  --text-meta--line-height: var(--eh-leading-normal);
 }
 
 @layer eh-legacy {
@@ -398,7 +424,7 @@ html, body {
 /* =====================================================   einfachhausen – Design-System FINAL 100% (Bonus-Paket)
    Ueberschreibt vorherige Variablen mit finalen Werten
    ============================================================ */
-:root { --bg:#f4f7f7; --ink:#1c2129; --green:#105258; --green-soft:#eaf4ee; --muted:#5b6d73; --card:#ffffff; --line:#e6eeeb; --danger:#d0452e; --radius:18px; }
+:root { --bg:#f4f7f7; --ink:#1c2129; --green:#105258; --green-soft:#eaf4ee; --muted:#5b6d73; --card:#ffffff; --line:#e6eeeb; --danger:#d0452e; --radius:12px; }
 * { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
 html, body { height:100%; background:var(--bg); color:var(--ink); font-family:-apple-system,"SF Pro Text","Avenir Next",Helvetica,Arial,sans-serif; -webkit-font-smoothing:antialiased; overscroll-behavior:none; }
 /* Legacy anchor color must sit in @layer base: un-layered, it would override
@@ -464,7 +490,7 @@ button { -webkit-appearance:none; }
   --card:#ffffff;
   --line:rgba(28,33,41,.09);
   --muted:#57686b;
-  --radius:24px;
+  --radius:12px;
   --shadow-soft:0 10px 32px rgba(28,33,41,.065);
   --shadow-float:0 14px 38px rgba(28,33,41,.10);
 }

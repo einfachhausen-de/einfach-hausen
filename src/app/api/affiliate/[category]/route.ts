@@ -9,7 +9,7 @@ import {
 // decision has to be re-evaluated on the server for every single request.
 export const dynamic = 'force-dynamic';
 
-const COMPARISON_TAB = '/app/contracts?tab=vergleichen';
+const COMPARISON_TAB = '/app/contracts#vergleiche';
 
 /**
  * Sends the browser back into the app instead of to an external page. Used for

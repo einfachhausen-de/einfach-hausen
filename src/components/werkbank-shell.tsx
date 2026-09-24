@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useId, useState, type ReactNode } from 'react';
 import { PanelRight } from 'lucide-react';
+import { KiHausmeisterIcon } from '@/components/ki-hausmeister-icon';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import {
   SidebarInset,
@@ -61,6 +62,7 @@ export function WerkbankShell({
   breadcrumb,
   main,
   rail,
+  kiVorschlaege,
 }: {
   role: 'homeowner' | 'provider';
   active: string;
@@ -86,29 +88,46 @@ export function WerkbankShell({
   main: ReactNode;
   rail?: ReactNode;
   defaultRailOpen?: boolean;
+  /** Startvorschlaege des Kundenberaters (Seite + eigene Daten). */
+  kiVorschlaege?: string[];
 }) {
   // Der Kundenberater sitzt als rechter Bereich im Fluss - wie die Sidebar
   // links: der Bereich schiebt sich auf, der mittlere Bereich wird schmaler.
   // Nichts schwebt ueber dem Inhalt.
-  const [kiOffen, setKiOffen] = useState(false);
+  // Der Chat-Offenzustand bleibt wie der Rail-Zustand im Cookie, damit der
+  // Kundenberater beim Seitenwechsel geoeffnet bleibt (neue Shell-Instanz
+  // pro Route liest das Cookie beim Initialisieren).
+  const [kiOffen, setKiOffen] = useState(() => {
+    if (typeof document === 'undefined') return false;
+    return document.cookie.split('; ').some((c) => c === 'ki_state=true');
+  });
   const hatKi = role === 'homeowner';
   // Der rechte Bereich laesst sich am Rand ein- und ausklappen - mit demselben
   // Griff wie die Seitenleiste links. Der Zustand bleibt im Cookie, damit die
   // Seite nach dem Neuladen gleich aussieht.
   const [railZu, setRailZu] = useState(!defaultRailOpen);
   const railId = useId();
+  function kiSetzen(offen: boolean) {
+    setKiOffen(offen);
+    document.cookie = `ki_state=${offen ? 'true' : 'false'}; path=/; max-age=${60 * 60 * 24 * 7}`;
+  }
   function railSetzen(zu: boolean) {
     setRailZu(zu);
-    if (zu) setKiOffen(false);
+    if (zu) kiSetzen(false);
     document.cookie = `rail_state=${zu ? 'false' : 'true'}; path=/; max-age=${60 * 60 * 24 * 7}`;
   }
   function railUmschalten() {
     railSetzen(!railZu);
   }
+  // Mobil gibt es keinen rechten Bereich: der Kontext (Ueberblick) wandert
+  // in den mittleren Bereich und der Kundeberater wird ein Vollbild-Ueber-
+  // lager, das ueber das KI-Symbol in der Kopfzeile geoeffnet wird. Der
+  // Zustand gilt pro Ansicht (neue Shell-Instanz pro Route).
+  const [mobilKi, setMobilKi] = useState(false);
   /** Die Kachel im schmalen Streifen holt den Bereich zurueck und oeffnet den Chat. */
   function kiUmschalten(offen: boolean) {
     if (offen && railZu) railSetzen(false);
-    setKiOffen(offen);
+    kiSetzen(offen);
   }
   return (
     <TooltipProvider>
@@ -159,6 +178,17 @@ export function WerkbankShell({
                 unread={unread}
                 notices={notices}
               />
+              {hatKi && (
+                <button type="button" className={s['wb-ki-mobil']} aria-controls={railId} aria-expanded={mobilKi && kiOffen}
+                  aria-label={mobilKi && kiOffen ? 'Kundenberater schließen' : 'Kundenberater öffnen'}
+                  title={mobilKi && kiOffen ? 'Kundenberater schließen' : 'Kundenberater öffnen'}
+                  onClick={() => {
+                    if (mobilKi && kiOffen) { setMobilKi(false); kiSetzen(false); }
+                    else { setMobilKi(true); kiUmschalten(true); }
+                  }}>
+                  <KiHausmeisterIcon size={21} />
+                </button>
+              )}
               <Link
                 href={profileHref}
                 className={s.toolAvatar}
@@ -170,10 +200,14 @@ export function WerkbankShell({
             </div>
           </div>
           <div className={s['wb-content']}>
-            <main className={s['wb-main']}>{main}</main>
+            <main className={s['wb-main']}>
+              {main}
+              {rail && <div className={s['wb-kontext-mobil']} aria-label="Kontext dieser Seite">{rail}</div>}
+            </main>
             {(rail || hatKi) && (
               <aside id={railId} aria-label={rail ? 'Kontext dieser Seite' : 'Kundenberater'} className={s['wb-rail']}
-                data-ki={hatKi && kiOffen ? 'offen' : undefined} data-zu={railZu || undefined}>
+                data-ki={hatKi && kiOffen ? 'offen' : undefined} data-zu={railZu || undefined}
+                data-mobil={mobilKi && kiOffen ? 'ki' : undefined}>
                 {/* Griff am Rand des Bereiches, Gegenstueck zum Griff der
                     Seitenleiste: unsichtbarer Streifen, Linie beim Zeigen,
                     Ziehen-Symbol als Zeiger, Klick klappt ein oder aus. */}
@@ -188,7 +222,7 @@ export function WerkbankShell({
                   </button>
                 )}
                 {rail && <div className={s['wb-rail-kontext']}>{rail}</div>}
-                {hatKi && <HouseAssistant placement="panel" compact={railZu} open={kiOffen} onOpenChange={kiUmschalten} />}
+                {hatKi && <HouseAssistant placement="panel" compact={railZu} open={kiOffen} onOpenChange={kiUmschalten} suggestions={kiVorschlaege} />}
               </aside>
             )}
           </div>

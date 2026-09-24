@@ -1,16 +1,13 @@
 "use client";
-import Link from 'next/link';
 import {usePathname} from 'next/navigation';
-import {FileText} from 'lucide-react';
-import {EHAssistant, EHRecommendation, type EHActivityStep, type EHAssistantMessage, type EHAssistantResult} from '@/design-system';
-import {bookQuoteAction} from '@/app/actions';
+import {EHAssistant, EHRecommendation, type EHActivityStep, type EHAssistantMessage, type EHAssistantResult, type EHSendOptions} from '@/design-system';
+import {bookQuoteAction, saveAssistantChatPhotoAction, uploadAssistantChatDocumentAction} from '@/app/actions';
 import type {OfferCard} from '@/lib/offer-cards';
-import s from './shell.module.css';
 
 const AUSFALL = 'Eine Antwort ist gerade nicht verfügbar. Bitte versuche es später erneut.';
 const IDLE_MS = 30000;
 
-type Ergebnisrahmen = {status?: number; reply?: string; steps?: EHActivityStep[]; cards?: OfferCard[]};
+type Ergebnisrahmen = {status?: number; reply?: string; steps?: EHActivityStep[]; cards?: OfferCard[]; sources?: Array<{title: string; href: string; domain: string}>; links?: Array<{label: string; href: string}>; suggestions?: string[]};
 
 /** Offene Angebote als Karte unter der Antwort; gebucht wird nur per Knopf. */
 function kartenknoten(karten?: OfferCard[]) {
@@ -39,12 +36,34 @@ function ergebnis(status: number, data: Ergebnisrahmen): EHAssistantResult {
   const reply = typeof data.reply === 'string' ? data.reply : AUSFALL;
   const steps = data.steps?.length ? {steps: data.steps} : {};
   const cards = kartenknoten(data.cards);
+  const sources = data.sources?.length ? data.sources : data.links?.length ? data.links.map(l => ({title: l.label, href: l.href, domain: l.href.startsWith('/') ? 'einfachhausen.de' : (() => { try { return new URL(l.href).hostname.replace(/^www\./,''); } catch { return l.href; }})()})) : undefined;
   if (status === 401) return {kind: 'login', reply, ...steps};
   if (status === 402) return {kind: 'quota', reply, ...steps};
-  return {kind: status >= 200 && status < 300 ? 'reply' : 'error', reply, ...steps, ...(cards ? {cards} : {})};
+  const vorschlaege = status >= 200 && status < 300 && data.suggestions?.length ? data.suggestions.slice(0, 3) : undefined;
+  return {kind: status >= 200 && status < 300 ? 'reply' : 'error', reply, ...steps, ...(cards ? {cards} : {}), ...(sources ? {sources} : {}), ...(vorschlaege ? {suggestions: vorschlaege} : {})};
 }
 
-async function send(messages: EHAssistantMessage[], signal: AbortSignal, onStep?: (step: EHActivityStep) => void): Promise<EHAssistantResult> {
+async function send(messages: EHAssistantMessage[], signal: AbortSignal, onStep?: (step: EHActivityStep) => void, options?: EHSendOptions): Promise<EHAssistantResult> {
+  const anhang = options?.attachment ?? null;
+  // Dokument: durch die bestehende Hausakte-Upload-Pipeline (private Ablage,
+  // Texterkennung und Klassifizierung, Chat-Rueckmeldung) – kein /api/ki-Aufruf
+  // und kein belastetes Modell, die Antwort kommt direkt zurueck.
+  if (anhang?.kind === 'document') {
+    const beschreibung = messages.at(-1)?.content ?? '';
+    const ergebnis = await uploadAssistantChatDocumentAction(anhang.file, beschreibung);
+    if (!ergebnis.ok) return {kind: 'error', reply: ergebnis.reply};
+    return {kind: 'reply', reply: ergebnis.reply,
+      steps: [{key: 'dokument', label: 'Dokument gespeichert', state: 'done', meta: 'Hausakte', details: ['Private Ablage, Texterkennung und Zuordnung auf dem Server.', 'Kein Cloud-Modell aufgerufen, kein Kontingent belastet.']}],
+      suggestions: ['Frag mich zu dem Dokument', 'Dokumente ansehen', 'Hausakte durchsuchen']};
+  }
+  // Foto: erst über den bestehenden privaten Medienpfad ablegen; der Chat
+  // schickt danach nur den Pfad mit, keine Bilddaten im JSON.
+  let fotoPfad: string | null = null;
+  if (anhang?.kind === 'photo') {
+    const gesichert = await saveAssistantChatPhotoAction(anhang.file, messages.at(-1)?.content ?? '');
+    if (!gesichert.ok) return {kind: 'error', reply: gesichert.reply};
+    fotoPfad = gesichert.saved ?? null;
+  }
   // Wachhund statt fester Frist: solange Ereignisse kommen, darf der Aufruf
   // laufen. Erst 30 Sekunden Stille brechen ab.
   const abbruch = new AbortController();
@@ -54,7 +73,7 @@ async function send(messages: EHAssistantMessage[], signal: AbortSignal, onStep?
     const response = await fetch(`/api/ki${onStep ? '?stream=1' : ''}`, {
       method: 'POST',
       headers: {'Content-Type': 'application/json', ...(onStep ? {'Accept': 'text/event-stream'} : {})},
-      body: JSON.stringify({messages}),
+      body: JSON.stringify({messages, ...(options?.tool ? {tool: options.tool} : {}), ...(fotoPfad ? {photoPath: fotoPfad} : {})}),
       signal: AbortSignal.any([signal, abbruch.signal]),
     });
     if (onStep && response.ok && response.body && (response.headers.get('content-type') ?? '').includes('text/event-stream')) {
@@ -80,12 +99,14 @@ async function send(messages: EHAssistantMessage[], signal: AbortSignal, onStep?
   }
 }
 
-export function HouseAssistant({placement = 'floating', open, onOpenChange, compact = false}: {
+export function HouseAssistant({placement = 'floating', open, onOpenChange, compact = false, suggestions}: {
   placement?: 'floating' | 'toolbar' | 'panel';
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   /** Der rechte Bereich ist eingeklappt: nur die Kachel bleibt sichtbar. */
   compact?: boolean;
+  /** Startvorschlaege (Seite + eigene Daten) fuer den leeren Verlauf. */
+  suggestions?: string[];
 }) {
   const path = usePathname();
   const isOwner = path === '/app' || path?.startsWith('/app/');
@@ -94,15 +115,9 @@ export function HouseAssistant({placement = 'floating', open, onOpenChange, comp
   if (placement === 'floating' && isOwner) return null;
   if (placement !== 'floating' && !isOwner) return null;
   // Do not compete with authentication, provider work, payments, print or existing chat.
-  if (!path || path === '/app/onboarding' || path.startsWith('/app/onboarding/') || /^\/(login|register|auth|onboarding|pro|admin|ki-chat|checkout|pay|transfer|partner-invite|design-system)(\/|$)/.test(path)
+  if (!path || path === '/app/onboarding' || path.startsWith('/app/onboarding/') || /^\/(login|register|auth|onboarding|pro|partner|admin|ki-chat|checkout|pay|transfer|partner-invite|design-system)(\/|$)/.test(path)
       || /^\/(passport|receipt)(\/|$)/.test(path) || /^\/app\/invoices\//.test(path)
       || ['/impressum', '/datenschutz', '/app/hausmeister'].includes(path) || (path === '/app/messages' && placement !== 'toolbar')) return null;
-  return <>
-    <EHAssistant placement={placement} key={path} onSend={send} loginHref="/login" settingsHref="/app/settings"
-      aboveNavigation={path === '/app' || path.startsWith('/app/')} open={open} onOpenChange={onOpenChange} compact={compact} />
-    {isOwner && placement !== 'floating' && <Link className={s.menuItem} data-placement={placement}
-      href="/app/hausmeister#hausmeister-composer" title="Dokument im Hausmanager hochladen">
-      <FileText size={16} aria-hidden="true"/><span>Dokument</span>
-    </Link>}
-  </>;
+  return <EHAssistant placement={placement} onSend={send} loginHref="/login" settingsHref="/app/settings"
+    aboveNavigation={path === '/' || path === '/app' || path.startsWith('/app/')} open={open} onOpenChange={onOpenChange} compact={compact} suggestions={suggestions} />;
 }

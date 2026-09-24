@@ -12,19 +12,10 @@ type ProfileField = { id: string; label: string; value: string; filled: boolean 
 
 /**
  * Werkbank-Kopf, Kennzahlenzeile und rechte Spalte. Dieselben Token wie /app:
- * Karten, Registerlinie, keine zweite Stilfamilie. Der Balken rechts traegt
- * den Anteil der hinterlegten Angaben, kein Layout.
+ * Karten, Registerlinie, keine zweite Stilfamilie. Der Fortschrittsbalken war
+ * hier zusaetzlich in der rechten Spalte doppelt (Betreiber-Order 2026-09-23:
+ * raus) — die Vollstaendigkeit steht nur noch im Seiteninhalt selbst.
  */
-
-// Prozent -> fuenf Stufen. Die Breite liegt in der shared CSS, nicht inline
-// (design-check: keine unowned inline styles).
-function fillStep(pct: number): 'full' | 'three-quarter' | 'half' | 'quarter' | undefined {
-  if (pct >= 100) return 'full';
-  if (pct >= 75) return 'three-quarter';
-  if (pct >= 50) return 'half';
-  if (pct >= 25) return 'quarter';
-  return undefined;
-}
 
 export default async function Profile(){
   const u=await requireUser('homeowner'); const p=db.prepare('SELECT * FROM homeowner_profiles WHERE user_id=?').get(u.id) as any;
@@ -40,7 +31,6 @@ export default async function Profile(){
   ];
   const filled=fields.filter(f=>f.filled).length;
   const complete=filled===fields.length;
-  const profilePct=Math.round(filled/fields.length*100);
   // Abgleich Profiladresse gegen die Hausakte: beide werden beim Speichern des
   // Profils zusammengefuehrt, koennen aber getrennt gepflegt worden sein.
   const addressMatch=!!property&&(property.postcode||'')===(p?.postcode||'')&&(property.address||'')===(p?.address||'');
@@ -55,12 +45,6 @@ export default async function Profile(){
       { href: '/app/settings', label: 'App-Einstellungen', active: false },
     ]} brandSub={property?.address || p?.address} rail={<>
       <p className="eh-werkbank-rail-h">Kontext dieser Seite</p>
-      <div className="eh-werkbank-karte">
-        <h4>Profilvollständigkeit{!complete && <span className="eh-werkbank-badge">unvollständig</span>}</h4>
-        <div className="eh-werkbank-bar"><i data-fill={fillStep(profilePct)} /></div>
-        <div className="eh-werkbank-row"><span>Angaben</span><span>{filled} von {fields.length}</span></div>
-        <div className="eh-werkbank-row"><span>Status</span><span>{complete ? 'Alle hinterlegt' : 'Noch Lücken'}</span></div>
-      </div>
       <div className="eh-werkbank-karte">
         <h4>Konto &amp; App</h4>
         <div className="eh-werkbank-item"><span><b>Benachrichtigungen</b><small>Benachrichtigungen verwalten</small></span><span><Link href="/notifications">öffnen</Link></span></div>

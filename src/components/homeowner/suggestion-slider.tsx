@@ -2,11 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { CalendarCheck, ChevronLeft, ChevronRight, ShieldCheck, Truck } from 'lucide-react';
+import { CalendarCheck, ChevronLeft, ChevronRight, PiggyBank, ShieldCheck, Truck } from 'lucide-react';
 import { EHText } from '@/design-system';
 import styles from '@/app/app/eigentuemer-start.module.css';
 
-export type SuggestionIconKey = 'wartung' | 'sperrmuell' | 'versicherung';
+export type SuggestionIconKey = 'wartung' | 'sperrmuell' | 'versicherung' | 'sparen';
 
 export type Suggestion = {
   id: string;
@@ -44,7 +44,7 @@ export const DASHBOARD_SUGGESTIONS: Suggestion[] = [
     title: 'Versicherungs-Check',
     text: 'Hausrat, Haftpflicht und Gebäude gegenprüfen – Lücken finden und doppelte Beiträge rechtzeitig vermeiden.',
     cta: 'Verträge vergleichen',
-    href: '/app/contracts?tab=vergleichen',
+    href: '/app/contracts#vergleiche',
     iconKey: 'versicherung',
   },
 ];
@@ -53,13 +53,18 @@ const ICONS: Record<SuggestionIconKey, typeof CalendarCheck> = {
   wartung: CalendarCheck,
   sperrmuell: Truck,
   versicherung: ShieldCheck,
+  sparen: PiggyBank,
 };
 
 const ROTATE_MS = 5000;
 
-export function SuggestionSlider({ items = DASHBOARD_SUGGESTIONS }: { items?: Suggestion[] }) {
+export function SuggestionSlider({ items = DASHBOARD_SUGGESTIONS, teaser = null }: { items?: Suggestion[]; teaser?: Suggestion | null }) {
+  // teaser kommt als prop aus einer Server Component (die darf die Const-Liste
+  // nicht importieren — 'use client'-Waerte sind dort Client-Refs). Daran
+  // andern: hier vorne anhaengen, alles weitere bleibt identisch.
+  const list = teaser ? [teaser, ...items] : items;
   const [index, setIndex] = useState(0);
-  const count = items.length;
+  const count = list.length;
   const safeIndex = count > 0 ? index % count : 0;
 
   // Läuft immer automatisch weiter (5 s je Vorschlag); Punkte und Pfeile
@@ -71,7 +76,7 @@ export function SuggestionSlider({ items = DASHBOARD_SUGGESTIONS }: { items?: Su
   }, [count]);
 
   if (count === 0) return null;
-  const item = items[safeIndex];
+  const item = list[safeIndex];
   const Icon = ICONS[item.iconKey] ?? CalendarCheck;
 
   return (
@@ -90,7 +95,7 @@ export function SuggestionSlider({ items = DASHBOARD_SUGGESTIONS }: { items?: Su
 
       <div className={styles.suggestControls}>
         <div className={styles.suggestDots}>
-          {items.map((entry, i) => (
+          {list.map((entry, i) => (
             <button
               key={entry.id}
               type="button"

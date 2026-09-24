@@ -120,92 +120,70 @@
 .railScroll :global(.eh-werkbank-chip) { flex: none; }
 .railControls { display: flex; gap: 8px; margin-left: auto; }
 
-/* ── Haus-Historie: zwei Spalten, mobil Anstehendes zuerst ──────────────
- * Die Reihenfolge im Markup ist Anstehendes, Vergangenes. Auf breiten
- * Schirmen dreht `order` sie auf Vergangenes links / Anstehendes rechts;
- * auf dem Telefon gilt wieder die Markup-Reihenfolge. */
+/* ── Haus-Historie: Zeitleisten-Karte ─────────────────────────────────
+ * Betreiber-Order 2026-09-23, Muster nach der 21st.dev-Incident-Karte (adaptiert,
+ * nicht kopiert — hauseigene Token, Ton ueber data-tone, keine Tailwind-Utils):
+ * Kopf mit Symbol (sofortige Erkennung), neuestem Vorgang und Statusplakette;
+ * darunter die Zeitleiste an einer durchgehenden Linie, der neueste Punkt in
+ * Petrol. Aufgeklappt im Ruhezustand, ueber die Zeile „Zeitleiste“ schmal zu
+ * stellen. */
 
-.historyCols {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
-  align-items: start;
-}
+.tlCard { border:1px solid var(--eh-color-line); border-radius:var(--eh-radius-control); background:var(--eh-color-white); padding:18px 22px; }
+/* 'Als naechstes'-Zeile: fuehrt die Haus-Historie, eigens Link und eigens
+   beschriftet (Termin bzw. offene Entscheidung) — nicht mehr Fuss der Karte. */
+.tlNext { display:flex; align-items:center; gap:10px; margin-bottom:12px; padding:12px 16px; border:1px solid var(--eh-color-line); border-radius:var(--eh-radius-control); background:var(--eh-color-white); text-decoration:none; color:inherit; }
+.tlNext:hover, .tlNext:focus-visible { background:var(--eh-color-paper); border-color:var(--eh-color-petrol); }
+.tlNextIcon { flex:none; display:grid; place-items:center; width:28px; height:28px; border-radius:var(--eh-radius-control); background:var(--eh-color-paper); color:var(--eh-color-petrol); }
+.tlNextLabel { flex:none; font-size:var(--eh-font-meta); font-weight:var(--eh-weight-semibold); text-transform:uppercase; letter-spacing:var(--eh-track-wide); color:var(--eh-color-secondary); }
+.tlNextTitel { font-size:var(--eh-font-label); font-weight:var(--eh-weight-medium); overflow-wrap:anywhere; }
+.tlNextWhen { margin-left:auto; padding-left:14px; font-size:var(--eh-font-meta); color:var(--eh-color-secondary); font-variant-numeric:tabular-nums; }
+.tlNextChev { flex:none; color:var(--eh-color-secondary); }
+.tlNext:hover .tlNextChev { color:var(--eh-color-petrol); }
 
-.historyCols > * { min-width: 0; }
-.historyCols > :nth-child(1) { order: 2; }
-.historyCols > :nth-child(2) { order: 1; }
+.tlHead { display:flex; align-items:flex-start; gap:12px; }
+.tlIcon { flex:none; display:grid; place-items:center; width:36px; height:36px; border-radius:var(--eh-radius-control); background:var(--eh-color-paper); color:var(--eh-color-petrol); }
+.tlHeadCopy { flex:1 1 auto; min-width:0; display:grid; gap:3px; }
+.tlHeadTitel { font-size:var(--eh-font-label); font-weight:var(--eh-weight-semibold); line-height:var(--eh-leading-tight); overflow-wrap:anywhere; }
+.tlHeadMeta { display:flex; flex-wrap:wrap; align-items:center; gap:8px; font-size:var(--eh-font-meta); color:var(--eh-color-secondary); }
 
-.historyPanel { display: grid; gap: 8px; align-content: start; }
+.tlBadge { flex:none; padding:3px 11px; border:1px solid var(--eh-color-line); border-radius:var(--eh-radius-pill); background:var(--eh-color-paper); font-size:var(--eh-font-meta); font-weight:var(--eh-weight-semibold); color:var(--eh-color-secondary); }
+.tlBadge[data-tone='warn'] { color:var(--eh-color-terra); }
+.tlBadge[data-tone='ok'] { color:var(--eh-color-success); }
+.tlBadge[data-tone='info'] { color:var(--eh-color-petrol); }
 
-.historyPanelHead { display: flex; align-items: center; gap: 8px; }
+.tlToggle { display:inline-flex; align-items:center; gap:6px; margin-top:10px; padding:8px 0; border:0; background:transparent; font-size:var(--eh-font-meta); font-weight:var(--eh-weight-semibold); color:var(--eh-color-secondary); cursor:pointer }
+.tlToggle:hover { color:var(--eh-color-petrol); }
+.tlChevron { transition:transform .2s ease; }
+.tlToggle[data-state='open'] .tlChevron { transform:rotate(180deg); }
 
-.historyPanelTitle {
-  font-size: var(--eh-font-meta);
-  font-weight: var(--eh-weight-bold);
-  letter-spacing: var(--eh-track-wide);
-  text-transform: uppercase;
-  color: var(--eh-color-secondary);
-}
+/* Die Liste: grosse Punkte, luftige Zeilen, ein Klickfeld pro Eintrag.
+   Die Linie faengt unter dem Kopf an und laeuft bis zum letzten Punkt. */
+.tlGruppen { display:grid; gap:24px; padding-top:16px; }
+.tlGruppe { margin:0 0 8px; font-size:var(--eh-font-meta); font-weight:var(--eh-weight-semibold); letter-spacing:var(--eh-track-wide); text-transform:uppercase; color:var(--eh-color-secondary); }
+.tlList { position:relative; list-style:none; margin:0; padding:2px 0 0; display:grid; gap:20px; }
+.tlList::before { content:''; position:absolute; left:8px; top:12px; bottom:16px; width:1px; background:var(--eh-color-line); }
+.tlItem { position:relative; }
+.tlRow { display:flex; align-items:center; gap:10px; min-height:44px; text-decoration:none; color:inherit; border-radius:var(--eh-radius-control); transition:background-color .12s ease; }
+.tlRow:hover { background:var(--eh-color-paper); }
+/* Erledigtes und abgebrochenes tritt zurueck: Titel und Terminhinweis in
+   Sekundaertinte, die Statusplakette bleibt als Anker lesbar. */
+.tlRow[data-vergangen] .tlTitel { color:var(--eh-color-secondary); }
+/* Punkt-Sprache (Betreiber-Nachschurf 23.09.): offen/laufend = petrolrandig
+   mit gefuelltem Kern, vergangen = hohl und grau — Unterscheidung ohne Lesen. */
+.tlRow:not([data-vergangen]) .tlDot { border-color:var(--eh-color-petrol); }
+.tlRow:not([data-vergangen]) .tlDot::after { background:var(--eh-color-petrol); }
+.tlRow[data-vergangen] .tlDot::after { content:none; }
+.tlDot { z-index:1; flex:none; width:17px; height:17px; border:1px solid var(--eh-color-line); border-radius:var(--eh-radius-pill); background:var(--eh-color-white); display:grid; place-items:center; }
+.tlDot::after { content:''; width:7px; height:7px; border-radius:var(--eh-radius-pill); background:var(--eh-color-secondary); }
+.tlDot[data-neuest]::after { background:var(--eh-color-petrol); width:9px; height:9px; }
+.tlMehr { justify-self:start; display:inline-flex; align-items:center; padding:8px 14px; border:1px solid var(--eh-color-line); border-radius:var(--eh-radius-pill); background:var(--eh-color-white); font-size:var(--eh-font-meta); font-weight:var(--eh-weight-semibold); color:var(--eh-color-secondary); cursor:pointer; }
+.tlMehr:hover, .tlMehr:focus-visible { color:var(--eh-color-petrol); border-color:var(--eh-color-petrol); background:var(--eh-color-paper); }
+.tlBody { flex:1 1 auto; min-width:0; display:flex; align-items:baseline; gap:6px 14px; flex-wrap:wrap; }
+.tlTitel { font-size:var(--eh-font-label); font-weight:var(--eh-weight-medium); line-height:var(--eh-leading-tight); overflow-wrap:anywhere; flex:1 1 180px; }
+.tlWhen { margin-left:auto; font-size:var(--eh-font-meta); color:var(--eh-color-secondary); font-variant-numeric:tabular-nums; flex:none; }
+.tlZusatz { flex:1 1 100%; margin:1px 0 0 27px; font-size:var(--eh-font-meta); color:var(--eh-color-secondary); }
 
-.historyPanelCount {
-  margin-left: auto;
-  font-size: var(--eh-font-meta);
-  font-variant-numeric: tabular-nums;
-  color: var(--eh-color-secondary);
-}
-
-.historyList { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
-
-.historyRow {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  min-height: 44px;
-  padding: 12px 14px;
-  border: 1px solid var(--eh-color-line);
-  border-radius: var(--eh-radius-control);
-  background: var(--eh-color-white);
-  color: inherit;
-  text-decoration: none;
-}
-
-.historyRow:hover { background: var(--eh-color-paper); }
-
-.historyRowMain { flex: 1; min-width: 0; display: grid; gap: 2px; }
-
-.historyRowTitle {
-  font-size: var(--eh-font-label);
-  font-weight: var(--eh-weight-medium);
-  line-height: var(--eh-leading-tight);
-  overflow-wrap: anywhere;
-}
-
-.historyRowMeta { font-size: var(--eh-font-meta); color: var(--eh-color-secondary); }
-
-.historyRowStatus { font-weight: var(--eh-weight-semibold); }
-.historyRowStatus[data-tone='warn'] { color: var(--eh-color-terra); }
-.historyRowStatus[data-tone='ok'] { color: var(--eh-color-success); }
-.historyRowStatus[data-tone='info'] { color: var(--eh-color-petrol); }
-
-.historyRowWhen { display: grid; gap: 2px; text-align: right; font-variant-numeric: tabular-nums; flex: none; }
-.historyRowDate { font-size: var(--eh-font-label); font-weight: var(--eh-weight-semibold); }
-.historyRowTime { font-size: var(--eh-font-meta); color: var(--eh-color-secondary); }
-.historyRowChevron { color: var(--eh-color-secondary); flex: none; }
-
-.historyColEmpty {
-  margin: 0;
-  padding: 14px;
-  border: 1px dashed var(--eh-color-line);
-  border-radius: var(--eh-radius-control);
-  font-size: var(--eh-font-meta);
-  color: var(--eh-color-secondary);
-}
-
-@media (max-width: 900px) {
-  .historyCols { grid-template-columns: minmax(0, 1fr); }
-  .historyCols > * { order: 0; }
-}
+.tlLeer { margin:12px 0 0; font-size:var(--eh-font-meta); color:var(--eh-color-secondary); }
 
 /* ── Rechte Schiene: flache Kennzahlen-Karten ─────────────────────────── */
 
@@ -340,4 +318,10 @@
 .quickCardPrimary .quickCardArrow { color: var(--eh-color-white); }
 
 @media (max-width: 1100px) { .quickGrid, .quickGridThree { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 600px) { .quickGrid, .quickGridThree { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 600px) {
+  .quickGrid { grid-template-columns: minmax(0, 1fr); }
+  /* Betreiber-Order 2026-09-23: auf Schmal die beiden kleineren Karten
+     nebeneinander, die erste (Primar-Aktion) bleibt ausschlaggebend breit. */
+  .quickGridThree { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .quickGridThree > :first-child { grid-column: 1 / -1; }
+}

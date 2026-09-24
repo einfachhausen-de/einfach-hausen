@@ -29,7 +29,7 @@ if(mod){
   assert.doesNotThrow(()=>mod.executeAssistantTool(a,'documents',"' OR 1=1 --"));
  });
  test('every capability returns a bounded useful result',()=>{
-  for(const cap of ['jobs','quotes','contracts','documents','contacts','calendar','house','maintenance','next_actions','compare_quotes','house_check','house_event','find_provider','create_job','compare_tariffs','help','clarify']){
+  for(const cap of ['jobs','quotes','contracts','documents','contacts','calendar','house','maintenance','next_actions','compare_quotes','house_check','house_event','find_provider','create_job','compare_tariffs','search_house','create_report','help','clarify']){
    const r=mod.executeAssistantTool(a,cap,'Meine Daten');
    assert.equal(typeof r.reply,'string');assert.ok(r.reply.length>10&&r.reply.length<16000);
   }
@@ -64,6 +64,25 @@ test('document lookup filters named document rather than returning unrelated lat
  insert.run(ja,'Rechnung Müller');insert.run(ja,'Rechnung Meier');
  const out=mod.executeAssistantTool(a,'documents','Wo ist meine Rechnung von Müller?');
  assert.match(out.reply,/Müller/);assert.doesNotMatch(out.reply,/Meier|Annas Beleg/);
+});
+test('search_house bundles own tenant data from several house areas',()=>{
+ db.prepare("INSERT INTO house_assets(homeowner_id,name,kind,installed_year) VALUES(?,'Annas Wärmepumpe','Heizung',2021)").run(a);
+ db.prepare("INSERT INTO house_assets(homeowner_id,name,kind,installed_year) VALUES(?,'Bens Geheimplane','Heizung',2020)").run(b);
+ db.prepare("INSERT INTO maintenance_tasks(homeowner_id,title,category,due_date) VALUES(?,'Annas Filter tauschen','Heizung',date('now'))").run(a);
+ const out=mod.executeAssistantTool(a,'search_house','Wärmepumpe Müller');
+ assert.match(out.reply,/Annas Wärmepumpe/);
+ assert.match(out.reply,/Rechnung Müller/);
+ assert.match(out.reply,/Anlage/);
+ assert.match(out.reply,/Dokument/);
+});
+test('search_house never leaks foreign owner data',()=>{
+ const out=mod.executeAssistantTool(a,'search_house','Heizung');
+ assert.doesNotMatch(out.reply,/Bens Geheimplane|Bens Geheimauftrag|Bens Geheimanbieter|Bens Geheimbeleg|Bens Geheimwartung/);
+});
+test('search_house stays bounded and answers honestly without query',()=>{
+ const out=mod.executeAssistantTool(a,'search_house','xyzunbekannt');
+ assert.ok(out.reply.length>10&&out.reply.length<16000);
+ assert.match(out.reply,/nicht.*gefunden|nichts zu|noch keine Einträge/);
 });
 test('calendar excludes past ISO-T appointments from today',()=>{
  const future=job(a,'Zukunftstermin');

@@ -29,6 +29,16 @@
   .eh-werkbank-kopf-tools { overflow-x:auto; max-width:100%; padding-bottom:2px; }
 }
 .eh-werkbank-tbl { min-width:0; max-width:100%; overflow-x:auto; }
+/* Dichtes Dashboard-Set (24.09., Betreiber: 'Kompakt-Dashboard, KPI-Streifen
+   oben; Kopf-Freiflaechen waren der Aergernis-Punkt): kompakter Kopf mit
+   KPI-Kacheln, einzeilige Fokuszeile, engere Tabellen-Zellen oben. */
+.eh-vdash-fokus { display:flex; align-items:center; gap:10px; padding:8px 13px; border:1px solid var(--eh-rule); border-left:3px solid var(--eh-color-petrol); border-radius:var(--eh-radius-control); background:var(--eh-color-white); text-decoration:none; color:var(--eh-color-ink); font-size:var(--eh-font-label); }
+.eh-vdash-fokus:hover { background:var(--eh-color-paper); }
+.eh-vdash-fokus[data-tone="danger"] { border-left-color:#b42318; background:#fff9f8; }
+.eh-vdash-fokus b { font-variant-numeric:tabular-nums; font-weight:var(--eh-weight-bold); }
+.eh-vdash-fokus > span { flex:1 1 auto; min-width:0; overflow-wrap:anywhere; }
+.eh-vdash-fokus svg { flex:none; opacity:.5; }
+
 .eh-werkbank-kopf-cta { flex:none; display:inline-flex; align-items:center; gap:8px; background:var(--eh-color-petrol); color:var(--eh-color-white); border-radius:var(--eh-radius-control); padding:10px 18px; font-weight:var(--eh-weight-semibold); text-decoration:none; font-size:var(--eh-font-label); }
 .eh-werkbank-kopf-copy h1 { font-size:var(--eh-font-body); font-weight:var(--eh-weight-semibold); line-height:var(--eh-leading-tight); }
 .eh-werkbank-kopf-copy span { font-size:var(--eh-font-label); line-height:var(--eh-leading-normal); color:var(--eh-muted); }
@@ -57,6 +67,24 @@
 .eh-werkbank-chip:focus-visible { border-color:var(--eh-color-petrol); }
 .eh-werkbank-chip[aria-current="page"] { background:var(--eh-color-petrol); color:var(--eh-color-white); border-color:var(--eh-color-petrol); }
 .eh-werkbank-chip-n { font-variant-numeric:tabular-nums; }
+/* Farbige Vergleichs-Chips (Betreiber-Order 2026-09-23: mehr Farben,
+   2. Order: kraeftiger und NICHT die Flaechen, sondern nur Symbol und Rand).
+   Das Markup traegt nur die Kategorie (data-hue); der Zustand bleibt in
+   aria-current (petrol), nie in einer Klasse. Die Tinten sind lokale Token
+   dieser Datei — volle Saettigung, weil sie Rand und Symbol steuern. */
+.eh-werkbank-chip[data-hue="sonne"]    { --eh-chip-ink:#94590a; }
+.eh-werkbank-chip[data-hue="himmel"]   { --eh-chip-ink:#0f62c4; }
+.eh-werkbank-chip[data-hue="veilchen"] { --eh-chip-ink:#6d33d6; }
+.eh-werkbank-chip[data-hue="stahl"]    { --eh-chip-ink:#0e6f8a; }
+.eh-werkbank-chip[data-hue="rose"]     { --eh-chip-ink:#d0265f; }
+.eh-werkbank-chip[data-hue="sand"]     { --eh-chip-ink:#9a6414; }
+.eh-werkbank-chip[data-hue="terra"]    { --eh-chip-ink:#b34a1d; }
+.eh-werkbank-chip[data-hue="blatt"]    { --eh-chip-ink:#177a35; }
+.eh-werkbank-chip[data-hue="petrol"]   { --eh-chip-ink:#0c5a63; }
+.eh-werkbank-chip[data-hue] { border-color:var(--eh-chip-ink); }
+.eh-werkbank-chip[data-hue] > svg { color:var(--eh-chip-ink); }
+.eh-werkbank-chip[data-hue]:hover, .eh-werkbank-chip[data-hue]:focus-visible { border-color:var(--eh-chip-ink); background:var(--eh-color-paper); }
+
 .eh-werkbank-tbl small { display:block; color:var(--eh-muted); font-size:var(--eh-font-eyebrow); margin-top:2px; }
 /* Der versiegelte EHFileInput bringt eine eigene Mindestbreite mit. Ohne
    Klammer drueckt sie die Feldspalte ueber das Viewport; der Consumer
@@ -65,3 +93,161 @@
 .eh-werkbank-filefield :is(span, div) { max-width: 100%; }
 
 .eh-werkbank-tbl a { display:inline-flex; align-items:center; min-height:44px; color:inherit; text-decoration:none; font-weight:var(--eh-weight-semibold); }
+
+/* ── Verträge & Tarife: Kartenliste im Startseiten-Muster (23.09.) ──────
+   Je Vertrag eine Zeile, aufklappbar zu Fakten, Spar-Check und Bearbeiten.
+   Nur Tokens; der Frist-Zustand faerbt Rand+Schrift, nie die Flaeche. */
+.eh-vertrag-list { display:grid; gap:10px; }
+.eh-vertrag { border:1px solid var(--eh-color-line); border-radius:var(--eh-radius-control); background:var(--eh-color-white); }
+/* Vertrags-Filter (24.09.): Suche + Status/Sortierung als GET-Formular,
+   ohne JS bedienbar — laeuft damit auch in Vorschau-Panels ohne Cookies. */
+.eh-vertrag-filter { display:flex; flex-wrap:wrap; gap:10px; align-items:end; margin:0 0 14px; }
+.eh-vertrag-filter input[type=search] { flex:1 1 260px; min-height:44px; padding:10px 14px; border:1px solid var(--eh-color-line); border-radius:var(--eh-radius-control); font:inherit; background:var(--eh-color-white); color:var(--eh-color-ink); }
+.eh-vertrag-filter label { display:grid; gap:4px; font-size:var(--eh-font-meta); color:var(--eh-color-ink); }
+.eh-vertrag-filter select { min-height:44px; padding:8px 12px; border:1px solid var(--eh-color-line); border-radius:var(--eh-radius-control); font:inherit; background:var(--eh-color-white); color:var(--eh-color-ink); }
+.eh-vertrag-filter button { min-height:44px; padding:8px 18px; border:1px solid var(--eh-color-petrol); border-radius:var(--eh-radius-control); background:var(--eh-color-petrol); color:var(--eh-color-white); font:inherit; cursor:pointer; }
+.eh-vertrag-filter input:focus-visible, .eh-vertrag-filter select:focus-visible, .eh-vertrag-filter button:focus-visible { outline:2px solid var(--eh-color-petrol); outline-offset:2px; }
+.eh-vertrag-treffer { margin:0 0 10px; font-size:var(--eh-font-meta); }
+/* Vertragstabelle (24.09., Betreiber-Vorbild): flache Zeilen mit feinen
+   Hairlines, Toolbar aus Suche + Status-Umschalter + Spalten-Toggle,
+   Sortierung ueber die Kopfzeile — alles URL-getrieben, kein JavaScript. */
+.eh-vtbl { border:1px solid var(--eh-color-line); border-radius:var(--eh-radius-panel); background:var(--eh-color-white); overflow-x:auto; }
+.eh-vtbl-tool { display:flex; flex-wrap:wrap; gap:8px; align-items:center; padding:10px 12px; border-bottom:1px solid var(--eh-rule); }
+.eh-vtbl-suche { position:relative; flex:1 1 240px; display:flex; align-items:center; gap:9px; border:1px solid var(--eh-color-line); border-radius:var(--eh-radius-pill); padding:0 13px; min-height:40px; background:var(--eh-color-white); }
+.eh-vtbl-suche svg { flex:none; opacity:.55; }
+.eh-vtbl-suche input { flex:1; border:0; outline:0; font:inherit; width:100%; background:transparent; padding:10px 0; color:var(--eh-color-ink); }
+.eh-vtbl-suche:focus-within { border-color:var(--eh-color-petrol); }
+.eh-vtbl-suche-btn { flex:none; display:inline-flex; align-items:center; justify-content:center; border:0; border-radius:var(--eh-radius-pill); background:var(--eh-color-petrol); color:var(--eh-color-white); width:28px; height:28px; cursor:pointer; transition:background var(--eh-motion-duration) var(--eh-motion-ease); }
+.eh-vtbl-suche-btn:hover { background:var(--eh-color-deep); }
+.eh-vtbl-suche input::-webkit-search-cancel-button, .eh-ang-suche input::-webkit-search-cancel-button { -webkit-appearance:none; appearance:none; }
+.eh-live-x { flex:none; display:inline-flex; align-items:center; justify-content:center; border:0; background:transparent; color:var(--eh-color-secondary); width:24px; height:24px; border-radius:var(--eh-radius-pill); cursor:pointer; transition:background var(--eh-motion-duration) var(--eh-motion-ease), color var(--eh-motion-duration) var(--eh-motion-ease); }
+.eh-live-x:hover { background:var(--eh-color-paper); color:var(--eh-color-ink); }
+.eh-vtbl-treffer[data-live], .eh-ang-treffer[data-live] { flex-basis:100%; margin:2px 4px 0; color:var(--eh-color-secondary); }
+.eh-live-reset { border:0; background:none; padding:0; font:inherit; color:var(--eh-color-petrol); cursor:pointer; }
+.eh-vtbl-btn { display:inline-flex; align-items:center; gap:8px; min-height:40px; padding:7px 12px; border:1px solid var(--eh-color-line); border-radius:var(--eh-radius-control); background:var(--eh-color-white); color:var(--eh-color-ink); text-decoration:none; font-size:var(--eh-font-label); font-weight:var(--eh-weight-semibold); white-space:nowrap; }
+.eh-vtbl-btn:hover { background:var(--eh-color-paper); border-color:var(--eh-color-petrol); }
+.eh-vtbl-treffer { margin:10px 16px 0; font-size:var(--eh-font-meta); }
+.eh-vtbl-treffer a { color:var(--eh-color-petrol); }
+.eh-vtbl-table { width:100%; border-collapse:collapse; min-width:640px; }
+.eh-vtbl-table th { text-align:left; font-size:var(--eh-font-meta); font-weight:var(--eh-weight-semibold); opacity:.66; padding:9px 13px 5px; border-bottom:1px solid var(--eh-rule); white-space:nowrap; }
+.eh-vtbl-table th a, .eh-vtbl-sortlink { display:inline-flex; align-items:center; gap:6px; color:inherit; text-decoration:none; }
+.eh-vtbl-table th a:hover, .eh-vtbl-sortlink:hover { color:var(--eh-color-petrol); opacity:1; }
+.eh-vtbl-sort-idle { opacity:.28; }
+.eh-vtbl-table th.is-sorted a { color:var(--eh-color-petrol); opacity:1; }
+.eh-vtbl-table td { padding:9px 13px; vertical-align:top; }
+.eh-vtbl-table tbody tr + tr td { border-top:1px solid var(--eh-rule); }
+.eh-vtbl-table tbody tr:hover { background:var(--eh-color-paper); }
+.eh-vtbl-table tr[data-sel], .eh-vtbl-table tr[data-sel]:hover { background:var(--eh-color-paper); }
+.eh-vtbl-anbieter a { display:flex; align-items:center; gap:8px; color:inherit; text-decoration:none; }
+.eh-vtbl-anbieter a b { font-weight:var(--eh-weight-semibold); }
+.eh-vtbl-anbieter a:hover b { color:var(--eh-color-petrol); text-decoration:underline; text-underline-offset:3px; }
+.eh-vtbl-anbieter small { display:block; margin-top:3px; opacity:.62; font-size:var(--eh-font-meta); }
+.eh-vtbl-zahlen { text-align:right; font-variant-numeric:tabular-nums; }
+.eh-vtbl-kosten b { font-weight:var(--eh-weight-bold); }
+.eh-vtbl-kosten small { display:block; opacity:.62; font-size:var(--eh-font-meta); }
+.eh-vtbl-frist { font-size:var(--eh-font-label); white-space:nowrap; }
+.eh-vtbl-frist[data-tone="danger"] { color:#b42318; font-weight:var(--eh-weight-semibold); }
+.eh-vtbl-frist[data-tone="warn"] { color:#8a5a12; }
+.eh-vtbl-frist[data-tone="ok"] { opacity:.78; }
+.eh-vtbl-badge { display:inline-flex; align-items:center; border-radius:var(--eh-radius-pill); padding:3px 10px; font-size:var(--eh-font-meta); font-weight:var(--eh-weight-bold); white-space:nowrap; }
+.eh-vtbl-badge[data-tone="ok"] { background:#e3f4ea; color:#0b6b3a; }
+.eh-vtbl-badge[data-tone="warn"] { background:#fdf0d5; color:#8a5a12; }
+.eh-vtbl-badge[data-tone="danger"] { background:#fde8e6; color:#b42318; }
+.eh-vtbl-badge[data-tone="muted"] { background:var(--eh-color-paper); color:var(--eh-color-ink); opacity:.7; }
+.eh-vtbl-leer { text-align:center; padding:26px 16px; opacity:.7; }
+.eh-vtbl-leer a { color:var(--eh-color-petrol); }
+.eh-vertrag-treffer a { color:var(--eh-color-petrol); text-underline-offset:3px; }
+.eh-vertrag[open] { border-color:var(--eh-color-secondary); }
+.eh-vertrag > summary { display:flex; align-items:center; gap:12px; min-height:58px; padding:10px 16px; cursor:pointer; list-style:none; border-radius:var(--eh-radius-control); }
+.eh-vertrag > summary::-webkit-details-marker { display:none; }
+.eh-vertrag > summary:hover { background:var(--eh-color-paper); }
+.eh-vertrag-ic { flex:none; display:grid; place-items:center; width:32px; height:32px; border-radius:var(--eh-radius-control); background:var(--eh-color-paper); color:var(--eh-color-petrol); }
+.eh-vertrag-body { flex:1 1 auto; min-width:0; display:grid; gap:2px; }
+.eh-vertrag-body strong { font-size:var(--eh-font-label); font-weight:var(--eh-weight-semibold); line-height:var(--eh-leading-tight); overflow-wrap:anywhere; }
+.eh-vertrag-body small { font-size:var(--eh-font-meta); color:var(--eh-color-secondary); overflow-wrap:anywhere; }
+.eh-vertrag-rechts { margin-left:auto; display:flex; align-items:center; gap:14px; flex:none; }
+.eh-vertrag-cost { text-align:right; display:grid; gap:1px; }
+.eh-vertrag-cost b { font-size:var(--eh-font-label); font-variant-numeric:tabular-nums; }
+.eh-vertrag-cost small { font-size:var(--eh-font-meta); color:var(--eh-color-secondary); }
+.eh-vertrag-frist { padding:3px 11px; border:1px solid var(--eh-color-line); border-radius:var(--eh-radius-pill); background:var(--eh-color-paper); font-size:var(--eh-font-meta); font-weight:var(--eh-weight-semibold); color:var(--eh-color-secondary); white-space:nowrap; }
+.eh-vertrag-frist[data-state='soon'] { color:var(--eh-color-terra); border-color:var(--eh-color-terra); }
+.eh-vertrag-frist[data-state='overdue'] { color:var(--eh-color-error); border-color:var(--eh-color-error); }
+.eh-vertrag-frist[data-state='planned'] { color:var(--eh-color-petrol); }
+.eh-vertrag[data-past] > summary { background:transparent; }
+.eh-vertrag[data-past] .eh-vertrag-body strong { color:var(--eh-color-secondary); }
+.eh-vertrag[data-past] .eh-vertrag-ic { color:var(--eh-color-secondary); }
+/* Vertrags-Blatt (eigene Seite seit Betreiber 24.09. »ganz anders«): Fakten
+   als Kacheln — nicht als auseinandergezogenes Label-Gitter. */
+.eh-vertrag-fakten { display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:10px; }
+.eh-vertrag-fakt { display:grid; gap:2px; min-width:0; background:var(--eh-color-paper); border-radius:var(--eh-radius-control); padding:9px 11px; }
+.eh-vertrag-fakt small { font-size:var(--eh-font-meta); color:var(--eh-color-secondary); text-transform:uppercase; letter-spacing:var(--eh-track-wide); }
+.eh-vertrag-fakt b { font-size:var(--eh-font-label); font-weight:var(--eh-weight-medium); overflow-wrap:anywhere; }
+.eh-vertrag-spar { display:grid; gap:10px; padding:12px 14px; border:0; border-left:3px solid var(--eh-color-petrol); background:var(--eh-color-paper); border-radius:var(--eh-radius-control); }
+.eh-vertrag-spar-zahl { display:flex; flex-wrap:wrap; align-items:baseline; gap:10px; }
+.eh-vertrag-spar-zahl b { font-size:var(--eh-font-body); font-variant-numeric:tabular-nums; color:var(--eh-color-petrol); }
+.eh-vertrag-spar-zahl small { font-size:var(--eh-font-meta); color:var(--eh-color-secondary); }
+.eh-vertrag-spar-gruende { margin:0; padding:0 0 0 18px; display:grid; gap:4px; font-size:var(--eh-font-meta); color:var(--eh-color-secondary); }
+.eh-vertrag-aktionen { display:flex; flex-wrap:wrap; align-items:flex-start; gap:12px; }
+.eh-vertrag-edit { width:100%; border:1px solid var(--eh-color-line); border-radius:var(--eh-radius-control); background:var(--eh-color-white); }
+.eh-vertrag-edit > summary { padding:8px 14px; cursor:pointer; font-size:var(--eh-font-meta); font-weight:var(--eh-weight-semibold); color:var(--eh-color-secondary); border-radius:var(--eh-radius-control); }
+.eh-vertrag-edit > summary:hover { color:var(--eh-color-petrol); }
+.eh-vertrag-edit[open] { margin-top:2px; }
+.eh-vertrag-edit > form, .eh-vertrag-edit > * + * { padding:0 14px 14px; }
+@media (max-width:640px) {
+  .eh-vertrag > summary { flex-wrap:wrap; }
+  .eh-vertrag-rechts { margin-left:44px; }
+}
+.eh-vtbl-spar { display:inline-flex; align-items:center; border-radius:var(--eh-radius-pill); padding:2px 9px; background:#e5f5ea; color:#0b6b3a; font-size:var(--eh-font-meta); font-weight:var(--eh-weight-bold); white-space:nowrap; }
+.eh-vtbl-spar-leer { opacity:.3; }
+.eh-vdash-fokus[data-tone="save"] { border-left-color:#0b6b3a; background:#f4fbf6; }
+.eh-vdash-fokus[data-tone="save"] b { color:#0b6b3a; }
+.eh-vdash-nudge { margin:10px 2px 0; font-size:var(--eh-font-meta); color:var(--eh-muted); }
+.eh-vdash-gespeichert { display:flex; align-items:stretch; gap:10px; flex-wrap:wrap; }
+.eh-vdash-gespeichert > :first-child { flex:1 1 280px; }
+.eh-vdash-gespeichert a { align-self:center; }
+.eh-vdash-nudge a { color:var(--eh-color-petrol); }
+
+.eh-vertrag-quick { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; }
+@media (max-width:720px) { .eh-vertrag-quick { grid-template-columns:minmax(0,1fr); } }
+.eh-akt-abstand { margin-bottom:22px; }
+.eh-sr { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; border:0; }
+
+/* Anlege-Funnel (24.09., Betreiber): Weg-Waehler-Karten + Werbebanner statt
+   Unterformular. Karten sind die Buttons — grosse Klickflaeche, einer
+   hervorgehoben, Badge nicht Iconsalat. */
+.eh-anlege-kopf { display:grid; gap:6px; padding:2px 0 14px; }
+.eh-anlege-kopf h1 { margin:0; font-size:21px; }
+.eh-anlege-zurueck { display:inline-flex; align-items:center; gap:6px; font-size:var(--eh-font-label); color:var(--eh-color-petrol); text-decoration:none; width:max-content; }
+.eh-anlege-zurueck:hover { text-decoration:underline; }
+.eh-anlege-wege { display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:12px; margin:4px 0 14px; }
+.eh-anlege-weg { position:relative; display:grid; gap:8px; align-content:start; padding:18px 16px 16px; border:1px solid var(--eh-color-line); border-radius:var(--eh-radius-panel); background:var(--eh-color-white); text-decoration:none; color:var(--eh-color-ink); transition:transform .12s ease, border-color .12s ease; }
+.eh-anlege-weg:hover { border-color:var(--eh-color-petrol); transform:translateY(-1px); }
+.eh-anlege-weg[data-hervor] { border-color:var(--eh-color-petrol); background:linear-gradient(180deg,#f2f8f7,#ffffff 55%); }
+.eh-anlege-weg-badge { position:absolute; top:-9px; right:12px; background:var(--eh-color-petrol); color:#fff; border-radius:var(--eh-radius-pill); padding:2px 10px; font-size:var(--eh-font-meta); font-style:normal; font-weight:var(--eh-weight-bold); }
+.eh-anlege-weg-ic { width:44px; height:44px; display:grid; place-items:center; border-radius:var(--eh-radius-control); background:var(--eh-color-paper); color:var(--eh-color-petrol); }
+.eh-anlege-weg strong { font-size:16px; }
+.eh-anlege-weg small { color:var(--eh-color-secondary); font-size:var(--eh-font-meta); line-height:1.45; }
+.eh-anlege-weg-go { margin-top:auto; color:var(--eh-color-petrol); font-size:var(--eh-font-label); font-weight:var(--eh-weight-semibold); }
+.eh-anlege-wechsel { display:flex; flex-wrap:wrap; gap:12px; align-items:center; margin:6px 2px 0; font-size:var(--eh-font-meta); color:var(--eh-muted); }
+.eh-anlege-wechsel a { display:inline-flex; gap:6px; align-items:center; color:var(--eh-color-petrol); text-decoration:none; }
+.eh-anlege-wechsel a:hover { text-decoration:underline; }
+/* Schiebezeile fuer die Markt-Kacheln (Betreiber 24.09.: Angebote wie bei
+   Wolt). Optik der Karten lebt als EHOfferCard im versiegelten Designkern;
+   hier bleibt nur die Zeile selbst: seitlich schieben, einrasten, Breite. */
+.eh-vergleich-slider { display:flex; flex-wrap:nowrap; gap:12px; padding:2px 2px 8px; scroll-snap-type:x proximity; scrollbar-width:none; }
+.eh-vergleich-slider::-webkit-scrollbar { display:none; }
+.eh-vergleich-slider > * { flex:0 0 clamp(232px, 25%, 296px); scroll-snap-align:start; }
+/* Chrome der Angebote-Seite (CHECK24-Dealz-Muster, Betreiber 24.09.): Kopf,
+   Suchleiste, Zahlzeile, Deal-Liste. Karten-Optik selbst: Kern (EHOfferDeal). */
+.eh-ang { display:grid; gap:14px; }
+.eh-ang-kopf h1 { margin:0 0 4px; font-size:var(--eh-font-lead); line-height:var(--eh-leading-tight); }
+.eh-ang-kopf p { margin:0; max-width:62ch; font-size:var(--eh-font-body); line-height:var(--eh-leading-normal); color:var(--eh-color-secondary); }
+.eh-ang-suche { display:flex; align-items:center; gap:9px; border:1px solid var(--eh-color-line); border-radius:var(--eh-radius-pill); padding:0 6px 0 14px; min-height:44px; background:var(--eh-color-white); }
+.eh-ang-suche svg { flex:none; color:var(--eh-color-secondary); }
+.eh-ang-suche input { flex:1; min-width:0; border:0; background:transparent; font:inherit; color:inherit; }
+.eh-ang-suche input:focus { outline:none; }
+.eh-ang-btn { flex:none; border:0; border-radius:var(--eh-radius-pill); background:var(--eh-color-petrol); color:var(--eh-color-white); font-size:var(--eh-font-meta); font-weight:var(--eh-weight-semibold); padding:8px 14px; cursor:pointer; transition:background var(--eh-motion-duration) var(--eh-motion-ease); }
+.eh-ang-btn:hover { background:var(--eh-color-deep); }
+.eh-ang-treffer { margin:0; font-size:var(--eh-font-meta); color:var(--eh-color-secondary); }
+.eh-ang-leer { margin:0; padding:18px; border:1px dashed var(--eh-color-line); border-radius:var(--eh-radius-panel); font-size:var(--eh-font-label); color:var(--eh-color-secondary); }
+.eh-ang-liste { display:grid; gap:12px; margin:0; padding:0; list-style:none; }

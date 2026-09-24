@@ -9,6 +9,11 @@
 Die Login-Seite zeigt die Demo-Box mit Ein-Klick-Buttons nur wenn Demo explizit an ist; Benutzernamen gehen auch per Hand (ohne `@` → Demo-Mapping).
 
 ## Technik
+- Direkt-Einstieg ohne Formular: `/login/demo` (Eigentümer) bzw. `/login/demo/handwerker` — Pfad statt Query
+  (Vorschau-Adressleisten übernehmen oft nur Pfade); alternativ `/login?demo=1`. Leitet serverseitig auf
+  `/api/auth/demo-start` (Eigentümer) bzw. `/login?demo=handwerker` — leitet serverseitig auf
+  `/api/auth/demo-start` (Session via `createSession`, 303 nach `/app` bzw. `/pro`). Existiert nur bei
+  `AUTH_MODE=local` + `DEMO_LOGIN_ENABLED=1`; Supabase-Setups bekommen 404.
 - Supabase-User `kunde@demo.einfachhausen.de` + `handwerker@demo.einfachhausen.de` (Passwort aus `DEMO_PASSWORD`, confirmed). Anlegen: `node scripts/seed-demo-users.mjs` (braucht Service-Key).
 - App-Zeilen entstehen beim ersten Login automatisch (`ensureDemoAppRow`, feste Rollen).
 - CRM: Ausnahme in `adminPasswordMatches` (nur wenn Demo an).
@@ -25,4 +30,11 @@ Nur `DEMO_LOGIN_ENABLED=1` UND gesetztes `DEMO_PASSWORD` schalten Box/Mapping/Ad
 ## Entfernung nach der Demo-Phase
 1. `DEMO_LOGIN_ENABLED` unset/`0` lassen bzw. entfernen (sofort wirksam nach Deploy, Default ist aus).
 2. Supabase-Demo-User deaktivieren/löschen.
-3. Löschen: `src/lib/demo-accounts.ts`, Login-Box in `src/app/login/page.tsx`, Ausnahme in `src/lib/admin-auth.ts`, `scripts/seed-demo-users.mjs`, diese Datei.
+3. Löschen: `src/lib/demo-accounts.ts`, Login-Box + `?demo=`-Zweig in `src/app/login/page.tsx`, `src/app/api/auth/demo-start/`, Ausnahme in `src/lib/admin-auth.ts`, `scripts/seed-demo-users.mjs`, diese Datei.
+
+## Oeffentliches Schaufenster /app/preview/vertraege
+
+Vorschau der Verträge-Seite OHNE Login/Cookie (feste Demo-Zeilen, Fristen
+relativ zum Besuchstag, keine Server-Actions). Für Umgebungen, in denen der
+Browser im Vorschau-iframe Session-Cookies verwirft (Arena-Panel). Kann mit
+den Demo-Routen zusammen entfernt werden.
