@@ -2387,7 +2387,12 @@ a.ownerDashboardStatusItem:hover {
 .ownerSection > header { display:flex; align-items:baseline; justify-content:space-between; gap:16px; }
 .ownerSection h2, .ownerComposer h2 { margin:0; font-size:22px; font-weight: var(--eh-weight-bold); line-height:1.35; letter-spacing:-.025em; }
 .ownerSection > header p { margin:6px 0 0; color:var(--eh-color-secondary); font-size:15px; }
-.ownerSection > header > a { color:var(--eh-color-petrol); font-size:15px; min-height:44px; display:inline-flex; align-items:center; }
+/* Sektions-Aktion (Betreiber 24.09.): Pillen-Button wie der fruehere
+   »Alle ansehen«-Schalter — kein nackter Link mehr. Wirkt global, weil alle
+   Section-Actions (Start, Vertraege, Preview, Pro) durch diesen Selector gehen. */
+.ownerSection > header > a { display:inline-flex; align-items:center; gap:7px; flex:none; padding:8px 14px; border:1px solid var(--eh-color-line); border-radius:var(--eh-radius-pill); background:var(--eh-color-white); color:var(--eh-color-ink); font-size:var(--eh-font-meta); font-weight:var(--eh-weight-semibold); line-height:1.3; text-decoration:none; min-height:36px; transition:border-color var(--eh-motion-duration) var(--eh-motion-ease), background var(--eh-motion-duration) var(--eh-motion-ease); }
+.ownerSection > header > a:hover { border-color:var(--eh-color-petrol); background:var(--eh-color-paper); }
+.ownerSection > header > a > span { color:var(--eh-color-petrol); }
 .ownerRecords { list-style:none; padding:0; margin:0; background:var(--eh-color-white); border:1px solid var(--eh-color-line); border-radius:var(--eh-radius-panel); }
 .ownerRecords > li { display:flex; align-items:center; justify-content:space-between; gap:24px; padding:24px; }
 .ownerRecords > li + li { border-top:1px solid var(--eh-color-line); }
