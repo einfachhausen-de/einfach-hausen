@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Search } from 'lucide-react';
+import { LiveSuche } from './live-suche';
 import { EHOwnerFilters, EHText, EHOfferDeal } from '@/design-system';
 import { AFFILIATE_CATEGORIES, AFFILIATE_CATEGORY_LABELS } from '@/lib/affiliate';
 import { filtereAngebote, type Angebot } from '@/lib/angebote';
@@ -8,7 +8,9 @@ import { filtereAngebote, type Angebot } from '@/lib/angebote';
  * Chrome der Angebote-Seite (Betreiber 24.09., Vorbild CHECK24-Dealz):
  * Kopfzeile, Suchleiste, Kategoriechips, Sortierung, Zahlzeile und die
  * Liste als liegende Deal-Karten (EHOfferDeal, Kern). Filter sind reine
- * GET-Links/Formulare — kein Client-Zustand, jede Ansicht ist teilbar.
+ * GET-Links/Formulare — jede Ansicht ist teilbar; die Suche filtert
+ * zusaetzlich live beim Eintippen (Client-Insel, gleiche Komponente wie
+ * in der Vertrags-Tabelle), Enter/ohne JS faellt auf GET zurueck.
  */
 export function AngebotsListe({ base, sp, alle, hinweis }: { base: string; sp: Record<string, string>; alle: Angebot[]; hinweis?: string }) {
   const { sichtbar, aktiv } = filtereAngebote(alle, sp);
@@ -27,14 +29,7 @@ export function AngebotsListe({ base, sp, alle, hinweis }: { base: string; sp: R
         <h1>Angebote in deiner Nähe</h1>
         <p>Die Tarife unserer Partner, sortiert nach dem, was sie dir bringen — ein Angebot ist oben, wo es deinen erfassten Vertrag schlägt.</p>
       </div>
-      <form className="eh-ang-suche" method="get" action={base} role="search">
-        <Search size={15} aria-hidden="true" />
-        <input type="search" name="q" defaultValue={sp.q ?? ''} placeholder="Angebot, Anbieter oder Kategorie durchsuchen …" aria-label="Angebote durchsuchen" />
-        {sp.art && <input type="hidden" name="art" value={sp.art} />}
-        {sp.nur === '1' && <input type="hidden" name="nur" value="1" />}
-        {sp.sort && <input type="hidden" name="sort" value={sp.sort} />}
-        <button type="submit" className="eh-ang-btn">Suchen</button>
-      </form>
+      <LiveSuche base={base} defaultValue={sp.q ?? ''} noun="Angebote" root=".eh-ang" items=".eh-ang-liste > li" leer=".eh-ang-leer" formClassName="eh-ang-suche" trefferClassName="eh-ang-treffer" placeholder="Angebot, Anbieter oder Kategorie durchsuchen …" label="Angebote durchsuchen" submitClassName="eh-ang-btn" submitText="Suchen" hidden={{ art: sp.art, nur: sp.nur === '1' ? '1' : undefined, sort: sp.sort }} />
       <EHOwnerFilters
         label="Nach Kategorie filtern"
         items={[

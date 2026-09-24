@@ -4,7 +4,7 @@ import {
   cancellationDeadline, contractKindLabel, currentTermEnd, deadlineDays, deadlineState, formatDate,
 } from '@/lib/contracts';
 import { filterIsActive, withContractQuery, type ContractFilter, type ContractStatusFilter } from '@/lib/contract-filter';
-import { TabellenSucheLive } from './tabellen-suche-live';
+import { LiveSuche } from './live-suche';
 import type { LucideIcon } from 'lucide-react';
 
 /**
@@ -85,7 +85,7 @@ export function VertraegeTabelle({
   return (
     <div className="eh-vtbl">
       <div className="eh-vtbl-tool">
-        <TabellenSucheLive base={base} defaultValue={filter.q} hidden={{ status: filter.status, sort: filter.sort, art: filter.kind ?? undefined, ansicht: filter.voll ? 'voll' : undefined }} />
+        <LiveSuche base={base} defaultValue={filter.q} noun="Verträge" root=".eh-vtbl" items="tbody tr" leer=".eh-vtbl-leer" formClassName="eh-vtbl-suche" trefferClassName="eh-vtbl-treffer" placeholder="Anbieter, Tarif, Nummer oder Notiz filtern …" label="Verträge filtern" hidden={{ status: filter.status, sort: filter.sort, art: filter.kind ?? undefined, ansicht: filter.voll ? 'voll' : undefined }} />
         <Link className="eh-vtbl-btn" href={`${base}${withContractQuery(filter, { status: nextStatus })}`}>
           <ListFilter size={14} aria-hidden="true" /> Status: {STATUS_LABEL[filter.status]}
         </Link>
