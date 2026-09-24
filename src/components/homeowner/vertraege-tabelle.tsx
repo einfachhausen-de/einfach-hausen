@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ArrowUp, ChevronsUpDown, ListFilter, Search, Table2 } from 'lucide-react';
+import { ArrowRight, ArrowUp, ChevronsUpDown, ListFilter, Search, Table2 } from 'lucide-react';
 import {
   cancellationDeadline, contractKindLabel, currentTermEnd, deadlineDays, deadlineState, formatDate,
 } from '@/lib/contracts';
@@ -89,6 +89,7 @@ export function VertraegeTabelle({
         <form method="get" action={base} className="eh-vtbl-suche" role="search">
           <Search size={15} aria-hidden="true" />
           <input type="search" name="q" defaultValue={filter.q} placeholder="Anbieter, Tarif, Nummer oder Notiz filtern …" aria-label="Verträge filtern" />
+          <button type="submit" className="eh-vtbl-suche-btn" aria-label="Suchen"><ArrowRight size={14} aria-hidden="true" /></button>
           <input type="hidden" name="status" value={filter.status} />
           <input type="hidden" name="sort" value={filter.sort} />
           {filter.kind && <input type="hidden" name="art" value={filter.kind} />}

@@ -112,7 +112,7 @@ export default function Preview() {
           </div>
         </section>
 
-      <EHOwnerSection title="Verträge & Vergleiche" action={{ href: '/app/contracts#vergleiche', label: 'Alle Vergleiche' }}>
+      <EHOwnerSection title="Verträge & Vergleiche" action={{ href: '/app/preview/angebote', label: 'Alle ansehen' }}>
         <CompareRail label="Verträge und Vergleiche">
           <nav className="eh-werkbank-chips" aria-label="Verträge und Vergleiche">
             {COMPARES.map((compare) => (
