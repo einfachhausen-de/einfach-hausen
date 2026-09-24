@@ -500,8 +500,19 @@
   }
 
   @media (max-width: 1023px) {
+    /* Keep the form as the first screen. A centered, overflowing card was clipping the photo into a stray strip. */
+    .arena-auth {
+      align-items: flex-start;
+    }
+
+    .arena-main {
+      min-height: 100dvh;
+    }
+
     .arena-hero {
-      min-height: 320px;
+      min-height: 280px;
+      margin: 0 12px 12px;
+      clip-path: polygon(0 0, calc(100% - var(--eh-radius-cut)) 0, 100% var(--eh-radius-cut), 100% 100%, 0 100%);
     }
   }
 

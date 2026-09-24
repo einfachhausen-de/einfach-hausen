@@ -12,6 +12,7 @@ v0 hat hier **nur Design/Frontend** angefasst. Keine Tests, kein Re-Seal, kein E
 - **Produktseiten** `/beratung`, `/notfall`, `/versicherung`, `/immobilienverkauf`: nicht mehr dieselbe dunkle Karte ohne Bild. Eigene Fotos unter `public/images/site/story-*.png` (keine lesbaren Marken, keine Namen). Notfall zeigt die Notruf-Grenze **vor** dem Button. Versicherung und Verkauf zeigen die Freigabe-Grenze vor dem Button.
 - **Leistungs-Unterseiten:** Titel ist der Leistungsname, nicht mehr der vierzeilige Schablonensatz.
 - **ClosingCta:** `rounded-[2.5rem]` ersetzt durch die Hauskante (`houseEdgeClass`). G5 (übrige Radien) bleibt bei der Designautorität.
+- **929px:** Versprechenleiste bricht nicht mehr um (unter `xl` nur das erste Versprechen plus „Für Handwerker“). Login/Register: das Formular ist die erste Ansicht, das Foto beginnt darunter statt als angeschnittener Streifen.
 
 ## Bewusst nicht Remotion
 
