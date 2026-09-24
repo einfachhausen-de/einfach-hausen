@@ -9,7 +9,7 @@ import {
 } from '@/design-system';
 import { WerkbankRahmen } from '@/components/werkbank-rahmen';
 import { euroExact } from '@/lib/format';
-import { VertraegeTabelle } from '@/components/homeowner/vertraege-tabelle';
+import { VertraegeTabelle, type TabellenZeile } from '@/components/homeowner/vertraege-tabelle';
 import { VertraegeAnlegeWege } from '@/components/homeowner/anlege-wege';
 import { CompareRail } from '@/components/homeowner/compare-rail';
 import { baueAngebote, sortiereVorschlaege } from '@/lib/angebote';
@@ -34,7 +34,7 @@ import { AFFILIATE_CATEGORIES } from '@/lib/affiliate';
  */
 
 
-function fristText(row: PreviewFristRow): string {
+function fristText(row: TabellenZeile): string {
   const deadline = cancellationDeadline(row);
   if (!deadline) return 'Keine Frist erfasst';
   const days = deadlineDays(deadline) ?? 0;
@@ -138,9 +138,7 @@ export default async function ContractsPreview({ searchParams }: { searchParams:
 
     <EHOwnerSection title={filterIsActive(filter) ? `Meine Verträge · ${visible.length} von ${CONTRACTS.length}` : `Meine Verträge · ${CONTRACTS.length}`}>
       <div id="vertraege" />
-      <VertraegeTabelle base="/app/preview/vertraege" allRows={pool} rows={visible} filter={filter} selectedId={selectedRow?.id ?? null} icons={KIND_ICONS}>
-        {selectedRow && <PreviewDetail row={selectedRow} />}
-      </VertraegeTabelle>
+      <VertraegeTabelle base="/app/preview/vertraege" allRows={pool} rows={visible} filter={filter} selectedId={selectedRow?.id ?? null} icons={KIND_ICONS} detailFuer={(row) => <PreviewDetail row={row} />} />
       {pool.length > 0 && pool.length < 4 && (
         <p className="eh-vdash-nudge">Je mehr Verträge du erfasst, desto genauer dein Spar-Check — auch Gas, Handy, Abo oder Versicherung gehören in die Hausakte.</p>
       )}
@@ -166,7 +164,7 @@ export default async function ContractsPreview({ searchParams }: { searchParams:
 
 /** Detailpanel unter der Tabelle: Fakten + Spar-Check, ohne Formulare
  *  (die echte Hausakte bearbeiten — hier ist es das Schaufenster). */
-function PreviewDetail({ row }: { row: PreviewFristRow }) {
+function PreviewDetail({ row }: { row: TabellenZeile }) {
   const end = currentTermEnd(row);
   const estimate = row.status === 'active' && SAVINGS_KINDS.includes(row.kind as (typeof SAVINGS_KINDS)[number])
     ? estimateSavings({ kind: row.kind, yearlyCents: yearlyCents(row.cost_amount, row.cost_interval), postcode: PREVIEW_RECHNUNG.postcode, householdSize: PREVIEW_RECHNUNG.householdSize, hasLoyaltyBonus: false, switchWilling: true })

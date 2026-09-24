@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { Fragment, type ReactNode } from 'react';
 import { ArrowRight, ArrowUp, ChevronsUpDown, ListFilter, Search, Table2 } from 'lucide-react';
 import {
   cancellationDeadline, contractKindLabel, currentTermEnd, deadlineDays, deadlineState, formatDate,
@@ -29,6 +30,8 @@ export type TabellenZeile = {
   cancellation_deadline: string | null;
   notice: string;
   status: string;
+  document_title?: string;
+  document_path?: string | null;
   /** Obergrenze des Schaetzers in Cent, nur fuer aktive spaehrende Arten —
    *  der Koeder in der Liste: 'bis zu X € /Jahr'. */
   sparCents?: number | null;
@@ -57,7 +60,7 @@ function fristZelle(row: TabellenZeile): { text: string; tone: 'ok' | 'warn' | '
 }
 
 export function VertraegeTabelle({
-  base, allRows, rows, filter, selectedId, icons, children,
+  base, allRows, rows, filter, selectedId, icons, detailFuer,
 }: {
   base: string;
   allRows: TabellenZeile[];
@@ -65,7 +68,8 @@ export function VertraegeTabelle({
   filter: ContractFilter;
   selectedId: number | null;
   icons: Partial<Record<string, LucideIcon>>;
-  children?: React.ReactNode;
+  /** Aufklapper-Inhalt: wird direkt unter der geklickten Zeile gerendert. */
+  detailFuer?: (row: TabellenZeile) => ReactNode;
 }) {
   const statusIdx = STATUS_CYCLE.indexOf(filter.status);
   const nextStatus = STATUS_CYCLE[(statusIdx + 1) % STATUS_CYCLE.length];
@@ -128,7 +132,8 @@ export function VertraegeTabelle({
             const frist = fristZelle(row);
             const end = currentTermEnd(row);
             return (
-              <tr key={row.id} {...(selectedId === row.id ? { 'data-sel': 'true' } : {})}>
+              <Fragment key={row.id}>
+              <tr {...(selectedId === row.id ? { 'data-sel': 'true' } : {})}>
                 <td className="eh-vtbl-anbieter">
                   <Link href={detailHref(row.id)}>{Icon ? <Icon size={15} aria-hidden="true" /> : null}<b>{row.provider}</b></Link>
                   {(row.tariff || row.notice) && <small>{row.tariff || row.notice}</small>}
@@ -150,12 +155,16 @@ export function VertraegeTabelle({
                   </span>
                 </td>
               </tr>
+              {row.id === selectedId && detailFuer && (
+                <tr className="eh-vtbl-detailrow">
+                  <td colSpan={filter.voll ? 7 : 5}><div className="eh-vtbl-detailkarte">{detailFuer(row)}</div></td>
+                </tr>
+              )}
+              </Fragment>
             );
           })}
         </tbody>
       </table>
-
-      {selectedId != null && rows.length > 0 && children && <div className="eh-vtbl-detail">{children}</div>}
     </div>
   );
 }

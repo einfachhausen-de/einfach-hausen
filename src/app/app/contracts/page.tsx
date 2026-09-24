@@ -8,7 +8,7 @@ import {
   EHActionTiles, EHButton, EHOfferCard, EHEmptyState, EHField, EHFieldGrid, EHFormFeedback, EHFormSection, EHInput, EHOwnerSection, EHSelect, EHSubmitButton, EHText, EHTextarea, EHWorkflowForm,
 } from '@/design-system';
 import { WerkbankRahmen } from '@/components/werkbank-rahmen';
-import { VertraegeTabelle } from '@/components/homeowner/vertraege-tabelle';
+import { VertraegeTabelle, type TabellenZeile } from '@/components/homeowner/vertraege-tabelle';
 import { CompareRail } from '@/components/homeowner/compare-rail';
 import { baueAngebote, sortiereVorschlaege } from '@/lib/angebote';
 import { requireUser } from '@/lib/auth';
@@ -39,13 +39,8 @@ const COMPARISON_NOTICES: Record<string, string> = {
   'fehler': 'Die Partnerkonfiguration ist unvollständig. Aus Sicherheitsgründen wurde nichts geöffnet und nichts übertragen.',
 };
 
-type ContractRow = {
-  id: number; kind: string; provider: string; tariff: string; contract_number: string;
-  cost_amount: number | null; cost_interval: string; started_at: string | null;
-  term_months: number | null; renewal_months: number | null; cancellation_days: number | null;
-  cancellation_deadline: string | null; notice: string; document_title: string;
-  document_path: string | null; status: string;
-};
+/** Vertragstyp = Tabellenzeile — Detail und Tabelle teilen sich eine Form. */
+type ContractRow = TabellenZeile;
 
 const KIND_ICONS = {
   strom: Zap, gas: Flame, dsl: Wifi, mobilfunk: Smartphone, versicherung: ShieldCheck,
@@ -162,9 +157,7 @@ export default async function Contracts({ searchParams }: { searchParams: Promis
         ? <EHEmptyState title="Noch kein Vertrag erfasst" text="Trag deinen Strom-, DSL- oder Versicherungsvertrag ein. Danach siehst du hier Kosten, Laufzeit und Kündigungsfrist – und ob sich ein Wechsel lohnt." action={<EHButton href="/app/contracts/anlegen">Jetzt Vertrag anlegen</EHButton>} />
         : (
           <>
-            <VertraegeTabelle base="/app/contracts" allRows={contracts} rows={visible} filter={filter} selectedId={selectedRow?.id ?? null} icons={KIND_ICONS}>
-              {selectedRow && <VertragsDetail row={selectedRow} postcode={profile?.postcode} />}
-            </VertraegeTabelle>
+            <VertraegeTabelle base="/app/contracts" allRows={contracts} rows={visible} filter={filter} selectedId={selectedRow?.id ?? null} icons={KIND_ICONS} detailFuer={(row) => <VertragsDetail row={row} postcode={profile?.postcode} />} />
             {contracts.length > 0 && contracts.length < 4 && (
               <p className="eh-vdash-nudge">Je mehr Verträge du erfasst, desto genauer dein Spar-Check — auch Gas, Handy, Abo oder Versicherung gehören in die Hausakte. <Link href="/app/contracts/anlegen">Weitersammeln</Link></p>
             )}
