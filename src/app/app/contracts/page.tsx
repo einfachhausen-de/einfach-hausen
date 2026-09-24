@@ -5,11 +5,11 @@ import {
   Smartphone, Thermometer, Trash2, Wifi, Wrench, Zap,
 } from 'lucide-react';
 import {
-  EHActionTiles, EHButton, EHOfferCard, EHEmptyState, EHField, EHFieldGrid, EHFormFeedback, EHFormSection, EHInput, EHOwnerSection, EHSelect, EHSubmitButton, EHText, EHTextarea, EHWorkflowForm,
+  EHActionTiles, EHButton, EHEmptyState, EHField, EHFieldGrid, EHFormFeedback, EHFormSection, EHInput, EHOwnerSection, EHSelect, EHSubmitButton, EHText, EHTextarea, EHWorkflowForm,
 } from '@/design-system';
 import { WerkbankRahmen } from '@/components/werkbank-rahmen';
 import { VertraegeTabelle } from '@/components/homeowner/vertraege-tabelle';
-import { CompareRail } from '@/components/homeowner/compare-rail';
+import { AngebotsRail } from '@/components/homeowner/angebote-rail';
 import { requireUser } from '@/lib/auth';
 import { VertraegeAnlegeWege } from '@/components/homeowner/anlege-wege';
 import { db } from '@/lib/db';
@@ -176,37 +176,34 @@ export default async function Contracts({ searchParams }: { searchParams: Promis
     <EHOwnerSection title="Angebote in deiner Nähe">
       <div id="vergleiche" />
       <EHText muted>Wir zeigen keine eigenen Tarife und keine Rangliste. Der Vergleich läuft beim jeweiligen Partner, dort wird auch abgeschlossen. Deine Vertragsdaten bleiben in der Hausakte und werden nicht an den Partner übertragen.</EHText>
-      <CompareRail label="Angebote nebeneinander">
-        <div className="eh-vergleich-slider">
-          {comparisonRows
-            .map((row, i) => ({row, i, spar: (sparByKind.get(row.category) ?? 0) > 0 ? 0 : 1}))
-            .sort((a, b) => a.spar - b.spar || a.i - b.i)
-            .map(({row}) => {
-              const {category, contract} = row;
-              const spar = sparByKind.get(category) ?? 0;
-              const yearly = contract ? yearlyCents(contract.cost_amount, contract.cost_interval) : null;
-              const monthly = contract ? monthlyCents(contract.cost_amount, contract.cost_interval) ?? yearly : null;
-              const deadline = contract ? cancellationDeadline(contract) : null;
-              return (
-                <EHOfferCard
-                  key={category}
-                  id={`vergleich-${category}`}
-                  hue={VERGLEICH_HUES[category]}
-                  icon={({strom: 'bolt', gas: 'flame', dsl: 'wifi', mobilfunk: 'phone', versicherung: 'shield'} as const)[category as 'strom' | 'gas' | 'dsl' | 'mobilfunk' | 'versicherung']}
-                  title={AFFILIATE_CATEGORY_LABELS[category]}
-                  badge={spar > 0 ? `Bis zu ${euroExact(spar)} pro Jahr drin` : undefined}
-                  brand={contract?.provider}
-                  text={contract ? `Aktuell ${euroExact(monthly ?? 0)} pro Monat` : AFFILIATE_CATEGORY_HINTS[category]}
-                  meta={contract
-                    ? [{icon: 'clock' as const, label: deadline ? `Kündigen bis ${formatDate(deadline)}` : 'Keine Frist erfasst · jederzeit prüfbar'}]
-                    : [{label: 'Sobald du den Tarif erfasst, rechnen wir mit deinen echten Kosten'}]}
-                  action={row.availability.status === 'available' ? {href: `/api/affiliate/${category}`, label: 'Jetzt vergleichen'} : undefined}
-                  note={row.availability.status === 'available' ? undefined : row.availability.status === 'error' ? 'Konfiguration prüfen' : 'Noch kein Partner freigeschaltet'}
-                />
-              );
-            })}
-        </div>
-      </CompareRail>
+      <AngebotsRail
+        cards={comparisonRows
+          .map((row, i) => ({ row, i, rang: (sparByKind.get(row.category) ?? 0) > 0 ? 0 : 1 }))
+          .sort((a, b) => a.rang - b.rang || a.i - b.i)
+          .map(({ row }) => {
+            const category = row.category;
+            const contract = row.contract;
+            const spar = sparByKind.get(category) ?? 0;
+            const yearly = contract ? yearlyCents(contract.cost_amount, contract.cost_interval) : null;
+            const monthly = contract ? monthlyCents(contract.cost_amount, contract.cost_interval) ?? yearly : null;
+            const deadline = contract ? cancellationDeadline(contract) : null;
+            return {
+              id: `vergleich-${category}`,
+              hue: VERGLEICH_HUES[category],
+              icon: ({strom: 'bolt', gas: 'flame', dsl: 'wifi', mobilfunk: 'phone', versicherung: 'shield'} as const)[category as 'strom' | 'gas' | 'dsl' | 'mobilfunk' | 'versicherung'],
+              title: AFFILIATE_CATEGORY_LABELS[category],
+              badge: spar > 0 ? `Bis zu ${euroExact(spar)} pro Jahr drin` : undefined,
+              brand: contract?.provider,
+              text: contract ? `Aktuell ${euroExact(monthly ?? 0)} pro Monat` : AFFILIATE_CATEGORY_HINTS[category],
+              meta: contract
+                ? [{ icon: 'clock' as const, label: deadline ? `Kündigen bis ${formatDate(deadline)}` : 'Keine Frist erfasst · jederzeit prüfbar' }]
+                : [{ label: 'Sobald du den Tarif erfasst, rechnen wir mit deinen echten Kosten' }],
+              action: row.availability.status === 'available' ? { href: `/api/affiliate/${category}`, label: 'Jetzt vergleichen' } : undefined,
+              note: row.availability.status === 'available' ? undefined : row.availability.status === 'error' ? 'Konfiguration prüfen' : 'Noch kein Partner freigeschaltet',
+              vorschlag: spar > 0,
+            };
+          })}
+      />
     </EHOwnerSection>
 
     <EHOwnerSection title="Vertrag hinzufügen">

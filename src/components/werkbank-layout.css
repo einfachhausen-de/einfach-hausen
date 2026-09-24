@@ -233,3 +233,7 @@
 .eh-vergleich-slider { display:flex; flex-wrap:nowrap; gap:12px; padding:2px 2px 8px; scroll-snap-type:x proximity; scrollbar-width:none; }
 .eh-vergleich-slider::-webkit-scrollbar { display:none; }
 .eh-vergleich-slider > * { flex:0 0 clamp(232px, 25%, 296px); scroll-snap-align:start; }
+/* „Alle ansehen"-Schalter der Angebots-Sektion (rechtsbündig ueber der Rail). */
+.eh-angebot-schalter { display:flex; justify-content:flex-end; margin:0 0 2px; }
+.eh-angebot-schalter button { border:1px solid var(--eh-color-line); border-radius:var(--eh-radius-pill); background:var(--eh-color-white); color:var(--eh-color-ink); font-size:var(--eh-font-meta); font-weight:var(--eh-weight-semibold); padding:6px 13px; cursor:pointer; transition:border-color var(--eh-motion-duration) var(--eh-motion-ease), background var(--eh-motion-duration) var(--eh-motion-ease); }
+.eh-angebot-schalter button:hover { border-color:var(--eh-color-petrol); background:var(--eh-color-paper); }
