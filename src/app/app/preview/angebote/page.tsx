@@ -40,7 +40,7 @@ export default async function AngebotePreview({ searchParams }: { searchParams: 
 
   return <WerkbankRahmen role="homeowner" active="/app/preview/vertraege">
     <AngebotsListe base="/app/preview/angebote" sp={sp} alle={angebote} />
-    <EHButton href="/app/preview/vertraege" variant="outline">zurück zu Verträge & Tarife</EHButton>
+    <EHButton href="/app/preview/vertraege" variant="outline"><span aria-hidden="true">←</span> zurück zu Verträge & Tarife</EHButton>
     <EHText muted>Kennenlern-Ansicht: echte Rechenlogik, feste Demo-Werte, keine Klicks nach draußen.</EHText>
   </WerkbankRahmen>;
 }
