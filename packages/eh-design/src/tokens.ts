@@ -1,10 +1,15 @@
 // Generated from tokens.json. Do not edit.
 export const EHTokens = {
-  "version": "1.0.0",
+  "version": "1.1.0",
   "color": {
     "paper": "#faf8f4",
     "petrol": "#105258",
+    "petrolSoft": "#e4f1ef",
     "deep": "#0a3539",
+    "lime": "#bef264",
+    "limeStrong": "#a3e635",
+    "limeSoft": "#f0fbd9",
+    "terraSoft": "#fbece5",
     "ink": "#10222a",
     "secondary": "#4b5b60",
     "line": "#e4e2dc",
@@ -59,6 +64,7 @@ export const EHTokens = {
     "control": "0.375rem",
     "panel": "0.5rem",
     "pill": "999px",
+    "card": "clamp(1.25rem, 2vw, 2rem)",
     "cut": "clamp(1.5rem, 3vw, 3rem)"
   },
   "shape": {
@@ -69,7 +75,8 @@ export const EHTokens = {
   "shadow": {
     "none": "none",
     "panel": "0 1px 2px rgba(16, 34, 42, 0.06)",
-    "card": "0 2px 10px rgba(16, 34, 42, 0.08)"
+    "card": "0 2px 10px rgba(16, 34, 42, 0.08)",
+    "lift": "0 28px 56px -28px rgba(16, 34, 42, 0.45)"
   },
   "motion": {
     "duration": "180ms",

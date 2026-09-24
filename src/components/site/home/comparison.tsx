@@ -1,5 +1,5 @@
 import { Check, Minus, X } from 'lucide-react';
-import { Container, SectionHeading } from '../ui';
+import { Container, SectionHeading } from '@/design-system/site';
 
 type Mark = 'yes' | 'no' | 'partial';
 
@@ -9,8 +9,9 @@ const ROWS: ReadonlyArray<{ label: string; marks: readonly [Mark, Mark, Mark, Ma
   { label: 'Tarife vergleichen & wechseln', marks: ['yes', 'yes', 'no', 'no'] },
   { label: 'Automatischer Spar-Alarm', marks: ['yes', 'partial', 'no', 'no'] },
   { label: 'Geprüfte Handwerker finden', marks: ['yes', 'no', 'yes', 'no'] },
+  { label: 'Handwerker-Angebote vergleichen', marks: ['yes', 'no', 'partial', 'no'] },
   { label: 'Handwerker als Kontakt speichern', marks: ['yes', 'no', 'partial', 'partial'] },
-  { label: 'Anfrage wird nicht weiterverkauft', marks: ['yes', 'partial', 'no', 'yes'] },
+  { label: 'Fester Ansprechpartner nach der Buchung', marks: ['yes', 'no', 'partial', 'no'] },
   { label: 'KI-Hausmanager rund um die Uhr', marks: ['yes', 'no', 'no', 'no'] },
   { label: 'Digitale Hausakte & Garantien', marks: ['yes', 'no', 'no', 'partial'] },
   { label: 'Wartungs-Erinnerungen', marks: ['yes', 'no', 'no', 'no'] },
@@ -19,7 +20,7 @@ const ROWS: ReadonlyArray<{ label: string; marks: readonly [Mark, Mark, Mark, Ma
 function MarkIcon({ mark, highlight }: { mark: Mark; highlight?: boolean }) {
   if (mark === 'yes') {
     return (
-      <span className={`mx-auto grid size-7 place-items-center rounded-full ${highlight ? 'bg-lime text-ink' : 'bg-brand-soft text-brand'}`}>
+      <span className={`mx-auto grid size-7 place-items-center rounded-pill ${highlight ? 'bg-lime text-ink' : 'bg-brand-soft text-brand'}`}>
         <Check className="size-4" strokeWidth={3} aria-hidden="true" />
         <span className="sr-only">Ja</span>
       </span>
@@ -27,7 +28,7 @@ function MarkIcon({ mark, highlight }: { mark: Mark; highlight?: boolean }) {
   }
   if (mark === 'partial') {
     return (
-      <span className="mx-auto grid size-7 place-items-center rounded-full bg-cream text-body">
+      <span className="mx-auto grid size-7 place-items-center rounded-pill bg-cream text-body">
         <Minus className="size-4" aria-hidden="true" />
         <span className="sr-only">Teilweise</span>
       </span>
@@ -50,7 +51,7 @@ export function Comparison() {
           eyebrow="Der Vergleich"
           title="Warum zehn Apps und drei Ordner, wenn eine App reicht?"
         />
-        <div className="overflow-x-auto rounded-[2rem] bg-white p-2 sm:p-4">
+        <div className="overflow-x-auto rounded-card bg-white p-2 sm:p-4">
           <table className="w-full min-w-[640px] border-separate border-spacing-0 text-sm">
             <caption className="sr-only">Funktionsvergleich zwischen Einfach Hausen und anderen Lösungen</caption>
             <thead>

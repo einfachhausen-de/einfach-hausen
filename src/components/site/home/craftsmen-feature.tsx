@@ -1,13 +1,37 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowUpRight, BadgeCheck, MessageSquare, Phone, Star } from 'lucide-react';
+import { ArrowUpRight, BadgeCheck, CalendarDays, Heart, Phone, Star } from 'lucide-react';
 import { SERVICE_CATEGORIES } from '@/components/marketing/service-catalog';
-import { ButtonLink, CheckList, Container, SectionHeading } from '../ui';
+import { ButtonLink, CheckList, Container, ExampleNote, SectionHeading } from '@/design-system/site';
 
-const CONTACTS = [
-  { src: '/images/site/avatar-heizung.png', name: 'Thomas Bauer', company: 'Bauer Haustechnik', trade: 'Heizung & Sanitär', rating: '4,9', jobs: '3 Aufträge' },
-  { src: '/images/site/avatar-elektro.png', name: 'Lena Kern', company: 'Elektro Kern', trade: 'Elektro & Wallbox', rating: '5,0', jobs: '1 Auftrag' },
-  { src: '/images/site/avatar-dach.png', name: 'Jonas Weber', company: 'Dach Weber', trade: 'Dach & Dachrinne', rating: '4,8', jobs: '2 Aufträge' },
+const OFFERS = [
+  {
+    src: '/images/site/avatar-heizung.png',
+    company: 'Bauer Haustechnik',
+    price: '189 €',
+    date: 'Do, 9:00',
+    rating: '4,9',
+    badge: 'Meine Empfehlung',
+    recommended: true,
+  },
+  {
+    src: '/images/site/avatar-elektro.png',
+    company: 'Wärme Kern',
+    price: '165 €',
+    date: 'Mo, 14:00',
+    rating: '4,7',
+    badge: 'Günstigstes Angebot',
+    recommended: false,
+  },
+  {
+    src: '/images/site/avatar-dach.png',
+    company: 'Heiztechnik Weber',
+    price: '210 €',
+    date: 'Morgen, 8:00',
+    rating: '4,8',
+    badge: 'Schnellster Termin',
+    recommended: false,
+  },
 ] as const;
 
 export function CraftsmenFeature() {
@@ -18,60 +42,86 @@ export function CraftsmenFeature() {
           <div className="flex flex-col gap-8">
             <SectionHeading
               eyebrow="Handwerker finden"
-              title="Nie wieder „Wen ruf ich da eigentlich an?“"
-              text="Beschreib einfach, was los ist – in deinen Worten, mit Foto oder per Sprachnachricht. Wir finden den passenden, geprüften Betrieb aus deiner Region. Und wenn du zufrieden bist, speicherst du ihn als festen Ansprechpartner."
+              title="Angebote vergleichen wie Tarife. Den Besten behalten."
+              text="Beschreib, was los ist – in deinen Worten, mit Foto oder Sprachnachricht. Geprüfte Betriebe aus deiner Region machen dir Angebote, du vergleichst Preis, Termin und Bewertung auf einen Blick. Wer gut war, bleibt als fester Ansprechpartner in deiner App."
             />
             <CheckList
               items={[
-                'Persönlich geprüfte Betriebe mit echten Bewertungen',
-                'Kostenrahmen vor dem Termin – keine bösen Überraschungen',
-                'Dein Anliegen wird nicht an fünf Betriebe verkauft',
+                'Nur persönlich geprüfte Betriebe – kein offener Lead-Marktplatz',
+                'Preis, Termin und Bewertung übersichtlich nebeneinander',
+                'Kein Auftrag ohne deine ausdrückliche Freigabe',
                 'Rechnung und Garantie landen automatisch in deiner Hausakte',
               ]}
             />
             <ButtonLink href="/register?role=homeowner" size="lg" arrow className="w-fit">
-              Handwerker finden
+              Angebote einholen
             </ButtonLink>
           </div>
 
-          <div className="relative">
-            <div className="rounded-[2rem] bg-cream p-5 sm:p-7">
-              <div className="mb-5 flex items-center justify-between">
-                <p className="font-display text-lg font-bold">Meine Handwerker</p>
-                <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-body">7 gespeichert</span>
+          <div className="flex flex-col gap-4">
+            <div className="rounded-card bg-cream p-5 sm:p-7">
+              <div className="mb-5 flex flex-wrap items-center justify-between gap-2">
+                <div>
+                  <p className="text-sm text-body">Heizungswartung · Gas-Brennwert</p>
+                  <p className="font-display text-lg font-bold">3 Angebote für dich</p>
+                </div>
+                <span className="rounded-pill bg-white px-3 py-1 text-meta font-semibold text-body">Beispielansicht</span>
               </div>
               <ul className="flex flex-col gap-3">
-                {CONTACTS.map((contact) => (
-                  <li key={contact.name} className="flex items-center gap-4 rounded-2xl bg-white p-4">
-                    <Image src={contact.src} alt={`Porträt ${contact.name}`} width={56} height={56} className="size-14 rounded-2xl object-cover" />
+                {OFFERS.map((offer) => (
+                  <li
+                    key={offer.company}
+                    className={
+                      offer.recommended
+                        ? 'flex items-center gap-4 rounded-2xl bg-white p-4 ring-2 ring-lime-strong'
+                        : 'flex items-center gap-4 rounded-2xl bg-white p-4'
+                    }
+                  >
+                    <Image src={offer.src} alt="" width={56} height={56} className="size-14 shrink-0 rounded-2xl object-cover" />
                     <div className="min-w-0 flex-1">
-                      <p className="flex items-center gap-1.5 font-semibold">
-                        {contact.company}
-                        <BadgeCheck className="size-4 text-brand" aria-label="Geprüfter Betrieb" />
+                      <p
+                        className={
+                          offer.recommended
+                            ? 'w-fit rounded-pill bg-lime px-2 py-0.5 text-meta font-bold text-ink'
+                            : 'w-fit rounded-pill bg-brand-soft px-2 py-0.5 text-meta font-semibold text-brand'
+                        }
+                      >
+                        {offer.badge}
                       </p>
-                      <p className="truncate text-sm text-body">
-                        {contact.name} · {contact.trade}
+                      <p className="mt-1 flex items-center gap-1.5 font-semibold">
+                        <span className="truncate">{offer.company}</span>
+                        <BadgeCheck className="size-4 shrink-0 text-brand" aria-label="Geprüfter Betrieb" />
                       </p>
-                      <p className="mt-0.5 flex items-center gap-1 text-xs text-body">
-                        <Star className="size-3 fill-coral text-coral" aria-hidden="true" />
-                        <span className="font-semibold text-ink">{contact.rating}</span> · {contact.jobs} bei dir
+                      <p className="flex flex-wrap items-center gap-x-3 text-meta text-body">
+                        <span className="flex items-center gap-1">
+                          <Star className="size-3 fill-coral text-coral" aria-hidden="true" />
+                          <span className="font-semibold text-ink">{offer.rating}</span>
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <CalendarDays className="size-3" aria-hidden="true" />
+                          {offer.date}
+                        </span>
                       </p>
                     </div>
-                    <div className="flex gap-2" aria-hidden="true">
-                      <span className="grid size-10 place-items-center rounded-full bg-cream text-ink">
-                        <MessageSquare className="size-4" />
-                      </span>
-                      <span className="grid size-10 place-items-center rounded-full bg-ink text-white">
-                        <Phone className="size-4" />
-                      </span>
-                    </div>
+                    <p className="font-display text-xl font-extrabold">{offer.price}</p>
                   </li>
                 ))}
               </ul>
             </div>
-            <p className="absolute -bottom-5 right-6 rounded-full bg-lime px-4 py-2 text-sm font-bold text-ink shadow-lg">
-              Einmal gefunden. Immer erreichbar.
-            </p>
+
+            <div className="flex items-center gap-4 rounded-card bg-ink p-5 text-white">
+              <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-lime text-ink">
+                <Heart className="size-5 fill-ink" aria-hidden="true" />
+              </span>
+              <p className="flex-1 text-sm leading-snug text-white/85">
+                <strong className="block text-base text-white">Bauer Haustechnik gespeichert</strong>
+                Ab jetzt dein Ansprechpartner für Heizung – mit Nummer, Verlauf und Rechnungen.
+              </p>
+              <span className="hidden size-10 place-items-center rounded-pill bg-white/10 sm:grid" aria-hidden="true">
+                <Phone className="size-4" />
+              </span>
+            </div>
+            <ExampleNote>Beispielansicht mit illustrativen Betrieben, Preisen und Bewertungen.</ExampleNote>
           </div>
         </div>
 
@@ -82,7 +132,7 @@ export function CraftsmenFeature() {
               <li key={slug}>
                 <Link
                   href={`/leistungen/${slug}`}
-                  className="group flex h-full flex-col gap-3 rounded-2xl border border-hairline p-4 transition-all hover:-translate-y-0.5 hover:border-brand hover:shadow-[0_12px_30px_-16px_rgba(14,79,85,0.4)]"
+                  className="group flex h-full flex-col gap-3 rounded-2xl border border-hairline p-4 transition-[border-color,box-shadow] hover:border-brand hover:shadow-card"
                 >
                   <span className="flex items-center justify-between">
                     <span className="grid size-11 place-items-center rounded-xl bg-brand-soft text-brand transition-colors group-hover:bg-brand group-hover:text-white">
@@ -92,7 +142,7 @@ export function CraftsmenFeature() {
                   </span>
                   <span>
                     <strong className="block text-sm font-semibold text-ink">{shortTitle}</strong>
-                    <span className="line-clamp-2 text-xs leading-snug text-body">{description}</span>
+                    <span className="line-clamp-2 text-meta leading-snug text-body">{description}</span>
                   </span>
                 </Link>
               </li>

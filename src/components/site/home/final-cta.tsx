@@ -1,17 +1,13 @@
 import Link from 'next/link';
 import { ArrowRight, Check } from 'lucide-react';
-import { ButtonLink, Container } from '../ui';
+import { ButtonLink, Container } from '@/design-system/site';
 
 export function FinalCta() {
   return (
     <section className="bg-white py-20 lg:py-28">
       <Container>
-        <div className="relative overflow-hidden rounded-[2.5rem] bg-lime px-6 py-16 text-center sm:px-12 lg:py-24">
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-0 bg-[radial-gradient(40%_60%_at_50%_0%,rgba(255,255,255,0.55),transparent_70%)]"
-          />
-          <div className="relative mx-auto flex max-w-3xl flex-col items-center gap-6">
+        <div className="rounded-[2.5rem] bg-lime px-6 py-16 text-center sm:px-12 lg:py-24">
+          <div className="mx-auto flex max-w-3xl flex-col items-center gap-6">
             <h2 className="font-display text-balance text-4xl font-extrabold leading-[1.05] tracking-tight text-ink sm:text-6xl">
               Dein Haus kümmert sich ab heute um sich selbst.
             </h2>

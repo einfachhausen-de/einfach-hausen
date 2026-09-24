@@ -1,5 +1,5 @@
 import { Building2, HandCoins, Lock } from 'lucide-react';
-import { ButtonLink, CheckList, Container } from '../ui';
+import { ButtonLink, CheckList, Container } from '@/design-system/site';
 
 const HOW_WE_EARN = [
   {
@@ -34,8 +34,8 @@ export function PricingPromise() {
               tone="dark"
               items={[
                 'Tarifvergleich & Wechsel-Service',
-                'Handwerker finden & als Kontakt speichern',
-                'KI-Hausmanager ohne Limit',
+                'Handwerker-Angebote vergleichen & speichern',
+                'KI-Hausmanager inklusive',
                 'Digitale Hausakte & Erinnerungen',
                 'Keine Provision, keine Servicegebühr',
               ]}

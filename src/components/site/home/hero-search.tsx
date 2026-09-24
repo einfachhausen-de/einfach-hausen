@@ -2,7 +2,7 @@
 
 import { useId, useState } from 'react';
 import { ArrowRight, MapPin, Search, Sparkles, Users, Wrench, Zap } from 'lucide-react';
-import { cn } from '../cn';
+import { cn } from '@/design-system/site';
 
 type TabId = 'handwerker' | 'tarife' | 'ki';
 
@@ -38,40 +38,37 @@ export function HeroSearch() {
   }${plzSuffix}`;
 
   return (
-    <div className="rounded-[1.75rem] bg-white p-2 shadow-[0_30px_60px_-20px_rgba(0,0,0,0.45)]">
-      <div role="tablist" aria-label="Was möchtest du erledigen?" className="grid grid-cols-3 gap-1 rounded-[1.4rem] bg-cream p-1">
-        {TABS.map(({ id, label, short, icon: Icon }) => {
-          const selected = tab === id;
-          return (
-            <button
-              key={id}
-              type="button"
-              role="tab"
-              id={`${baseId}-tab-${id}`}
-              aria-selected={selected}
+    <div className="rounded-[1.75rem] bg-white p-2 text-ink shadow-lift">
+      <fieldset className="grid grid-cols-3 gap-1 rounded-[1.4rem] bg-cream p-1">
+        <legend className="sr-only">Was möchtest du erledigen?</legend>
+        {TABS.map(({ id, label, short, icon: Icon }) => (
+          <label
+            key={id}
+            className="group flex h-12 cursor-pointer items-center justify-center gap-2 rounded-[1.1rem] text-sm font-semibold text-body transition-colors hover:text-ink has-[:checked]:bg-white has-[:checked]:text-ink has-[:checked]:shadow-card has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-brand"
+          >
+            <input
+              type="radio"
+              name={`${baseId}-mode`}
+              value={id}
+              checked={tab === id}
+              onChange={() => setTab(id)}
               aria-controls={`${baseId}-panel-${id}`}
-              onClick={() => setTab(id)}
-              className={cn(
-                'flex h-12 items-center justify-center gap-2 rounded-[1.1rem] text-sm font-semibold transition-all',
-                selected ? 'bg-white text-ink shadow-sm' : 'text-body hover:text-ink',
-              )}
-            >
-              <Icon className={cn('size-4', selected && 'text-brand')} aria-hidden="true" />
-              <span className="hidden sm:inline">{label}</span>
-              <span className="sm:hidden">{short}</span>
-            </button>
-          );
-        })}
-      </div>
+              className="sr-only"
+            />
+            <Icon className="size-4 group-has-[:checked]:text-brand" aria-hidden="true" />
+            <span className="hidden sm:inline">{label}</span>
+            <span className="sm:hidden">{short}</span>
+          </label>
+        ))}
+      </fieldset>
 
       <div className="p-3 sm:p-4">
         {tab === 'handwerker' && (
           <form
             action="/register"
             method="get"
-            role="tabpanel"
             id={`${baseId}-panel-handwerker`}
-            aria-labelledby={`${baseId}-tab-handwerker`}
+            aria-label="Handwerker finden"
             className="flex flex-col gap-3"
           >
             <input type="hidden" name="role" value="homeowner" />
@@ -96,13 +93,13 @@ export function HeroSearch() {
               </button>
             </div>
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-xs font-medium text-body">Beliebt:</span>
+              <span className="text-meta font-medium text-body">Beliebt:</span>
               {CRAFT_CHIPS.map((chip) => (
                 <button
                   key={chip}
                   type="button"
                   onClick={() => setCraftRequest(chip)}
-                  className="rounded-full border border-hairline px-3 py-1.5 text-xs font-medium text-ink transition-colors hover:border-brand hover:bg-brand-soft"
+                  className="rounded-pill border border-hairline px-3 py-1.5 text-meta font-medium text-ink transition-colors hover:border-brand hover:bg-brand-soft"
                 >
                   {chip}
                 </button>
@@ -115,9 +112,8 @@ export function HeroSearch() {
           <form
             action="/register"
             method="get"
-            role="tabpanel"
             id={`${baseId}-panel-tarife`}
-            aria-labelledby={`${baseId}-tab-tarife`}
+            aria-label="Tarife vergleichen"
             className="flex flex-col gap-3"
           >
             <input type="hidden" name="role" value="homeowner" />
@@ -128,10 +124,7 @@ export function HeroSearch() {
                 {TARIFF_TYPES.map((type) => (
                   <label
                     key={type}
-                    className={cn(
-                      'flex h-11 cursor-pointer items-center justify-center rounded-xl border text-sm font-semibold transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-brand',
-                      tariffType === type ? 'border-brand bg-brand text-white' : 'border-hairline text-ink hover:border-brand',
-                    )}
+                    className="flex h-11 cursor-pointer items-center justify-center rounded-xl border border-hairline text-sm font-semibold text-ink transition-colors hover:border-brand has-[:checked]:border-brand has-[:checked]:bg-brand has-[:checked]:text-white has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-brand"
                   >
                     <input
                       type="radio"
@@ -170,7 +163,7 @@ export function HeroSearch() {
                 <ArrowRight className="size-5 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
               </button>
             </div>
-            <p className="text-xs text-body">Wir kündigen deinen alten Vertrag für dich. Kein Wechsel ohne deine Freigabe.</p>
+            <p className="text-meta text-body">Wir bereiten Kündigung und Wechsel für dich vor. Kein Wechsel ohne deine Freigabe.</p>
           </form>
         )}
 
@@ -178,9 +171,8 @@ export function HeroSearch() {
           <form
             action="/register"
             method="get"
-            role="tabpanel"
             id={`${baseId}-panel-ki`}
-            aria-labelledby={`${baseId}-tab-ki`}
+            aria-label="KI-Hausmanager fragen"
             className="flex flex-col gap-3"
           >
             <input type="hidden" name="role" value="homeowner" />
@@ -209,7 +201,7 @@ export function HeroSearch() {
                   key={chip}
                   type="button"
                   onClick={() => setQuestion(chip)}
-                  className="rounded-full border border-hairline px-3 py-1.5 text-xs font-medium text-ink transition-colors hover:border-brand hover:bg-brand-soft"
+                  className="rounded-pill border border-hairline px-3 py-1.5 text-meta font-medium text-ink transition-colors hover:border-brand hover:bg-brand-soft"
                 >
                   {chip}
                 </button>

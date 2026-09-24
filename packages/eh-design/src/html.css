@@ -55,6 +55,16 @@
 .eh-button[data-size="small"] { padding: 10px 16px; min-height: 44px; }
 .eh-button[data-variant="secondary"] { background: transparent; color: var(--eh-fg); border-color: var(--eh-fg); }
 .eh-button[data-variant="secondary"]:hover { background: var(--eh-color-sand); color: var(--eh-color-ink); }
+/* Outline (Betreiber 24.09.): die feine Aktions-Pille wie im Sektionskopf —
+   weiss, feine Linie, Hover in Petrol/Papier. Leicht, nicht der dunkle
+   Sekundaer-Rand. */
+.eh-button[data-variant="outline"] { background: var(--eh-color-white); color: var(--eh-color-ink); border-color: var(--eh-color-line); }
+.eh-button[data-variant="outline"]:hover { border-color: var(--eh-color-petrol); background: var(--eh-color-paper); }
+/* Outline bleibt eine kompakte Pille: auch als Grid-Kind der Sektion nicht
+   auf Spaltenbreite ziehen (Betreiber 24.09.: volle Breite war nicht
+   gemeint), Proportionen wie die Aktions-Pille im Sektionskopf. */
+.eh-button[data-variant="outline"] { justify-self: start; min-height: 36px; padding: 8px 14px; justify-content: flex-start; gap: 7px; border-radius: var(--eh-radius-pill); font: 600 var(--eh-font-meta)/1.3 var(--eh-font-family); text-align: left; }
+.eh-button[data-variant="outline"] > span { color: var(--eh-color-petrol); }
 .eh-button[data-variant="quiet"] { background: transparent; color: var(--eh-fg); text-decoration: underline; text-underline-offset: 5px; }
 .eh-button[data-variant="on-dark"] { background: var(--eh-color-paper); color: var(--eh-color-deep); }
 .eh-button[data-variant="on-dark"]:hover { background: var(--eh-color-sand); }
@@ -779,9 +789,156 @@ summary.eh-activityHead { cursor:pointer; list-style:none; }
 .eh-assistantPanel .eh-assistantActions { flex-direction:column;align-items:stretch; }
 .eh-assistantPanel .eh-assistantActions > a { text-align:center; }
 @media(max-width:1023.5px) { .eh-assistantPanel,.eh-assistantLauncher[data-placement="panel"] { display:none; } }
+/* Assistant · Aufwertung: Kopf, Welcome, Verlauf, Quellen */
+.eh-assistantHeaderIcon { display:grid;place-items:center;flex:none;width:32px;height:32px;border-radius:var(--eh-radius-pill);background:var(--eh-color-petrol);color:var(--eh-color-white); }
+.eh-assistantClose { display:grid;place-items:center;width:32px;height:32px;border:1px solid var(--eh-color-line);border-radius:var(--eh-radius-control);background:var(--eh-color-white);color:var(--eh-color-secondary);cursor:pointer; }
+.eh-assistantClose:hover { border-color:var(--eh-color-petrol);color:var(--eh-color-petrol); }
+.eh-assistantVerlaufHead { display:flex;align-items:center;gap:8px;padding:6px 2px 2px;font-size:11px;font-weight:var(--eh-weight-semibold);letter-spacing:.07em;text-transform:uppercase;color:var(--eh-color-secondary); }
+.eh-assistantWelcome { display:grid;gap:14px;padding:18px;border:1px solid var(--eh-color-line);border-radius:var(--eh-radius-panel);background:var(--eh-color-white); }
+.eh-assistantWelcomeHead { display:flex;align-items:center;gap:12px; }
+.eh-assistantWelcomeIcon { display:grid;place-items:center;flex:none;width:36px;height:36px;border-radius:var(--eh-radius-control);background:var(--eh-color-petrol);color:var(--eh-color-white); }
+.eh-assistantWelcome h3 { font-size:var(--eh-font-body);font-weight:var(--eh-weight-semibold);line-height:1.35;letter-spacing:-.015em;margin:0; }
+.eh-assistantMessageMeta { display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px;font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--eh-color-secondary); }
+.eh-assistantRoleUser { font-weight:var(--eh-weight-semibold);color:var(--eh-color-ink); }
+.eh-assistantRoleAi { display:inline-flex;align-items:center;gap:6px;font-weight:var(--eh-weight-semibold);color:var(--eh-color-petrol); }
+.eh-assistantMetaTime { display:inline-flex;align-items:center;gap:4px; }
+.eh-assistantMessageActions { display:flex;align-items:center;gap:6px;margin-top:10px;flex-wrap:wrap; }
+.eh-assistantActionBtn { display:inline-flex;align-items:center;gap:6px;min-height:30px;padding:5px 10px;border:1px solid var(--eh-color-line);border-radius:var(--eh-radius-control);background:var(--eh-color-paper);color:var(--eh-color-secondary);font:600 12px/1 var(--eh-font-family);cursor:pointer; }
+.eh-assistantActionBtn:hover { border-color:var(--eh-color-petrol);color:var(--eh-color-petrol);background:var(--eh-color-white); }
+.eh-assistantActionBtn[data-active="true"] { border-color:var(--eh-color-petrol);color:var(--eh-color-petrol);background:color-mix(in srgb, var(--eh-color-petrol) 10%, var(--eh-color-white)); }
+.eh-assistantSources { margin-top:12px;border:1px solid var(--eh-color-line);border-radius:var(--eh-radius-control);background:var(--eh-color-paper);overflow:hidden; }
+.eh-assistantSourcesHead { display:flex;align-items:center;gap:8px;min-height:36px;padding:8px 10px;font-size:12px;font-weight:var(--eh-weight-semibold);color:var(--eh-color-secondary);cursor:pointer;list-style:none; }
+.eh-assistantSourcesHead::-webkit-details-marker { display:none; }
+.eh-assistantSourcesHint { font-weight:var(--eh-weight-regular);color:var(--eh-color-secondary); }
+.eh-assistantSourceList { list-style:none;margin:0;padding:6px;display:grid;gap:6px; }
+.eh-assistantSourceItem { display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px solid var(--eh-color-line);border-radius:var(--eh-radius-control);background:var(--eh-color-white);color:var(--eh-color-ink);text-decoration:none; }
+.eh-assistantSourceItem:hover { border-color:var(--eh-color-petrol); }
+.eh-assistantSourceIcon { display:grid;place-items:center;flex:none;width:28px;height:28px;border-radius:var(--eh-radius-control);background:var(--eh-color-paper);color:var(--eh-color-petrol); }
+.eh-assistantSourceMeta { flex:1;min-width:0; }
+.eh-assistantSourceMeta strong { display:block;font-size:12px;font-weight:var(--eh-weight-semibold);line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+.eh-assistantSourceMeta span { display:block;font-size:11px;color:var(--eh-color-secondary);line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+.eh-assistantBusy { display:flex;align-items:center;gap:8px;font-size:var(--eh-font-meta);color:var(--eh-color-secondary); }
+.eh-assistantBusyDot { width:8px;height:8px;border-radius:var(--eh-radius-pill);background:var(--eh-color-petrol);animation:assistantPulse 1.2s ease-in-out infinite; }
+@keyframes assistantPulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+/* Streaming-Antwort (Token-Adaption von streaming-response.eh-tsx): Quellen und Feedback wie die Werkbank. */
+.eh-streamingResponse { display:grid;gap:12px;padding:14px 16px;border:1px solid var(--eh-color-line);border-radius:var(--eh-radius-panel);background:var(--eh-color-white); }
+.eh-streamingContent { font-size:var(--eh-font-input);line-height:var(--eh-leading-loose);white-space:pre-wrap;overflow-wrap:anywhere; }
+.eh-streamingDot { display:inline-block;width:8px;height:8px;margin-left:6px;border-radius:var(--eh-radius-pill);background:var(--eh-color-petrol);animation:assistantPulse 1s ease-in-out infinite;vertical-align:middle; }
+.eh-streamingActions { display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding-top:12px;border-top:1px solid var(--eh-color-line); }
+.eh-streamingActionBtn { display:inline-flex;align-items:center;gap:6px;min-height:32px;padding:6px 10px;border:1px solid var(--eh-color-line);border-radius:var(--eh-radius-control);background:var(--eh-color-white);color:var(--eh-color-secondary);font:600 12px/1 var(--eh-font-family);cursor:pointer; }
+.eh-streamingActionBtn:hover { border-color:var(--eh-color-petrol);color:var(--eh-color-petrol); }
+.eh-streamingFeedback { display:inline-flex;align-items:center;gap:6px;margin-left:auto; }
+.eh-streamingFeedbackBtn { display:grid;place-items:center;width:32px;height:32px;border:1px solid var(--eh-color-line);border-radius:var(--eh-radius-control);background:var(--eh-color-white);color:var(--eh-color-secondary);cursor:pointer; }
+.eh-streamingFeedbackBtn:hover { border-color:var(--eh-color-petrol);color:var(--eh-color-petrol); }
+.eh-streamingFeedbackBtn[data-active="true"] { border-color:var(--eh-color-petrol);color:var(--eh-color-petrol);background:color-mix(in srgb, var(--eh-color-petrol) 10%, var(--eh-color-white)); }
+.eh-citationStack { display:inline-flex;align-items:center;gap:6px; }
+.eh-citationStackIcons { display:inline-flex;gap:0; }
+.eh-citationStackIcon { display:grid;place-items:center;width:22px;height:22px;margin-left:-6px;border:1px solid var(--eh-color-white);border-radius:var(--eh-radius-pill);background:var(--eh-color-paper);color:var(--eh-color-petrol); }
+.eh-citationStackIcon:first-child { margin-left:0; }
+.eh-citationStackExtra { font-size:var(--eh-font-meta);color:var(--eh-color-secondary);font-variant-numeric:tabular-nums; }
+.eh-citationList { list-style:none;margin:0;padding:0;display:grid;gap:6px; }
+.eh-citationItem { display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px solid var(--eh-color-line);border-radius:var(--eh-radius-control);background:var(--eh-color-white);color:var(--eh-color-ink);text-decoration:none; }
+.eh-citationItem:hover { border-color:var(--eh-color-petrol);background:var(--eh-color-paper); }
+.eh-citationIcon { display:grid;place-items:center;flex:none;width:28px;height:28px;border-radius:var(--eh-radius-control);background:var(--eh-color-paper);color:var(--eh-color-petrol); }
+.eh-citationMeta { flex:1;min-width:0; }
+.eh-citationMeta strong { display:block;font-size:12px;font-weight:var(--eh-weight-semibold);line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+.eh-citationMeta span { display:block;font-size:11px;color:var(--eh-color-secondary);line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+.eh-agentDisclosure { border:1px solid var(--eh-color-line);border-radius:var(--eh-radius-control);background:var(--eh-color-paper);overflow:hidden; }
+.eh-agentDisclosureSummary { display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:36px;padding:8px 10px;font-size:12px;font-weight:var(--eh-weight-semibold);color:var(--eh-color-secondary);cursor:pointer;list-style:none; }
+.eh-agentDisclosureSummary::-webkit-details-marker { display:none; }
+.eh-agentDisclosureSummaryText { display:inline-flex;align-items:center;gap:8px; }
+.eh-agentDisclosureChevron { transition:transform var(--eh-motion-duration) var(--eh-motion-ease); }
+.eh-agentDisclosureChevron[data-open="true"] { transform:rotate(180deg); }
+.eh-agentDisclosureBody { padding:6px;border-top:1px solid var(--eh-color-line);background:var(--eh-color-white); }
+.eh-srOnly { position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap; }
 .eh-assistantLauncher[data-placement="toolbar"] .eh-assistantLauncherAvatar { display:none; }
 .eh-assistantLauncher[data-placement="toolbar"] strong { font-size:14px; white-space:nowrap; }
 @media(max-width:600px) { .eh-assistantLauncher[data-placement="toolbar"] { padding:8px; } }
+
+/* ── Hausmanager · ChatGPT ───────────────────────────────────────────────
+   Der rechte Bereich und das schwebende Fenster nutzen dieselbe Sprache:
+   zentrierter Titel, schwebende Eingabe mit 28px-Rundung, Nutzerblase
+   rechts, Assistent flach mit feinen Aktionen. Alles aus Tokens, kein
+   Hex im Markup. */
+.eh-assistantWelcome { display:grid; gap:16px; padding:28px 18px 22px; text-align:center; border:0; background:transparent; }
+.eh-assistantWelcomeHead { justify-content:center; }
+.eh-assistantWelcomeIcon { display:none; }
+.eh-assistantWelcome h3 { font-size:clamp(26px,3vw,32px); font-weight:700; letter-spacing:-.03em; line-height:1.1; }
+.eh-assistantWelcome > .eh-text { margin-inline:auto; }
+.eh-assistantMessages { background:var(--eh-color-paper); }
+.eh-assistantMessage { border:0; border-radius:18px; padding:12px 16px; font-size:var(--eh-font-input); line-height:1.6; }
+.eh-assistantMessage[data-role="user"] { margin-left:auto; margin-right:0; max-width:78%; background:var(--eh-color-white); color:var(--eh-color-ink); border:1px solid var(--eh-color-line); border-radius:22px; }
+.eh-assistantMessage[data-role="assistant"] { background:transparent; border:0; padding:4px 2px; border-radius:0; }
+.eh-assistantMessageMeta { justify-content:flex-start; }
+.eh-assistantMessage[data-role="user"] .eh-assistantMessageMeta { justify-content:flex-end; }
+.eh-assistantPanel { background:var(--eh-color-white); }
+.eh-assistantPanel .eh-assistantMessages { background:var(--eh-color-white); padding:20px 16px 12px; }
+.eh-assistantPanel .eh-assistantComposer { background:transparent; border-top:0; padding:12px 12px 14px; }
+.eh-assistantComposer { background:transparent; border-top:0; padding:14px 16px 16px; }
+.eh-assistantPromptBox { display:flex; flex-direction:column; gap:0; background:var(--eh-color-white); border:1px solid var(--eh-color-line); border-radius:var(--eh-radius-panel); padding:8px; box-shadow:0 4px 24px rgba(16,34,42,.06), 0 1px 2px rgba(16,34,42,.04); transition:border-color var(--eh-motion-duration) var(--eh-motion-ease), box-shadow var(--eh-motion-duration) var(--eh-motion-ease); }
+.eh-assistantPromptBox:focus-within { border-color:var(--eh-color-petrol); box-shadow:0 0 0 3px color-mix(in srgb, var(--eh-color-petrol) 12%, transparent), 0 8px 32px rgba(16,34,42,.08); }
+.eh-assistantPromptInput { width:100%; min-height:52px; max-height:160px; resize:none; border:0; background:transparent; color:var(--eh-color-ink); font:400 var(--eh-font-input)/1.55 var(--eh-font-family); padding:10px 14px; outline:0; }
+.eh-assistantPromptInput::placeholder { color:var(--eh-color-secondary); }
+.eh-assistantPromptInput:focus { outline:0; }
+.eh-assistantPromptPreview { display:flex; gap:8px; padding:4px 8px 0; flex-wrap:wrap; }
+.eh-assistantPromptPreviewItem { position:relative; width:56px; height:56px; border-radius:14px; overflow:hidden; border:1px solid var(--eh-color-line); }
+.eh-assistantPromptPreviewItem img { width:100%; height:100%; object-fit:cover; display:block; }
+.eh-assistantPromptPreviewRemove { position:absolute; top:4px; right:4px; width:20px; height:20px; display:grid; place-items:center; border-radius:999px; background:rgba(16,34,42,.72); color:var(--eh-color-white); border:0; cursor:pointer; }
+.eh-assistantPromptPreviewItem[data-doku="true"] { width:auto; height:auto; min-height:40px; max-width:220px; display:inline-flex; align-items:center; gap:8px; padding:8px 12px; overflow:hidden; }
+.eh-assistantPromptPreviewDocIcon { display:grid; place-items:center; color:var(--eh-color-petrol); flex:none; }
+.eh-assistantPromptPreviewName { font:var(--eh-font-meta)/1.3 var(--eh-font-family); color:var(--eh-color-ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.eh-assistantPromptBar { display:flex; align-items:center; gap:8px; padding:6px 6px 2px; flex-wrap:wrap; }
+.eh-assistantPromptLeft { display:flex; align-items:center; gap:6px; }
+.eh-assistantPromptRight { margin-left:auto; display:flex; align-items:center; gap:8px; }
+.eh-assistantPromptIconBtn { width:34px; height:34px; display:grid; place-items:center; border:0; border-radius:999px; background:transparent; color:var(--eh-color-secondary); cursor:pointer; }
+.eh-assistantPromptIconBtn:hover { background:var(--eh-color-paper); color:var(--eh-color-ink); }
+.eh-assistantPromptToolsBtn { display:inline-flex; align-items:center; gap:6px; min-height:34px; padding:6px 12px; border:1px solid transparent; border-radius:999px; background:transparent; color:var(--eh-color-secondary); font:500 13px/1 var(--eh-font-family); cursor:pointer; }
+.eh-assistantPromptToolsBtn:hover { background:var(--eh-color-paper); color:var(--eh-color-ink); }
+.eh-assistantPromptToolsBtn[data-active="true"] { background:color-mix(in srgb, var(--eh-color-petrol) 10%, var(--eh-color-white)); color:var(--eh-color-petrol); border-color:var(--eh-color-line); }
+.eh-assistantPromptToolsBtn svg { width:16px; height:16px; }
+.eh-assistantPromptSend { width:34px; height:34px; display:grid; place-items:center; border:0; border-radius:999px; background:var(--eh-color-ink); color:var(--eh-color-white); cursor:pointer; transition:background var(--eh-motion-duration) var(--eh-motion-ease), opacity var(--eh-motion-duration) var(--eh-motion-ease); }
+.eh-assistantPromptSend:disabled { background:var(--eh-color-line); color:var(--eh-color-secondary); cursor:not-allowed; opacity:1; }
+.eh-assistantPromptSend:hover:not(:disabled) { background:var(--eh-color-petrol); }
+.eh-assistantPromptToolsMenu { position:absolute; bottom:calc(100% + 10px); left:0; min-width:220px; padding:8px; border:1px solid var(--eh-color-line); border-radius:14px; background:var(--eh-color-white); box-shadow:0 12px 40px rgba(16,34,42,.12), 0 2px 8px rgba(16,34,42,.06); z-index:5; }
+.eh-assistantPromptToolsMenu button { width:100%; display:flex; align-items:center; gap:10px; padding:10px 12px; border:0; border-radius:10px; background:transparent; color:var(--eh-color-ink); font:500 13px/1.4 var(--eh-font-family); text-align:left; cursor:pointer; }
+.eh-assistantPromptToolsMenu button:hover { background:var(--eh-color-paper); }
+.eh-assistantPromptToolsMenu small { margin-left:auto; color:var(--eh-color-secondary); font-size:12px; }
+.eh-assistantPromptHint { padding:6px 14px 0; font-size:11px; color:var(--eh-color-secondary); text-align:center; }
+.eh-assistantSuggestions { display:flex; flex-wrap:wrap; gap:8px; animation:assistantChipIn var(--eh-motion-duration) var(--eh-motion-ease); }
+@keyframes assistantChipIn { from { opacity:0; } }
+@media (prefers-reduced-motion: reduce) { .eh-assistantSuggestions { animation:none; } }
+.eh-assistantSuggestion { display:inline-flex; align-items:center; min-height:34px; padding:6px 12px; border:1px solid var(--eh-color-line); border-radius:var(--eh-radius-control); background:var(--eh-color-white); color:var(--eh-color-petrol); font:600 var(--eh-font-meta)/1.4 var(--eh-font-family); cursor:pointer; transition:border-color var(--eh-motion-duration) var(--eh-motion-ease), background-color var(--eh-motion-duration) var(--eh-motion-ease); }
+.eh-assistantSuggestion:hover { border-color:var(--eh-color-petrol); background:var(--eh-color-paper); }
+.eh-assistantCamera { position:fixed; inset:0; z-index:1400; display:grid; place-items:center; padding:16px; background:rgba(16,34,42,.62); }
+.eh-assistantCameraCard { width:min(560px,calc(100vw - 32px)); border:1px solid var(--eh-color-line); border-radius:var(--eh-radius-panel); background:var(--eh-color-white); overflow:hidden; }
+.eh-assistantCameraVideo { display:block; width:100%; aspect-ratio:4/3; object-fit:cover; background:var(--eh-color-petrol); }
+.eh-assistantCameraNote { margin:0; padding:10px 14px 0; color:var(--eh-color-secondary); font:var(--eh-font-meta)/1.4 var(--eh-font-family); }
+.eh-assistantCameraBar { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px 12px; }
+.eh-assistantCameraGhost { min-height:34px; padding:6px 12px; border:1px solid var(--eh-color-line); border-radius:var(--eh-radius-control); background:var(--eh-color-white); color:var(--eh-color-petrol); font:600 var(--eh-font-meta)/1.4 var(--eh-font-family); cursor:pointer; }
+.eh-assistantCameraGhost:hover { background:var(--eh-color-paper); }
+.eh-assistantCameraShutter { display:grid; place-items:center; width:52px; height:52px; border:2px solid var(--eh-color-line); border-radius:var(--eh-radius-pill); background:var(--eh-color-petrol); color:var(--eh-color-white); cursor:pointer; }
+.eh-assistantCameraShutter:hover { border-color:var(--eh-color-petrol); }
+.eh-assistantDialog { background:var(--eh-color-white); }
+.eh-assistantDialog .eh-assistantMessages { background:var(--eh-color-white); }
+.eh-assistantDialog .eh-assistantComposer { background:transparent; border-top:0; }
+
+/* StreamingResponse · ChatGPT-fein: Inhalts-Poesie statt Karte */
+.eh-streamingResponse { display:grid; gap:0; padding:0; border:0; background:transparent; border-radius:0; }
+.eh-streamingContent { font-size:15px; line-height:1.7; color:var(--eh-color-ink); }
+.eh-streamingContent :where(a) { color:var(--eh-color-petrol); text-decoration:underline; text-underline-offset:3px; }
+.eh-streamingContent :where(code) { padding:1px 6px; border-radius:6px; background:var(--eh-color-paper); font-size:.9em; }
+.eh-streamingContent :where(pre) { margin:12px 0; padding:14px; border:1px solid var(--eh-color-line); border-radius:12px; background:var(--eh-color-paper); overflow:auto; }
+.eh-streamingActions { display:flex; align-items:center; gap:2px; padding-top:10px; }
+.eh-streamingActionBtn { min-height:30px; padding:6px 10px; border:0; border-radius:999px; background:transparent; color:var(--eh-color-secondary); }
+.eh-streamingActionBtn:hover { background:var(--eh-color-paper); color:var(--eh-color-ink); }
+.eh-streamingFeedback { gap:2px; }
+.eh-streamingFeedbackBtn { width:30px; height:30px; border:0; border-radius:999px; background:transparent; }
+.eh-streamingFeedbackBtn:hover { background:var(--eh-color-paper); }
+.eh-agentDisclosure { border:0; background:transparent; }
+.eh-agentDisclosureSummary { background:var(--eh-color-paper); border:1px solid var(--eh-color-line); border-radius:999px; padding:6px 12px; gap:8px; }
+.eh-agentDisclosureBody { background:transparent; border:0; padding:8px 0 0; }
+.eh-citationList { gap:8px; }
+.eh-citationItem { border-radius:14px; }
 
 
 /* Owner dashboard composition explicitly approved by the operator on 2026-09-11. */
@@ -2240,7 +2397,12 @@ a.eh-ownerDashboardStatusItem:hover {
 .eh-ownerSection > header { display:flex; align-items:baseline; justify-content:space-between; gap:16px; }
 .eh-ownerSection h2, .eh-ownerComposer h2 { margin:0; font-size:22px; font-weight: var(--eh-weight-bold); line-height:1.35; letter-spacing:-.025em; }
 .eh-ownerSection > header p { margin:6px 0 0; color:var(--eh-color-secondary); font-size:15px; }
-.eh-ownerSection > header > a { color:var(--eh-color-petrol); font-size:15px; min-height:44px; display:inline-flex; align-items:center; }
+/* Sektions-Aktion (Betreiber 24.09.): Pillen-Button wie der fruehere
+   »Alle ansehen«-Schalter — kein nackter Link mehr. Wirkt global, weil alle
+   Section-Actions (Start, Vertraege, Preview, Pro) durch diesen Selector gehen. */
+.eh-ownerSection > header > a { display:inline-flex; align-items:center; gap:7px; flex:none; padding:8px 14px; border:1px solid var(--eh-color-line); border-radius:var(--eh-radius-pill); background:var(--eh-color-white); color:var(--eh-color-ink); font-size:var(--eh-font-meta); font-weight:var(--eh-weight-semibold); line-height:1.3; text-decoration:none; min-height:36px; transition:border-color var(--eh-motion-duration) var(--eh-motion-ease), background var(--eh-motion-duration) var(--eh-motion-ease); }
+.eh-ownerSection > header > a:hover { border-color:var(--eh-color-petrol); background:var(--eh-color-paper); }
+.eh-ownerSection > header > a > span { color:var(--eh-color-petrol); }
 .eh-ownerRecords { list-style:none; padding:0; margin:0; background:var(--eh-color-white); border:1px solid var(--eh-color-line); border-radius:var(--eh-radius-panel); }
 .eh-ownerRecords > li { display:flex; align-items:center; justify-content:space-between; gap:24px; padding:24px; }
 .eh-ownerRecords > li + li { border-top:1px solid var(--eh-color-line); }
@@ -2496,4 +2658,108 @@ a.eh-ownerDashboardStatusItem:hover {
   .eh-recordMain,.eh-recordTail { flex-basis:100%; }
   .eh-recordEvent { grid-template-columns:34px minmax(0,1fr); }
   .eh-recordEventTime { grid-column:1 / -1; padding-top:0; }
+}
+
+/* 2026-09-23: Dicken Fokus-Rahmen in der App komplett raus – User-Wunsch.
+   Alle 3px-Outline/Box-Shadow Fokus-Ringe werden auf none gesetzt; die
+   Eingabe bleibt über border-color erkennbar, aber ohne fetten Außenring. */
+.eh-scope :where(a, button, input, textarea, select, summary, [tabindex]):focus-visible,
+.eh-scope :where(a, button, input, textarea, select, summary, [tabindex]):focus,
+.eh-dialog :where(a, button, input, textarea, select, [tabindex]):focus-visible,
+.eh-directoryWorkspace :where(a, button, input, select, summary, [tabindex]):focus-visible,
+.eh-detailDisclosure summary:focus-visible,
+.eh-workspaceCollapse:focus-visible,
+.eh-fileInputNative:focus-visible,
+.eh-activityRetry:focus-visible,
+.eh-ownerDashboardComposer :global(.eh-agent-composer > textarea:focus-visible) {
+  outline: none !important;
+  outline-offset: 0 !important;
+  box-shadow: none !important;
+}
+.eh-assistantPromptBox:focus-within {
+  border-color: var(--eh-color-line) !important;
+  box-shadow: none !important;
+}
+.eh-assistantPromptInput:focus,
+.eh-assistantPromptInput:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+  border-color: transparent !important;
+}
+.eh-assistantPromptInput { resize: none; }
+.eh-searchField:focus-within {
+  outline: none !important;
+  box-shadow: none !important;
+  border-color: var(--eh-color-line) !important;
+}
+.eh-contactDirectorySearch:focus-within,
+.eh-ownerOrdersSearch:focus-within,
+.eh-directorySearch input:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+.eh-directorySearch input:focus,
+.eh-directoryGroupSwitch select:focus,
+.eh-directoryField input:focus,
+.eh-directoryField select:focus {
+  outline: none !important;
+  box-shadow: none !important;
+  border-color: var(--eh-color-line) !important;
+}
+
+/* EHActionTiles (Kern-Zuwachs, Betreiber-Freigabe 24.09.): flache
+   Aktionskacheln mit Aufklapp-Menue in Plus-Menue-Optik. */
+.eh-actionRow { display: flex; flex-wrap: wrap; gap: 12px; }
+.eh-actionWrap { position: relative; flex: 1 1 240px; min-width: 0; }
+.eh-actionTile { display: flex; align-items: center; gap: 12px; width: 100%; padding: 11px 14px; border: 1px solid var(--eh-color-line); border-radius: var(--eh-radius-panel); background: var(--eh-color-white); color: var(--eh-color-ink); font-family: inherit; cursor: pointer; text-align: left; transition: border-color var(--eh-motion-duration) var(--eh-motion-ease), background var(--eh-motion-duration) var(--eh-motion-ease); }
+.eh-actionTile:hover, .eh-actionTile[aria-expanded="true"] { border-color: var(--eh-color-petrol); background: var(--eh-color-paper); }
+.eh-actionTile:focus-visible { outline: 2px solid var(--eh-color-focus); outline-offset: 2px; }
+.eh-actionIcon { display: grid; place-items: center; width: 34px; height: 34px; flex: none; border-radius: var(--eh-radius-control); background: var(--eh-color-sand); color: var(--eh-color-petrol); }
+.eh-actionText { display: grid; gap: 1px; flex: 1 1 auto; min-width: 0; }
+.eh-actionText strong { font-size: var(--eh-font-label); font-weight: var(--eh-weight-semibold); line-height: var(--eh-leading-tight); }
+.eh-actionText small { font-size: var(--eh-font-meta); line-height: var(--eh-leading-normal); color: var(--eh-color-secondary); }
+.eh-actionMenu { position: absolute; top: calc(100% + 6px); left: 0; z-index: 40; display: grid; gap: 2px; min-width: min(280px, 88vw); padding: 8px; border: 1px solid var(--eh-color-line); border-radius: var(--eh-radius-panel); background: var(--eh-color-white); box-shadow: var(--eh-shadow-card); }
+.eh-actionMenu[hidden] { display: none; }
+.eh-actionMenu a { display: flex; align-items: center; gap: 10px; padding: 9px 11px; border-radius: var(--eh-radius-control); color: var(--eh-color-ink); font-family: inherit; font-size: var(--eh-font-label); font-weight: var(--eh-weight-medium); text-decoration: none; }
+.eh-actionMenu a:hover { background: var(--eh-color-paper); color: var(--eh-color-petrol); }
+.eh-actionMenu a svg { color: var(--eh-color-petrol); }
+
+/* EHOfferCard (Markt-Kachel im Wolt-Schema, Betreiber-Freigabe 24.09.). */
+.eh-offerCard { display: flex; flex-direction: column; gap: 10px; width: 100%; min-width: 0; padding: 0 0 12px; border: 1px solid var(--eh-color-line); border-radius: var(--eh-radius-panel); background: var(--eh-color-white); overflow: hidden; }
+.eh-offerHero { position: relative; display: grid; place-items: center; aspect-ratio: 16 / 9; background: var(--eh-offer-brand, var(--eh-color-petrol)); color: var(--eh-color-white); }
+.eh-offerBadge { position: absolute; top: 10px; left: 10px; right: 10px; display: inline-flex; align-items: center; gap: 6px; width: fit-content; max-width: 100%; padding: 5px 11px; border-radius: var(--eh-radius-pill); background: color-mix(in srgb, var(--eh-color-ink) 76%, transparent); color: var(--eh-color-white); font-size: var(--eh-font-meta); font-weight: var(--eh-weight-semibold); line-height: 1.3; }
+.eh-offerBody { display: grid; gap: 3px; padding: 0 14px; }
+.eh-offerTitleRow { margin: 0; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.eh-offerTitleRow strong { font-size: var(--eh-font-body); font-weight: var(--eh-weight-bold); line-height: var(--eh-leading-tight); color: var(--eh-color-ink); }
+.eh-offerBrand { padding: 2px 9px; border-radius: var(--eh-radius-pill); background: var(--eh-color-sand); color: var(--eh-color-ink); font-size: var(--eh-font-meta); font-weight: var(--eh-weight-medium); }
+.eh-offerText { margin: 0; font-size: var(--eh-font-label); line-height: var(--eh-leading-normal); color: var(--eh-color-secondary); overflow-wrap: anywhere; }
+.eh-offerFoot { margin-top: auto; display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; padding: 10px 14px 0; border-top: 1px dashed var(--eh-color-line); }
+.eh-offerMeta { display: flex; align-items: center; gap: 12px; margin: 0; padding: 0; list-style: none; flex-wrap: wrap; }
+.eh-offerMeta li { display: inline-flex; align-items: center; gap: 5px; font-size: var(--eh-font-meta); color: var(--eh-color-secondary); line-height: 1.35; }
+.eh-offerMeta svg { color: var(--eh-offer-ink, var(--eh-color-petrol)); flex: none; }
+.eh-offerCta { display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px; border-radius: var(--eh-radius-control); background: var(--eh-color-petrol); color: var(--eh-color-white); font-size: var(--eh-font-meta); font-weight: var(--eh-weight-semibold); text-decoration: none; transition: background var(--eh-motion-duration) var(--eh-motion-ease); }
+.eh-offerCta:hover { background: var(--eh-color-deep); }
+.eh-offerNote { font-size: var(--eh-font-meta); color: var(--eh-color-secondary); }
+.eh-offerCard[data-hue="sonne"], .eh-offerDeal[data-hue="sonne"] { --eh-offer-brand: #e08a2e; --eh-offer-ink: #94590a; }
+.eh-offerCard[data-hue="himmel"], .eh-offerDeal[data-hue="himmel"] { --eh-offer-brand: #2f7fd1; --eh-offer-ink: #0f62c4; }
+.eh-offerCard[data-hue="veilchen"], .eh-offerDeal[data-hue="veilchen"] { --eh-offer-brand: #7a4fd8; --eh-offer-ink: #6d33d6; }
+.eh-offerCard[data-hue="stahl"], .eh-offerDeal[data-hue="stahl"] { --eh-offer-brand: #14809c; --eh-offer-ink: #0e6f8a; }
+.eh-offerCard[data-hue="rose"], .eh-offerDeal[data-hue="rose"] { --eh-offer-brand: #d94a76; --eh-offer-ink: #d0265f; }
+
+/* EHOfferDeal — dieselbe Sprache, aber als liegende Zeile fuer Listen. */
+.eh-offerDeal { position: relative; display: grid; grid-template-columns: 104px minmax(0, 1fr) auto; gap: 16px; align-items: center; padding: 14px 16px; border: 1px solid var(--eh-color-line); border-radius: var(--eh-radius-panel); background: var(--eh-color-white); }
+.eh-offerDealHero { display: grid; place-items: center; align-self: stretch; min-height: 92px; border-radius: var(--eh-radius-control); background: var(--eh-offer-brand, var(--eh-color-petrol)); color: var(--eh-color-white); }
+.eh-offerDealBody { display: grid; gap: 5px; min-width: 0; }
+.eh-offerDealFlag { padding: 2px 9px; border-radius: var(--eh-radius-pill); background: color-mix(in srgb, var(--eh-color-success) 14%, var(--eh-color-white)); color: var(--eh-color-success); font-size: var(--eh-font-meta); font-weight: var(--eh-weight-semibold); }
+.eh-offerDealSide { display: grid; gap: 8px; justify-items: end; align-content: center; }
+.eh-offerDealFrist { padding: 4px 10px; border-radius: var(--eh-radius-pill); background: var(--eh-color-sand); color: var(--eh-color-ink); font-size: var(--eh-font-meta); font-weight: var(--eh-weight-medium); }
+.eh-offerDealSpar { margin: 0; display: grid; gap: 1px; justify-items: end; text-align: right; }
+.eh-offerDealSpar small { font-size: var(--eh-font-meta); color: var(--eh-color-secondary); }
+.eh-offerDealSpar strong { font-size: var(--eh-font-body); font-weight: var(--eh-weight-bold); color: var(--eh-color-success); }
+@media (max-width: 760px) {
+  .eh-offerDeal { grid-template-columns: 64px minmax(0, 1fr); }
+  .eh-offerDealHero { min-height: 64px; }
+  .eh-offerDealSide { grid-column: 1 / -1; grid-template-columns: minmax(0, 1fr) auto; justify-items: start; align-items: center; }
+  .eh-offerDealSpar { justify-items: start; text-align: left; }
+  .eh-offerDealFrist { justify-self: end; }
 }

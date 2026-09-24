@@ -7,37 +7,32 @@
 /* shadcn font-sans mapped to the brand Inter Variable (DESIGN.md contract). */
 @theme inline {
   --font-sans: var(--font-marketing), Inter, ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-display-face), var(--font-marketing), ui-sans-serif, system-ui, sans-serif;
-}
+  /* Designsystem 1.1 · Website-Baukasten: Wortbild bleibt Inter, keine zweite Displayschrift. */
+  --font-display: var(--font-marketing), Inter, ui-sans-serif, system-ui, sans-serif;
 
-/* Public website 2026 palette: petrol brand, lime action, cream canvas, ink text, coral alerts. */
-@theme {
-  --color-ink: #0b1f24;
-  --color-body: #4a5c61;
-  --color-brand: #0e4f55;
-  --color-brand-deep: #082e33;
-  --color-brand-soft: #e4f1ef;
-  --color-lime: #bef264;
-  --color-lime-strong: #a3e635;
-  --color-lime-soft: #f0fbd9;
-  --color-save: #0f7a52;
-  --color-coral: #e4572e;
-  --color-coral-soft: #fdebe4;
-  --color-cream: #f7f5f0;
-  --color-hairline: #e6e3dc;
+  /* Designsystem 1.1 · Website-Palette. Rohwerte leben ausschliesslich in packages/eh-design/src/tokens.json. */
+  --color-ink: var(--eh-color-ink);
+  --color-body: var(--eh-color-secondary);
+  --color-brand: var(--eh-color-petrol);
+  --color-brand-deep: var(--eh-color-deep);
+  --color-brand-soft: var(--eh-color-petrol-soft);
+  --color-lime: var(--eh-color-lime);
+  --color-lime-strong: var(--eh-color-lime-strong);
+  --color-lime-soft: var(--eh-color-lime-soft);
+  --color-save: var(--eh-color-success);
+  --color-coral: var(--eh-color-terra);
+  --color-coral-soft: var(--eh-color-terra-soft);
+  --color-cream: var(--eh-color-paper);
+  --color-sand: var(--eh-color-sand);
+  --color-hairline: var(--eh-color-line);
 
-  --animate-float: site-float 7s ease-in-out infinite;
-  --animate-float-slow: site-float 9s ease-in-out infinite;
-  --animate-marquee: site-marquee 40s linear infinite;
-
-  @keyframes site-float {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-10px); }
-  }
-  @keyframes site-marquee {
-    from { transform: translateX(0); }
-    to { transform: translateX(-50%); }
-  }
+  --radius-pill: var(--eh-radius-pill);
+  --radius-card: var(--eh-radius-card);
+  --radius-cut: var(--eh-radius-cut);
+  --shadow-card: var(--eh-shadow-card);
+  --shadow-lift: var(--eh-shadow-lift);
+  --text-meta: var(--eh-font-meta);
+  --text-meta--line-height: var(--eh-leading-normal);
 }
 
 @layer eh-legacy {

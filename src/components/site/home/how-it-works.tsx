@@ -1,5 +1,4 @@
-import Image from 'next/image';
-import { Container, SectionHeading } from '../ui';
+import { Container, HouseEdgeImage, SectionHeading } from '@/design-system/site';
 
 const STEPS = [
   { title: 'Kostenlos registrieren', text: 'E-Mail, Passwort, fertig. Keine Kreditkarte, kein Abo, keine versteckten Kosten.', time: '30 Sek.' },
@@ -11,16 +10,15 @@ export function HowItWorks() {
   return (
     <section className="bg-white py-20 lg:py-28">
       <Container className="grid items-center gap-14 lg:grid-cols-[0.9fr_1.1fr]">
-        <div className="relative aspect-[4/5] overflow-hidden rounded-[2rem] lg:aspect-auto lg:h-full lg:min-h-[520px]">
-          <Image
+        <div className="relative aspect-[4/5] lg:aspect-auto lg:h-full lg:min-h-[520px]">
+          <HouseEdgeImage
             src="/images/site/craftsman-at-work.png"
             alt="Ein Heizungstechniker wartet die Heizung, die Eigentümerin schaut entspannt zu"
-            fill
             sizes="(min-width: 1024px) 40vw, 100vw"
-            className="object-cover"
+            className="absolute inset-0"
           />
-          <div className="absolute bottom-5 left-5 right-5 rounded-2xl bg-white/95 p-4 backdrop-blur">
-            <p className="text-xs font-semibold uppercase tracking-wider text-brand">Heizungswartung · erledigt</p>
+          <div className="absolute bottom-5 left-5 right-5 rounded-2xl bg-white p-4 shadow-lift">
+            <p className="text-meta font-semibold uppercase tracking-wider text-brand">Heizungswartung · erledigt</p>
             <p className="mt-1 text-sm text-ink">Rechnung, Protokoll und nächster Termin liegen automatisch in deiner Hausakte.</p>
           </div>
         </div>
@@ -42,7 +40,7 @@ export function HowItWorks() {
                 <div className="flex flex-col gap-1.5 pt-1">
                   <div className="flex flex-wrap items-center gap-3">
                     <h3 className="font-display text-xl font-bold">{step.title}</h3>
-                    <span className="rounded-full bg-lime-soft px-2.5 py-0.5 text-xs font-semibold text-save">{step.time}</span>
+                    <span className="rounded-pill bg-lime-soft px-2.5 py-0.5 text-meta font-semibold text-save">{step.time}</span>
                   </div>
                   <p className="leading-relaxed text-body">{step.text}</p>
                 </div>

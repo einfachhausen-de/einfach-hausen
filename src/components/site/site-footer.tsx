@@ -1,7 +1,6 @@
-import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowRight, HardHat } from 'lucide-react';
-import logoFull from '@/components/marketing/assets/logo-full.png';
+import { SiteLogo } from '@/design-system/site';
 
 const GROUPS = [
   {
@@ -55,9 +54,7 @@ export function SiteFooter() {
       <div className="mx-auto max-w-7xl px-5 py-16 sm:px-8 lg:py-20">
         <div className="grid gap-12 lg:grid-cols-[1.2fr_2fr]">
           <div className="flex flex-col gap-6">
-            <Link href="/" aria-label="einfach hausen Startseite" className="w-fit">
-              <Image src={logoFull} alt="einfach hausen" width={110} height={76} className="h-16 w-auto brightness-0 invert" />
-            </Link>
+            <SiteLogo tone="dark" className="w-fit" />
             <p className="max-w-sm leading-relaxed text-white/70">
               Die App für dein Eigenheim: Tarife vergleichen und wechseln, geprüfte Handwerker finden, alle Unterlagen griffbereit und ein
               KI-Hausmanager, der mitdenkt.
@@ -95,7 +92,7 @@ export function SiteFooter() {
           </div>
         </div>
 
-        <div className="mt-16 flex flex-col gap-4 border-t border-white/10 pt-8 text-xs text-white/50 md:flex-row md:items-center md:justify-between">
+        <div className="mt-16 flex flex-col gap-4 border-t border-white/10 pt-8 text-meta text-white/60 md:flex-row md:items-center md:justify-between">
           <p>© 2026 Einfach Hausen. Ausgeführt wird durch eigenständige, geprüfte Partnerbetriebe.</p>
           <p>Kein Auftrag und kein Tarifwechsel ohne deine ausdrückliche Freigabe.</p>
         </div>

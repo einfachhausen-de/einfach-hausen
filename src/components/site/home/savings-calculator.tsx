@@ -3,8 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { ArrowRight, TrendingDown } from 'lucide-react';
-import { cn } from '../cn';
-import { Container, SectionHeading } from '../ui';
+import { Container, SectionHeading } from '@/design-system/site';
 
 type Heating = 'gas' | 'oel' | 'waermepumpe';
 type LastSwitch = 'nie' | 'alt' | 'neu';
@@ -74,7 +73,7 @@ export function SavingsCalculator() {
           </div>
         </div>
 
-        <div className="relative rounded-[2rem] bg-brand-deep p-7 text-white shadow-[0_40px_80px_-30px_rgba(8,46,51,0.6)] sm:p-10">
+        <div className="relative rounded-card bg-brand-deep p-7 text-white shadow-lift sm:p-10">
           <p className="flex items-center gap-2 text-sm font-medium text-white/70">
             <TrendingDown className="size-4 text-lime" aria-hidden="true" />
             Dein geschätztes Sparpotenzial
@@ -91,12 +90,10 @@ export function SavingsCalculator() {
                   <span className="text-white/80">{row.label}</span>
                   <span className="font-semibold">{euro.format(row.value)}</span>
                 </div>
-                <div className="h-2 overflow-hidden rounded-full bg-white/10">
-                  <div
-                    className="h-full rounded-full bg-lime transition-[width] duration-500"
-                    style={{ width: `${(row.value / max) * 100}%` }}
-                  />
-                </div>
+                <svg viewBox="0 0 100 8" preserveAspectRatio="none" className="h-2 w-full overflow-hidden rounded-pill" aria-hidden="true">
+                  <rect width="100" height="8" className="fill-white/10" />
+                  <rect width={(row.value / max) * 100} height="8" className="fill-lime transition-[width] duration-500" />
+                </svg>
               </li>
             ))}
           </ul>
@@ -108,12 +105,12 @@ export function SavingsCalculator() {
 
           <Link
             href="/register?role=homeowner&request=Sparpotenzial%20meiner%20Vertr%C3%A4ge%20pr%C3%BCfen"
-            className="group mt-6 flex h-14 items-center justify-center gap-2 rounded-full bg-lime font-bold text-ink transition-colors hover:bg-lime-strong"
+            className="group mt-6 flex h-14 items-center justify-center gap-2 rounded-pill bg-lime font-bold text-ink transition-colors hover:bg-lime-strong"
           >
             Sparpotenzial jetzt sichern
             <ArrowRight className="size-5 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
           </Link>
-          <p className="mt-3 text-center text-xs text-white/50">
+          <p className="mt-3 text-center text-meta text-white/50">
             Unverbindliche Schätzung auf Basis typischer Verbräuche. Dein echtes Ergebnis hängt von Region, Verbrauch und Vertrag ab.
           </p>
         </div>
@@ -137,10 +134,7 @@ function Option({ active, onClick, children }: { active: boolean; onClick: () =>
       type="button"
       aria-pressed={active}
       onClick={onClick}
-      className={cn(
-        'h-11 min-w-12 rounded-full border px-5 text-sm font-semibold transition-colors',
-        active ? 'border-ink bg-ink text-white' : 'border-hairline bg-white text-ink hover:border-ink',
-      )}
+      className="h-11 min-w-12 rounded-pill border border-hairline bg-white px-5 text-sm font-semibold text-ink transition-colors hover:border-ink aria-pressed:border-ink aria-pressed:bg-ink aria-pressed:text-white"
     >
       {children}
     </button>
