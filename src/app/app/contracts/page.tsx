@@ -125,7 +125,7 @@ export default async function Contracts({ searchParams }: { searchParams: Promis
       title="Beleg her. Den Rest liest die KI."
       text="Hochladen, abfotografieren oder zwei Felder selbst ausfüllen — der Spar-Check startet danach von allein."
     >
-      <AnlageMenue base="/app/contracts/anlegen" vergleichHref="#vergleiche" />
+      <AnlageMenue base="/app/contracts/anlegen" />
     </EHPromoBanner>
 
     {saved && (

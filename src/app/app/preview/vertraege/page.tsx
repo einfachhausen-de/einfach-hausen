@@ -126,7 +126,7 @@ export default async function ContractsPreview({ searchParams }: { searchParams:
       title="Beleg her. Den Rest liest die KI."
       text="So kommt ein Vertrag in die Hausakte. Hier nur Ansicht, ohne Speicherung."
     >
-      <AnlageMenue base="/app/preview/anlegen" vergleichHref="#vergleiche" />
+      <AnlageMenue base="/app/preview/anlegen" />
     </EHPromoBanner>
 
     <h1 className="eh-sr">Verträge &amp; Tarife</h1>
