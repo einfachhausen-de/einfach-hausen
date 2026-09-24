@@ -6,10 +6,11 @@
  * (Reveal/Stagger): kurz, endlich, nur transform/opacity, reduced-motion zeigt
  * sofort den Endzustand, ohne JavaScript ist nichts versteckt.
  */
+import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowRight, ArrowUpRight, Info, type LucideIcon } from 'lucide-react';
 import { Reveal, Stagger } from '@/components/marketing/motion';
-import { Container, Eyebrow, SectionHeading, cn } from '@/design-system/site';
+import { Container, Eyebrow, SectionHeading, cn, houseEdgeClass } from '@/design-system/site';
 
 type Tone = 'white' | 'cream' | 'dark';
 
@@ -293,6 +294,85 @@ export function ClosingCta({
         </Reveal>
       </Container>
     </section>
+  );
+}
+
+/** Sicherheits- und Hinweisflächen. `warn` nur für echte Gefahrenhinweise (Notruf). */
+export function AlertPanel({
+  tone = 'info',
+  icon: Icon = Info,
+  title,
+  children,
+}: {
+  tone?: 'info' | 'warn';
+  icon?: LucideIcon;
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div
+      role={tone === 'warn' ? 'note' : undefined}
+      className={cn('flex h-full gap-4 rounded-card p-6 sm:p-7', tone === 'warn' ? 'bg-coral-soft text-ink' : 'bg-white ring-1 ring-hairline')}
+    >
+      <span
+        className={cn('grid size-11 shrink-0 place-items-center rounded-xl', tone === 'warn' ? 'bg-coral text-white' : 'bg-brand-soft text-brand')}
+        aria-hidden="true"
+      >
+        <Icon className="size-5" />
+      </span>
+      <div className="flex flex-col gap-1.5">
+        <p className="font-display text-lg font-bold leading-snug text-ink">{title}</p>
+        <div className="leading-relaxed text-body">{children}</div>
+      </div>
+    </div>
+  );
+}
+
+/** Bild mit Hauskante neben Textinhalt. Illustrative Bildwelt wird sichtbar gekennzeichnet. */
+export function ImageSplit({
+  src,
+  alt,
+  reverse,
+  note = 'Illustrative Bildwelt, keine Kundenaussage.',
+  children,
+}: {
+  src: string;
+  alt: string;
+  reverse?: boolean;
+  note?: string | null;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
+      <Reveal y={24} className={cn('relative aspect-[4/5] w-full lg:aspect-[5/6]', reverse && 'lg:order-2')}>
+        <div className={cn('absolute inset-0 overflow-hidden rounded-card', houseEdgeClass)}>
+          <Image src={src} alt={alt} fill sizes="(min-width: 1024px) 45vw, 100vw" className="object-cover" />
+        </div>
+      </Reveal>
+      <div className="flex flex-col gap-6">
+        {children}
+        {note && <p className="text-meta text-body">{note}</p>}
+      </div>
+    </div>
+  );
+}
+
+/** Lesefläche für Rechtstexte und lange Artikel: ruhige Zeilenlänge, klare Zwischenüberschriften. */
+export function Prose({ children, className }: { children: React.ReactNode; className?: string }) {
+  return (
+    <div
+      className={cn(
+        'max-w-3xl text-lg leading-relaxed text-body',
+        '[&_h2]:mt-12 [&_h2]:font-display [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:leading-tight [&_h2]:text-ink first:[&_h2]:mt-0',
+        '[&_h3]:mt-8 [&_h3]:font-display [&_h3]:text-xl [&_h3]:font-bold [&_h3]:text-ink',
+        '[&_p]:mt-4 [&_ul]:mt-4 [&_ul]:flex [&_ul]:list-disc [&_ul]:flex-col [&_ul]:gap-2 [&_ul]:pl-6 [&_ol]:mt-4 [&_ol]:list-decimal [&_ol]:pl-6',
+        '[&_strong]:font-semibold [&_strong]:text-ink [&_address]:mt-4 [&_address]:not-italic',
+        '[&_a]:font-semibold [&_a]:text-brand [&_a]:underline [&_a]:underline-offset-4 hover:[&_a]:text-ink',
+        className,
+      )}
+    >
+      {children}
+    </div>
   );
 }
 

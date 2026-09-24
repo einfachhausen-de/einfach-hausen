@@ -1,60 +1,107 @@
 import type { Metadata } from 'next';
-import { canonical } from '@/lib/seo';
 import { BrainCircuit, HeartHandshake, Home } from 'lucide-react';
-import { MarketingShell } from '@/components/marketing/site-shell';
-import { HeroEditorialPhoto } from '@/components/marketing/hero-visuals';
-import { EHScope, EHSection, EHPageHero, EHTimeline, EHFeatureRows, EHProse, EHClosing, EHButton, EHEyebrow, EHHeading, EHText } from '@/design-system';
+import { canonical } from '@/lib/seo';
+import { SiteShell } from '@/components/site/site-shell';
+import { ClosingCta, FeatureCards, Heading, ImageSplit, PageHero, Section } from '@/components/site/page/blocks';
+import { Stagger } from '@/components/marketing/motion';
+import { ButtonLink, HouseEdgeImage } from '@/design-system/site';
 
-export const metadata: Metadata = { 
-  title: 'Über uns', 
-  description: 'Mission und Arbeitsweise hinter Einfach Hausen: Eine ruhige Eingangstür für Eigentümer und Partner.', 
-  alternates: { canonical: canonical('/ueber-uns') } 
+export const metadata: Metadata = {
+  title: 'Über uns',
+  description: 'Mission und Arbeitsweise hinter Einfach Hausen: eine ruhige Eingangstür für Eigentümer und Partnerbetriebe.',
+  alternates: { canonical: canonical('/ueber-uns') },
 };
 
-export default function Page() {
-  const principles = [
-    { num: '01', title: 'Nutzen vor Technologie', text: 'Jede Funktion beginnt mit einem konkreten Nutzen für das Haus. KI ist ein leises Werkzeug im Hintergrund, kein lautes Werbeversprechen.' },
-    { num: '02', title: 'Entscheidung bleibt beim Menschen', text: 'Einordnen, vorbereiten, prüfen: ja. Aber Beauftragung, Freigabe und Vereinbarungen sind immer bewusste Entscheidungen zwischen Eigentümer und Handwerker.' },
-    { num: '03', title: 'Region vor Skalierung', text: 'Wir wachsen mit verifizierten Partnerbetrieben vor Ort. Verlässliche Handwerksqualität und kurze Wege schlagen anonyme Vermittlungsplattformen.' },
-    { num: '04', title: 'Hauswissen bleibt erhalten', text: 'Die Immobilie ist der langlebige Datensatz. Technik, Wartungshistorie, Rechnungen und bewährte Kontakte gehören dauerhaft an einen Ort.' },
-  ];
+const PRINCIPLES = [
+  { title: 'Nutzen vor Technologie', text: 'Jede Funktion beginnt mit einem konkreten Nutzen für das Haus. KI ist ein leises Werkzeug im Hintergrund, kein lautes Werbeversprechen.' },
+  { title: 'Entscheidung bleibt beim Menschen', text: 'Einordnen, vorbereiten, prüfen: ja. Beauftragung, Freigabe und Vereinbarungen bleiben bewusste Entscheidungen zwischen Eigentümer und Betrieb.' },
+  { title: 'Region vor Skalierung', text: 'Wir wachsen mit geprüften Partnerbetrieben vor Ort. Verlässliche Arbeit und kurze Wege sind uns wichtiger als eine anonyme Vermittlungsplattform.' },
+  { title: 'Hauswissen bleibt erhalten', text: 'Das Haus ist der langlebige Zusammenhang. Technik, Wartungen, Rechnungen und bewährte Kontakte gehören dauerhaft an einen Ort.' },
+] as const;
 
+export default function Page() {
   return (
-    <MarketingShell>
-      <EHScope>
-      <EHPageHero
+    <SiteShell>
+      <PageHero
         eyebrow="Über uns"
         title="Die ruhige Eingangstür für dein Eigenheim."
-        text="Nicht noch ein unübersichtliches Handwerkerverzeichnis, kein kompliziertes ERP: Eine verlässliche Anlaufstelle, die Anliegen versteht, lokale Meisterbetriebe verbindet und das Wissen deines Hauses bewahrt."
-        actions={<EHButton href="/register?role=homeowner" arrow>Hauskonto anlegen</EHButton>}
-        media={<HeroEditorialPhoto src="/images/premium/hero-homeowner.jpg" label="Einfach Hausen" detail="Verlässliche Organisation im Hintergrund. Handwerkskunst vor Ort." />}
+        text="Kein unübersichtliches Handwerkerverzeichnis und keine komplizierte Software: eine verlässliche Anlaufstelle, die Anliegen versteht, geprüfte Betriebe aus der Region verbindet und das Wissen deines Hauses bewahrt."
+        actions={
+          <ButtonLink href="/register?role=homeowner" size="lg" arrow>
+            Hauskonto anlegen
+          </ButtonLink>
+        }
+        aside={
+          <div className="relative aspect-[4/5] w-full">
+            <HouseEdgeImage
+              src="/images/premium/hero-homeowner.jpg"
+              alt="Eine Eigentümerin steht entspannt vor ihrem Haus"
+              sizes="(min-width: 1024px) 40vw, 100vw"
+              priority
+              className="absolute inset-0"
+            />
+          </div>
+        }
       />
 
-      <EHSection compact>
-        <EHEyebrow>Leitbild</EHEyebrow>
-        <EHHeading>Vier Grundsätze, an denen wir jede Zeile Code messen.</EHHeading>
-        <EHTimeline items={principles.map((p) => ({ when: p.num, title: p.title, text: p.text }))} />
-      </EHSection>
+      <Section>
+        <Heading eyebrow="Leitbild" title="Vier Grundsätze, an denen wir jede Entscheidung messen." />
+        <Stagger className="grid gap-5 md:grid-cols-2" y={20}>
+          {PRINCIPLES.map((p, index) => (
+            <div key={p.title} className="flex h-full gap-5 rounded-card bg-cream p-7 sm:p-8">
+              <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-ink font-display text-lg font-bold text-lime" aria-hidden="true">
+                {String(index + 1).padStart(2, '0')}
+              </span>
+              <div className="flex flex-col gap-2">
+                <h3 className="font-display text-xl font-bold text-ink">{p.title}</h3>
+                <p className="leading-relaxed text-body">{p.text}</p>
+              </div>
+            </div>
+          ))}
+        </Stagger>
+      </Section>
 
-      <EHSection compact>
-          <EHProse>
-            <p><strong>Unser Versprechen.</strong> Ein Ansprechpartner für alles rund ums Eigenheim.</p>
-          </EHProse>
-        </EHSection>
+      <Section tone="dark">
+        <Heading
+          tone="dark"
+          eyebrow="Transparenz"
+          title="Regionale Partner und 0 % Provision."
+          text="Eigentümer nutzen Einfach Hausen kostenlos. Wir verdienen über planbare Tarife der Partnerbetriebe – nicht an deinem Auftragswert."
+        />
+        <FeatureCards
+          tone="dark"
+          items={[
+            { icon: HeartHandshake, title: 'Keine Lead-Auktionen', text: 'Betriebe ersteigern keine Anfragen. Dein Anliegen geht gezielt an einen passenden Betrieb, wenn einer verfügbar ist.' },
+            { icon: BrainCircuit, title: 'Assistenz statt Show', text: 'Der Hausmanager hilft bei Beschreibung und Organisation, nimmt dir aber keine Entscheidung ab.' },
+            { icon: Home, title: 'Dauerhafter Werterhalt', text: 'Hinterlegte Rechnungen, Wartungen und Kontakte bleiben in der digitalen Hausakte deines Hauses.' },
+          ]}
+        />
+      </Section>
 
-      <EHSection compact>
-        <EHEyebrow>Transparenz</EHEyebrow>
-        <EHHeading>Echte Menschen, regionale Partner und 0 % Provision.</EHHeading>
-        <EHText size="lead">Wir verdienen nicht an vermittelten Aufträgen, sondern an stabilen Service-Paketen für Haus und Betrieb.</EHText>
-        <EHFeatureRows items={[
-          { icon: <HeartHandshake size={20} />, title: 'Keine Lead-Auktionen', text: 'Partner kaufen keine Anfragen im Sekundentakt. Anfragen gehen gezielt an den passenden Betrieb in deiner Nachbarschaft.' },
-          { icon: <BrainCircuit size={20} />, title: 'Assistenz statt Show', text: 'Der Hausmeister-Copilot hilft bei der Problembeschreibung und Terminkoordination, nimmt dir aber niemals eigenmächtig das Ruder aus der Hand.' },
-          { icon: <Home size={20} />, title: 'Dauerhafter Werterhalt', text: 'Jede Rechnung, jede Wartung und jeder Kontakt fließt in die digitale Hausakte deines Eigenheims.' },
-        ]} />
-      </EHSection>
+      <Section>
+        <ImageSplit src="/images/marketing/family-home.jpg" alt="Familie auf der Terrasse ihres Hauses">
+          <Heading
+            eyebrow="Unser Versprechen"
+            title="Ein Ansprechpartner für alles rund ums Eigenheim."
+            text="Weniger im Kopf behalten, weniger suchen, weniger hinterhertelefonieren. Und bei jeder Entscheidung wissen, worauf du dich einlässt."
+          />
+          <div className="flex flex-wrap gap-3">
+            <ButtonLink href="/so-funktionierts" variant="outline">
+              So funktioniert&apos;s
+            </ButtonLink>
+            <ButtonLink href="/sicherheit" variant="outline">
+              Sicherheit & Daten
+            </ButtonLink>
+          </div>
+        </ImageSplit>
+      </Section>
 
-      <EHClosing title="Lerne Einfach Hausen für dein Zuhause kennen." text="Erstelle in zwei Minuten dein kostenloses Hauskonto und behalte den Kopf frei." href="/register?role=homeowner" label="Hauskonto kostenlos anlegen" secondary={<EHButton href="/#anliegen" variant="secondary">Anliegen starten</EHButton>} />
-    </EHScope>
-    </MarketingShell>
+      <ClosingCta
+        title="Lerne Einfach Hausen für dein Zuhause kennen."
+        text="Erstelle in wenigen Minuten dein kostenloses Hauskonto und behalte den Kopf frei."
+        primary={{ href: '/register?role=homeowner', label: 'Hauskonto kostenlos anlegen' }}
+        secondary={{ href: '/kontakt', label: 'Kontakt aufnehmen' }}
+      />
+    </SiteShell>
   );
 }
