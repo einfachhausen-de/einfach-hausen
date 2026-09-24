@@ -1,5 +1,5 @@
 import { Building2, HandCoins, Lock } from 'lucide-react';
-import { ButtonLink, CheckList, Container } from '@/design-system/site';
+import { ButtonLink, CheckList, Container, cn, houseEdgeClass } from '@/design-system/site';
 
 const HOW_WE_EARN = [
   {
@@ -23,7 +23,7 @@ export function PricingPromise() {
   return (
     <section id="preise" className="scroll-mt-24 bg-white pb-20 lg:pb-28">
       <Container>
-        <div className="grid overflow-hidden rounded-[2.5rem] bg-ink text-white lg:grid-cols-2">
+        <div className={cn('grid overflow-hidden bg-ink text-white lg:grid-cols-2', houseEdgeClass)}>
           <div className="flex flex-col gap-8 p-8 sm:p-12 lg:p-14">
             <p className="text-sm font-semibold uppercase tracking-wider text-lime">Preise für Eigentümer</p>
             <div>

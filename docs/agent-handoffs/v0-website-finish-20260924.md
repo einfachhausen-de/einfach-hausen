@@ -16,6 +16,8 @@ v0 hat hier **nur Design/Frontend** angefasst. Keine Tests, kein Re-Seal, kein E
 - **Hausmanager-Knopf:** auf der Website nur noch eine Lime-Ecke, nicht die breite Karte über Formular und Inhalt. Die Startseite hebt ihn nicht mehr an (dort gibt es keine untere App-Leiste). Werkbank und Werkzeugleiste unverändert.
 - **Fehler- und Ladezustand** der öffentlichen Seite: Papier, Lime, Kartenradius aus Tokens statt Teal-Karte.
 - **Leistungsseiten:** Hauskanten-Foto und der Satz, dass der Auftrag erst nach Bestätigung entsteht.
+- **Lexikon-Suche:** das Suchfeld füllt die Zeile. Der Platzhalter bleibt in der Pille und liegt nicht mehr über „Häufig gesucht“.
+- **Abschlussflächen** auf Startseite und Partnerseite: dieselbe Hauskante wie `ClosingCta`, nicht mehr `rounded-[2.5rem]`.
 
 ## Bewusst nicht Remotion
 

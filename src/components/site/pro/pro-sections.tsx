@@ -3,7 +3,7 @@ import {
   Star, Target, ToggleRight, UserPlus, X,
 } from 'lucide-react';
 import Link from 'next/link';
-import { ButtonLink, Container, ExampleBadge, HouseEdgeImage, PhoneFrame, SectionHeading } from '@/design-system/site';
+import { ButtonLink, Container, ExampleBadge, HouseEdgeImage, PhoneFrame, SectionHeading, cn, houseEdgeClass } from '@/design-system/site';
 import { SiteFaq } from '@/design-system/site-faq';
 import { PartnerAppScreen } from './partner-app-screen';
 
@@ -349,7 +349,7 @@ export function ProFinalCta() {
   return (
     <section className="py-20 lg:py-28">
       <Container>
-        <div className="flex flex-col items-center gap-6 rounded-[2.5rem] bg-lime px-6 py-16 text-center text-ink sm:px-12 lg:py-20">
+        <div className={cn('flex flex-col items-center gap-6 bg-lime px-6 py-16 text-center text-ink sm:px-12 lg:py-20', houseEdgeClass)}>
           <h2 className="max-w-3xl font-display text-balance text-4xl font-bold leading-[1.05] tracking-tight sm:text-6xl">
             Weniger akquirieren. Mehr arbeiten.
           </h2>
