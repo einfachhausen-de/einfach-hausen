@@ -344,7 +344,7 @@ async function assertKeyboardFocus(page,label){
   }
   if(!focused.tag||focused.tag==='BODY')throw new Error(`${label} has no keyboard focus target after Tab`);
 }
-async function clickAndWaitUrl(page,locator,matcher,timeout=30000){await Promise.all([page.waitForURL(matcher,{timeout}),locator.click()]);}
+async function clickAndWaitUrl(page,locator,matcher,timeout=30000){try{await Promise.all([page.waitForURL(matcher,{timeout}),locator.click()]);}catch(error){throw new Error(`click navigation failed: ${error.message.split('\n')[0]}\nserverLog tail:\n${serverLog.slice(-15).join('')}`,{cause:error});}}
 async function clickServerAction(page,locator,timeout=90000){try{await Promise.all([page.waitForResponse(r=>r.request().method()==='POST',{timeout}),locator.click()]);}catch(error){throw new Error(`server action click failed: ${error.message.split('\n')[0]}\nserverLog tail:\n${serverLog.slice(-12).join('')}`,{cause:error});} await page.waitForLoadState('load').catch(()=>{}); await page.waitForTimeout(400);}
 // The production hydration window can briefly double-render a freshly navigated
 // document; register fields are filled only after the DOM settles to one input.
