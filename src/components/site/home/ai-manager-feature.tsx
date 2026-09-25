@@ -1,42 +1,37 @@
 import { Brain, CalendarCheck, FileSearch, Mic, Paperclip, Scale, Send, Sparkles } from 'lucide-react';
-import { ButtonLink, Container, ExampleBadge, SectionHeading } from '@/design-system/site';
+import { ExampleBadge, SectionHeading } from '@/design-system/site';
+import { CtaRow, FeatureSplit, IconTiles } from '@/components/site/page/blocks';
 
 const POWERS = [
   { icon: Brain, title: 'Kennt dein Haus', text: 'Baujahr, Heizung, Verträge, Handwerker – er weiß, wovon er spricht.' },
   { icon: Scale, title: 'Prüft Angebote', text: 'Ist der Preis fair? Er vergleicht und erklärt jede Position.' },
   { icon: FileSearch, title: 'Versteht Unterlagen', text: 'Rechnungen, Verträge, Garantien – einfach abfotografieren.' },
   { icon: CalendarCheck, title: 'Bereitet vor', text: 'Anfragen formulieren, Erinnerungen setzen, Angebote einholen – du gibst frei.' },
-] as const;
+];
 
 export function AiManagerFeature() {
   return (
-    <section id="ki-hausmanager" className="scroll-mt-24 bg-brand-deep py-20 text-white lg:py-28">
-      <Container className="grid items-center gap-14 lg:grid-cols-2">
-        <div className="flex flex-col gap-10">
-          <SectionHeading
-            tone="dark"
-            eyebrow="KI-Hausmanager"
-            title={
-              <>
-                Der Hausmeister, den du dir <span className="text-lime">immer gewünscht hast.</span>
-              </>
-            }
-            text="Immer erreichbar, nie genervt, und er vergisst nichts. Frag ihn, was dein Haus, deine Verträge und Handwerker betrifft – ist er sich unsicher, fragt er nach. Und er kümmert sich nur, wenn du es freigibst."
-          />
-          <ul className="grid gap-4 sm:grid-cols-2">
-            {POWERS.map(({ icon: Icon, title, text }) => (
-              <li key={title} className="flex flex-col gap-2 rounded-2xl bg-white/5 p-5 ring-1 ring-white/10">
-                <Icon className="size-5 text-lime" aria-hidden="true" />
-                <strong className="font-semibold">{title}</strong>
-                <span className="text-sm leading-relaxed text-white/65">{text}</span>
-              </li>
-            ))}
-          </ul>
-          <ButtonLink href="/register?role=homeowner" size="lg" arrow className="w-fit">
-            Hausmanager kostenlos testen
-          </ButtonLink>
-        </div>
+    <FeatureSplit id="ki-hausmanager" tone="dark" mediaFirst media={<AssistantDemo />}>
+      <SectionHeading
+        tone="dark"
+        eyebrow="KI-Hausmanager"
+        title={
+          <>
+            Der Hausmeister, den du dir <span className="text-lime">immer gewünscht hast.</span>
+          </>
+        }
+        text="Immer erreichbar, nie genervt, und er vergisst nichts. Frag ihn, was dein Haus, deine Verträge und Handwerker betrifft – ist er sich unsicher, fragt er nach. Und er kümmert sich nur, wenn du es freigibst."
+      />
+      <IconTiles items={POWERS} tone="dark" />
+      <CtaRow href="/register?role=homeowner" note="Kein Auftrag ohne deine Bestätigung" tone="dark">
+        Hausmanager kostenlos testen
+      </CtaRow>
+    </FeatureSplit>
+  );
+}
 
+function AssistantDemo() {
+  return (
         <div className="rounded-card bg-white p-3 text-ink shadow-lift">
           <div className="flex items-center gap-3 border-b border-hairline px-4 pb-4 pt-3">
             <span className="grid size-10 place-items-center rounded-pill bg-brand text-lime">
@@ -85,7 +80,5 @@ export function AiManagerFeature() {
             </span>
           </div>
         </div>
-      </Container>
-    </section>
   );
 }

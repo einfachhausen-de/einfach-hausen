@@ -10,7 +10,7 @@ export default function Page() {
     title: 'Bewerten, passende Makler finden, Daten bewusst freigeben.',
     text: 'Dein Haus bleibt der zentrale Datensatz. Bewertung, Verkaufsinteresse und Makler-Matching werden nachvollziehbar organisiert, ohne private Hausdaten automatisch offenzulegen.',
     primaryHref: '/register?role=homeowner', primaryLabel: 'Hauskonto starten',
-    mood: 'careful',
+    mood: 'value',
     proofLabel: 'Was du behältst',
     alert: {
       title: 'Daten bleiben bei dir, bis du freigibst',

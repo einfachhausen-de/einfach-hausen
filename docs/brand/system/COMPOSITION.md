@@ -29,6 +29,29 @@ Abschnittsabstände übernimmt EHSection, die Abstände des Abschnittskopfs EHSe
 Auf der Startseite bleiben Hero, Problem, Vergleich, Ablauf, Nutzen, Vertrauen, Leistungen, Pilot, FAQ und Abschluss vorhanden. Auth-Redirect, Intake und Navigation bleiben produktiv angebunden. Keine entfernten Präsentationsvideos wieder einsetzen.
 Auf „So funktioniert's“ stehen ein großer Beispielvorgang im Hero, drei Prozessschritte mit lesbaren Ausschnitten und genau eine Fallgeschichte. Medienflächen sind eigene Bereiche.
 
+## Website-Unterseiten · 2026-09-25
+
+Verbindlich nach `DESIGN.md` § Website-Seitenkompositionen 2026-09-25. Bausteine in `src/components/site/page/blocks.tsx`:
+
+| Aufgabe | Baustein | Verbindliche Verwendung |
+| --- | --- | --- |
+| Nutzen mit Beleg im Hero | `ProofPanel` | `ink` auf hellem, `light` auf dunklem Hero |
+| Breites Stimmungsbild | `WideFigure` | unter zentriertem Kopf, mit `ILLUSTRATIVE_IMAGE_NOTE` |
+| Drei Kernaussagen | `NumberedPoints` | nur im dunklen Abschnitt |
+| Echte App-Ansicht | `ProductScreenshot` | nur auf dunklem Hero, Beispieldaten benennen |
+| Prinzip mit Schritten | `ProcessPanel` | Creme-Fläche, z. B. im weißen zentrierten Hero |
+| Kriterien neben Bild | `CheckRows` | innerhalb `ImageSplit`, statt Kartenraster |
+| Kopf links / Beispiel links | `AsideLayout` | `heading` bzw. `media`; keine lokalen Grids |
+| Dramaturgie Produktseite | `PageMood` / `MOOD_HERO_TONE` | calm, urgent, careful, value |
+| Produktkapitel Startseite | `FeatureSplit` | Zickzack über `mediaFirst`, mobil Text zuerst |
+| Beispielansicht | `DemoFrame` | Kontext, Titel, `ExampleBadge` Pflicht |
+| Fähigkeiten / Schritte | `IconTiles` | `numbered` nur für Abläufe; `light` auf Creme, `dark` im dunklen Kapitel |
+| Leistungsbereiche | `ServiceTiles` | nur `SERVICE_CATEGORIES` |
+| Hauptaktion | `CtaRow` | genau eine belegte Entlastung |
+| Login-Bildkarte | `AuthAside` | rollenabhängig, `OWNER_ASSURANCES` bzw. `PARTNER_ASSURANCES` |
+
+Ein Motiv pro Leistung (`public/images/services/<slug>.jpg`, ≤ 200 KB). Abschnittsüberschrift genau einmal; echte App-Ansicht und gekennzeichnetes Beispiel nie vertauschen.
+
 ## Integration durch lokalen Agenten
 1. Laufenden Branch und uncommittierte Arbeit sichern; niemals reset, clean, force oder vollständige fremde Dateien blind überschreiben.
 2. Diesen Korrekturbranch relativ zur gemeinsamen Basis dc70cd6 prüfen. Neue Arbeit anderer Agenten gezielt mit den Änderungen zusammenführen.

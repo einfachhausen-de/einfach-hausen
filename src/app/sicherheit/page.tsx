@@ -2,7 +2,19 @@ import type { Metadata } from 'next';
 import { BadgeCheck, Eye, FileCheck2, FolderLock, Handshake, LockKeyhole, ShieldCheck, ShieldOff, UserCheck, Users } from 'lucide-react';
 import { canonical } from '@/lib/seo';
 import { SiteShell } from '@/components/site/site-shell';
-import { AlertPanel, ClosingCta, ExampleCard, FeatureCards, Heading, HonestLimits, LegalNav, PageHero, Section } from '@/components/site/page/blocks';
+import {
+  AlertPanel,
+  CheckRows,
+  ClosingCta,
+  FeatureCards,
+  Heading,
+  HonestLimits,
+  ImageSplit,
+  LegalNav,
+  PageHero,
+  ProcessPanel,
+  Section,
+} from '@/components/site/page/blocks';
 import { Reveal } from '@/components/marketing/motion';
 import { PRINCIPLES } from '@/components/marketing/content';
 import { ButtonLink } from '@/design-system/site';
@@ -15,10 +27,24 @@ export const metadata: Metadata = {
 
 const PRINCIPLE_ICONS = [UserCheck, Users, Handshake, FolderLock] as const;
 
+const PARTNER_CHECKS = [
+  { icon: BadgeCheck, title: 'Unternehmen & Qualifikation', text: 'Unternehmensdaten, erforderliche Qualifikationen beziehungsweise Zulassungen und der vertragliche Partnerstatus.' },
+  { icon: ShieldCheck, title: 'Versicherung & Qualität', text: 'Betriebshaftpflicht, Referenzen beziehungsweise Bewertungen und der laufende Qualitätsstatus.' },
+  { icon: Users, title: 'Region, Kapazität & Kommunikation', text: 'Einsatzgebiet, verfügbare Kapazität und Kommunikationsqualität sind Teil des Partner- und Matchingmodells.' },
+] as const;
+
+const CONSENT_STEPS = [
+  { title: 'Konkreter Vorgang', text: 'Freigaben gelten nur für das Anliegen, um das es gerade geht.' },
+  { title: 'Konkreter Betrieb', text: 'Nur der Partner, den du bestätigst – nicht pauschal alle.' },
+  { title: 'Deine Bestätigung', text: 'Ohne deine aktive Zustimmung passiert nichts.' },
+];
+
 export default function Page() {
   return (
     <SiteShell>
       <PageHero
+        tone="white"
+        layout="center"
         eyebrow="Sicherheit & Daten"
         title="Nichts passiert mit deinem Haus oder deinen Daten ohne dich."
         text="Einfach Hausen trennt private Daten, bewusste Freigaben und technische Sicherheitsgrenzen. Hier stehen überprüfbare Produktprinzipien und vorhandene Schutzmechanismen – keine externe Zertifizierung und keine Garantie, die wir nicht belegen können."
@@ -32,25 +58,16 @@ export default function Page() {
             </ButtonLink>
           </>
         }
-        aside={
-          <ExampleCard
-            label="Freigabe-Prinzip"
-            title="Bevor Daten weitergehen, fragen wir dich."
-            rows={[
-              { title: 'Konkreter Vorgang', text: 'Freigaben gelten nur für das Anliegen, um das es gerade geht.' },
-              { title: 'Konkreter Betrieb', text: 'Nur der Partner, den du bestätigst – nicht pauschal alle.' },
-              { title: 'Deine Bestätigung', text: 'Ohne deine aktive Zustimmung passiert nichts.' },
-            ]}
-          />
-        }
-      />
-
-      <Section>
-        <Heading eyebrow="Vier Regeln" title="Woran du uns messen kannst." />
-        <FeatureCards columns={2} items={PRINCIPLES.map((principle, index) => ({ ...principle, icon: PRINCIPLE_ICONS[index] }))} />
-      </Section>
+      >
+        <ProcessPanel label="Freigabe-Prinzip · Bevor Daten weitergehen, fragen wir dich." steps={CONSENT_STEPS} />
+      </PageHero>
 
       <Section tone="cream">
+        <Heading eyebrow="Vier Regeln" title="Woran du uns messen kannst." />
+        <FeatureCards variant="register" columns={2} items={PRINCIPLES.map((principle, index) => ({ ...principle, icon: PRINCIPLE_ICONS[index] }))} />
+      </Section>
+
+      <Section>
         <Heading eyebrow="Deine Entscheidung" title="Was nie ohne dich passiert." />
         <FeatureCards
           items={[
@@ -80,18 +97,14 @@ export default function Page() {
       </Section>
 
       <Section>
-        <Heading
-          eyebrow="Partnervertrauen"
-          title="Wie wir Partnerbetriebe prüfen."
-          text="Der Prüfstandard ist ein Produktstandard, kein pauschales Zertifikat. Ob ein konkreter Betrieb aktiv ist, ergibt sich aus seinem realen Verifizierungs- und Vertragsstatus."
-        />
-        <FeatureCards
-          items={[
-            { icon: BadgeCheck, title: 'Unternehmen & Qualifikation', text: 'Unternehmensdaten, erforderliche Qualifikationen beziehungsweise Zulassungen und der vertragliche Partnerstatus.' },
-            { icon: ShieldCheck, title: 'Versicherung & Qualität', text: 'Betriebshaftpflicht, Referenzen beziehungsweise Bewertungen und der laufende Qualitätsstatus.' },
-            { icon: Users, title: 'Region, Kapazität & Kommunikation', text: 'Einsatzgebiet, verfügbare Kapazität und Kommunikationsqualität sind Teil des Partner- und Matchingmodells.' },
-          ]}
-        />
+        <ImageSplit src="/images/site/craftsman-at-work.png" alt="Handwerker bei der Arbeit an einem Haus, ohne lesbare Marken oder Namen">
+          <Heading
+            eyebrow="Partnervertrauen"
+            title="Wie wir Partnerbetriebe prüfen."
+            text="Der Prüfstandard ist ein Produktstandard, kein pauschales Zertifikat. Ob ein konkreter Betrieb aktiv ist, ergibt sich aus seinem realen Verifizierungs- und Vertragsstatus."
+          />
+          <CheckRows items={PARTNER_CHECKS} />
+        </ImageSplit>
       </Section>
 
       <Section tone="cream">
@@ -114,6 +127,7 @@ export default function Page() {
       </Section>
 
       <ClosingCta
+        tone="dark"
         title="Kontrolle behalten – von der ersten Frage bis zum erledigten Auftrag."
         text="Starte kostenlos und entscheide bei jedem Schritt selbst, was mit deinen Daten und deinem Haus passiert."
         primary={{ href: '/register?role=homeowner', label: 'Hauskonto kostenlos anlegen' }}
