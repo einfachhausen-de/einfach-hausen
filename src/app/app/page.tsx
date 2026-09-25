@@ -1,26 +1,24 @@
 import '@/components/werkbank-layout.css';
-import Link from 'next/link';
-import { BarChart3, BatteryCharging, CalendarDays, ChevronRight, FileText, Flame, HousePlug, MessageCircle, ShieldCheck, Smartphone, Sun, Thermometer, Users, Wifi, Wrench, Zap } from 'lucide-react';
 import { WerkbankRahmen } from '@/components/werkbank-rahmen';
-import { CompareRail } from '@/components/homeowner/compare-rail';
-import { VerlaufNaechstes, VerlaufZeitleiste } from '@/components/homeowner/verlauf-zeitleiste';
-import { SuggestionSlider, type Suggestion } from '@/components/homeowner/suggestion-slider';
-import { EHButton, EHCallout, EHOwnerSection } from '@/design-system';
+import {
+  START_VORSCHLAEGE,
+  StartAnsicht,
+  StartRail,
+  type StartFokus,
+  type StartVorschlag,
+} from '@/components/homeowner/start-ansicht';
+import type { VerlaufEintrag } from '@/components/homeowner/verlauf-zeitleiste';
 import { requireUser } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { ownerInstant } from '@/lib/owner-format';
 import { primaryProperty } from '@/lib/properties';
 import { SAVINGS_KINDS, contractKindLabel, estimateSavings, yearlyCents } from '@/lib/contracts';
 import { euroExact } from '@/lib/format';
-import styles from './eigentuemer-start.module.css';
 
 /**
- * Startseite der Eigentümer-App.
- *
- * Werkbank-Kopf, Fokus-Zeile, Schnellaktionen und Sektionsrahmen kommen aus
- * der Bibliothek; die drei eigenen Sektionen (Vergleiche, Haus-Historie,
- * Schiene) und die Vorschlagskarte liegen im begleitenden Modul
- * `eigentuemer-start.module.css` – nur Tokens, keine Rohwerte, keine Verläufe.
+ * Startseite der Eigentümer-App. Die Komposition liegt in
+ * `components/homeowner/start-ansicht.tsx` (gemeinsam mit /app/preview);
+ * hier entstehen ausschließlich die echten Daten und der eine Fokus.
  */
 
 /** "24.09." – kurz, tabellarisch, sortiert wird am ISO-Wert. */
@@ -33,25 +31,38 @@ function shortDay(value: string | null): string {
   return new Intl.DateTimeFormat('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit' }).format(instant);
 }
 
-/** Uhrzeit eines Termins (HH:MM, Berlin) – nur wenn echte Zeit steckt. */
+/** Uhrzeit eines Termins (HH:MM) – nur wenn echte Zeit steckt. */
 function shortTime(value: string | null): string | null {
   if (!value) return null;
   const m = /(\d{2}):(\d{2})/.exec(String(value));
   return m ? `${m[1]}:${m[2]}` : null;
 }
 
-/** Heutiges Datum als erste Zeile des Werkbank-Kopfes, z. B. „Dienstag, 22. September". */
-function todayEyebrow(): string {
-  return new Intl.DateTimeFormat('de-DE', {
-    timeZone: 'Europe/Berlin',
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-  }).format(new Date());
+/** „Sa., 26.09., 14:30 Uhr“ – Wochentag hilft mehr als ein nacktes Datum. */
+function terminWann(value: string): string {
+  const raw = String(value);
+  const instant = /^\d{4}-\d{2}-\d{2}$/.test(raw) ? new Date(`${raw}T12:00:00Z`) : ownerInstant(raw);
+  const tag = instant
+    ? new Intl.DateTimeFormat('de-DE', { timeZone: 'Europe/Berlin', weekday: 'short', day: '2-digit', month: '2-digit' }).format(instant)
+    : shortDay(raw);
+  const zeit = shortTime(raw);
+  return zeit ? `${tag}, ${zeit} Uhr` : tag;
+}
+
+/** Gruß nach Berliner Tageszeit. */
+function tageszeitGruss(): string {
+  const stunde = Number(
+    new Intl.DateTimeFormat('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', hourCycle: 'h23' })
+      .formatToParts(new Date())
+      .find((part) => part.type === 'hour')?.value ?? 12,
+  );
+  if (stunde < 11) return 'Guten Morgen';
+  if (stunde < 18) return 'Guten Tag';
+  return 'Guten Abend';
 }
 
 /** Zustand eines Vorgangs: Text plus Registerton, nie Farbe allein. */
-function jobStatus(status: string): { label: string; tone: 'neutral' | 'info' | 'ok' | 'warn' } {
+function jobStatus(status: string): { label: string; tone: VerlaufEintrag['ton'] } {
   switch (status) {
     case 'open': return { label: 'Offen', tone: 'neutral' };
     case 'quoted': return { label: 'Angebote da', tone: 'warn' };
@@ -64,48 +75,34 @@ function jobStatus(status: string): { label: string; tone: 'neutral' | 'info' | 
   }
 }
 
-/** Die sechs Vergleiche als kleine Kacheln einer Reihe. */
-const COMPARES = [
-  { href: '/app/contracts#vergleich-strom', label: 'Strom', icon: Zap, hue: 'sonne' },
-  { href: '/app/contracts#vergleich-gas', label: 'Gas', icon: Flame, hue: 'himmel' },
-  { href: '/app/contracts#vergleich-dsl', label: 'Internet', icon: Wifi, hue: 'veilchen' },
-  { href: '/app/contracts#vergleich-versicherung', label: 'Versicherung', icon: ShieldCheck, hue: 'stahl' },
-  { href: '/app/contracts#vergleich-mobilfunk', label: 'Mobilfunk', icon: Smartphone, hue: 'rose' },
-  { href: '/app/contracts#vergleiche', label: 'Photovoltaik', icon: Sun, hue: 'sand' },
-  { href: '/app/contracts#vergleiche', label: 'Heizung', icon: Thermometer, hue: 'terra' },
-  { href: '/app/contracts#vergleiche', label: 'Smart Home', icon: HousePlug, hue: 'blatt' },
-  { href: '/app/contracts#vergleiche', label: 'Wallbox', icon: BatteryCharging, hue: 'petrol' },
-] as const;
-
 type HistoryRow = { id: number; title: string; status: string; shown_at: string; next_at: string | null };
+type ContractRow = { id: number; kind: string; provider: string; cost_amount: number | null; cost_interval: string };
 
 export default async function Dashboard() {
   const user = await requireUser('homeowner');
   const profile = db.prepare('SELECT address,postcode,onboarding_step FROM homeowner_profiles WHERE user_id=?').get(user.id) as { address?: string; postcode?: string; onboarding_step?: string } | undefined;
   const property = primaryProperty(user.id);
   const address = property?.address || profile?.address || '';
-  const userName = `${user.first_name || ''} ${user.last_name || ''}`.trim();
+  const vorname = (user.first_name || '').trim();
 
   const jobsCount = (db.prepare(`SELECT COUNT(*) c FROM jobs WHERE homeowner_id=? AND status IN ('open','quoted','accepted','in_progress')`).get(user.id) as { c: number }).c;
   const offersCount = (db.prepare(`SELECT COUNT(*) c FROM quotes q JOIN jobs j ON j.id=q.job_id WHERE j.homeowner_id=? AND q.status='pending' AND j.status='quoted'`).get(user.id) as { c: number }).c;
   const firstDecision = db.prepare(`SELECT j.id FROM quotes q JOIN jobs j ON j.id=q.job_id WHERE j.homeowner_id=? AND q.status='pending' AND j.status='quoted' ORDER BY datetime(q.created_at) DESC LIMIT 1`).get(user.id) as { id: number } | undefined;
   const contactsCount = (db.prepare(`SELECT COUNT(DISTINCT q.provider_id) c FROM quotes q JOIN jobs j ON j.id=q.job_id WHERE j.homeowner_id=?`).get(user.id) as { c: number }).c;
   const appointmentsCount = (db.prepare(`SELECT COUNT(*) c FROM appointments WHERE homeowner_id=? AND datetime(start_at) >= datetime('now') AND status != 'cancelled'`).get(user.id) as { c: number }).c;
-  // (b) Trichter-Front: der ergiebigste Vertrags-Spar-Check erbt den ersten
-  // Slide der Vorschlaege — ohne neuen Block, ohne Zaun, ein Klick in die Liste.
-  let sparTeaser: Suggestion | null = null;
-  {
-    const rows = db.prepare(`SELECT id, kind, provider, cost_amount, cost_interval FROM house_contracts WHERE homeowner_id=? AND status='active'`).all(user.id) as { id: number; kind: string; provider: string; cost_amount: number | null; cost_interval: string }[];
-    if (rows.length === 0) {
-      sparTeaser = { id: 'vertraege-erfassen', title: 'Verträge erfassen, Spar-Check starten', text: 'Strom, Internet, Versicherung: nur den Anbieter eintragen, fertig. Wir prüfen automatisch, ob dein Tarif zu teuer ist.', cta: 'Jetzt ersten Vertrag anlegen', href: '/app/contracts#vertrag-anlegen', iconKey: 'sparen' };
-    } else {
-      const scored = rows
-        .filter((r) => (SAVINGS_KINDS as readonly string[]).includes(r.kind))
-        .map((r) => ({ r, e: estimateSavings({ kind: r.kind, yearlyCents: yearlyCents(r.cost_amount, r.cost_interval), postcode: profile?.postcode || '', householdSize: null, hasLoyaltyBonus: false, switchWilling: true }) }));
-      const best = scored.filter((x) => x.e).sort((a, b) => (b.e?.highCents ?? 0) - (a.e?.highCents ?? 0))[0];
-      if (best?.e) {
-        sparTeaser = { id: `spar-${best.r.id}`, title: `Spar-Check: ${contractKindLabel(best.r.kind)}`, text: `Bei ${best.r.provider} sind bis zu ${euroExact(best.e.highCents)} pro Jahr drin — die Rechnung dahinter liegt in deiner Hausakte.`, cta: 'Angebot ansehen', href: `/app/contracts?vertrag=${best.r.id}`, iconKey: 'sparen' };
-      }
+
+  // Spar-Check: der ergiebigste laufende Vertrag – Fokus, wenn sonst nichts
+  // wartet, sonst erster Vorschlag.
+  const contracts = db.prepare(`SELECT id, kind, provider, cost_amount, cost_interval FROM house_contracts WHERE homeowner_id=? AND status='active'`).all(user.id) as ContractRow[];
+  let bestSaving: { art: string; anbieter: string; betrag: string; href: string } | null = null;
+  if (contracts.length > 0) {
+    const best = contracts
+      .filter((r) => (SAVINGS_KINDS as readonly string[]).includes(r.kind))
+      .map((r) => ({ r, e: estimateSavings({ kind: r.kind, yearlyCents: yearlyCents(r.cost_amount, r.cost_interval), postcode: profile?.postcode || '', householdSize: null, hasLoyaltyBonus: false, switchWilling: true }) }))
+      .filter((x) => x.e)
+      .sort((a, b) => (b.e?.highCents ?? 0) - (a.e?.highCents ?? 0))[0];
+    if (best?.e) {
+      bestSaving = { art: contractKindLabel(best.r.kind), anbieter: best.r.provider, betrag: euroExact(best.e.highCents), href: `/app/contracts?vertrag=${best.r.id}` };
     }
   }
 
@@ -132,10 +129,7 @@ export default async function Dashboard() {
     ORDER BY datetime(updated_at) DESC LIMIT 18
   `).all(user.id) as HistoryRow[];
 
-  // Haus-Historie als Zeitleiste (Muster 21st.dev, Betreiber-Order 23.09.):
-  // Anstehendes und Vergangenes in einer absteigenden Liste; der Fuss zeigt
-  // den naechsten Termin oder den naechsten offenen Schritt.
-  const verlauf = [...upcomingHistory.map((job) => ({ ...job, past: false })), ...pastHistory.map((job) => ({ ...job, past: true }))]
+  const verlauf: VerlaufEintrag[] = [...upcomingHistory.map((job) => ({ ...job, past: false })), ...pastHistory.map((job) => ({ ...job, past: true }))]
     .map((job) => {
       const meta = jobStatus(job.status);
       const when = job.next_at ?? job.shown_at;
@@ -153,135 +147,45 @@ export default async function Dashboard() {
       };
     })
     .sort((a, b) => (b.iso ?? '').localeCompare(a.iso ?? ''));
+
+  // Genau ein Fokus, feste Rangfolge: Entscheidung vor Einrichtung vor Termin
+  // vor Sparpotenzial; wartet nichts, sagt die Seite das ehrlich.
   const naechsterTermin = upcomingHistory.find((job) => job.next_at);
-  // Der naechste Schritt fuehrt die Haus-Historie als eigene Zeile — die
-  // Karte selbst bleibt reiner Verlauf (Betreiber-Order 23.09., zweiter).
-  const verlaufNaechstes = naechsterTermin
-    ? {
-        label: 'Nächster Termin',
-        titel: naechsterTermin.title,
-        wann: `${shortDay(naechsterTermin.next_at)}${shortTime(naechsterTermin.next_at) ? `, ${shortTime(naechsterTermin.next_at)} Uhr` : ''}`,
-        href: `/app/jobs/${naechsterTermin.id}`,
-      }
-    : offersCount > 0
-      ? {
-          label: 'Offene Entscheidung',
-          titel: `${offersCount} ${offersCount === 1 ? 'Angebot' : 'Angebote'} warten auf dich`,
-          href: '/app/jobs',
-        }
-      : null;
+  const einrichtungOffen = Boolean(profile?.onboarding_step && profile.onboarding_step !== 'done');
+  const fokus: StartFokus =
+    offersCount > 0
+      ? { art: 'entscheidung', anzahl: offersCount, href: firstDecision ? `/app/jobs/${firstDecision.id}` : '/app/jobs' }
+      : einrichtungOffen
+        ? { art: 'einrichtung' }
+        : naechsterTermin?.next_at
+          ? { art: 'termin', titel: naechsterTermin.title, wann: terminWann(naechsterTermin.next_at), href: `/app/jobs/${naechsterTermin.id}` }
+          : bestSaving
+            ? { art: 'sparen', betrag: bestSaving.betrag, hinweis: `${bestSaving.art} bei ${bestSaving.anbieter} – die Rechnung dahinter liegt in deiner Hausakte.`, href: bestSaving.href }
+            : { art: 'ruhe' };
+
+  const sparVorschlag: StartVorschlag | null =
+    contracts.length === 0
+      ? { id: 'vertraege-erfassen', titel: 'Verträge erfassen, Spar-Check starten', text: 'Strom, Internet, Versicherung: nur den Anbieter eintragen. Wir prüfen automatisch, ob dein Tarif zu teuer ist.', weiter: 'Ersten Vertrag anlegen', href: '/app/contracts#vertrag-anlegen', symbol: 'sparen' }
+      : bestSaving && fokus.art !== 'sparen'
+        ? { id: 'spar-check', titel: `Spar-Check: ${bestSaving.art}`, text: `Bei ${bestSaving.anbieter} sind bis zu ${bestSaving.betrag} pro Jahr drin – die Rechnung dahinter liegt in deiner Hausakte.`, weiter: 'Spar-Check ansehen', href: bestSaving.href, symbol: 'sparen' }
+        : null;
+  const vorschlaege = sparVorschlag ? [sparVorschlag, ...START_VORSCHLAEGE] : START_VORSCHLAEGE;
 
   return (
     <WerkbankRahmen
       role="homeowner"
       active="/app"
       brandSub={address}
-      rail={
-        <>
-          <p className="eh-werkbank-rail-h">Mein Zuhause im Überblick</p>
-          <Link href="/app/jobs" className={styles.railStat}>
-            <span className={styles.railStatIcon} aria-hidden="true"><Wrench size={15} /></span>
-            <span className={styles.railStatLabel}>Aktuelle Aufträge</span>
-            <strong className={styles.railStatValue}>{jobsCount}</strong>
-          </Link>
-          <Link href="/app/jobs" className={styles.railStat}>
-            <span className={styles.railStatIcon} aria-hidden="true"><FileText size={15} /></span>
-            <span className={styles.railStatLabel}>Angebote</span>
-            <strong className={styles.railStatValue} data-tone={offersCount > 0 ? 'terra' : undefined}>{offersCount}</strong>
-          </Link>
-          <Link href="/app/partners" className={styles.railStat}>
-            <span className={styles.railStatIcon} aria-hidden="true"><Users size={15} /></span>
-            <span className={styles.railStatLabel}>Ansprechpartner</span>
-            <strong className={styles.railStatValue}>{contactsCount}</strong>
-          </Link>
-          <Link href="/app/calendar" className={styles.railStat}>
-            <span className={styles.railStatIcon} aria-hidden="true"><CalendarDays size={15} /></span>
-            <span className={styles.railStatLabel}>Termine</span>
-            <strong className={styles.railStatValue} data-tone={appointmentsCount > 0 ? 'terra' : undefined}>{appointmentsCount}</strong>
-          </Link>
-        </>
-      }
+      rail={<StartRail werte={{ auftraege: jobsCount, angebote: offersCount, kontakte: contactsCount, termine: appointmentsCount }} />}
     >
-      <header className="eh-werkbank-kopf">
-        <div className="eh-werkbank-kopf-copy">
-          <span>{todayEyebrow()}</span>
-          <h1>{address || 'Adresse ergänzen'}</h1>
-          {userName && <span>{userName}</span>}
-        </div>
-        <div className="eh-werkbank-kopf-tools">
-          <Link href="/app/hausmeister" className="eh-werkbank-kopf-cta">+ Anliegen</Link>
-        </div>
-      </header>
-
-      <Link
-        href={firstDecision ? `/app/jobs/${firstDecision.id}` : '/app/jobs'}
-        className="eh-werkbank-fokus"
-        data-ruhig={offersCount === 0 || undefined}
-        aria-label={`${offersCount} offene Entscheidungen`}
-      >
-        <span className="eh-werkbank-fokus-zahl">{offersCount}</span>
-        <span className="eh-werkbank-fokus-text">
-          <strong>Warten auf dich</strong>
-          <span>Entscheidungen offen</span>
-        </span>
-        <span className="eh-werkbank-fokus-pfeil" aria-hidden="true"><ChevronRight size={20} /></span>
-      </Link>
-
-      {profile?.onboarding_step && profile.onboarding_step !== 'done' && (
-        <EHCallout title="Einrichtung unvollständig">
-          <p>Ergänze die Angaben zu deinem Zuhause, damit wir passende Betriebe finden.</p>
-          <EHButton href="/app/onboarding" variant="secondary">Einrichtung fortsetzen</EHButton>
-        </EHCallout>
-      )}
-
-      <div className={styles.sections}>
-        {/* 1) Schnellaktionen – eigene Optik wie am 22.09.2026 */}
-        <section className={styles.quickSection} aria-labelledby="quick-title">
-          <p id="quick-title" className={styles.quickLabel}>Schnellaktionen</p>
-          <div className={`${styles.quickGrid} ${styles.quickGridThree}`}>
-            <Link href="/app/hausmeister" className={`${styles.quickCard} ${styles.quickCardPrimary} eh-quick-primary`}>
-              <span className={styles.quickIcon}><Wrench size={20} /></span>
-              <strong>Auftrag starten</strong>
-              <small>Handwerker, Wartung oder Reparatur – Auftrag anlegen und passenden Betrieb finden.</small>
-              <span className={styles.quickCardArrow}>Auftrag starten <ChevronRight size={16} aria-hidden="true" /></span>
-            </Link>
-            <Link href="/app/consultation" className={styles.quickCard}>
-              <span className={styles.quickIcon}><MessageCircle size={20} /></span>
-              <strong>Beratung starten</strong>
-              <small>Frage zu deinem Zuhause klären – mit Hausmanager oder Fachberatung sprechen.</small>
-              <span className={styles.quickCardArrow}>Beratung starten <ChevronRight size={16} aria-hidden="true" /></span>
-            </Link>
-            <Link href="/app/contracts#vergleiche" className={styles.quickCard}>
-              <span className={styles.quickIcon}><BarChart3 size={20} /></span>
-              <strong>Tarife vergleichen</strong>
-              <small>Versicherung, Energie oder Verträge prüfen – Tarife vergleichen und sparen.</small>
-              <span className={styles.quickCardArrow}>Tarife vergleichen <ChevronRight size={16} aria-hidden="true" /></span>
-            </Link>
-          </div>
-        </section>
-
-      <EHOwnerSection title="Verträge & Vergleiche" action={{ href: '/app/angebote', label: 'Alle ansehen' }}>
-        <CompareRail label="Verträge und Vergleiche">
-          <nav className="eh-werkbank-chips" aria-label="Verträge und Vergleiche">
-            {COMPARES.map((compare) => (
-              <Link key={compare.label} href={compare.href} className="eh-werkbank-chip" data-hue={compare.hue}>
-                <compare.icon size={16} aria-hidden="true" />
-                {compare.label}
-              </Link>
-            ))}
-          </nav>
-        </CompareRail>
-      </EHOwnerSection>
-
-      <EHOwnerSection title="Haus-Historie" action={{ href: '/app/jobs', label: 'Alle Vorgänge' }}>
-        {verlaufNaechstes && <VerlaufNaechstes {...verlaufNaechstes} />}
-        <VerlaufZeitleiste eintraege={verlauf} stand={shortDay(new Date().toISOString())} />
-      </EHOwnerSection>
-
-      <EHOwnerSection title="Vorschläge für dich" action={{ href: '/app/contracts', label: 'Alle Verträge' }}>
-        <SuggestionSlider teaser={sparTeaser} />
-      </EHOwnerSection>
-      </div>
+      <StartAnsicht
+        gruss={vorname ? `${tageszeitGruss()}, ${vorname}` : tageszeitGruss()}
+        adresse={address}
+        fokus={fokus}
+        verlauf={verlauf}
+        stand={shortDay(new Date().toISOString())}
+        vorschlaege={vorschlaege}
+      />
     </WerkbankRahmen>
   );
 }
