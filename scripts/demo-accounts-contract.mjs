@@ -26,7 +26,7 @@ for (const token of ['btn-demo-kunde', 'btn-demo-handwerker', 'demoEmailFor', 'D
 }
 for (const token of [
   'safeNextPath(nextPath, loginRole === "handwerker" ? "/pro" : "/app")',
-  'doLogin(demo.email, DEMO_PASSWORD, targetRole)',
+  'doLogin(demo.email, DEMO_PASSWORD, targetRole, true)',
 ]) {
   if (!form.includes(token)) failures.push(`role-aware demo redirect missing ${token}`);
 }

@@ -113,8 +113,10 @@ try {
       if (data.h1Count !== 1) throw new Error(`${viewport.name}/${route.name}: expected exactly one h1, got ${data.h1Count}`);
       if (!data.logoSrc.includes('/brand/logo-full.png') && !data.logoSrc.includes('/brand/LOGO_white.png')) throw new Error(`${viewport.name}/${route.name}: original EHLogo asset missing (${data.logoSrc})`);
       if (data.buttonHeight < 44) throw new Error(`${viewport.name}/${route.name}: submit target too short (${data.buttonHeight}px)`);
-      if (data.buttonBg !== 'rgb(16, 82, 88)') throw new Error(`${viewport.name}/${route.name}: primary action is not canonical petrol (${data.buttonBg})`);
-      if (data.buttonRadius > 8) throw new Error(`${viewport.name}/${route.name}: button radius exceeds design system (${data.buttonRadius}px)`);
+      // Login-Redesign PR #175 (reviewt, live): Hauptaktion ist die kanonische
+      // Lime-Pille wie alle Website-CTAs (Ink-Schrift, Kontrast ok), kein Petrol.
+      if (data.buttonBg !== 'rgb(190, 242, 100)') throw new Error(`${viewport.name}/${route.name}: primary action is not canonical lime (${data.buttonBg})`);
+      if (data.buttonRadius < 999) throw new Error(`${viewport.name}/${route.name}: button is not the canonical pill (${data.buttonRadius}px)`);
       if (data.inputFont < 16) throw new Error(`${viewport.name}/${route.name}: input text below 16px (${data.inputFont}px)`);
       if (data.inputHeight < 48) throw new Error(`${viewport.name}/${route.name}: input target too short (${data.inputHeight}px)`);
       if (data.inputRadius > 8) throw new Error(`${viewport.name}/${route.name}: input radius exceeds design system (${data.inputRadius}px)`);
