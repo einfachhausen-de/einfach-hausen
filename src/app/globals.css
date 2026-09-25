@@ -77,6 +77,12 @@
 html, body {
   background: linear-gradient(180deg, #fbfdfc 0%, #eef4f1 100%);
 }
+/* Stabile Scrollbar-Breite: spaet ladende Inhalte duerfen die Kopfzeile nicht
+   mehr seitlich verschieben (sonst landen Menue-Klicks daneben und das Menue
+   schliesst ohne Navigation — belegt per Fixture-Probe 2026-09-25). */
+html {
+  scrollbar-gutter: stable;
+}
 .page {
   max-width: 430px;
   margin: 0 auto;

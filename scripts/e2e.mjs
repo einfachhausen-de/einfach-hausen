@@ -345,6 +345,21 @@ async function assertKeyboardFocus(page,label){
   if(!focused.tag||focused.tag==='BODY')throw new Error(`${label} has no keyboard focus target after Tab`);
 }
 async function clickAndWaitUrl(page,locator,matcher,timeout=30000){try{await Promise.all([page.waitForURL(matcher,{timeout}),locator.click()]);}catch(error){throw new Error(`click navigation failed: ${error.message.split('\n')[0]}\nserverLog tail:\n${serverLog.slice(-15).join('')}`,{cause:error});}}
+// Menue-Klicks mit Nutzer-Retry: Verschiebt sich das Layout unter dem Cursor
+// (z. B. Scrollbar nach spaeten Server-Payloads — scrollbar-gutter:stable
+// federt das meiste ab), schliesst ein Radix-Menue ohne Navigation. Dann wie
+// ein echter Nutzer erneut oeffnen und klicken (max 3 Versuche).
+async function clickMenuItemAndWaitUrl(page,openMenu,itemLocator,matcher,label,attempts=3){
+  let last=null;
+  for(let i=0;i<attempts;i++){
+    try{
+      await openMenu();
+      await clickAndWaitUrl(page,itemLocator(),matcher,15000);
+      return;
+    }catch(error){last=error;await page.waitForTimeout(700);}
+  }
+  throw new Error(`menu item unreachable after ${attempts} tries: ${label} (${String(last&&last.message||last).split('\n')[0]})`);
+}
 async function clickServerAction(page,locator,timeout=90000){try{await Promise.all([page.waitForResponse(r=>r.request().method()==='POST',{timeout}),locator.click()]);}catch(error){throw new Error(`server action click failed: ${error.message.split('\n')[0]}\nserverLog tail:\n${serverLog.slice(-12).join('')}`,{cause:error});} await page.waitForLoadState('load').catch(()=>{}); await page.waitForTimeout(400);}
 // The production hydration window can briefly double-render a freshly navigated
 // document; register fields are filled only after the DOM settles to one input.
@@ -704,7 +719,8 @@ await headerMenu.getByRole('button',{name:'Aufträge'}).click();
 const jobsMenu=ownerDesktop.getByRole('menu');
 await jobsMenu.getByText('Neuer Auftrag',{exact:true}).first().waitFor({timeout:10000});
 await jobsMenu.getByText('Alle Aufträge',{exact:true}).first().waitFor({timeout:10000});
-await clickAndWaitUrl(ownerDesktop,jobsMenu.getByRole('menuitem',{name:'Alle Aufträge'}),/\/app\/jobs/);
+async function openJobsMenu(){if(await ownerDesktop.getByRole('menu').count()===0)await headerMenu.getByRole('button',{name:'Aufträge'}).click();await ownerDesktop.getByRole('menu').waitFor({timeout:10000});}
+await clickMenuItemAndWaitUrl(ownerDesktop,openJobsMenu,()=>ownerDesktop.getByRole('menu').getByRole('menuitem',{name:'Alle Aufträge'}),/\/app\/jobs/,'Aufträge -> Alle Aufträge');
 await nav(ownerDesktop, base+'/app');
 // 3b3) Bereichs-Flyout: Hover auf "Neuer Auftrag" öffnet daneben die
 // 12 Bereiche (Platzierung ist viewport-abhängig und wird per
@@ -717,26 +733,33 @@ await jobsMenu2.getByRole('menuitem',{name:'Neuer Auftrag'}).hover();
 const subMenu=ownerDesktop.locator('[data-slot="dropdown-menu-sub-content"]');
 await subMenu.getByText('Garten & Außen',{exact:true}).first().waitFor({timeout:10000});
 if(await subMenu.getByRole('menuitem').count()!==12)throw new Error('Area submenu must list exactly the 12 service areas');
-await clickAndWaitUrl(ownerDesktop,subMenu.getByRole('menuitem',{name:'Garten & Außen'}),/\/app\/hausmeister\?topic=garten-aussenbereich/);
+async function openAreaSubmenu(){
+  if(await ownerDesktop.locator('[data-slot="dropdown-menu-sub-content"]').count()===0){
+    await openJobsMenu();
+    await ownerDesktop.getByRole('menu').getByRole('menuitem',{name:'Neuer Auftrag'}).hover();
+    await ownerDesktop.locator('[data-slot="dropdown-menu-sub-content"]').waitFor({timeout:10000});
+  }
+}
+await clickMenuItemAndWaitUrl(ownerDesktop,openAreaSubmenu,()=>ownerDesktop.locator('[data-slot="dropdown-menu-sub-content"]').getByRole('menuitem',{name:'Garten & Außen'}),/\/app\/hausmeister\?topic=garten-aussenbereich/,'Aufträge -> Garten & Außen');
 await nav(ownerDesktop, base+'/app');
 // Direkt-Klick auf "Neuer Auftrag" navigiert ohne Umweg.
 await waitText(ownerDesktop,'Warten auf dich');
-await headerMenu.getByRole('button',{name:'Aufträge'}).click();
-await clickAndWaitUrl(ownerDesktop,ownerDesktop.getByRole('menu').getByRole('menuitem',{name:'Neuer Auftrag'}),/\/app\/hausmeister$/);
+await clickMenuItemAndWaitUrl(ownerDesktop,openJobsMenu,()=>ownerDesktop.getByRole('menu').getByRole('menuitem',{name:'Neuer Auftrag'}),/\/app\/hausmeister$/,'Aufträge -> Neuer Auftrag');
 await nav(ownerDesktop, base+'/app');
 // 3b4) Alle Termine lebt im Aufträge-Menü (kein eigener Kalender-Punkt).
 if(await headerMenu.getByRole('button',{name:'Kalender'}).count()!==0)throw new Error('Calendar must not be a top-level menu item');
 await waitText(ownerDesktop,'Warten auf dich');
-await headerMenu.getByRole('button',{name:'Aufträge'}).click();
-const jobsMenu3=ownerDesktop.getByRole('menu');
-await clickAndWaitUrl(ownerDesktop,jobsMenu3.getByRole('menuitem',{name:'Alle Termine'}),/\/app\/calendar/);
+await clickMenuItemAndWaitUrl(ownerDesktop,openJobsMenu,()=>ownerDesktop.getByRole('menu').getByRole('menuitem',{name:'Alle Termine'}),/\/app\/calendar/,'Aufträge -> Alle Termine');
 // 3c) Glocken-Menue: Mini-Liste statt Seitenwechsel, "Alle ansehen" fuehrt weiter.
 await nav(ownerDesktop, base+'/app');
 await ownerDesktop.getByRole('button',{name:'Benachrichtigung'}).click();
 const bellMenu=ownerDesktop.getByRole('menu');
 await bellMenu.getByText('Alle ansehen',{exact:true}).first().waitFor({timeout:10000});
 // Radix rollt den Link als menuitem (Rolle statt Link in der AX-Hierarchie).
-await clickAndWaitUrl(ownerDesktop,bellMenu.getByRole('menuitem',{name:'Alle ansehen'}),/\/notifications/);
+await clickMenuItemAndWaitUrl(ownerDesktop,
+  async()=>{if(await ownerDesktop.getByRole('menu').count()===0)await ownerDesktop.getByRole('button',{name:'Benachrichtigung'}).click();await ownerDesktop.getByRole('menu').waitFor({timeout:10000});},
+  ()=>ownerDesktop.getByRole('menu').getByRole('menuitem',{name:'Alle ansehen'}),
+  /\/notifications/,'Glocke -> Alle ansehen');
 // 3d) Client-Navigation: Sidebar-Wechsel laesst das Dokument leben (Marker
 // ueberlebt), statt neu zu laden — gilt auch fuer plain-`<a>`-Zeilen aus
 // EH-Komponenten (ClientNav-Horcher).
