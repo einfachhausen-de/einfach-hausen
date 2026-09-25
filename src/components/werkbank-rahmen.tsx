@@ -1,3 +1,4 @@
+import './werkbank-layout.css';
 import type { ReactNode } from 'react';
 import { cookies } from 'next/headers';
 import { EHScope, EHRouteTabs } from '@/design-system';
@@ -29,6 +30,7 @@ export async function WerkbankRahmen({
   tabs,
   brandSub,
   searchLabel,
+  pageLabel,
 }: {
   role: 'homeowner' | 'provider';
   active: string;
@@ -37,6 +39,9 @@ export async function WerkbankRahmen({
   tabs?: readonly ContextTab[];
   brandSub?: string;
   searchLabel?: string;
+  /** Eigener Seitenname im Pfad fuer Seiten ohne eigenen Navigationspunkt
+   *  (z. B. Notfall unter Start), statt dort nur „Start“ zu zeigen. */
+  pageLabel?: string;
 }) {
   const pro = role === 'provider';
   const user = await getCurrentUser();
@@ -139,6 +144,10 @@ export async function WerkbankRahmen({
       section = { href: profileHref, label: 'Konto' };
       page = 'Benachrichtigungen';
     }
+  }
+  if (pageLabel) {
+    section = area ? { href: area.href, label: area.label } : { href: homeHref, label: 'Start' };
+    page = pageLabel;
   }
 
   return (

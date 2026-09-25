@@ -77,7 +77,7 @@ export default function Preview() {
         </div>
       </header>
 
-      <Link href="/app/jobs" className="eh-werkbank-fokus" aria-label="0 offene Entscheidungen">
+      <Link href="/app/jobs" className="eh-werkbank-fokus" data-ruhig aria-label="0 offene Entscheidungen">
         <span className="eh-werkbank-fokus-zahl">0</span>
         <span className="eh-werkbank-fokus-text">
           <strong>Warten auf dich</strong>

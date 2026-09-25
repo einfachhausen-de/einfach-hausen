@@ -9,7 +9,8 @@
 .eh-werkbank-item small { color:var(--eh-muted); font-size:var(--eh-font-eyebrow); }
 .eh-werkbank-item > :last-child { margin-left:auto; color:var(--eh-muted); text-align:right; }
 .eh-werkbank-ic { width:24px; height:24px; display:grid; place-items:center; color:var(--eh-muted); flex:0 0 auto; font-size:var(--eh-font-meta); }
-.eh-werkbank-go { display:block; text-align:center; background:var(--eh-color-petrol); color:var(--eh-color-white); border-radius:var(--eh-radius-control); padding:8px; font-weight:var(--eh-weight-semibold); margin-top:10px; text-decoration:none; font-size:var(--eh-font-label); }
+.eh-werkbank-go { display:flex; align-items:center; justify-content:center; min-height:44px; text-align:center; background:var(--eh-color-lime); color:var(--eh-color-ink); border-radius:var(--eh-radius-pill); padding:8px 16px; font-weight:var(--eh-weight-bold); margin-top:10px; text-decoration:none; font-size:var(--eh-font-label); }
+.eh-werkbank-go:hover { background:var(--eh-color-lime-strong); }
 .eh-werkbank-bar { height:7px; border-radius:var(--eh-radius-pill); background:var(--eh-color-paper); overflow:hidden; margin:8px 0 6px; }
 .eh-werkbank-bar i { display:block; height:100%; width:0; background:var(--eh-color-petrol); }
 .eh-werkbank-bar i[data-fill="full"] { width:100%; }
@@ -39,15 +40,74 @@
 .eh-vdash-fokus > span { flex:1 1 auto; min-width:0; overflow-wrap:anywhere; }
 .eh-vdash-fokus svg { flex:none; opacity:.5; }
 
-.eh-werkbank-kopf-cta { flex:none; display:inline-flex; align-items:center; gap:8px; background:var(--eh-color-petrol); color:var(--eh-color-white); border-radius:var(--eh-radius-control); padding:10px 18px; font-weight:var(--eh-weight-semibold); text-decoration:none; font-size:var(--eh-font-label); }
-.eh-werkbank-kopf-copy h1 { font-size:var(--eh-font-body); font-weight:var(--eh-weight-semibold); line-height:var(--eh-leading-tight); }
+/* App-Angleichung an die Website 2026-09-25: Hauptaktion als Lime-Pille mit
+   Ink-Schrift (wie „Kostenlos starten“), Seitentitel in der App-Titelgroesse
+   (28 px, DESIGN.md §13), Fokuszeile als dunkle Petrolflaeche mit Lime-Zahl
+   wie die Sparkarte der Website. Nur Token, keine Rohwerte. */
+.eh-werkbank-kopf-cta { flex:none; display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:44px; background:var(--eh-color-lime); color:var(--eh-color-ink); border-radius:var(--eh-radius-pill); padding:10px 22px; font-weight:var(--eh-weight-bold); text-decoration:none; font-size:var(--eh-font-label); transition:background-color var(--eh-motion-duration) var(--eh-motion-ease); }
+.eh-werkbank-kopf-cta:hover { background:var(--eh-color-lime-strong); }
+.eh-werkbank-kopf-cta:focus-visible { outline:2px solid var(--eh-color-deep); outline-offset:2px; }
+.eh-werkbank-kopf-copy h1 { margin:0; font-size:var(--eh-app-title); font-weight:var(--eh-weight-bold); line-height:var(--eh-leading-tight); color:var(--eh-color-ink); overflow-wrap:anywhere; }
 .eh-werkbank-kopf-copy span { font-size:var(--eh-font-label); line-height:var(--eh-leading-normal); color:var(--eh-muted); }
-.eh-werkbank-fokus { display:flex; align-items:center; gap:14px; min-height:80px; padding:14px 16px; border:1px solid var(--eh-rule); border-radius:var(--eh-radius-panel); background:var(--eh-color-white); text-decoration:none; }
-.eh-werkbank-fokus-zahl { flex:none; font-size:var(--eh-font-section); font-weight:var(--eh-weight-semibold); line-height:var(--eh-leading-tight); color:var(--eh-color-terra); font-variant-numeric:tabular-nums; }
+.eh-werkbank-kopf-copy > span:first-child:not(:only-child) { font-size:var(--eh-font-eyebrow); font-weight:var(--eh-weight-bold); letter-spacing:var(--eh-track-wide); text-transform:uppercase; color:var(--eh-color-petrol); }
+.eh-werkbank-fokus { display:flex; align-items:center; gap:16px; min-height:88px; padding:16px 20px; border:1px solid var(--eh-color-deep); border-radius:var(--eh-radius-panel); background:var(--eh-color-deep); color:var(--eh-color-white); text-decoration:none; box-shadow:var(--eh-shadow-card); transition:background-color var(--eh-motion-duration) var(--eh-motion-ease); }
+.eh-werkbank-fokus:hover { background:var(--eh-color-petrol); }
+.eh-werkbank-fokus-zahl { flex:none; min-width:1.2ch; font-size:var(--eh-font-section); font-weight:var(--eh-weight-bold); line-height:var(--eh-leading-tight); color:var(--eh-color-lime); font-variant-numeric:tabular-nums; }
 .eh-werkbank-fokus-text { flex:1; min-width:0; display:grid; gap:2px; }
 .eh-werkbank-fokus-text strong { font-size:var(--eh-font-body); font-weight:var(--eh-weight-semibold); line-height:var(--eh-leading-tight); }
-.eh-werkbank-fokus-text span { font-size:var(--eh-font-label); line-height:var(--eh-leading-normal); color:var(--eh-color-secondary); }
-.eh-werkbank-fokus-pfeil { flex:none; width:44px; height:44px; display:grid; place-items:center; border-radius:var(--eh-radius-pill); background:var(--eh-color-petrol); color:var(--eh-color-white); }
+.eh-werkbank-fokus-text span { font-size:var(--eh-font-label); line-height:var(--eh-leading-normal); color:var(--eh-color-sand); }
+.eh-werkbank-fokus-pfeil { flex:none; width:44px; height:44px; display:grid; place-items:center; border-radius:var(--eh-radius-pill); background:var(--eh-color-lime); color:var(--eh-color-ink); }
+/* Nichts offen: ruhige helle Zeile statt dunkler Alarmflaeche — Zustand
+   ehrlich zeigen, keine Dringlichkeit fuer eine Null. */
+.eh-werkbank-fokus[data-ruhig] { background:var(--eh-color-white); border-color:var(--eh-color-line); color:var(--eh-color-ink); box-shadow:none; }
+.eh-werkbank-fokus[data-ruhig]:hover { background:var(--eh-color-paper); }
+.eh-werkbank-fokus[data-ruhig] .eh-werkbank-fokus-zahl { color:var(--eh-color-petrol); }
+.eh-werkbank-fokus[data-ruhig] .eh-werkbank-fokus-text span { color:var(--eh-color-secondary); }
+.eh-werkbank-fokus[data-ruhig] .eh-werkbank-fokus-pfeil { background:var(--eh-color-petrol-soft); color:var(--eh-color-deep); }
+/* Primaere Schnellaktion der Startseite: dunkler Haus-Ton mit Lime-Symbol
+   und Lime-Aktion wie die dunklen Karten der Website. Konsumentenschicht,
+   das geschuetzte Seitenmodul bleibt unveraendert. */
+a.eh-quick-primary { background:var(--eh-color-deep); border-color:var(--eh-color-deep); }
+a.eh-quick-primary:hover { background:var(--eh-color-petrol); border-color:var(--eh-color-petrol); }
+a.eh-quick-primary > span:first-child { background:var(--eh-color-lime); color:var(--eh-color-deep); }
+a.eh-quick-primary > span:last-child { color:var(--eh-color-lime); }
+@media (max-width:760px) {
+  .eh-werkbank-kopf-copy h1 { font-size:var(--eh-app-large); }
+  .eh-werkbank-fokus { min-height:76px; padding:14px 16px; }
+}
+@media (prefers-reduced-motion:reduce) {
+  .eh-werkbank-kopf-cta, .eh-werkbank-fokus { transition:none; }
+}
+
+/* Seitenleiste im Markenton: Creme-Flaeche, Hover weiss, aktuelle Seite als
+   dunkle Petrolzeile mit Lime-Symbol. Zustand kommt ausschliesslich aus
+   aria-current (DESIGN.md §15). Doppeltes :root hebt die Spezifitaet ueber
+   die shadcn-Grundwerte aus globals.css. */
+:root:root {
+  --sidebar: var(--eh-color-paper);
+  --sidebar-foreground: var(--eh-color-ink);
+  --sidebar-primary: var(--eh-color-petrol);
+  --sidebar-primary-foreground: var(--eh-color-white);
+  --sidebar-accent: var(--eh-color-white);
+  --sidebar-accent-foreground: var(--eh-color-deep);
+  --sidebar-border: var(--eh-color-line);
+  --sidebar-ring: var(--eh-color-petrol);
+}
+[data-sidebar="sidebar"] [data-sidebar="group-label"] { font-size:var(--eh-font-eyebrow); font-weight:var(--eh-weight-bold); letter-spacing:var(--eh-track-wide); text-transform:uppercase; color:var(--eh-color-secondary); }
+[data-sidebar="sidebar"] [data-sidebar="menu-button"] { font-size:var(--eh-font-label); color:var(--eh-color-ink); transition:background-color var(--eh-motion-duration) var(--eh-motion-ease), color var(--eh-motion-duration) var(--eh-motion-ease); }
+[data-sidebar="sidebar"] [data-sidebar="menu-button"] > svg { color:var(--eh-color-petrol); }
+[data-sidebar="sidebar"] [data-sidebar="menu-button"][aria-current="page"] { background:var(--eh-color-deep); color:var(--eh-color-white); font-weight:var(--eh-weight-semibold); }
+[data-sidebar="sidebar"] [data-sidebar="menu-button"][aria-current="page"] > svg { color:var(--eh-color-lime); }
+/* Bereich und Unterpunkt teilen sich dieselbe Adresse: dann traegt nur der
+   Unterpunkt die Markierung, der Bereich bleibt als ruhige Klammer stehen. */
+[data-sidebar="sidebar"] [data-sidebar="menu-item"]:has([data-sidebar="menu-sub-button"][aria-current="page"]) > [data-sidebar="menu-button"][aria-current="page"] { background:transparent; color:var(--eh-color-deep); }
+[data-sidebar="sidebar"] [data-sidebar="menu-item"]:has([data-sidebar="menu-sub-button"][aria-current="page"]) > [data-sidebar="menu-button"][aria-current="page"] > svg { color:var(--eh-color-petrol); }
+[data-sidebar="sidebar"] [data-sidebar="menu-sub-button"] { color:var(--eh-color-secondary); }
+[data-sidebar="sidebar"] [data-sidebar="menu-sub-button"]:hover { color:var(--eh-color-ink); }
+[data-sidebar="sidebar"] [data-sidebar="menu-sub-button"][aria-current="page"] { background:var(--eh-color-petrol-soft); color:var(--eh-color-deep); font-weight:var(--eh-weight-semibold); }
+@media (prefers-reduced-motion:reduce) {
+  [data-sidebar="sidebar"] [data-sidebar="menu-button"] { transition:none; }
+}
 .eh-werkbank-kennzahlen > dl { grid-auto-flow:column; grid-template-columns:repeat(3,minmax(0,1fr)); }
 .eh-werkbank-kennzahlen > dl > div:nth-child(n) { min-height:76px; padding:12px 14px; border-top:0; }
 .eh-werkbank-kennzahlen > dl > div:nth-child(n) + div { border-left:1px solid var(--eh-rule); }

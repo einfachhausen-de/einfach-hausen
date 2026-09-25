@@ -17,7 +17,7 @@
     "packages/eh-design/src/composition.tsx": "b81e331888eeceb4d1af3d5da8abb989129f869c78562101d0e2f977b8ce9829",
     "packages/eh-design/src/documents.tsx": "b9140f0fbbb09071c6d7b034492662a3f65a60bd54aa66102408ffea027abeed",
     "packages/eh-design/src/domain-recipes.tsx": "4ab6bc03926690539761d73b55a18ed08da43688cb04c907b80429226d1876a7",
-    "packages/eh-design/src/html-style.mjs": "51e5a274bd33e0658de1190471d2295ff7471881cf1d74aa3d4c517d0553d25f",
+    "packages/eh-design/src/html-style.mjs": "1bfe65f0efe8586dfb702511182b0f1d8f838b6ddc3cc46b606563ea2307c2b2",
     "packages/eh-design/src/html.css": "9f9993e51b420ffc9effd19b212c42991dc67656e26e7fb1280493aab1417a14",
     "packages/eh-design/src/html.mjs": "7dde2a71e7eccbe9ddd7888bfb7b8d96a0a91c74e6fd07a2501070abf72d6033",
     "packages/eh-design/src/icons.ts": "ab6542a0af298a519a58f023fef1819e6139f64a82919fba3e076f3cd11c2609",
