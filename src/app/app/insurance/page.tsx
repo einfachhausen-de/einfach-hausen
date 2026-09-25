@@ -59,7 +59,7 @@ export default async function InsuranceSupport({ searchParams }: { searchParams:
         href: `/app/insurance?auftrag=${job.id}#schadenfall`,
       }));
 
-  return <WerkbankRahmen role="homeowner" active="/app">
+  return <WerkbankRahmen role="homeowner" active="/app" pageLabel="Versicherung">
     <EHWorkflowStack>
     <EHPageHeader title="Versicherung" context={`${jobs.length} beauftragte ${jobs.length === 1 ? 'Auftrag' : 'Aufträge'}`} />
     {sp.error && <EHErrorState text={sp.error} />}

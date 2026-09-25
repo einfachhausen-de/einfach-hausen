@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { notFound } from 'next/navigation';
-import { EHContactWorkspace, EHConversation, EHCallout, EHButton, EHMetricsBar, EHRecordList, EHText, EHWorkSection, EHWorkspaceGrid, type EHDirectoryMode } from '@/design-system';
+import { EHContactWorkspace, EHConversation, EHCallout, EHMetricsBar, EHRecordList, EHWorkSection, EHWorkspaceGrid, type EHDirectoryMode } from '@/design-system';
 import { WerkbankRahmen } from '@/components/werkbank-rahmen';
 import { requireUser } from '@/lib/auth';
 import { db } from '@/lib/db';
@@ -137,10 +137,6 @@ export default async function Messages({ searchParams }: { searchParams: Promise
           detail: contact.company || undefined,
           value: contact.phone,
         }))} />
-      </EHWorkSection>
-      <EHWorkSection title="Kontakte verwalten">
-        <EHText muted>Neue Betriebe speicherst du direkt im Verzeichnis links.</EHText>
-        <EHButton href="/app/messages?mode=manage" variant="secondary" arrow>Kontakte verwalten</EHButton>
       </EHWorkSection>
     </>} />
   </WerkbankRahmen>;

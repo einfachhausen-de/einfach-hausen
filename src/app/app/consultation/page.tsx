@@ -28,7 +28,7 @@ export default async function Consultation({ searchParams }: { searchParams: Pro
     href: `/app/jobs/${request.id}`,
   }));
 
-  return <WerkbankRahmen role="homeowner" active="/app">
+  return <WerkbankRahmen role="homeowner" active="/app" pageLabel="Beratung">
     <EHWorkflowStack>
     <EHPageHeader title="Beratung" context={requests.length === 0 ? 'Stell deine erste Frage' : `${requests.length} ${requests.length === 1 ? 'Frage' : 'Fragen'} gestellt`} />
     <EHWorkspaceGrid main={<>

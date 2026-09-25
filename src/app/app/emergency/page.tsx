@@ -29,7 +29,7 @@ export default async function Emergency({searchParams}:{searchParams:Promise<Rec
     href: `/app/jobs/${job.id}`,
   }));
 
-  return <WerkbankRahmen role="homeowner" active="/app" brandSub={profile?.address}>
+  return <WerkbankRahmen role="homeowner" active="/app" pageLabel="Notfall" brandSub={profile?.address}>
     <EHWorkflowStack>
     <EHPageHeader title="Notfall melden" context={target} />
     <EHWorkspaceGrid main={<>

@@ -43,6 +43,26 @@
 .wb-rail>[data-eh-app]{display:flex;flex-direction:column;gap:10px;flex:0 0 auto;min-height:0;background:transparent}
 .wb-rail>*{min-width:0;max-width:100%}
 .wb-bottom{display:none}
+/* Seiteninterne Zweispalter (EHWorkspaceGrid) sitzen hier zwischen Navigation
+   und rechter Leiste. Ihr eigener Umbruch rechnet mit voller Fensterbreite und
+   quetscht den Hauptbereich sonst auf ~430 px (Worttrennung in Titeln und
+   Kacheln). Erst ab echter Breite nebeneinander, darunter gestapelt; die
+   Nebenspalte legt ihre Karten dann als ruhiges Raster nebeneinander. */
+/* Beide Seitenkopf-Varianten (Werkbank-Kopf und EHPageHeader) tragen denselben
+   App-Titel wie die Startseite: 28 px fett, mobil 20 px (DESIGN.md §13). */
+.wb-main header:first-child>div:first-child>h1{margin:0;font-size:var(--eh-app-title);font-weight:var(--eh-weight-bold);line-height:var(--eh-leading-tight);color:var(--eh-color-ink);overflow-wrap:anywhere}
+@media(max-width:760px){.wb-main header:first-child>div:first-child>h1{font-size:var(--eh-app-large)}}
+/* Kontext-Reiter (Profil / App-Einstellungen …) im selben Unterstrich-Stil wie
+   die Filterreiter der Seiten, statt als gefüllte Schaltfläche. */
+.wb-main>nav[aria-label="Kontextnavigation"]{display:flex;flex-wrap:wrap;gap:4px 24px;padding:0;margin:0;border:0;border-bottom:1px solid var(--eh-color-line);background:transparent}
+.wb-main>nav[aria-label="Kontextnavigation"]>a{display:inline-flex;align-items:center;min-height:48px;padding:8px 0;margin-bottom:-1px;border:0;border-bottom:3px solid transparent;border-radius:0;background:transparent;color:var(--eh-muted);font-size:var(--eh-font-input);font-weight:var(--eh-weight-semibold);text-decoration:none}
+.wb-main>nav[aria-label="Kontextnavigation"]>a:hover{color:var(--eh-color-petrol);background:transparent}
+.wb-main>nav[aria-label="Kontextnavigation"]>a[aria-current="page"]{color:var(--eh-color-petrol);border-bottom-color:var(--eh-color-petrol);background:transparent}
+.wb-main>nav[aria-label="Kontextnavigation"]>a:focus-visible{outline:3px solid var(--eh-color-focus);outline-offset:2px}
+@media(max-width:1599px){
+  .wb-main div:has(>div:first-child+aside:last-child){grid-template-columns:minmax(0,1fr)}
+  .wb-main div:has(>div:first-child+aside:last-child)>aside{grid-template-columns:repeat(auto-fit,minmax(260px,1fr));align-items:start}
+}
 @media(max-width:1180px){.wb-body{grid-template-columns:198px minmax(0,1fr) 220px}.wb-rail{flex-basis:220px;width:220px;max-width:220px}}
 @media(max-width:1120px){.wb-top{flex-wrap:wrap;height:auto;min-height:58px;padding:9px 14px;gap:8px}.wb-brand{border-right:0;padding-right:0}}
 @media(max-width:1023.5px){.wb-rail{display:none}}
