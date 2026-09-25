@@ -692,6 +692,11 @@ const searchBox=await searchDialog.boundingBox();
 if(!searchBox)throw new Error('Search palette has no box');
 if(searchBox.x<200||searchBox.x>650)throw new Error(`Search palette must be roughly centered, got x=${Math.round(searchBox.x)}`);
 await clickAndWaitUrl(ownerDesktop,searchDialog.getByRole('button',{name:'Verträge & Tarife'}),/\/app\/contracts/);
+// Nach Client-Navigation erst den Seiteninhalt abwarten: spaet stroemende
+// Server-Payloads haengen offene Radix-Menues sonst innerhalb ~1s ab
+// (belegt per Fixture-Probe, Produkt-Follow-up in NEXT_AGENT).
+await ownerDesktop.getByRole('heading',{name:/Verträge/i}).first().waitFor({timeout:20000});
+await ownerDesktop.waitForTimeout(2500);
 // 3b2) Kopf-Menueleiste: Aufträge-Menü mit Neuer-Auftrag + Alle Aufträge
 // (noch keine laufenden), Kalender als Direkt-Link.
 const headerMenu=ownerDesktop.getByRole('navigation',{name:'Werkzeugleiste'});
@@ -705,6 +710,7 @@ await nav(ownerDesktop, base+'/app');
 // 12 Bereiche (Platzierung ist viewport-abhängig und wird per
 // Fixture-Probe auf 1320 + 1920 geprüft, nicht hier). Klick auf einen
 // Bereich startet den Hausmeister mit passendem Thema.
+await waitText(ownerDesktop,'Warten auf dich');
 await headerMenu.getByRole('button',{name:'Aufträge'}).click();
 const jobsMenu2=ownerDesktop.getByRole('menu');
 await jobsMenu2.getByRole('menuitem',{name:'Neuer Auftrag'}).hover();
@@ -714,11 +720,13 @@ if(await subMenu.getByRole('menuitem').count()!==12)throw new Error('Area submen
 await clickAndWaitUrl(ownerDesktop,subMenu.getByRole('menuitem',{name:'Garten & Außen'}),/\/app\/hausmeister\?topic=garten-aussenbereich/);
 await nav(ownerDesktop, base+'/app');
 // Direkt-Klick auf "Neuer Auftrag" navigiert ohne Umweg.
+await waitText(ownerDesktop,'Warten auf dich');
 await headerMenu.getByRole('button',{name:'Aufträge'}).click();
 await clickAndWaitUrl(ownerDesktop,ownerDesktop.getByRole('menu').getByRole('menuitem',{name:'Neuer Auftrag'}),/\/app\/hausmeister$/);
 await nav(ownerDesktop, base+'/app');
 // 3b4) Alle Termine lebt im Aufträge-Menü (kein eigener Kalender-Punkt).
 if(await headerMenu.getByRole('button',{name:'Kalender'}).count()!==0)throw new Error('Calendar must not be a top-level menu item');
+await waitText(ownerDesktop,'Warten auf dich');
 await headerMenu.getByRole('button',{name:'Aufträge'}).click();
 const jobsMenu3=ownerDesktop.getByRole('menu');
 await clickAndWaitUrl(ownerDesktop,jobsMenu3.getByRole('menuitem',{name:'Alle Termine'}),/\/app\/calendar/);
