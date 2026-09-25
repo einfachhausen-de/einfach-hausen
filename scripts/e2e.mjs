@@ -733,14 +733,19 @@ await jobsMenu2.getByRole('menuitem',{name:'Neuer Auftrag'}).hover();
 const subMenu=ownerDesktop.locator('[data-slot="dropdown-menu-sub-content"]');
 await subMenu.getByText('Garten & Außen',{exact:true}).first().waitFor({timeout:10000});
 if(await subMenu.getByRole('menuitem').count()!==12)throw new Error('Area submenu must list exactly the 12 service areas');
-async function openAreaSubmenu(){
-  if(await ownerDesktop.locator('[data-slot="dropdown-menu-sub-content"]').count()===0){
-    await openJobsMenu();
-    await ownerDesktop.getByRole('menu').getByRole('menuitem',{name:'Neuer Auftrag'}).hover();
-    await ownerDesktop.locator('[data-slot="dropdown-menu-sub-content"]').waitFor({timeout:10000});
-  }
+// Aktivierung per Tastatur: Hover oeffnet (oben belegt), aber der Maus-Transit
+// Trigger->Untermenue stirbt bei Layout-Verschiebung (Fixture-Probe 2026-09-25).
+// Tastatur loest denselben Link aus — Fokus wandern lassen bis Garten, dann Enter.
+await ownerDesktop.getByRole('menu').getByRole('menuitem',{name:'Neuer Auftrag'}).focus();
+await ownerDesktop.keyboard.press('Enter');
+for(let i=0;i<15;i++){
+  const focused=await ownerDesktop.evaluate(()=>(document.activeElement?.textContent||'').trim().slice(0,40));
+  if(focused.includes('Garten'))break;
+  await ownerDesktop.keyboard.press('ArrowDown');
+  await ownerDesktop.waitForTimeout(150);
+  if(i===14)throw new Error('Area submenu keyboard focus never reached Garten & Außen');
 }
-await clickMenuItemAndWaitUrl(ownerDesktop,openAreaSubmenu,()=>ownerDesktop.locator('[data-slot="dropdown-menu-sub-content"]').getByRole('menuitem',{name:'Garten & Außen'}),/\/app\/hausmeister\?topic=garten-aussenbereich/,'Aufträge -> Garten & Außen');
+await Promise.all([ownerDesktop.waitForURL(/\/app\/hausmeister\?topic=garten-aussenbereich/,{timeout:30000}),ownerDesktop.keyboard.press('Enter')]);
 await nav(ownerDesktop, base+'/app');
 // Direkt-Klick auf "Neuer Auftrag" navigiert ohne Umweg.
 await waitText(ownerDesktop,'Warten auf dich');
