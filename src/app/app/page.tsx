@@ -216,6 +216,7 @@ export default async function Dashboard() {
       <Link
         href={firstDecision ? `/app/jobs/${firstDecision.id}` : '/app/jobs'}
         className="eh-werkbank-fokus"
+        data-ruhig={offersCount === 0 || undefined}
         aria-label={`${offersCount} offene Entscheidungen`}
       >
         <span className="eh-werkbank-fokus-zahl">{offersCount}</span>
@@ -238,7 +239,7 @@ export default async function Dashboard() {
         <section className={styles.quickSection} aria-labelledby="quick-title">
           <p id="quick-title" className={styles.quickLabel}>Schnellaktionen</p>
           <div className={`${styles.quickGrid} ${styles.quickGridThree}`}>
-            <Link href="/app/hausmeister" className={`${styles.quickCard} ${styles.quickCardPrimary}`}>
+            <Link href="/app/hausmeister" className={`${styles.quickCard} ${styles.quickCardPrimary} eh-quick-primary`}>
               <span className={styles.quickIcon}><Wrench size={20} /></span>
               <strong>Auftrag starten</strong>
               <small>Handwerker, Wartung oder Reparatur – Auftrag anlegen und passenden Betrieb finden.</small>

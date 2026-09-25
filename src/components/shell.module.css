@@ -20,6 +20,10 @@
 .wb-top{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:14px;padding:0 18px;height:58px;background:var(--eh-color-white);border-bottom:1px solid var(--eh-color-line)}
 .wb-brand{display:flex;align-items:center;gap:9px;padding-right:14px;border-right:1px solid var(--eh-color-line);height:32px}
 .wb-mark{width:28px;height:28px;border-radius:var(--eh-radius-control);background:var(--eh-color-petrol);color:var(--eh-color-white);display:grid;place-items:center;font-size:var(--eh-font-meta);font-weight:var(--eh-weight-heavy)}
+.wb-logo{flex:none;width:58px;height:40px;object-fit:contain}
+.wb-logo-mark{flex:none;width:32px;height:24px;object-fit:contain}
+.wb-brand-copy{display:grid;flex:1;min-width:0;padding-left:10px;border-left:1px solid var(--eh-color-line);text-align:left;line-height:var(--eh-leading-tight);font-size:var(--eh-font-meta);color:var(--eh-color-ink)}
+.wb-brand-copy>:first-child{font-size:var(--eh-font-label)}
 .wb-name{line-height:var(--eh-leading-tight)}
 .wb-name b{display:block;font-size:var(--eh-font-label);font-weight:var(--eh-weight-semibold);color:var(--eh-color-deep)}
 .wb-name small{font-size:var(--eh-font-meta);color:var(--eh-color-secondary);font-weight:var(--eh-weight-medium)}

@@ -1,3 +1,4 @@
+import './werkbank-layout.css';
 import type { ReactNode } from 'react';
 import { cookies } from 'next/headers';
 import { EHScope, EHRouteTabs } from '@/design-system';
