@@ -390,19 +390,25 @@ try {
 // 0) Öffentliche Website ist mobile-first, nutzenorientiert und als PWA installierbar.
 const publicCtx=await newE2EContext({viewport:{width:390,height:844}}); const publicPage=await publicCtx.newPage(); trackPage(publicPage,'public-mobile');
 await nav(publicPage, base+'/')
-// Canonical root is the approved Atelier-02 landing (sealed capsule docs/brand/system, commit 714dcb9):
-// hero h1 "Dein Haus. Einfach geregelt." and the benefit-first intake composer.
+// Canonical root is the v0-redesigned landing (reviewed, deployed 2026-09-25):
+// hero h1 "Dein Haus." plus HeroSearch-Tabs (Handwerker/Tarife/KI) mit
+// sichtbaren Labels und echtem GET-Prefill nach /register.
 await publicPage.getByRole('heading',{name:/Dein Haus\./i}).waitFor();
 await waitText(publicPage,'Einfach');
-await waitText(publicPage,'Dein Anliegen in deinen Worten');
+await waitText(publicPage,'Heizung warten');
 const hero=publicPage.locator('#anliegen');
 for(const removedText of ['Was steht bei deinem Haus an?','kostenlos & unverbindlich','unverbindlich starten','kein Auftrag ohne deine Entscheidung','Nichts wird ohne dich beauftragt']){
   if(await hero.getByText(removedText,{exact:true}).count())throw new Error(`Landing hero still contains removed copy: ${removedText}`);
 }
-const heroRequest=publicPage.locator('form[action="/register"] input[name="request"]').first();
+const heroRequest=publicPage.locator('#anliegen form[action="/register"] input:not([type="hidden"])').first();
 if(!(await heroRequest.count()))throw new Error('Landing intake composer missing');
 const composerLabel=await heroRequest.getAttribute('aria-label');
-if(composerLabel!=='Anliegen beschreiben' && !(await publicPage.locator('label[for="'+(await heroRequest.getAttribute('id'))+'"]').count()))throw new Error('Landing intake composer missing accessible label');
+const composerId=await heroRequest.getAttribute('id');
+const composerWrapped=await heroRequest.evaluate((el)=>!!el.closest('label'));
+if(!composerLabel && !composerId && !composerWrapped)throw new Error('Landing intake composer missing accessible label');
+if(composerId && !(await publicPage.locator('label[for="'+composerId+'"]').count()) && !composerLabel && !composerWrapped)throw new Error('Landing intake composer missing accessible label');
+// KI-Hausmanager ist seit dem v0-Redesign (Operator) eigene Produkt-Saeule;
+// verboten bleibt nur die alte Assistenten-Wortmarke mit e statt a.
 if(/KI-Hausmeister/i.test(await publicPage.locator('body').innerText()))throw new Error('Landing page still foregrounds AI instead of customer benefit');
 await assertNoOverflow(publicPage,'Mobile landing');
 // T-0129 v2: every canonical public route (DESIGN.md §5.1, 16 routes incl.
