@@ -117,7 +117,7 @@ export function SavingsCalculator() {
             Sparpotenzial jetzt sichern
             <ArrowRight className="size-5 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
           </Link>
-          <p className="mt-3 text-center text-meta text-white/50">
+          <p className="mt-3 text-center text-meta text-white/70">
             Unverbindliche Schätzung mit Richtwerten: typischer Stromverbrauch nach Haushaltsgröße und übliche Preisabstände
             zwischen Grundversorgung bzw. Bestandsvertrag und Wettbewerbstarifen. Dein echtes Ergebnis hängt von Region, Verbrauch
             und Vertrag ab.

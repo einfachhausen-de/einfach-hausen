@@ -52,7 +52,6 @@ export function HeroSearch() {
               value={id}
               checked={tab === id}
               onChange={() => setTab(id)}
-              aria-controls={`${baseId}-panel-${id}`}
               className="sr-only"
             />
             <Icon className="size-4 group-has-[:checked]:text-brand" aria-hidden="true" />
@@ -63,12 +62,12 @@ export function HeroSearch() {
       </fieldset>
 
       <div className="p-3 sm:p-4">
-        {tab === 'handwerker' && (
-          <form
+        <form
             action="/register"
             method="get"
             id={`${baseId}-panel-handwerker`}
             aria-label="Handwerker finden"
+            hidden={tab !== 'handwerker'}
             className="flex flex-col gap-3"
           >
             <input type="hidden" name="role" value="homeowner" />
@@ -106,14 +105,13 @@ export function HeroSearch() {
               ))}
             </div>
           </form>
-        )}
 
-        {tab === 'tarife' && (
-          <form
+        <form
             action="/register"
             method="get"
             id={`${baseId}-panel-tarife`}
             aria-label="Tarife vergleichen"
+            hidden={tab !== 'tarife'}
             className="flex flex-col gap-3"
           >
             <input type="hidden" name="role" value="homeowner" />
@@ -165,14 +163,13 @@ export function HeroSearch() {
             </div>
             <p className="text-meta text-body">Wir bereiten Kündigung und Wechsel für dich vor. Kein Wechsel ohne deine Freigabe.</p>
           </form>
-        )}
 
-        {tab === 'ki' && (
-          <form
+        <form
             action="/register"
             method="get"
             id={`${baseId}-panel-ki`}
             aria-label="KI-Hausmanager fragen"
+            hidden={tab !== 'ki'}
             className="flex flex-col gap-3"
           >
             <input type="hidden" name="role" value="homeowner" />
@@ -208,7 +205,6 @@ export function HeroSearch() {
               ))}
             </div>
           </form>
-        )}
       </div>
     </div>
   );

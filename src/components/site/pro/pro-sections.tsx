@@ -195,7 +195,7 @@ export function ProSteps() {
                 <span className="grid size-12 place-items-center rounded-2xl bg-ink text-lime">
                   <Icon className="size-6" aria-hidden="true" />
                 </span>
-                <span className="font-display text-4xl font-bold text-sand" aria-hidden="true">
+                <span className="font-display text-4xl font-bold text-body" aria-hidden="true">
                   0{index + 1}
                 </span>
               </span>

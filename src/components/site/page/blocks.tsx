@@ -942,7 +942,7 @@ export function IconTiles({
               <Icon className="size-5" aria-hidden="true" />
             </span>
             {numbered && (
-              <span className={cn('font-display text-sm font-bold tabular-nums', dark ? 'text-white/50' : 'text-body/60')} aria-hidden="true">
+              <span className={cn('font-display text-sm font-bold tabular-nums', dark ? 'text-white/75' : 'text-body')} aria-hidden="true">
                 {String(index + 1).padStart(2, '0')}
               </span>
             )}
