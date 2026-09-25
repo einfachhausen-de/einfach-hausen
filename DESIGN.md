@@ -107,6 +107,8 @@ Bewegung unterstützt einen Zustand oder einen Wechsel. Kurze endliche Übergän
 | Arbeitsflächen | EHAppHeader, EHPanel, EHList, EHDataTable, EHDocumentList |
 | Eingaben | EHField, EHInput, EHTextarea, EHSelect, EHCheckbox, EHComposer |
 | Interaktion und Zustände | EHTabs, EHDialog, EHEmptyState, EHLoadingState, EHErrorState |
+| Website-Unterseiten (Adapter `src/components/site/page/blocks.tsx`) | PageHero, Section, Heading, HeroPhoto, ImageSplit, StepList, FeatureCards, LinkCards, FactStrip, SituationCards, ExampleCard, AlertPanel, HonestLimits, ClosingCta, ProofPanel, WideFigure, NumberedPoints, ProductScreenshot, ProcessPanel, CheckRows, AsideLayout, FeatureSplit, DemoFrame, IconTiles, ServiceTiles, CtaRow · Regeln: § Website-Seitenkompositionen 2026-09-25 und § Startseite und Login 2026-09-25 |
+| Login-Bildkarte und Zusagen | AuthAside (`src/components/site/page/auth-aside.tsx`), OWNER_ASSURANCES, PARTNER_ASSURANCES (`src/components/site/page/assurances.ts`) |
 
 Der Bestand richtet sich nach den Exporten von `packages/eh-design`; am 16.09.2026 waren es 152 exportierte `EH*`-Symbole (gezählt über `export const|function|class EH…` in `packages/eh-design/src/`). Ein Registereintrag ist kein Nachweis der Verwendung: Wer einen Baustein einsetzt, prüft vorher, ob er im Produktcode tatsächlich ankommt.
 
@@ -363,3 +365,61 @@ Jerry hat am 22.09.2026 die Referenz-Menüleiste (21st.dev-Menü als Vorbild: sc
 Komposition in `src/components/header-menu.tsx` (Consumer-Code, keine versiegelten Dateien): Suchen (öffnet die Bereichssuche), Aufträge (Menü: Neuer Auftrag — direkt oder über einen der 12 Bereiche aus `SERVICE_CATEGORIES` ins passende Hausmeister-Thema via `?topic=`-Hinweis —, laufende Aufträge, Alle Aufträge, Alle Termine), Benachrichtigung (neueste Mitteilungen, Alle ansehen). Zahlen nur aus echten `jobs`, `appointments` und `notifications` (offen, bestätigt-bevorstehend, ungelesen); keine Mock-Zähler im Produkt. Neuer Menüpunkt Kalender existiert nicht; „Alle Termine“ lebt im Aufträge-Menü.
 
 Ausdrücklich freigegebene Abweichungen nur für diese Komponente: 40-px-Ziele statt des 44-px-Touch-Floors aus § Form/Abstand, `font-medium` statt `semibold` in der Leiste, schlankere Zeilenabstände. Farben, Schrift, Radien und Schatten bleiben Token (`ink`, `paper`, `line`, Panel-Radius/Schatten) — keine zweite Palette, keine Slate-Werte im Produkt. Guard, Debt-Baseline, Token und versiegelter Kern bleiben unverändert; die Prüfskripte melden für diese Komponente keinen neuen Verstoß. Grüne Tests beweisen Verhalten, keine visuelle Zustimmung.
+
+## Website-Seitenkompositionen 2026-09-25 — verbindlich für Leistungs-, Produkt- und Vertrauensseiten
+
+Jerry hat am 25.09.2026 die Umstellung der Website-Unterseiten auf unterscheidbare Kompositionen freigegeben und ihre Aufnahme in Designsystem und `DESIGN.md` angeordnet. Anlass: Unterseiten sahen trotz unterschiedlicher Inhalte gleich aus (dasselbe Foto, derselbe Hero, dieselbe Abschnittsfolge). Palette, Inter, Originallogo, Radien, Schatten und Token bleiben unverändert. Abwechslung entsteht ausschließlich über Tonfolge, Layout und Bildinhalt.
+
+**Bausteine** in `src/components/site/page/blocks.tsx` (Website-Adapterschicht, komponiert aus `@/design-system/site`; nicht Teil des versiegelten Kerns):
+
+| Baustein | Zweck | Verbindliche Verwendung |
+| --- | --- | --- |
+| `ProofPanel` | Nutzen-Karte mit belegten Punkten | `tone="ink"` auf hellem Hero, `tone="light"` auf dunklem Hero; nur belegte Aussagen |
+| `WideFigure` | Breitbild 21:9 (mobil 4:3) mit Hauskante | unter einem zentrierten Kopf; immer mit Bildhinweis |
+| `NumberedPoints` | drei nummerierte Kernaussagen | ausschließlich in `Section tone="dark"` |
+| `ProductScreenshot` | echte Produktansicht im Rahmen mit Vollbild-Link | ausschließlich auf dunklem Hero; Beispieldaten in der Bildunterschrift benennen |
+| `ProcessPanel` | Prinzip mit nummerierten Schritten in Creme-Fläche | im zentrierten weißen Hero oder als eigenständiger Beleg |
+| `CheckRows` | Prüfkriterien oder Regeln als Icon-Zeilen mit Trennlinien | neben einem Bild (`ImageSplit`) statt eines Kartenrasters |
+| `AsideLayout` | zweispaltig: `heading` (Kopf links, Inhalt rechts) oder `media` (Beispiel links, Text rechts) | ersetzt jede routenlokale Grid-Nachbildung |
+| `PageMood`, `MOOD_HERO_TONE` | Dramaturgie der Produktseiten | `calm` → Creme, `urgent` → Dunkel, `careful` → Weiß, `value` → Creme |
+| `ILLUSTRATIVE_IMAGE_NOTE` | Pflichthinweis „Illustrative Bildwelt, keine Kundenaussage.“ | unter jeder generierten oder gestellten Bildwelt |
+
+**Kompositionsregeln**
+
+1. **Hero-Ton nach Inhalt.** Dunkel ist Seiten mit Dringlichkeit (Notfall) oder echter Produktansicht (Hausakte, Eigenheimbesitzer) vorbehalten. Leistungsseiten wechseln über ihren Katalogindex zwischen Creme und Weiß.
+2. **Tonfolge innerhalb einer Seite.** Abschnittstöne wechseln. Auf Leistungsseiten steht der Ablauf (`StepList`) im dunklen Abschnitt; typische Situationen stehen als große, verlinkte Karten.
+3. **Ein Motiv pro Leistung.** Jede der 12 Leistungen nutzt ihr eigenes Motiv `public/images/services/<slug>.jpg`. Das generische Handwerkerfoto ist nur Rückfall, wenn kein Motiv existiert. Kein Motiv erscheint auf zwei Leistungsseiten.
+4. **Bilddateien.** Neue Fotos als JPG, höchstens 1600 px breit, mozjpeg-Qualität 80, Zielgröße ≤ 200 KB. Keine neuen PNG-Fotos.
+5. **Produktseiten wählen ihre Dramaturgie ausschließlich über `mood`:** Beratung `calm` (Foto vorn), Notfall `urgent` (Hinweis vor allem anderen, danach „Was jetzt passiert“), Versicherung `careful` (Ablauf als Aktenumschlag), Immobilienverkauf `value` (zentrierter Kopf mit `WideFigure`). Keine fünfte Stimmung ohne Eintrag hier.
+6. **Echte App und Beispiel sind nicht austauschbar.** `ProductScreenshot` zeigt die echte Oberfläche; `ExampleCard` ist stets als Beispieldaten gekennzeichnet. Keine Marketing-Illustration im Text-Slot (vgl. § Verbindliche Komposition).
+7. **Keine lokalen Kopien.** Routen importieren diese Bausteine; fehlt eine Variante, wird der Baustein in `blocks.tsx` erweitert und in dieser Tabelle nachgetragen. Kein neues Seiten-CSS.
+
+**Seitenzuordnung (Stand 25.09.2026):** `/leistungen/*` → `ServiceDetailPage` (eigenes Motiv, Creme/Weiß im Wechsel, dunkler Ablauf); `/beratung`, `/notfall`, `/versicherung`, `/immobilienverkauf` → `ProductStoryPage` mit `mood`; `/hausakte` → dunkler Hero mit `ProductScreenshot`, `AsideLayout` für Einstieg und Fragen; `/sicherheit` → weißer zentrierter Hero mit `ProcessPanel`, `CheckRows` neben `ImageSplit`; `/eigenheimbesitzer` → dunkler Hero mit `OWNER_ASSURANCES`, Fakten hell auf Creme.
+
+**Siegel.** Diese Freigabe autorisiert ausschließlich die Aktualisierung der Prüfsumme von `DESIGN.md` in `design/design-lock.json`. Guard, Workflow, Debt-Baseline, Tokens, `packages/eh-design` und alle übrigen Lock-Einträge bleiben unverändert. Grüne Prüfungen beweisen Verhalten, keine visuelle Abnahme durch Gina.
+
+## Startseite und Login 2026-09-25 — verbindlich
+
+Jerry hat am 25.09.2026 die Fortsetzung auf Startseite und Login freigegeben. Palette, Inter, Originallogo, Token und die Dramaturgie der Startseite (`src/app/page.tsx`) bleiben unverändert. Businesslogik, Auth, Rollen-Umschalter, Demo-Einstieg und Formularverhalten des Logins bleiben unverändert.
+
+**Bausteine** in `src/components/site/page/blocks.tsx`, `auth-aside.tsx` und `assurances.ts`:
+
+| Baustein | Zweck | Verbindliche Verwendung |
+| --- | --- | --- |
+| `FeatureSplit` | Produktkapitel: Text und Beispielansicht | `mediaFirst` für den Zickzack ab `lg`; mobil steht der Text zuerst; Ton `cream`, `white` oder `dark`, nie zwei gleiche Töne nacheinander |
+| `DemoFrame` | Rahmen jeder Beispielansicht | Kontextzeile, Titel und `ExampleBadge` sind Pflicht; `white` auf Creme, `cream` auf Weiß |
+| `IconTiles` | Fähigkeiten oder Schritte als Kacheln | `numbered` nur für echte Abläufe; `light` nur auf Creme, `dark` nur im dunklen Kapitel |
+| `ServiceTiles` | alle Leistungsbereiche verlinkt | Daten ausschließlich aus `SERVICE_CATEGORIES` |
+| `CtaRow` | Hauptaktion mit genau einer belegten Entlastung | eine Hauptaktion pro Kapitel; Entlastung aus den Zusagenlisten oder gleichwertig belegt |
+| `OWNER_ASSURANCES` / `PARTNER_ASSURANCES` | belegte Zusagen | Partnerzusagen stammen aus `/partner` (FAQ); die Listen werden nie gemischt |
+| `AuthAside` | rollenabhängiger Inhalt der Login-Bildkarte | wechselt mit dem Rollen-Umschalter; Zusagenliste erst ab `lg`, damit die Karte mobil das Foto nicht verdeckt |
+
+**Regeln**
+
+1. **Zickzack der Produktkapitel.** Tarife (Beispiel links, Creme) → Handwerker (Beispiel rechts, Weiß, darunter `ServiceTiles`) → KI-Hausmanager (Beispiel links, dunkel).
+2. **Entlastung am Handlungsort.** Jede Hauptaktion eines Kapitels trägt genau eine belegte Entlastung: Tarife „Kostenlos und unverbindlich“, Handwerker „Keine Provision auf deinen Auftrag“, KI-Hausmanager „Kein Auftrag ohne deine Bestätigung“.
+3. **Beispiele sind gekennzeichnet.** Jede Beispielansicht steht in `DemoFrame` oder trägt ein `ExampleBadge`; keine echten Anbieter- oder Betriebsnamen.
+4. **Login spricht die gewählte Rolle an.** Eigentümer sehen `OWNER_ASSURANCES`, Betriebe `PARTNER_ASSURANCES`. Keine Werbeversprechen, die über die Partner-FAQ hinausgehen.
+5. **Altlast `auth-shell.css`.** Die Datei (Schicht `eh-legacy`) wird weder erweitert noch gekürzt, solange die Debt-Baseline sie führt. Neue Login-Inhalte entstehen als Tailwind-Bausteine innerhalb der vorhandenen Rahmenklassen (`arena-hero-card`). Ein Rückbau der Datei ist eine eigene Aufgabe mit freigegebenem `design:debt:sync`.
+
+**Siegel.** Wie oben: nur die Prüfsumme von `DESIGN.md` in `design/design-lock.json` wird aktualisiert.

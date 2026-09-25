@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { BellRing, FileText, FolderSearch, Home, PhoneCall, Siren, Sparkles, Tag, UserRound, Wallet } from 'lucide-react';
 import { canonical } from '@/lib/seo';
 import { SiteShell } from '@/components/site/site-shell';
-import { ClosingCta, FactStrip, FeatureCards, Heading, ImageSplit, LinkCards, PageHero, Section, SituationCards } from '@/components/site/page/blocks';
+import { ClosingCta, FactStrip, FeatureCards, Heading, ImageSplit, LinkCards, OWNER_ASSURANCES, PageHero, Section, SituationCards } from '@/components/site/page/blocks';
 import { OwnerAppScreen } from '@/components/site/home/owner-app-screen';
 import { Reveal, Stagger } from '@/components/marketing/motion';
 import { FACTS } from '@/components/marketing/content';
@@ -31,6 +31,8 @@ export default function Page() {
   return (
     <SiteShell>
       <PageHero
+        tone="dark"
+        assurances={OWNER_ASSURANCES}
         eyebrow="Für Eigenheimbesitzer"
         title="Dein Haus hat viele Themen. Du brauchst nur eine Eingangstür."
         text="Ein Haus zu besitzen heißt, ständig Dinge im Kopf zu haben: Wartungen, Betriebe, Termine, Rechnungen. Einfach Hausen nimmt dir die Koordination ab und bewahrt das Wissen, das sonst verloren geht."
@@ -39,7 +41,7 @@ export default function Page() {
             <ButtonLink href="/register?role=homeowner" size="lg" arrow>
               Hauskonto kostenlos anlegen
             </ButtonLink>
-            <ButtonLink href="/#anliegen" variant="outline" size="lg">
+            <ButtonLink href="/#anliegen" variant="outline-dark" size="lg">
               Anliegen beschreiben
             </ButtonLink>
           </>
@@ -143,9 +145,9 @@ export default function Page() {
         </ImageSplit>
       </Section>
 
-      <Section tone="dark">
-        <Heading tone="dark" eyebrow="Klare Regeln" title="Was du von uns erwarten kannst." />
-        <FactStrip items={FACTS} />
+      <Section tone="cream">
+        <Heading eyebrow="Klare Regeln" title="Was du von uns erwarten kannst." />
+        <FactStrip items={FACTS} tone="light" />
       </Section>
 
       <ClosingCta

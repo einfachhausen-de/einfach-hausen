@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { LoginForm, type AuthMode, type Role } from "./LoginForm";
 import { LegalModal } from "./LegalModal";
+import { AuthAside } from "@/components/site/page/auth-aside";
 import "./auth-shell.css";
 
 type LegalType = "agb" | "datenschutz" | "impressum" | "sicherheit" | "partnerkriterien";
@@ -75,9 +76,7 @@ export function AuthShell({
             className="arena-hero-photo"
           />
           <div className="arena-hero-card">
-            <p>
-              Ein Ansprechpartner für alle. Hausakte, Termine und die Menschen, die dein Haus kennen — an einem Ort.
-            </p>
+            <AuthAside role={role} />
             <div className="arena-hero-chips">
               <button type="button" id="link-impressum" className="arena-chip" onClick={() => setActiveLegalModal("impressum")}>
                 Impressum
