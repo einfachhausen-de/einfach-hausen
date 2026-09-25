@@ -1,5 +1,5 @@
 import { BadgeCheck, CreditCard, FileCheck2, ShieldCheck } from 'lucide-react';
-import { SectionTitle } from '@/components/shell';
+import { SectionTitle } from '@/components/section-title';
 import { WerkbankRahmen } from '@/components/werkbank-rahmen';
 import { ProviderAccessBoundary, ProviderState } from '@/components/provider/workspace';
 import { requireUser } from '@/lib/auth';

@@ -1878,18 +1878,11 @@
     "literal-color\u0000#a3d4c3": 2,
     "literal-color\u0000#eaf4ee": 2
   },
-  "src/components/owner-menu.tsx": {
-    "state-class\u0000open": 2,
-    "state-class\u0000active": 4
-  },
   "src/components/shell.module.css": {
     "small-type\u0000font-size:10.5px": 1,
     "raw-value\u0000font-size:10.5px": 1,
     "raw-value\u0000letter-spacing:.09em": 1,
     "raw-value\u0000font-weight:700": 1
-  },
-  "src/components/shell.tsx": {
-    "state-class\u0000active": 1
   },
   "src/components/sidebar-account-menu.module.css": {
     "raw-value\u0000border-radius: 50%": 1,
