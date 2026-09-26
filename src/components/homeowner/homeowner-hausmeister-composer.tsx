@@ -3,7 +3,7 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import { Camera, FileText, Mic, Send, Square } from 'lucide-react';
 import { sendHausmeisterAction } from '@/app/actions';
-import { EHPanel, EHText, EHButton, EHActions } from '@/design-system';
+import { EHCallout, EHText, EHButton, EHActions } from '@/design-system';
 
 // T-0155: the intake draft survives network failures. The text is mirrored to
 // localStorage on every keystroke, restored on mount, and only cleared after
@@ -133,7 +133,7 @@ export function HomeownerHausmeisterComposer({
 
   return (
     <form action={submitDraft} className="agent-composer" aria-describedby={connectionStatus ? statusId : undefined}>
-      {incomingDraft?.trim() && incomingDraft !== handledDraft && <EHPanel title="Deine mitgebrachte Frage">
+      {incomingDraft?.trim() && incomingDraft !== handledDraft && <EHCallout title="Deine mitgebrachte Frage">
         <EHText>{incomingDraft}</EHText>
         <EHText>Übernimm den Text in dein Eingabefeld und prüfe ihn vor dem Senden. Ein vorhandener Entwurf bleibt erhalten.</EHText>
         <EHActions>
@@ -148,7 +148,7 @@ export function HomeownerHausmeisterComposer({
             document.getElementById(descriptionId)?.focus();
           }}>Vorschlag verwerfen</EHButton>
         </EHActions>
-      </EHPanel>}
+      </EHCallout>}
       <label className="owner-visually-hidden" htmlFor={descriptionId}>Anliegen an den Hausmanager</label>
       <textarea
         id={descriptionId}

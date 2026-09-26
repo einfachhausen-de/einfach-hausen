@@ -180,8 +180,8 @@ export function WerkbankShell({
               />
               {hatKi && (
                 <button type="button" className={s['wb-ki-mobil']} aria-controls={railId} aria-expanded={mobilKi && kiOffen}
-                  aria-label={mobilKi && kiOffen ? 'Kundenberater schließen' : 'Kundenberater öffnen'}
-                  title={mobilKi && kiOffen ? 'Kundenberater schließen' : 'Kundenberater öffnen'}
+                  aria-label={mobilKi && kiOffen ? 'Hausmanager schließen' : 'Hausmanager öffnen'}
+                  title={mobilKi && kiOffen ? 'Hausmanager schließen' : 'Hausmanager öffnen'}
                   onClick={() => {
                     if (mobilKi && kiOffen) { setMobilKi(false); kiSetzen(false); }
                     else { setMobilKi(true); kiUmschalten(true); }

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { WerkbankKennzahlen } from '@/components/werkbank-seite';
 import styles from './settings.module.css';
 
 type Status = {
@@ -46,11 +47,16 @@ export function PwaSettingsStatus() {
   if (!status) return <p className={styles.statusLine}>Browser-Status wird geprüft …</p>;
 
   return (
-    <div className={styles.statusGrid} role="status" aria-live="polite">
-      <div><span>Verbindung</span><strong>{status.online ? 'Online' : 'Offline'}</strong></div>
-      <div><span>Offline-Recovery</span><strong>{status.controlled ? 'Bereit' : 'Noch nicht aktiv'}</strong></div>
-      <div><span>Installation</span><strong>{status.installed ? 'Installiert' : 'Im Browser'}</strong></div>
-      <p>
+    <div className={styles.statusBlock} role="status" aria-live="polite">
+      <WerkbankKennzahlen
+        label="Browser-Status"
+        items={[
+          { id: 'verbindung', label: 'Verbindung', value: status.online ? 'Online' : 'Offline' },
+          { id: 'recovery', label: 'Offline-Recovery', value: status.controlled ? 'Bereit' : 'Noch nicht aktiv' },
+          { id: 'installation', label: 'Installation', value: status.installed ? 'Installiert' : 'Im Browser' },
+        ]}
+      />
+      <p className={styles.statusLine}>
         {status.online
           ? 'Speichern, Senden und Buchen nutzen die aktuelle Serververbindung.'
           : 'Senden, Speichern und Buchen bleiben gesperrt, bis die Verbindung wieder da ist.'}

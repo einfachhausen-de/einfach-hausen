@@ -37,40 +37,6 @@
   height: 20px;
   accent-color: var(--eh-color-petrol);
 }
-.statusGrid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--eh-space-sm);
-}
-.statusGrid > div {
-  display: grid;
-  gap: var(--eh-space-xs);
-  border: 1px solid var(--eh-color-line);
-  border-radius: var(--eh-radius-panel);
-  padding: var(--eh-space-sm);
-  background: var(--eh-color-paper);
-  box-shadow: var(--eh-shadow-panel);
-}
-.statusGrid span {
-  font-size: var(--eh-font-meta);
-  color: var(--eh-color-secondary);
-  line-height: var(--eh-leading-normal);
-}
-.statusGrid strong {
-  font-size: var(--eh-font-label);
-  font-weight: var(--eh-weight-semibold);
-  line-height: var(--eh-leading-tight);
-  color: var(--eh-color-ink);
-}
-.statusGrid p {
-  grid-column: 1 / -1;
-  margin: 0;
-  padding-top: var(--eh-space-sm);
-  border-top: 1px solid var(--eh-color-line);
-  color: var(--eh-color-secondary);
-  font-size: var(--eh-font-meta);
-  line-height: var(--eh-leading-normal);
-}
 .statusLine {
   margin: 0;
   color: var(--eh-color-secondary);
@@ -78,12 +44,6 @@
   line-height: var(--eh-leading-normal);
 }
 @media (max-width: 640px) {
-  .statusGrid {
-    grid-template-columns: 1fr;
-  }
-  .statusGrid p {
-    grid-column: auto;
-  }
   .disabledSetting {
     grid-template-columns: auto minmax(0, 1fr);
   }
@@ -91,4 +51,24 @@
     grid-column: 2;
     justify-self: start;
   }
+}
+.statusBlock {
+  display: grid;
+  gap: var(--eh-space-sm);
+  min-width: 0;
+}
+.toggleLine {
+  display: flex;
+  gap: var(--eh-space-xs);
+  align-items: center;
+  min-height: 44px;
+  color: var(--eh-color-ink);
+  font-size: var(--eh-font-meta);
+  line-height: var(--eh-leading-normal);
+}
+.toggleLine input {
+  width: 20px;
+  height: 20px;
+  flex: none;
+  accent-color: var(--eh-color-petrol);
 }

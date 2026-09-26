@@ -50,19 +50,30 @@
 .eh-werkbank-kopf-copy h1 { margin:0; font-size:var(--eh-app-title); font-weight:var(--eh-weight-bold); line-height:var(--eh-leading-tight); color:var(--eh-color-ink); overflow-wrap:anywhere; }
 .eh-werkbank-kopf-copy span { font-size:var(--eh-font-label); line-height:var(--eh-leading-normal); color:var(--eh-muted); }
 .eh-werkbank-kopf-copy > span:first-child:not(:only-child) { font-size:var(--eh-font-eyebrow); font-weight:var(--eh-weight-bold); letter-spacing:var(--eh-track-wide); text-transform:uppercase; color:var(--eh-color-petrol); }
-.eh-werkbank-fokus { display:flex; align-items:center; gap:16px; min-height:88px; padding:16px 20px; border:1px solid var(--eh-color-deep); border-radius:var(--eh-radius-panel); background:var(--eh-color-deep); color:var(--eh-color-white); text-decoration:none; box-shadow:var(--eh-shadow-card); transition:background-color var(--eh-motion-duration) var(--eh-motion-ease); }
-.eh-werkbank-fokus:hover { background:var(--eh-color-petrol); }
+/* Fokuszeile der Startseite: genau ein naechster Schritt. Dunkle Petrol-
+   flaeche mit Lime (wie die Sparkarte der Website), wenn etwas auf dich
+   wartet; ruhige helle Zeile fuer Termin, Einrichtung und „Alles im Griff“.
+   Farben am Link mit Elementselektor, sonst erbt `.scope :where(a)`. */
+a.eh-werkbank-fokus { display:flex; align-items:center; gap:16px; min-height:88px; padding:16px 20px; border:1px solid var(--eh-color-deep); border-radius:var(--eh-radius-panel); background:var(--eh-color-deep); color:var(--eh-color-paper); text-decoration:none; box-shadow:var(--eh-shadow-card); transition:background-color var(--eh-motion-duration) var(--eh-motion-ease), border-color var(--eh-motion-duration) var(--eh-motion-ease); }
+a.eh-werkbank-fokus:hover { background:var(--eh-color-petrol); border-color:var(--eh-color-petrol); }
+a.eh-werkbank-fokus:focus-visible { outline:3px solid var(--eh-color-focus); outline-offset:3px; }
 .eh-werkbank-fokus-zahl { flex:none; min-width:1.2ch; font-size:var(--eh-font-section); font-weight:var(--eh-weight-bold); line-height:var(--eh-leading-tight); color:var(--eh-color-lime); font-variant-numeric:tabular-nums; }
-.eh-werkbank-fokus-text { flex:1; min-width:0; display:grid; gap:2px; }
-.eh-werkbank-fokus-text strong { font-size:var(--eh-font-body); font-weight:var(--eh-weight-semibold); line-height:var(--eh-leading-tight); }
+.eh-werkbank-fokus-symbol { flex:none; width:48px; height:48px; display:grid; place-items:center; border-radius:var(--eh-radius-panel); background:var(--eh-color-lime); color:var(--eh-color-deep); }
+.eh-werkbank-fokus-text { flex:1; min-width:0; display:grid; gap:4px; }
+.eh-werkbank-fokus-text strong { font-size:var(--eh-font-body); font-weight:var(--eh-weight-semibold); line-height:var(--eh-leading-tight); color:var(--eh-color-paper); }
 .eh-werkbank-fokus-text span { font-size:var(--eh-font-label); line-height:var(--eh-leading-normal); color:var(--eh-color-sand); }
-.eh-werkbank-fokus-pfeil { flex:none; width:44px; height:44px; display:grid; place-items:center; border-radius:var(--eh-radius-pill); background:var(--eh-color-lime); color:var(--eh-color-ink); }
-/* Nichts offen: ruhige helle Zeile statt dunkler Alarmflaeche — Zustand
+.eh-werkbank-fokus-text .eh-werkbank-fokus-label { font-size:var(--eh-font-label); font-weight:var(--eh-weight-semibold); letter-spacing:var(--eh-track-normal); text-transform:uppercase; color:var(--eh-color-lime); }
+.eh-werkbank-fokus-pfeil { flex:none; width:44px; height:44px; display:grid; place-items:center; border-radius:var(--eh-radius-pill); background:var(--eh-color-lime); color:var(--eh-color-ink); transition:transform var(--eh-motion-duration) var(--eh-motion-ease); }
+a.eh-werkbank-fokus:hover .eh-werkbank-fokus-pfeil { transform:translateX(2px); }
+/* Nichts Dringendes: ruhige helle Zeile statt dunkler Alarmflaeche — Zustand
    ehrlich zeigen, keine Dringlichkeit fuer eine Null. */
-.eh-werkbank-fokus[data-ruhig] { background:var(--eh-color-white); border-color:var(--eh-color-line); color:var(--eh-color-ink); box-shadow:none; }
-.eh-werkbank-fokus[data-ruhig]:hover { background:var(--eh-color-paper); }
+a.eh-werkbank-fokus[data-ruhig] { background:var(--eh-color-white); border-color:var(--eh-color-line); color:var(--eh-color-ink); box-shadow:none; }
+a.eh-werkbank-fokus[data-ruhig]:hover { background:var(--eh-color-paper); border-color:var(--eh-color-petrol); }
 .eh-werkbank-fokus[data-ruhig] .eh-werkbank-fokus-zahl { color:var(--eh-color-petrol); }
+.eh-werkbank-fokus[data-ruhig] .eh-werkbank-fokus-symbol { background:var(--eh-color-petrol-soft); color:var(--eh-color-petrol); }
+.eh-werkbank-fokus[data-ruhig] .eh-werkbank-fokus-text strong { color:var(--eh-color-ink); }
 .eh-werkbank-fokus[data-ruhig] .eh-werkbank-fokus-text span { color:var(--eh-color-secondary); }
+.eh-werkbank-fokus[data-ruhig] .eh-werkbank-fokus-text .eh-werkbank-fokus-label { color:var(--eh-color-petrol); }
 .eh-werkbank-fokus[data-ruhig] .eh-werkbank-fokus-pfeil { background:var(--eh-color-petrol-soft); color:var(--eh-color-deep); }
 /* Primaere Schnellaktion der Startseite: dunkler Haus-Ton mit Lime-Symbol
    und Lime-Aktion wie die dunklen Karten der Website. Konsumentenschicht,
@@ -71,12 +82,40 @@ a.eh-quick-primary { background:var(--eh-color-deep); border-color:var(--eh-colo
 a.eh-quick-primary:hover { background:var(--eh-color-petrol); border-color:var(--eh-color-petrol); }
 a.eh-quick-primary > span:first-child { background:var(--eh-color-lime); color:var(--eh-color-deep); }
 a.eh-quick-primary > span:last-child { color:var(--eh-color-lime); }
+.eh-quick-pfeiltext { display:inline; }
+/* Gruss statt Datum als erste Zeile des Startseitenkopfes: normale
+   Schreibung, ruhige Sekundaerfarbe. */
+.eh-werkbank-kopf-copy > span[data-gruss]:first-child:not(:only-child) { font-size:var(--eh-font-label); font-weight:var(--eh-weight-medium); letter-spacing:var(--eh-track-normal); text-transform:none; color:var(--eh-color-secondary); }
 @media (max-width:760px) {
   .eh-werkbank-kopf-copy h1 { font-size:var(--eh-app-large); }
-  .eh-werkbank-fokus { min-height:76px; padding:14px 16px; }
+  a.eh-werkbank-fokus { min-height:76px; gap:12px; padding:14px 16px; }
+  /* Auf dem Telefon steht die Hauptaktion direkt darunter als Schnellaktion. */
+  .eh-werkbank-kopf-tools[data-nur-desktop] { display:none; }
+}
+/* Telefon (Betreiber-Order 23.09.: Hauptaktion breit, die beiden anderen
+   nebeneinander) – kompakt: Hauptaktion als eine Zeile mit Pfeil, die
+   Nebenaktionen nur Symbol und Titel. Beschreibungen tragen die breiten
+   Ansichten; mobil zaehlt die Hoehe (DESIGN.md §13). */
+@media (max-width:600px) {
+  div.eh-quick-grid { gap:8px; }
+  div.eh-quick-grid > a.eh-quick-card { min-height:0; padding:14px; gap:10px; }
+  div.eh-quick-grid > a.eh-quick-card small, div.eh-quick-grid .eh-quick-pfeiltext { display:none; }
+  div.eh-quick-grid > a.eh-quick-card:not(.eh-quick-primary) > span:last-child { display:none; }
+  div.eh-quick-grid > a.eh-quick-primary { flex-direction:row; align-items:center; gap:14px; padding:14px 16px; }
+  div.eh-quick-grid > a.eh-quick-primary > strong { font-size:var(--eh-font-body); }
+  div.eh-quick-grid > a.eh-quick-primary > span:last-child { margin:0 0 0 auto; }
+}
+/* Kennzahlen der Startseite: rechts als ruhige Liste, auf Telefon und
+   Tablet als 2×2-Raster unter dem Inhalt statt vier voller Zeilen. */
+.eh-rail-stats { display:grid; gap:8px; }
+.eh-rail-stats > a { margin:0; }
+@media (max-width:1023.5px) {
+  .eh-rail-stats { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .eh-rail-stats > a { flex-wrap:wrap; row-gap:4px; min-height:56px; }
 }
 @media (prefers-reduced-motion:reduce) {
-  .eh-werkbank-kopf-cta, .eh-werkbank-fokus { transition:none; }
+  .eh-werkbank-kopf-cta, a.eh-werkbank-fokus, .eh-werkbank-fokus-pfeil { transition:none; }
+  a.eh-werkbank-fokus:hover .eh-werkbank-fokus-pfeil { transform:none; }
 }
 
 /* Seitenleiste im Markenton: Creme-Flaeche, Hover weiss, aktuelle Seite als
@@ -329,3 +368,10 @@ a.eh-quick-primary > span:last-child { color:var(--eh-color-lime); }
   .eh-werkbank-kennzahlen > dl:has(> div:nth-child(4)) > div:nth-child(3) { border-left:0; border-top:1px solid var(--eh-rule); }
   .eh-werkbank-kennzahlen > dl:has(> div:nth-child(4)) > div:nth-child(4) { border-top:1px solid var(--eh-rule); }
 }
+
+/* Werkbank-Zustand (werkbank-zustand.tsx, Fehlergrenzen /app und /pro) */
+.eh-werkbank-zustand { display:grid; gap:20px; align-content:center; width:100%; max-width:720px; min-height:70vh; margin:0 auto; padding:48px 24px; outline:none; }
+.eh-werkbank-zustand-kicker { display:inline-flex; align-items:center; gap:8px; color:var(--eh-color-secondary); font-size:var(--eh-font-meta); font-weight:var(--eh-weight-semibold); }
+.eh-werkbank-zustand-kicker svg { width:18px; height:18px; flex:none; }
+.eh-werkbank-zustand-text { margin:0; max-width:56ch; color:var(--eh-color-secondary); line-height:var(--eh-leading-normal); }
+.eh-werkbank-zustand-tools { display:flex; flex-wrap:wrap; align-items:center; gap:12px 24px; }

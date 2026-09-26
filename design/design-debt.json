@@ -70,17 +70,6 @@
     "raw-value\u0000background:\n      linear-gradient(180deg, rgba(237, 245, 241, 0.72) 0, transparent 190px),\n      var(--owner-bg)": 1,
     "raw-value\u0000box-shadow: 0 16px 38px rgba(14, 61, 51, 0.08)": 1
   },
-  "src/app/app/settings/account-forms.module.css": {
-    "literal-color\u0000#d64541": 2,
-    "literal-color\u0000#2f7650": 1,
-    "raw-value\u0000border-radius: 14px": 1,
-    "raw-value\u0000font-size: 14px": 5,
-    "raw-value\u0000color: #d64541": 1,
-    "raw-value\u0000color: #2f7650": 1
-  },
-  "src/app/app/settings/cloud-backup-card.tsx": {
-    "unowned-style\u0000style={": 2
-  },
   "src/app/app-ux-vorschlaege/page.tsx": {
     "unowned-style\u0000style={": 1
   },
@@ -1500,9 +1489,6 @@
     "raw-value\u0000font-size: 16px": 1,
     "raw-value\u0000background: color-mix(in srgb, var(--eh-color-mist) 70%, var(--eh-color-white))": 1,
     "raw-value\u0000font-size: 12px": 1
-  },
-  "src/components/bottom-nav.tsx": {
-    "state-class\u0000active": 1
   },
   "src/components/icons.tsx": {
     "literal-color\u0000#105258": 45,

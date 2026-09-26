@@ -8,6 +8,7 @@ import {
   BACKUP_ERROR_COPY, detectPlatform, isNativeApp, runBackupRound, startAutoRestore, suggestedProvider,
   type BackupError, type NativeCloudProvider,
 } from "@/lib/cloud-backup-bridge";
+import { WerkbankKennzahlen } from "@/components/werkbank-seite";
 import styles from "./settings.module.css";
 
 type Status = {
@@ -155,11 +156,16 @@ export function CloudBackupCard() {
       {error && <EHFormFeedback kind="error">{error}</EHFormFeedback>}
       {notice && <EHCallout title="Cloud-Backup"><EHText>{notice}</EHText></EHCallout>}
 
-      <div className={styles.statusGrid} role="status" aria-live="polite">
-        <div><span>Dateien</span><strong>{status.operational}</strong></div>
-        <div><span>Sicher in deiner Cloud</span><strong>{status.archived}</strong></div>
-        <div><span>Wartet auf Rückholung</span><strong>{status.pending}</strong></div>
-        <p>
+      <div className={styles.statusBlock} role="status" aria-live="polite">
+        <WerkbankKennzahlen
+          label="Cloud-Backup"
+          items={[
+            { id: "dateien", label: "Dateien", value: status.operational },
+            { id: "cloud", label: "Sicher in deiner Cloud", value: status.archived },
+            { id: "rueckholung", label: "Wartet auf Rückholung", value: status.pending },
+          ]}
+        />
+        <p className={styles.statusLine}>
           {status.provider === "none"
             ? `Vorschlag für dieses Gerät: ${PROVIDER_LABEL[hint]}.`
             : `Aktiv: ${PROVIDER_LABEL[status.provider]}${status.last_archived_at ? ` · letztes Backup ${new Date(status.last_archived_at).toLocaleDateString("de-DE")}` : ""}.`
@@ -183,14 +189,13 @@ export function CloudBackupCard() {
 
       {status.provider !== "none" && (
         <EHWorkflowStack>
-          <label className={styles.statusLine} style={{ display: "flex", gap: 8, alignItems: "center" }}>
+          <label className={styles.toggleLine}>
             <input
               type="checkbox"
               checked={status.auto_restore}
               disabled={busy !== null}
               onChange={(e) => toggleAutoRestore(e.target.checked)}
               aria-label="Dateien automatisch aus meiner Cloud zurückholen"
-              style={{ width: 20, height: 20 }}
             />
             Dateien automatisch zurückholen (auch wenn die KI sie braucht)
           </label>
