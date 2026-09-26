@@ -1,14 +1,7 @@
 import { CalendarDays, FileText } from 'lucide-react';
 import { WerkbankRahmen } from '@/components/werkbank-rahmen';
-import {
-  EHFormFeedback,
-  EHManagerAutomations,
-  EHPageHeader,
-  EHRecordList,
-  EHWorkSection,
-  EHWorkflowStack,
-  type EHRecordEntry,
-} from '@/design-system';
+import { WerkbankAbschnitt, WerkbankKopf } from '@/components/werkbank-seite';
+import { EHFormFeedback, EHManagerAutomations, EHRecordList, EHWorkflowStack, type EHRecordEntry } from '@/design-system';
 import { requireUser } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { dateLabel } from '@/lib/format';
@@ -70,15 +63,15 @@ export default async function Hausmanager({
       active="/app/hausmanager"
     >
       <EHWorkflowStack>
-      <EHPageHeader title="Hausmanager" context={houseLabel || undefined} />
+      <WerkbankKopf title="Hausmanager" context={houseLabel || undefined} />
 
       {sp.prefs === 'saved' && (
         <EHFormFeedback kind="success">Erinnerungen gespeichert.</EHFormFeedback>
       )}
 
-      <EHWorkSection title="Anstehende Aufgaben">
+      <WerkbankAbschnitt title="Anstehende Aufgaben">
         <EHRecordList label="Anstehende Aufgaben" items={taskItems} empty="Aktuell nichts fällig. Neue Aufgaben erscheinen hier automatisch." />
-      </EHWorkSection>
+      </WerkbankAbschnitt>
 
       <EHManagerAutomations
         items={AUTOMATION_STARTERS.map((starter) => ({

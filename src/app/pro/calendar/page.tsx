@@ -1,7 +1,8 @@
 import { CalendarDays } from 'lucide-react';
 import { WerkbankRahmen } from '@/components/werkbank-rahmen';
+import { WerkbankAbschnitt, WerkbankKennzahlen, WerkbankKopf, WerkbankRaster } from '@/components/werkbank-seite';
 import { ProviderAccessBoundary, ProviderState } from '@/components/provider/workspace';
-import { EHMetricsBar, EHButton, EHPageHeader, EHRecordList, EHRecordViews, EHStatus, EHText, EHWorkSection, EHWorkspaceGrid, type EHRecordEntry } from '@/design-system';
+import { EHButton, EHRecordList, EHRecordViews, EHStatus, EHText, type EHRecordEntry } from '@/design-system';
 import { requireUser } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { statusLabel } from '@/lib/format';
@@ -69,11 +70,11 @@ export default async function ProCalendar() {
 
   return (
     <WerkbankRahmen role="provider" active="/pro/calendar">
-      <EHPageHeader title="Termine" context={`${items.length} Termine${ctx.canManageJobs ? ' des Betriebs' : ' mit dir als Ansprechpartner'}`} />
+      <WerkbankKopf title="Termine" context={`${items.length} Termine${ctx.canManageJobs ? ' des Betriebs' : ' mit dir als Ansprechpartner'}`} />
       <ProviderAccessBoundary canManageJobs={ctx.canManageJobs} />
 
       {items.length > 0 && (
-        <EHMetricsBar label="Termine" items={[
+        <WerkbankKennzahlen label="Termine" items={[
           { id: 'heute', label: 'Heute', value: today.length, hint: 'Anstehende Kundentermine' },
           { id: 'anstehend', label: 'Anstehend', value: upcoming.length + undated.length, hint: 'Geplante Folgetermine' },
           { id: 'ueberfaellig', label: 'Überfällig', value: overdue.length, hint: 'Nacharbeiten oder neu planen' },
@@ -82,78 +83,78 @@ export default async function ProCalendar() {
         ]} />
       )}
 
-      <EHWorkspaceGrid main={<>
+      <WerkbankRaster main={<>
         {items.length === 0 && (
-          <EHWorkSection title="Termine · 0 Termine">
+          <WerkbankAbschnitt title="Termine · 0 Termine">
             <ProviderState
               icon={<CalendarDays size={21} />}
               title="Noch keine Termine"
               description="Sobald ein bestätigter Kundentermin hinterlegt ist, erscheint er hier zusammen mit Auftrag und Ansprechpartner."
               action={{ href: '/pro/orders', label: 'Aufträge ansehen' }}
             />
-          </EHWorkSection>
+          </WerkbankAbschnitt>
         )}
 
         {items.length > 0 && (
           <div id="pro-cal-overdue">
-            <EHWorkSection title={`Überfällig · ${overdue.length}`}>
+            <WerkbankAbschnitt title={`Überfällig · ${overdue.length}`}>
               {overdue.length > 0 ? <EHRecordViews label="Überfällige Termine" items={overdue} storageKey="pro-cal-ueberfaellig" switcherLabel="Überfällige Termine: Ansicht wechseln" /> : (
                 <ProviderState compact icon={<CalendarDays size={21} />} title="Nichts überfällig" description="Alle Termine sind im Plan." tone="success" />
               )}
-            </EHWorkSection>
+            </WerkbankAbschnitt>
           </div>
         )}
 
         {items.length > 0 && (
           <div id="pro-cal-today">
-            <EHWorkSection title={`Heute · ${today.length}`}>
+            <WerkbankAbschnitt title={`Heute · ${today.length}`}>
               {today.length > 0 ? <EHRecordViews label="Termine heute" items={today} storageKey="pro-cal-heute" switcherLabel="Termine heute: Ansicht wechseln" /> : (
                 <ProviderState compact icon={<CalendarDays size={21} />} title="Heute keine Termine" description="Der Tag ist frei für Vorbereitung und Anfragen." />
               )}
-            </EHWorkSection>
+            </WerkbankAbschnitt>
           </div>
         )}
 
         {items.length > 0 && (
           <div id="pro-cal-upcoming">
-            <EHWorkSection title={`Anstehend · ${upcoming.length + undated.length}`}>
+            <WerkbankAbschnitt title={`Anstehend · ${upcoming.length + undated.length}`}>
               {(upcoming.length + undated.length) > 0 ? <EHRecordViews label="Anstehende Termine" items={[...upcoming, ...undated]} storageKey="pro-cal-anstehend" switcherLabel="Anstehende Termine: Ansicht wechseln" /> : (
                 <ProviderState compact icon={<CalendarDays size={21} />} title="Keine Folgetermine" description="Sobald ein weiterer Kundentermin bestätigt ist, steht er hier." />
               )}
-            </EHWorkSection>
+            </WerkbankAbschnitt>
           </div>
         )}
 
         {items.length > 0 && (
           <div id="pro-cal-done">
-            <EHWorkSection title={`Erledigt · ${done.length}`}>
+            <WerkbankAbschnitt title={`Erledigt · ${done.length}`}>
               {done.length > 0 ? <EHRecordViews label="Erledigte Termine" items={done} storageKey="pro-cal-erledigt" switcherLabel="Erledigte Termine: Ansicht wechseln" /> : (
                 <ProviderState compact icon={<CalendarDays size={21} />} title="Noch nichts erledigt" description="Abgeschlossene Termine bleiben hier nachvollziehbar." />
               )}
-            </EHWorkSection>
+            </WerkbankAbschnitt>
           </div>
         )}
         {items.length > 0 && (
           <div id="pro-cal-cancelled">
-            <EHWorkSection title={`Storniert · ${cancelled.length}`}>
+            <WerkbankAbschnitt title={`Storniert · ${cancelled.length}`}>
               {cancelled.length > 0 ? <EHRecordViews label="Stornierte Termine" items={cancelled} storageKey="pro-cal-storniert" switcherLabel="Stornierte Termine: Ansicht wechseln" /> : (
                 <ProviderState compact icon={<CalendarDays size={21} />} title="Nichts storniert" description="Abgesagte Termine bleiben hier getrennt von den erfolgreichen sichtbar." />
               )}
-            </EHWorkSection>
+            </WerkbankAbschnitt>
           </div>
         )}
       </>} aside={<>
-        <EHWorkSection title="Nächster Termin">
+        <WerkbankAbschnitt title="Nächster Termin">
           {next ? <>
             <EHText>{next.dateLabel}</EHText>
             <EHText muted>{next.detail}</EHText>
             {next.status}
             {next.href && <EHButton href={next.href} variant="secondary" arrow>{next.title}</EHButton>}
           </> : <EHText muted>Kein anstehender Termin. Sobald ein Kundentermin bestätigt ist, steht er hier mit Datum und Ansprechpartner.</EHText>}
-        </EHWorkSection>
-        <EHWorkSection title="Weitere anstehende Termine">
+        </WerkbankAbschnitt>
+        <WerkbankAbschnitt title="Weitere anstehende Termine">
           <EHRecordList label="Weitere anstehende Termine" items={[...today, ...upcoming].filter((item) => item !== next).slice(0, 4)} empty="Noch keine weiteren Termine vereinbart." />
-        </EHWorkSection>
+        </WerkbankAbschnitt>
         <EHButton href="/pro/orders" variant="secondary" arrow>Aufträge ansehen</EHButton>
       </>} />
     </WerkbankRahmen>

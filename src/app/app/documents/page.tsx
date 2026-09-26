@@ -1,6 +1,7 @@
 import { FileCheck, FileSignature, FileText, ReceiptText, ShieldCheck } from 'lucide-react';
 import { WerkbankRahmen } from '@/components/werkbank-rahmen';
-import { EHButton, EHEmptyState, EHField, EHFileInput, EHFormFeedback, EHInput, EHMetricsBar, EHOwnerSection, EHPageHeader, EHRecordList, EHStatus, EHSubmitButton, EHText, EHWorkSection, EHWorkflowForm, EHWorkspaceGrid, type EHRecordEntry } from '@/design-system';
+import { WerkbankAbschnitt, WerkbankKennzahlen, WerkbankKopf, WerkbankRaster } from '@/components/werkbank-seite';
+import { EHButton, EHEmptyState, EHField, EHFileInput, EHFormFeedback, EHInput, EHOwnerSection, EHRecordList, EHStatus, EHSubmitButton, EHText, EHWorkflowForm, type EHRecordEntry } from '@/design-system';
 import { requireUser } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { euroExact } from '@/lib/format';
@@ -93,25 +94,25 @@ export default async function Documents({searchParams}:{searchParams:Promise<Rec
   const items = [...houseDocumentItems,...invoiceItems,...uploadItems,...receiptItems]
     .sort((a,b)=>(b.date??'').localeCompare(a.date??''));
   return <WerkbankRahmen role="homeowner" active="/app/documents">
-    <EHPageHeader title="Dokumente" context={openInvoices.length>0 ? `Noch offen: ${euroExact(openTotal)}` : undefined} />
+    <WerkbankKopf title="Dokumente" context={openInvoices.length>0 ? `Noch offen: ${euroExact(openTotal)}` : undefined} />
     {sp.uploaded==='1'&&<EHFormFeedback kind="success">Dokument sicher gespeichert. Es wird automatisch gelesen und einsortiert.</EHFormFeedback>}
-    <EHMetricsBar label="Dokumente" items={[
+    <WerkbankKennzahlen label="Dokumente" items={[
       {id:'gesamt',label:'Dokumente',value:String(documentTotal),hint:'alles an einem Ort'},
       {id:'offen',label:'Noch offen',value:String(openInvoices.length),hint:openInvoices.length>0?`${euroExact(openTotal)} zu zahlen`:'nichts offen'},
     ]} />
-    <EHWorkspaceGrid main={empty
+    <WerkbankRaster main={empty
       ? <EHEmptyState title="Noch keine Dokumente" text="Rechnungen und Belege landen hier automatisch, sobald ein Auftrag abgerechnet wird. Für ein neues Anliegen startest du beim Hausmeister." action={<EHButton href="/app/hausmeister" arrow>Anliegen beschreiben</EHButton>} />
       : <EHOwnerSection title={`Dokumente · ${documentTotal}`} text="Neueste zuerst.">
         <EHRecordList label="Alle Dokumente" items={items} />
       </EHOwnerSection>} aside={<>
-      <EHWorkSection title="Dokument ablegen">
+      <WerkbankAbschnitt title="Dokument ablegen">
         <EHText muted>PDF oder Foto hochladen. Der Hausmanager liest und sortiert es im Hintergrund; bei Unsicherheit bleibt es sichtbar und wird nur zur Prüfung markiert.</EHText>
         <EHWorkflowForm action={uploadOwnerDocumentAction}>
           <EHField id="owner-document-title" label="Titel" hint="Optional – sonst verwenden wir den Dateinamen."><EHInput id="owner-document-title" name="title" maxLength={180} placeholder="z. B. Heizungswartung 2026" /></EHField>
           <EHField id="owner-document-file" label="PDF oder Foto"><EHFileInput id="owner-document-file" name="document" accept="application/pdf,image/*" required /></EHField>
           <EHSubmitButton pendingLabel="Wird sicher gespeichert …">Hochladen</EHSubmitButton>
         </EHWorkflowForm>
-      </EHWorkSection>
+      </WerkbankAbschnitt>
     </>} />
   </WerkbankRahmen>;
 }

@@ -1,6 +1,7 @@
 import { BadgeCheck, CalendarClock, Flame, Leaf, Sprout } from 'lucide-react';
-import { EHPageHeader, EHMetricsBar, EHEmptyState, EHPriorityAction, EHRecordList, EHRecordViews, EHStatus, EHText, EHWorkspaceGrid, EHWorkSection, type EHRecordEntry } from '@/design-system';
+import { EHMetricsBar, EHEmptyState, EHPriorityAction, EHRecordList, EHRecordViews, EHStatus, EHText, type EHRecordEntry } from '@/design-system';
 import { WerkbankRahmen } from '@/components/werkbank-rahmen';
+import { WerkbankAbschnitt, WerkbankKennzahlen, WerkbankKopf, WerkbankRaster } from '@/components/werkbank-seite';
 import { ProviderAccessBoundary, ProviderState } from '@/components/provider/workspace';
 import { requireUser } from '@/lib/auth';
 import { db } from '@/lib/db';
@@ -48,8 +49,8 @@ export default async function Pro() {
     const blockedUnread = (db.prepare(`SELECT COUNT(*) c FROM messages WHERE recipient_id=? AND read_at IS NULL`).get(u.id) as any).c as number;
     return (
       <WerkbankRahmen role="provider" active="/pro">
-        <EHPageHeader title={`${greeting()}, ${u.first_name}.`} context="Partnerbereich" />
-        <EHMetricsBar label="Stand deines Betriebs" items={[
+        <WerkbankKopf title={`${greeting()}, ${u.first_name}.`} context="Partnerbereich" />
+        <WerkbankKennzahlen label="Stand deines Betriebs" items={[
           { id: 'neu', label: 'Neue Aufträge', value: blockedNew, hint: 'Zuletzt zugeordnete Vorgänge' },
           { id: 'laufend', label: 'Laufende Aufträge', value: blockedRunning },
           { id: 'termine', label: 'Nächste Termine', value: blockedUpcoming, hint: 'Bestätigte Termine' },
@@ -61,14 +62,14 @@ export default async function Pro() {
           description="Dein App-Zugang ist aktuell keinem aktiven Partnerunternehmen zugeordnet. Bitte lass die Unternehmenszuordnung prüfen."
           tone="unavailable"
         />
-        <EHWorkspaceGrid main={
-          <EHWorkSection title="Betriebsübersicht">
+        <WerkbankRaster main={
+          <WerkbankAbschnitt title="Betriebsübersicht">
             <EHEmptyState title="Noch keine Betriebsdaten" text="Sobald die Unternehmenszuordnung aktiv ist, erscheinen hier Aufträge, Termine und Nachrichten." />
-          </EHWorkSection>
+          </WerkbankAbschnitt>
         } aside={
-          <EHWorkSection title="Nächster Schritt">
+          <WerkbankAbschnitt title="Nächster Schritt">
             <EHText muted>Die Unternehmenszuordnung wird geprüft. Danach erscheinen hier Termine und Vorgänge.</EHText>
-          </EHWorkSection>
+          </WerkbankAbschnitt>
         } />
       </WerkbankRahmen>
     );
@@ -84,7 +85,7 @@ export default async function Pro() {
       + ((db.prepare(`SELECT COUNT(*) c FROM contact_messages WHERE provider_id=? AND sender_id!=? AND read_at IS NULL`).get(ctx.providerId, u.id) as any).c as number);
     return (
       <WerkbankRahmen role="provider" active="/pro">
-        <EHPageHeader title={`${greeting()}, ${u.first_name}.`} context={ctx.businessName} />
+        <WerkbankKopf title={`${greeting()}, ${u.first_name}.`} context={ctx.businessName} />
         <EHMetricsBar label="Stand deines Betriebs" items={[
           { id: 'neu', label: 'Neue Aufträge', value: blockedRequests, hint: 'Zuletzt zugeordnete Vorgänge' },
           { id: 'laufend', label: 'Laufende Aufträge', value: blockedRunningJobs },
@@ -98,14 +99,14 @@ export default async function Pro() {
           action={{ href: '/pro/profile', label: 'Partnerstatus ansehen' }}
           tone="unavailable"
         />
-        <EHWorkspaceGrid main={
-          <EHWorkSection title="Betriebsübersicht">
+        <WerkbankRaster main={
+          <WerkbankAbschnitt title="Betriebsübersicht">
             <EHEmptyState title="Noch keine Betriebsdaten" text="Sobald Prüfung und Vertrag aktiv sind, erscheinen hier Aufträge, Termine und Nachrichten." />
-          </EHWorkSection>
+          </WerkbankAbschnitt>
         } aside={
-          <EHWorkSection title="Nächster Schritt">
+          <WerkbankAbschnitt title="Nächster Schritt">
             <EHText muted>Den aktuellen Prüf- und Vertragsstatus im Profil prüfen. Danach erscheinen hier Termine und Vorgänge.</EHText>
-          </EHWorkSection>
+          </WerkbankAbschnitt>
         } />
       </WerkbankRahmen>
     );
@@ -165,7 +166,7 @@ export default async function Pro() {
           (Symptom "Dokument statt Werkzeug"). Die Zielvorlage a-liste.png
           traegt an dieser Stelle einen kleinen Titel direkt ueber den
           Kennzahlen. */}
-      <EHPageHeader
+      <WerkbankKopf
         title={`${greeting()}, ${u.first_name}.`}
         context={`${ctx.businessName} · ${location}`}
       />
@@ -183,14 +184,14 @@ export default async function Pro() {
         <EHPriorityAction eyebrow="Als Nächstes" title="Dein nächstes Angebot" text={`${quoteCandidates} Aufträge ohne eigenes Angebot warten auf deine Prüfung.`} href={`/pro/jobs/${requests.find((job) => !job.my_quote && job.request_kind !== 'contact')?.id}`} label="Auftrag prüfen" />
       )}
 
-      <EHWorkspaceGrid main={
-        <EHWorkSection title="Passende Kundenaufträge" link={{ href: '/pro/orders', label: 'Alle ansehen' }}>
+      <WerkbankRaster main={
+        <WerkbankAbschnitt title="Passende Kundenaufträge" link={{ href: '/pro/orders', label: 'Alle ansehen' }}>
           <EHRecordViews label="Passende Kundenaufträge" items={requestItems} empty="Keine neuen Aufträge." storageKey="pro-start" switcherLabel="Aufträge: Ansicht wechseln" />
-        </EHWorkSection>
+        </WerkbankAbschnitt>
       } aside={
-        <EHWorkSection title="Deine nächsten Termine" link={{ href: '/pro/calendar', label: 'Kalender' }}>
+        <WerkbankAbschnitt title="Deine nächsten Termine" link={{ href: '/pro/calendar', label: 'Kalender' }}>
           <EHRecordList label="Kommende Vor-Ort-Termine" items={appointmentItems} empty="Keine anstehenden Termine." />
-        </EHWorkSection>
+        </WerkbankAbschnitt>
       } />
     </WerkbankRahmen>
   );

@@ -1,10 +1,11 @@
-import { EHEmptyState, EHField, EHFieldGrid, EHFormFeedback, EHFormSection, EHFileInput, EHInput, EHMetricsBar, EHPageHeader, EHRecordList, EHRecordViews, EHSelect, EHStatus, EHSubmitButton, EHText, EHTextarea, EHWorkSection, EHWorkspaceGrid, EHWorkflowForm, EHWorkflowStack, EHButton } from '@/design-system';
+import { EHEmptyState, EHField, EHFieldGrid, EHFormFeedback, EHFormSection, EHFileInput, EHInput, EHRecordList, EHRecordViews, EHSelect, EHStatus, EHSubmitButton, EHText, EHTextarea, EHWorkflowForm, EHWorkflowStack, EHButton } from '@/design-system';
 import { requireUser } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { addHouseHistoryAction,createHouseTransferAction } from '@/app/actions';
 import { euroExact } from '@/lib/format';
 import { HOUSE_TRANSFER_TTL_DAYS,houseTransferExpiresAt,houseTransferLifecycleStatus,primaryProperty } from '@/lib/properties';
 import { WerkbankRahmen } from '@/components/werkbank-rahmen';
+import { WerkbankAbschnitt, WerkbankKennzahlen, WerkbankKopf, WerkbankRaster } from '@/components/werkbank-seite';
 
 // An e-mail address is one unbreakable token: at 390px a long one sets the
 // column's min-content width and pushes the whole page into horizontal
@@ -28,7 +29,7 @@ export default async function HouseHistory({searchParams}:{searchParams:Promise<
   const user=await requireUser('homeowner'); const sp=await searchParams; const property=primaryProperty(user.id);
   if (!property) return <WerkbankRahmen role="homeowner" active="/app/home/history">
     <EHWorkflowStack>
-    <EHPageHeader title="Haus-Historie" />
+    <WerkbankKopf title="Haus-Historie" />
     <EHEmptyState title="Keine aktive Hausakte" text="Lege zuerst dein Zuhause an. Danach kannst du frühere Arbeiten, Wartungen und Dokumente hier sammeln." action={<EHButton href="/app/home">Mein Haus einrichten</EHButton>} />
     </EHWorkflowStack>
   </WerkbankRahmen>;
@@ -62,22 +63,22 @@ export default async function HouseHistory({searchParams}:{searchParams:Promise<
   const ownerChanges=Math.max(0,ownerships.length-1);
   return <WerkbankRahmen role="homeowner" active="/app/home/history">
     <EHWorkflowStack>
-    <EHPageHeader title="Haus-Historie" context={`${entries.length} ${entries.length === 1 ? 'dokumentierte Arbeit' : 'dokumentierte Arbeiten'}`} actions={<EHButton href="#historie-anlegen" arrow>Arbeit dokumentieren</EHButton>} />
-    <EHMetricsBar label="Haus-Historie" items={[
+    <WerkbankKopf title="Haus-Historie" context={`${entries.length} ${entries.length === 1 ? 'dokumentierte Arbeit' : 'dokumentierte Arbeiten'}`} actions={<EHButton href="#historie-anlegen" arrow>Arbeit dokumentieren</EHButton>} />
+    <WerkbankKennzahlen label="Haus-Historie" items={[
       { id: 'arbeiten', label: 'Arbeiten', value: entries.length, hint: 'dokumentiert in der Akte' },
       { id: 'kosten', label: 'Kosten', value: costEntryCount > 0 ? euroExact(costTotal) : '–', hint: costEntryCount > 0 ? `aus ${costEntryCount} ${costEntryCount === 1 ? 'Eintrag' : 'Einträgen'}` : 'keine Kosten erfasst' },
       { id: 'garantien', label: 'Garantien', value: guaranteeEntries.length, hint: guaranteeEntries.length === 0 ? 'keine hinterlegt' : `${activeGuarantees} noch gültig` },
       { id: 'wechsel', label: 'Eigentümerwechsel', value: ownerChanges, hint: ownerships.length > 1 ? `${ownerships.length} Eigentümer erfasst` : 'kein Wechsel erfasst' },
     ]} />
     {sp.transfer&&<EHFormFeedback kind="success">Übergabelink erstellt. Nur die angegebene Käufer-E-Mail kann ihn innerhalb von {HOUSE_TRANSFER_TTL_DAYS} Tagen annehmen.</EHFormFeedback>}
-    <EHWorkSection title="Dokumentierte Arbeiten">
+    <WerkbankAbschnitt title="Dokumentierte Arbeiten">
     {entries.length > 0 && <EHRecordViews label="Haus-Historie" storageKey="historie" defaultView="chronik" items={entries.map(e=>({ id: String(e.id), title: e.title,
       detail: [e.category, e.company_name||'Eigenleistung / unbekannt', e.contact_name, e.cost_amount!=null?euroExact(e.cost_amount):'', e.guarantee_until?`Garantie bis ${day(e.guarantee_until)}`:'', e.maintenance_due?`Wartung ${day(e.maintenance_due)}`:'', e.job_id?'Über Einfach Hausen dokumentiert':'Manuell eingetragen', e.notes].filter(Boolean).join(' · '),
       date: String(e.performed_at).slice(0, 10), dateLabel: day(e.performed_at),
       status: e.provider_id?<EHStatus tone="success">Partner verbunden</EHStatus>:e.contact_email?<EHStatus>Einladung vorgemerkt</EHStatus>:undefined,
       action: (e.before_photo||e.after_photo||e.document_count>0)?<span>{e.before_photo&&<a href={`/api/house-history-files/${e.id}/before`} target="_blank" rel="noreferrer">Vorher</a>}{e.after_photo&&<span> · </span>}{e.after_photo&&<a href={`/api/house-history-files/${e.id}/after`} target="_blank" rel="noreferrer">Nachher</a>}{e.document_count>0&&(db.prepare(`SELECT id,title FROM house_history_documents WHERE entry_id=?`).all(e.id) as any[]).map(d=><a key={d.id} href={`/api/house-history-documents/${d.id}`} target="_blank" rel="noreferrer"> · {d.title}</a>)}</span>:undefined }))} />}
     {entries.length===0&&<EHEmptyState title="Noch keine Historie" text="Trag frühere Sanierungen, Wartungen, Technik oder Gartenarbeiten ein. Abgeschlossene Aufträge bleiben zusätzlich in deinen Aufträgen und Dokumenten nachvollziehbar." />}
-    </EHWorkSection>
+    </WerkbankAbschnitt>
 
     <section id="historie-anlegen" aria-label="Frühere Arbeit eintragen"><EHWorkflowForm action={addHouseHistoryAction}>
       <EHFormSection title="Arbeit & Zeitpunkt" description="Was wurde gemacht und wann? Alle weiteren Angaben sind optional."><EHFieldGrid>
@@ -107,21 +108,21 @@ export default async function HouseHistory({searchParams}:{searchParams:Promise<
       <EHSubmitButton pendingLabel="Arbeit wird gespeichert …">In Hausakte speichern</EHSubmitButton>
       </EHFormSection></EHWorkflowForm></section>
 
-    {invites.length>0&&<EHWorkSection title="Vorgemerkte Betriebe"><EHRecordList label="Vorgemerkte Betriebe" items={invites.map(i=>({ id: String(i.id), title: i.company_name||breakableEmail(i.email), detail: i.company_name?breakableEmail(i.email):undefined, href: `/partner-invite/${i.token}` }))} /></EHWorkSection>}
+    {invites.length>0&&<WerkbankAbschnitt title="Vorgemerkte Betriebe"><EHRecordList label="Vorgemerkte Betriebe" items={invites.map(i=>({ id: String(i.id), title: i.company_name||breakableEmail(i.email), detail: i.company_name?breakableEmail(i.email):undefined, href: `/partner-invite/${i.token}` }))} /></WerkbankAbschnitt>}
 
-    <EHWorkSection title="Eigentümerhistorie"><EHRecordViews label="Eigentümerhistorie" storageKey="historie-eigentum" defaultView="chronik" items={ownerships.map(o=>({ id: String(o.id), title: `${o.first_name} ${o.last_name}`, detail: o.active?'heute':o.ended_at?`bis ${day(o.ended_at)}`:'beendet', date: String(o.started_at).slice(0, 10), dateLabel: day(o.started_at), status: o.active?<EHStatus tone="success">Aktuell</EHStatus>:undefined }))} /></EHWorkSection>
+    <WerkbankAbschnitt title="Eigentümerhistorie"><EHRecordViews label="Eigentümerhistorie" storageKey="historie-eigentum" defaultView="chronik" items={ownerships.map(o=>({ id: String(o.id), title: `${o.first_name} ${o.last_name}`, detail: o.active?'heute':o.ended_at?`bis ${day(o.ended_at)}`:'beendet', date: String(o.started_at).slice(0, 10), dateLabel: day(o.started_at), status: o.active?<EHStatus tone="success">Aktuell</EHStatus>:undefined }))} /></WerkbankAbschnitt>
 
-    <EHWorkspaceGrid main={<EHWorkSection title="Hausakte an Käufer übergeben">
+    <WerkbankRaster main={<WerkbankAbschnitt title="Hausakte an Käufer übergeben">
       <EHText>Es wird dieselbe Immobilie mit ihrer Historie weitergeführt. Hausprofil, Anlagen, offene Wartungen und hausbezogene Ansprechpartner gehen mit. Private alte Nachrichten, Zahlungen und Aufträge bleiben beim bisherigen Eigentümer.</EHText>
       <EHFormFeedback kind="info">Der Übergabelink ist {HOUSE_TRANSFER_TTL_DAYS} Tage gültig. Nur die angegebene Käufer-E-Mail kann ihn annehmen. Danach wird die Freigabe automatisch ungültig.</EHFormFeedback>
       <EHButton href="/app/home/passport" variant="secondary">Hauspass ansehen</EHButton>
-    </EHWorkSection>} aside={<>
-      <EHWorkSection title="Kosten nach Bereich">
+    </WerkbankAbschnitt>} aside={<>
+      <WerkbankAbschnitt title="Kosten nach Bereich">
         <EHRecordList label="Kosten nach Bereich" items={costByCategory} empty="Noch keine Kosten erfasst." />
-      </EHWorkSection>
-      <EHWorkSection title="Garantien & Wartungen">
+      </WerkbankAbschnitt>
+      <WerkbankAbschnitt title="Garantien & Wartungen">
         <EHRecordList label="Garantien und nächste Wartungen" items={careItems} empty="Keine Garantie und keine Wartung hinterlegt." />
-      </EHWorkSection>
+      </WerkbankAbschnitt>
       <EHWorkflowForm action={createHouseTransferAction}>
       <EHFormSection title="Übergabe vorbereiten" description="Die Hausakte wechselt erst nach Annahme durch den Käufer den Eigentümer.">
         <EHField id="hist-targetemail" label="E-Mail des Käufers" required><EHInput id="hist-targetemail" name="targetEmail" type="email" required placeholder="käufer@example.de" /></EHField>
@@ -129,7 +130,7 @@ export default async function HouseHistory({searchParams}:{searchParams:Promise<
       </EHFormSection>
     </EHWorkflowForm>
     </>} />
-    {transfers.length>0&&<EHWorkSection title="Übergabe-Verlauf"><EHRecordList label="Übergabe-Verlauf" items={transfers.map(t=>{const lifecycle=houseTransferLifecycleStatus(t);const expiresAt=houseTransferExpiresAt(t.created_at);const label=lifecycle==='accepted'?'Übergeben':lifecycle==='expired'?'Abgelaufen':lifecycle==='revoked'?'Widerrufen':'Bereit';return { id: String(t.id), title: breakableEmail(t.target_email), detail: lifecycle==='active'&&expiresAt?`gültig bis ${expiresAt.toLocaleDateString('de-DE')}`:undefined, date: String(t.created_at).slice(0, 10), status: <EHStatus tone={lifecycle==='accepted'?'success':lifecycle==='active'?'info':'neutral'}>{label}</EHStatus> };})} /></EHWorkSection>}
+    {transfers.length>0&&<WerkbankAbschnitt title="Übergabe-Verlauf"><EHRecordList label="Übergabe-Verlauf" items={transfers.map(t=>{const lifecycle=houseTransferLifecycleStatus(t);const expiresAt=houseTransferExpiresAt(t.created_at);const label=lifecycle==='accepted'?'Übergeben':lifecycle==='expired'?'Abgelaufen':lifecycle==='revoked'?'Widerrufen':'Bereit';return { id: String(t.id), title: breakableEmail(t.target_email), detail: lifecycle==='active'&&expiresAt?`gültig bis ${expiresAt.toLocaleDateString('de-DE')}`:undefined, date: String(t.created_at).slice(0, 10), status: <EHStatus tone={lifecycle==='accepted'?'success':lifecycle==='active'?'info':'neutral'}>{label}</EHStatus> };})} /></WerkbankAbschnitt>}
     </EHWorkflowStack>
   </WerkbankRahmen>;
 }

@@ -311,3 +311,21 @@ a.eh-quick-primary > span:last-child { color:var(--eh-color-lime); }
 .eh-ang-treffer { margin:0; font-size:var(--eh-font-meta); color:var(--eh-color-secondary); }
 .eh-ang-leer { margin:0; padding:18px; border:1px dashed var(--eh-color-line); border-radius:var(--eh-radius-panel); font-size:var(--eh-font-label); color:var(--eh-color-secondary); }
 .eh-ang-liste { display:grid; gap:12px; margin:0; padding:0; list-style:none; }
+
+/* Werkbank-Seitenbausteine (werkbank-seite.tsx) */
+.eh-werkbank-abschnitt { display:grid; gap:14px; min-width:0; }
+.eh-werkbank-abschnitt > form { display:grid; gap:14px; min-width:0; }
+.eh-werkbank-abschnitt-link { justify-self:start; display:inline-flex; align-items:center; min-height:44px; color:var(--eh-color-petrol); font-weight:var(--eh-weight-semibold); text-decoration:none; }
+.eh-werkbank-abschnitt-link:hover { text-decoration:underline; }
+.eh-werkbank-raster { display:grid; gap:32px; min-width:0; }
+.eh-werkbank-raster-haupt, .eh-werkbank-raster-seite { display:grid; gap:32px; align-content:start; min-width:0; }
+@media (min-width:1100px) {
+  .eh-werkbank-raster { grid-template-columns:minmax(0,1fr) minmax(0,340px); gap:40px; }
+  .eh-werkbank-raster-seite { padding-left:28px; border-left:1px solid var(--eh-rule); }
+}
+.eh-werkbank-kennzahlen > dl:has(> div:nth-child(4)) { grid-template-columns:repeat(4,minmax(0,1fr)); }
+@media (max-width:760px) {
+  .eh-werkbank-kennzahlen > dl:has(> div:nth-child(4)) { grid-auto-flow:row; grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .eh-werkbank-kennzahlen > dl:has(> div:nth-child(4)) > div:nth-child(3) { border-left:0; border-top:1px solid var(--eh-rule); }
+  .eh-werkbank-kennzahlen > dl:has(> div:nth-child(4)) > div:nth-child(4) { border-top:1px solid var(--eh-rule); }
+}

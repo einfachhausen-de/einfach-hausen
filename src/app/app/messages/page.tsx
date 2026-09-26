@@ -1,7 +1,8 @@
 import { randomUUID } from 'node:crypto';
 import { notFound } from 'next/navigation';
-import { EHContactWorkspace, EHConversation, EHCallout, EHMetricsBar, EHRecordList, EHWorkSection, EHWorkspaceGrid, type EHDirectoryMode } from '@/design-system';
+import { EHContactWorkspace, EHConversation, EHCallout, EHRecordList, type EHDirectoryMode } from '@/design-system';
 import { WerkbankRahmen } from '@/components/werkbank-rahmen';
+import { WerkbankAbschnitt, WerkbankKennzahlen, WerkbankRaster } from '@/components/werkbank-seite';
 import { requireUser } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { CONTACT_DIRECTORY_CATEGORIES, contactDirectoryCategory, contactDirectorySubcategory } from '@/lib/contact-directory-taxonomy';
@@ -114,14 +115,14 @@ export default async function Messages({ searchParams }: { searchParams: Promise
     composer={<OwnerMessageComposer contactUserId={active.contact_user_id} peerName={active.first_name} unreadCount={Number(active.unread_count || 0)} />} />
     : entry?.platformUserId ? <EHCallout title="Gerade kein Chat möglich"><p>Mit diesem Kontakt gibt es aktuell keinen laufenden Auftrag. Nachrichten gehen nur bei einem laufenden Auftrag — deine gespeicherten Daten bleiben erhalten.</p></EHCallout> : undefined;
   return <WerkbankRahmen role="homeowner" active="/app/messages">
-    <EHMetricsBar label="Nachrichten" items={[
+    <WerkbankKennzahlen label="Nachrichten" items={[
       { id: 'kontakte', label: 'Kontakte', value: String(contacts.length), hint: 'in deinem Netzwerk' },
       { id: 'ungelesen', label: 'Ungelesen', value: String(unreadTotal), hint: unreadTotal > 0 ? 'neue Nachrichten' : 'nichts ungelesen' },
     ]} />
-    <EHWorkspaceGrid main={
+    <WerkbankRaster main={
       <EHContactWorkspace categories={CONTACT_DIRECTORY_CATEGORIES} contacts={contacts} mode={mode} mainId={main?.id} subcategoryId={sub?.id} entryId={entryId} query={text('q').slice(0, 200)} requestId={randomUUID()} notice={text('saved') === '1' ? 'Gespeichert. Dein Kontakt und alle Zuordnungen sind aktuell.' : undefined} action={submitDirectoryAction} shortcutAction={submitDirectoryShortcut} counts={countsByMain} conversation={mode === 'detail' ? conversation : undefined} />
     } aside={<>
-      <EHWorkSection title="Ungelesene Nachrichten">
+      <WerkbankAbschnitt title="Ungelesene Nachrichten">
         <EHRecordList label="Kontakte mit ungelesenen Nachrichten" empty="Keine ungelesene Nachricht. Neue Antworten erscheinen hier." items={unreadContacts.map(contact => ({
           id: String(contact.id),
           title: contact.name,
@@ -129,15 +130,15 @@ export default async function Messages({ searchParams }: { searchParams: Promise
           value: `${contact.unreadCount} neu`,
           href: contact.platformUserId !== null ? `/app/messages?contact=${contact.platformUserId}` : `/app/messages?entry=${contact.id}`,
         }))} />
-      </EHWorkSection>
-      <EHWorkSection title="Anrufen">
+      </WerkbankAbschnitt>
+      <WerkbankAbschnitt title="Anrufen">
         <EHRecordList label="Kontakte mit Rufnummer" empty="Noch keine Rufnummer hinterlegt. Sobald ein Kontakt eine Nummer hat, steht er hier." items={reachable.map(contact => ({
           id: String(contact.id),
           title: contact.name,
           detail: contact.company || undefined,
           value: contact.phone,
         }))} />
-      </EHWorkSection>
+      </WerkbankAbschnitt>
     </>} />
   </WerkbankRahmen>;
 }

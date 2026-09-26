@@ -1,6 +1,7 @@
-import { EHEmptyState, EHErrorState, EHButton, EHField, EHFormFeedback, EHInput, EHMetricsBar, EHPageHeader, EHRecordList, EHStatus, EHSubmitButton, EHText, EHWorkflowStack, EHWorkSection, EHWorkspaceGrid } from '@/design-system';
+import { EHEmptyState, EHErrorState, EHButton, EHField, EHFormFeedback, EHInput, EHRecordList, EHStatus, EHSubmitButton, EHText, EHWorkflowStack } from '@/design-system';
 import { notFound } from 'next/navigation';
 import { WerkbankRahmen } from '@/components/werkbank-rahmen';
+import { WerkbankAbschnitt, WerkbankKennzahlen, WerkbankKopf, WerkbankRaster } from '@/components/werkbank-seite';
 import { requireUser } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { reportReviewAction } from '@/app/actions';
@@ -21,22 +22,22 @@ export default async function PartnerProfile({params,searchParams}:{params:Promi
     <EHWorkflowStack>
     {sp.message&&<EHFormFeedback kind="success">{String(sp.message)}</EHFormFeedback>}
     {sp.error&&<EHErrorState text={String(sp.error)} />}
-    <EHPageHeader title={provider.business_name} context={`Geprüfter Partner · ${rating.toFixed(1)} von 5 aus ${ratingCount} Bewertungen`} actions={<EHButton href={returnHref} variant="secondary">Zurück</EHButton>} />
-    <EHMetricsBar label="Partnerdaten" items={[
+    <WerkbankKopf title={provider.business_name} context={`Geprüfter Partner · ${rating.toFixed(1)} von 5 aus ${ratingCount} Bewertungen`} actions={<EHButton href={returnHref} variant="secondary">Zurück</EHButton>} />
+    <WerkbankKennzahlen label="Partnerdaten" items={[
       { id: 'region', label: 'Region', value: `${provider.postcode} · bis ${provider.radius_km} km` },
       { id: 'bereiche', label: 'Bereiche', value: String(trades.length||1), hint: 'Leistungen' },
       { id: 'bewertung', label: 'Bewertung', value: `${rating.toFixed(1)} / 5`, hint: `${ratingCount} Bewertungen` },
       { id: 'nachweise', label: 'Nachweise', value: `${verifiedCount} / 4`, hint: 'Prüfungen bestätigt' },
     ]} />
-    <EHWorkspaceGrid main={<>
-    <EHWorkSection title="Profildaten">
+    <WerkbankRaster main={<>
+    <WerkbankAbschnitt title="Profildaten">
       <EHRecordList label="Profildaten" items={[
         { id: 'leistungen', title: trades.length ? trades.join(' · ') : 'Kein Bereich hinterlegt', detail: 'Leistungen' },
         { id: 'standards', title: 'Vertraglich geprüft', detail: 'Standards' },
         { id: 'beschreibung', title: provider.description || 'Keine Beschreibung hinterlegt.', detail: 'Beschreibung' },
       ]} />
-    </EHWorkSection>
-    <EHWorkSection title={`Bewertungen · ${ratingCount} insgesamt`}>
+    </WerkbankAbschnitt>
+    <WerkbankAbschnitt title={`Bewertungen · ${ratingCount} insgesamt`}>
     {reviews.length===0
       ? <EHEmptyState title="Noch keine öffentliche Bewertung" text="Der Betrieb ist geprüft und neu im Netzwerk." />
       : <EHRecordList label={`Bewertungen · ${ratingCount} insgesamt`} items={reviews.map((r:any,i:number)=>({
@@ -46,25 +47,25 @@ export default async function PartnerProfile({params,searchParams}:{params:Promi
           value: `★ ${r.rating}/5`,
           action: <details><summary>Melden</summary><form action={reportReviewAction.bind(null,r.id)}><EHField id={`report-${r.id}`} label="Grund der Meldung"><EHInput id={`report-${r.id}`} name="reason" maxLength={500} placeholder="Was stimmt an dieser Bewertung nicht?" aria-label="Grund der Meldung" required/></EHField><EHSubmitButton pendingLabel="Meldung wird gesendet …">Bewertung melden</EHSubmitButton></form></details>,
         }))} />}
-    </EHWorkSection>
+    </WerkbankAbschnitt>
     <EHButton href={returnHref} arrow>{returnLabel}</EHButton>
     </>} aside={<>
-      <EHWorkSection title="Nächster Schritt">
+      <WerkbankAbschnitt title="Nächster Schritt">
         {sp.job
           ? <><EHText>Dieser Betrieb hat dir für deinen Auftrag ein Angebot gemacht.</EHText><EHButton href={returnHref} arrow>{returnLabel}</EHButton></>
           : <><EHText>Der Betrieb ist geprüft und nimmt Aufträge an.</EHText><EHButton href="/app/hausmeister" arrow>Anliegen beschreiben</EHButton></>}
-      </EHWorkSection>
-      <EHWorkSection title="Prüfstatus">
+      </WerkbankAbschnitt>
+      <WerkbankAbschnitt title="Prüfstatus">
         <EHRecordList label="Prüfstatus" items={[
           { id: 'versicherung', title: 'Versicherung', status: <EHStatus tone={provider.insurance_verified?'success':'neutral'}>{provider.insurance_verified?'Geprüft':'In Prüfung'}</EHStatus> },
           { id: 'qualifikation', title: 'Qualifikation', status: <EHStatus tone={provider.qualification_verified?'success':'neutral'}>{provider.qualification_verified?'Geprüft':'In Prüfung'}</EHStatus> },
           { id: 'vertrag', title: 'Partnervertrag', status: <EHStatus tone={provider.contract_verified?'success':'neutral'}>{provider.contract_verified?'Aktiv':'In Prüfung'}</EHStatus> },
           { id: 'qualitaet', title: 'Qualitätsstandard', status: <EHStatus tone={provider.quality_standard_verified?'success':'neutral'}>{provider.quality_standard_verified?'Bestätigt':'In Prüfung'}</EHStatus> },
         ]} />
-      </EHWorkSection>
-      <EHWorkSection title="Gut zu wissen">
+      </WerkbankAbschnitt>
+      <WerkbankAbschnitt title="Gut zu wissen">
         <EHText muted>Nur Betriebe mit aktivem Partnervertrag erscheinen hier. Versicherung, Qualifikation und Qualitätsstandard prüft Einfach Hausen vor der Aufnahme.</EHText>
-      </EHWorkSection>
+      </WerkbankAbschnitt>
     </>} />
     </EHWorkflowStack>
   </WerkbankRahmen>;

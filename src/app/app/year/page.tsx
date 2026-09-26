@@ -1,10 +1,11 @@
-import { EHButton, EHEmptyState, EHMetricsBar, EHPageHeader, EHRecordList, EHStatus, EHSubmitButton, EHText, EHWorkSection, EHWorkspaceGrid, EHWorkflowStack } from '@/design-system';
+import { EHButton, EHEmptyState, EHRecordList, EHStatus, EHSubmitButton, EHText, EHWorkflowStack } from '@/design-system';
 import { completeMaintenanceTaskAction } from '@/app/actions';
 import { requireUser } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { dateLabel, euroExact } from '@/lib/format';
 import { primaryProperty } from '@/lib/properties';
 import { WerkbankRahmen } from '@/components/werkbank-rahmen';
+import { WerkbankAbschnitt, WerkbankKennzahlen, WerkbankKopf, WerkbankRaster } from '@/components/werkbank-seite';
 
 type Task = { id: number; title: string; category: string; due_date: string; status: string };
 type Job = { id: number; title: string; preferred_date: string; status: string };
@@ -71,8 +72,8 @@ export default async function YearPage({ searchParams }: {
 
   return <WerkbankRahmen role="homeowner" active="/app/year">
     <EHWorkflowStack>
-    <EHPageHeader title="Mein Jahr" context={`${view === 'plan' ? 'Plan' : 'Erledigt'} ${year}`} actions={<EHButton href="/app/hausmeister" arrow>Neue Aufgabe planen</EHButton>} />
-    <EHMetricsBar label="Mein Jahr" items={view === 'plan' ? [
+    <WerkbankKopf title="Mein Jahr" context={`${view === 'plan' ? 'Plan' : 'Erledigt'} ${year}`} actions={<EHButton href="/app/hausmeister" arrow>Neue Aufgabe planen</EHButton>} />
+    <WerkbankKennzahlen label="Mein Jahr" items={view === 'plan' ? [
       { id: 'offen', label: 'Noch offen', value: String(remaining.length), hint: 'Aufgaben in diesem Jahr' },
       { id: 'ueberfaellig', label: 'Überfällig', value: String(overdueCount), hint: overdueCount > 0 ? 'vor heute fällig' : 'nichts überfällig' },
     ] : [
@@ -91,13 +92,13 @@ export default async function YearPage({ searchParams }: {
         { id: 'done', title: `Erledigt ${year}`, detail: 'Was geschafft ist', href: `/app/year?view=history&year=${year}`, status: view !== 'plan' ? <EHStatus tone="info">Hier</EHStatus> : undefined },
       ]} />
     </nav>
-    <EHWorkspaceGrid main={<>
-      <EHWorkSection title={view === 'plan' ? `Pflege · ${year}` : `Erledigte Pflege · ${year}`}>
+    <WerkbankRaster main={<>
+      <WerkbankAbschnitt title={view === 'plan' ? `Pflege · ${year}` : `Erledigte Pflege · ${year}`}>
         {shownTasks.length > 0
           ? <EHRecordList label={view === 'plan' ? 'Geplante Pflege' : 'Erledigte Pflege'} items={taskItems(shownTasks)} />
           : <EHEmptyState title={view === 'plan' ? 'Keine weiteren Pflegepunkte geplant' : 'Nichts erledigt in diesem Jahr'} text={view === 'plan' ? 'Hinterlege deine Technik in „Mein Haus“ oder plane ein Anliegen über den Hausmeister.' : 'Abgeschlossene Pflege bleibt hier erhalten.'} />}
-      </EHWorkSection>
-      <EHWorkSection title={view === 'plan' ? `Aufträge · ${year}` : `Erledigte Aufträge · ${year}`}>
+      </WerkbankAbschnitt>
+      <WerkbankAbschnitt title={view === 'plan' ? `Aufträge · ${year}` : `Erledigte Aufträge · ${year}`}>
         {jobs.length === 0
           ? <EHEmptyState title={view === 'plan' ? 'Keine Aufträge mit Datum in diesem Jahr' : 'Keine abgeschlossenen Aufträge in diesem Jahr'} text="Alle deine Anfragen und Aufträge findest du unabhängig vom Jahr in der Auftragsübersicht." />
           : <EHRecordList label="Aufträge im gewählten Jahr" items={jobs.map(job => ({
@@ -110,9 +111,9 @@ export default async function YearPage({ searchParams }: {
               href: `/app/jobs/${job.id}`,
             }))} />}
         <EHButton variant="secondary" href="/app/jobs">Alle Aufträge öffnen</EHButton>
-      </EHWorkSection>
+      </WerkbankAbschnitt>
     </>} aside={<>
-      <EHWorkSection title={`Noch zu zahlen · ${year}`}>
+      <WerkbankAbschnitt title={`Noch zu zahlen · ${year}`}>
         <EHRecordList label={`Noch zu zahlen ${year}`} empty={`Keine offenen Rechnungen mit Rechnungsdatum in ${year}.`} items={openInvoices.map(invoice => ({
           id: String(invoice.id),
           title: `Rechnung ${invoice.invoice_number}`,
@@ -124,7 +125,7 @@ export default async function YearPage({ searchParams }: {
           href: `/app/invoices/${invoice.id}`,
         }))} />
         {openInvoices.length > 0 && <EHText muted>{openInvoices.length} {openInvoices.length === 1 ? 'Rechnung' : 'Rechnungen'} · {euroExact(openTotal)} noch offen.</EHText>}
-      </EHWorkSection>
+      </WerkbankAbschnitt>
     </>} />
     </EHWorkflowStack>
   </WerkbankRahmen>;

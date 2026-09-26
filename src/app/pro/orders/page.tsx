@@ -1,6 +1,7 @@
 import { ClipboardList, UserRound } from 'lucide-react';
-import { EHButton, EHMetricsBar, EHPageHeader, EHRecordList, EHRecordViews, EHStatus, EHText, EHWorkSection, EHWorkspaceGrid, type EHRecordEntry } from '@/design-system';
+import { EHButton, EHRecordList, EHRecordViews, EHStatus, EHText, type EHRecordEntry } from '@/design-system';
 import { WerkbankRahmen } from '@/components/werkbank-rahmen';
+import { WerkbankAbschnitt, WerkbankKennzahlen, WerkbankKopf, WerkbankRaster } from '@/components/werkbank-seite';
 import { ProviderAccessBoundary, ProviderState } from '@/components/provider/workspace';
 import { requireUser } from '@/lib/auth';
 import { db } from '@/lib/db';
@@ -72,12 +73,12 @@ export default async function Orders() {
 
   return (
     <WerkbankRahmen role="provider" active="/pro/orders">
-      <EHPageHeader title="Aufträge & Kontakte" context={`${items.length} Vorgänge im aktuellen Zugriff`} />
+      <WerkbankKopf title="Aufträge & Kontakte" context={`${items.length} Vorgänge im aktuellen Zugriff`} />
 
       <ProviderAccessBoundary canManageJobs={ctx.canManageJobs} />
 
       {items.length > 0 && (
-        <EHMetricsBar label="Vorgänge" items={[
+        <WerkbankKennzahlen label="Vorgänge" items={[
           { id: 'aktiv', label: 'Aktive Aufträge', value: activeJobs.length, hint: 'Vorbereiten oder fortführen' },
           { id: 'kontakte', label: 'Kontakte', value: contacts.length, hint: 'Persönliche Ansprechpartner' },
           { id: 'abgeschlossen', label: 'Abgeschlossen', value: done.length, hint: 'Erfolgreich beendet' },
@@ -86,67 +87,67 @@ export default async function Orders() {
         ]} />
       )}
 
-      <EHWorkspaceGrid main={<>
+      <WerkbankRaster main={<>
         {items.length === 0 && (
-          <EHWorkSection title="Arbeitsliste · 0 Vorgänge im aktuellen Zugriff.">
+          <WerkbankAbschnitt title="Arbeitsliste · 0 Vorgänge im aktuellen Zugriff.">
             <ProviderState
               icon={<ClipboardList size={21} />}
               title="Noch keine Aufträge oder Kontakte"
               description={ctx.canManageJobs ? 'Sobald ein Kontakt übernommen oder ein Angebot gesendet wurde, bleibt der Vorgang hier bis zum Abschluss nachvollziehbar.' : 'Sobald dir ein Vorgang zugewiesen wurde, erscheint er hier.'}
               action={{ href: '/pro/leads', label: 'Offene Anfragen ansehen' }}
             />
-          </EHWorkSection>
+          </WerkbankAbschnitt>
         )}
 
         {items.length > 0 && (
           <div id="pro-orders-active">
-            <EHWorkSection title={`Aktive Aufträge · ${activeJobs.length}`}>
+            <WerkbankAbschnitt title={`Aktive Aufträge · ${activeJobs.length}`}>
               {activeJobs.length > 0 ? <EHRecordViews label="Aktive Aufträge" items={activeJobs} storageKey="pro-auftraege-aktiv" switcherLabel="Aktive Aufträge: Ansicht wechseln" /> : (
                 <ProviderState compact icon={<ClipboardList size={21} />} title="Keine aktiven Aufträge" description="Sobald ein Angebot angenommen oder ein Auftrag zugewiesen wurde, erscheint er hier." />
               )}
-            </EHWorkSection>
+            </WerkbankAbschnitt>
           </div>
         )}
 
         {items.length > 0 && (
           <div id="pro-orders-contacts">
-            <EHWorkSection title={`Kontakte · ${contacts.length}`}>
+            <WerkbankAbschnitt title={`Kontakte · ${contacts.length}`}>
               {contacts.length > 0 ? <EHRecordList label="Persönliche Ansprechpartner" items={contacts} /> : (
                 <ProviderState compact icon={<ClipboardList size={21} />} title="Keine Kontakte" description="Sobald du einen Kundenkontakt übernimmst, bleibt er hier nachvollziehbar." />
               )}
-            </EHWorkSection>
+            </WerkbankAbschnitt>
           </div>
         )}
 
         {items.length > 0 && (
           <div id="pro-orders-done">
-            <EHWorkSection title={`Abgeschlossen · ${done.length}`}>
+            <WerkbankAbschnitt title={`Abgeschlossen · ${done.length}`}>
               {done.length > 0 ? <EHRecordList label="Erledigte Vorgänge" items={done} /> : (
                 <ProviderState compact icon={<ClipboardList size={21} />} title="Noch nichts abgeschlossen" description="Erledigte Vorgänge bleiben hier zur Nachvollziehbarkeit erhalten." />
               )}
-            </EHWorkSection>
+            </WerkbankAbschnitt>
           </div>
         )}
         {items.length > 0 && (
           <div id="pro-orders-cancelled">
-            <EHWorkSection title={`Storniert · ${cancelled.length}`}>
+            <WerkbankAbschnitt title={`Storniert · ${cancelled.length}`}>
               {cancelled.length > 0 ? <EHRecordList label="Stornierte Vorgänge" items={cancelled} /> : (
                 <ProviderState compact icon={<ClipboardList size={21} />} title="Nichts storniert" description="Abgebrochene Vorgänge bleiben hier getrennt von den erfolgreichen sichtbar." />
               )}
-            </EHWorkSection>
+            </WerkbankAbschnitt>
           </div>
         )}
       </>} aside={<>
-        <EHWorkSection title="Ohne Angebot">
+        <WerkbankAbschnitt title="Ohne Angebot">
           {items.length === 0
             ? <EHText muted>Ohne Vorgänge gibt es nichts vorzubereiten. Neue Anfragen erscheinen unter „Offene Anfragen“.</EHText>
             : withoutQuote.length > 0
               ? <EHRecordList label="Aktive Aufträge ohne hinterlegtes Angebot" items={withoutQuote} />
               : <EHText muted>Für alle aktiven Aufträge ist ein Angebot hinterlegt.</EHText>}
-        </EHWorkSection>
-        <EHWorkSection title="Zuletzt abgeschlossen">
+        </WerkbankAbschnitt>
+        <WerkbankAbschnitt title="Zuletzt abgeschlossen">
           <EHRecordList label="Zuletzt abgeschlossene Vorgänge" items={done.slice(0, 3)} empty="Noch nichts abgeschlossen." />
-        </EHWorkSection>
+        </WerkbankAbschnitt>
         <EHButton href="/pro/leads" variant="secondary" arrow>Offene Anfragen ansehen</EHButton>
       </>} />
     </WerkbankRahmen>

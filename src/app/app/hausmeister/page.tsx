@@ -1,11 +1,9 @@
 import { WerkbankRahmen } from '@/components/werkbank-rahmen';
+import { WerkbankAbschnitt, WerkbankKennzahlen, WerkbankKopf, WerkbankRaster } from '@/components/werkbank-seite';
 import { HomeownerHausmeisterComposer } from '@/components/homeowner/homeowner-hausmeister-composer';
 import { HausmeisterQuotaStatus } from '@/components/homeowner/hausmeister-quota-status';
 import { startHausmeisterRouteAction } from '@/app/actions';
-import {
-  EHActions, EHButton, EHConversation, EHErrorState, EHMetricsBar, EHPageHeader, EHRecordList,
-  EHStatus, EHText, EHWorkSection, EHWorkspaceGrid, EHWorkflowStack, type EHRecordEntry,
-} from '@/design-system';
+import { EHActions, EHButton, EHConversation, EHErrorState, EHRecordList, EHStatus, EHText, EHWorkflowStack, type EHRecordEntry } from '@/design-system';
 import { requireUser } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { aiQuotaSnapshot } from '@/lib/ai-engine';
@@ -72,36 +70,36 @@ export default async function Hausmeister({searchParams}:{searchParams:Promise<R
 
   return <WerkbankRahmen role="homeowner" active="/app">
     <EHWorkflowStack>
-    <EHPageHeader title="Hausmeister" context={thread ? `Letzte Nachricht ${dateLabel(thread.updated_at)}` : 'Noch kein Gespräch'} />
-    <EHMetricsBar label="Hausmeister" items={[
+    <WerkbankKopf title="Hausmeister" context={thread ? `Letzte Nachricht ${dateLabel(thread.updated_at)}` : 'Noch kein Gespräch'} />
+    <WerkbankKennzahlen label="Hausmeister" items={[
       {id:'nachrichten',label:'Nachrichten',value:String(messageCount),hint:thread?'im laufenden Gespräch':'noch kein Gespräch begonnen'},
       {id:'aufgaben',label:'Offene Aufgaben',value:String(openTaskCount),hint:overdueCount>0?`${overdueCount} überfällig`:property?'nichts überfällig':'kein Haus hinterlegt'},
     ]} />
-    <EHWorkspaceGrid main={<>
+    <WerkbankRaster main={<>
       {sp.error&&<EHErrorState text={sp.error} />}
       <EHConversation role="owner" name="Einfach Hausen" detail="Dein Hausmeister · antwortet auf Basis deiner Angaben" messages={conversation} composer={<>
         {draft&&<EHText size="meta" muted>{draft.intent==='contact'
           ? 'Ansprechpartner finden: Nur noch eine kurze Info, dann suchen wir den passenden Menschen.'
           : 'Auftrag organisieren: Nur noch eine kurze Info, dann können passende Partner angefragt werden.'}</EHText>}
-        {showNextChoice&&<EHWorkSection title="Wie soll es weitergehen?">
+        {showNextChoice&&<WerkbankAbschnitt title="Wie soll es weitergehen?">
           <EHText muted>Nichts passiert automatisch. Du entscheidest.</EHText>
           <EHActions>
             <form action={startHausmeisterRouteAction.bind(null,'contact')}><EHButton type="submit" variant="secondary">Ansprechpartner finden</EHButton></form>
             <form action={startHausmeisterRouteAction.bind(null,'service')}><EHButton type="submit">Auftrag organisieren</EHButton></form>
           </EHActions>
-        </EHWorkSection>}
+        </WerkbankAbschnitt>}
         <div id="hausmeister-composer"><HomeownerHausmeisterComposer continuingIntent={draft?.intent} starterHint={starterHint} incomingDraft={typeof sp.draft === 'string' ? sp.draft : undefined}/></div>
       </>} />
       <p data-testid="hausmeister-quota" role="status" className="eh-werkbank-item">Noch {quota.freemiumRemaining} {quota.freemiumRemaining === 1 ? 'Frage' : 'Fragen'} frei diesen Monat.</p>
     </>} aside={<>
-      <EHWorkSection title="Offene Aufgaben">
+      <WerkbankAbschnitt title="Offene Aufgaben">
         <EHRecordList label="Offene Aufgaben" items={taskItems} empty={property?'Aktuell nichts fällig. Neue Aufgaben erscheinen hier automatisch.':'Für dein Haus ist noch nichts hinterlegt.'} />
         <EHButton href="/app/year" variant="secondary" arrow>Alle Aufgaben in Mein Jahr</EHButton>
-      </EHWorkSection>
-      <EHWorkSection title="Mehr">
+      </WerkbankAbschnitt>
+      <WerkbankAbschnitt title="Mehr">
         <EHText muted>Ältere Gespräche und Erinnerungen findest du beim Hausmanager.</EHText>
         <EHButton href="/app/hausmanager" variant="secondary" arrow>Zum Hausmanager</EHButton>
-      </EHWorkSection>
+      </WerkbankAbschnitt>
       <HausmeisterQuotaStatus />
     </>} />
     </EHWorkflowStack>

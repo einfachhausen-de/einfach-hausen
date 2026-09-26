@@ -1,6 +1,7 @@
 import { BellOff, ShieldCheck } from 'lucide-react';
 import { WerkbankRahmen } from '@/components/werkbank-rahmen';
-import { EHPageHeader, EHPanel, EHList, EHButton, EHMetricsBar, EHRecordList, EHStatus, EHText, EHWorkSection, EHWorkspaceGrid, type EHRecordEntry } from '@/design-system';
+import { WerkbankAbschnitt, WerkbankKennzahlen, WerkbankKopf, WerkbankPanel, WerkbankRaster } from '@/components/werkbank-seite';
+import { EHList, EHButton, EHRecordList, EHStatus, EHText, type EHRecordEntry } from '@/design-system';
 import { InstallAppCard } from '@/components/install-app-card';
 import { requireUser } from '@/lib/auth';
 import { db } from '@/lib/db';
@@ -52,23 +53,23 @@ export default async function AppSettingsPage() {
   return (
     <WerkbankRahmen role="homeowner" active="/app/settings"
 >
-      <EHPageHeader title="App-Einstellungen" actions={<><OwnerSettingsDialog /><EHButton href="/app/profile" variant="secondary">Profil</EHButton></>} />
+      <WerkbankKopf title="App-Einstellungen" actions={<><OwnerSettingsDialog /><EHButton href="/app/profile" variant="secondary">Profil</EHButton></>} />
 
-      <EHMetricsBar label="App-Einstellungen" items={[
+      <WerkbankKennzahlen label="App-Einstellungen" items={[
         { id: 'mitteilungen', label: 'Ungelesen', value: String(unread), hint: noticeTotal > 0 ? `${noticeTotal} Mitteilungen gesamt` : 'noch keine Mitteilung' },
         { id: 'kontingent', label: 'KI-Kontingent frei', value: `${quota.freemiumRemaining} von ${quota.freemiumAllowed}`, hint: quota.byok ? 'eigener Schlüssel aktiv' : 'KI-Aktionen pro Monat' },
         { id: 'bonus', label: 'Bonus-Aktionen', value: String(quota.credits), hint: 'zusätzlich verfügbar' },
         { id: 'konto', label: 'Konto seit', value: monthYearLabel(account?.created_at), hint: 'Registrierung' },
       ]} />
 
-      <EHWorkspaceGrid main={<>
-        <EHPanel title="Installation & Offline">
+      <WerkbankRaster main={<>
+        <WerkbankPanel title="Installation & Offline">
           <p>Die App speichert keine privaten Seiten als Offline-Kopie.</p>
           <InstallAppCard />
           <PwaSettingsStatus />
-        </EHPanel>
+        </WerkbankPanel>
 
-        <EHPanel title="Benachrichtigungen">
+        <WerkbankPanel title="Benachrichtigungen">
           <p>In-App-Updates sind aktiv; Browser-Push ist noch nicht freigeschaltet.</p>
           <EHList label="Benachrichtigungen" items={[{ id: 'inapp', title: 'In-App-Benachrichtigungen öffnen', text: 'Auftragsstatus, Nachrichten und wichtige Plattform-Updates.', href: '/notifications' }]} />
 
@@ -89,28 +90,28 @@ export default async function AppSettingsPage() {
             </span>
             <input type="checkbox" disabled aria-label="Checklisten-Erinnerungen per Push noch nicht verfügbar" />
           </div>
-        </EHPanel>
+        </WerkbankPanel>
 
-        <EHPanel title="KI-Assistent">
+        <WerkbankPanel title="KI-Assistent">
           <p>Kontingent, Bonus-Aktionen und eigener API-Key (BYOK).</p>
           <AiSettings />
-        </EHPanel>
+        </WerkbankPanel>
 
-        <EHPanel title="Konto & Daten">
+        <WerkbankPanel title="Konto & Daten">
           <p>Datenexport und Konto-Löschung nach DSGVO.</p>
           <AccountActions />
-        </EHPanel>
+        </WerkbankPanel>
       </>} aside={<>
-        <EHWorkSection title="Deine Mitteilungen">
+        <WerkbankAbschnitt title="Deine Mitteilungen">
           <EHRecordList label="Deine Mitteilungen" items={noticeItems} empty="Noch keine Mitteilung. Auftragsstatus und Absprachen erscheinen hier, sobald es etwas Neues gibt." />
           <EHButton href="/notifications" variant="secondary" arrow>Alle Mitteilungen</EHButton>
-        </EHWorkSection>
-        <EHWorkSection title="KI-Kontingent">
+        </WerkbankAbschnitt>
+        <WerkbankAbschnitt title="KI-Kontingent">
           <EHText>{quota.freemiumRemaining} von {quota.freemiumAllowed} freien Aktionen übrig, dazu {quota.credits} Bonus-Aktionen.</EHText>
           <EHStatus tone={quota.byok ? 'success' : 'neutral'}>{quota.byok ? 'Eigener Schlüssel aktiv' : 'Plattform-Kontingent'}</EHStatus>
           <EHText muted>Der eigene API-Key läuft über dein Anbieter-Konto — dessen Limits und Kosten gelten.</EHText>
-        </EHWorkSection>
-        <EHWorkSection title="Daten & Konto">
+        </WerkbankAbschnitt>
+        <WerkbankAbschnitt title="Daten & Konto">
           {lastRequest ? <>
             <EHText>{requestKindLabels[lastRequest.kind] ?? lastRequest.kind}</EHText>
             <EHStatus tone={lastRequest.status === 'completed' ? 'success' : lastRequest.status === 'failed' ? 'error' : 'info'}>
@@ -119,7 +120,7 @@ export default async function AppSettingsPage() {
             <EHText muted>{dateLabel(lastRequest.completed_at || lastRequest.created_at)}</EHText>
           </> : <EHText muted>Bisher kein Datenexport und keine Kontolöschung beantragt. Beides startest du links unter „Konto & Daten“.</EHText>}
           <EHText muted>Konto seit {monthYearLabel(account?.created_at)}.</EHText>
-        </EHWorkSection>
+        </WerkbankAbschnitt>
       </>} />
     </WerkbankRahmen>
   );

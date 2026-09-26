@@ -1,7 +1,8 @@
 import '@/components/werkbank-layout.css';
 import Link from 'next/link';
-import { EHButton, EHCallout, EHField, EHInput, EHWorkspaceGrid, EHIdentitySummary, EHWorkflowForm, EHFormSection, EHFieldGrid, EHRecordList, EHStatus, EHSubmitButton, EHText, EHWorkSection } from '@/design-system';
+import { EHButton, EHCallout, EHField, EHInput, EHIdentitySummary, EHWorkflowForm, EHFormSection, EHFieldGrid, EHRecordList, EHStatus, EHSubmitButton, EHText } from '@/design-system';
 import { WerkbankRahmen } from '@/components/werkbank-rahmen';
+import { WerkbankAbschnitt, WerkbankRaster } from '@/components/werkbank-seite';
 import { requireUser } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { primaryProperty } from '@/lib/properties';
@@ -62,7 +63,7 @@ export default async function Profile(){
       </div>
     </header>
 
-    <EHWorkspaceGrid main={<EHWorkflowForm action={saveProfileAction}>
+    <WerkbankRaster main={<EHWorkflowForm action={saveProfileAction}>
       <EHFormSection title="Persönliche Daten" description="So erreichen dich deine Ansprechpartner.">
         <EHFieldGrid>
           <EHField id="profile-first" label="Vorname"><EHInput id="profile-first" name="firstName" autoComplete="given-name" defaultValue={u.first_name}/></EHField>
@@ -75,13 +76,13 @@ export default async function Profile(){
       </EHFormSection>
     </EHWorkflowForm>} aside={<>
       <EHIdentitySummary initials={initials} name={`${u.first_name} ${u.last_name}`} email={u.email} />
-      <EHWorkSection title={complete ? 'Profil vollständig' : 'Noch unvollständig'}>
+      <WerkbankAbschnitt title={complete ? 'Profil vollständig' : 'Noch unvollständig'}>
         <EHText muted>{complete
           ? 'Ansprechpartner sehen Name, Mobilnummer und Adresse, sobald ein Kontakt oder Auftrag es verlangt.'
           : `${filled} von ${fields.length} Angaben sind hinterlegt. Fehlende Angaben ergänzt du im Formular links.`}</EHText>
         <EHRecordList label="Angaben im Profil" items={fieldItems} />
-      </EHWorkSection>
-      <EHWorkSection title="Passt die Adresse?">
+      </WerkbankAbschnitt>
+      <WerkbankAbschnitt title="Passt die Adresse?">
         <EHStatus tone={addressMatch ? 'success' : property ? 'warning' : 'neutral'}>{!property ? 'Noch kein Haus angelegt' : addressMatch ? 'Passt alles' : 'Adressen weichen ab'}</EHStatus>
         <EHText muted>{!property
           ? 'Lege dein Haus an, dann übernehmen wir die Adresse von hier.'
@@ -89,7 +90,7 @@ export default async function Profile(){
             ? 'Profil und Hausakte tragen dieselbe Adresse.'
             : 'Profil und Hausakte tragen verschiedene Adressen. Speichere das Formular links, um die Profiladresse zu übernehmen.'}</EHText>
         <EHButton href="/app/home" variant="secondary" arrow>Mein Haus öffnen</EHButton>
-      </EHWorkSection>
+      </WerkbankAbschnitt>
     </>}/>
 
     <div data-testid="owner-logout-section">

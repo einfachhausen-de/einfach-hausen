@@ -1,9 +1,10 @@
 import { CalendarDays, ClipboardList, MessageCircle, PhoneCall, Wrench } from 'lucide-react';
 import { WerkbankRahmen } from '@/components/werkbank-rahmen';
+import { WerkbankAbschnitt, WerkbankKennzahlen, WerkbankKopf, WerkbankRaster } from '@/components/werkbank-seite';
 import { requireUser } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { dateLabel, euroExact, statusLabel } from '@/lib/format';
-import { EHButton, EHCallout, EHMetricsBar, EHPageHeader, EHRecordList, EHStatus, EHText, EHWorkSection, EHWorkflowStack, EHWorkspaceGrid, type EHRecordEntry } from '@/design-system';
+import { EHButton, EHCallout, EHRecordList, EHStatus, EHText, EHWorkflowStack, type EHRecordEntry } from '@/design-system';
 
 const NEXT_STEPS: EHRecordEntry[] = [
   { id: 'request', title: 'Anliegen beschreiben', href: '/app/hausmeister', icon: <Wrench size={20} /> },
@@ -38,28 +39,28 @@ export default async function HilfePage() {
   return (
     <WerkbankRahmen role="homeowner" active="/app/hilfe">
       <EHWorkflowStack>
-      <EHPageHeader title="Hilfe & Kontakt" context={openJobs.length > 0 ? `${openJobs.length} ${openJobs.length === 1 ? 'Auftrag' : 'Aufträge'} in Bearbeitung` : 'Alles erledigt'} />
-      <EHMetricsBar label="Dein Stand" items={[
+      <WerkbankKopf title="Hilfe & Kontakt" context={openJobs.length > 0 ? `${openJobs.length} ${openJobs.length === 1 ? 'Auftrag' : 'Aufträge'} in Bearbeitung` : 'Alles erledigt'} />
+      <WerkbankKennzahlen label="Dein Stand" items={[
         { id: 'auftraege', label: 'Offene Aufträge', value: String(openJobs.length), hint: 'laufende Aufträge' },
         { id: 'rechnungen', label: 'Offene Rechnungen', value: String(openInvoices.length), hint: openInvoices.length > 0 ? `${euroExact(openTotal)} offen` : 'nichts offen' },
       ]} />
-      <EHWorkspaceGrid main={<>
+      <WerkbankRaster main={<>
         <EHCallout title="Lebensgefahr, Brand oder Gasgeruch?">
           <p>Sofort <a href="tel:112">112</a> anrufen. Bei Gasgeruch: Fenster öffnen, keine Schalter betätigen, Gebäude verlassen. Einfach Hausen ersetzt keinen öffentlichen Notruf.</p>
         </EHCallout>
-        <EHWorkSection title="Dein nächster Schritt">
+        <WerkbankAbschnitt title="Dein nächster Schritt">
           <EHRecordList label="Dein nächster Schritt" items={NEXT_STEPS} />
-        </EHWorkSection>
+        </WerkbankAbschnitt>
       </>} aside={<>
-        <EHWorkSection title="Deine offenen Aufträge">
+        <WerkbankAbschnitt title="Deine offenen Aufträge">
           <EHRecordList label="Deine offenen Aufträge" items={openJobItems} empty="Zurzeit ist nichts offen. Neue Anliegen landen nach der Beschreibung hier." />
           <EHButton href="/app/jobs" variant="secondary" arrow>Alle Aufträge ansehen</EHButton>
-        </EHWorkSection>
-        <EHWorkSection title="Offene Rechnungen">
+        </WerkbankAbschnitt>
+        <WerkbankAbschnitt title="Offene Rechnungen">
           {openInvoices.length === 0
             ? <EHText muted>Keine offene Rechnung. Bezahlte Belege liegen in den Dokumenten.</EHText>
             : <><EHText>{openInvoices.length} {openInvoices.length === 1 ? 'Rechnung' : 'Rechnungen'} · {euroExact(openTotal)} noch offen.</EHText><EHButton href="/app/documents" variant="secondary" arrow>Zu den Dokumenten</EHButton></>}
-        </EHWorkSection>
+        </WerkbankAbschnitt>
       </>} />
       </EHWorkflowStack>
     </WerkbankRahmen>

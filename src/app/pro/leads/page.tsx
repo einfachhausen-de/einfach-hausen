@@ -1,7 +1,8 @@
 import { Building2 } from 'lucide-react';
 import { WerkbankRahmen } from '@/components/werkbank-rahmen';
+import { WerkbankAbschnitt, WerkbankKennzahlen, WerkbankKopf, WerkbankRaster } from '@/components/werkbank-seite';
 import { requireUser } from '@/lib/auth';
-import { EHMetricsBar, EHButton, EHEmptyState, EHPageHeader, EHRecordList, EHStatus, EHCallout, EHField, EHSelect, EHSubmitButton, EHText, EHWorkSection, EHWorkspaceGrid, type EHRecordEntry } from '@/design-system';
+import { EHButton, EHEmptyState, EHRecordList, EHStatus, EHCallout, EHField, EHSelect, EHSubmitButton, EHText, type EHRecordEntry } from '@/design-system';
 import { db } from '@/lib/db';
 import { getProviderContext } from '@/lib/provider';
 import { providerHasCategory } from '@/lib/provider-categories';
@@ -43,7 +44,7 @@ export default async function ProLeads() {
   if (!broker) {
     return (
       <WerkbankRahmen role="provider" active="/pro/leads">
-        <EHPageHeader title="Freigegebene Kontakte" context="Nur für passende Anbieter" />
+        <WerkbankKopf title="Freigegebene Kontakte" context="Nur für passende Anbieter" />
         <EHEmptyState
           title="Keine Makler-Kategorie aktiv"
           text="Wenn dein Unternehmen auch Immobilienvermittlung anbietet, kannst du die Tätigkeit im Partnerprofil ergänzen. Es bleibt dasselbe Konto."
@@ -91,11 +92,11 @@ export default async function ProLeads() {
 
   return (
     <WerkbankRahmen role="provider" active="/pro/leads">
-      <EHPageHeader title="Freigegebene Kontakte" context={`${matches.length} ${matches.length === 1 ? 'freigegebener Kontakt' : 'freigegebene Kontakte'}`} />
+      <WerkbankKopf title="Freigegebene Kontakte" context={`${matches.length} ${matches.length === 1 ? 'freigegebener Kontakt' : 'freigegebene Kontakte'}`} />
       <EHCallout title="Nur freigegebene Daten"><EHText>Private Dokumente und vollständige Hausakten bleiben gesperrt. Die Freigabe ist zweckgebunden.</EHText></EHCallout>
 
       {matches.length > 0 && (
-        <EHMetricsBar label="Freigegebene Kontakte" items={[
+        <WerkbankKennzahlen label="Freigegebene Kontakte" items={[
           { id: 'kontakte', label: 'Freigegebene Kontakte', value: matches.length },
           { id: 'besichtigung', label: 'Besichtigung', value: matches.filter((match) => match.status === 'inspection').length },
           { id: 'mandat', label: 'Auftrag erhalten', value: matches.filter((match) => match.status === 'mandate').length },
@@ -103,23 +104,23 @@ export default async function ProLeads() {
         ]} />
       )}
 
-      <EHWorkspaceGrid main={matches.length > 0
+      <WerkbankRaster main={matches.length > 0
         ? <EHRecordList label="Freigegebene Immobilienkontakte" items={items} />
         : <EHEmptyState
             title="Noch keine freigegebenen Immobilienanfragen"
             text="Passende Eigentümer sehen dein Unternehmen zunächst als Vorschlag. Erst nach deren ausdrücklicher Freigabe erscheint der Kontakt hier."
           />} aside={<>
-        <EHWorkSection title="Nach Status">
+        <WerkbankAbschnitt title="Nach Status">
           <EHRecordList label="Freigegebene Kontakte nach Status" empty="Noch kein Kontakt freigegeben." items={Array.from(byStatus.entries()).sort((a, b) => b[1] - a[1]).map(([status, count]) => ({
             id: `status-${status}`,
             title: STATUS_LABEL[status] ?? status,
             detail: `${count} ${count === 1 ? 'Kontakt' : 'Kontakte'}`,
           }))} />
-        </EHWorkSection>
-        <EHWorkSection title="Vermittlung">
+        </WerkbankAbschnitt>
+        <WerkbankAbschnitt title="Vermittlung">
           <EHText muted>Ein Kontakt entsteht erst mit der Freigabe durch den Eigentümer. Den Fortgang hältst du in der Zeile links fest; die Hausakte des Eigentümers bleibt davon getrennt.</EHText>
           <EHButton href="/pro/profile" variant="secondary" arrow>Partnerprofil prüfen</EHButton>
-        </EHWorkSection>
+        </WerkbankAbschnitt>
       </>} />
     </WerkbankRahmen>
   );

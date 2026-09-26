@@ -1,10 +1,11 @@
 import { MessageSquare } from 'lucide-react';
 import { WerkbankRahmen } from '@/components/werkbank-rahmen';
+import { WerkbankAbschnitt, WerkbankKennzahlen, WerkbankKopf, WerkbankRaster } from '@/components/werkbank-seite';
 import { ProviderAccessBoundary, ProviderState } from '@/components/provider/workspace';
 import { requireUser } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { getProviderContext } from '@/lib/provider';
-import { EHInbox, EHContactGroup, EHConversation, EHFormFeedback, EHPageHeader, EHButton, EHMetricsBar, EHRecordList, EHText, EHWorkSection, EHWorkspaceGrid } from '@/design-system';
+import { EHInbox, EHContactGroup, EHConversation, EHFormFeedback, EHButton, EHRecordList, EHText } from '@/design-system';
 import { ProviderMessageComposer } from './thread-client';
 
 type ThreadMessage = {
@@ -89,18 +90,18 @@ export default async function Messages({ searchParams }: { searchParams: Promise
 
   return (
     <WerkbankRahmen role="provider" active="/pro/messages">
-      <EHPageHeader title="Nachrichten" context={`${customers.length} Kunden · ${unreadTotal} ungelesen`} />
+      <WerkbankKopf title="Nachrichten" context={`${customers.length} Kunden · ${unreadTotal} ungelesen`} />
 
       <ProviderAccessBoundary canManageJobs={ctx.canManageJobs} />
 
-      <EHMetricsBar label="Kundenkontakte" items={[
+      <WerkbankKennzahlen label="Kundenkontakte" items={[
         { id: 'kunden', label: 'Kunden', value: customers.length, hint: 'direkte Kontakte des Betriebs' },
         { id: 'ungelesen', label: 'Ungelesen', value: unreadTotal, hint: unreadContacts > 0 ? `${unreadContacts} Kontakte warten auf Antwort` : 'alle Nachrichten gelesen' },
         { id: 'verlauf', label: 'Im Verlauf', value: messages.length, hint: selected ? `mit ${selected.first_name} ${selected.last_name}` : 'kein Kontakt gewählt' },
         { id: 'auftraege', label: 'Auftragsnachrichten', value: jobMessages, hint: 'aus laufenden Aufträgen' },
       ]} />
 
-      <EHWorkspaceGrid main={
+      <WerkbankRaster main={
         customers.length === 0 ? (
         <ProviderState
           icon={<MessageSquare size={21} />}
@@ -114,25 +115,25 @@ export default async function Messages({ searchParams }: { searchParams: Promise
             composer={<ProviderMessageComposer homeownerId={selected.homeowner_id} peerName={selected.first_name} unreadCount={unreadCount}/>}/>:null}
         </EHInbox>
       )} aside={<>
-        <EHWorkSection title="Nächster Schritt">
+        <WerkbankAbschnitt title="Nächster Schritt">
           {selected
             ? unreadCount > 0
               ? <><EHText>{`${unreadCount} ungelesene ${unreadCount === 1 ? 'Nachricht' : 'Nachrichten'} von ${selected.first_name} ${selected.last_name}.`}</EHText><EHButton href={`/pro/messages?homeowner=${selected.homeowner_id}`} arrow>Kontakt öffnen</EHButton></>
               : <><EHText muted>{`Bei ${selected.first_name} ${selected.last_name} ist alles beantwortet.`}</EHText>{selected.phone && <EHButton href={`tel:${selected.phone}`} variant="secondary">Anrufen</EHButton>}</>
             : <EHText muted>Wähle links einen Kundenkontakt aus.</EHText>}
-        </EHWorkSection>
-        <EHWorkSection title="Kunde">
+        </WerkbankAbschnitt>
+        <WerkbankAbschnitt title="Kunde">
           {selected ? <EHRecordList label="Kundendaten" items={[
             { id: 'name', title: `${selected.first_name} ${selected.last_name}`, detail: 'Kunde' },
             { id: 'ort', title: selected.address || selected.postcode || 'Kein Ort hinterlegt', detail: 'Ort' },
             { id: 'telefon', title: selected.phone || 'Keine Nummer hinterlegt', detail: 'Telefon' },
             { id: 'auftrag', title: selected.last_job_title || 'Kein Auftrag hinterlegt', detail: 'Letzter Auftrag' },
           ]} /> : <EHText muted>Kein Kontakt ausgewählt.</EHText>}
-        </EHWorkSection>
-        <EHWorkSection title="Gut zu wissen">
+        </WerkbankAbschnitt>
+        <WerkbankAbschnitt title="Gut zu wissen">
           <EHText muted>Der direkte Kundenkontakt ist für Rückfragen und Absprachen da. Angebote und Rechnungen laufen über den jeweiligen Auftrag.</EHText>
           <EHButton href="/pro/orders" variant="secondary" arrow>Aufträge ansehen</EHButton>
-        </EHWorkSection>
+        </WerkbankAbschnitt>
       </>} />
     </WerkbankRahmen>
   );

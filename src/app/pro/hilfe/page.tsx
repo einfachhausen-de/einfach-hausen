@@ -1,10 +1,8 @@
 import { CalendarClock, Mail, MessageCircle, Phone, Settings, UserCheck } from 'lucide-react';
 import { WerkbankRahmen } from '@/components/werkbank-rahmen';
+import { WerkbankAbschnitt, WerkbankKennzahlen, WerkbankKopf, WerkbankRaster } from '@/components/werkbank-seite';
 import { getSupportContacts } from '@/config/contacts';
-import {
-  EHButton, EHMetricsBar, EHPageHeader, EHRecordList, EHStatus, EHText, EHWorkSection,
-  EHWorkspaceGrid, type EHRecordEntry,
-} from '@/design-system';
+import { EHButton, EHRecordList, EHStatus, EHText, type EHRecordEntry } from '@/design-system';
 import { requireUser } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { getProviderContext } from '@/lib/provider';
@@ -55,33 +53,33 @@ export default async function ProHilfe() {
   const target = contract?.response_target_minutes ?? null;
   return (
     <WerkbankRahmen role="provider" active="/pro/hilfe">
-      <EHPageHeader title="Hilfe" />
-      <EHMetricsBar label="Hilfe" items={[
+      <WerkbankKopf title="Hilfe" />
+      <WerkbankKennzahlen label="Hilfe" items={[
         { id: 'themen', label: 'Hilfethemen', value: TOPICS.length, hint: 'häufige Fragen dieser Seite' },
         { id: 'bereiche', label: 'Bereiche', value: AREAS.length, hint: 'weitere Bereiche verlinkt' },
         { id: 'kontaktwege', label: 'Kontaktwege', value: channelItems.length, hint: channelNames || 'kein Direktkanal hinterlegt' },
         { id: 'reaktionsziel', label: 'Reaktionsziel', value: responseTarget(target), hint: target ? 'laut Partnervertrag' : 'im Partnervertrag nicht hinterlegt' },
       ]} />
-      <EHWorkspaceGrid main={
-        <EHWorkSection title="Weitere Bereiche">
+      <WerkbankRaster main={
+        <WerkbankAbschnitt title="Weitere Bereiche">
           <EHRecordList label="Weitere Bereiche" items={AREAS} />
-        </EHWorkSection>
+        </WerkbankAbschnitt>
       } aside={<>
-        <EHWorkSection title="Direkter Kontakt">
+        <WerkbankAbschnitt title="Direkter Kontakt">
           <EHStatus tone={channelItems.length > 0 ? 'success' : 'neutral'}>{channelItems.length > 0 ? 'Direktkanal hinterlegt' : 'Kein Direktkanal hinterlegt'}</EHStatus>
           <EHText muted>{channelItems.length > 0
             ? 'Der kürzeste Weg bei Fragen zum Partnerzugang. Rückfragen zu einem laufenden Vorgang gehören weiter an den Auftrag.'
             : 'Für den Partnerbereich ist noch kein Support-Kanal hinterlegt. Rückfragen zu einem Vorgang laufen über die Nachrichten am Auftrag.'}</EHText>
           <EHRecordList label="Support-Kanäle" items={channelItems} empty="Noch kein Support-Kanal hinterlegt." />
           <EHButton href="/pro/messages" variant="secondary" arrow>Nachrichten am Auftrag</EHButton>
-        </EHWorkSection>
-        <EHWorkSection title="Häufige Fragen">
+        </WerkbankAbschnitt>
+        <WerkbankAbschnitt title="Häufige Fragen">
           <EHRecordList label="Häufige Fragen" items={TOPICS} />
-        </EHWorkSection>
-        <EHWorkSection title="Betriebs-Einstellungen">
+        </WerkbankAbschnitt>
+        <WerkbankAbschnitt title="Betriebs-Einstellungen">
           <EHText muted>Firmendaten, Leistungen, Arbeitsgebiet und Teamzugänge pflegst du im Profil. Dort steht auch der Stand der Nachweise und des Partnervertrags.</EHText>
           <EHButton href="/pro/profile" variant="secondary" arrow>Profil &amp; Einstellungen</EHButton>
-        </EHWorkSection>
+        </WerkbankAbschnitt>
       </>} />
     </WerkbankRahmen>
   );

@@ -1,14 +1,15 @@
 import { Fragment } from 'react';
 import { WerkbankRahmen } from '@/components/werkbank-rahmen';
+import { WerkbankAbschnitt, WerkbankKennzahlen, WerkbankKopf, WerkbankRaster } from '@/components/werkbank-seite';
 import { requireUser } from '@/lib/auth';
-import { EHPageHeader, EHWorkspaceGrid, EHWorkSection, EHStatus, EHButton, EHField, EHInput, EHCheckbox, EHWorkflowStack, EHWorkflowForm, EHFormSection, EHFormFeedback, EHSubmitButton, EHText, EHEmptyState, EHMetricsBar } from '@/design-system';
+import { EHStatus, EHButton, EHField, EHInput, EHCheckbox, EHWorkflowStack, EHWorkflowForm, EHFormSection, EHFormFeedback, EHSubmitButton, EHText, EHEmptyState } from '@/design-system';
 import { addProviderMemberAction, updateProviderMemberAction } from '@/app/actions';
 import { getProviderContext, getProviderMembers } from '@/lib/provider';
 
 export default async function Team({ searchParams }: { searchParams: Promise<Record<string, string>> }) {
   const u = await requireUser('provider');
   const ctx = getProviderContext(u.id);
-  if (!ctx) return <WerkbankRahmen role="provider" active="/pro/team"><EHPageHeader title="Team" /><EHEmptyState title="Kein Betrieb zugeordnet" text="Für die Teamverwaltung ist ein zugeordneter Betrieb erforderlich." /></WerkbankRahmen>;
+  if (!ctx) return <WerkbankRahmen role="provider" active="/pro/team"><WerkbankKopf title="Team" /><EHEmptyState title="Kein Betrieb zugeordnet" text="Für die Teamverwaltung ist ein zugeordneter Betrieb erforderlich." /></WerkbankRahmen>;
   const sp = await searchParams;
   const members = getProviderMembers(ctx.providerId);
   // Die vier Kennzahlen lesen dieselbe Mitgliederliste wie die Formulare
@@ -16,7 +17,7 @@ export default async function Team({ searchParams }: { searchParams: Promise<Rec
   const activeMembers = members.filter(member => member.active);
   const managingMembers = members.filter(member => member.can_manage_jobs);
 
-  const memberSection = <EHWorkSection title={`Team · ${members.length}`}>
+  const memberSection = <WerkbankAbschnitt title={`Team · ${members.length}`}>
       {members.map(member => {
         const firmAccount = member.user_id === ctx.providerId;
         return <EHWorkflowForm key={member.user_id} action={updateProviderMemberAction.bind(null, member.user_id)}>
@@ -41,7 +42,7 @@ export default async function Team({ searchParams }: { searchParams: Promise<Rec
         </EHWorkflowForm>;
       })}
       {members.length === 0 && <EHEmptyState title="Noch kein Ansprechpartner angelegt" text="Hier erscheinen die Menschen, die Kunden betreuen oder Aufträge ausführen." />}
-    </EHWorkSection>;
+    </WerkbankAbschnitt>;
 
   const addMemberForm = ctx.canManageJobs && <div id="team-anlegen"><EHWorkflowForm action={addProviderMemberAction}>
       <EHFormSection title="Ansprechpartner hinzufügen" description="Ein eigener Zugang mit klarer Auftragsberechtigung.">
@@ -58,17 +59,17 @@ export default async function Team({ searchParams }: { searchParams: Promise<Rec
       </EHFormSection>
     </EHWorkflowForm></div>;
 
-  const rolesSection = <EHWorkSection title="Rollen &amp; Rechte">
+  const rolesSection = <WerkbankAbschnitt title="Rollen &amp; Rechte">
     <EHText muted>Jeder Ansprechpartner hat einen eigenen Zugang. „Aufträge verwalten“ erlaubt Angebote, Termine und Teampflege; ohne dieses Recht bleibt die Ansicht auf die eigenen zugewiesenen Vorgänge beschränkt.</EHText>
     <EHText muted>{ctx.canManageJobs
       ? `${managingMembers.length} von ${members.length} Zugängen dürfen Aufträge steuern.`
       : 'Dein Zugang sieht die Teamübersicht, Änderungen bleiben der Betriebsleitung vorbehalten.'}</EHText>
-  </EHWorkSection>;
+  </WerkbankAbschnitt>;
 
   return <WerkbankRahmen role="provider" active="/pro/team">
     <EHWorkflowStack>
-      <EHPageHeader title="Team" context={ctx.businessName} actions={ctx.canManageJobs ? <EHButton href="#team-anlegen" arrow>Ansprechpartner hinzufügen</EHButton> : undefined} />
-      <EHMetricsBar label="Team" items={[
+      <WerkbankKopf title="Team" context={ctx.businessName} actions={ctx.canManageJobs ? <EHButton href="#team-anlegen" arrow>Ansprechpartner hinzufügen</EHButton> : undefined} />
+      <WerkbankKennzahlen label="Team" items={[
         { id: 'personen', label: 'Ansprechpartner', value: members.length, hint: 'im Betrieb geführt' },
         { id: 'aktiv', label: 'Aktive Zugänge', value: activeMembers.length, hint: 'können sich anmelden' },
         { id: 'verwaltung', label: 'Auftragsverwaltung', value: managingMembers.length, hint: 'dürfen Aufträge steuern' },
@@ -79,7 +80,7 @@ export default async function Team({ searchParams }: { searchParams: Promise<Rec
       {sp.member === 'created' && <EHFormFeedback kind="success">Ansprechpartner wurde angelegt und kann sich direkt einloggen.</EHFormFeedback>}
       {/* Das Anlegeformular steht nur mit Auftragsverwaltung zur Verfügung.
           Die rechte Spalte bleibt trotzdem belegt: sie erklärt die Rollen. */}
-      <EHWorkspaceGrid main={memberSection} aside={<EHWorkflowStack>{rolesSection}{addMemberForm}</EHWorkflowStack>} />
+      <WerkbankRaster main={memberSection} aside={<EHWorkflowStack>{rolesSection}{addMemberForm}</EHWorkflowStack>} />
     </EHWorkflowStack>
   </WerkbankRahmen>;
 }

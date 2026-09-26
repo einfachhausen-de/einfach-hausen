@@ -1,9 +1,10 @@
 import { CheckCheck } from 'lucide-react';
 import { requireUser } from '@/lib/auth';
-import { EHPageHeader, EHList, EHEmptyState, EHButton, EHStatus, EHActions, EHText, EHWorkflowStack } from '@/design-system';
+import { EHList, EHEmptyState, EHButton, EHStatus, EHActions, EHText, EHWorkflowStack } from '@/design-system';
 import { db } from '@/lib/db';
 import { setNotificationReadStateAction, markAllNotificationsReadForCurrentUserAction } from './actions';
 import { WerkbankRahmen } from '@/components/werkbank-rahmen';
+import { WerkbankKopf } from '@/components/werkbank-seite';
 
 const PAGE_SIZE = 25;
 
@@ -18,7 +19,7 @@ export default async function Notifications({ searchParams }: { searchParams: Pr
   const rows = db.prepare("SELECT * FROM notifications WHERE user_id=? AND channel='in_app' ORDER BY created_at DESC, id DESC LIMIT ? OFFSET ?").all(u.id, PAGE_SIZE, (safePage - 1) * PAGE_SIZE) as any[];
   return <WerkbankRahmen role={u.role === 'provider' ? 'provider' : 'homeowner'} active="/notifications">
     <EHWorkflowStack>
-    <EHPageHeader title="Updates" context={unreadTotal ? `${unreadTotal} ungelesen` : 'Alles gelesen'} actions={unreadTotal > 0 && <form action={markAllNotificationsReadForCurrentUserAction}><EHButton><CheckCheck size={15}/>Alle gelesen</EHButton></form>} />
+    <WerkbankKopf title="Updates" context={unreadTotal ? `${unreadTotal} ungelesen` : 'Alles gelesen'} actions={unreadTotal > 0 && <form action={markAllNotificationsReadForCurrentUserAction}><EHButton><CheckCheck size={15}/>Alle gelesen</EHButton></form>} />
     <EHList label="Updates" items={rows.map(n => {
         const isUnread = !n.read_at;
         return {

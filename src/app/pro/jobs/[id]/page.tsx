@@ -9,6 +9,7 @@ import {
   XCircle,
 } from 'lucide-react';
 import { WerkbankRahmen } from '@/components/werkbank-rahmen';
+import { WerkbankAbschnitt, WerkbankKennzahlen, WerkbankKopf, WerkbankRaster } from '@/components/werkbank-seite';
 import { JobMedia } from '@/components/job-media';
 import { mediaKindFromPath } from '@/lib/intake-media';
 import { requireUser } from '@/lib/auth';
@@ -28,12 +29,7 @@ import { canAccessProviderJob, getProviderMembers } from '@/lib/provider';
 import { DocumentForm } from './document-form';
 import { InvoiceForm } from './invoice-form';
 import { invoiceStatusLabel } from '@/lib/invoices';
-import {
-  EHActions, EHAttachmentPanel, EHAssignmentForm, EHButton, EHCallout, EHConversation,
-  EHDetailDisclosure, EHEmptyState, EHErrorState, EHJobMessageForm, EHList, EHMetricsBar,
-  EHPageHeader, EHQuoteForm, EHRecordList, EHStatus, EHSubmitButton, EHText, EHWorkflowForm,
-  EHWorkflowStack, EHWorkSection, EHWorkspaceGrid, type EHRecordEntry,
-} from '@/design-system';
+import { EHActions, EHAttachmentPanel, EHAssignmentForm, EHButton, EHCallout, EHConversation, EHDetailDisclosure, EHEmptyState, EHErrorState, EHJobMessageForm, EHList, EHQuoteForm, EHRecordList, EHStatus, EHSubmitButton, EHText, EHWorkflowForm, EHWorkflowStack, type EHRecordEntry } from '@/design-system';
 
 export default async function ProJob({
   params,
@@ -136,20 +132,20 @@ export default async function ProJob({
       <EHWorkflowStack>
         {sp.error && <EHErrorState text={sp.error} />}
 
-        <EHPageHeader
+        <WerkbankKopf
           title={access.title.replace(/^Ansprechpartner:\s*/, '')}
           context={[statusText, access.category].filter(Boolean).join(' · ')}
         />
 
-        <EHMetricsBar label="Stand des Vorgangs" items={[
+        <WerkbankKennzahlen label="Stand des Vorgangs" items={[
           { id: 'status', label: 'Status', value: statusText, hint: [access.category, Number.isFinite(access.distance_km) ? `${access.distance_km.toFixed(1)} km entfernt` : null].filter(Boolean).join(' · ') },
           { id: 'angebot', label: 'Eigenes Angebot', value: isContact ? 'Ohne Preis' : quote ? euro(quote.amount) : 'offen', hint: isContact ? 'Kontaktauftrag ohne Auftragswert' : quote ? (quote.available_at ? `Verfügbar ${dateLabel(quote.available_at)}` : 'Termin nach Abstimmung') : 'Preis und Termin noch offen' },
           { id: 'nachrichten', label: 'Nachrichten', value: messages.length, hint: mine ? `mit ${access.homeowner_first}` : assignment ? 'bei einem anderen Ansprechpartner' : 'noch kein Kundenkontakt' },
           { id: 'unterlagen', label: 'Unterlagen', value: docs.length + invoices.length, hint: isAccepted ? `${invoices.length} Rechnungen · ${docs.length} Nachweise` : 'erst nach Annahme' },
         ]} />
 
-        <EHWorkspaceGrid main={<>
-          <EHWorkSection title="Anliegen">
+        <WerkbankRaster main={<>
+          <WerkbankAbschnitt title="Anliegen">
             <EHText>{access.description || 'Keine Beschreibung hinterlegt.'}</EHText>
             {access.photo_id && (
               <JobMedia
@@ -158,14 +154,14 @@ export default async function ProJob({
                 kind={mediaKindFromPath(access.photo_path)}
               />
             )}
-          </EHWorkSection>
+          </WerkbankAbschnitt>
 
           {!isAccepted && ctx.canManageJobs && access.status !== 'completed' && isContact && (
             <>
               <EHCallout title="Nur persönlicher Ansprechpartner gesucht">
                 <EHText muted>Der Eigentümer möchte zunächst einen fachlichen Menschen sprechen. Es wird noch kein Auftrag und kein Preis vereinbart.</EHText>
               </EHCallout>
-              <EHWorkSection title="Kontakt übernehmen">
+              <WerkbankAbschnitt title="Kontakt übernehmen">
                 <EHText muted>Konkreten Ansprechpartner auswählen und den Kontakt übernehmen.</EHText>
                 <EHAssignmentForm
                   id="provider-accept-contact"
@@ -174,7 +170,7 @@ export default async function ProJob({
                   contacts={contacts}
                   selectedId={u.id}
                 />
-              </EHWorkSection>
+              </WerkbankAbschnitt>
               <EHWorkflowForm action={declineDispatchAction.bind(null, access.id)}>
                 <EHSubmitButton pendingLabel="Wird abgelehnt…"><XCircle size={16} />Kontaktauftrag ablehnen</EHSubmitButton>
               </EHWorkflowForm>
@@ -195,7 +191,7 @@ export default async function ProJob({
                   </EHText>
                 </EHCallout>
               )}
-              <EHWorkSection title={access.urgency === 'emergency' ? 'Notfall beantworten' : 'Angebot senden'}>
+              <WerkbankAbschnitt title={access.urgency === 'emergency' ? 'Notfall beantworten' : 'Angebot senden'}>
                 <EHText muted>Preis, frühesten realistischen Termin und Leistungsumfang als Angebot senden.</EHText>
                 <EHQuoteForm
                   id="provider-quote"
@@ -205,7 +201,7 @@ export default async function ProJob({
                   message={quote?.message || ''}
                   updating={Boolean(quote)}
                 />
-              </EHWorkSection>
+              </WerkbankAbschnitt>
               {!quote && (
                 <EHWorkflowForm action={declineDispatchAction.bind(null, access.id)}>
                   <EHSubmitButton pendingLabel="Wird abgelehnt…"><XCircle size={16} />Auftrag ablehnen</EHSubmitButton>
@@ -220,7 +216,7 @@ export default async function ProJob({
                 <EHStatus tone="success">{isContact ? 'Du bist mit dem Eigentümer verbunden. Noch kein Auftrag.' : `Kunde hat den Auftrag bei ${ctx.businessName} gebucht.`}</EHStatus>
               </div>
 
-              <EHWorkSection title="Ansprechpartner">
+              <WerkbankAbschnitt title="Ansprechpartner">
                 <EHRecordList label="Ansprechpartner" items={[{
                   id: 'ansprechpartner',
                   title: assignment ? `${assignment.first_name} ${assignment.last_name}` : 'Noch nicht zugewiesen',
@@ -228,10 +224,10 @@ export default async function ProJob({
                   status: mine ? <EHStatus tone="success">Du</EHStatus> : undefined,
                   icon: <UserRound size={20} />,
                 }]} />
-              </EHWorkSection>
+              </WerkbankAbschnitt>
 
               {ctx.canManageJobs && !assignment && (
-                <EHWorkSection title="Ansprechpartner festlegen">
+                <WerkbankAbschnitt title="Ansprechpartner festlegen">
                   <EHText muted>Einen konkreten Ansprechpartner festlegen, damit die weitere Bearbeitung eindeutig ist.</EHText>
                   <EHAssignmentForm
                     id="provider-assign-contact"
@@ -240,7 +236,7 @@ export default async function ProJob({
                     contacts={contacts}
                     selectedId={u.id}
                   />
-                </EHWorkSection>
+                </WerkbankAbschnitt>
               )}
 
               {ctx.canManageJobs && assignment && (
@@ -256,32 +252,32 @@ export default async function ProJob({
               )}
 
               {mine && isContact && (
-                <EHWorkSection title="Eigentümer anschreiben">
+                <WerkbankAbschnitt title="Eigentümer anschreiben">
                   <EHText muted>Eigentümer direkt anschreiben und die fachliche Frage klären.</EHText>
                   <EHButton href={`/pro/messages?homeowner=${access.homeowner_id}`} arrow>Nachricht öffnen</EHButton>
-                </EHWorkSection>
+                </WerkbankAbschnitt>
               )}
 
               {mine && !isContact && access.status === 'accepted' && (
-                <EHWorkSection title="Arbeit starten">
+                <WerkbankAbschnitt title="Arbeit starten">
                   <EHText muted>Arbeit starten, sobald Termin und Ausführung mit dem Kunden abgestimmt sind.</EHText>
                   <EHWorkflowForm action={markInProgressAction.bind(null, access.id)}>
                     <EHSubmitButton pendingLabel="Wird gestartet…">Arbeit starten</EHSubmitButton>
                   </EHWorkflowForm>
-                </EHWorkSection>
+                </WerkbankAbschnitt>
               )}
 
               {mine && !isContact && access.status === 'in_progress' && (
-                <EHWorkSection title="Auftrag abschließen">
+                <WerkbankAbschnitt title="Auftrag abschließen">
                   <EHText muted>Auftrag abschließen, wenn die vereinbarte Leistung vollständig erledigt ist.</EHText>
                   <EHWorkflowForm action={markCompleteAction.bind(null, access.id)}>
                     <EHSubmitButton pendingLabel="Wird gespeichert…">Als erledigt markieren</EHSubmitButton>
                   </EHWorkflowForm>
-                </EHWorkSection>
+                </WerkbankAbschnitt>
               )}
 
               {mine && !isContact && access.status === 'completed' && (
-                <EHWorkSection title="Rechnung erstellen">
+                <WerkbankAbschnitt title="Rechnung erstellen">
                   <EHText muted>Rechnung prüfen, erstellen und dem Eigentümer senden.</EHText>
                   <InvoiceForm
                       buyer={`${access.homeowner_first} ${access.homeowner_last}`.trim()}
@@ -291,11 +287,11 @@ export default async function ProJob({
                     primary
                     open
                   />
-                </EHWorkSection>
+                </WerkbankAbschnitt>
               )}
 
               {mine && (
-                <EHWorkSection title="Kundenkontakt">
+                <WerkbankAbschnitt title="Kundenkontakt">
                   <EHActions>
                     {!isContact && (
                       <EHButton href={`/pro/messages?homeowner=${access.homeowner_id}`} variant="secondary"><MessageSquare size={16} />Direkt schreiben</EHButton>
@@ -331,7 +327,7 @@ export default async function ProJob({
                       />
                     }
                   />
-                </EHWorkSection>
+                </WerkbankAbschnitt>
               )}
 
               {claim && (
@@ -342,7 +338,7 @@ export default async function ProJob({
               )}
 
               {mine && !isContact && (
-                <EHWorkSection title={`Rechnungen · ${invoices.length}`}>
+                <WerkbankAbschnitt title={`Rechnungen · ${invoices.length}`}>
                   {invoices.length > 0 ? (
                     <EHList label="Rechnungen" items={invoices.map((invoice) => ({
                       id: String(invoice.id),
@@ -363,33 +359,33 @@ export default async function ProJob({
                   )}
 
                   <EHAttachmentPanel files={docs.map((document) => ({id: String(document.id), name: document.title, kind: document.kind, detail: 'Unterlage zum Auftrag', href: `/api/documents/${document.id}`}))} upload={<DocumentForm jobId={access.id} />} />
-                </EHWorkSection>
+                </WerkbankAbschnitt>
               )}
             </>
           )}
         </>} aside={<>
-          <EHWorkSection title="Nächster Schritt">
+          <WerkbankAbschnitt title="Nächster Schritt">
             <EHText muted={!nextStep.href}>{nextStep.text}</EHText>
             {nextStep.href && <EHButton href={nextStep.href} arrow>{nextStep.label}</EHButton>}
-          </EHWorkSection>
-          <EHWorkSection title="Auf einen Blick">
+          </WerkbankAbschnitt>
+          <WerkbankAbschnitt title="Auf einen Blick">
             <EHRecordList label="Auftrag auf einen Blick" items={glance} />
-          </EHWorkSection>
-          <EHWorkSection title="Kunde">
+          </WerkbankAbschnitt>
+          <WerkbankAbschnitt title="Kunde">
             <EHRecordList label="Kundendaten" items={[
               { id: 'name', title: `${access.homeowner_first} ${access.homeowner_last}`.trim() || 'Ohne Namen', detail: 'Eigentümer' },
               { id: 'ort', title: access.address || access.postcode || 'Kein Ort hinterlegt', detail: 'Ort' },
               { id: 'telefon', title: mine ? (access.homeowner_phone || 'Keine Nummer hinterlegt') : 'Erst nach Zuweisung sichtbar', detail: 'Telefon' },
             ]} />
-          </EHWorkSection>
-          <EHWorkSection title="Zugriff im Betrieb">
+          </WerkbankAbschnitt>
+          <WerkbankAbschnitt title="Zugriff im Betrieb">
             <EHStatus tone={ctx.canManageJobs ? 'success' : 'neutral'}>Aufträge verwalten {ctx.canManageJobs ? 'AN' : 'AUS'}</EHStatus>
             <EHText muted>
               {ctx.canManageJobs
                 ? 'Du siehst betriebliche Aufträge, kannst Angebote abgeben und gebuchte Vorgänge zuweisen.'
                 : 'Du siehst nur dir zugewiesene Aufträge und Kontakte und bearbeitest dort Ausführung, Kundenkontakt, Dokumente und Rechnungen.'}
             </EHText>
-          </EHWorkSection>
+          </WerkbankAbschnitt>
         </>} />
       </EHWorkflowStack>
     </WerkbankRahmen>

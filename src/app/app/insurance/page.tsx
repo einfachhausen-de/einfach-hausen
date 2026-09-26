@@ -1,8 +1,9 @@
 import { createInsuranceSupportAction } from '@/app/actions';
 import { requireUser } from '@/lib/auth';
-import { EHButton, EHEmptyState, EHErrorState, EHField, EHFormFeedback, EHMetricsBar, EHPageHeader, EHRecordList, EHStatus, EHSubmitButton, EHText, EHTextarea, EHWorkSection, EHWorkspaceGrid, EHWorkflowStack, type EHRecordEntry } from '@/design-system';
+import { EHButton, EHEmptyState, EHErrorState, EHField, EHFormFeedback, EHRecordList, EHStatus, EHSubmitButton, EHText, EHTextarea, EHWorkflowStack, type EHRecordEntry } from '@/design-system';
 import { db } from '@/lib/db';
 import { WerkbankRahmen } from '@/components/werkbank-rahmen';
+import { WerkbankAbschnitt, WerkbankKennzahlen, WerkbankKopf, WerkbankRaster } from '@/components/werkbank-seite';
 
 type InsuranceJob = {
   id: number;
@@ -61,16 +62,16 @@ export default async function InsuranceSupport({ searchParams }: { searchParams:
 
   return <WerkbankRahmen role="homeowner" active="/app" pageLabel="Versicherung">
     <EHWorkflowStack>
-    <EHPageHeader title="Versicherung" context={`${jobs.length} beauftragte ${jobs.length === 1 ? 'Auftrag' : 'Aufträge'}`} />
+    <WerkbankKopf title="Versicherung" context={`${jobs.length} beauftragte ${jobs.length === 1 ? 'Auftrag' : 'Aufträge'}`} />
     {sp.error && <EHErrorState text={sp.error} />}
     {submitted && <EHFormFeedback kind="success">Übernommen. Einfach Hausen sieht den Vorgang jetzt im bestehenden Auftrag. Deine Versicherung wurde dadurch nicht automatisch kontaktiert.</EHFormFeedback>}
 
-    <EHMetricsBar label="Versicherung" items={[
+    <WerkbankKennzahlen label="Versicherung" items={[
       { id: 'auftraege', label: 'Beauftragte Aufträge', value: String(jobs.length) },
       { id: 'hilfe', label: 'Hilfe gemeldet', value: String(openClaims.length), hint: `${reviewingClaims.length} in Prüfung` },
     ]} />
 
-    <EHWorkSection title="Deine drei Möglichkeiten">
+    <WerkbankAbschnitt title="Deine drei Möglichkeiten">
       <EHText muted>Tarif prüfen, Mensch fragen oder Schaden zu einem Auftrag melden. Nichts davon schreibt automatisch einen Versicherer an, und nichts gibt deine Daten ohne deine Zustimmung weiter.</EHText>
       <EHRecordList label="Wege auf dieser Seite" items={[
         {
@@ -94,10 +95,10 @@ export default async function InsuranceSupport({ searchParams }: { searchParams:
           href: '#schadenfall',
         },
       ]} />
-    </EHWorkSection>
+    </WerkbankAbschnitt>
 
     <div id="schadenfall" />
-    <EHWorkspaceGrid main={<EHWorkSection title="Schaden zu Auftrag melden">
+    <WerkbankRaster main={<WerkbankAbschnitt title="Schaden zu Auftrag melden">
       <EHText muted>Hier entsteht nur eine interne Notiz an einem deiner beauftragten Aufträge. Ein Versicherer wird nicht angeschrieben.</EHText>
       {jobs.length === 0 ? (
       <EHEmptyState title="Noch kein passender Auftrag vorhanden" text="Eine Meldung lässt sich nur an einen eigenen, bereits angenommenen Auftrag hängen." action={<><EHButton href="/app/jobs">Aufträge ansehen</EHButton><EHButton href="/app/consultation" variant="secondary">Erst Mensch fragen</EHButton></>} />
@@ -113,8 +114,8 @@ export default async function InsuranceSupport({ searchParams }: { searchParams:
       ) : <EHText muted>Wähle oben einen Auftrag, dann erscheint hier das Formular.</EHText>}
       </>
     )}
-    </EHWorkSection>} aside={<>
-      <EHWorkSection title="Laufende Hilfe">
+    </WerkbankAbschnitt>} aside={<>
+      <WerkbankAbschnitt title="Laufende Hilfe">
         <EHRecordList label="Hilfe zu deinen Aufträgen" empty="Zu keinem Auftrag läuft gerade eine Hilfe-Anfrage." items={openClaims.map(job => ({
           id: `fall-${job.id}`,
           title: job.title,
@@ -122,14 +123,14 @@ export default async function InsuranceSupport({ searchParams }: { searchParams:
           status: <EHStatus tone={claimTone(job.claim_status)}>{claimStatus(job.claim_status)}</EHStatus>,
           href: `/app/jobs/${job.id}`,
         }))} />
-      </EHWorkSection>
-      <EHWorkSection title="Wie geht es weiter">
+      </WerkbankAbschnitt>
+      <WerkbankAbschnitt title="Wie geht es weiter">
         {nextJob
           ? <><EHText>{`Für „${nextJob.title}“ ist noch nichts gemeldet.`}</EHText><EHButton href={`/app/jobs/${nextJob.id}`} arrow>Auftrag öffnen</EHButton></>
           : jobs.length === 0
             ? <EHText muted>Sobald ein Auftrag angenommen ist, lässt sich hier eine Meldung daran hängen.</EHText>
             : <EHText muted>Jeder beauftragte Auftrag hat eine Meldung. Neues entsteht im jeweiligen Auftrag.</EHText>}
-      </EHWorkSection>
+      </WerkbankAbschnitt>
     </>} />
 
     <EHText muted>Frage zum Hausmeister? <a href="/app/hausmeister">Hier geht es zum Chat</a>.</EHText>

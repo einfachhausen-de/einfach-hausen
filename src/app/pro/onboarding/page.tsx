@@ -1,15 +1,11 @@
 import {WerkbankRahmen} from "@/components/werkbank-rahmen";
+import { WerkbankAbschnitt, WerkbankKennzahlen, WerkbankKopf, WerkbankPanel, WerkbankRaster } from '@/components/werkbank-seite';
 import {requireUser} from "@/lib/auth";
 import {db} from "@/lib/db";
 import {getProviderContext} from "@/lib/provider";
 import {saveWizardStepAction} from "./actions";
 import {WIZARD_STEPS, STEP_LABELS} from "./wizard-steps";
-import {
-  EHPageHeader, EHWorkflowStack, EHWorkflowForm, EHWorkflowHeading, EHStepProgress,
-  EHFormSection, EHFieldGrid, EHField, EHInput, EHSelect, EHTextarea, EHCheckbox,
-  EHFormFeedback, EHSubmitButton, EHActions, EHTextLink, EHText, EHPanel, EHEmptyState,
-  EHButton, EHMetricsBar, EHRecordList, EHStatus, EHWorkSection, EHWorkspaceGrid,
-} from "@/design-system";
+import { EHWorkflowStack, EHWorkflowForm, EHWorkflowHeading, EHStepProgress, EHFormSection, EHFieldGrid, EHField, EHInput, EHSelect, EHTextarea, EHCheckbox, EHFormFeedback, EHSubmitButton, EHActions, EHTextLink, EHText, EHEmptyState, EHButton, EHRecordList, EHStatus } from '@/design-system';
 
 export default async function ProviderOnboardingWizard({searchParams}: {
   searchParams: Promise<Record<string,string>>;
@@ -17,7 +13,7 @@ export default async function ProviderOnboardingWizard({searchParams}: {
   const user=await requireUser("provider");
   const ctx=getProviderContext(user.id);
   if(!ctx || !ctx.isOwner) return <WerkbankRahmen role="provider" active="/pro">
-    <EHPageHeader title="Einrichtung"/>
+    <WerkbankKopf title="Einrichtung"/>
     <EHEmptyState title="Für den Firmeninhaber" text="Die Einrichtung kann nur der Firmeninhaber bearbeiten. Ansprechpartner erhalten ihre zugewiesenen Aufgaben im Partnerbereich."/>
     <EHTextLink href="/pro">Zum Partnerbereich</EHTextLink>
   </WerkbankRahmen>;
@@ -49,8 +45,8 @@ export default async function ProviderOnboardingWizard({searchParams}: {
 
   return <WerkbankRahmen role="provider" active="/pro">
     <EHWorkflowStack>
-      <EHPageHeader title="Einrichtung" context={["Firmenkonto", ctx.businessName].join(" · ")}/>
-      <EHMetricsBar label="Einrichtung" items={[
+      <WerkbankKopf title="Einrichtung" context={["Firmenkonto", ctx.businessName].join(" · ")}/>
+      <WerkbankKennzahlen label="Einrichtung" items={[
         {id:"schritt",label:"Aktueller Schritt",value:`${index+1} von ${WIZARD_STEPS.length}`,hint:STEP_LABELS[step]},
         {id:"angaben",label:"Betriebsangaben",value:`${filled} von 9`,hint:"Felder mit Inhalt"},
         {id:"leistungen",label:"Leistungen gewählt",value:String(selected.size),hint:`${catalog.length} im Katalog`},
@@ -58,7 +54,7 @@ export default async function ProviderOnboardingWizard({searchParams}: {
       ]} />
       <EHStepProgress current={step} steps={WIZARD_STEPS.map(id=>({id,label:STEP_LABELS[id]}))}/>
       {sp.error && <EHFormFeedback kind="error">{sp.error}</EHFormFeedback>}
-      <EHWorkspaceGrid main={<>
+      <WerkbankRaster main={<>
       <EHWorkflowHeading title={STEP_LABELS[step]}/>
       <EHWorkflowForm action={saveWizardStepAction}>
         <input type="hidden" name="step" value={step}/>
@@ -96,14 +92,14 @@ export default async function ProviderOnboardingWizard({searchParams}: {
             <EHField id="work-radius" label="Einsatzradius in Kilometern" hint="Zwischen 1 und 200 Kilometern."><EHInput id="work-radius" name="radius" type="number" min={1} max={200} step={1} defaultValue={profile?.radius_km || 25} aria-describedby="work-radius-hint"/></EHField>
           </EHFieldGrid>
         </EHFormSection>}
-        {step==="abschluss" && <EHPanel title="Deine gespeicherten Betriebsangaben">
+        {step==="abschluss" && <WerkbankPanel title="Deine gespeicherten Betriebsangaben">
           <EHWorkflowStack>
             <EHText>{profile?.business_name || ctx.businessName}</EHText>
             <EHText>{[profile?.legal_form,profile?.founded_year && "Gegründet "+profile.founded_year,profile?.employees && profile.employees+" Mitarbeiter"].filter(Boolean).join(" · ")}</EHText>
             {profile?.street_address && <EHText>{profile.street_address}</EHText>}
             <EHText>{selected.size} Leistungen ausgewählt{profile?.postcode ? " · "+profile.postcode : ""}{profile?.radius_km ? " · "+profile.radius_km+" km Radius" : ""}</EHText>
           </EHWorkflowStack>
-        </EHPanel>}
+        </WerkbankPanel>}
         <EHActions>
           <EHSubmitButton disabled={step==="leistungen" && catalog.length===0}>{nextLabel}</EHSubmitButton>
           {index>0 && <EHTextLink href={"/pro/onboarding?step="+WIZARD_STEPS[index-1]}>Vorheriger Schritt</EHTextLink>}
@@ -111,7 +107,7 @@ export default async function ProviderOnboardingWizard({searchParams}: {
         </EHActions>
       </EHWorkflowForm>
       </>} aside={<>
-        <EHWorkSection title="Was noch fehlt">
+        <WerkbankAbschnitt title="Was noch fehlt">
           <EHRecordList label="Offene Angaben in der Einrichtung" items={openSteps.map(entry=>({
             id:entry.id,
             title:entry.label,
@@ -119,14 +115,14 @@ export default async function ProviderOnboardingWizard({searchParams}: {
             status:entry.done?<EHStatus tone="success">Vollständig</EHStatus>:<EHStatus tone="warning">Offen</EHStatus>,
             href:`/pro/onboarding?step=${entry.id}`,
           }))} />
-        </EHWorkSection>
-        <EHWorkSection title="Nächster Schritt">
+        </WerkbankAbschnitt>
+        <WerkbankAbschnitt title="Nächster Schritt">
           {nextOpen?<>
             <EHText>{nextOpen.label}</EHText>
             <EHText muted>{nextOpen.hint}</EHText>
             <EHButton href={`/pro/onboarding?step=${nextOpen.id}`} variant="secondary" arrow>Schritt öffnen</EHButton>
           </>:<EHText muted>Alle Angaben sind vollständig. Prüfe sie im letzten Schritt und schließe die Einrichtung ab.</EHText>}
-        </EHWorkSection>
+        </WerkbankAbschnitt>
       </>} />
     </EHWorkflowStack>
   </WerkbankRahmen>;

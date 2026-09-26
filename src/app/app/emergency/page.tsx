@@ -1,6 +1,7 @@
 import { WerkbankRahmen } from '@/components/werkbank-rahmen';
+import { WerkbankAbschnitt, WerkbankKopf, WerkbankRaster } from '@/components/werkbank-seite';
 import { requireUser } from '@/lib/auth';
-import { EHButton, EHCallout, EHPageHeader, EHErrorState, EHField, EHSelect, EHTextarea, EHSubmitButton, EHRecordList, EHStatus, EHWorkSection, EHWorkflowForm, EHWorkflowStack, EHWorkspaceGrid, type EHRecordEntry } from '@/design-system';
+import { EHButton, EHCallout, EHErrorState, EHField, EHSelect, EHTextarea, EHSubmitButton, EHRecordList, EHStatus, EHWorkflowForm, EHWorkflowStack, type EHRecordEntry } from '@/design-system';
 import { db } from '@/lib/db';
 import { dateLabel, statusLabel } from '@/lib/format';
 import { createEmergencyAction } from '@/app/actions';
@@ -31,18 +32,18 @@ export default async function Emergency({searchParams}:{searchParams:Promise<Rec
 
   return <WerkbankRahmen role="homeowner" active="/app" pageLabel="Notfall" brandSub={profile?.address}>
     <EHWorkflowStack>
-    <EHPageHeader title="Notfall melden" context={target} />
-    <EHWorkspaceGrid main={<>
+    <WerkbankKopf title="Notfall melden" context={target} />
+    <WerkbankRaster main={<>
       {sp.error&&<EHErrorState text={sp.error} />}
       <EHCallout title="Lebensgefahr, Brand oder Gasgeruch?">
         <p>Sofort <a href="tel:112">112</a> anrufen. Bei Gasgeruch: Fenster öffnen, keine Schalter betätigen, Gebäude verlassen. Einfach Hausen ersetzt keinen öffentlichen Notruf.</p>
       </EHCallout>
       <EHWorkflowForm action={createEmergencyAction}><EHField id="emg-type" label="Art des Notfalls"><EHSelect id="emg-type" name="emergencyType" required defaultValue=""><option value="" disabled>Bitte auswählen</option><option value="water">Wasserrohrbruch / Wasserschaden</option><option value="heating">Heizung ausgefallen</option><option value="electric">Stromproblem</option><option value="roof">Dach- oder Sturmschaden</option><option value="lock">Tür / Schloss</option><option value="sanitary">Bad, WC oder Küche</option><option value="other">Sonstiger Notfall</option></EHSelect></EHField><EHField id="emg-desc" label="Was ist passiert?"><EHTextarea id="emg-desc" name="description" rows={5} required placeholder="Zum Beispiel: Unter der Spüle läuft stark Wasser aus …"/></EHField><EHSubmitButton>Jetzt Helfer suchen</EHSubmitButton></EHWorkflowForm>
     </>} aside={<>
-      <EHWorkSection title="Hilfe ist unterwegs">
+      <WerkbankAbschnitt title="Hilfe ist unterwegs">
         <EHRecordList label="Laufende Notfälle" items={activeItems} empty="Zurzeit läuft kein Notfall. Abgeschlossene Einsätze stehen in der Auftragsübersicht." />
         <EHButton href="/app/jobs" variant="secondary" arrow>Alle Aufträge ansehen</EHButton>
-      </EHWorkSection>
+      </WerkbankAbschnitt>
     </>} />
     </EHWorkflowStack>
   </WerkbankRahmen>;

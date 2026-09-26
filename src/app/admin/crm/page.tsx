@@ -4,7 +4,8 @@ import { requireAdmin } from '@/lib/admin-auth';
 import s from '@/components/shell.module.css';
 import { CRM_LEAD_TYPES, CRM_PERMISSIONS, CRM_SOURCES, CRM_STATUSES, crmCategories, crmStats, listCrmLeads, syncCrmLifecycle } from '@/lib/crm';
 import { addCrmLeadAction, syncBusinessResearchAction, updateCrmLeadAction } from './actions';
-import { EHActions, EHButton, EHCallout, EHEmptyState, EHField, EHFieldGrid, EHFormFeedback, EHFormSection, EHInput, EHMetricsBar, EHPageHeader, EHRecordList, EHScope, EHSection, EHSelect, EHStatus, EHText, EHTextarea, EHWorkSection, EHWorkspaceGrid, EHWorkflowForm, EHWorkflowStack } from '@/design-system';
+import { EHActions, EHButton, EHCallout, EHEmptyState, EHField, EHFieldGrid, EHFormFeedback, EHFormSection, EHInput, EHRecordList, EHScope, EHSection, EHSelect, EHStatus, EHText, EHTextarea, EHWorkflowForm, EHWorkflowStack } from '@/design-system';
+import { WerkbankAbschnitt, WerkbankKennzahlen, WerkbankKopf, WerkbankRaster } from '@/components/werkbank-seite';
 
 const labels: Record<string, string> = {
   collected: 'Gesammelt',
@@ -113,7 +114,7 @@ export default async function CrmPage({ searchParams }: { searchParams: Promise<
               <EHButton href="/admin" variant="quiet" size="small"><ArrowLeft size={16} /> Zurück zur Betriebsverwaltung</EHButton>
             </EHActions>
 
-            <EHPageHeader
+            <WerkbankKopf
               title="Leads & Outreach CRM"
               context="Betriebsverwaltung"
               actions={
@@ -125,15 +126,15 @@ export default async function CrmPage({ searchParams }: { searchParams: Promise<
 
             {feedback && <EHFormFeedback kind={sp.error ? 'error' : 'success'}>{feedback}</EHFormFeedback>}
 
-            <EHMetricsBar label="Leads und Outreach" items={[
+            <WerkbankKennzahlen label="Leads und Outreach" items={[
               { id: 'gesamt', label: 'Leads gesamt', value: compact(stats.total), hint: `${result.total.toLocaleString('de-DE')} in dieser Auswahl` },
               { id: 'faellig', label: 'Fällige Folgekontakte', value: compact(stats.dueFollowUps), hint: 'heute oder überfällig' },
               { id: 'antworten', label: 'Antworten', value: compact(statusCount('replied')), hint: `${statusCount('qualified')} qualifiziert` },
               { id: 'konten', label: 'Plattformkonten', value: compact(statusCount('converted')), hint: `${statusCount('invited')} eingeladen` },
             ]} />
 
-            <EHWorkspaceGrid main={<>
-              <EHWorkSection title="Leads filtern">
+            <WerkbankRaster main={<>
+              <WerkbankAbschnitt title="Leads filtern">
                 <EHWorkflowForm action="/admin/crm">
                   <EHFieldGrid>
                     <EHField id="filter-suche" label="Suche">
@@ -168,9 +169,9 @@ export default async function CrmPage({ searchParams }: { searchParams: Promise<
                     <div><EHButton type="submit">Filtern</EHButton></div>
                   </EHFieldGrid>
                 </EHWorkflowForm>
-              </EHWorkSection>
+              </WerkbankAbschnitt>
 
-              <EHWorkSection title="Leads">
+              <WerkbankAbschnitt title="Leads">
                 <EHActions>
                   <EHText size="meta" muted>{result.total.toLocaleString('de-DE')} Treffer · Seite {result.page} von {result.pages}</EHText>
                   {result.page > 1 && <EHButton href={pageHref(result.page - 1)} variant="secondary" size="small">Zurück</EHButton>}
@@ -249,9 +250,9 @@ export default async function CrmPage({ searchParams }: { searchParams: Promise<
                       );
                     })}
                   </EHWorkflowStack>}
-              </EHWorkSection>
+              </WerkbankAbschnitt>
             </>} aside={<>
-              <EHWorkSection title="Lead erfassen">
+              <WerkbankAbschnitt title="Lead erfassen">
                 <EHWorkflowForm action={addCrmLeadAction}>
                   <EHFormSection title="Neuer Lead">
                     <EHFieldGrid>
@@ -313,15 +314,15 @@ export default async function CrmPage({ searchParams }: { searchParams: Promise<
                     <EHActions><EHButton type="submit">Lead speichern</EHButton></EHActions>
                   </EHFormSection>
                 </EHWorkflowForm>
-              </EHWorkSection>
+              </WerkbankAbschnitt>
 
-              <EHWorkSection title="Pipeline-Verteilung">
+              <WerkbankAbschnitt title="Pipeline-Verteilung">
                 <EHRecordList label="Leads nach Status" empty="Keine Leads vorhanden." items={stats.byStatus.map(x => ({
                   id: `status-${x.status}`,
                   title: labels[x.status] || x.status,
                   value: x.count.toLocaleString('de-DE'),
                 }))} />
-              </EHWorkSection>
+              </WerkbankAbschnitt>
 
               <EHCallout title="Datenschutz & Kontaktfreigabe">
                 <EHText>Jeder Datensatz trennt Recherche von Outreach. Direktkontakte sind nur bei expliziter Erlaubnis zulässig.</EHText>

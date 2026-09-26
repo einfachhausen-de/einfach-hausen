@@ -1,6 +1,7 @@
 import { BadgeCheck, CreditCard, FileCheck2, ShieldCheck } from 'lucide-react';
 import { SectionTitle } from '@/components/section-title';
 import { WerkbankRahmen } from '@/components/werkbank-rahmen';
+import { WerkbankAbschnitt, WerkbankKennzahlen, WerkbankKopf, WerkbankPanel, WerkbankRaster } from '@/components/werkbank-seite';
 import { ProviderAccessBoundary, ProviderState } from '@/components/provider/workspace';
 import { requireUser } from '@/lib/auth';
 import { db } from '@/lib/db';
@@ -10,11 +11,7 @@ import { statusLabel } from '@/lib/format';
 import { getProviderContext } from '@/lib/provider';
 import { getPartnerActivationCheck } from '@/lib/partner-config';
 import { InstallAppCard } from '@/components/install-app-card';
-import {
-  EHPanel, EHList, EHErrorState, EHStatus, EHText, EHActions, EHFormFeedback, EHPageHeader,
-  EHWorkflowForm, EHFormSection, EHFieldGrid, EHField, EHFileInput, EHInput, EHTextarea, EHSelect, EHCheckbox, EHSubmitButton,
-  EHButton, EHMetricsBar, EHRecordList, EHWorkSection, EHWorkspaceGrid,
-} from '@/design-system';
+import { EHList, EHErrorState, EHStatus, EHText, EHActions, EHFormFeedback, EHWorkflowForm, EHFormSection, EHFieldGrid, EHField, EHFileInput, EHInput, EHTextarea, EHSelect, EHCheckbox, EHSubmitButton, EHButton, EHRecordList } from '@/design-system';
 
 function trustStatus(ok: boolean, label: string) {
   return <EHStatus tone={ok ? 'success' : 'warning'}>{ok ? `${label} geprüft` : `${label} offen`}</EHStatus>;
@@ -24,7 +21,7 @@ export default async function ProProfile({ searchParams }: { searchParams: Promi
   const u = await requireUser('provider'); const sp = await searchParams; const ctx = getProviderContext(u.id);
   if (!ctx) {
     return <WerkbankRahmen role="provider" active="/pro/profile">
-      <EHPageHeader title="Profil & Vertrauen" context="Zugang prüfen" />
+      <WerkbankKopf title="Profil & Vertrauen" context="Zugang prüfen" />
       <ProviderState
         icon={<ShieldCheck size={21} />}
         title="Profil derzeit nicht verfügbar"
@@ -53,14 +50,14 @@ export default async function ProProfile({ searchParams }: { searchParams: Promi
   const requestKinds = [prefs?.accepts_normal_jobs !== 0, prefs?.accepts_short_notice !== 0, prefs?.accepts_consultation !== 0, !!prefs?.accepts_emergencies];
   const requestKindsOn = requestKinds.filter(Boolean).length;
   return <WerkbankRahmen role="provider" active="/pro/profile">
-    <EHPageHeader title="Profil & Vertrauen" context={[p?.business_name || ctx.businessName, ctx.canManageJobs ? 'Änderungen möglich' : 'Nur Ansicht'].join(' · ')} />
-    <EHMetricsBar label="Stand des Betriebs" items={[
+    <WerkbankKopf title="Profil & Vertrauen" context={[p?.business_name || ctx.businessName, ctx.canManageJobs ? 'Änderungen möglich' : 'Nur Ansicht'].join(' · ')} />
+    <WerkbankKennzahlen label="Stand des Betriebs" items={[
       { id: 'freigabe', label: 'Freigabe', value: activation.receivesNewJobs ? 'Erteilt' : 'Offen', hint: activation.receivesNewJobs ? 'Neue Anfragen werden verteilt' : `${activation.missing.length} Punkte offen` },
       { id: 'checks', label: 'Vertrauenschecks', value: `${trustDone}/4`, hint: 'Versicherung · Qualifikation · Vertrag · Qualität' },
       { id: 'anfragen', label: 'Anfragearten', value: `${requestKindsOn}/4`, hint: 'normal · kurzfristig · Beratung · Notfall' },
       { id: 'kapazitaet', label: 'Kapazität', value: prefs?.weekly_capacity ? `${prefs.weekly_capacity}/Woche` : 'unbegrenzt', hint: 'Aufträge pro Woche' },
     ]} />
-    <EHWorkspaceGrid main={<>
+    <WerkbankRaster main={<>
     <ProviderAccessBoundary canManageJobs={ctx.canManageJobs} />
     <InstallAppCard />
     {sp.verification === 'submitted' && <EHFormFeedback kind="success">Unternehmensnachweise wurden eingereicht. Bis zur erneuten Freigabe werden keine neuen Anfragen verteilt.</EHFormFeedback>}
@@ -73,11 +70,11 @@ export default async function ProProfile({ searchParams }: { searchParams: Promi
     {sp.stripe === 'missing' && <ProviderState icon={<CreditCard size={21} />} title="Auszahlungen derzeit nicht verfügbar" description="Die Stripe-Integration ist auf der Plattform noch nicht vollständig konfiguriert. Es wurde nichts an deinem Auszahlungsstatus geändert." tone="unavailable" />}
     {sp.stripe === 'owner' && <EHFormFeedback kind="error">Auszahlungen kann nur der Firmeninhaber einrichten.</EHFormFeedback>}
 
-    <EHPanel title={p?.verified ? 'Unternehmen geprüft' : 'Unternehmensprüfung erforderlich'}>
+    <WerkbankPanel title={p?.verified ? 'Unternehmen geprüft' : 'Unternehmensprüfung erforderlich'}>
       <EHText>{p?.verified ? 'Identität und eingereichte Unternehmensnachweise sind geprüft.' : v ? `Prüfstatus: ${statusLabel(v.status)}` : 'Gewerbe-, Qualifikations- und Versicherungsnachweise müssen geprüft werden.'}</EHText>
       {v?.admin_note && <EHText>Rückmeldung: {v.admin_note}</EHText>}
-    </EHPanel>
-    {ctx.isOwner && !p?.verified && <EHPanel title="Nachweise einreichen">
+    </WerkbankPanel>
+    {ctx.isOwner && !p?.verified && <WerkbankPanel title="Nachweise einreichen">
       <EHWorkflowForm action={submitProviderVerificationAction}>
         <div className="eh-werkbank-filefield"><EHField id="prov-doc" label="Nachweis" hint="PDF, JPG, PNG oder WebP bis 12 MB." required>
           <EHFileInput id="prov-doc" name="document" accept="application/pdf,image/jpeg,image/png,image/webp" required />
@@ -87,11 +84,11 @@ export default async function ProProfile({ searchParams }: { searchParams: Promi
         </EHField>
         <EHActions><EHSubmitButton pendingLabel="Wird eingereicht …">Zur Prüfung einreichen</EHSubmitButton></EHActions>
       </EHWorkflowForm>
-    </EHPanel>}
+    </WerkbankPanel>}
 
     <SectionTitle>Firmenprofil & Leistungen</SectionTitle><EHList label="Firmenprofil" items={[{ id: 'wizard', title: 'Firmendaten-Wizard', text: 'Firmendaten, Leistungen und Arbeitsgebiet strukturiert pflegen', href: '/pro/onboarding' }]} />
     <SectionTitle>Partnervertrag & Standards</SectionTitle>
-    <EHPanel title={activation.receivesNewJobs ? 'Aktiver Einfach-Hausen-Vertragspartner' : (p?.contract_status === 'active' ? 'Freigabe unvollständig' : `Vertragsstatus: ${statusLabel(p?.contract_status || 'pending')}`)}>
+    <WerkbankPanel title={activation.receivesNewJobs ? 'Aktiver Einfach-Hausen-Vertragspartner' : (p?.contract_status === 'active' ? 'Freigabe unvollständig' : `Vertragsstatus: ${statusLabel(p?.contract_status || 'pending')}`)}>
       {activation.receivesNewJobs ? <BadgeCheck aria-hidden="true" /> : <FileCheck2 aria-hidden="true" />}
       <EHText>Neue Anfragen gibt es nur bei freigegebener Unternehmensprüfung, aktivem Vertrag und vollständig bestätigten Qualitätschecks. Das Qualitätsmatching ist unabhängig vom gebuchten Partner-Tarif.</EHText>
       <EHActions>
@@ -102,17 +99,17 @@ export default async function ProProfile({ searchParams }: { searchParams: Promi
       </EHActions>
       {activation.missing.length > 0 && <EHText>Noch offen: {activation.missing.join(' · ')}</EHText>}
       {activation.receivesNewJobs && <EHText>0 % Provision · Reaktionsziel {p.response_target_minutes} Min.</EHText>}
-    </EHPanel>
+    </WerkbankPanel>
 
     <SectionTitle>Partner-Tarif</SectionTitle><EHList label="Partner-Tarif" items={[{ id: 'tarif', title: subscription?.title || 'Free', text: `${subscription?.status === 'trialing' ? 'Kostenlose Testphase aktiv.' : subscription?.status === 'active' ? 'Tarif aktiv.' : 'Free ist der Standardtarif.'} Alle Tarife: 0 % Provision und keine Gebühr pro Auftrag. Tarife ansehen oder ändern.`, href: '/pro/plans' }]} />
 
     <SectionTitle>Team</SectionTitle><EHList label="Team" items={[{ id: 'team', title: ctx.canManageJobs ? 'Ansprechpartner verwalten' : 'Team ansehen', text: ctx.canManageJobs ? 'Eigener App-Zugang für jeden Ansprechpartner. Nur ein Schalter entscheidet, wer neue Aufträge annehmen und verteilen darf.' : 'Du kannst die Ansprechpartner des Betriebs sehen. Änderungen an Zugängen und Auftragsberechtigungen sind für dich nicht verfügbar.', href: '/pro/team' }]} />
 
     {ctx.isOwner && <><SectionTitle>Auszahlungen</SectionTitle>
-      <EHPanel title={p?.stripe_onboarded ? 'Stripe Connect aktiv' : 'Stripe Connect einrichten'}>
+      <WerkbankPanel title={p?.stripe_onboarded ? 'Stripe Connect aktiv' : 'Stripe Connect einrichten'}>
         <EHText>{p?.stripe_onboarded ? 'Der Betrieb erhält 100 % des Auftragswertes. Einfach Hausen berechnet keine Auftragsprovision.' : 'Für zentrale Plattformzahlungen muss der Firmeninhaber das Auszahlungs-Onboarding abschließen.'}</EHText>
         {!p?.stripe_onboarded && <EHActions><EHWorkflowForm action={createStripeOnboardingAction}><EHSubmitButton pendingLabel="Wird eingerichtet …">Stripe einrichten</EHSubmitButton></EHWorkflowForm></EHActions>}
-      </EHPanel></>}
+      </WerkbankPanel></>}
 
     <SectionTitle>Mein Profil</SectionTitle>
     <EHWorkflowForm action={saveProviderProfileLifecycleAction}>
@@ -212,12 +209,12 @@ export default async function ProProfile({ searchParams }: { searchParams: Promi
     </EHWorkflowForm>
     <EHActions><EHWorkflowForm action={logoutAction}><EHSubmitButton pendingLabel="Wird abgemeldet …">Ausloggen</EHSubmitButton></EHWorkflowForm></EHActions>
     </>} aside={<>
-      <EHWorkSection title="Nächster Schritt">
+      <WerkbankAbschnitt title="Nächster Schritt">
         {activation.receivesNewJobs
           ? <><EHText>Der Betrieb ist freigegeben und erhält neue Anfragen. Der gebuchte Tarif ändert daran nichts.</EHText><EHButton href="/pro/leads" arrow>Offene Anfragen ansehen</EHButton></>
           : <><EHText muted>{activation.missing.length > 0 ? `Noch offen: ${activation.missing.join(' · ')}` : 'Die Partnerfreigabe ist noch nicht abgeschlossen.'}</EHText><EHButton href="/pro/hilfe" variant="secondary" arrow>Hilfe zur Freigabe</EHButton></>}
-      </EHWorkSection>
-      <EHWorkSection title="Betrieb">
+      </WerkbankAbschnitt>
+      <WerkbankAbschnitt title="Betrieb">
         <EHRecordList label="Betriebsdaten" items={[
           { id: 'name', title: p?.business_name || ctx.businessName, detail: 'Firmenname' },
           { id: 'gewerke', title: p?.trades || 'Keine Gewerke hinterlegt', detail: 'Gewerke / Leistungen' },
@@ -225,8 +222,8 @@ export default async function ProProfile({ searchParams }: { searchParams: Promi
           { id: 'reaktion', title: p?.response_target_minutes ? `${p.response_target_minutes} Min.` : 'Kein Reaktionsziel hinterlegt', detail: 'Reaktionsziel' },
           { id: 'tarif', title: subscription?.title || 'Free', detail: 'Partner-Tarif' },
         ]} />
-      </EHWorkSection>
-      <EHWorkSection title="Vertrauen & Team">
+      </WerkbankAbschnitt>
+      <WerkbankAbschnitt title="Vertrauen & Team">
         <EHActions>
           {trustStatus(activation.insuranceVerified, 'Versicherung')}
           {trustStatus(activation.qualificationVerified, 'Qualifikation')}
@@ -235,7 +232,7 @@ export default async function ProProfile({ searchParams }: { searchParams: Promi
         </EHActions>
         <EHText muted>{ctx.isOwner ? 'Firmendaten, Nachweise und Teamzugänge verwaltet das Firmenkonto.' : 'Firmendaten und Nachweise ändert nur das Firmenkonto. Du siehst den aktuellen Stand.'}</EHText>
         <EHButton href="/pro/team" variant="secondary" arrow>Team ansehen</EHButton>
-      </EHWorkSection>
+      </WerkbankAbschnitt>
     </>} />
   </WerkbankRahmen>;
 }

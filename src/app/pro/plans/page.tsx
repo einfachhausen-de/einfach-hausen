@@ -1,8 +1,9 @@
 import { BadgeCheck,CircleAlert } from 'lucide-react';
 import { WerkbankRahmen } from '@/components/werkbank-rahmen';
+import { WerkbankAbschnitt, WerkbankKennzahlen, WerkbankKopf, WerkbankRaster } from '@/components/werkbank-seite';
 import { ProviderState } from '@/components/provider/workspace';
 import { requireUser } from '@/lib/auth';
-import { EHButton, EHFormFeedback, EHErrorState, EHMetricsBar, EHPageHeader, EHRecordList, EHStatus, EHSubmitButton, EHText, EHWorkSection, EHWorkspaceGrid, type EHRecordEntry } from '@/design-system';
+import { EHButton, EHFormFeedback, EHErrorState, EHRecordList, EHStatus, EHSubmitButton, EHText, type EHRecordEntry } from '@/design-system';
 import { db } from '@/lib/db';
 import { euro } from '@/lib/format';
 import { startPartnerPlanCheckoutAction } from '@/app/actions';
@@ -47,20 +48,20 @@ export default async function PartnerPlans({searchParams}:{searchParams:Promise<
   }));
   const periodEnd = current?.trial_end || current?.current_period_end;
   return <WerkbankRahmen role="provider" active="/pro/plans">
-    <EHPageHeader title="Partner-Tarife" context={current?.title?`Gebucht: ${current.title}`:undefined}/>
+    <WerkbankKopf title="Partner-Tarife" context={current?.title?`Gebucht: ${current.title}`:undefined}/>
     {sp.error&&<EHErrorState text={sp.error} />}{sp.checkout==='success'&&<EHFormFeedback kind="success"><BadgeCheck/>Tarif wurde aktiviert.</EHFormFeedback>}{sp.checkout==='processing'&&<EHFormFeedback kind="success"><BadgeCheck/>Zahlung eingegangen. Tarifstatus folgt erst nach bestätigtem Stripe-Webhook.</EHFormFeedback>}{sp.checkout==='unavailable'&&<ProviderState icon={<CircleAlert size={21}/>} title="Tarifwechsel derzeit nicht verfügbar" description="Die Onlinezahlung ist aktuell nicht vollständig konfiguriert. Es wurde kein Tarifstatus geändert; dein bestehender Zugang bleibt unverändert." tone="unavailable"/>}
-    <EHMetricsBar label="Partner-Tarife" items={[
+    <WerkbankKennzahlen label="Partner-Tarife" items={[
       {id:'tarife',label:'Tarife',value:String(plans.length),hint:'im Tarifkatalog'},
       {id:'gebucht',label:'Gebuchter Tarif',value:current?.title||'–',hint:current?`${euro(current.monthly_amount)}/Monat`:'kein Tarif gebucht'},
       {id:'zahlung',label:'Zahlungsstatus',value:subscriptionLabel(current?.status),hint:current?.trial_end?`Testphase bis ${day(current.trial_end)}`:current?.current_period_end?`Laufzeit bis ${day(current.current_period_end)}`:'keine Zahlung hinterlegt'},
       {id:'vertrag',label:'Partnervertrag',value:contractLabel(contract?.status),hint:contract?(contract.ends_at?`endet ${day(contract.ends_at)}`:'ohne hinterlegtes Ende'):'kein Partnervertrag hinterlegt'},
     ]} />
-    <EHWorkspaceGrid main={
-      <EHWorkSection title={`Tarife · ${plans.length}`}>
+    <WerkbankRaster main={
+      <WerkbankAbschnitt title={`Tarife · ${plans.length}`}>
         <EHRecordList label="Partner-Tarife" items={planItems} empty="Keine Tarife verfügbar."/>
-      </EHWorkSection>
+      </WerkbankAbschnitt>
     } aside={<>
-      <EHWorkSection title="Gebuchter Tarif">
+      <WerkbankAbschnitt title="Gebuchter Tarif">
         {current ? <>
           <EHText>{current.title} · {euro(current.monthly_amount)}/Monat</EHText>
           <EHStatus tone={subscriptionTone(current.status)}>{subscriptionLabel(current.status)}</EHStatus>
@@ -70,8 +71,8 @@ export default async function PartnerPlans({searchParams}:{searchParams:Promise<
               ? `Die aktuelle Laufzeit endet am ${day(current.current_period_end)}.`
               : 'Für diesen Tarif ist kein Laufzeitende hinterlegt.'}</EHText>
         </> : <EHText muted>Für {ctx.businessName} ist noch kein Tarif gebucht. Wähle links einen Tarif; freigeschaltet wird er erst nach bestätigter Zahlung.</EHText>}
-      </EHWorkSection>
-      <EHWorkSection title="Zahlungsstatus">
+      </WerkbankAbschnitt>
+      <WerkbankAbschnitt title="Zahlungsstatus">
         {current ? <>
           <EHStatus tone={subscriptionTone(current.status)}>{subscriptionLabel(current.status)}</EHStatus>
           <EHText muted>{current.trial_end
@@ -80,8 +81,8 @@ export default async function PartnerPlans({searchParams}:{searchParams:Promise<
               ? `Nächster Zahlungstermin: ${day(periodEnd)}. Der Status wechselt erst mit der bestätigten Zahlung.`
               : 'Für diesen Tarif ist kein Zahlungstermin hinterlegt.'}</EHText>
         </> : <EHText muted>Ohne gebuchten Tarif entsteht kein Zahlungsvorgang. Es fallen keine Kosten an.</EHText>}
-      </EHWorkSection>
-      <EHWorkSection title="Kündigung &amp; Laufzeit">
+      </WerkbankAbschnitt>
+      <WerkbankAbschnitt title="Kündigung &amp; Laufzeit">
         {contract ? <>
           <EHStatus tone={contractTone(contract.status)}>{contractLabel(contract.status)}</EHStatus>
           <EHText muted>{contract.ends_at
@@ -90,7 +91,7 @@ export default async function PartnerPlans({searchParams}:{searchParams:Promise<
         </> : <EHText muted>Für den Betrieb ist kein Partnervertrag hinterlegt. Tarif und Vertrag sind getrennt: der Tarif regelt die monatliche Zahlung, der Vertrag die Zusammenarbeit.</EHText>}
         {!ctx.isOwner&&<EHText muted>Tarif und Kündigung verwaltet nur das Firmenkonto.</EHText>}
         <EHButton href="/pro/profile" variant="secondary" arrow>Profil &amp; Einstellungen</EHButton>
-      </EHWorkSection>
+      </WerkbankAbschnitt>
     </>} />
   </WerkbankRahmen>;
 }

@@ -1,9 +1,5 @@
 import { CalendarClock, Wrench } from 'lucide-react';
-import {
-  EHButton, EHEmptyState, EHText, EHPropertyOverview, EHDetailDisclosure,
-  EHWorkspaceGrid, EHWorkSection, EHWorkflowStack,
-  EHSubmitButton, EHMetricsBar, EHPageHeader, EHRecordList, EHStatus,
-} from '@/design-system';
+import { EHButton, EHEmptyState, EHText, EHPropertyOverview, EHDetailDisclosure, EHWorkflowStack, EHSubmitButton, EHRecordList, EHStatus } from '@/design-system';
 import { HouseProfileForm, HouseAssetForm, HOUSE_ASSET_KINDS } from '@/components/homeowner/house-profile-forms';
 import { requireUser } from '@/lib/auth';
 import { db } from '@/lib/db';
@@ -12,6 +8,7 @@ import { dateLabel } from '@/lib/format';
 import { ownerMaintenanceState } from '@/lib/owner-format';
 import { primaryProperty } from '@/lib/properties';
 import { WerkbankRahmen } from '@/components/werkbank-rahmen';
+import { WerkbankAbschnitt, WerkbankKennzahlen, WerkbankKopf, WerkbankRaster } from '@/components/werkbank-seite';
 
 export default async function MyHome() {
   const u=await requireUser('homeowner'); const p=db.prepare('SELECT * FROM homeowner_profiles WHERE user_id=?').get(u.id) as any; const property=primaryProperty(u.id);
@@ -33,9 +30,9 @@ export default async function MyHome() {
   const surroundings=[p?.postcode, p?.house_type].filter(Boolean).join(' · ');
   return <WerkbankRahmen role="homeowner" active="/app/home">
     <EHWorkflowStack>
-      <EHPageHeader title={p?.address || 'Hausdaten ergänzen'} context={surroundings || undefined}
+      <WerkbankKopf title={p?.address || 'Hausdaten ergänzen'} context={surroundings || undefined}
         actions={<EHButton href="/app/year" variant="secondary">Jahresplan öffnen</EHButton>} />
-      <EHMetricsBar label="Mein Haus" items={[
+      <WerkbankKennzahlen label="Mein Haus" items={[
         { id: 'pflege', label: 'Pflege offen', value: String(openTaskCount), hint: overdueTaskCount > 0 ? `${overdueTaskCount} überfällig` : 'nichts überfällig' },
         { id: 'belege', label: 'Belege', value: String(docs.c + invoiceCount), hint: 'Dokumente & Rechnungen' },
       ]} />
@@ -46,8 +43,8 @@ export default async function MyHome() {
           { label: 'Grundstück', value: p?.plot_area ? p.plot_area + ' m²' : 'Nicht erfasst' },
           { label: 'Geräte', value: assets.length + ' erfasst' },
         ]} />
-      <EHWorkspaceGrid main={<>
-        <EHWorkSection title="Technik & Ausstattung">
+      <WerkbankRaster main={<>
+        <WerkbankAbschnitt title="Technik & Ausstattung">
           {assets.length > 0 ? <EHRecordList label="Deine Geräte" items={assets.map(a => ({
             id: String(a.id), title: a.name,
             detail: [HOUSE_ASSET_KINDS[a.kind] || a.kind, a.installed_year ? `Installiert ${a.installed_year}` : null, a.details].filter(Boolean).join(' · '),
@@ -56,8 +53,8 @@ export default async function MyHome() {
           <EHDetailDisclosure id="technik-anlegen" title="Gerät hinzufügen" description="Heizung, PV-Anlage oder anderes Gerät erfassen">
             <HouseAssetForm action={addHouseAssetAction} />
           </EHDetailDisclosure>
-        </EHWorkSection>
-        {tasks.length > 0 && <EHWorkSection title="Anstehende Pflege" link={{ href: '/app/year', label: 'Alle ansehen' }}>
+        </WerkbankAbschnitt>
+        {tasks.length > 0 && <WerkbankAbschnitt title="Anstehende Pflege" link={{ href: '/app/year', label: 'Alle ansehen' }}>
           <EHRecordList label="Anstehende Pflege" items={tasks.slice(0, 4).map(t => {
             const state = ownerMaintenanceState(t.due_date);
             return {
@@ -69,12 +66,12 @@ export default async function MyHome() {
               </form>,
             };
           })} />
-        </EHWorkSection>}
+        </WerkbankAbschnitt>}
       </>} aside={<>
-        <EHWorkSection title="Noch fehlt" link={{ href: '#hausprofil', label: 'Hausdaten bearbeiten' }}>
+        <WerkbankAbschnitt title="Noch fehlt" link={{ href: '#hausprofil', label: 'Hausdaten bearbeiten' }}>
           <EHText muted>{assets.length} {assets.length === 1 ? 'Gerät' : 'Geräte'} · {profileFilled} von 4 Hausdaten erfasst</EHText>
           <EHRecordList label="Fehlende Hausdaten" items={profileGaps} empty="Alle Hausdaten sind erfasst." />
-        </EHWorkSection>
+        </WerkbankAbschnitt>
       </>} />
       <EHDetailDisclosure id="hausprofil" title="Hausdaten bearbeiten" description="Adresse, Gebäude und Flächen">
         <HouseProfileForm action={saveHouseProfileAction} profile={p} />

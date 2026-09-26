@@ -4,7 +4,8 @@ import { toggleFeatureFlagAction, requeueDeadNotificationAction } from '@/app/ac
 import { requireAdmin } from '@/lib/admin-auth';
 import { db } from '@/lib/db';
 import s from '@/components/shell.module.css';
-import { EHButton, EHField, EHInput, EHMetricsBar, EHPageHeader, EHRecordList, EHScope, EHSection, EHStatus, EHText, EHWorkSection, EHWorkspaceGrid, EHWorkflowStack, type EHRecordEntry } from '@/design-system';
+import { EHButton, EHField, EHInput, EHRecordList, EHScope, EHSection, EHStatus, EHText, EHWorkflowStack, type EHRecordEntry } from '@/design-system';
+import { WerkbankAbschnitt, WerkbankKennzahlen, WerkbankKopf, WerkbankRaster } from '@/components/werkbank-seite';
 
 /** Die Flags, die diese Seite schaltet; die Kennzahl oben zaehlt genau diese Liste. */
 const FLAGS=['ki_chat'];
@@ -87,35 +88,35 @@ export default async function AdminOps({searchParams}:{searchParams:Promise<Reco
         {/* Soll-Gruppen „Prüfen“ (Nachweise/Servicefälle) und „Daten“ (Exporte) haben keine eigenen Routen — die Warteschlangen leben als Abschnitte im Inhalt. Keine Links erfunden. */}
       </aside>
       <main className={s['wb-main']}><EHSection compact><EHWorkflowStack>
-    <EHPageHeader title="Operations" context="Betriebsverwaltung" />
-    <EHMetricsBar label="Operations" items={[
+    <WerkbankKopf title="Operations" context="Betriebsverwaltung" />
+    <WerkbankKennzahlen label="Operations" items={[
       {id:'flags',label:'Aktive Feature-Flags',value:`${enabledFlags} von ${flags.length}`,hint:'in dieser Umgebung'},
       {id:'zustellungen',label:'Zustellungen',value:String(deliveries),hint:'Benachrichtigungen in der Outbox'},
       {id:'tote-briefe',label:'Tote Briefe',value:String(deadCount),hint:deadCount>0?'brauchen eine Entscheidung':'keine offen'},
       {id:'matching',label:'Matching-Entscheidungen',value:String(trace.length),hint:'zuletzt protokolliert'},
     ]} />
-    <EHWorkspaceGrid main={<>
-      <EHWorkSection title="Lookup">
+    <WerkbankRaster main={<>
+      <WerkbankAbschnitt title="Lookup">
         <form action="/admin/ops"><EHField id="ops-q" label="Nutzer suchen"><EHInput id="ops-q" name="q" defaultValue={q} placeholder="E-Mail oder Name"/></EHField><EHButton type="submit">Suchen</EHButton></form>
         <EHRecordList label="Lookup-Treffer" items={matchItems} empty={q?'Keine Treffer.':'Noch keine Suche gestartet.'} />
-      </EHWorkSection>
-      <EHWorkSection title="Feature-Flags">
+      </WerkbankAbschnitt>
+      <WerkbankAbschnitt title="Feature-Flags">
         <EHRecordList label="Feature-Flags" items={flagItems} empty="Keine Flags konfiguriert." />
-      </EHWorkSection>
-      <EHWorkSection title="Intern">
+      </WerkbankAbschnitt>
+      <WerkbankAbschnitt title="Intern">
         <EHText muted>Entwickler-Dokumentation, nur für das Operationsteam.</EHText>
         <EHButton href="/docs-internal" variant="secondary" arrow>Entwickler-Docs öffnen</EHButton>
-      </EHWorkSection>
+      </WerkbankAbschnitt>
     </>} aside={<>
-      <EHWorkSection title="Zustellstatus">
+      <WerkbankAbschnitt title="Zustellstatus">
         <EHRecordList label="Zustellstatus der Outbox" items={outboxItems} empty="Keine Benachrichtigungen vorhanden." />
-      </EHWorkSection>
-      <EHWorkSection title="Tote Briefe">
+      </WerkbankAbschnitt>
+      <WerkbankAbschnitt title="Tote Briefe">
         <EHRecordList label="Tote Briefe" items={deadItems} empty="Keine toten Briefe." />
-      </EHWorkSection>
-      <EHWorkSection title="Matching-Trace">
+      </WerkbankAbschnitt>
+      <WerkbankAbschnitt title="Matching-Trace">
         <EHRecordList label="Letzte Matching-Entscheidungen" items={traceItems} empty="Keine Entscheidungen protokolliert." />
-      </EHWorkSection>
+      </WerkbankAbschnitt>
     </>} />
   </EHWorkflowStack></EHSection></main></div></div></EHScope>;
 }

@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { CalendarDays,CheckCircle2,MapPin,MessageSquare,Phone,ShieldCheck,UserRound } from 'lucide-react';
 import { WerkbankRahmen } from '@/components/werkbank-rahmen';
+import { WerkbankAbschnitt } from '@/components/werkbank-seite';
 import { JobMedia } from '@/components/job-media';
 import { mediaKindFromPath } from '@/lib/intake-media';
 import { requireUser } from '@/lib/auth';
@@ -12,7 +13,7 @@ import { dateLabel,euro,statusLabel } from '@/lib/format';
 import { ownerDate } from '@/lib/owner-format';
 import { getQuoteRecommendations } from '@/lib/orchestrator';
 import { offerCard } from '@/lib/offer-cards';
-import { EHActivity,EHActions,EHButton,EHCallout,EHConversation,EHEmptyState,EHErrorState,EHField,EHFormFeedback,EHFormSection,EHInput,EHMetricsBar,EHRecommendation,EHRecordList,EHSelect,EHStatus,EHSubmitButton,EHText,EHTextarea,EHWorkflowForm,EHWorkflowStack,EHWorkSection,type EHActivityStep } from '@/design-system';
+import { EHActivity, EHActions, EHButton, EHCallout, EHConversation, EHEmptyState, EHErrorState, EHField, EHFormFeedback, EHFormSection, EHInput, EHMetricsBar, EHRecommendation, EHRecordList, EHSelect, EHStatus, EHSubmitButton, EHText, EHTextarea, EHWorkflowForm, EHWorkflowStack, type EHActivityStep } from '@/design-system';
 
 /**
  * Rechte Spalte und Kopf dieser Seite. Dieselben Token wie auf /app und /app/jobs:
@@ -125,22 +126,22 @@ export default async function JobDetail({params,searchParams}:{params:Promise<{i
         { id: 'kontakt', label: 'Kontakt', value: contact ? 'Verbunden' : 'Wird gesucht' },
       ]} />
       <>
-      <EHWorkSection title="Dein Anliegen">
+      <WerkbankAbschnitt title="Dein Anliegen">
         <EHRecordList label="Eckdaten des Anliegens" items={[
           { id: 'ort', title: job.postcode||'Ohne PLZ', detail: 'Ort', icon: <MapPin size={20} /> },
         ]} />
         {job.description&&<EHText>{job.description}</EHText>}
         {job.photo_id&&<JobMedia src={`/api/job-media/${job.photo_id}`} alt="Foto, Video oder Sprachnachricht zum Thema" kind={mediaKindFromPath(job.photo_path)}/>}
-      </EHWorkSection>
+      </WerkbankAbschnitt>
       <EHCallout title="Du hast nur einen Ansprechpartner gewählt">
         <EHText muted>Es wurde noch kein Auftrag vergeben und kein Preis vereinbart.</EHText>
       </EHCallout>
-      <EHWorkSection title="Wie wir passende Betriebe gesucht haben">
+      <WerkbankAbschnitt title="Wie wir passende Betriebe gesucht haben">
         <EHActivity steps={vermittlung(job,{modus:'kontakt',angefragt:dispatches.total||0,geantwortet:dispatches.geantwortet||0,angebote:0,guenstigst:null,kontakt:Boolean(contact)})} />
         <EHText size="meta" muted>Angaben aus dem Prüfprotokoll der Vermittlung. Betriebe, die nicht angefragt wurden, bleiben namenlos.</EHText>
-      </EHWorkSection>
+      </WerkbankAbschnitt>
       {!contact?<EHEmptyState title="Passender Ansprechpartner wird gesucht" text={`${dispatches.total||0} geprüfte regionale Partner wurden angefragt. Sobald ein Betrieb übernimmt, kannst du direkt schreiben oder anrufen.`} />:<>
-        <EHWorkSection title="Dein persönlicher Ansprechpartner">
+        <WerkbankAbschnitt title="Dein persönlicher Ansprechpartner">
           <EHRecordList label="Ansprechpartner" items={[
             { id: 'name', title: `${contact.first_name} ${contact.last_name}`, detail: contact.job_title||'Ansprechpartner', icon: <UserRound size={20} /> },
             { id: 'betrieb', title: contact.business_name, detail: 'Betrieb', href: `/app/partners/${contact.provider_id}?job=${job.id}` },
@@ -151,8 +152,8 @@ export default async function JobDetail({params,searchParams}:{params:Promise<{i
             <EHButton href={`/app/messages?contact=${contact.contact_user_id}`}><MessageSquare size={16}/>Nachricht</EHButton>
             {contact.phone&&<EHButton href={`tel:${contact.phone}`} variant="secondary"><Phone size={16}/>Anrufen</EHButton>}
           </EHActions>
-        </EHWorkSection>
-        <EHWorkSection title="Verlauf">
+        </WerkbankAbschnitt>
+        <WerkbankAbschnitt title="Verlauf">
           <EHConversation role="owner" name={`${contact.first_name} ${contact.last_name}`} detail={contact.business_name} phone={contact.phone||undefined}
             messages={messages.map((m:any)=>({ id: String(m.id), mine: m.sender_id===u.id, author: m.sender_id===u.id?'Du':contact.first_name, body: m.body }))}
             composer={<EHWorkflowForm action={sendSavedContactMessageAction.bind(null,contact.contact_user_id,u.id)}>
@@ -161,13 +162,13 @@ export default async function JobDetail({params,searchParams}:{params:Promise<{i
               </EHField>
               <EHSubmitButton pendingLabel="Wird gesendet …">Nachricht senden</EHSubmitButton>
             </EHWorkflowForm>} />
-        </EHWorkSection>
-        <EHWorkSection title="Soll daraus doch ein Auftrag werden?">
+        </WerkbankAbschnitt>
+        <WerkbankAbschnitt title="Soll daraus doch ein Auftrag werden?">
           <EHText muted>Du entscheidest erst jetzt. Dann organisiert Einfach Hausen separat Termin und Angebote.</EHText>
           <EHWorkflowForm action={turnContactIntoServiceAction.bind(null,job.id)}>
             <EHSubmitButton pendingLabel="Wird organisiert…">Auftrag organisieren</EHSubmitButton>
           </EHWorkflowForm>
-        </EHWorkSection>
+        </WerkbankAbschnitt>
       </>}
       </>
       </EHWorkflowStack>
@@ -236,25 +237,25 @@ export default async function JobDetail({params,searchParams}:{params:Promise<{i
       { id: 'nachrichten', label: 'Nachrichten', value: messages.length, hint: contact ? 'mit deinem Ansprechpartner' : 'noch kein Kontakt' },
     ]} />
     <>
-    <EHWorkSection title="Dein Auftrag">
+    <WerkbankAbschnitt title="Dein Auftrag">
       <EHRecordList label="Eckdaten des Auftrags" items={[
         { id: 'ort', title: job.postcode||'Ohne PLZ', detail: 'Ort', icon: <MapPin size={20} /> },
         { id: 'termin', title: dateLabel(job.preferred_date), detail: 'Wunschtermin', icon: <CalendarDays size={20} /> },
       ]} />
       {job.description&&<EHText>{job.description}</EHText>}
       {job.photo_id&&<JobMedia src={`/api/job-media/${job.photo_id}`} alt="Foto, Video oder Sprachnachricht zum Auftrag" kind={mediaKindFromPath(job.photo_path)}/>}
-    </EHWorkSection>
+    </WerkbankAbschnitt>
 
     <EHCallout title={job.urgency==='emergency'?'Wir suchen jetzt verfügbare Hilfe':'Einfach Hausen organisiert'}>
       <EHText muted>Richtpreis {job.budget_min&&job.budget_max?`${euro(job.budget_min)}–${euro(job.budget_max)}`:'wird ermittelt'}.</EHText>
     </EHCallout>
 
-    <EHWorkSection title="Wie wir passende Betriebe gesucht haben">
+    <WerkbankAbschnitt title="Wie wir passende Betriebe gesucht haben">
       <EHActivity steps={vermittlung(job,{modus:'auftrag',angefragt:dispatches.total||0,geantwortet:dispatches.geantwortet||0,angebote:quotes.length,guenstigst:cheapest,kontakt:Boolean(contact)})} />
       <EHText size="meta" muted>Angaben aus dem Prüfprotokoll der Vermittlung. Betriebe, die nicht angefragt wurden, bleiben namenlos.</EHText>
-    </EHWorkSection>
+    </WerkbankAbschnitt>
 
-    <EHWorkSection title="Vergleich">
+    <WerkbankAbschnitt title="Vergleich">
     {angebotsKarte&&<EHRecommendation question={angebotsKarte.question} subject={angebotsKarte.subject} options={angebotsKarte.options} onPrimary={bookQuoteAction} />}
     {quotes.length===0?<EHEmptyState title="Angebote werden eingeholt" text="Einfach Hausen klärt Verfügbarkeit und Angebote mit passenden Partnern." />:<EHRecordList label="Angebote im Vergleich" items={quotes.map((q,index)=>({
       id:String(q.id),
@@ -271,10 +272,10 @@ export default async function JobDetail({params,searchParams}:{params:Promise<{i
       status:<>{q.status==='accepted'&&<EHStatus tone="success"><CheckCircle2 size={16}/> Gebucht</EHStatus>}{index===0&&<EHStatus tone="info">EMPFEHLUNG</EHStatus>}{job.urgency==='emergency'&&q.emergency_mode==='24_7'&&<EHStatus tone="warning">24/7 NOTDIENST</EHStatus>}{job.urgency==='emergency'&&q.emergency_mode!=='24_7'&&<EHStatus tone="neutral">LOKAL VERFÜGBAR</EHStatus>}{q.amount===cheapest&&<EHStatus tone="success">GÜNSTIGST</EHStatus>}{q.id===fastest&&<EHStatus tone="info">SCHNELLSTER TERMIN</EHStatus>}</>,
       action:<><EHButton href={`/app/partners/${q.provider_id}?job=${job.id}`} variant="secondary" aria-label={`${q.business_name} — Profil ansehen`}>Profil ansehen</EHButton>{q.status==='pending'&&<EHWorkflowForm action={acceptQuoteAction.bind(null,q.id)}><EHSubmitButton pendingLabel="Buchung läuft…">Diesen Partner buchen</EHSubmitButton></EHWorkflowForm>}</>,
     }))} />}
-    </EHWorkSection>
+    </WerkbankAbschnitt>
 
     {accepted&&<>
-      <EHWorkSection title="Dein persönlicher Ansprechpartner">
+      <WerkbankAbschnitt title="Dein persönlicher Ansprechpartner">
       {contact?<EHRecordList label="Ansprechpartner des Auftrags" items={[
         { id: 'name', title: `${contact.first_name} ${contact.last_name}`, detail: contact.job_title||'Ansprechpartner', icon: <UserRound size={20} /> },
         { id: 'betrieb', title: contact.business_name, detail: 'Betrieb', href: `/app/partners/${accepted.provider_id}?job=${job.id}` },
@@ -288,9 +289,9 @@ export default async function JobDetail({params,searchParams}:{params:Promise<{i
           <EHButton href={`/app/messages?contact=${contact.contact_user_id}`} variant="secondary"><CalendarDays size={16}/>Termin abstimmen</EHButton>
         </EHActions>
       </>}
-      </EHWorkSection>
+      </WerkbankAbschnitt>
 
-      {contact&&<EHWorkSection title="Verlauf">
+      {contact&&<WerkbankAbschnitt title="Verlauf">
         <EHConversation role="owner" name={`${contact.first_name} ${contact.last_name}`} detail={contact.business_name} phone={contact.phone||undefined}
           messages={messages.map((m:any)=>({ id: String(m.id), mine: m.sender_id===u.id, author: m.sender_id===u.id?'Du':contact.first_name, body: m.body }))}
           composer={<EHWorkflowForm action={sendMessageAction.bind(null,job.id,contact.contact_user_id)}>
@@ -299,18 +300,18 @@ export default async function JobDetail({params,searchParams}:{params:Promise<{i
             </EHField>
             <EHSubmitButton pendingLabel="Wird gesendet …">Nachricht senden</EHSubmitButton>
           </EHWorkflowForm>} />
-      </EHWorkSection>}
+      </WerkbankAbschnitt>}
 
-      <EHWorkSection title="Abwicklung">
+      <WerkbankAbschnitt title="Abwicklung">
         <EHRecordList label="Abwicklung" items={[
           { id: 'zahlung', title: paid?.status==='paid'?'Bezahlt – Beleg liegt in deiner Hausakte.':accepted.stripe_onboarded?'Optional sichere Zahlung über Einfach Hausen. Die Plattform berechnet dem Partner 0 % Provision pro Auftrag.':'Zahlung wird direkt mit dem Partner abgestimmt.', detail: 'Auftragswert bleibt beim Partner', icon: <ShieldCheck size={20} /> },
         ]} />
         {paid?.status!=='paid'&&accepted.stripe_onboarded&&<EHWorkflowForm action={createCheckoutAction.bind(null,job.id)}><EHSubmitButton pendingLabel="Checkout wird gestartet…">{euro(accepted.amount)} zahlen</EHSubmitButton></EHWorkflowForm>}
-      </EHWorkSection>
+      </WerkbankAbschnitt>
 
       {job.status==='accepted'&&paid?.status!=='paid'&&<EHWorkflowForm action={cancelJobAction.bind(null,job.id)}><EHSubmitButton pendingLabel="Wird storniert…">Auftrag stornieren</EHSubmitButton></EHWorkflowForm>}
 
-      <EHWorkSection title="Wenn etwas nicht klappt">
+      <WerkbankAbschnitt title="Wenn etwas nicht klappt">
         {claim?<EHCallout title={`Servicefall · ${statusLabel(claim.status)}`}>
           <EHText>{claim.description}</EHText>
           {claim.admin_note&&<EHText muted>Rückmeldung: {claim.admin_note}</EHText>}
@@ -322,10 +323,10 @@ export default async function JobDetail({params,searchParams}:{params:Promise<{i
             <EHSubmitButton pendingLabel="Wird gemeldet …">Hausmeister einschalten</EHSubmitButton>
           </EHFormSection>
         </EHWorkflowForm>}
-      </EHWorkSection>
+      </WerkbankAbschnitt>
     </>}
 
-    {job.status==='completed'&&!review&&<EHWorkSection title="Bewertung">
+    {job.status==='completed'&&!review&&<WerkbankAbschnitt title="Bewertung">
       <EHWorkflowForm action={reviewAction.bind(null,job.id)}>
         <EHFormSection title="Bewertung abgeben" description="Wie war die Ausführung?">
           <EHField id={`review-rating-${job.id}`} label="Bewertung" hint="Sternebewertung: 5 Sterne sind sehr gut, 1 Stern ist schlecht.">
@@ -339,7 +340,7 @@ export default async function JobDetail({params,searchParams}:{params:Promise<{i
           <EHSubmitButton pendingLabel="Bewertung wird gesendet …">Bewertung senden</EHSubmitButton>
         </EHFormSection>
       </EHWorkflowForm>
-    </EHWorkSection>}
+    </WerkbankAbschnitt>}
     </>
     </EHWorkflowStack>
   </WerkbankRahmen>;

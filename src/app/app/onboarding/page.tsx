@@ -1,8 +1,9 @@
 import { requireUser } from '@/lib/auth';
 import { loadOnboardingState, saveOnboardingContactAction, saveOnboardingInterestsAction, saveOnboardingProfileAction } from './actions';
 import { db } from '@/lib/db';
-import { EHPanel, EHField, EHInput, EHSelect, EHCheckbox, EHSubmitButton, EHButton, EHErrorState, EHPageHeader, EHStepProgress, EHText, EHWorkSection, EHWorkspaceGrid, EHWorkflowStack } from '@/design-system';
+import { EHField, EHInput, EHSelect, EHCheckbox, EHSubmitButton, EHButton, EHErrorState, EHStepProgress, EHText, EHWorkflowStack } from '@/design-system';
 import { WerkbankRahmen } from '@/components/werkbank-rahmen';
+import { WerkbankAbschnitt, WerkbankKopf, WerkbankPanel, WerkbankRaster } from '@/components/werkbank-seite';
 
 /** Was der gerade sichtbare Schritt von dir braucht - einer je Schritt. */
 const STEP_ASK: Record<string, string> = {
@@ -20,21 +21,21 @@ export default async function OnboardingPage({ searchParams }: { searchParams: P
   return (
     <WerkbankRahmen role="homeowner" active="/app">
       <EHWorkflowStack>
-      <EHPageHeader title="Einrichtung" context={`Schritt ${state.stepIndex} von ${state.totalSteps}`} />
+      <WerkbankKopf title="Einrichtung" context={`Schritt ${state.stepIndex} von ${state.totalSteps}`} />
       <EHStepProgress current={state.step} steps={[{ id: 'profile', label: 'Adresse' }, { id: 'interests', label: 'Interessen' }, { id: 'contact', label: 'Erreichbarkeit' }]} />
       {error && <EHErrorState text={error} />}
-      <EHWorkspaceGrid main={<>
+      <WerkbankRaster main={<>
         {state.step === 'profile' && (
-          <EHPanel title="Adresse">
+          <WerkbankPanel title="Adresse">
             <form action={saveOnboardingProfileAction}>
               <EHField id="ob-address" label="Straße und Hausnummer"><EHInput id="ob-address" name="address" defaultValue={state.address} required maxLength={200} /></EHField>
               <EHField id="ob-postcode" label="PLZ"><EHInput id="ob-postcode" name="postcode" defaultValue={state.postcode} required inputMode="numeric" pattern="[0-9]{4,5}" /></EHField>
               <EHSubmitButton>Weiter</EHSubmitButton>
             </form>
-          </EHPanel>
+          </WerkbankPanel>
         )}
         {state.step === 'interests' && (
-          <EHPanel title="Interessen">
+          <WerkbankPanel title="Interessen">
             <form action={saveOnboardingInterestsAction}>
               {categories.map(category => (
                 <EHCheckbox key={category} label={category} name="interest" value={category} defaultChecked={state.interests.includes(category)} />
@@ -42,10 +43,10 @@ export default async function OnboardingPage({ searchParams }: { searchParams: P
               <EHSubmitButton>Weiter</EHSubmitButton>
               <EHButton type="submit" name="skip" value="1" variant="secondary">Überspringen</EHButton>
             </form>
-          </EHPanel>
+          </WerkbankPanel>
         )}
         {state.step === 'contact' && (
-          <EHPanel title="Wie sollen wir dich erreichen?">
+          <WerkbankPanel title="Wie sollen wir dich erreichen?">
             <form action={saveOnboardingContactAction}>
               <EHField id="ob-channel" label="Bevorzugter Weg"><EHSelect id="ob-channel" name="preferredChannel" defaultValue={state.preferredChannel || 'email'}>
                 <option value="email">E-Mail</option>
@@ -55,15 +56,15 @@ export default async function OnboardingPage({ searchParams }: { searchParams: P
               <EHSubmitButton>Fertig</EHSubmitButton>
               <EHButton type="submit" name="skip" value="1" variant="secondary">Überspringen</EHButton>
             </form>
-          </EHPanel>
+          </WerkbankPanel>
         )}
       </>} aside={<>
-        <EHWorkSection title="Nächster Schritt">
+        <WerkbankAbschnitt title="Nächster Schritt">
           <EHText>{STEP_ASK[state.step]}</EHText>
-        </EHWorkSection>
-        <EHWorkSection title="Wozu die Angaben dienen">
+        </WerkbankAbschnitt>
+        <WerkbankAbschnitt title="Wozu die Angaben dienen">
           <EHText muted>Adresse und Interessen steuern, welche Betriebe und Anliegen dir vorgeschlagen werden. Alles bleibt in deiner Hausakte und lässt sich später im Profil ändern.</EHText>
-        </EHWorkSection>
+        </WerkbankAbschnitt>
       </>} />
       </EHWorkflowStack>
     </WerkbankRahmen>

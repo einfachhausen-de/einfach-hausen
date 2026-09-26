@@ -3,10 +3,11 @@ import Link from 'next/link';
 import { requireAdmin } from '@/lib/admin-auth';
 import { db } from '@/lib/db';
 import s from '@/components/shell.module.css';
-import { EHActions, EHButton, EHCheckbox, EHField, EHFieldGrid, EHFormFeedback, EHFormSection, EHInput, EHMetricsBar, EHPageHeader, EHRecordList, EHScope, EHSection, EHSelect, EHStatus, EHText, EHTextLink, EHTextarea, EHWorkSection, EHWorkspaceGrid, EHWorkflowForm, EHWorkflowStack, type EHRecordEntry } from '@/design-system';
+import { EHActions, EHButton, EHCheckbox, EHField, EHFieldGrid, EHFormFeedback, EHFormSection, EHInput, EHMetricsBar, EHRecordList, EHScope, EHSection, EHSelect, EHStatus, EHText, EHTextLink, EHTextarea, EHWorkflowForm, EHWorkflowStack, type EHRecordEntry } from '@/design-system';
 import { adminLogoutAction,adminUpdateClaimAction,moderateReviewAction } from '@/app/actions';
 import { adminReviewVerificationLifecycleAction,adminUpdatePartnerContractLifecycleAction } from './actions';
 import { statusLabel } from '@/lib/format';
+import { WerkbankAbschnitt, WerkbankKennzahlen, WerkbankKopf, WerkbankRaster } from '@/components/werkbank-seite';
 
 export default async function Admin({searchParams}:{searchParams:Promise<Record<string,string>>}){
   await requireAdmin();
@@ -92,13 +93,13 @@ export default async function Admin({searchParams}:{searchParams:Promise<Record<
         </nav>
         {/* Soll-Gruppen „Prüfen“ (Nachweise/Servicefälle) und „Daten“ (Exporte) haben keine eigenen Routen — die Warteschlangen leben als Abschnitte im Inhalt. Keine Links erfunden. */}
       </aside>
-      <main className={s['wb-main']}><EHSection compact><EHWorkflowStack><EHPageHeader title="Einfach Hausen · Admin" context="Betriebsverwaltung" actions={<><EHButton href="/admin/crm"><Database size={16}/>Leads &amp; CRM</EHButton><form action={adminLogoutAction}><EHButton type="submit" variant="secondary"><LogOut size={16}/>Abmelden</EHButton></form></>} />{sp.error&&<EHFormFeedback kind="error">{sp.error}</EHFormFeedback>}<EHMetricsBar label="Verwaltung" items={[
+      <main className={s['wb-main']}><EHSection compact><EHWorkflowStack><WerkbankKopf title="Einfach Hausen · Admin" context="Betriebsverwaltung" actions={<><EHButton href="/admin/crm"><Database size={16}/>Leads &amp; CRM</EHButton><form action={adminLogoutAction}><EHButton type="submit" variant="secondary"><LogOut size={16}/>Abmelden</EHButton></form></>} />{sp.error&&<EHFormFeedback kind="error">{sp.error}</EHFormFeedback>}<WerkbankKennzahlen label="Verwaltung" items={[
       {id:'pruefungen',label:'Offene Partnerprüfungen',value:String(pendingVerifications.length),hint:`${verifications.length} Prüfungen insgesamt`},
       {id:'servicefaelle',label:'Offene Servicefälle',value:String(openClaims.length),hint:`${claims.length} Fälle insgesamt`},
       {id:'meldungen',label:'Offene Bewertungsmeldungen',value:String(openReportQueue.length),hint:`${openReports.length} Meldungen insgesamt`},
       {id:'partner',label:'Freigegebene Partner',value:`${overview.verifiedProviders} von ${overview.providers}`,hint:'im Partnernetzwerk'},
-    ]} /><EHWorkspaceGrid main={<><EHWorkSection title="Betriebsübersicht"><EHText muted>Ein kompakter Blick auf Nutzer, Vorgänge und Zustellungen – ohne sensible Inhalte.</EHText><EHMetricsBar label="Betriebsübersicht" items={[{id:'nutzer',label:'Nutzer',value:String(overview.users),hint:'Eigentümer und Partner'},{id:'partnernetz',label:'Partner',value:String(overview.providers),hint:`${overview.verifiedProviders} geprüft`},{id:'anfragen',label:'Anfragen',value:String(overview.requests),hint:`${overview.openRequests} offen`},{id:'bookings',label:'Bookings',value:String(overview.bookings),hint:'Termine insgesamt'},{id:'matching',label:'Matching',value:String(overview.matches),hint:'Partner-Zuordnungen'},{id:'mitteilungen',label:'Benachrichtigungen',value:String(overview.unreadNotifications),hint:'ungelesen'}]} /></EHWorkSection><EHWorkSection title="Anfragen"><EHRecordList label="Neueste Anfragen" empty="Noch keine Anfragen." items={recentJobs.map((job:any)=>({id:`anfrage-${job.id}`,title:job.title,detail:`${job.first_name} ${job.last_name} · ${statusLabel(job.status)}`,status:<EHStatus tone={job.status === 'open' ? 'warning' : job.status === 'completed' ? 'success' : 'neutral'}>{statusLabel(job.status)}</EHStatus>,icon:<ListChecks size={20}/>}))} /></EHWorkSection><EHWorkSection title="Bookings"><EHRecordList label="Neueste Bookings" empty="Noch keine Bookings." items={recentBookings.map((booking:any,index:number)=>({id:`booking-${booking.start_at}-${index}`,title:booking.title,detail:`${booking.business_name} · ${String(booking.start_at).slice(0,10)}`,status:<EHStatus tone={booking.status === 'completed' ? 'success' : booking.status === 'cancelled' ? 'error' : 'info'}>{statusLabel(booking.status)}</EHStatus>,icon:<CalendarCheck size={20}/>}))} /></EHWorkSection><EHWorkSection title="Bewertungen"><EHRecordList label="Neueste Bewertungen" empty="Noch keine Bewertungen." items={recentReviews.map((review:any,index:number)=>({id:`bewertung-${review.created_at}-${index}`,title:review.business_name,detail:review.title,status:<EHStatus tone="success">{review.rating}/5</EHStatus>,icon:<Star size={20}/>}))} /></EHWorkSection><EHWorkSection title="Admin-Audit-Log"><EHText muted>Privilegierte Aktionen, chronologisch und ohne geheime Werte. {auditEntries.length} Einträge.</EHText><EHRecordList label="Admin-Audit-Log" empty="Noch keine Admin-Aktionen protokolliert." items={auditEntries.map((entry:any,index:number)=>({id:`audit-${entry.created_at}-${entry.action}-${index}`,title:entry.action,detail:[`${entry.actor} · ${entry.target||'System'}`,entry.detail].filter(Boolean).join(' — '),dateLabel:String(entry.created_at)}))} /></EHWorkSection><EHWorkflowStack>
-        <EHWorkSection title="Partnernetzwerk">
+    ]} /><WerkbankRaster main={<><WerkbankAbschnitt title="Betriebsübersicht"><EHText muted>Ein kompakter Blick auf Nutzer, Vorgänge und Zustellungen – ohne sensible Inhalte.</EHText><EHMetricsBar label="Betriebsübersicht" items={[{id:'nutzer',label:'Nutzer',value:String(overview.users),hint:'Eigentümer und Partner'},{id:'partnernetz',label:'Partner',value:String(overview.providers),hint:`${overview.verifiedProviders} geprüft`},{id:'anfragen',label:'Anfragen',value:String(overview.requests),hint:`${overview.openRequests} offen`},{id:'bookings',label:'Bookings',value:String(overview.bookings),hint:'Termine insgesamt'},{id:'matching',label:'Matching',value:String(overview.matches),hint:'Partner-Zuordnungen'},{id:'mitteilungen',label:'Benachrichtigungen',value:String(overview.unreadNotifications),hint:'ungelesen'}]} /></WerkbankAbschnitt><WerkbankAbschnitt title="Anfragen"><EHRecordList label="Neueste Anfragen" empty="Noch keine Anfragen." items={recentJobs.map((job:any)=>({id:`anfrage-${job.id}`,title:job.title,detail:`${job.first_name} ${job.last_name} · ${statusLabel(job.status)}`,status:<EHStatus tone={job.status === 'open' ? 'warning' : job.status === 'completed' ? 'success' : 'neutral'}>{statusLabel(job.status)}</EHStatus>,icon:<ListChecks size={20}/>}))} /></WerkbankAbschnitt><WerkbankAbschnitt title="Bookings"><EHRecordList label="Neueste Bookings" empty="Noch keine Bookings." items={recentBookings.map((booking:any,index:number)=>({id:`booking-${booking.start_at}-${index}`,title:booking.title,detail:`${booking.business_name} · ${String(booking.start_at).slice(0,10)}`,status:<EHStatus tone={booking.status === 'completed' ? 'success' : booking.status === 'cancelled' ? 'error' : 'info'}>{statusLabel(booking.status)}</EHStatus>,icon:<CalendarCheck size={20}/>}))} /></WerkbankAbschnitt><WerkbankAbschnitt title="Bewertungen"><EHRecordList label="Neueste Bewertungen" empty="Noch keine Bewertungen." items={recentReviews.map((review:any,index:number)=>({id:`bewertung-${review.created_at}-${index}`,title:review.business_name,detail:review.title,status:<EHStatus tone="success">{review.rating}/5</EHStatus>,icon:<Star size={20}/>}))} /></WerkbankAbschnitt><WerkbankAbschnitt title="Admin-Audit-Log"><EHText muted>Privilegierte Aktionen, chronologisch und ohne geheime Werte. {auditEntries.length} Einträge.</EHText><EHRecordList label="Admin-Audit-Log" empty="Noch keine Admin-Aktionen protokolliert." items={auditEntries.map((entry:any,index:number)=>({id:`audit-${entry.created_at}-${entry.action}-${index}`,title:entry.action,detail:[`${entry.actor} · ${entry.target||'System'}`,entry.detail].filter(Boolean).join(' — '),dateLabel:String(entry.created_at)}))} /></WerkbankAbschnitt><EHWorkflowStack>
+        <WerkbankAbschnitt title="Partnernetzwerk">
           {verifications.length===0&&<EHText muted>Keine Partnerprüfungen vorhanden.</EHText>}
           <EHWorkflowStack>{verifications.map((v:any)=>{
             const kontakt=[v.first_name,v.last_name,v.email].filter(Boolean).join(' ');
@@ -137,8 +138,8 @@ export default async function Admin({searchParams}:{searchParams:Promise<Record<
               </EHFormSection>
             </EHWorkflowStack>;
           })}</EHWorkflowStack>
-        </EHWorkSection>
-        <EHWorkSection title="Bewertungs-Moderation">
+        </WerkbankAbschnitt>
+        <WerkbankAbschnitt title="Bewertungs-Moderation">
           <EHText muted>Operations-Lookup und Outbox: <EHTextLink href="/admin/ops">/admin/ops</EHTextLink></EHText>
           {openReports.length===0&&<EHText muted>Keine gemeldeten Bewertungen.</EHText>}
           <EHWorkflowStack>{openReports.map((report:any)=>(
@@ -156,8 +157,8 @@ export default async function Admin({searchParams}:{searchParams:Promise<Record<
               </EHFormSection>
             </EHWorkflowForm>
           ))}</EHWorkflowStack>
-        </EHWorkSection>
-        <EHWorkSection title="Servicefälle">
+        </WerkbankAbschnitt>
+        <WerkbankAbschnitt title="Servicefälle">
           {claims.length===0&&<EHText muted>Keine Servicefälle vorhanden.</EHText>}
           <EHWorkflowStack>{claims.map((c:any)=>(
             <EHWorkflowForm key={c.id} action={adminUpdateClaimAction.bind(null,c.id)}>
@@ -170,16 +171,16 @@ export default async function Admin({searchParams}:{searchParams:Promise<Record<
               </EHFormSection>
             </EHWorkflowForm>
           ))}</EHWorkflowStack>
-        </EHWorkSection>
+        </WerkbankAbschnitt>
       </EHWorkflowStack></>} aside={<>
-    <EHWorkSection title="Prüf-Warteschlange">
+    <WerkbankAbschnitt title="Prüf-Warteschlange">
       <EHRecordList label="Offene Partnerprüfungen" items={verificationQueue} empty="Keine offenen Partnerprüfungen." />
-    </EHWorkSection>
-    <EHWorkSection title="Servicefälle in Arbeit">
+    </WerkbankAbschnitt>
+    <WerkbankAbschnitt title="Servicefälle in Arbeit">
       <EHRecordList label="Offene Servicefälle" items={claimQueue} empty="Keine offenen Servicefälle." />
-    </EHWorkSection>
-    <EHWorkSection title="Gemeldete Bewertungen">
+    </WerkbankAbschnitt>
+    <WerkbankAbschnitt title="Gemeldete Bewertungen">
       <EHRecordList label="Offene Bewertungsmeldungen" items={reportQueue} empty="Keine offenen Bewertungsmeldungen." />
-    </EHWorkSection>
+    </WerkbankAbschnitt>
   </>} /></EHWorkflowStack></EHSection></main></div></div></EHScope>;
 }
